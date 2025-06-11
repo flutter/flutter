@@ -27,12 +27,12 @@ void main() {
   test(
     'Help for command line arguments is consistently styled and complete',
     () => TestBed().run(() {
-      final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+      final runner = FlutterCommandRunner(verboseHelp: true);
       executable.generateCommands(verboseHelp: true, verbose: true).forEach(runner.addCommand);
       verifyCommandRunner(runner);
       for (final Command<void> command in runner.commands.values) {
         if (command.name == 'analyze') {
-          final AnalyzeCommand analyze = command as AnalyzeCommand;
+          final analyze = command as AnalyzeCommand;
           expect(analyze.allProjectValidators().length, 2);
         }
       }
@@ -40,13 +40,13 @@ void main() {
   );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
 
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(verboseHelp: true);
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
@@ -56,13 +56,13 @@ void main() {
   });
 
   testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
 
-    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+    final subcommand = DummyFlutterCommand(
       name: 'sub',
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
@@ -71,7 +71,7 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(verboseHelp: true);
 
     runner.addCommand(command);
     runner.addCommand(subcommand);
@@ -86,12 +86,12 @@ void main() {
   });
 
   testUsingContext('bool? safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
     // argResults will be null at this point, if attempt to read them is made,
@@ -112,12 +112,12 @@ void main() {
   });
 
   testUsingContext('String? safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown
@@ -134,12 +134,12 @@ void main() {
   });
 
   testUsingContext('List<String> safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addMultiOption('key', allowed: <String>['a', 'b', 'c']);
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown.
@@ -258,7 +258,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     );
 
     // Deprecated options and flags should be hidden but still have help text.
-    const List<String> deprecatedOptions = <String>[];
+    const deprecatedOptions = <String>[];
     final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
     if (!isOptionDeprecated) {
       expect(

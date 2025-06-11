@@ -1072,7 +1072,7 @@ class _FindsCountMatcher extends Matcher {
     assert(min != null || max != null);
     assert(min == null || max == null || min! <= max!);
     matchState[FinderBase] = finder;
-    int count = 0;
+    var count = 0;
     final Iterator<dynamic> iterator = finder.evaluate().iterator;
     if (min != null) {
       while (count < min! && iterator.moveNext()) {
@@ -1127,7 +1127,7 @@ class _FindsCountMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final FinderBase<dynamic> finder = matchState[FinderBase] as FinderBase<dynamic>;
+    final finder = matchState[FinderBase] as FinderBase<dynamic>;
     final int count = finder.found.length;
     if (count == 0) {
       assert(min != null && min! > 0);
@@ -1155,7 +1155,7 @@ bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate)
   if (nodes.length != 1) {
     return false;
   }
-  bool result = false;
+  var result = false;
   nodes.single.visitAncestorElements((Element ancestor) {
     if (predicate(ancestor.widget)) {
       result = true;
@@ -1196,7 +1196,7 @@ class _IsOnstage extends Matcher {
     if (nodes.length != 1) {
       return false;
     }
-    bool result = true;
+    var result = true;
     nodes.single.visitAncestorElements((Element ancestor) {
       final Widget widget = ancestor.widget;
       if (widget is Offstage) {
@@ -1256,7 +1256,7 @@ class _IsSystemTextScaler extends Matcher {
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation =
+    final scaleFactorExpectation =
         expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
     return description.add(
       'A SystemTextScaler that reflects the font scale settings in the system user preference $scaleFactorExpectation',
@@ -1284,7 +1284,7 @@ class _HasOneLineDescription extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = object.toString();
+    final description = object.toString();
     return description.isNotEmpty &&
         !description.contains('\n') &&
         !description.contains('Instance of ') &&
@@ -1333,7 +1333,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     final Iterator<String> expectedIt = _value.iterator;
     final Iterator<String> seenIt = normalized.iterator;
 
-    int lineNumber = 1;
+    var lineNumber = 1;
 
     bool hasExpected = expectedIt.moveNext();
     bool hasSeen = seenIt.moveNext();
@@ -1368,7 +1368,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     if (matchState.containsKey(_lineNumberValueKey) &&
         matchState.containsKey(_expectedLineValueKey) &&
         matchState.containsKey(_seenLineValueKey)) {
-      final int lineNumber = matchState[_lineNumberValueKey] as int;
+      final lineNumber = matchState[_lineNumberValueKey] as int;
       if (lineNumber > 1) {
         mismatchDescription = mismatchDescription
             .add('Lines $lineNumber differed, expected: \n')
@@ -1400,7 +1400,7 @@ bool _isVerticalLine(int c) {
 /// The last line of a text tree contains only vertical tree connector
 /// characters indicates a poorly formatted tree.
 bool _isAllTreeConnectorCharacters(String line) {
-  for (int i = 0; i < line.length; ++i) {
+  for (var i = 0; i < line.length; ++i) {
     final int c = line.codeUnitAt(i);
     if (!_isWhitespace(c) && !_isVerticalLine(c)) {
       return false;
@@ -1416,8 +1416,8 @@ class _HasGoodToStringDeep extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final List<String> issues = <String>[];
-    String description = object.toStringDeep() as String; // ignore: avoid_dynamic_calls
+    final issues = <String>[];
+    var description = object.toStringDeep() as String; // ignore: avoid_dynamic_calls
     if (description.endsWith('\n')) {
       // Trim off trailing \n as the remaining calculations assume
       // the description does not end with a trailing \n.
@@ -1439,7 +1439,7 @@ class _HasGoodToStringDeep extends Matcher {
       issues.add('Contains text "Instance of ".');
     }
 
-    for (int i = 0; i < lines.length; ++i) {
+    for (var i = 0; i < lines.length; ++i) {
       final String line = lines[i];
       if (line.isEmpty) {
         issues.add('Line ${i + 1} is empty.');
@@ -1457,10 +1457,10 @@ class _HasGoodToStringDeep extends Matcher {
     // If a toStringDeep method doesn't properly handle nested values that
     // contain line breaks it can fail to add the required prefixes to all
     // lined when toStringDeep is called specifying prefixes.
-    const String prefixLineOne = 'PREFIX_LINE_ONE____';
-    const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
-    final List<String> prefixIssues = <String>[];
-    String descriptionWithPrefixes =
+    const prefixLineOne = 'PREFIX_LINE_ONE____';
+    const prefixOtherLines = 'PREFIX_OTHER_LINES_';
+    final prefixIssues = <String>[];
+    var descriptionWithPrefixes =
         // ignore: avoid_dynamic_calls
         object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines)
             as String;
@@ -1477,13 +1477,13 @@ class _HasGoodToStringDeep extends Matcher {
       prefixIssues.add('First line does not contain expected prefix.');
     }
 
-    for (int i = 1; i < linesWithPrefixes.length; ++i) {
+    for (var i = 1; i < linesWithPrefixes.length; ++i) {
       if (!linesWithPrefixes[i].startsWith(prefixOtherLines)) {
         prefixIssues.add('Line ${i + 1} does not contain the expected prefix.');
       }
     }
 
-    final StringBuffer errorDescription = StringBuffer();
+    final errorDescription = StringBuffer();
     if (issues.isNotEmpty) {
       errorDescription.writeln('Bad toStringDeep():');
       errorDescription.writeln(description);
@@ -1601,23 +1601,23 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _matrixDistance(Matrix4 a, Matrix4 b) {
-  double delta = 0.0;
-  for (int i = 0; i < 16; i += 1) {
+  var delta = 0.0;
+  for (var i = 0; i < 16; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;
 }
 
 double _matrix3Distance(Matrix3 a, Matrix3 b) {
-  double delta = 0.0;
-  for (int i = 0; i < 9; i += 1) {
+  var delta = 0.0;
+  for (var i = 0; i < 9; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = (b - a) as Offset;
+  final delta = (b - a) as Offset;
   return delta.distance;
 }
 
@@ -1767,7 +1767,7 @@ class _IsMethodCall extends Matcher {
     if (a.length != b.length) {
       return false;
     }
-    for (int i = 0; i < a.length; i++) {
+    for (var i = 0; i < a.length; i++) {
       if (!_deepEquals(a[i], b[i])) {
         return false;
       }
@@ -1960,7 +1960,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (borderRadius != null && !assertRoundedRectangle(shapeClipper, borderRadius!, matchState)) {
       return false;
@@ -1993,7 +1993,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != borderRadius) {
       return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
     }
@@ -2034,7 +2034,7 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Re
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (shapeClipper.shape != shape) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
@@ -2078,11 +2078,11 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != BorderRadius.zero) {
       return failWithDescription(matchState, 'borderRadius was: ${border.borderRadius}');
     }
@@ -2116,11 +2116,11 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != borderRadius) {
       return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
     }
@@ -2142,7 +2142,7 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape != shape) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
@@ -2175,9 +2175,9 @@ class _CoversSameAreaAs extends Matcher {
 
   @override
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
-    for (int i = 0; i < sampleSize; i += 1) {
-      for (int j = 0; j < sampleSize; j += 1) {
-        final Offset offset = Offset(
+    for (var i = 0; i < sampleSize; i += 1) {
+      for (var j = 0; j < sampleSize; j += 1) {
+        final offset = Offset(
           i * (areaToCompare.width / sampleSize),
           j * (areaToCompare.height / sampleSize),
         );
@@ -2186,7 +2186,7 @@ class _CoversSameAreaAs extends Matcher {
           return false;
         }
 
-        final Offset noise = Offset(
+        final noise = Offset(
           maxHorizontalNoise * random.nextDouble(),
           maxVerticalNoise * random.nextDouble(),
         );
@@ -2251,13 +2251,13 @@ class _ColorSwatchMatcher<T> extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is ColorSwatch) {
-      final _ColorMatcher matcher = _ColorMatcher(_target, _threshold);
+      final matcher = _ColorMatcher(_target, _threshold);
       if (!matcher.matches(item, matchState)) {
         return false;
       }
 
       for (final T key in _target.keys) {
-        final _ColorMatcher matcher = _ColorMatcher(_target[key]!, _threshold);
+        final matcher = _ColorMatcher(_target[key]!, _threshold);
         if (!matcher.matches(item[key], matchState)) {
           return false;
         }
@@ -2294,8 +2294,8 @@ class _ColorMatcher extends Matcher {
 
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
   assert(imageA.length == imageB.length);
-  int delta = 0;
-  for (int i = 0; i < imageA.length; i += 4) {
+  var delta = 0;
+  for (var i = 0; i < imageA.length; i += 4) {
     if (imageA[i] != imageB[i] ||
         imageA[i + 1] != imageB[i + 1] ||
         imageA[i + 2] != imageB[i + 2] ||
@@ -2323,7 +2323,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = Future<ui.Image>.value(item);
       disposeImage = false;
     } else {
-      final Finder finder = item as Finder;
+      final finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
       if (elements.isEmpty) {
         return 'could not be rendered because no widget was found';
@@ -2663,8 +2663,8 @@ class _MatchesSemanticsData extends Matcher {
     if (children != null) {
       description.add(' with children:\n  ');
       final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
-      int childIndex = 1;
-      for (final _MatchesSemanticsData child in childMatches) {
+      var childIndex = 1;
+      for (final child in childMatches) {
         child.describe(description, index != null ? '$index:$childIndex' : '$childIndex');
         if (child != childMatches.last) {
           description.add('\n  ');
@@ -2679,7 +2679,7 @@ class _MatchesSemanticsData extends Matcher {
     if (first.length != second.length) {
       return false;
     }
-    for (int i = 0; i < first.length; i++) {
+    for (var i = 0; i < first.length; i++) {
       if (first[i] is SpellOutStringAttribute &&
           (second[i] is! SpellOutStringAttribute || second[i].range != first[i].range)) {
         return false;
@@ -2797,12 +2797,12 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
-      final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
-      final List<SemanticsAction> missingActions = <SemanticsAction>[];
+      final unexpectedActions = <SemanticsAction>[];
+      final missingActions = <SemanticsAction>[];
       for (final MapEntry<ui.SemanticsAction, bool> actionEntry in actions.entries) {
         final ui.SemanticsAction action = actionEntry.key;
         final bool actionExpected = actionEntry.value;
-        final bool actionPresent = (action.index & data.actions) == action.index;
+        final actionPresent = (action.index & data.actions) == action.index;
         if (actionPresent != actionExpected) {
           if (actionExpected) {
             missingActions.add(action);
@@ -2853,19 +2853,19 @@ class _MatchesSemanticsData extends Matcher {
 
       expectedCustomActions.sort(sortActions);
       providedCustomActions.sort(sortActions);
-      for (int i = 0; i < expectedCustomActions.length; i++) {
+      for (var i = 0; i < expectedCustomActions.length; i++) {
         if (expectedCustomActions[i] != providedCustomActions[i]) {
           return failWithDescription(matchState, 'custom actions were: $providedCustomActions');
         }
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> unexpectedFlags = <SemanticsFlag>[];
-      final List<SemanticsFlag> missingFlags = <SemanticsFlag>[];
+      final unexpectedFlags = <SemanticsFlag>[];
+      final missingFlags = <SemanticsFlag>[];
       for (final MapEntry<ui.SemanticsFlag, bool> flagEntry in flags.entries) {
         final ui.SemanticsFlag flag = flagEntry.key;
         final bool flagExpected = flagEntry.value;
-        final bool flagPresent = flag.index & data.flags == flag.index;
+        final flagPresent = flag.index & data.flags == flag.index;
         if (flagPresent != flagExpected) {
           if (flagExpected) {
             missingFlags.add(flag);
@@ -2882,9 +2882,9 @@ class _MatchesSemanticsData extends Matcher {
         );
       }
     }
-    bool allMatched = true;
+    var allMatched = true;
     if (children != null) {
-      int i = 0;
+      var i = 0;
       (node as SemanticsNode).visitChildren((SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;

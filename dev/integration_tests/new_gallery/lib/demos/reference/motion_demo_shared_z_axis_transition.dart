@@ -103,7 +103,7 @@ class _SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<_SettingsInfo> settingsList = <_SettingsInfo>[
+    final settingsList = <_SettingsInfo>[
       _SettingsInfo(Icons.person, localizations.demoSharedZAxisProfileSettingLabel),
       _SettingsInfo(Icons.notifications, localizations.demoSharedZAxisNotificationSettingLabel),
       _SettingsInfo(Icons.security, localizations.demoSharedZAxisPrivacySettingLabel),
@@ -150,7 +150,7 @@ class _RecipePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<_RecipeInfo> savedRecipes = <_RecipeInfo>[
+    final savedRecipes = <_RecipeInfo>[
       _RecipeInfo(
         localizations.demoSharedZAxisBurgerRecipeTitle,
         localizations.demoSharedZAxisBurgerRecipeDescription,

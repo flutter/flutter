@@ -95,7 +95,7 @@ void main() {
     const double buttonWidth = 400;
     const double rowHeight = 100;
     Widget testButton(double contextBodySize) {
-      const double standardHigBody = 17.0;
+      const standardHigBody = 17.0;
       final double contextScaleFactor = contextBodySize / standardHigBody;
       return OverrideMediaQuery(
         transformer: (MediaQueryData data) {
@@ -360,7 +360,7 @@ void main() {
   });
 
   testWidgets('Content section but no actions', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -398,7 +398,7 @@ void main() {
   });
 
   testWidgets('Actions but no content section', (WidgetTester tester) async {
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -439,7 +439,7 @@ void main() {
   });
 
   testWidgets('Action section is scrollable', (WidgetTester tester) async {
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -523,7 +523,7 @@ void main() {
   });
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
-    final ScrollController messageScrollController = ScrollController();
+    final messageScrollController = ScrollController();
     addTearDown(messageScrollController.dispose);
     late double screenHeight;
     await tester.pumpWidget(
@@ -596,7 +596,7 @@ void main() {
   testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
     // Verifies that when the actions section overscrolls, the overscroll part
     // is correctly covered with background.
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -655,7 +655,7 @@ void main() {
   ) async {
     // When the scroll is really far, the overscroll might be longer than the
     // actions section, causing overflow if not controlled.
-    final ScrollController actionScrollController = ScrollController();
+    final actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -726,7 +726,7 @@ void main() {
   });
 
   testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -812,7 +812,7 @@ void main() {
   testWidgets('Taps at the padding of buttons calls onPressed', (WidgetTester tester) async {
     // Ensures that the entire button responds to hit tests, not just the text
     // part.
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -903,7 +903,7 @@ void main() {
   });
 
   testWidgets('Taps on the content can be slided to other buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -943,7 +943,7 @@ void main() {
   });
 
   testWidgets('Taps on the barrier can not be slided to buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -1193,7 +1193,7 @@ void main() {
     // use customized legacy buttons should continue to work.
     //
     // Regression test for https://github.com/flutter/flutter/issues/150980 .
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -1431,7 +1431,7 @@ void main() {
   });
 
   testWidgets('Cancel button tap calls onPressed', (WidgetTester tester) async {
-    bool wasPressed = false;
+    var wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
@@ -1652,7 +1652,7 @@ void main() {
   });
 
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
-    final AnimationSheetBuilder enterRecorder = AnimationSheetBuilder(
+    final enterRecorder = AnimationSheetBuilder(
       frameSize: const Size(600, 600),
     );
     addTearDown(enterRecorder.dispose);
@@ -1679,7 +1679,7 @@ void main() {
       matchesGoldenFile('cupertinoActionSheet.enter.png'),
     );
 
-    final AnimationSheetBuilder exitRecorder = AnimationSheetBuilder(
+    final exitRecorder = AnimationSheetBuilder(
       frameSize: const Size(600, 600),
     );
     addTearDown(exitRecorder.dispose);
@@ -1696,7 +1696,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Animation is correct if entering is canceled halfway', (WidgetTester tester) async {
-    final AnimationSheetBuilder recorder = AnimationSheetBuilder(frameSize: const Size(600, 600));
+    final recorder = AnimationSheetBuilder(frameSize: const Size(600, 600));
     addTearDown(recorder.dispose);
 
     final Widget target = createAppWithButtonThatLaunchesActionSheet(
@@ -1730,7 +1730,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -1811,7 +1811,7 @@ void main() {
     'Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/83819
-      final ScrollController actionScrollController = ScrollController();
+      final actionScrollController = ScrollController();
       addTearDown(actionScrollController.dispose);
       await tester.pumpWidget(
         createAppWithButtonThatLaunchesActionSheet(
@@ -1925,7 +1925,7 @@ void main() {
   testWidgets(
     'Action sheets emits haptic vibration on sliding into a button',
     (WidgetTester tester) async {
-      int vibrationCount = 0;
+      var vibrationCount = 0;
 
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,

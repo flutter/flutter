@@ -31,7 +31,7 @@ void registerWebServiceExtension(
     (JSAny message) {
       (() async {
         try {
-          final Map<String, dynamic> messageJson =
+          final messageJson =
               jsonDecode((message as JSString).toDart) as Map<String, dynamic>;
           final Map<String, String> params = messageJson.cast<String, String>();
           final Map<String, dynamic> result = await callback(params);

@@ -52,7 +52,7 @@ class DebugAdapterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final DapServer server = DapServer(
+    final server = DapServer(
       globals.stdio.stdin,
       globals.stdio.stdout.nonBlocking,
       fileSystem: globals.fs,

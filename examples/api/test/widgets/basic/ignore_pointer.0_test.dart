@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IgnorePointer ignores pointer on the ElevatedButton', (WidgetTester tester) async {
-    const String clickButtonText = 'Click me!';
+    const clickButtonText = 'Click me!';
 
     await tester.pumpWidget(const example.IgnorePointerApp());
 

@@ -50,7 +50,7 @@ abstract class SemanticsEvent {
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
   Map<String, dynamic> toMap({int? nodeId}) {
-    final Map<String, dynamic> event = <String, dynamic>{'type': type, 'data': getDataMap()};
+    final event = <String, dynamic>{'type': type, 'data': getDataMap()};
     if (nodeId != null) {
       event['nodeId'] = nodeId;
     }
@@ -63,10 +63,10 @@ abstract class SemanticsEvent {
 
   @override
   String toString() {
-    final List<String> pairs = <String>[];
+    final pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (final String key in sortedKeys) {
+    for (final key in sortedKeys) {
       pairs.add('$key: ${dataMap[key]}');
     }
     return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';

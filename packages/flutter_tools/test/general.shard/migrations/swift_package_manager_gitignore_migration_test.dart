@@ -33,7 +33,7 @@ void main() {
     });
 
     testWithoutContext('skipped if .gitignore file is missing', () {
-      final SwiftPackageManagerGitignoreMigration migration = SwiftPackageManagerGitignoreMigration(
+      final migration = SwiftPackageManagerGitignoreMigration(
         mockProject,
         testLogger,
       );
@@ -48,13 +48,13 @@ void main() {
     });
 
     testWithoutContext('skipped if nothing to migrate', () {
-      const String gitignoreFileContents = 'Nothing to migrate';
+      const gitignoreFileContents = 'Nothing to migrate';
 
       gitignoreFile.writeAsStringSync(gitignoreFileContents);
 
       final DateTime updatedAt = gitignoreFile.lastModifiedSync();
 
-      final SwiftPackageManagerGitignoreMigration migration = SwiftPackageManagerGitignoreMigration(
+      final migration = SwiftPackageManagerGitignoreMigration(
         mockProject,
         testLogger,
       );
@@ -66,7 +66,7 @@ void main() {
     });
 
     testWithoutContext('skipped if already migrated', () {
-      const String gitignoreFileContents = '''
+      const gitignoreFileContents = '''
 .build/
 .swiftpm/
 ''';
@@ -75,7 +75,7 @@ void main() {
 
       final DateTime updatedAt = gitignoreFile.lastModifiedSync();
 
-      final SwiftPackageManagerGitignoreMigration migration = SwiftPackageManagerGitignoreMigration(
+      final migration = SwiftPackageManagerGitignoreMigration(
         mockProject,
         testLogger,
       );
@@ -96,7 +96,7 @@ void main() {
         'migrate_working_dir/\n',
       );
 
-      final SwiftPackageManagerGitignoreMigration migration = SwiftPackageManagerGitignoreMigration(
+      final migration = SwiftPackageManagerGitignoreMigration(
         mockProject,
         testLogger,
       );

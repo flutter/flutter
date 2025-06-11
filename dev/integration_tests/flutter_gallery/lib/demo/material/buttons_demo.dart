@@ -60,7 +60,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+    final demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'ELEVATED',
         description: _elevatedText,

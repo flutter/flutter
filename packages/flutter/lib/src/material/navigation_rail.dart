@@ -442,7 +442,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity,
             );
 
-    final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
+    final isRTLDirection = Directionality.of(context) == TextDirection.rtl;
 
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
@@ -646,7 +646,7 @@ class _RailDestinationState extends State<_RailDestination> {
       textDirection,
     );
     Offset indicatorOffset;
-    bool applyXOffset = false;
+    var applyXOffset = false;
 
     final Widget themedIcon = IconTheme(
       data:
@@ -764,7 +764,7 @@ class _RailDestinationState extends State<_RailDestination> {
               _verticalDestinationPaddingWithLabel,
               appearingAnimationValue,
             )!;
-        final Interval interval =
+        final interval =
             widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = widget.destinationAnimation.drive(
           CurveTween(curve: interval),

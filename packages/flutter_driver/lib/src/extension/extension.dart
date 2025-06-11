@@ -67,7 +67,7 @@ class _DriverBinding extends BindingBase
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(
+    final extension = FlutterDriverExtension(
       _handler,
       _silenceErrors,
       _enableTextEntryEmulation,
@@ -423,11 +423,11 @@ class FlutterDriverExtension
       final Result response = await responseFuture;
       return _makeResponse(response.toJson());
     } on TimeoutException catch (error, stackTrace) {
-      final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
+      final message = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log(message);
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
-      final String message =
+      final message =
           'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
       if (!_silenceErrors) {
         _log(message);

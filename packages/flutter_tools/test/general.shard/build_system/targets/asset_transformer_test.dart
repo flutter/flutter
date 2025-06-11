@@ -18,16 +18,16 @@ import '../../../src/fake_process_manager.dart';
 void main() {
   testWithoutContext('Invokes dart properly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final Artifacts artifacts = Artifacts.test();
+    final logger = BufferLogger.test();
+    final artifacts = Artifacts.test();
 
     final File asset =
         fileSystem.file('asset.txt')
           ..createSync()
           ..writeAsStringSync('hello world');
-    const String outputPath = 'output.txt';
+    const outputPath = 'output.txt';
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -52,7 +52,7 @@ void main() {
       ),
     ]);
 
-    final AssetTransformer transformer = AssetTransformer(
+    final transformer = AssetTransformer(
       processManager: processManager,
       fileSystem: fileSystem,
       dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -86,13 +86,13 @@ void main() {
     'logs useful error information when transformation process returns a nonzero exit code',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
 
       final File asset = fileSystem.file('asset.txt')..createSync();
-      const String outputPath = 'output.txt';
+      const outputPath = 'output.txt';
 
       final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             dartBinaryPath,
@@ -114,7 +114,7 @@ void main() {
         ),
       ]);
 
-      final AssetTransformer transformer = AssetTransformer(
+      final transformer = AssetTransformer(
         processManager: processManager,
         fileSystem: fileSystem,
         dartBinaryPath: dartBinaryPath,
@@ -154,13 +154,13 @@ Something went wrong''');
     'prints error message when the transformer does not produce an output file',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
 
       final File asset = fileSystem.file('asset.txt')..createSync();
-      const String outputPath = 'output.txt';
+      const outputPath = 'output.txt';
 
       final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             dartBinaryPath,
@@ -176,7 +176,7 @@ Something went wrong''');
         ),
       ]);
 
-      final AssetTransformer transformer = AssetTransformer(
+      final transformer = AssetTransformer(
         processManager: processManager,
         fileSystem: fileSystem,
         dartBinaryPath: dartBinaryPath,
@@ -214,16 +214,16 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
 
   testWithoutContext('correctly chains transformations when there are multiple of them', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Artifacts artifacts = Artifacts.test();
+    final artifacts = Artifacts.test();
 
     final File asset =
         fileSystem.file('asset.txt')
           ..createSync()
           ..writeAsStringSync('ABC');
-    const String outputPath = 'output.txt';
+    const outputPath = 'output.txt';
 
     final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           dartBinaryPath,
@@ -259,9 +259,9 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
               .parse(args);
 
           final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
-          final StringBuffer outputContents = StringBuffer();
+          final outputContents = StringBuffer();
 
-          for (int i = 0; i < inputFileContents.length; i++) {
+          for (var i = 0; i < inputFileContents.length; i++) {
             outputContents.write(inputFileContents.codeUnitAt(i) - 'a'.codeUnits.first);
           }
 
@@ -272,7 +272,7 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
       ),
     ]);
 
-    final AssetTransformer transformer = AssetTransformer(
+    final transformer = AssetTransformer(
       processManager: processManager,
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
@@ -307,16 +307,16 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
     "prints an error when a transformer in a chain (that's not the first) does not produce an output",
     () async {
       final FileSystem fileSystem = MemoryFileSystem();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
 
       final File asset =
           fileSystem.file('asset.txt')
             ..createSync()
             ..writeAsStringSync('ABC');
-      const String outputPath = 'output.txt';
+      const outputPath = 'output.txt';
 
       final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             dartBinaryPath,
@@ -354,7 +354,7 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
         ),
       ]);
 
-      final AssetTransformer transformer = AssetTransformer(
+      final transformer = AssetTransformer(
         processManager: processManager,
         fileSystem: fileSystem,
         dartBinaryPath: dartBinaryPath,

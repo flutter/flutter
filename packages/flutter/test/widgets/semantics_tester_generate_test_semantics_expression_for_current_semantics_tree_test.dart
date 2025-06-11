@@ -55,7 +55,7 @@ void _tests() {
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
   testWidgets('generates code', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code =
         semantics
@@ -99,7 +99,7 @@ void _tests() {
   });
 
   testWidgets('generated code is correct', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(
       semantics,

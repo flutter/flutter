@@ -524,7 +524,7 @@ class _HasNoRemainingExpectations extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
+    final fakeProcessManager = item as FakeProcessManager;
     return description.add(
       'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}',
     );

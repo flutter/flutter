@@ -28,7 +28,7 @@ Future<String> evalTestAppInChrome({
   io.HttpServer? server;
   Chrome? chrome;
   try {
-    final Completer<String> resultCompleter = Completer<String>();
+    final resultCompleter = Completer<String>();
     server = await io.HttpServer.bind('localhost', serverPort);
     final Cascade cascade = Cascade()
         .add((Request request) async {
@@ -79,7 +79,7 @@ class AppServer {
     Chrome chrome;
     server = await io.HttpServer.bind('localhost', serverPort);
     final Handler staticHandler = createStaticHandler(appDirectory, defaultDocument: 'index.html');
-    Cascade cascade = Cascade();
+    var cascade = Cascade();
     if (additionalRequestHandlers != null) {
       for (final Handler handler in additionalRequestHandlers) {
         cascade = cascade.add(handler);
@@ -93,7 +93,7 @@ class AppServer {
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync(
       'flutter_chrome_user_data.',
     );
-    final Completer<String> chromeErrorCompleter = Completer<String>();
+    final chromeErrorCompleter = Completer<String>();
     chrome = await Chrome.launch(
       ChromeOptions(
         headless: headless,

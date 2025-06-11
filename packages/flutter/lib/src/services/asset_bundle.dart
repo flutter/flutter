@@ -351,7 +351,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
       final ByteData bytes = await load(key);
       return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
-    bool debugUsePlatformChannel = false;
+    var debugUsePlatformChannel = false;
     assert(() {
       // dart:io is safe to use here since we early return for web
       // above. If that code is changed, this needs to be guarded on

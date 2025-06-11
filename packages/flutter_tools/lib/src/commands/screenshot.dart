@@ -109,7 +109,7 @@ class ScreenshotCommand extends FlutterCommand {
       outputFile = fs.file(stringArg(_kOut));
     }
 
-    bool success = true;
+    var success = true;
     switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);

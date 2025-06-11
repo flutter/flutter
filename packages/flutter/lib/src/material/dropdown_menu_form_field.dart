@@ -74,7 +74,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
-           final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
+           final state = field as _DropdownMenuFormFieldState<T>;
            void onSelectedHandler(T? value) {
              field.didChange(value);
              onSelected?.call(value);

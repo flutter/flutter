@@ -20,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
-    final NetworkImage imageProvider = image.image as NetworkImage;
+    final imageProvider = image.image as NetworkImage;
 
     expect(imageProvider.url, equals('https://example.does.not.exist/image.jpg'));
   });

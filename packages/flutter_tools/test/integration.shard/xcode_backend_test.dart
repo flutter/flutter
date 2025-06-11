@@ -102,7 +102,7 @@ void main() {
       expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
     });
 
-    const String emptyPlist = '''
+    const emptyPlist = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -131,7 +131,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
     });
 
-    for (final String buildConfiguration in <String>['Debug', 'Profile']) {
+    for (final buildConfiguration in <String>['Debug', 'Profile']) {
       test('add keys in $buildConfiguration', () async {
         infoPlist.writeAsStringSync(emptyPlist);
 

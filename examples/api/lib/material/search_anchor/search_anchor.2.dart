@@ -37,7 +37,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return List<ListTile>.generate(5, (int index) {
-                  final String item = 'item $index';
+                  final item = 'item $index';
                   return ListTile(
                     title: Text(item),
                     onTap: () {

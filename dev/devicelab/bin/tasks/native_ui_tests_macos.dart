@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
-    final String projectDirectory =
+    final projectDirectory =
         '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
 
     await inDirectory(projectDirectory, () async {

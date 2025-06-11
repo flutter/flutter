@@ -140,7 +140,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return deleteUrl(uri);
   }
 
@@ -154,7 +154,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return getUrl(uri);
   }
 
@@ -165,7 +165,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> head(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return headUrl(uri);
   }
 
@@ -176,7 +176,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> open(String method, String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return openUrl(method, uri);
   }
 
@@ -187,7 +187,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> patch(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return patchUrl(uri);
   }
 
@@ -198,7 +198,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> post(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return postUrl(uri);
   }
 
@@ -209,7 +209,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> put(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return putUrl(uri);
   }
 
@@ -308,14 +308,14 @@ class _FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) async {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(_body.addAll, onDone: completer.complete);
     await completer.future;
   }
 
   @override
   Future<HttpClientResponse> close() async {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     Timer.run(() {
       if (_expectedBody != null && !const ListEquality<int>().equals(_expectedBody, _body)) {
         completer.completeError(
@@ -416,7 +416,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    final Stream<List<int>> response = Stream<List<int>>.fromIterable(<List<int>>[_response.body]);
+    final response = Stream<List<int>>.fromIterable(<List<int>>[_response.body]);
     return response.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 

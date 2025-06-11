@@ -397,7 +397,7 @@ class _DetailsListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    const double height = 120.0;
+    const height = 120.0;
 
     return _InkWellOverlay(
       openContainer: openContainer,

@@ -78,7 +78,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
   }
 
   void _onTapUp(TapUpDetails details) {
-    final RenderBox renderBox = _targetKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _targetKey.currentContext!.findRenderObject()! as RenderBox;
     final Offset offset = details.globalPosition - renderBox.localToGlobal(Offset.zero);
     final Offset scenePoint = _transformationController.toScene(offset);
     final BoardPoint? boardPoint = _board.pointToBoardPoint(scenePoint);
@@ -109,7 +109,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
           builder: (BuildContext context, BoxConstraints constraints) {
             // Draw the scene as big as is available, but allow the user to
             // translate beyond that to a visibleSize that's a bit bigger.
-            final Size viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
+            final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
 
             // Start the first render, start the scene centered in the viewport.
             if (_homeMatrix == null) {

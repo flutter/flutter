@@ -8,14 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SystemChrome - style', () {
-    const double statusBarHeight = 25.0;
-    const double navigationBarHeight = 54.0;
-    const double deviceHeight = 960.0;
-    const double deviceWidth = 480.0;
-    const double devicePixelRatio = 2.0;
+    const statusBarHeight = 25.0;
+    const navigationBarHeight = 54.0;
+    const deviceHeight = 960.0;
+    const deviceWidth = 480.0;
+    const devicePixelRatio = 2.0;
 
     void setupTestDevice(WidgetTester tester) {
-      const FakeViewPadding padding = FakeViewPadding(
+      const padding = FakeViewPadding(
         top: statusBarHeight * devicePixelRatio,
         bottom: navigationBarHeight * devicePixelRatio,
       );

@@ -19,7 +19,7 @@ class _HoverDemoState extends State<HoverDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final ButtonStyle overrideFocusColor = ButtonStyle(
+    final overrideFocusColor = ButtonStyle(
       overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
         return states.contains(MaterialState.focused)
             ? Colors.deepOrangeAccent

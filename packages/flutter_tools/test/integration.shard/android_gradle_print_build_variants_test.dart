@@ -53,7 +53,7 @@ void main() {
       // Verify that gradlew has a javaVersion task.
       expect(result.exitCode, 0);
       // Verify the format is a number on its own line.
-      const List<String> expectedLines = <String>[
+      const expectedLines = <String>[
         'BuildVariant: debug',
         'BuildVariant: release',
         'BuildVariant: profile',

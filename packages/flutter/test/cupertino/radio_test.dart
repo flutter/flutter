@@ -20,7 +20,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Radio control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final log = <int?>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -64,7 +64,7 @@ void main() {
 
   testWidgets('Radio disabled', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final log = <int?>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -87,7 +87,7 @@ void main() {
 
   testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final log = <int?>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -141,7 +141,7 @@ void main() {
   });
 
   testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -175,7 +175,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('Radio semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -261,7 +261,7 @@ void main() {
   });
 
   testWidgets('has semantic events', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
@@ -308,10 +308,10 @@ void main() {
   testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
-    const Key radioKey0 = Key('radio0');
-    const Key radioKey1 = Key('radio1');
-    const Key radioKey2 = Key('radio2');
-    final FocusNode focusNode2 = FocusNode(debugLabel: 'radio2');
+    const radioKey0 = Key('radio0');
+    const radioKey1 = Key('radio1');
+    const radioKey2 = Key('radio2');
+    final focusNode2 = FocusNode(debugLabel: 'radio2');
     addTearDown(focusNode2.dispose);
     Widget buildApp({bool enabled = true}) {
       return CupertinoApp(
@@ -587,12 +587,12 @@ void main() {
   );
 
   testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color activeColor = Color(0x0000000A);
-    const Color fillColor = Color(0x0000000B);
-    const Color inactiveColor = Color(0x0000000C);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const inactiveBorderColor = Color(0xffd1d1d6);
+    const activeColor = Color(0x0000000A);
+    const fillColor = Color(0x0000000B);
+    const inactiveColor = Color(0x0000000C);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -642,13 +642,13 @@ void main() {
   });
 
   testWidgets('Radio is slightly darkened when pressed in light mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color inactiveOuterColor = Color(0xffffffff);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-    const Color pressedShadowColor = Color(0x26ffffff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const inactiveBorderColor = Color(0xffd1d1d6);
+    const inactiveOuterColor = Color(0xffffffff);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
+    const pressedShadowColor = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -697,12 +697,12 @@ void main() {
   });
 
   testWidgets('Radio is slightly lightened when pressed in dark mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0x40000000);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-    const Color pressedShadowColor = Color(0x26ffffff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const inactiveBorderColor = Color(0x40000000);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
+    const pressedShadowColor = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -752,17 +752,17 @@ void main() {
   });
 
   testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
     final Color defaultFocusColor =
         HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
             .withLightness(kCupertinoFocusColorBrightness)
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     await tester.pumpWidget(
@@ -792,13 +792,13 @@ void main() {
   });
 
   testWidgets('Radio can configure a focus color', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color focusColor = Color(0x0000000A);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
+    const activeInnerColor = Color(0xffffffff);
+    const activeOuterColor = Color(0xff007aff);
+    const focusColor = Color(0x0000000A);
+    const innerRadius = 2.975;
+    const outerRadius = 7.0;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     await tester.pumpWidget(
@@ -858,7 +858,7 @@ void main() {
   testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    final focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     await tester.pumpWidget(

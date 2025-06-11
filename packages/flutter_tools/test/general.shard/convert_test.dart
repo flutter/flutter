@@ -11,7 +11,7 @@ void main() {
   late String passedString;
   late String nonpassString;
 
-  const Utf8Decoder decoder = Utf8Decoder();
+  const decoder = Utf8Decoder();
 
   setUp(() {
     passedString = 'normal string';

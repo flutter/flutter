@@ -117,7 +117,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
+    final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
     );
@@ -135,7 +135,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
         boolArg('deferred-components') &&
         boolArg('validate-deferred-components') &&
         !boolArg('debug')) {
-      final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+      final validator = DeferredComponentsPrebuildValidator(
         project.directory,
         globals.logger,
         globals.platform,

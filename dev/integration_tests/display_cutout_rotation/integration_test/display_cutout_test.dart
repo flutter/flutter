@@ -62,7 +62,7 @@ void main() {
 
     testWidgets('cutout handles rotation', (WidgetTester tester) async {
       await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.portraitUp);
-      const MyApp widgetUnderTest = MyApp();
+      const widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
       BuildContext context = tester.element(find.byType(Text));

@@ -21,8 +21,8 @@ Depfile unpackDesktopArtifacts({
   List<String>? clientSourcePaths,
   String? icuDataPath,
 }) {
-  final List<File> inputs = <File>[];
-  final List<File> outputs = <File>[];
+  final inputs = <File>[];
+  final outputs = <File>[];
   for (final String artifact in artifacts) {
     final String entityPath = fileSystem.path.join(engineSourcePath, artifact);
     final FileSystemEntityType entityType = fileSystem.typeSync(entityPath);

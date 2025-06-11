@@ -52,7 +52,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Restor
     final TextTheme textTheme = Theme.of(context).textTheme;
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    List<BottomNavigationBarItem> bottomNavigationBarItems = <BottomNavigationBarItem>[
+    var bottomNavigationBarItems = <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: const Icon(Icons.add_comment),
         label: localizations.bottomNavigationCommentsTab,

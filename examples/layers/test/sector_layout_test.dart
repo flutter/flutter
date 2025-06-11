@@ -14,11 +14,11 @@ void main() {
       final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
 
-      final HitTestResult wrapped = HitTestResult();
+      final wrapped = HitTestResult();
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
 
-      final SectorHitTestResult wrapping = SectorHitTestResult.wrap(wrapped);
+      final wrapping = SectorHitTestResult.wrap(wrapped);
       expect(wrapping.path, equals(<HitTestEntry>[entry1]));
       expect(wrapping.path, same(wrapped.path));
 

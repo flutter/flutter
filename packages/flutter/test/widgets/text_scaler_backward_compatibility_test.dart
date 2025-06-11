@@ -19,7 +19,7 @@ void main() {
   });
   group('TextPainter', () {
     test('textScaleFactor translates to textScaler', () {
-      final TextPainter textPainter = TextPainter(
+      final textPainter = TextPainter(
         text: const TextSpan(text: 'text'),
         textDirection: TextDirection.ltr,
         textScaleFactor: 42,
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('copyWith is backward compatible', () {
-      const MediaQueryData data = MediaQueryData(textScaler: TextScaler.linear(2.0));
+      const data = MediaQueryData(textScaler: TextScaler.linear(2.0));
 
       final MediaQueryData data1 = data.copyWith(textScaleFactor: 42);
       expect(data1.textScaler, const TextScaler.linear(42));
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('copyWith specifying both textScaler and textScalingFactor asserts', () {
-      const MediaQueryData data = MediaQueryData();
+      const data = MediaQueryData();
       expect(
         () => data.copyWith(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
         throwsAssertionError,
@@ -139,7 +139,7 @@ void main() {
 
   group('RenderObjects backward compatibility', () {
     test('RenderEditable', () {
-      final RenderEditable renderObject = RenderEditable(
+      final renderObject = RenderEditable(
         backgroundCursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
         textDirection: TextDirection.ltr,
         cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -161,7 +161,7 @@ void main() {
     });
 
     test('RenderParagraph', () {
-      final RenderParagraph renderObject = RenderParagraph(
+      final renderObject = RenderParagraph(
         const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),
         textDirection: TextDirection.ltr,
       );
@@ -201,12 +201,12 @@ void main() {
     });
 
     testWidgets('EditableText', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+      final focusNode = FocusNode(debugLabel: 'EditableText Node');
       addTearDown(focusNode.dispose);
-      const TextStyle textStyle = TextStyle();
-      const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+      const textStyle = TextStyle();
+      const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),

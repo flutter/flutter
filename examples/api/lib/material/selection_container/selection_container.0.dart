@@ -78,7 +78,7 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    final Rect containerRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
+    final containerRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
     final Matrix4 globalToLocal = getTransformTo(null)..invert();
     final Offset localOffset = MatrixUtils.transformPoint(globalToLocal, event.globalPosition);
     final Offset adjustOffset = SelectionUtils.adjustDragOffset(containerRect, localOffset);
@@ -89,7 +89,7 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
     }
     // Select all content if the selection rect intercepts with the rect.
     if (_adjustedStartEdge != null && _adjustedEndEdge != null) {
-      final Rect selectionRect = Rect.fromPoints(_adjustedStartEdge!, _adjustedEndEdge!);
+      final selectionRect = Rect.fromPoints(_adjustedStartEdge!, _adjustedEndEdge!);
       if (!selectionRect.intersect(containerRect).isEmpty) {
         handleSelectAll(const SelectAllSelectionEvent());
       } else {

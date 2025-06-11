@@ -20,7 +20,7 @@ class BenchPathRecording extends RawRecorder {
   @override
   void body(Profile profile) {
     profile.record('recordPathConstruction', () {
-      for (int i = 1; i <= 10; i++) {
+      for (var i = 1; i <= 10; i++) {
         recording.createPaths();
       }
     }, reported: true);

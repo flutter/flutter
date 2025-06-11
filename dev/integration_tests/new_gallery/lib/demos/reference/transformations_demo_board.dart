@@ -26,7 +26,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
     // Set up the positions for the center hexagon where the entire board is
     // centered on the origin.
     // Start point of hexagon (top vertex).
-    final Point<double> hexStart = Point<double>(0, -hexagonRadius);
+    final hexStart = Point<double>(0, -hexagonRadius);
     final double hexagonRadiusPadded = hexagonRadius - hexagonMargin;
     final double centerToFlat = sqrt(3) / 2 * hexagonRadiusPadded;
     positionsForHexagonAtOrigin.addAll(<Offset>[
@@ -107,7 +107,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
 
   // Check if the board point is actually on the board.
   bool _validateBoardPoint(BoardPoint boardPoint) {
-    const BoardPoint center = BoardPoint(0, 0);
+    const center = BoardPoint(0, 0);
     final int distanceFromCenter = getDistance(center, boardPoint);
     return distanceFromCenter <= boardRadius;
   }
@@ -132,8 +132,8 @@ class Board extends Object with IterableMixin<BoardPoint?> {
   // the center of the board in both coordinate systems. If no BoardPoint at the
   // location, return null.
   BoardPoint? pointToBoardPoint(Offset point) {
-    final Offset pointCentered = Offset(point.dx - size.width / 2, point.dy - size.height / 2);
-    final BoardPoint boardPoint = BoardPoint(
+    final pointCentered = Offset(point.dx - size.width / 2, point.dy - size.height / 2);
+    final boardPoint = BoardPoint(
       ((sqrt(3) / 3 * pointCentered.dx - 1 / 3 * pointCentered.dy) / hexagonRadius).round(),
       ((2 / 3 * pointCentered.dy) / hexagonRadius).round(),
     );
@@ -178,7 +178,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
     if (selected == boardPoint) {
       return this;
     }
-    final Board nextBoard = Board(
+    final nextBoard = Board(
       boardRadius: boardRadius,
       hexagonRadius: hexagonRadius,
       hexagonMargin: hexagonMargin,
@@ -199,7 +199,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
       return this;
     }
 
-    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
+    final nextBoardPoints = List<BoardPoint>.from(_boardPoints);
     nextBoardPoints[boardPointIndex] = nextBoardPoint;
     final BoardPoint? selectedBoardPoint = boardPoint == selected ? nextBoardPoint : selected;
     return Board(

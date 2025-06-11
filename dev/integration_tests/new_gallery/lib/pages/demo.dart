@@ -190,12 +190,12 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color iconColor = colorScheme.onSurface;
     final Color selectedIconColor = colorScheme.primary;
-    final double appBarPadding = isDesktop ? 20.0 : 0.0;
+    final appBarPadding = isDesktop ? 20.0 : 0.0;
     final _DemoState currentDemoState = _DemoState.values[_demoStateIndex.value];
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final GalleryOptions options = GalleryOptions.of(context);
 
-    final AppBar appBar = AppBar(
+    final appBar = AppBar(
       systemOverlayStyle: options.resolvedSystemUiOverlayStyle(),
       backgroundColor: Colors.transparent,
       leading: Padding(
@@ -264,7 +264,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
         appBar.preferredSize.height;
     final double maxSectionHeight = isDesktop ? contentHeight : contentHeight - 64;
     final double horizontalPadding = isDesktop ? mediaQuery.size.width * 0.12 : 0.0;
-    const double maxSectionWidth = 420.0;
+    const maxSectionWidth = 420.0;
 
     Widget section;
     switch (currentDemoState) {
@@ -318,7 +318,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
       child: DemoWrapper(height: contentHeight, buildRoute: _currentConfig.buildRoute),
     );
     if (isDesktop) {
-      final bool isFullScreen = currentDemoState == _DemoState.fullscreen;
+      final isFullScreen = currentDemoState == _DemoState.fullscreen;
       final Widget sectionAndDemo = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -339,7 +339,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
         child: section,
       );
 
-      final bool isDemoNormal = currentDemoState == _DemoState.normal;
+      final isDemoNormal = currentDemoState == _DemoState.normal;
       // Add a tap gesture to collapse the currently opened section.
       demoContent = Semantics(
         label: '${GalleryLocalizations.of(context)!.demo}, ${widget.demo.title}',

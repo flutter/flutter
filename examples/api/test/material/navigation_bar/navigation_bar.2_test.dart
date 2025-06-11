@@ -10,10 +10,10 @@ void main() {
   testWidgets('RootPage: only selected destination is on stage', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: example.Home()));
 
-    const String tealTitle = 'Teal RootPage - /';
-    const String cyanTitle = 'Cyan RootPage - /';
-    const String orangeTitle = 'Orange RootPage - /';
-    const String blueTitle = 'Blue RootPage - /';
+    const tealTitle = 'Teal RootPage - /';
+    const cyanTitle = 'Cyan RootPage - /';
+    const orangeTitle = 'Orange RootPage - /';
+    const blueTitle = 'Blue RootPage - /';
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Teal'));
     await tester.pumpAndSettle();

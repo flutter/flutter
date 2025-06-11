@@ -545,7 +545,7 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
   Directory get location => cache.getArtifactDirectory('fuchsia');
 
   Future<void> _doUpdate(ArtifactUpdater artifactUpdater) {
-    final String url = '${cache.cipdBaseUrl}/$_path/+/$version';
+    final url = '${cache.cipdBaseUrl}/$_path/+/$version';
     return artifactUpdater.downloadZipArchive(
       'Downloading package fuchsia SDK...',
       Uri.parse(url),
@@ -577,7 +577,7 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
     if (!_platform.isLinux && !_platform.isMacOS) {
       return;
     }
-    final String url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
+    final url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
     await artifactUpdater.downloadZipArchive(
       'Downloading package flutter runner...',
       Uri.parse(url),
@@ -628,7 +628,7 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   String? get version => cache.engineRevision;
 
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
-    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final packageName = 'fuchsia-debug-symbols-$targetArch';
     final String url = packageResolver.resolveUrl(packageName, version!);
     await artifactUpdater.downloadZipArchive(
       'Downloading debug symbols for flutter runner - arch:$targetArch...',
@@ -707,7 +707,7 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
   List<List<String>> getBinaryDirs() {
     // Linux and Windows both support arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
-    final Map<String, List<String>> artifacts = <String, List<String>>{
+    final artifacts = <String, List<String>>{
       'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],

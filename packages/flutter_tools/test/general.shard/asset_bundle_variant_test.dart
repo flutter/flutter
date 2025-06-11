@@ -28,9 +28,9 @@ void main() {
     final String manifestJson = utf8.decode(
       await bundle.entries['AssetManifest.json']!.contentsAsBytes(),
     );
-    final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
+    final parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>>{
+    final parsedManifest = <String, List<String>>{
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     return parsedManifest;
@@ -40,8 +40,8 @@ void main() {
     ManifestAssetBundle bundle,
   ) async {
     final List<int> manifest = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
-    final ByteData asByteData = ByteData.view(Uint8List.fromList(manifest).buffer);
-    final Map<Object?, Object?> decoded =
+    final asByteData = ByteData.view(Uint8List.fromList(manifest).buffer);
+    final decoded =
         const StandardMessageCodec().decodeMessage(asByteData)! as Map<Object?, Object?>;
     return decoded;
   }
@@ -79,19 +79,19 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       () async {
         createPubspec(assets: <String>['assets/', 'assets/notAVariant/']);
 
-        const String image = 'assets/image.jpg';
-        const String image2xVariant = 'assets/2x/image.jpg';
-        const String imageNonVariant = 'assets/notAVariant/image.jpg';
+        const image = 'assets/image.jpg';
+        const image2xVariant = 'assets/2x/image.jpg';
+        const imageNonVariant = 'assets/notAVariant/image.jpg';
 
-        final List<String> assets = <String>[image, image2xVariant, imageNonVariant];
+        final assets = <String>[image, image2xVariant, imageNonVariant];
 
-        for (final String asset in assets) {
+        for (final asset in assets) {
           final File assetFile = fs.file(asset);
           assetFile.createSync(recursive: true);
           assetFile.writeAsStringSync(asset);
         }
 
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
+        final bundle = ManifestAssetBundle(
           logger: BufferLogger.test(),
           fileSystem: fs,
           platform: platform,
@@ -110,7 +110,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
           bundle,
         );
 
-        final Map<String, List<Map<String, Object>>> expectedAssetManifest =
+        final expectedAssetManifest =
             <String, List<Map<String, Object>>>{
               image: <Map<String, Object>>[
                 <String, String>{'asset': image},
@@ -131,19 +131,19 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       () async {
         createPubspec(assets: <String>['assets/', 'assets/folder/']);
 
-        const String topLevelImage = 'assets/image.jpg';
-        const String secondLevelImage = 'assets/folder/secondLevel.jpg';
-        const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
+        const topLevelImage = 'assets/image.jpg';
+        const secondLevelImage = 'assets/folder/secondLevel.jpg';
+        const secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
 
-        final List<String> assets = <String>[topLevelImage, secondLevelImage, secondLevel2xVariant];
+        final assets = <String>[topLevelImage, secondLevelImage, secondLevel2xVariant];
 
-        for (final String asset in assets) {
+        for (final asset in assets) {
           final File assetFile = fs.file(asset);
           assetFile.createSync(recursive: true);
           assetFile.writeAsStringSync(asset);
         }
 
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
+        final bundle = ManifestAssetBundle(
           logger: BufferLogger.test(),
           fileSystem: fs,
           flutterRoot: flutterRoot,
@@ -169,7 +169,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
           bundle,
         );
 
-        final Map<String, List<Map<String, Object>>> expectedAssetManifest =
+        final expectedAssetManifest =
             <String, List<Map<String, Object>>>{
               topLevelImage: <Map<String, Object>>[
                 <String, String>{'asset': topLevelImage},
@@ -187,18 +187,18 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
     testWithoutContext('Asset paths should never be URI-encoded', () async {
       createPubspec(assets: <String>['assets/normalFolder/']);
 
-      const String image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
-      const String imageVariant = 'assets/normalFolder/3x/i have URI-reserved_characters.jpg';
+      const image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
+      const imageVariant = 'assets/normalFolder/3x/i have URI-reserved_characters.jpg';
 
-      final List<String> assets = <String>[image, imageVariant];
+      final assets = <String>[image, imageVariant];
 
-      for (final String asset in assets) {
+      for (final asset in assets) {
         final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
 
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
+      final bundle = ManifestAssetBundle(
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
@@ -217,7 +217,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         bundle,
       );
 
-      final Map<String, List<Map<String, Object>>> expectedAssetManifest =
+      final expectedAssetManifest =
           <String, List<Map<String, Object>>>{
             image: <Map<String, Object>>[
               <String, Object>{'asset': image},
@@ -233,16 +233,16 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       createPubspec(assets: <String>['assets/image.png']);
 
       // We intentionally do not add a 'assets/image.png'.
-      const String imageVariant = 'assets/2x/image.png';
-      final List<String> assets = <String>[imageVariant];
+      const imageVariant = 'assets/2x/image.png';
+      final assets = <String>[imageVariant];
 
-      for (final String asset in assets) {
+      for (final asset in assets) {
         final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
 
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
+      final bundle = ManifestAssetBundle(
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
@@ -254,7 +254,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<Map<String, Object>>> expectedManifest =
+      final expectedManifest =
           <String, List<Map<String, Object>>>{
             'assets/image.png': <Map<String, Object>>[
               <String, Object>{'asset': imageVariant, 'dpr': 2.0},
@@ -301,20 +301,20 @@ flutter:
     });
 
     testWithoutContext('Variant detection works with windows-style filepaths', () async {
-      const List<String> assets = <String>[
+      const assets = <String>[
         r'assets\foo.jpg',
         r'assets\2x\foo.jpg',
         r'assets\somewhereElse\bar.jpg',
         r'assets\somewhereElse\2x\bar.jpg',
       ];
 
-      for (final String asset in assets) {
+      for (final asset in assets) {
         final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
 
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
+      final bundle = ManifestAssetBundle(
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
@@ -326,7 +326,7 @@ flutter:
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<Map<String, Object>>> expectedAssetManifest =
+      final expectedAssetManifest =
           <String, List<Map<String, Object>>>{
             'assets/foo.jpg': <Map<String, Object>>[
               <String, Object>{'asset': 'assets/foo.jpg'},

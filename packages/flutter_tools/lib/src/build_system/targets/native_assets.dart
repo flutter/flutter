@@ -77,7 +77,7 @@ abstract class DartBuild extends Target {
     }
     dartBuildResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
       <File>[fileSystem.file(dartBuildResultJsonFile)],
     );
@@ -165,7 +165,7 @@ class InstallCodeAssets extends Target {
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri file in dartBuildResult.filesToBeBundled) fileSystem.file(file)],
       <File>[fileSystem.file(nativeAssetsFileUri)],
     );

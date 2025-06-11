@@ -117,7 +117,7 @@ void main() {
   });
 
   group('integration tests', () {
-    const List<String> toolArgs = <String>['-d', 'flutter-tester'];
+    const toolArgs = <String>['-d', 'flutter-tester'];
 
     setUp(() async {
       project = IntegrationTestsProject();

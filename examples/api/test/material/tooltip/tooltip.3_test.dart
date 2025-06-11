@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tooltip is visible when tapping button', (WidgetTester tester) async {
-    const String tooltipText = 'I am a Tooltip';
+    const tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(const example.TooltipExampleApp());
 

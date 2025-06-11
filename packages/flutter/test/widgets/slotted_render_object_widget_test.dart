@@ -108,7 +108,7 @@ void main() {
   test('nameForSlot', () {
     expect(_RenderDiagonal().publicNameForSlot(_DiagonalSlot.bottomRight), 'bottomRight');
     expect(_RenderDiagonal().publicNameForSlot(_DiagonalSlot.topLeft), 'topLeft');
-    final _Slot slot = _Slot();
+    final slot = _Slot();
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
@@ -286,7 +286,7 @@ class _RenderDiagonal extends RenderBox
 
   @override
   void performLayout() {
-    const BoxConstraints childConstraints = BoxConstraints();
+    const childConstraints = BoxConstraints();
 
     Size topLeftSize = Size.zero;
     if (_topLeft != null) {
@@ -333,7 +333,7 @@ class _RenderDiagonal extends RenderBox
   }
 
   void _paintChild(RenderBox child, PaintingContext context, Offset offset) {
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 

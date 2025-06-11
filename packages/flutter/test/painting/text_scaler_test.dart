@@ -8,16 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Linear TextScaler', () {
     test('equality', () {
-      const TextScaler a = TextScaler.linear(3.0);
+      const a = TextScaler.linear(3.0);
       final TextScaler b = TextScaler.noScaling.clamp(minScaleFactor: 3.0);
       // Creates a non-const TextScaler instance.
-      final TextScaler c = TextScaler.linear(3.0); // ignore: prefer_const_constructors
+      final c = TextScaler.linear(3.0); // ignore: prefer_const_constructors
       final TextScaler d = TextScaler.noScaling
           .clamp(minScaleFactor: 1, maxScaleFactor: 5)
           .clamp(minScaleFactor: 3, maxScaleFactor: 6);
 
-      final List<TextScaler> list = <TextScaler>[a, b, c, d];
-      for (final TextScaler lhs in list) {
+      final list = <TextScaler>[a, b, c, d];
+      for (final lhs in list) {
         expect(list, everyElement(lhs));
       }
     });

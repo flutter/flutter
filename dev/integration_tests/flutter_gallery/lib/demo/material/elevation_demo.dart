@@ -19,7 +19,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
   bool _showElevation = true;
 
   List<Widget> buildCards() {
-    const List<double> elevations = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 8.0, 16.0, 24.0];
+    const elevations = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 8.0, 16.0, 24.0];
 
     return elevations.map<Widget>((double elevation) {
       return Center(

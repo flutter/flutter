@@ -27,7 +27,7 @@ void main() {
   late int dragStartCount;
   late int dragUpdateCount;
   late int dragEndCount;
-  const Offset forcePressOffset = Offset(400.0, 50.0);
+  const forcePressOffset = Offset(400.0, 50.0);
 
   void handleTapDown(TapDragDownDetails details) {
     tapCount++;
@@ -112,20 +112,20 @@ void main() {
     bool forcePressEnabled = true,
     bool selectionEnabled = true,
   }) async {
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: forcePressEnabled,
           selectionEnabled: selectionEnabled,
         );
 
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -746,7 +746,7 @@ void main() {
       await pumpTextSelectionGestureDetectorBuilder(tester);
       final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
       final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
-      const TextSelection selection = TextSelection.collapsed(offset: 1);
+      const selection = TextSelection.collapsed(offset: 1);
       state.updateEditingValue(
         const TextEditingValue(text: 'something misspelled', selection: selection),
       );
@@ -756,7 +756,7 @@ void main() {
       await tester.pump();
 
       // Test spell check suggestions toolbar is shown on first tap of misspelled word.
-      const Offset position = Offset(25.0, 200.0);
+      const position = Offset(25.0, 200.0);
       await tester.tapAt(position);
       await tester.pumpAndSettle();
 
@@ -854,19 +854,19 @@ void main() {
 
   testWidgets('Mouse drag selects and cannot drag cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
-    final TextEditingController controller = TextEditingController(text: 'I love flutter!');
+    final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -920,19 +920,19 @@ void main() {
 
   testWidgets('Touch drag moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
-    final TextEditingController controller = TextEditingController(text: 'I love flutter!');
+    final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -979,19 +979,19 @@ void main() {
 
   testWidgets('Stylus drag moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
-    final TextEditingController controller = TextEditingController(text: 'I love flutter!');
+    final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -1038,19 +1038,19 @@ void main() {
 
   testWidgets('Drag of unknown type moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
-    final TextEditingController controller = TextEditingController(text: 'I love flutter!');
+    final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -1106,7 +1106,7 @@ void main() {
 
       // Reconfigure the RenderEditable for multi-line.
       renderEditable.maxLines = null;
-      final ViewportOffset offset1 = ViewportOffset.fixed(20.0);
+      final offset1 = ViewportOffset.fixed(20.0);
       addTearDown(offset1.dispose);
       renderEditable.offset = offset1;
       renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
@@ -1126,7 +1126,7 @@ void main() {
       expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
 
       // Move the viewport offset (scroll).
-      final ViewportOffset offset2 = ViewportOffset.fixed(150.0);
+      final offset2 = ViewportOffset.fixed(150.0);
       addTearDown(offset2.dispose);
       renderEditable.offset = offset2;
       renderEditable.layout(const BoxConstraints.tightFor(width: 400, height: 300.0));
@@ -1202,7 +1202,7 @@ void main() {
   testWidgets(
     "selection handle's GestureDetector should not cover the entire screen",
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'a');
+      final controller = TextEditingController(text: 'a');
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1243,10 +1243,10 @@ void main() {
       TextSelectionControls? selectionControls,
       TextMagnifierConfiguration? magnifierConfiguration,
     }) async {
-      final UniqueKey column = UniqueKey();
-      final LayerLink startHandleLayerLink = LayerLink();
-      final LayerLink endHandleLayerLink = LayerLink();
-      final LayerLink toolbarLayerLink = LayerLink();
+      final column = UniqueKey();
+      final startHandleLayerLink = LayerLink();
+      final endHandleLayerLink = LayerLink();
+      final toolbarLayerLink = LayerLink();
       await tester.pumpWidget(
         MaterialApp(
           home: Column(
@@ -1263,7 +1263,7 @@ void main() {
         ),
       );
 
-      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
+      final clipboardStatus = FakeClipboardStatusNotifier();
       addTearDown(clipboardStatus.dispose);
 
       return SelectionOverlay(
@@ -1301,7 +1301,7 @@ void main() {
     });
 
     testWidgets('can show and hide handles', (WidgetTester tester) async {
-      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
@@ -1346,7 +1346,7 @@ void main() {
     });
 
     testWidgets('only paints one collapsed handle', (WidgetTester tester) async {
-      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.collapsed
@@ -1366,7 +1366,7 @@ void main() {
     });
 
     testWidgets('can change handle parameter', (WidgetTester tester) async {
-      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
@@ -1379,8 +1379,8 @@ void main() {
         ];
       selectionOverlay.showHandles();
       await tester.pump();
-      Text leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
-      Text rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
+      var leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
+      var rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
       expect(leftHandle.data, 'height 10');
       expect(rightHandle.data, 'height 11');
 
@@ -1400,9 +1400,9 @@ void main() {
     });
 
     testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
-      bool selectionHandleTapped = false;
+      var selectionHandleTapped = false;
       void handleTapped() => selectionHandleTapped = true;
-      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
         onSelectionHandleTapped: handleTapped,
@@ -1447,7 +1447,7 @@ void main() {
       void endDragStart(DragStartDetails details) => endDragStartDetails = details;
       void endDragUpdate(DragUpdateDetails details) => endDragUpdateDetails = details;
       void endDragEnd(DragEndDetails details) => endDragEndDetails = details;
-      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
         tester,
         onStartDragStart: startDragStart,
@@ -1487,7 +1487,7 @@ void main() {
         tester.getCenter(find.byKey(spy.leftHandleKey)),
       );
 
-      const Offset newLocation = Offset(20, 20);
+      const newLocation = Offset(20, 20);
       await gesture.moveTo(newLocation);
       await tester.pump(const Duration(milliseconds: 20));
       expect(startDragUpdateDetails!.globalPosition, newLocation);
@@ -1537,9 +1537,9 @@ void main() {
 
       expect(find.byKey(magnifierKey), findsNothing);
 
-      const Offset globalGesturePosition = Offset(10.0, 10.0);
+      const globalGesturePosition = Offset(10.0, 10.0);
       final Rect fieldBounds = Offset.zero & const Size(200.0, 50.0);
-      final MagnifierInfo info = MagnifierInfo(
+      final info = MagnifierInfo(
         globalGesturePosition: globalGesturePosition,
         caretRect: Offset.zero & const Size(5.0, 20.0),
         fieldBounds: fieldBounds,
@@ -1561,7 +1561,7 @@ void main() {
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
       setUp(() {
-        final MockClipboard mockClipboard = MockClipboard(hasStringsThrows: true);
+        final mockClipboard = MockClipboard(hasStringsThrows: true);
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
           SystemChannels.platform,
           mockClipboard.handleMethodCall,
@@ -1576,7 +1576,7 @@ void main() {
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
-        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        final notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
@@ -1585,7 +1585,7 @@ void main() {
     });
 
     group('when Clipboard succeeds', () {
-      final MockClipboard mockClipboard = MockClipboard();
+      final mockClipboard = MockClipboard();
 
       setUp(() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -1602,7 +1602,7 @@ void main() {
       });
 
       test('update sets value based on clipboard contents', () async {
-        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        final notifier = ClipboardStatusNotifier();
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
@@ -1619,23 +1619,23 @@ void main() {
 
   testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102484
-    final TextEditingController controller = TextEditingController(text: 'I love flutter!\n' * 8);
+    final controller = TextEditingController(text: 'I love flutter!\n' * 8);
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
 
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    const double kLineHeight = 16.0;
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    const kLineHeight = 16.0;
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -1700,23 +1700,23 @@ void main() {
     'Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/102484
-      final TextEditingController controller = TextEditingController(text: 'I love flutter!\n' * 8);
+      final controller = TextEditingController(text: 'I love flutter!\n' * 8);
       addTearDown(controller.dispose);
-      final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-      final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+      final editableTextKey = GlobalKey<EditableTextState>();
+      final delegate =
           FakeTextSelectionGestureDetectorBuilderDelegate(
             editableTextKey: editableTextKey,
             forcePressEnabled: false,
             selectionEnabled: true,
           );
 
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double kLineHeight = 16.0;
-      final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+      const kLineHeight = 16.0;
+      final provider = TextSelectionGestureDetectorBuilder(
         delegate: delegate,
       );
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
@@ -1783,15 +1783,15 @@ void main() {
 
   group('TextSelectionOverlay', () {
     Future<TextSelectionOverlay> pumpApp(WidgetTester tester) async {
-      final UniqueKey column = UniqueKey();
-      final LayerLink startHandleLayerLink = LayerLink();
-      final LayerLink endHandleLayerLink = LayerLink();
-      final LayerLink toolbarLayerLink = LayerLink();
+      final column = UniqueKey();
+      final startHandleLayerLink = LayerLink();
+      final endHandleLayerLink = LayerLink();
+      final toolbarLayerLink = LayerLink();
 
-      final UniqueKey editableTextKey = UniqueKey();
-      final TextEditingController controller = TextEditingController();
+      final editableTextKey = UniqueKey();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
@@ -1836,21 +1836,21 @@ void main() {
   });
 
   testWidgets('Context menus', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final controller = TextEditingController(
       text: 'You make wine from sour grapes',
     );
     addTearDown(controller.dispose);
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate =
         FakeTextSelectionGestureDetectorBuilderDelegate(
           editableTextKey: editableTextKey,
           forcePressEnabled: false,
           selectionEnabled: true,
         );
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
+    final provider = TextSelectionGestureDetectorBuilder(
       delegate: delegate,
     );
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(

@@ -317,9 +317,9 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
           source = delegate.openSync();
           sink = resultFile.openSync(mode: FileMode.writeOnly);
           // 64k is the same sized buffer used by dart:io for `File.openRead`.
-          final Uint8List buffer = Uint8List(64 * 1024);
+          final buffer = Uint8List(64 * 1024);
           final int totalBytes = source.lengthSync();
-          int bytes = 0;
+          var bytes = 0;
           while (bytes < totalBytes) {
             final int chunkLength = source.readIntoSync(buffer);
             sink.writeFromSync(buffer, 0, chunkLength);
@@ -700,9 +700,9 @@ void _handlePosixException(
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
-  const int eperm = 1;
-  const int enospc = 28;
-  const int eacces = 13;
+  const eperm = 1;
+  const enospc = 28;
+  const eacces = 13;
   // Catch errors and bail when:
   String? errorMessage;
   switch (errorCode) {
@@ -713,7 +713,7 @@ void _handlePosixException(
           'Free up space and try again.';
     case eperm:
     case eacces:
-      final StringBuffer errorBuffer = StringBuffer();
+      final errorBuffer = StringBuffer();
       if (message != null && message.isNotEmpty) {
         errorBuffer.writeln('$message.');
       } else {
@@ -741,10 +741,10 @@ void _handleMacOSException(
   String? posixPermissionSuggestion,
 ) {
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
-  const int ebadarch = 86;
-  const int eagain = 35;
+  const ebadarch = 86;
+  const eagain = 35;
   if (errorCode == ebadarch) {
-    final StringBuffer errorBuffer = StringBuffer();
+    final errorBuffer = StringBuffer();
     if (message != null) {
       errorBuffer.writeln('$message.');
     }
@@ -758,7 +758,7 @@ void _handleMacOSException(
     _throwFileSystemException(errorBuffer.toString());
   }
   if (errorCode == eagain) {
-    final StringBuffer errorBuffer = StringBuffer();
+    final errorBuffer = StringBuffer();
     if (message != null) {
       errorBuffer.writeln('$message.');
     }
@@ -774,11 +774,11 @@ void _handleMacOSException(
 void _handleWindowsException(Exception e, String? message, int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
-  const int kDeviceFull = 112;
-  const int kUserMappedSectionOpened = 1224;
-  const int kAccessDenied = 5;
-  const int kFatalDeviceHardwareError = 483;
-  const int kDeviceDoesNotExist = 433;
+  const kDeviceFull = 112;
+  const kUserMappedSectionOpened = 1224;
+  const kAccessDenied = 5;
+  const kFatalDeviceHardwareError = 483;
+  const kDeviceDoesNotExist = 433;
 
   // Catch errors and bail when:
   String? errorMessage;

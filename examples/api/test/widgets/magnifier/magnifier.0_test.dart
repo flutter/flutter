@@ -21,7 +21,7 @@ void main() {
     // Make sure magnifier is present.
     final Finder positionedWidget = find.byType(Positioned);
     final Widget positionedWidgetInTree = tester.widget(positionedWidget);
-    final Positioned oldConcretePositioned = positionedWidgetInTree as Positioned;
+    final oldConcretePositioned = positionedWidgetInTree as Positioned;
     expect(positionedWidget, findsOneWidget);
 
     // Confirm if magnifier is in the center of the FlutterLogo.
@@ -30,8 +30,8 @@ void main() {
     expect(centerOfPositioned, equals(centerOfFlutterLogo));
 
     // Drag the magnifier and confirm its new position is expected.
-    const Offset dragDistance = Offset(10, 10);
-    final Offset updatedPositioned = Offset(
+    const dragDistance = Offset(10, 10);
+    final updatedPositioned = Offset(
       oldConcretePositioned.left ?? 0.0 + 10.0,
       oldConcretePositioned.top ?? 0.0 + 10.0,
     );
@@ -44,7 +44,7 @@ void main() {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
     final Offset centerOfPositioned = tester.getCenter(find.byType(Positioned));
-    const Offset dragDistance = Offset(10, 10);
+    const dragDistance = Offset(10, 10);
 
     await tester.dragFrom(centerOfPositioned, dragDistance);
     await tester.pump();

@@ -325,8 +325,8 @@ class _DefaultPub implements Pub {
       }
     }
 
-    final String command = upgrade ? 'upgrade' : 'get';
-    final List<String> args = <String>[
+    final command = upgrade ? 'upgrade' : 'get';
+    final args = <String>[
       if (_logger.supportsColor) '--color',
       '--directory',
       _fileSystem.path.relative(directory),
@@ -367,7 +367,7 @@ class _DefaultPub implements Pub {
   }) async {
     int exitCode;
 
-    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
+    final pubCommand = <String>[..._pubCommand, ...arguments];
     final Map<String, String> pubEnvironment = await _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
@@ -435,8 +435,8 @@ class _DefaultPub implements Pub {
         pubStderr = result.stderr;
       }
     } on io.ProcessException catch (exception) {
-      final StringBuffer buffer = StringBuffer('${exception.message}\n');
-      final String directoryExistsMessage =
+      final buffer = StringBuffer('${exception.message}\n');
+      final directoryExistsMessage =
           _fileSystem.directory(directory).existsSync() ? 'exists' : 'does not exist';
       buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
       buffer.write(_stringifyPubEnv(pubEnvironment));
@@ -448,10 +448,10 @@ class _DefaultPub implements Pub {
       );
     }
 
-    final int code = exitCode;
+    final code = exitCode;
 
     if (code != 0) {
-      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      final buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
@@ -483,7 +483,7 @@ class _DefaultPub implements Pub {
     if (map.isEmpty) {
       return '';
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('$prefix: {');
     for (final MapEntry<String, String> entry in map.entries) {
       buffer.writeln('  "${entry.key}": "${entry.value}",');
@@ -503,7 +503,7 @@ class _DefaultPub implements Pub {
   }) async {
     final bool showTraceForErrors = await _botDetector.isRunningOnBot;
 
-    String lastPubMessage = 'no message';
+    var lastPubMessage = 'no message';
     String? filterWrapper(String line) {
       lastPubMessage = line;
       if (filter == null) {
@@ -519,7 +519,7 @@ class _DefaultPub implements Pub {
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
-    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
+    final pubCommand = <String>[..._pubCommand, ...arguments];
     final int code = await _processUtils.stream(
       pubCommand,
       workingDirectory: directory,
@@ -528,7 +528,7 @@ class _DefaultPub implements Pub {
     );
 
     if (code != 0) {
-      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      final buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
@@ -592,7 +592,7 @@ class _DefaultPub implements Pub {
     // DO NOT update this function without contacting kevmoo.
     // We have server-side tooling that assumes the values are consistent.
     final String? existing = _platform.environment[_kPubEnvironmentKey];
-    final List<String> values = <String>[
+    final values = <String>[
       if (existing != null && existing.isNotEmpty) existing,
       if (await _botDetector.isRunningOnBot) 'flutter_bot',
       'flutter_cli',
@@ -647,7 +647,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool? summaryOnly = false,
   }) async {
-    final Map<String, String> environment = <String, String>{
+    final environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',

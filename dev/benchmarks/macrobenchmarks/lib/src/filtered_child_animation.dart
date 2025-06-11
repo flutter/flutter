@@ -42,7 +42,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
+      final childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       _childCenter = childBox.paintBounds.center;
     });
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
@@ -67,7 +67,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
   };
 
   static Widget _makeChild(int rows, int cols, double fontSize, bool complex) {
-    final BoxDecoration decoration = BoxDecoration(
+    final decoration = BoxDecoration(
       color: Colors.green,
       boxShadow: complex ? <BoxShadow>[const BoxShadow(blurRadius: 10.0)] : null,
       borderRadius: BorderRadius.circular(10.0),

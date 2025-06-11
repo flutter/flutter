@@ -717,9 +717,9 @@ class RenderFlex extends RenderBox
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
-      double totalFlex = 0.0;
+      var totalFlex = 0.0;
       double inflexibleSpace = spacing * (childCount - 1);
-      double maxFlexFractionSoFar = 0.0;
+      var maxFlexFractionSoFar = 0.0;
       for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
         final int flex = _getFlex(child);
         totalFlex += flex;
@@ -811,12 +811,12 @@ class RenderFlex extends RenderBox
   }
 
   static int _getFlex(RenderBox child) {
-    final FlexParentData childParentData = child.parentData! as FlexParentData;
+    final childParentData = child.parentData! as FlexParentData;
     return childParentData.flex ?? 0;
   }
 
   static FlexFit _getFit(RenderBox child) {
-    final FlexParentData childParentData = child.parentData! as FlexParentData;
+    final childParentData = child.parentData! as FlexParentData;
     return childParentData.fit ?? FlexFit.tight;
   }
 
@@ -969,7 +969,7 @@ class RenderFlex extends RenderBox
                     (childCount - 1) * spaceBetween +
                     (sizes.axisSize.mainAxisExtent - sizes.mainAxisFreeSpace)
                 : leadingSpaceY;
-        final double directionUnit = flipMainAxis ? -1.0 : 1.0;
+        final directionUnit = flipMainAxis ? -1.0 : 1.0;
         for (
           RenderBox? child = firstChild;
           baselineOffset == BaselineOffset.noBaseline && child != null;
@@ -986,7 +986,7 @@ class RenderFlex extends RenderBox
         final bool flipCrossAxis = _flipCrossAxis;
         for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
           final BoxConstraints childConstraints = constraintsForChild(child);
-          final BaselineOffset distance = BaselineOffset(
+          final distance = BaselineOffset(
             child.getDryBaseline(childConstraints, baseline),
           );
           final double freeCrossAxisSpace =
@@ -1036,11 +1036,11 @@ class RenderFlex extends RenderBox
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final String identity = _direction == Axis.horizontal ? 'row' : 'column';
-          final String axis = _direction == Axis.horizontal ? 'horizontal' : 'vertical';
-          final String dimension = _direction == Axis.horizontal ? 'width' : 'height';
+          final identity = _direction == Axis.horizontal ? 'row' : 'column';
+          final axis = _direction == Axis.horizontal ? 'horizontal' : 'vertical';
+          final dimension = _direction == Axis.horizontal ? 'width' : 'height';
           DiagnosticsNode error, message;
-          final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
+          final addendum = <DiagnosticsNode>[];
           if (!canFlex && (mainAxisSize == MainAxisSize.max || _getFit(child) == FlexFit.tight)) {
             error = ErrorSummary(
               'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.',
@@ -1146,18 +1146,18 @@ class RenderFlex extends RenderBox
             : null;
 
     // The first pass lays out non-flex children and computes total flex.
-    int totalFlex = 0;
+    var totalFlex = 0;
     RenderBox? firstFlexChild;
     _AscentDescent accumulatedAscentDescent = _AscentDescent.none;
     // Initially, accumulatedSize is the sum of the spaces between children in the main axis.
-    _AxisSize accumulatedSize = _AxisSize._(Size(spacing * (childCount - 1), 0.0));
+    var accumulatedSize = _AxisSize._(Size(spacing * (childCount - 1), 0.0));
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final int flex;
       if (canFlex && (flex = _getFlex(child)) > 0) {
         totalFlex += flex;
         firstFlexChild ??= child;
       } else {
-        final _AxisSize childSize = _AxisSize.fromSize(
+        final childSize = _AxisSize.fromSize(
           size: layoutChild(child, nonFlexChildConstraints),
           direction: direction,
         );
@@ -1181,7 +1181,7 @@ class RenderFlex extends RenderBox
     final double flexSpace = math.max(0.0, maxMainSize - accumulatedSize.mainAxisExtent);
     final double spacePerFlex = flexSpace / totalFlex;
     for (
-      RenderBox? child = firstFlexChild;
+      var child = firstFlexChild;
       child != null && totalFlex > 0;
       child = childAfter(child)
     ) {
@@ -1198,7 +1198,7 @@ class RenderFlex extends RenderBox
         constraints,
         maxChildExtent,
       );
-      final _AxisSize childSize = _AxisSize.fromSize(
+      final childSize = _AxisSize.fromSize(
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
@@ -1281,8 +1281,8 @@ class RenderFlex extends RenderBox
 
     // Position all children in visual order: starting from the top-left child and
     // work towards the child that's farthest away from the origin.
-    double childMainPosition = leadingSpace;
-    for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
+    var childMainPosition = leadingSpace;
+    for (var child = topLeftChild; child != null; child = nextChild(child)) {
       final double? childBaselineOffset;
       final bool baselineAlign =
           baselineOffset != null &&
@@ -1295,7 +1295,7 @@ class RenderFlex extends RenderBox
                 crossAxisExtent - _getCrossSize(child.size),
                 flipCrossAxis,
               );
-      final FlexParentData childParentData = child.parentData! as FlexParentData;
+      final childParentData = child.parentData! as FlexParentData;
       childParentData.offset = switch (direction) {
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),
         Axis.vertical => Offset(childCrossPosition, childMainPosition),
@@ -1331,7 +1331,7 @@ class RenderFlex extends RenderBox
     );
 
     assert(() {
-      final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
+      final debugOverflowHints = <DiagnosticsNode>[
         ErrorDescription('The overflowing $runtimeType has an orientation of $_direction.'),
         ErrorDescription(
           'The edge of the $runtimeType that is overflowing has been marked '

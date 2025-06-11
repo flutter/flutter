@@ -218,7 +218,7 @@ void writeGeneratedPluginRegistrant(FileSystem fs) {
 // Adds a bunch of files to the filesystem
 // (taken from commands.shard/hermetic/build_web_test.dart)
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
-  final List<String> dependencies = <String>[
+  final dependencies = <String>[
     fileSystem.path.join('.dart_tool', 'package_config.json'),
     fileSystem.path.join('web', 'index.html'),
     fileSystem.path.join('lib', 'main.dart'),
@@ -236,7 +236,7 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
-  for (final String dependency in dependencies) {
+  for (final dependency in dependencies) {
     fileSystem.file(dependency).createSync(recursive: true);
   }
 

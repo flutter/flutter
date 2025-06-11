@@ -103,7 +103,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[
+    final futures = <Future<void>>[
       for (final StreamSubscription<String> subscription in subscriptions) subscription.cancel(),
       logLinesController.close(),
     ];
@@ -158,14 +158,14 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // launch the forwarding command
     final Process process = await _processUtils.start(interpolated);
 
-    final Completer<ForwardedPort?> completer = Completer<ForwardedPort?>();
+    final completer = Completer<ForwardedPort?>();
 
     // Read the outputs of the process; if we find a line that matches
     // the configs forwardPortSuccessRegex, we complete with a successfully
     // forwarded port.
     // If that regex never matches, this will potentially run forever
     // and the forwarding will never complete.
-    final CustomDeviceLogReader reader = CustomDeviceLogReader(_deviceName)
+    final reader = CustomDeviceLogReader(_deviceName)
       ..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
@@ -196,7 +196,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
     int actualHostPort = (hostPort == 0 || hostPort == null) ? devicePort : hostPort;
-    int tries = 0;
+    var tries = 0;
 
     while ((numTries == null) || (tries < numTries!)) {
       // when the desired host port is already forwarded by this Forwarder,
@@ -358,7 +358,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
+    final discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -465,7 +465,7 @@ class CustomDevice extends Device {
     return _sessions.putIfAbsent(app, () {
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
-      final CustomDeviceAppSession session = CustomDeviceAppSession(
+      final session = CustomDeviceAppSession(
         name: name,
         device: this,
         appPackage: app,
@@ -703,7 +703,7 @@ class CustomDevice extends Device {
     final TargetPlatform platform = await targetPlatform;
     final Artifacts artifacts = globals.artifacts!;
 
-    final Map<String, String> additionalReplacementValues = <String, String>{
+    final additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
       'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
       'engineRevision':
@@ -824,7 +824,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     final List<CustomDevice> devices = _enabledCustomDevices;
 
     // maps any custom device to whether its reachable or not.
-    final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(
+    final pingedDevices = Map<CustomDevice, bool>.fromIterables(
       devices,
       await Future.wait(devices.map((CustomDevice e) => e.tryPing(timeout: timeout))),
     );

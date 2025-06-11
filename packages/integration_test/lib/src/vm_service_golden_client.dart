@@ -172,7 +172,7 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
     final int nextId = ++_nextId;
     assert(!_pendingRequests.containsKey(nextId));
 
-    final Completer<_Result> completer = Completer<_Result>();
+    final completer = Completer<_Result>();
     _postEvent(operation, <String, Object?>{
       'id': nextId,
       'path': '$golden',

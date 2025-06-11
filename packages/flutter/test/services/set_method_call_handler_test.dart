@@ -11,7 +11,7 @@ void main() {
   // not being initialized and we call ensureInitialized() in the other test
   // file.
   test('throws assertion error iff WidgetsFlutterBinding is not yet initialized', () {
-    const MethodChannel methodChannel = MethodChannel('mock');
+    const methodChannel = MethodChannel('mock');
 
     // Verify an assertion error is thrown before the binary messenger is
     // accessed (which would result in a _CastError due to the non-null

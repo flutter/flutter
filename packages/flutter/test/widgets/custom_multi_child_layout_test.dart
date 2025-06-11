@@ -28,7 +28,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
     assert(!RenderObject.debugCheckingIntrinsics);
     expect(() {
       performLayoutSize = size;
-      final BoxConstraints constraints = BoxConstraints.loose(size);
+      final constraints = BoxConstraints.loose(size);
       performLayoutSize0 = layoutChild(0, constraints);
       performLayoutSize1 = layoutChild(1, constraints);
       performLayoutIsChild = hasChild('fred');
@@ -98,7 +98,7 @@ class NotifierLayoutDelegate extends MultiChildLayoutDelegate {
 class ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(size);
+    final constraints = BoxConstraints.loose(size);
     layoutChild(0, constraints);
     layoutChild(1, constraints);
   }
@@ -112,7 +112,7 @@ class ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
 class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(size);
+    final constraints = BoxConstraints.loose(size);
     layoutChild(0, constraints);
     layoutChild(0, constraints);
   }
@@ -139,7 +139,7 @@ class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
 class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(
+    final constraints = BoxConstraints.loose(
       // Invalid because width and height must be greater than or equal to 0
       const Size(-1, -1),
     );
@@ -162,7 +162,7 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
 
 void main() {
   testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
-    final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
+    final delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     expect(delegate.getSizeConstraints.minWidth, 0.0);
@@ -180,7 +180,7 @@ void main() {
   });
 
   testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) async {
-    TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
+    var delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     // Layout happened because the delegate was set.
@@ -203,7 +203,7 @@ void main() {
   });
 
   testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) async {
-    final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
+    final delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(
       Center(
         child: CustomMultiChildLayout(
@@ -255,7 +255,7 @@ void main() {
   });
 
   testWidgets('Can use listener for relayout', (WidgetTester tester) async {
-    final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
+    final size = ValueNotifier<Size>(const Size(100.0, 200.0));
     addTearDown(size.dispose);
 
     await tester.pumpWidget(
@@ -289,7 +289,7 @@ void main() {
       required String message,
     }) async {
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final errors = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
       try {
         await tester.pumpWidget(widget ?? buildSingleChildFrame(delegate!));

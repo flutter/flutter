@@ -338,8 +338,8 @@ mixin SchedulerBinding on BindingBase {
 
   @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
-    final List<TimingsCallback> clonedCallbacks = List<TimingsCallback>.of(_timingsCallbacks);
-    for (final TimingsCallback callback in clonedCallbacks) {
+    final clonedCallbacks = List<TimingsCallback>.of(_timingsCallbacks);
+    for (final callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
           callback(timings);
@@ -471,7 +471,7 @@ mixin SchedulerBinding on BindingBase {
     Flow? flow,
   }) {
     final bool isFirstTask = _taskQueue.isEmpty;
-    final _TaskEntry<T> entry = _TaskEntry<T>(task, priority.value, debugLabel, flow);
+    final entry = _TaskEntry<T>(task, priority.value, debugLabel, flow);
     _taskQueue.add(entry);
     if (isFirstTask && !locked) {
       _ensureEventLoopCallback();
@@ -663,7 +663,7 @@ mixin SchedulerBinding on BindingBase {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.of(
+        final callbacks = Map<int, _FrameCallbackEntry>.of(
           _transientCallbacks,
         );
         FlutterError.reportError(
@@ -1241,7 +1241,7 @@ mixin SchedulerBinding on BindingBase {
       _debugFrameNumber += 1;
 
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
-        final StringBuffer frameTimeStampDescription = StringBuffer();
+        final frameTimeStampDescription = StringBuffer();
         if (rawTimeStamp != null) {
           _debugDescribeTimeStamp(_currentFrameTimeStamp!, frameTimeStampDescription);
         } else {
@@ -1347,13 +1347,13 @@ mixin SchedulerBinding on BindingBase {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (final FrameCallback callback in List<FrameCallback>.of(_persistentCallbacks)) {
+      for (final callback in List<FrameCallback>.of(_persistentCallbacks)) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
       }
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      final List<FrameCallback> localPostFrameCallbacks = List<FrameCallback>.of(
+      final localPostFrameCallbacks = List<FrameCallback>.of(
         _postFrameCallbacks,
       );
       _postFrameCallbacks.clear();
@@ -1361,7 +1361,7 @@ mixin SchedulerBinding on BindingBase {
         FlutterTimeline.startSync('POST_FRAME');
       }
       try {
-        for (final FrameCallback callback in localPostFrameCallbacks) {
+        for (final callback in localPostFrameCallbacks) {
           _invokeFrameCallback(callback, _currentFrameTimeStamp!);
         }
       } finally {

@@ -38,7 +38,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     mockWebDevFS = FakeWebDevFS();
-    final FakeWebDevice mockWebDevice = FakeWebDevice();
+    final mockWebDevice = FakeWebDevice();
     mockFlutterDevice = FakeFlutterDevice(mockWebDevice);
     mockFlutterDevice._devFS = mockWebDevFS;
 
@@ -55,7 +55,7 @@ name: my_app
     'Can successfully run and connect without vmservice',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+      final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -71,7 +71,7 @@ name: my_app
         ),
       );
 
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+      final connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
@@ -91,7 +91,7 @@ name: my_app
     'ResidentWebRunner calls appFailedToStart if initial compilation fails',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+      final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -123,7 +123,7 @@ name: my_app
     'ResidentWebRunner calls appFailedToStart if error is thrown during startup',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+      final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -154,7 +154,7 @@ name: my_app
     'Can full restart after attaching',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+      final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -169,7 +169,7 @@ name: my_app
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
       );
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+      final connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
@@ -189,7 +189,7 @@ name: my_app
     'Fails on compilation errors in hot restart',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
+      final residentWebRunner = ResidentWebRunner(
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -204,7 +204,7 @@ name: my_app
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
       );
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+      final connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;

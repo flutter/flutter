@@ -13,7 +13,7 @@ import '../../src/common.dart';
 void main() {
   group('CocoaPods validation', () {
     testWithoutContext('Emits installed status when CocoaPods is installed', () async {
-      final CocoaPodsValidator workflow = CocoaPodsValidator(
+      final workflow = CocoaPodsValidator(
         FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'),
         UserMessages(),
       );
@@ -26,7 +26,7 @@ void main() {
     });
 
     testWithoutContext('Emits missing status when CocoaPods is not installed', () async {
-      final CocoaPodsValidator workflow = CocoaPodsValidator(
+      final workflow = CocoaPodsValidator(
         FakeCocoaPods(CocoaPodsStatus.notInstalled),
         UserMessages(),
       );
@@ -42,7 +42,7 @@ void main() {
     testWithoutContext(
       'Emits partial status when CocoaPods is installed with unknown version',
       () async {
-        final CocoaPodsValidator workflow = CocoaPodsValidator(
+        final workflow = CocoaPodsValidator(
           FakeCocoaPods(CocoaPodsStatus.unknownVersion),
           UserMessages(),
         );
@@ -57,12 +57,12 @@ void main() {
     );
 
     testWithoutContext('Emits partial status when CocoaPods version is too low', () async {
-      const String currentVersion = '1.4.0';
+      const currentVersion = '1.4.0';
       final CocoaPods fakeCocoaPods = FakeCocoaPods(
         CocoaPodsStatus.belowRecommendedVersion,
         currentVersion,
       );
-      final CocoaPodsValidator workflow = CocoaPodsValidator(fakeCocoaPods, UserMessages());
+      final workflow = CocoaPodsValidator(fakeCocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.length, 1);

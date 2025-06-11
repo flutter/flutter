@@ -117,7 +117,7 @@ class PrecacheCommand extends FlutterCommand {
   /// If an umbrella is chosen, its children will be included as well.
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
-    final Set<String> selections = <String>{};
+    final selections = <String>{};
     bool explicitlySelected(String name) => boolArg(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       final String? umbrellaName = umbrellaForArtifact[artifact.name];
@@ -169,7 +169,7 @@ class PrecacheCommand extends FlutterCommand {
     // all artifacts that correspond to an enabled platform.
     final bool downloadDefaultArtifacts = explicitlyEnabled.isEmpty;
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
-    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
+    final requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature!)) {
         continue;

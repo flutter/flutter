@@ -93,7 +93,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
         });
     unawaited(
       _process.exitCode.then((int code) {
-        final String message = 'Out-of-process DAP server terminated with code $code';
+        final message = 'Out-of-process DAP server terminated with code $code';
         logger?.call(message);
         if (!_isShuttingDown && code != 0 && onStderrOutput == null) {
           throw Exception(message);
@@ -144,7 +144,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // When running from source, run "dart bin/flutter_tools.dart debug_adapter"
     // instead of directly using "flutter debug_adapter".
     final String executable = _runFromSource ? Platform.resolvedExecutable : flutterToolPath;
-    final List<String> args = <String>[
+    final args = <String>[
       if (_runFromSource) flutterToolsEntryScript,
       'debug-adapter',
       ...?additionalArgs,

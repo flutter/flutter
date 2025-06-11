@@ -56,7 +56,7 @@ void main() {
   });
 
   testWidgets('Picker semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -82,7 +82,7 @@ void main() {
       ),
     );
 
-    final FixedExtentScrollController hourListController =
+    final hourListController =
         tester.widget<ListWheelScrollView>(find.byType(ListWheelScrollView)).controller!
             as FixedExtentScrollController;
 
@@ -126,7 +126,7 @@ void main() {
     });
 
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
-      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
+      final controller = FixedExtentScrollController(initialItem: 1);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Directionality(
@@ -274,8 +274,8 @@ void main() {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback when scroll passes middle of item',
       (WidgetTester tester) async {
-        final List<int> selectedItems = <int>[];
-        final List<MethodCall> systemCalls = <MethodCall>[];
+        final selectedItems = <int>[];
+        final systemCalls = <MethodCall>[];
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -337,8 +337,8 @@ void main() {
     testWidgets(
       'does not trigger haptics when scrolling by tapping on the item',
       (WidgetTester tester) async {
-        final List<int> selectedItems = <int>[];
-        final List<MethodCall> systemCalls = <MethodCall>[];
+        final selectedItems = <int>[];
+        final systemCalls = <MethodCall>[];
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -383,8 +383,8 @@ void main() {
     testWidgets(
       'do not trigger haptic effects on non-iOS devices',
       (WidgetTester tester) async {
-        final List<int> selectedItems = <int>[];
-        final List<MethodCall> systemCalls = <MethodCall>[];
+        final selectedItems = <int>[];
+        final systemCalls = <MethodCall>[];
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -432,9 +432,9 @@ void main() {
     testWidgets(
       'a drag in between items settles back',
       (WidgetTester tester) async {
-        final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+        final controller = FixedExtentScrollController(initialItem: 10);
         addTearDown(controller.dispose);
-        final List<int> selectedItems = <int>[];
+        final selectedItems = <int>[];
 
         await tester.pumpWidget(
           Directionality(
@@ -501,9 +501,9 @@ void main() {
     testWidgets(
       'a big fling that overscrolls springs back',
       (WidgetTester tester) async {
-        final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+        final controller = FixedExtentScrollController(initialItem: 10);
         addTearDown(controller.dispose);
-        final List<int> selectedItems = <int>[];
+        final selectedItems = <int>[];
 
         await tester.pumpWidget(
           Directionality(
@@ -630,7 +630,7 @@ void main() {
   });
 
   testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
-    final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
+    final controller = SpyFixedExtentScrollController();
     addTearDown(controller.dispose);
     expect(controller.hasListeners, false);
     expect(controller.positions.length, 0);
@@ -665,9 +665,9 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/126491
 
-    final List<int> children = List<int>.generate(100, (int index) => index);
-    final List<int> paintedChildren = <int>[];
-    final Set<int> tappedChildren = <int>{};
+    final children = List<int>.generate(100, (int index) => index);
+    final paintedChildren = <int>[];
+    final tappedChildren = <int>{};
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -727,10 +727,10 @@ void main() {
   testWidgets('Tapping on child in a CupertinoPicker selects that child', (
     WidgetTester tester,
   ) async {
-    int selectedItem = 0;
-    const Duration tapScrollDuration = Duration(milliseconds: 300);
+    var selectedItem = 0;
+    const tapScrollDuration = Duration(milliseconds: 300);
     // The tap animation is set to 300ms, but add an extra 1µs to complete the scroll animation.
-    const Duration infinitesimalPause = Duration(microseconds: 1);
+    const infinitesimalPause = Duration(microseconds: 1);
 
     await tester.pumpWidget(
       CupertinoApp(

@@ -86,7 +86,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   DateTime dateTime = DateTime.now();
 
   Widget _buildColorPicker(BuildContext context) {
-    final FixedExtentScrollController scrollController = FixedExtentScrollController(
+    final scrollController = FixedExtentScrollController(
       initialItem: _selectedColorIndex,
     );
 

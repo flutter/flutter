@@ -109,7 +109,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
         workingDirectory: innerTempDir.path,
       );
 
-      final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
+      final appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
       final File appGradleBuild = getAndroidBuildFile(
         localFileSystem.path.join(appPath, 'android', 'app'),

@@ -134,7 +134,7 @@ class ItemListNotifier<T> {
   bool get isPopulated => _isPopulated;
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = Set<T>.of(updatedList);
+    final updatedSet = Set<T>.of(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);
@@ -194,7 +194,7 @@ class SettingsFile {
 /// Given a data structure which is a Map of String to dynamic values, return
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
 Map<String, Object?>? castStringKeyedMap(Object? untyped) {
-  final Map<dynamic, dynamic>? map = untyped as Map<dynamic, dynamic>?;
+  final map = untyped as Map<dynamic, dynamic>?;
   return map?.cast<String, Object?>();
 }
 
@@ -250,8 +250,8 @@ String wrapText(
   indent ??= 0;
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
-  final List<String> result = <String>[];
-  for (final String line in splitText) {
+  final result = <String>[];
+  for (final line in splitText) {
     String trimmedText = line.trimLeft();
     final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
@@ -290,14 +290,14 @@ String wrapText(
         if (line.isEmpty) {
           return '';
         }
-        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        var truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
         if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
           truncatedIndent = truncatedIndent.substring(
             0,
             math.max(columnWidth - kMinColumnWidth, 0),
           );
         }
-        final String result = '$truncatedIndent$line';
+        final result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent!;
         return result;
       }),
@@ -349,9 +349,9 @@ List<String> _wrapTextAsLines(
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
-    List<_AnsiRun> result = <_AnsiRun>[];
-    final StringBuffer current = StringBuffer();
+    final characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
+    var result = <_AnsiRun>[];
+    final current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
       if (match[0]!.length < 4) {
@@ -378,7 +378,7 @@ List<String> _wrapTextAsLines(
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
-  final List<String> result = <String>[];
+  final result = <String>[];
   final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
@@ -393,10 +393,10 @@ List<String> _wrapTextAsLines(
       continue;
     }
 
-    int currentLineStart = 0;
+    var currentLineStart = 0;
     int? lastWhitespace;
     // Find the start of the current line.
-    for (int index = 0; index < splitLine.length; ++index) {
+    for (var index = 0; index < splitLine.length; ++index) {
       if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
@@ -542,7 +542,7 @@ bool listEquals<T>(List<T> a, List<T> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index++) {
+  for (var index = 0; index < a.length; index++) {
     if (a[index] != b[index]) {
       return false;
     }

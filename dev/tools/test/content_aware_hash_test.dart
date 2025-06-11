@@ -23,7 +23,7 @@ import 'package:test/test.dart';
 
 void main() {
   const FileSystem localFs = LocalFileSystem();
-  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin();
+  final flutterRoot = _FlutterRootUnderTest.findWithin();
 
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;
@@ -66,8 +66,8 @@ void main() {
 
     if (const LocalPlatform().isWindows) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
-      for (final String key in powerShellVariables) {
+      const powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
+      for (final key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
           environment[key] = value;
@@ -288,7 +288,7 @@ final class _ProcessSucceedsAndOutputs extends Matcher {
     if (item is! io.ProcessResult || item.exitCode != 0 || item.stdout is! String) {
       return false;
     }
-    final String actual = item.stdout as String;
+    final actual = item.stdout as String;
     return collapseWhitespace(actual) == collapseWhitespace(_expected);
   }
 

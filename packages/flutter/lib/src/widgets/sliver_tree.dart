@@ -747,7 +747,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
   @override
   TreeSliverNode<T>? getNodeFor(T content) => _getNode(content, widget.tree);
   TreeSliverNode<T>? _getNode(T content, List<TreeSliverNode<T>> tree) {
-    final List<TreeSliverNode<T>> nextDepth = <TreeSliverNode<T>>[];
+    final nextDepth = <TreeSliverNode<T>>[];
     for (final TreeSliverNode<T> node in tree) {
       if (node.content == content) {
         return node;
@@ -772,7 +772,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
 
   @override
   void expandAll() {
-    final List<TreeSliverNode<T>> activeNodesToExpand = <TreeSliverNode<T>>[];
+    final activeNodesToExpand = <TreeSliverNode<T>>[];
     _expandAll(widget.tree, activeNodesToExpand);
     activeNodesToExpand.reversed.forEach(toggleNode);
   }
@@ -801,7 +801,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
 
   @override
   void collapseAll() {
-    final List<TreeSliverNode<T>> activeNodesToCollapse = <TreeSliverNode<T>>[];
+    final activeNodesToCollapse = <TreeSliverNode<T>>[];
     _collapseAll(widget.tree, activeNodesToCollapse);
     activeNodesToCollapse.reversed.forEach(toggleNode);
   }
@@ -914,7 +914,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
         case AnimationStatus.completed:
       }
 
-      final CurvedAnimation newAnimation = CurvedAnimation(
+      final newAnimation = CurvedAnimation(
         parent: controller,
         curve: widget.toggleAnimationStyle?.curve ?? TreeSliver.defaultAnimationCurve,
       );
@@ -945,9 +945,9 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<TreeSliverNodeParentDat
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TreeSliverNodeParentData parentData =
+    final parentData =
         renderObject.parentData! as TreeSliverNodeParentData;
-    bool needsLayout = false;
+    var needsLayout = false;
 
     if (parentData.depth != depth) {
       assert(depth >= 0);
@@ -995,7 +995,7 @@ class _SliverTree extends SliverVariedExtentList {
 
   @override
   RenderTreeSliver createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderTreeSliver(
       itemExtentBuilder: itemExtentBuilder,
       activeAnimations: activeAnimations,

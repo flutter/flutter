@@ -42,8 +42,8 @@ class SnippetGenerator {
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.sample] snippet.
   String interpolateSkeleton(CodeSample sample, String skeleton) {
-    final List<String> codeParts = <String>[];
-    const HtmlEscape htmlEscape = HtmlEscape();
+    final codeParts = <String>[];
+    const htmlEscape = HtmlEscape();
     String? language;
     for (final SkeletonInjection injection in sample.parts) {
       if (!injection.name.startsWith('code')) {
@@ -61,7 +61,7 @@ class SnippetGenerator {
     // Only insert a div for the description if there actually is some text there.
     // This means that the {{description}} marker in the skeleton needs to
     // be inside of an {@inject-html} block.
-    final String description =
+    final description =
         sample.description.trim().isNotEmpty
             ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
             : '';
@@ -69,9 +69,9 @@ class SnippetGenerator {
     // DartPad only supports stable or main as valid channels. Use main
     // if not on stable so that local runs will work (although they will
     // still take their sample code from the master docs server).
-    final String channel = sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
+    final channel = sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
 
-    final Map<String, String> substitutions = <String, String>{
+    final substitutions = <String, String>{
       'description': description,
       'code': htmlEscape.convert(codeParts.join('\n')),
       'language': language ?? 'dart',
@@ -100,8 +100,8 @@ class SnippetGenerator {
       return <SourceLine>[];
     }
     final Iterable<SnippetSample> snippets = samples.whereType<SnippetSample>();
-    final List<SourceLine> snippetLines = <SourceLine>[...snippets.first.assumptions];
-    for (final SnippetSample sample in snippets) {
+    final snippetLines = <SourceLine>[...snippets.first.assumptions];
+    for (final sample in snippets) {
       parseInput(sample);
       snippetLines.addAll(_processBlocks(sample));
     }
@@ -153,11 +153,11 @@ class SnippetGenerator {
       _expressionId += 1;
       return _surround('void expression$_expressionId() { ', block.toList(), ' }');
     } else {
-      final List<SourceLine> buffer = <SourceLine>[];
-      int blocks = 0;
+      final buffer = <SourceLine>[];
+      var blocks = 0;
       SourceLine? subLine;
-      final List<SourceLine> subsections = <SourceLine>[];
-      for (int index = 0; index < block.length; index += 1) {
+      final subsections = <SourceLine>[];
+      for (var index = 0; index < block.length; index += 1) {
         // Each section of the dart code that is either split by a blank line, or with
         // '// ...' is treated as a separate code block.
         if (block[index].text.trim().isEmpty || block[index].text == '// ...') {
@@ -195,11 +195,11 @@ class SnippetGenerator {
   /// Parses the input for the various code and description segments, and
   /// returns a set of skeleton injections in the order found.
   List<SkeletonInjection> parseInput(CodeSample sample) {
-    bool inCodeBlock = false;
-    final List<SourceLine> description = <SourceLine>[];
-    final List<SkeletonInjection> components = <SkeletonInjection>[];
+    var inCodeBlock = false;
+    final description = <SourceLine>[];
+    final components = <SkeletonInjection>[];
     String? language;
-    final RegExp codeStartEnd = RegExp(
+    final codeStartEnd = RegExp(
       r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$',
     );
     for (final SourceLine line in sample.input) {
@@ -232,8 +232,8 @@ class SnippetGenerator {
         components.last.contents.add(line);
       }
     }
-    final List<String> descriptionLines = <String>[];
-    bool lastWasWhitespace = false;
+    final descriptionLines = <String>[];
+    var lastWasWhitespace = false;
     for (final String line in description.map<String>((SourceLine line) => line.text.trimRight())) {
       final bool onlyWhitespace = line.trim().isEmpty;
       if (onlyWhitespace && descriptionLines.isEmpty) {

@@ -14,7 +14,7 @@ final FakePlatform linux = FakePlatform();
 
 void main() {
   testWithoutContext('Applies to macOS platform', () {
-    final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
+    final macOSWorkflow = MacOSWorkflow(
       platform: macOS,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
     );
@@ -26,7 +26,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply to non-macOS platform', () {
-    final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
+    final macOSWorkflow = MacOSWorkflow(
       platform: linux,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
     );
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply when feature is disabled', () {
-    final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
+    final macOSWorkflow = MacOSWorkflow(
       platform: macOS,
       featureFlags: TestFeatureFlags(),
     );

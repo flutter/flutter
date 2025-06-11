@@ -51,7 +51,7 @@ class IOSDeploy {
     // Python script that uses package 'six'. LLDB.framework relies on the
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which includes it.
-    final Map<String, String> environment = Map<String, String>.of(_platform.environment);
+    final environment = Map<String, String>.of(_platform.environment);
     environment['PATH'] = '/usr/bin:${environment['PATH']}';
     environment.addEntries(<MapEntry<String, String>>[_cache.dyLdLibEntry]);
     return environment;
@@ -61,7 +61,7 @@ class IOSDeploy {
   ///
   /// Uses ios-deploy and returns the exit code.
   Future<int> uninstallApp({required String deviceId, required String bundleId}) async {
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -89,7 +89,7 @@ class IOSDeploy {
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -123,7 +123,7 @@ class IOSDeploy {
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       'script',
       '-t',
       '0',
@@ -160,7 +160,7 @@ class IOSDeploy {
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -182,7 +182,7 @@ class IOSDeploy {
   }
 
   Future<bool> isAppInstalled({required String bundleId, required String deviceId}) async {
-    final List<String> launchCommand = <String>[
+    final launchCommand = <String>[
       _binaryPath,
       '--id',
       deviceId,
@@ -308,11 +308,11 @@ class IOSDeployDebugger {
 
     // (lldb)     run
     // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-    RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
+    var lldbRun = RegExp(r'\(lldb\)\s*run');
 
-    final Completer<bool> debuggerCompleter = Completer<bool>();
+    final debuggerCompleter = Completer<bool>();
 
-    bool receivedLogs = false;
+    var receivedLogs = false;
     try {
       _iosDeployProcess = await _processUtils.start(_launchCommand, environment: _iosDeployEnv);
       String? lastLineFromDebugger;
@@ -364,7 +364,7 @@ class IOSDeployDebugger {
             // Example: "error: process launch failed"
             if (_debuggerState == _IOSDeployDebuggerState.launching) {
               _logger.printTrace(line);
-              final bool attachSuccess = line == 'success';
+              final attachSuccess = line == 'success';
               _debuggerState =
                   attachSuccess
                       ? _IOSDeployDebuggerState.attached
@@ -520,7 +520,7 @@ class IOSDeployDebugger {
     if (!debuggerAttached) {
       return;
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _processResumeCompleter = completer;
     try {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
@@ -555,7 +555,7 @@ class IOSDeployDebugger {
     final Directory currentDeviceSupportDir = symbolsDirectory.parent;
     final List<FileSystemEntity> symbolStatusFiles = currentDeviceSupportDir.listSync();
     _logger.printTrace('Symbol files:');
-    for (final FileSystemEntity file in symbolStatusFiles) {
+    for (final file in symbolStatusFiles) {
       _logger.printTrace('  ${file.basename}');
     }
   }

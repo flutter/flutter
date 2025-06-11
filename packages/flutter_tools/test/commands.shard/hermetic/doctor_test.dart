@@ -44,8 +44,8 @@ void main() {
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
-    const ValidationMessage messageA = ValidationMessage('ab', contextUrl: 'a');
-    const ValidationMessage messageB = ValidationMessage('ab', contextUrl: 'b');
+    const messageA = ValidationMessage('ab', contextUrl: 'a');
+    const messageB = ValidationMessage('ab', contextUrl: 'b');
 
     expect(messageB, isNot(messageA));
     expect(messageB.hashCode, isNot(messageA.hashCode));
@@ -130,8 +130,8 @@ void main() {
 
     group('device validator', () {
       testWithoutContext('no devices', () async {
-        final FakeDeviceManager deviceManager = FakeDeviceManager();
-        final DeviceValidator deviceValidator = DeviceValidator(
+        final deviceManager = FakeDeviceManager();
+        final deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
@@ -144,10 +144,10 @@ void main() {
       });
 
       testWithoutContext('diagnostic message', () async {
-        final FakeDeviceManager deviceManager =
+        final deviceManager =
             FakeDeviceManager()..diagnostics = <String>['Device locked'];
 
-        final DeviceValidator deviceValidator = DeviceValidator(
+        final deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
@@ -158,13 +158,13 @@ void main() {
       });
 
       testWithoutContext('diagnostic message and devices', () async {
-        final FakeDevice device = FakeDevice();
-        final FakeDeviceManager deviceManager =
+        final device = FakeDevice();
+        final deviceManager =
             FakeDeviceManager()
               ..devices = <Device>[device]
               ..diagnostics = <String>['Device locked'];
 
-        final DeviceValidator deviceValidator = DeviceValidator(
+        final deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
           userMessages: UserMessages(),
         );
@@ -183,7 +183,7 @@ void main() {
     testUsingContext(
       'validate non-verbose output format for run without issues',
       () async {
-        final Doctor doctor = Doctor(logger: logger, clock: const SystemClock());
+        final doctor = Doctor(logger: logger, clock: const SystemClock());
         expect(await doctor.diagnose(verbose: false), isTrue);
         expect(
           logger.statusText,
@@ -275,7 +275,7 @@ void main() {
     testUsingContext(
       'validate non-verbose output format for run with an async crash',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         await FakeAsync().run((FakeAsync time) {
           unawaited(
             FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
@@ -450,17 +450,17 @@ void main() {
     testUsingContext(
       'PII separated, events only sent once',
       () async {
-        final DateTime fakeDate = DateTime(1995, 3, 3);
-        final SystemClock systemClock = SystemClock.fixed(fakeDate);
+        final fakeDate = DateTime(1995, 3, 3);
+        final systemClock = SystemClock.fixed(fakeDate);
 
         final Doctor fakeDoctor = FakePiiDoctor(logger, clock: systemClock);
-        final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
-        const String expectedPiiText =
+        final doctorText = DoctorText(logger, doctor: fakeDoctor);
+        const expectedPiiText =
             '[✓] PII Validator [0ms]\n'
             '    • Contains PII path/to/username\n'
             '\n'
             '• No issues found!\n';
-        const String expectedPiiStrippedText =
+        const expectedPiiStrippedText =
             '[✓] PII Validator [0ms]\n'
             '    • Does not contain PII\n'
             '\n'
@@ -489,7 +489,7 @@ void main() {
 
     testUsingContext('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
-      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final doctorText = DoctorText(logger, doctor: fakeDoctor);
       final String piiText = await doctorText.text;
       expect(piiText, isNotEmpty);
       expect(piiText, await doctorText.piiStrippedText);
@@ -499,7 +499,7 @@ void main() {
   testUsingContext(
     'validate non-verbose output wrapping',
     () async {
-      final BufferLogger wrapLogger = BufferLogger.test(
+      final wrapLogger = BufferLogger.test(
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
       );
       expect(await FakeDoctor(wrapLogger).diagnose(verbose: false), isFalse);
@@ -537,7 +537,7 @@ void main() {
   );
 
   testUsingContext('validate verbose output wrapping', () async {
-    final BufferLogger wrapLogger = BufferLogger.test(
+    final wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
     );
     expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
@@ -628,9 +628,9 @@ void main() {
   });
 
   group('grouped validator merging results', () {
-    final PassingGroupedValidator installed = PassingGroupedValidator('Category');
-    final PartialGroupedValidator partial = PartialGroupedValidator('Category');
-    final MissingGroupedValidator missing = MissingGroupedValidator('Category');
+    final installed = PassingGroupedValidator('Category');
+    final partial = PartialGroupedValidator('Category');
+    final missing = MissingGroupedValidator('Category');
 
     testUsingContext(
       'validate installed + installed = installed',
@@ -798,7 +798,7 @@ void main() {
   testUsingContext(
     'If android workflow is disabled, AndroidStudio validator is not included',
     () {
-      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+      final provider = DoctorValidatorsProvider.test(
         featureFlags: TestFeatureFlags(isAndroidEnabled: false),
       );
       expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
@@ -811,9 +811,9 @@ void main() {
 
   group('Doctor events with unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
-    final DateTime fakeDate = DateTime(1995, 3, 3);
-    final SystemClock fakeSystemClock = SystemClock.fixed(fakeDate);
+    final fakeFlutterVersion = FakeFlutterVersion();
+    final fakeDate = DateTime(1995, 3, 3);
+    final fakeSystemClock = SystemClock.fixed(fakeDate);
 
     setUp(() {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -834,7 +834,7 @@ void main() {
     testUsingContext(
       'contains installed',
       () async {
-        final Doctor doctor = Doctor(
+        final doctor = Doctor(
           logger: logger,
           clock: fakeSystemClock,
           analytics: fakeAnalytics,
@@ -844,7 +844,7 @@ void main() {
         expect(fakeAnalytics.sentEvents.length, 3);
 
         // The event that should have been fired off during the doctor invocation
-        final Event eventToFind = Event.doctorValidatorResult(
+        final eventToFind = Event.doctorValidatorResult(
           validatorName: 'Passing Validator',
           result: 'installed',
           partOfGroupedValidator: false,
@@ -994,7 +994,7 @@ void main() {
     testUsingContext(
       'grouped validator subresult and subvalidators different lengths',
       () async {
-        final FakeGroupedDoctorWithCrash fakeDoctor = FakeGroupedDoctorWithCrash(
+        final fakeDoctor = FakeGroupedDoctorWithCrash(
           logger,
           clock: fakeSystemClock,
         );
@@ -1007,7 +1007,7 @@ void main() {
         // Attempt to send a random event to ensure that the
         // analytics package is still working, despite not sending
         // above (as expected)
-        final Event testEvent = Event.analyticsCollectionEnabled(status: true);
+        final testEvent = Event.analyticsCollectionEnabled(status: true);
         fakeAnalytics.send(testEvent);
         expect(fakeAnalytics.sentEvents, hasLength(1));
         expect(fakeAnalytics.sentEvents, contains(testEvent));
@@ -1037,7 +1037,7 @@ class PassingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
@@ -1054,7 +1054,7 @@ class PiiValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage(
         'Contains PII path/to/username',
         piiStrippedMessage: 'Does not contain PII',
@@ -1069,7 +1069,7 @@ class MissingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
@@ -1083,7 +1083,7 @@ class NotAvailableValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
@@ -1097,7 +1097,7 @@ class StuckValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() {
-    final Completer<ValidationResult> completer = Completer<ValidationResult>();
+    final completer = Completer<ValidationResult>();
 
     // This future will never complete
     return completer.future;
@@ -1109,7 +1109,7 @@ class PartialValidatorWithErrors extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.error('An error message indicating partial installation'),
       ValidationMessage.hint('Maybe a hint will help the user'),
       ValidationMessage('An extra message with some verbose details'),
@@ -1123,7 +1123,7 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.hint('There is a hint here'),
       ValidationMessage('But there is no error'),
     ];
@@ -1147,8 +1147,8 @@ class AsyncCrashingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() {
-    const Duration delay = Duration(seconds: 1);
-    final Future<ValidationResult> result = Future<ValidationResult>.delayed(
+    const delay = Duration(seconds: 1);
+    final result = Future<ValidationResult>.delayed(
       delay,
       () => throw StateError('fatal error'),
     );
@@ -1280,7 +1280,7 @@ class PassingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
     return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
@@ -1292,7 +1292,7 @@ class MissingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
     ];
     return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
@@ -1304,7 +1304,7 @@ class PartialGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage.error('An error message for partial installation'),
     ];
     return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
@@ -1316,7 +1316,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const List<ValidationMessage> messages = <ValidationMessage>[
+    const messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
     return ZeroExecutionTimeValidationResult(

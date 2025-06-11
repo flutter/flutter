@@ -84,7 +84,7 @@ class CleanCommand extends FlutterCommand {
       final XcodeProjectInfo projectInfo =
           (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
       if (argResults?.wasParsed('scheme') ?? false) {
-        final String scheme = argResults!['scheme'] as String;
+        final scheme = argResults!['scheme'] as String;
         if (scheme.isEmpty) {
           throwToolExit('No scheme was specified for --scheme');
         }
@@ -106,7 +106,7 @@ class CleanCommand extends FlutterCommand {
         }
       }
     } on Exception catch (error) {
-      final String message = 'Could not clean Xcode workspace: $error';
+      final message = 'Could not clean Xcode workspace: $error';
       if (argResults?.wasParsed('scheme') ?? false) {
         throwToolExit(message);
       } else {

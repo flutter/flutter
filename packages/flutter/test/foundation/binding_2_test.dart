@@ -37,7 +37,7 @@ void main() {
     });
     BindingBase.debugZoneErrorsAreFatal = false;
     Zone.current.fork().run(() {
-      bool sawError = false;
+      var sawError = false;
       final FlutterExceptionHandler? lastHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         final Object error = details.exception;

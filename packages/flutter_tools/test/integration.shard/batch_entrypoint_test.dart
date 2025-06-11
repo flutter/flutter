@@ -26,7 +26,7 @@ Future<void> main() async {
     // the Dart SDK update.
     dartSdkStamp.deleteSync();
     final Future<String> runFuture = runDartBatch();
-    final Timer timer = Timer(const Duration(minutes: 5), () {
+    final timer = Timer(const Duration(minutes: 5), () {
       // This print is useful for people debugging this test. Normally we would
       // avoid printing in a test but this is an exception because it's useful
       // ambient information.
@@ -56,7 +56,7 @@ Future<void> main() async {
 }
 
 Future<String> runDartBatch() async {
-  String output = '';
+  var output = '';
   final Process process = await processManager.start(<String>[dartBatch.path]);
   final Future<Object?> stdoutFuture = process.stdout.transform<String>(utf8.decoder).forEach((
     String str,

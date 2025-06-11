@@ -19,12 +19,12 @@ void main() {
 
   test('CardThemeData lerp special cases', () {
     expect(CardThemeData.lerp(null, null, 0), const CardThemeData());
-    const CardThemeData theme = CardThemeData();
+    const theme = CardThemeData();
     expect(identical(CardThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
   test('CardThemeData defaults', () {
-    const CardThemeData cardThemeData = CardThemeData();
+    const cardThemeData = CardThemeData();
 
     expect(cardThemeData.clipBehavior, null);
     expect(cardThemeData.color, null);
@@ -34,7 +34,7 @@ void main() {
     expect(cardThemeData.shape, null);
     expect(cardThemeData.surfaceTintColor, null);
 
-    const CardTheme cardTheme = CardTheme(data: CardThemeData(), child: SizedBox());
+    const cardTheme = CardTheme(data: CardThemeData(), child: SizedBox());
     expect(cardTheme.clipBehavior, null);
     expect(cardTheme.color, null);
     expect(cardTheme.elevation, null);
@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('Default CardThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const CardThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -58,7 +58,7 @@ void main() {
   });
 
   testWidgets('CardThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const CardThemeData(
       clipBehavior: Clip.antiAlias,
       color: Colors.amber,
@@ -91,7 +91,7 @@ void main() {
   });
 
   testWidgets('Material3 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card())));
 
     final Padding padding = _getCardPadding(tester);
@@ -132,8 +132,8 @@ void main() {
     const Clip clip = Clip.hardEdge;
     const Color color = Colors.orange;
     const Color shadowColor = Colors.pink;
-    const double elevation = 7.0;
-    const EdgeInsets margin = EdgeInsets.all(3.0);
+    const elevation = 7.0;
+    const margin = EdgeInsets.all(3.0);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
@@ -180,7 +180,7 @@ void main() {
   testWidgets('Material3 - ThemeData properties are used when no CardTheme is set', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     await tester.pumpWidget(MaterialApp(theme: themeData, home: const Scaffold(body: Card())));
 
@@ -189,7 +189,7 @@ void main() {
   });
 
   testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
-    const CardThemeData cardTheme = CardThemeData(
+    const cardTheme = CardThemeData(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
       elevation: 1.0,
@@ -216,8 +216,8 @@ void main() {
     const Clip themeClipBehavior = Clip.antiAlias;
     const Color themeColor = Colors.red;
     const Color themeShadowColor = Colors.orange;
-    const double themeElevation = 10.0;
-    const EdgeInsets themeMargin = EdgeInsets.all(12.0);
+    const themeElevation = 10.0;
+    const themeMargin = EdgeInsets.all(12.0);
     const ShapeBorder themeShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
@@ -225,13 +225,13 @@ void main() {
     const Clip clipBehavior = Clip.hardEdge;
     const Color color = Colors.yellow;
     const Color shadowColor = Colors.green;
-    const double elevation = 20.0;
-    const EdgeInsets margin = EdgeInsets.all(18.0);
+    const elevation = 20.0;
+    const margin = EdgeInsets.all(18.0);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(25.0)),
     );
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       cardTheme: const CardThemeData(
         clipBehavior: themeClipBehavior,
         color: themeColor,
@@ -274,8 +274,8 @@ void main() {
     const Clip globalClipBehavior = Clip.antiAlias;
     const Color globalColor = Colors.red;
     const Color globalShadowColor = Colors.orange;
-    const double globalElevation = 10.0;
-    const EdgeInsets globalMargin = EdgeInsets.all(12.0);
+    const globalElevation = 10.0;
+    const globalMargin = EdgeInsets.all(12.0);
     const ShapeBorder globalShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
@@ -283,13 +283,13 @@ void main() {
     const Clip localClipBehavior = Clip.hardEdge;
     const Color localColor = Colors.yellow;
     const Color localShadowColor = Colors.green;
-    const double localElevation = 20.0;
-    const EdgeInsets localMargin = EdgeInsets.all(18.0);
+    const localElevation = 20.0;
+    const localMargin = EdgeInsets.all(18.0);
     const ShapeBorder localShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(25.0)),
     );
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       cardTheme: const CardThemeData(
         clipBehavior: globalClipBehavior,
         color: globalColor,
@@ -337,7 +337,7 @@ void main() {
     testWidgets('Material2 - ThemeData properties are used when no CardTheme is set', (
       WidgetTester tester,
     ) async {
-      final ThemeData themeData = ThemeData(useMaterial3: false);
+      final themeData = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(MaterialApp(theme: themeData, home: const Scaffold(body: Card())));
 
@@ -366,7 +366,7 @@ void main() {
     });
 
     testWidgets('Material2 - CardTheme customizes shape', (WidgetTester tester) async {
-      const CardThemeData cardTheme = CardThemeData(
+      const cardTheme = CardThemeData(
         color: Colors.white,
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
         elevation: 1.0,

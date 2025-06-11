@@ -55,7 +55,7 @@ final class AssetTransformer {
   }) async {
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
 
-    int transformStep = 0;
+    var transformStep = 0;
     File nextTempFile() {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
@@ -69,7 +69,7 @@ final class AssetTransformer {
     await asset.copy(tempInputFile.path);
     File tempOutputFile = nextTempFile();
 
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -111,13 +111,13 @@ final class AssetTransformer {
     required String workingDirectory,
     required Logger logger,
   }) async {
-    final List<String> transformerArguments = <String>[
+    final transformerArguments = <String>[
       '--input=${asset.absolute.path}',
       '--output=${output.absolute.path}',
       ...transformer.args,
     ];
 
-    final List<String> command = <String>[
+    final command = <String>[
       _dartBinaryPath,
       'run',
       transformer.package,
@@ -135,8 +135,8 @@ final class AssetTransformer {
       workingDirectory: workingDirectory,
       environment: <String, String>{AssetTransformer.buildModeEnvVar: _buildMode.cliName},
     );
-    final String stdout = result.stdout as String;
-    final String stderr = result.stderr as String;
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
 
     if (result.exitCode != 0) {
       return AssetTransformationFailure(
@@ -193,7 +193,7 @@ final class DevelopmentAssetTransformer {
     );
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {

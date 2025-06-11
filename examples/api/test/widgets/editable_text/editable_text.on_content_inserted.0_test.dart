@@ -20,8 +20,8 @@ void main() {
     await tester.enterText(find.byType(EditableText), 'test');
     await tester.idle();
 
-    const String uri = 'content://com.google.android.inputmethod.latin.fileprovider/test.png';
-    const List<int> kBlueSquarePng = <int>[
+    const uri = 'content://com.google.android.inputmethod.latin.fileprovider/test.png';
+    const kBlueSquarePng = <int>[
       0x89,
       0x50,
       0x4e,

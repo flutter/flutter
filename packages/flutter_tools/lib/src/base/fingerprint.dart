@@ -47,7 +47,7 @@ class Fingerprinter {
         return false;
       }
 
-      final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
+      final oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
       final Fingerprint newFingerprint = buildFingerprint();
       return oldFingerprint == newFingerprint;
     } on Exception catch (e) {

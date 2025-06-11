@@ -75,9 +75,9 @@ class _BackdropTitle extends AnimatedWidget {
       curve: const Interval(0, 0.78),
     );
 
-    final int textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+    final textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    const ImageIcon slantedMenuIcon = ImageIcon(
+    const slantedMenuIcon = ImageIcon(
       AssetImage('packages/shrine_images/slanted_menu.png'),
     );
 
@@ -266,7 +266,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const int layerTitleHeight = 48;
+    const layerTitleHeight = 48;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
 
@@ -300,7 +300,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final AppBar appBar = AppBar(
+    final appBar = AppBar(
       automaticallyImplyLeading: false,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 0,

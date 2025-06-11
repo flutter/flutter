@@ -16,7 +16,7 @@ void main() {
     expect(find.widgetWithIcon(FloatingActionButton, Icons.add), findsOne);
     expect(find.text('You have pressed the button 0 times.'), findsOne);
 
-    for (int i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 5; i++) {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pump();
       expect(find.text('You have pressed the button $i times.'), findsOne);

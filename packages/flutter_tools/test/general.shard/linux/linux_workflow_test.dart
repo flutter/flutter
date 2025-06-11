@@ -19,7 +19,7 @@ void main() {
   final FeatureFlags disabledFlags = TestFeatureFlags();
 
   testWithoutContext('Applies to Linux platform', () {
-    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(platform: linux, featureFlags: enabledFlags);
+    final linuxWorkflow = LinuxWorkflow(platform: linux, featureFlags: enabledFlags);
 
     expect(linuxWorkflow.appliesToHostPlatform, true);
     expect(linuxWorkflow.canLaunchDevices, true);
@@ -28,7 +28,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply to non-Linux platform', () {
-    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+    final linuxWorkflow = LinuxWorkflow(
       platform: notLinux,
       featureFlags: enabledFlags,
     );
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply when the Linux desktop feature is disabled', () {
-    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(platform: linux, featureFlags: disabledFlags);
+    final linuxWorkflow = LinuxWorkflow(platform: linux, featureFlags: disabledFlags);
 
     expect(linuxWorkflow.appliesToHostPlatform, false);
     expect(linuxWorkflow.canLaunchDevices, false);

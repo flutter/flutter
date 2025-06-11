@@ -230,8 +230,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name.');
-    final List<String> channels = <String>[
+    final buffer = StringBuffer('Enable or disable $name.');
+    final channels = <String>[
       if (master.available) 'master',
       if (beta.available) 'beta',
       if (stable.available) 'stable',

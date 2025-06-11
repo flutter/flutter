@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Clamped simulation 1', () {
-    final GravitySimulation gravity = GravitySimulation(9.81, 10.0, 0.0, 0.0);
-    final ClampedSimulation clamped = ClampedSimulation(
+    final gravity = GravitySimulation(9.81, 10.0, 0.0, 0.0);
+    final clamped = ClampedSimulation(
       gravity,
       xMin: 20.0,
       xMax: 100.0,
@@ -24,8 +24,8 @@ void main() {
   });
 
   test('Clamped simulation 2', () {
-    final GravitySimulation gravity = GravitySimulation(-10, 0.0, 6.0, 10.0);
-    final ClampedSimulation clamped = ClampedSimulation(
+    final gravity = GravitySimulation(-10, 0.0, 6.0, 10.0);
+    final clamped = ClampedSimulation(
       gravity,
       xMin: 0.0,
       xMax: 2.5,

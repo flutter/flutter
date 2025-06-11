@@ -64,7 +64,7 @@ class GestureTester {
 
 void main() {
   test('Should win by accepting', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -74,7 +74,7 @@ void main() {
   });
 
   test('Should win by sweep', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -84,7 +84,7 @@ void main() {
   });
 
   test('Should win on release after hold sweep release', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -98,7 +98,7 @@ void main() {
   });
 
   test('Should win on sweep after hold release sweep', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -112,7 +112,7 @@ void main() {
   });
 
   test('Only first winner should win', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -123,7 +123,7 @@ void main() {
   });
 
   test('Only first winner should win, regardless of order', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -134,7 +134,7 @@ void main() {
   });
 
   test('Win before close is delayed to close', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.expectNothing();
@@ -145,7 +145,7 @@ void main() {
   });
 
   test('Win before close is delayed to close, and only first winner should win', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.expectNothing();
@@ -159,7 +159,7 @@ void main() {
   test(
     'Win before close is delayed to close, and only first winner should win, regardless of order',
     () {
-      final GestureTester tester = GestureTester();
+      final tester = GestureTester();
       tester.addFirst();
       tester.addSecond();
       tester.expectNothing();

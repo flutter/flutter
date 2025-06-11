@@ -11,7 +11,7 @@ void main() {
   testWidgets('Forces text to be lower case', (WidgetTester tester) async {
     await tester.pumpWidget(const example.TextEditingControllerExampleApp());
 
-    const String input = 'Almost Everything Is a WIDGET! 💙';
+    const input = 'Almost Everything Is a WIDGET! 💙';
 
     await tester.enterText(find.byType(TextFormField), input);
     await tester.pump();
@@ -26,7 +26,7 @@ void main() {
   testWidgets('Keeps the caret at the end of the input', (WidgetTester tester) async {
     await tester.pumpWidget(const example.TextEditingControllerExampleApp());
 
-    const String input = 'flutter';
+    const input = 'flutter';
 
     await tester.enterText(find.byType(TextFormField), input);
     await tester.pump();

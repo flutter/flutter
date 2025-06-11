@@ -445,7 +445,7 @@ void main() {
 
   testWidgets('onTap with delay does not throw an exception', (WidgetTester tester) async {
     const Widget title = Text('CupertinoListTile');
-    bool showTile = true;
+    var showTile = true;
 
     Future<void> onTap() async {
       showTile = false;
@@ -499,7 +499,7 @@ void main() {
   });
 
   testWidgets('Leading and trailing animate on listtile long press', (WidgetTester tester) async {
-    bool value = false;
+    var value = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -520,9 +520,9 @@ void main() {
       ),
     );
 
-    final CurvedAnimation firstPosition =
+    final firstPosition =
         (tester.state(find.byType(CupertinoSwitch).first) as dynamic).position as CurvedAnimation;
-    final CurvedAnimation lastPosition =
+    final lastPosition =
         (tester.state(find.byType(CupertinoSwitch).last) as dynamic).position as CurvedAnimation;
 
     expect(firstPosition.value, 0.0);

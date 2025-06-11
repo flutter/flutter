@@ -42,7 +42,7 @@ void main() {
   testWidgets(
     'Default PageTransitionsTheme builds a CupertinoPageTransition',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -77,7 +77,7 @@ void main() {
   testWidgets(
     'Default PageTransitionsTheme builds a _ZoomPageTransition for android',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -118,7 +118,7 @@ void main() {
   testWidgets(
     'Default background color when FadeForwardsPageTransitionBuilder is used',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -174,7 +174,7 @@ void main() {
   testWidgets(
     'Override background color in FadeForwardsPageTransitionBuilder',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -233,7 +233,7 @@ void main() {
     testWidgets(
       'opacity fades out during forward secondary animation',
       (WidgetTester tester) async {
-        final AnimationController controller = AnimationController(
+        final controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           vsync: const TestVSync(),
         );
@@ -278,7 +278,7 @@ void main() {
     testWidgets(
       'opacity fades in during reverse secondary animaation',
       (WidgetTester tester) async {
-        final AnimationController controller = AnimationController(
+        final controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           vsync: const TestVSync(),
         );
@@ -324,7 +324,7 @@ void main() {
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -381,7 +381,7 @@ void main() {
   testWidgets(
     'CupertinoPageTransitionsBuilder default duration is 500ms',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -518,7 +518,7 @@ void main() {
   testWidgets(
     'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -571,7 +571,7 @@ void main() {
   testWidgets(
     'PageTransitionsTheme override builds a CupertinoPageTransition on android',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -614,7 +614,7 @@ void main() {
   testWidgets(
     'CupertinoPageTransition on android does not block gestures on backswipe',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -671,7 +671,7 @@ void main() {
   testWidgets(
     'PageTransitionsTheme override builds a _FadeUpwardsTransition',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -751,8 +751,8 @@ void main() {
     final Iterable<Layer> layers = tester.layerListOf(
       find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
     );
-    final bool hasOneOpacityLayer = layers.whereType<OpacityLayer>().length == 1;
-    final bool hasOneTransformLayer = layers.whereType<TransformLayer>().length == 1;
+    final hasOneOpacityLayer = layers.whereType<OpacityLayer>().length == 1;
+    final hasOneTransformLayer = layers.whereType<TransformLayer>().length == 1;
     // When snapshotting is on, the OpacityLayer and TransformLayer will not be
     // applied directly.
     return !(hasOneOpacityLayer && hasOneTransformLayer);
@@ -862,9 +862,9 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/58345
 
-      int builtCount = 0;
+      var builtCount = 0;
 
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -917,7 +917,7 @@ void main() {
   testWidgets(
     'predictive back gestures pop the route on all platforms regardless of whether their transition handles predictive back',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(
@@ -999,9 +999,9 @@ void main() {
     'ZoomPageTransitionsBuilder uses theme color during transition effects',
     (WidgetTester tester) async {
       // Color that is being tested for presence.
-      const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
+      const themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
 
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: Scaffold(
@@ -1119,7 +1119,7 @@ void main() {
       // Color that is being tested for presence.
       const Color testSurfaceColor = Colors.red;
 
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: Scaffold(
@@ -1231,7 +1231,7 @@ void main() {
   testWidgets(
     'Can interact with incoming route during FadeForwards back navigation',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(

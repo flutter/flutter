@@ -33,7 +33,7 @@ import 'test_utils.dart';
 void main() {
   testWidgets('Has light and dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(const App());
-    final MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
+    final app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme!.brightness, equals(Brightness.light));
     expect(app.darkTheme!.brightness, equals(Brightness.dark));
   });
@@ -43,7 +43,7 @@ void main() {
       const MediaQuery(data: MediaQueryData(highContrast: true), child: App()),
     );
 
-    final MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
+    final app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
 
     final DynamicScheme highContrastScheme = SchemeTonalSpot(
       sourceColorHct: Hct.fromInt(const Color(0xff6750a4).value),
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('Each A11y Assessments page has a unique page title.', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,

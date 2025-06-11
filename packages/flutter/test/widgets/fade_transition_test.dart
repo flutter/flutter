@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('FadeTransition', (WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
-    final List<String> log = <String>[];
+    final log = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add(message!);
     };
     debugPrintBuildScope = true;
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 2),
     );
@@ -36,7 +36,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey key = GlobalKey();
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       value: 1,
       duration: const Duration(seconds: 2),

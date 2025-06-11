@@ -511,16 +511,16 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
     assert(enableAnimation != null);
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(
+    final activeTrackColorTween = ColorTween(
       begin: sliderTheme.disabledActiveTrackColor,
       end: sliderTheme.activeTrackColor,
     );
-    final ColorTween inactiveTrackColorTween = ColorTween(
+    final inactiveTrackColorTween = ColorTween(
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
+    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
@@ -534,7 +534,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-    final Rect leftTrackSegment = Rect.fromLTRB(
+    final leftTrackSegment = Rect.fromLTRB(
       trackRect.left,
       trackRect.top,
       leftThumbOffset.dx,
@@ -543,7 +543,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
     if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
     }
-    final Rect middleTrackSegment = Rect.fromLTRB(
+    final middleTrackSegment = Rect.fromLTRB(
       leftThumbOffset.dx,
       trackRect.top,
       rightThumbOffset.dx,
@@ -552,7 +552,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
     if (!middleTrackSegment.isEmpty) {
       context.canvas.drawRect(middleTrackSegment, activePaint);
     }
-    final Rect rightTrackSegment = Rect.fromLTRB(
+    final rightTrackSegment = Rect.fromLTRB(
       rightThumbOffset.dx,
       trackRect.top,
       trackRect.right,
@@ -624,16 +624,16 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape
 
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(
+    final activeTrackColorTween = ColorTween(
       begin: sliderTheme.disabledActiveTrackColor,
       end: sliderTheme.activeTrackColor,
     );
-    final ColorTween inactiveTrackColorTween = ColorTween(
+    final inactiveTrackColorTween = ColorTween(
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
@@ -651,7 +651,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape
       isDiscrete: isDiscrete,
     );
 
-    final Radius trackRadius = Radius.circular(trackRect.height / 2);
+    final trackRadius = Radius.circular(trackRect.height / 2);
 
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
@@ -758,7 +758,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
             : sliderTheme.disabledInactiveTickMarkColor;
     final Color? end =
         isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
-    final Paint paint =
+    final paint =
         Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
@@ -834,21 +834,21 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     assert(sliderTheme.showValueIndicator != null);
     assert(sliderTheme.overlappingShapeStrokeColor != null);
     final Canvas canvas = context.canvas;
-    final Tween<double> radiusTween = Tween<double>(
+    final radiusTween = Tween<double>(
       begin: _disabledThumbRadius,
       end: enabledThumbRadius,
     );
-    final ColorTween colorTween = ColorTween(
+    final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
     final double radius = radiusTween.evaluate(enableAnimation);
-    final Tween<double> elevationTween = Tween<double>(begin: elevation, end: pressedElevation);
+    final elevationTween = Tween<double>(begin: elevation, end: pressedElevation);
 
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
     if (isOnTop ?? false) {
-      final Paint strokePaint =
+      final strokePaint =
           Paint()
             ..color = sliderTheme.overlappingShapeStrokeColor!
             ..strokeWidth = 1.0
@@ -860,14 +860,14 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     final double evaluatedElevation =
         isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;
-    final Path shadowPath =
+    final shadowPath =
         Path()..addArc(
           Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius),
           0,
           math.pi * 2,
         );
 
-    bool paintShadows = true;
+    var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
         _debugDrawShadow(canvas, shadowPath, evaluatedElevation);
@@ -1043,17 +1043,17 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
       return;
     }
 
-    final ColorTween activeTrackColorTween = ColorTween(
+    final activeTrackColorTween = ColorTween(
       begin: sliderTheme.disabledActiveTrackColor,
       end: sliderTheme.activeTrackColor,
     );
-    final ColorTween inactiveTrackColorTween = ColorTween(
+    final inactiveTrackColorTween = ColorTween(
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
 
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1063,8 +1063,8 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
       isDiscrete: isDiscrete,
     );
 
-    final Radius trackCornerRadius = Radius.circular(trackRect.shortestSide / 2);
-    const Radius trackInsideCornerRadius = Radius.circular(2.0);
+    final trackCornerRadius = Radius.circular(trackRect.shortestSide / 2);
+    const trackInsideCornerRadius = Radius.circular(2.0);
 
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
@@ -1076,7 +1076,7 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
     assert(thumbRadius > 0);
     final double trackGap = sliderTheme.trackGap!;
 
-    final RRect trackRRect = RRect.fromRectAndCorners(
+    final trackRRect = RRect.fromRectAndCorners(
       trackRect,
       topLeft: trackCornerRadius,
       bottomLeft: trackCornerRadius,
@@ -1084,7 +1084,7 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
       bottomRight: trackCornerRadius,
     );
 
-    final RRect leftRRect = RRect.fromLTRBAndCorners(
+    final leftRRect = RRect.fromLTRBAndCorners(
       trackRect.left,
       trackRect.top,
       leftThumbOffset.dx - trackGap,
@@ -1095,7 +1095,7 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
       bottomRight: trackInsideCornerRadius,
     );
 
-    final RRect rightRRect = RRect.fromLTRBAndCorners(
+    final rightRRect = RRect.fromLTRBAndCorners(
       rightThumbOffset.dx + trackGap,
       trackRect.top,
       trackRect.right,
@@ -1136,20 +1136,20 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
 
     context.canvas.restore();
 
-    const double stopIndicatorRadius = 2.0;
+    const stopIndicatorRadius = 2.0;
     final double stopIndicatorTrailingSpace = sliderTheme.trackHeight! / 2;
-    final Offset startStopIndicatorOffset = Offset(
+    final startStopIndicatorOffset = Offset(
       trackRect.centerLeft.dx + stopIndicatorTrailingSpace,
       trackRect.center.dy,
     );
-    final Offset endStopIndicatorOffset = Offset(
+    final endStopIndicatorOffset = Offset(
       trackRect.centerRight.dx - stopIndicatorTrailingSpace,
       trackRect.center.dy,
     );
 
     final bool showStartStopIndicator = startThumbCenter.dx > startStopIndicatorOffset.dx;
     if (showStartStopIndicator && !isDiscrete) {
-      final Rect stopIndicatorRect = Rect.fromCircle(
+      final stopIndicatorRect = Rect.fromCircle(
         center: startStopIndicatorOffset,
         radius: stopIndicatorRadius,
       );
@@ -1158,7 +1158,7 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
 
     final bool showEndStopIndicator = endThumbCenter.dx < endStopIndicatorOffset.dx;
     if (showEndStopIndicator && !isDiscrete) {
-      final Rect stopIndicatorRect = Rect.fromCircle(
+      final stopIndicatorRect = Rect.fromCircle(
         center: endStopIndicatorOffset,
         radius: stopIndicatorRadius,
       );
@@ -1218,7 +1218,7 @@ class HandleRangeSliderThumbShape extends RangeSliderThumbShape {
     assert(sliderTheme.thumbColor != null);
     assert(sliderTheme.thumbSize != null);
 
-    final ColorTween colorTween = ColorTween(
+    final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
@@ -1227,7 +1227,7 @@ class HandleRangeSliderThumbShape extends RangeSliderThumbShape {
 
     final Size thumbSize =
         sliderTheme.thumbSize!.resolve(<WidgetState>{})!; // This is resolved in the paint method.
-    final RRect rrect = RRect.fromRectAndRadius(
+    final rrect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: thumbSize.width, height: thumbSize.height),
       Radius.circular(thumbSize.shortestSide / 2),
     );
@@ -1415,7 +1415,7 @@ class _RoundedRectSliderValueIndicatorPathPainter {
   }) {
     assert(!sizeWithOverflow.isEmpty);
 
-    const double edgePadding = 8.0;
+    const edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
 
     /// Value indicator draws on the Overlay and by using the global Offset
@@ -1473,14 +1473,14 @@ class _RoundedRectSliderValueIndicatorPathPainter {
       scale: scale,
     );
 
-    final Rect upperRect = Rect.fromLTWH(
+    final upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
       -_rectYOffset - _preferredHeight,
       rectangleWidth,
       _preferredHeight,
     );
 
-    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+    final fillPaint = Paint()..color = backgroundPaintColor;
 
     canvas.save();
     // Prepare the canvas for the base of the tooltip, which is relative to the
@@ -1488,9 +1488,9 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
 
-    final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
+    final rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
     if (strokePaintColor != null) {
-      final Paint strokePaint =
+      final strokePaint =
           Paint()
             ..color = strokePaintColor
             ..strokeWidth = 1.0
@@ -1503,8 +1503,8 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
     canvas.translate(0, bottomTipToUpperRectTranslateY);
-    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2.3);
-    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
+    final boxCenter = Offset(horizontalShift, upperRect.height / 2.3);
+    final halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
     labelPainter.paint(canvas, labelOffset);
     canvas.restore();
@@ -1540,7 +1540,7 @@ class _DropSliderValueIndicatorPathPainter {
   }) {
     assert(!sizeWithOverflow.isEmpty);
 
-    const double edgePadding = 8.0;
+    const edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
 
     /// Value indicator draws on the Overlay and by using the global Offset
@@ -1572,7 +1572,7 @@ class _DropSliderValueIndicatorPathPainter {
   }
 
   BorderRadius _adjustBorderRadius(Rect rect) {
-    const double rectness = 0.0;
+    const rectness = 0.0;
     return BorderRadius.lerp(
       BorderRadius.circular(_upperRectRadius),
       BorderRadius.all(Radius.circular(rect.shortestSide / 2.0)),
@@ -1605,14 +1605,14 @@ class _DropSliderValueIndicatorPathPainter {
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
-    final Rect upperRect = Rect.fromLTWH(
+    final upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
       -_rectYOffset - _minRectHeight,
       rectangleWidth,
       _minRectHeight,
     );
 
-    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+    final fillPaint = Paint()..color = backgroundPaintColor;
 
     canvas.save();
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
@@ -1622,7 +1622,7 @@ class _DropSliderValueIndicatorPathPainter {
     final RRect borderRect = adjustedBorderRadius
         .resolve(labelPainter.textDirection)
         .toRRect(upperRect);
-    final Path trianglePath =
+    final trianglePath =
         Path()
           ..lineTo(-_triangleHeight, -_triangleHeight)
           ..lineTo(_triangleHeight, -_triangleHeight)
@@ -1630,7 +1630,7 @@ class _DropSliderValueIndicatorPathPainter {
     trianglePath.addRRect(borderRect);
 
     if (strokePaintColor != null) {
-      final Paint strokePaint =
+      final strokePaint =
           Paint()
             ..color = strokePaintColor
             ..strokeWidth = 1.0
@@ -1643,8 +1643,8 @@ class _DropSliderValueIndicatorPathPainter {
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
     canvas.translate(0, bottomTipToUpperRectTranslateY);
-    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 1.75);
-    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
+    final boxCenter = Offset(horizontalShift, upperRect.height / 1.75);
+    final halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
     labelPainter.paint(canvas, labelOffset);
     canvas.restore();

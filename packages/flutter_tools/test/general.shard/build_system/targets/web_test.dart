@@ -520,7 +520,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -559,7 +559,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with minify false',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -597,7 +597,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -636,7 +636,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
@@ -675,7 +675,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in profile mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -713,7 +713,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -751,7 +751,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -792,7 +792,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -832,7 +832,7 @@ name: foo
     'Dart2JSTarget produces expected depfile',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -885,7 +885,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFOO=bar',
@@ -926,7 +926,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[WebCompilerConfig.kSourceMapsEnabled] = 'true';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
@@ -964,7 +964,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
@@ -1005,7 +1005,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -1045,7 +1045,7 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -1088,7 +1088,7 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
 
-      final List<String> common = <String>[
+      final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         ..._kStandardFlutterWebDefines,
@@ -1126,18 +1126,18 @@ name: foo
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
-  for (final WebRendererMode renderer in <WebRendererMode>[
+  for (final renderer in <WebRendererMode>[
     WebRendererMode.canvaskit,
     WebRendererMode.skwasm,
   ]) {
-    for (final int? level in <int?>[null, 0, 1, 2, 3, 4]) {
-      for (final bool strip in <bool>[true, false]) {
-        for (final List<String> defines in const <List<String>>[
+    for (final level in <int?>[null, 0, 1, 2, 3, 4]) {
+      for (final strip in <bool>[true, false]) {
+        for (final defines in const <List<String>>[
           <String>[],
           <String>['FOO=bar', 'BAZ=qux'],
         ]) {
-          for (final String buildMode in const <String>['profile', 'release', 'debug']) {
-            for (final bool sourceMaps in const <bool>[true, false]) {
+          for (final buildMode in const <String>['profile', 'release', 'debug']) {
+            for (final sourceMaps in const <bool>[true, false]) {
               test(
                 'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps',
                 () => testbed.run(() async {
@@ -1215,7 +1215,7 @@ name: foo
   }
 
   test('Dart2JSTarget has unique build keys for compiler configurations', () {
-    const List<JsCompilerConfig> testConfigs = <JsCompilerConfig>[
+    const testConfigs = <JsCompilerConfig>[
       // Default values
       JsCompilerConfig(),
 
@@ -1240,7 +1240,7 @@ name: foo
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((JsCompilerConfig config) {
-      final Dart2JSTarget target = Dart2JSTarget(config);
+      final target = Dart2JSTarget(config);
       return target.buildKey;
     });
 
@@ -1249,7 +1249,7 @@ name: foo
   });
 
   test('Dart2Wasm has unique build keys for compiler configurations', () {
-    const List<WasmCompilerConfig> testConfigs = <WasmCompilerConfig>[
+    const testConfigs = <WasmCompilerConfig>[
       // Default values
       WasmCompilerConfig(),
 
@@ -1267,7 +1267,7 @@ name: foo
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
-      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      final target = Dart2WasmTarget(config);
       return target.buildKey;
     });
 
@@ -1369,7 +1369,7 @@ name: foo
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains the same file hash for both `/` and the root index.html file.
-      const String rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
+      const rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
       expect(
         environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
         contains('"/": "$rootIndexHash"'),

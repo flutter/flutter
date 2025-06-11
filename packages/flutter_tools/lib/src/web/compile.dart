@@ -78,15 +78,15 @@ class WebBuilder {
     outputDirectory.createSync(recursive: true);
 
     // The migrators to apply to a Web project.
-    final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    final migrators = <ProjectMigrator>[
       ScrubGeneratedPluginRegistrant(flutterProject.web, _logger),
     ];
 
-    final ProjectMigration migration = ProjectMigration(migrators);
+    final migration = ProjectMigration(migrators);
     await migration.run();
 
     final Status status = _logger.startProgress('Compiling $target for the Web...');
-    final Stopwatch sw = Stopwatch()..start();
+    final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
         globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
@@ -149,7 +149,7 @@ class WebBuilder {
     );
 
     final Duration elapsedDuration = sw.elapsed;
-    final String variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
+    final variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
     _analytics.send(
       Event.timing(
         workflow: 'build',
@@ -239,9 +239,9 @@ const Map<WebRendererMode, HostArtifact> kDdcLibraryBundleDartSdkJsMapArtifactMa
     };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
-  final Map<String, Object> values = <String, Object>{};
-  final List<String> renderers = <String>[];
-  final List<String> targets = <String>[];
+  final values = <String, Object>{};
+  final renderers = <String>[];
+  final targets = <String>[];
   for (final WebCompilerConfig config in configs) {
     values.addAll(config.buildEventAnalyticsValues);
     renderers.add(config.renderer.name);

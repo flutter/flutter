@@ -140,7 +140,7 @@ class ShoppingCartSummary extends StatelessWidget {
     final TextStyle largeAmountStyle = Theme.of(
       context,
     ).textTheme.headlineMedium!.copyWith(letterSpacing: letterSpacingOrNone(mediumLetterSpacing));
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
+    final formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
     );
@@ -231,7 +231,7 @@ class ShoppingCartRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
+    final formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,
       locale: Localizations.localeOf(context).toString(),
     );

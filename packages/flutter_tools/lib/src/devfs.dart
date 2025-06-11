@@ -503,8 +503,8 @@ class DevFS {
   Uri? get baseUri => _baseUri;
 
   Uri deviceUriToHostUri(Uri deviceUri) {
-    final String deviceUriString = deviceUri.toString();
-    final String baseUriString = baseUri.toString();
+    final deviceUriString = deviceUri.toString();
+    final baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
       return rootDirectory.uri.resolve(deviceUriSuffix);
@@ -583,15 +583,15 @@ class DevFS {
     bool resetCompiler = false,
     File? dartPluginRegistrant,
   }) async {
-    final DateTime candidateCompileTime = DateTime.now();
+    final candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
 
     // Update modified files
-    final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
-    bool assetBuildFailed = false;
-    int syncedBytes = 0;
+    final dirtyEntries = <Uri, DevFSContent>{};
+    final pendingAssetBuilds = <Future<void>>[];
+    var assetBuildFailed = false;
+    var syncedBytes = 0;
     if (resetCompiler) {
       generator.reset();
     }
@@ -715,7 +715,7 @@ class DevFS {
       final String compiledBinary = compilerOutput.outputFilename;
       if (compiledBinary.isNotEmpty) {
         final Uri entryUri = _fileSystem.path.toUri(pathToReload);
-        final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
+        final content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
@@ -771,7 +771,7 @@ class LocalDevFSWriter implements DevFSWriter {
           destination.parent.createSync(recursive: true);
         }
         if (devFSContent is DevFSFileContent) {
-          final File content = devFSContent.file as File;
+          final content = devFSContent.file as File;
           content.copySync(destination.path);
           continue;
         }

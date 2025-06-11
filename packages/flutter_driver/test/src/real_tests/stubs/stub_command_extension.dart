@@ -19,9 +19,9 @@ class StubNestedCommandExtension extends CommandExtension {
     CreateFinderFactory finderFactory,
     CommandHandlerFactory handlerFactory,
   ) async {
-    final StubNestedCommand stubCommand = command as StubNestedCommand;
+    final stubCommand = command as StubNestedCommand;
     handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
-    for (int index = 0; index < stubCommand.times; index++) {
+    for (var index = 0; index < stubCommand.times; index++) {
       await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
     }
     return const StubCommandResult('stub response');
@@ -48,10 +48,10 @@ class StubProberCommandExtension extends CommandExtension {
     CreateFinderFactory finderFactory,
     CommandHandlerFactory handlerFactory,
   ) async {
-    final StubProberCommand stubCommand = command as StubProberCommand;
+    final stubCommand = command as StubProberCommand;
     final Finder finder = finderFactory.createFinder(stubCommand.finder);
     handlerFactory.waitForElement(finder);
-    for (int index = 0; index < stubCommand.times; index++) {
+    for (var index = 0; index < stubCommand.times; index++) {
       await prober.tap(finder);
     }
     return const StubCommandResult('stub response');

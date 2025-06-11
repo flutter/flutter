@@ -70,7 +70,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
+    final mdnsVMServiceDiscoveryForAttach =
         MdnsVMServiceDiscoveryForAttach(
           device: this,
           appId: appId,

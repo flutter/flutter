@@ -90,7 +90,7 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Paint paint =
+    final paint =
         Paint()
           ..style = PaintingStyle.fill
           ..color = color

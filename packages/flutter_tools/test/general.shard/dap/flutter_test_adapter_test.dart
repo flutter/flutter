@@ -15,12 +15,12 @@ import 'mocks.dart';
 
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
-  final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
+  final platform = FakePlatform.fromPlatform(globals.platform);
   final FileSystemStyle fsStyle =
       platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
 
   group('flutter test adapter', () {
-    final String expectedFlutterExecutable =
+    final expectedFlutterExecutable =
         platform.isWindows ? r'C:\fake\flutter\bin\flutter.bat' : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
@@ -28,13 +28,13 @@ void main() {
     });
 
     test('includes toolArgs', () async {
-      final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+      final adapter = MockFlutterTestDebugAdapter(
         fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
-      final Completer<void> responseCompleter = Completer<void>();
-      final MockRequest request = MockRequest();
-      final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+      final responseCompleter = Completer<void>();
+      final request = MockRequest();
+      final args = FlutterLaunchRequestArguments(
         cwd: '.',
         program: 'foo.dart',
         toolArgs: <String>['tool_arg'],
@@ -50,13 +50,13 @@ void main() {
     });
 
     test('includes env variables', () async {
-      final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+      final adapter = MockFlutterTestDebugAdapter(
         fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
-      final Completer<void> responseCompleter = Completer<void>();
-      final MockRequest request = MockRequest();
-      final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+      final responseCompleter = Completer<void>();
+      final request = MockRequest();
+      final args = FlutterLaunchRequestArguments(
         cwd: '.',
         program: 'foo.dart',
         env: <String, String>{'MY_TEST_ENV': 'MY_TEST_VALUE'},
@@ -71,13 +71,13 @@ void main() {
 
     group('includes customTool', () {
       test('with no args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+        final adapter = MockFlutterTestDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
-        final Completer<void> responseCompleter = Completer<void>();
-        final MockRequest request = MockRequest();
-        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+        final responseCompleter = Completer<void>();
+        final request = MockRequest();
+        final args = FlutterLaunchRequestArguments(
           cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',
@@ -94,13 +94,13 @@ void main() {
       });
 
       test('with all args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+        final adapter = MockFlutterTestDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
-        final Completer<void> responseCompleter = Completer<void>();
-        final MockRequest request = MockRequest();
-        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+        final responseCompleter = Completer<void>();
+        final request = MockRequest();
+        final args = FlutterLaunchRequestArguments(
           cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',

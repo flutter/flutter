@@ -237,7 +237,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
       logger.printStatus('No custom devices found in "${customDevicesConfig.configPath}"');
     } else {
       logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
-      for (final CustomDeviceConfig device in devices) {
+      for (final device in devices) {
         logger.printStatus(
           'id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}',
           indent: 2,
@@ -373,13 +373,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(final CustomDeviceConfig config) async {
-    final CustomDevice device = CustomDevice(
+    final device = CustomDevice(
       config: config,
       logger: logger,
       processManager: _processManager,
     );
 
-    bool result = true;
+    var result = true;
 
     try {
       final bool reachable = await device.tryPing();
@@ -419,7 +419,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
-      final CustomDevicePortForwarder portForwarder = CustomDevicePortForwarder(
+      final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
         forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
@@ -530,7 +530,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
   /// Ask the user for a y(es) / n(o) or empty input.
   Future<bool> askForBool(String name, {String? description, bool defaultsTo = true}) async {
-    final String defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
+    final defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
     logger.printStatus('$description $defaultsToStr (empty for default)');
     while (true) {
       final String input = await inputs.next;
@@ -577,7 +577,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // custom-devices add command is waiting for user input.
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
-    final StreamController<String> nonClosingKeystrokes = StreamController<String>();
+    final nonClosingKeystrokes = StreamController<String>();
     final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
       (String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true,
@@ -618,7 +618,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         ))!;
 
     final InternetAddress? targetIp = InternetAddress.tryParse(targetStr);
-    final bool useIp = targetIp != null;
+    final useIp = targetIp != null;
     final bool ipv6 = useIp && targetIp.type == InternetAddressType.IPv6;
     final InternetAddress loopbackIp =
         ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
@@ -666,7 +666,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     final String formattedLoopbackIp = ipv6 ? '[${loopbackIp.address}]' : loopbackIp.address;
 
-    CustomDeviceConfig config = CustomDeviceConfig(
+    var config = CustomDeviceConfig(
       id: id,
       label: label,
       sdkNameAndVersion: sdkNameAndVersion,
@@ -793,7 +793,7 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String? id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
+    final id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
     if (id == null || !customDevicesConfig.contains(id)) {
       throwToolExit(
         'Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"',

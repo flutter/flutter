@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 43.0;
-    const double anchorBelowY = 500.0;
-    double anchorAboveY = 0.0;
+    const height = 43.0;
+    const anchorBelowY = 500.0;
+    var anchorAboveY = 0.0;
 
     await tester.pumpWidget(
       MediaQuery(

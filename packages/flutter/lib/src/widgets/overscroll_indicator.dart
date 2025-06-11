@@ -242,9 +242,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       } else {
         assert(false);
       }
-      final bool isLeading = controller == _leadingController;
+      final isLeading = controller == _leadingController;
       if (_lastNotificationType is! OverscrollNotification) {
-        final OverscrollIndicatorNotification confirmationNotification =
+        final confirmationNotification =
             OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification.accepted;
@@ -260,7 +260,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            final RenderBox renderer = notification.context!.findRenderObject()! as RenderBox;
+            final renderer = notification.context!.findRenderObject()! as RenderBox;
             assert(renderer.hasSize);
             final Size size = renderer.size;
             final Offset position = renderer.globalToLocal(
@@ -545,9 +545,9 @@ class _GlowController extends ChangeNotifier {
     final double radius = size.width * 3.0 / 2.0;
     final double height = math.min(size.height, size.width * _widthToHeightFactor);
     final double scaleY = _glowSize.value * baseGlowScale;
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, height);
-    final Offset center = Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
-    final Paint paint = Paint()..color = color.withOpacity(_glowOpacity.value);
+    final rect = Rect.fromLTWH(0.0, 0.0, size.width, height);
+    final center = Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
+    final paint = Paint()..color = color.withOpacity(_glowOpacity.value);
     canvas.save();
     canvas.translate(0.0, _paintOffset + _paintOffsetScrollPixels);
     canvas.scale(1.0, scaleY);
@@ -740,7 +740,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
       if (_lastNotification.runtimeType is! OverscrollNotification) {
-        final OverscrollIndicatorNotification confirmationNotification =
+        final confirmationNotification =
             OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
         confirmationNotification.dispatch(context);
         _accepted = confirmationNotification.accepted;
@@ -804,8 +804,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double x = 1.0;
-          double y = 1.0;
+          var x = 1.0;
+          var y = 1.0;
           final double mainAxisSize;
 
           switch (widget.axis) {

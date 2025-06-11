@@ -58,7 +58,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
 
-    final String defaultTargetPlatform =
+    final defaultTargetPlatform =
         (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64)
             ? 'windows-arm64'
             : 'windows-x64';

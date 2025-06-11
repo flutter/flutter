@@ -117,11 +117,11 @@ class RallyLineChartPainter extends CustomPainter {
 
       // We divide the graph and the amounts into [numGroups] groups, with
       // [numItemsPerGroup] amounts per group.
-      const int numGroups = 10;
+      const numGroups = 10;
       final int numItemsPerGroup = amounts.length ~/ numGroups;
 
       // For each group we calculate the median value.
-      final List<double> medians = List<double>.generate(numGroups, (int i) {
+      final medians = List<double>.generate(numGroups, (int i) {
         final int middleIndex = i * numItemsPerGroup + numItemsPerGroup ~/ 2;
         if (numItemsPerGroup.isEven) {
           return (amounts[middleIndex] + amounts[middleIndex + 1]) / 2;
@@ -149,13 +149,13 @@ class RallyLineChartPainter extends CustomPainter {
   List<double> _amountsPerDay(int numDays) {
     // Arbitrary value for the first point. In a real app, a wider range of
     // points would be used that go beyond the boundaries of the screen.
-    double lastAmount = 600.0;
+    var lastAmount = 600.0;
 
     // Align the points with equal deltas (1 day) as a cumulative sum.
     int startMillis = startDate.millisecondsSinceEpoch;
 
-    final List<double> amounts = <double>[];
-    for (int i = 0; i < numDays; i++) {
+    final amounts = <double>[];
+    for (var i = 0; i < numDays; i++) {
       final int endMillis = startMillis + millisInDay * 1;
       final List<DetailedEventData> filteredEvents =
           events.where((DetailedEventData e) {
@@ -170,18 +170,18 @@ class RallyLineChartPainter extends CustomPainter {
   }
 
   void _drawLine(Canvas canvas, Rect rect) {
-    final Paint linePaint =
+    final linePaint =
         Paint()
           ..color = RallyColors.accountColor(2)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2;
 
     // Try changing this value between 1, 7, 15, etc.
-    const int smoothing = 1;
+    const smoothing = 1;
 
     final List<double> amounts = _amountsPerDay(numDays + smoothing);
-    final List<Offset> points = <Offset>[];
-    for (int i = 0; i < amounts.length; i++) {
+    final points = <Offset>[];
+    for (var i = 0; i < amounts.length; i++) {
       final double x = i / numDays * rect.width;
       final double y = (maxAmount - amounts[i]) / maxAmount * rect.height;
       points.add(Offset(x, y));
@@ -190,9 +190,9 @@ class RallyLineChartPainter extends CustomPainter {
     // Add last point of the graph to make sure we take up the full width.
     points.add(Offset(rect.width, (maxAmount - amounts[numDays - 1]) / maxAmount * rect.height));
 
-    final Path path = Path();
+    final path = Path();
     path.moveTo(points[0].dx, points[0].dy);
-    for (int i = 1; i < numDays - smoothing + 2; i += smoothing) {
+    for (var i = 1; i < numDays - smoothing + 2; i += smoothing) {
       final double x1 = points[i].dx;
       final double y1 = points[i].dy;
       final double x2 = (x1 + points[i + smoothing].dx) / 2;
@@ -204,7 +204,7 @@ class RallyLineChartPainter extends CustomPainter {
 
   /// Draw the X-axis increment markers at constant width intervals.
   void _drawXAxisTicks(Canvas canvas, Rect rect) {
-    for (int i = 0; i < numDays; i++) {
+    for (var i = 0; i < numDays; i++) {
       final double x = rect.width / numDays * i;
       canvas.drawRect(
         Rect.fromPoints(
@@ -233,14 +233,14 @@ class RallyLineChartPainter extends CustomPainter {
 
     // We use toUpperCase to format the dates. This function uses the language
     // independent Unicode mapping and thus only works in some languages.
-    final TextPainter leftLabel = TextPainter(
+    final leftLabel = TextPainter(
       text: TextSpan(text: dateFormat.format(startDate).toUpperCase(), style: unselectedLabelStyle),
       textDirection: textDirection,
     );
     leftLabel.layout();
     leftLabel.paint(canvas, Offset(rect.left + space / 2 + padding.vertical, rect.topCenter.dy));
 
-    final TextPainter centerLabel = TextPainter(
+    final centerLabel = TextPainter(
       text: TextSpan(
         text: dateFormat.format(DateTime(startDate.year, startDate.month + 1)).toUpperCase(),
         style: selectedLabelStyle,
@@ -252,7 +252,7 @@ class RallyLineChartPainter extends CustomPainter {
     final double y = rect.topCenter.dy;
     centerLabel.paint(canvas, Offset(x, y));
 
-    final TextPainter rightLabel = TextPainter(
+    final rightLabel = TextPainter(
       text: TextSpan(
         text: dateFormat.format(DateTime(startDate.year, startDate.month + 2)).toUpperCase(),
         style: unselectedLabelStyle,

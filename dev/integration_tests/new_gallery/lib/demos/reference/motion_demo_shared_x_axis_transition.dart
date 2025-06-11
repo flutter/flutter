@@ -162,7 +162,7 @@ class _SignInPage extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double maxHeight = constraints.maxHeight;
-        const SizedBox spacing = SizedBox(height: 10);
+        const spacing = SizedBox(height: 10);
 
         return Container(
           constraints: const BoxConstraints(maxWidth: 400),

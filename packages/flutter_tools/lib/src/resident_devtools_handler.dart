@@ -186,7 +186,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
-      final String devToolsUrl =
+      final devToolsUrl =
           activeDevToolsServer!.uri!
               .replace(
                 queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
@@ -239,7 +239,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   /// Returns null if the service extension cannot be found on the device.
   Future<FlutterDevice?> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
-    const String extension = 'ext.flutter.connectedVmServiceUri';
+    const extension = 'ext.flutter.connectedVmServiceUri';
     try {
       await flutterDevice.vmService?.findExtensionIsolate(extension);
       return flutterDevice;
@@ -377,7 +377,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
 /// Convert the [uri] with query parameters into a display format instead
 /// of the default URI encoding.
 String urlToDisplayString(Uri uri) {
-  final StringBuffer base = StringBuffer(
+  final base = StringBuffer(
     uri.replace(queryParameters: <String, String>{}).toString(),
   );
   base.write(

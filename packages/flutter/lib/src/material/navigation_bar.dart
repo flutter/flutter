@@ -423,9 +423,9 @@ class NavigationDestination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
-    const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
-    const Set<MaterialState> unselectedState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const selectedState = <MaterialState>{MaterialState.selected};
+    const unselectedState = <MaterialState>{};
+    const disabledState = <MaterialState>{MaterialState.disabled};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
@@ -494,7 +494,7 @@ class NavigationDestination extends StatelessWidget {
         final EdgeInsetsGeometry labelPadding =
             info.labelPadding ?? navigationBarTheme.labelPadding ?? defaults.labelPadding!;
 
-        final TextStyle? textStyle =
+        final textStyle =
             enabled
                 ? animation.isForwardOrCompleted
                     ? effectiveSelectedLabelTextStyle
@@ -637,7 +637,7 @@ class _IndicatorInkWell extends InkResponse {
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     return () {
-      final RenderBox iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
+      final iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
       final Rect iconRect = iconBox.localToGlobal(Offset.zero) & iconBox.size;
       return referenceBox.globalToLocal(iconRect.topLeft) & iconBox.size;
     };
@@ -1364,7 +1364,7 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final bool shouldUseForwardCurve =
+    final shouldUseForwardCurve =
         (_preservedDirection ?? _animationDirection) != AnimationStatus.reverse;
 
     final Animation<double> curvedAnimation = CurveTween(

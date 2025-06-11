@@ -89,7 +89,7 @@ class LLDBInitMigration extends ProjectMigrator {
     final String? lldbInitFileTestPath;
     try {
       // Check that both the LaunchAction and TestAction have the customLLDBInitFile set to flutter_lldbinit.
-      final XmlDocument document = XmlDocument.parse(schemeInfo.schemeContent);
+      final document = XmlDocument.parse(schemeInfo.schemeContent);
 
       lldbInitFileLaunchPath = _parseLLDBInitFileFromScheme(
         action: _launchActionIdentifier,
@@ -193,7 +193,7 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       customLLDBInitFile = "$_initPath"''',
     );
     try {
-      final XmlDocument document = XmlDocument.parse(newScheme);
+      final document = XmlDocument.parse(newScheme);
       _validateSchemeAction(
         action: _launchActionIdentifier,
         document: document,

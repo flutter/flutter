@@ -146,7 +146,7 @@ void main() {
       SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] is LocaleStringAttribute,
       isTrue,
     );
-    final LocaleStringAttribute localeAttribute =
+    final localeAttribute =
         SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
     expect(localeAttribute.range, const TextRange(start: 0, end: 5));
     expect(localeAttribute.locale, const Locale('en', 'MX'));

@@ -11,11 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Horizontal', () {
     testWidgets('gets local coordinates', (WidgetTester tester) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -69,11 +69,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -175,11 +175,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -281,11 +281,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -318,7 +318,7 @@ void main() {
       );
 
       // Move just below kTouchSlop should not recognize drag.
-      const Offset moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
+      const moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
       expect(moveBy1.distance, lessThan(kTouchSlop));
       await tester.drag(find.byKey(redContainer), moveBy1);
       expect(dragCancelCount, 1);
@@ -376,11 +376,11 @@ void main() {
 
   group('Vertical', () {
     testWidgets('gets local coordinates', (WidgetTester tester) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -434,11 +434,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -540,11 +540,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -646,11 +646,11 @@ void main() {
     testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (
       WidgetTester tester,
     ) async {
-      int dragCancelCount = 0;
-      final List<DragDownDetails> downDetails = <DragDownDetails>[];
-      final List<DragEndDetails> endDetails = <DragEndDetails>[];
-      final List<DragStartDetails> startDetails = <DragStartDetails>[];
-      final List<DragUpdateDetails> updateDetails = <DragUpdateDetails>[];
+      var dragCancelCount = 0;
+      final downDetails = <DragDownDetails>[];
+      final endDetails = <DragEndDetails>[];
+      final startDetails = <DragStartDetails>[];
+      final updateDetails = <DragUpdateDetails>[];
 
       final Key redContainer = UniqueKey();
       await tester.pumpWidget(
@@ -683,7 +683,7 @@ void main() {
       );
 
       // Move just below kTouchSlop should not recognize drag.
-      const Offset moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
+      const moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
       expect(moveBy1.distance, lessThan(kTouchSlop));
       await tester.drag(find.byKey(redContainer), moveBy1);
       expect(dragCancelCount, 1);

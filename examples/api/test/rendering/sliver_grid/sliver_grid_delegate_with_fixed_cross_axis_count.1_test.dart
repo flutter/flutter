@@ -13,7 +13,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp());
 
-    for (int i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
       expect(find.text('$i'), findsOne);
       final Element element = tester.element(find.text('$i'));
 

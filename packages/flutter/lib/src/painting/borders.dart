@@ -743,13 +743,13 @@ class _CompoundBorder extends ShapeBorder {
       final ShapeBorder? merged =
           ours.add(other, reversed: reversed) ?? other.add(ours, reversed: !reversed);
       if (merged != null) {
-        final List<ShapeBorder> result = <ShapeBorder>[...borders];
+        final result = <ShapeBorder>[...borders];
         result[reversed ? result.length - 1 : 0] = merged;
         return _CompoundBorder(result);
       }
     }
     // We can't, so fall back to just adding the new border to the list.
-    final List<ShapeBorder> mergedBorders = <ShapeBorder>[
+    final mergedBorders = <ShapeBorder>[
       if (reversed) ...borders,
       if (other is _CompoundBorder) ...other.borders else other,
       if (!reversed) ...borders,
@@ -780,9 +780,9 @@ class _CompoundBorder extends ShapeBorder {
     ); // Not really necessary, but all call sites currently intend this.
     final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
     final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
-    final List<ShapeBorder> results = <ShapeBorder>[];
+    final results = <ShapeBorder>[];
     final int length = math.max(aList.length, bList.length);
-    for (int index = 0; index < length; index += 1) {
+    for (var index = 0; index < length; index += 1) {
       final ShapeBorder? localA = index < aList.length ? aList[index] : null;
       final ShapeBorder? localB = index < bList.length ? bList[index] : null;
       if (localA != null && localB != null) {
@@ -808,7 +808,7 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    for (int index = 0; index < borders.length - 1; index += 1) {
+    for (var index = 0; index < borders.length - 1; index += 1) {
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
     }
     return borders.last.getInnerPath(rect, textDirection: textDirection);
@@ -885,9 +885,9 @@ void paintBorder(
   // We draw the borders as filled shapes, unless the borders are hairline
   // borders, in which case we use PaintingStyle.stroke, with the stroke width
   // specified here.
-  final Paint paint = Paint()..strokeWidth = 0.0;
+  final paint = Paint()..strokeWidth = 0.0;
 
-  final Path path = Path();
+  final path = Path();
 
   switch (top.style) {
     case BorderStyle.solid:

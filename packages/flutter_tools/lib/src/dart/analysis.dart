@@ -59,7 +59,7 @@ class AnalysisServer {
       'snapshots',
       'analysis_server.dart.snapshot',
     );
-    final List<String> command = <String>[
+    final command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--disable-server-feature-completion',
@@ -143,7 +143,7 @@ class AnalysisServer {
 
     if (response is Map<String, dynamic>) {
       if (response['event'] != null) {
-        final String event = response['event'] as String;
+        final event = response['event'] as String;
         final dynamic params = response['params'];
         Map<String, dynamic>? paramsMap;
         if (params is Map<String, dynamic>) {
@@ -174,7 +174,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing =
+      final isAnalyzing =
           (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
@@ -191,8 +191,8 @@ class AnalysisServer {
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
-    final String file = issueInfo['file'] as String;
-    final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
+    final file = issueInfo['file'] as String;
+    final errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors =
         errorsList
             .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
@@ -308,7 +308,7 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
+    final location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,

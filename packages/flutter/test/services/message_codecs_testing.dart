@@ -61,7 +61,7 @@ bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {
   if (valueA.length != valueB.length) {
     return false;
   }
-  for (int i = 0; i < valueA.length; i++) {
+  for (var i = 0; i < valueA.length; i++) {
     if (!deepEquals(valueA[i], valueB[i])) {
       return false;
     }

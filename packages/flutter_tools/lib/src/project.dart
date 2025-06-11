@@ -145,7 +145,7 @@ class FlutterProject {
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
   Future<Set<String>> get organizationNames async {
-    final List<String> candidates = <String>[];
+    final candidates = <String>[];
 
     if (ios.existsSync()) {
       // Don't require iOS build info, this method is only
@@ -416,7 +416,7 @@ class FlutterProject {
   String getVersionInfo() {
     final String? buildName = manifest.buildName;
     final String? buildNumber = manifest.buildNumber;
-    final Map<String, String> versionFileJson = <String, String>{
+    final versionFileJson = <String, String>{
       'app_name': manifest.appName,
       if (buildName != null) 'version': buildName,
       if (buildNumber != null) 'build_number': buildNumber,
@@ -587,7 +587,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final bool imperativeMatch =
+    final imperativeMatch =
         firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
     final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
       return (firstMatchInFile(appGradleFile, pattern) != null);
@@ -686,7 +686,7 @@ class AndroidProject extends FlutterProjectPlatform {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
-    const String visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
+    const visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
     final CompatibilityResult validJavaGradleAgpVersions = await hasValidJavaGradleAgpVersions();
 
     return ProjectValidatorResult(
@@ -745,7 +745,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
-      final String gradleDescription =
+      final gradleDescription =
           agpVersion != null
               ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
               : '';

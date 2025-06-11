@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 
 Future<void> frameworkCoverageRunner() async {
-  final File coverageFile = File(
+  final coverageFile = File(
     path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'),
   );
   if (!coverageFile.existsSync()) {

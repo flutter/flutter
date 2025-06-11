@@ -374,8 +374,8 @@ class Cache {
       _logger.printError('Please ensure you have permissions to create or open ${lockFile.path}');
       throwToolExit('Failed to open or create the lockfile');
     }
-    bool locked = false;
-    bool printed = false;
+    var locked = false;
+    var printed = false;
     while (!locked) {
       try {
         _lock!.lockSync();
@@ -428,12 +428,12 @@ class Cache {
 
   String get devToolsVersion {
     if (_devToolsVersion == null) {
-      const String devToolsDirPath = 'dart-sdk/bin/resources/devtools';
+      const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
       final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
       if (!devToolsDir.existsSync()) {
         throw Exception('Could not find directory at ${devToolsDir.path}');
       }
-      final String versionFilePath = '${devToolsDir.path}/version.json';
+      final versionFilePath = '${devToolsDir.path}/version.json';
       final File versionFile = _fileSystem.file(versionFilePath);
       if (!versionFile.existsSync()) {
         throw Exception('Could not find file at $versionFilePath');
@@ -587,7 +587,7 @@ class Cache {
       throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
 
-    final String cipdOverride =
+    final cipdOverride =
         original
             .replace(
               pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'],
@@ -653,7 +653,7 @@ class Cache {
     if (_dyLdLibEntry != null) {
       return _dyLdLibEntry!;
     }
-    final List<String> paths = <String>[];
+    final paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
       if (!env.containsKey('DYLD_LIBRARY_PATH')) {
@@ -789,7 +789,7 @@ class Cache {
     bool includeAllPlatforms = true,
   }) async {
     final bool includeAllPlatformsState = this.includeAllPlatforms;
-    bool allAvailable = true;
+    var allAvailable = true;
     this.includeAllPlatforms = includeAllPlatforms;
     for (final ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
@@ -982,7 +982,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
+    final url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
@@ -1022,9 +1022,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String? engineVersion) async {
     engineVersion ??= version;
-    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
+    final url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
 
-    bool exists = false;
+    var exists = false;
     for (final String pkgName in getPackageDirs()) {
       exists = await cache.doesRemoteExist(
         'Checking package $pkgName is available...',
@@ -1053,7 +1053,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     operatingSystemUtils.chmod(dir, 'a+r,a+x');
     for (final File file in dir.listSync(recursive: true).whereType<File>()) {
       final FileStat stat = file.statSync();
-      final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
+      final isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
       if (file.basename == 'flutter_tester' || isUserExecutable) {
         // Make the file readable and executable by all users.
         operatingSystemUtils.chmod(file, 'a+r,a+x');
@@ -1195,7 +1195,7 @@ class ArtifactUpdater {
         // Error that indicates another program has this file open and that it
         // cannot be deleted. For the cache, this is either the analyzer reading
         // the sky_engine package or a running flutter_tester device.
-        const int kSharingViolation = 32;
+        const kSharingViolation = 32;
         if (_platform.isWindows && error.osError?.errorCode == kSharingViolation) {
           throwToolExit(
             'Failed to delete ${destination.path} because the local file/directory is in use '
@@ -1373,7 +1373,7 @@ class ArtifactUpdater {
 
 @visibleForTesting
 String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
-  final List<String> pieces = <String>[url.host, ...url.pathSegments];
+  final pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);
 }
@@ -1381,7 +1381,7 @@ String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
 String _flattenNameNoSubdirs(String fileName) {
-  final List<int> replacedCodeUnits = <int>[
+  final replacedCodeUnits = <int>[
     for (final int codeUnit in fileName.codeUnits)
       ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
   ];

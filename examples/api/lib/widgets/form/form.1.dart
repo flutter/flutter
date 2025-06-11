@@ -47,7 +47,7 @@ class _SaveableFormState extends State<_SaveableForm> {
   }
 
   void _onChanged() {
-    final bool nextIsDirty = _savedValue != _controller.text;
+    final nextIsDirty = _savedValue != _controller.text;
     if (nextIsDirty == _isDirty) {
       return;
     }

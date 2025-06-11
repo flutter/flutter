@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Dialog shows submitted TextField value', (WidgetTester tester) async {
     // This example is also used to illustrate special character counting.
-    const String sampleText = 'Some sample text 👨‍👩‍👦';
+    const sampleText = 'Some sample text 👨‍👩‍👦';
     await tester.pumpWidget(const example.TextFieldExampleApp());
 
     expect(find.byType(TextField), findsOneWidget);

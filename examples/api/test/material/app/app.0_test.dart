@@ -18,8 +18,8 @@ void main() {
       );
     }
 
-    final ThemeData lightTheme = ThemeData(colorSchemeSeed: Colors.green);
-    final ThemeData darkTheme = ThemeData(
+    final lightTheme = ThemeData(colorSchemeSeed: Colors.green);
+    final darkTheme = ThemeData(
       colorSchemeSeed: Colors.green,
       brightness: Brightness.dark,
     );

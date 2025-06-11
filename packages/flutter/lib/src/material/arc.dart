@@ -53,7 +53,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     final double deltaX = delta.dx.abs();
     final double deltaY = delta.dy.abs();
     final double distanceFromAtoB = delta.distance;
-    final Offset c = Offset(end.dx, begin.dy);
+    final c = Offset(end.dx, begin.dy);
 
     double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius!));
 

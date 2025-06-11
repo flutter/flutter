@@ -10,7 +10,7 @@ const List<int> accentKeys = <int>[100, 200, 400, 700];
 
 void main() {
   test('MaterialColor basic functionality', () {
-    const MaterialColor color = MaterialColor(500, <int, Color>{
+    const color = MaterialColor(500, <int, Color>{
       50: Color(0x00000050),
       100: Color(0x00000100),
       200: Color(0x00000200),

@@ -49,7 +49,7 @@ class PlistParser {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
-    final List<String> args = <String>[
+    final args = <String>[
       _plutilExecutable,
       '-convert',
       'xml1',
@@ -75,7 +75,7 @@ class PlistParser {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
-    final List<String> args = <String>[_plutilExecutable, '-convert', 'json', '-o', '-', filePath];
+    final args = <String>[_plutilExecutable, '-convert', 'json', '-o', '-', filePath];
     try {
       final String jsonContent = _processUtils.runSync(args, throwOnError: true).stdout.trim();
       return jsonContent;
@@ -130,7 +130,7 @@ class PlistParser {
   }
 
   Map<String, Object> _parseXml(String xmlContent) {
-    final XmlDocument document = XmlDocument.parse(xmlContent);
+    final document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
     final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
     return _parseXmlDict(dictObject);
@@ -138,7 +138,7 @@ class PlistParser {
 
   Map<String, Object> _parseXmlDict(XmlElement node) {
     String? lastKey;
-    final Map<String, Object> result = <String, Object>{};
+    final result = <String, Object>{};
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {

@@ -12,7 +12,7 @@ void main() {
   MyTestRenderingFlutterBinding.ensureInitialized();
 
   tearDown(() {
-    final List<PipelineOwner> children = <PipelineOwner>[];
+    final children = <PipelineOwner>[];
     RendererBinding.instance.rootPipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
@@ -22,7 +22,7 @@ void main() {
   test(
     "BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update",
     () {
-      final PipelineOwner child = PipelineOwner();
+      final child = PipelineOwner();
       RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
       final RenderObject renderObject = TestRenderObject();
@@ -37,7 +37,7 @@ void main() {
   );
 
   test('Turning global semantics on/off creates semantics owners in PipelineOwner tree', () {
-    final PipelineOwner child = PipelineOwner(onSemanticsUpdate: (_) {});
+    final child = PipelineOwner(onSemanticsUpdate: (_) {});
     RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
     expect(child.semanticsOwner, isNull);

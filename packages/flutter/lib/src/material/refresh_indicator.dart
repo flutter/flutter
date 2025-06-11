@@ -562,7 +562,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   void _show() {
     assert(_status != RefreshIndicatorStatus.refresh);
     assert(_status != RefreshIndicatorStatus.snap);
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
     _status = RefreshIndicatorStatus.snap;
     widget.onStatusChange?.call(_status);

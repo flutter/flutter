@@ -276,7 +276,7 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
 
   @override
   Set<CheckedValue> fromPrimitives(Object? data) {
-    final List<dynamic> checkedValues = data! as List<dynamic>;
+    final checkedValues = data! as List<dynamic>;
     return Set<CheckedValue>.from(
       checkedValues.map<CheckedValue>((dynamic id) {
         return CheckedValue.values[id as int];

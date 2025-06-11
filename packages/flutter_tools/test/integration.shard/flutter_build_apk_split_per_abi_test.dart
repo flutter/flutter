@@ -18,7 +18,7 @@ const Map<String, int> _abiIndexMap = <String, int>{'armeabi-v7a': 1, 'arm64-v8a
 Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
   final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
 
-  final List<String> args = <String>[
+  final args = <String>[
     flutterBin,
     ...getLocalEngineArguments(),
     'build',
@@ -52,15 +52,15 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
       .childFile('output-metadata.json');
   expect(metadataFile, exists, reason: 'Expected output-metadata.json at ${metadataFile.path}');
 
-  final Map<String, dynamic> decodedJson =
+  final decodedJson =
       jsonDecode(await metadataFile.readAsString()) as Map<String, dynamic>;
-  final List<dynamic> elements = decodedJson['elements'] as List<dynamic>;
+  final elements = decodedJson['elements'] as List<dynamic>;
 
-  final Map<String, int> actualVersionCodes = <String, int>{};
+  final actualVersionCodes = <String, int>{};
   for (final dynamic rawElement in elements) {
-    final Map<String, dynamic> element = rawElement as Map<String, dynamic>;
+    final element = rawElement as Map<String, dynamic>;
 
-    final List<dynamic>? filters = element['filters'] as List<dynamic>?;
+    final filters = element['filters'] as List<dynamic>?;
     expect(
       filters,
       isNotNull,
@@ -69,7 +69,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
 
     String? abi;
     for (final dynamic rawFilter in filters!) {
-      final Map<String, dynamic> filter = rawFilter as Map<String, dynamic>;
+      final filter = rawFilter as Map<String, dynamic>;
       if (filter['filterType'] == 'ABI') {
         abi = filter['value'] as String?;
         break;
@@ -77,7 +77,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
     }
     expect(abi, isNotNull, reason: 'Could not find an ABI filter in element $element');
 
-    final int? versionCode = element['versionCode'] as int?;
+    final versionCode = element['versionCode'] as int?;
     expect(versionCode, isNotNull, reason: 'No "versionCode" field in element $element');
 
     actualVersionCodes[abi!] = versionCode!;

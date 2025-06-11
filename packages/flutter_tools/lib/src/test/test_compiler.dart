@@ -157,7 +157,7 @@ class TestCompiler {
     if (compilerController.isClosed) {
       throw StateError('TestCompiler is already disposed.');
     }
-    final _CompilationRequest request = _CompilationRequest(dartEntrypointPath);
+    final request = _CompilationRequest(dartEntrypointPath);
     compilerController.add(request);
     return request.result;
   }
@@ -179,7 +179,7 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
-    final ResidentCompiler residentCompiler = ResidentCompiler(
+    final residentCompiler = ResidentCompiler(
       globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
       artifacts: globals.artifacts!,
       logger: globals.logger,
@@ -213,15 +213,15 @@ class TestCompiler {
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
-      final Stopwatch compilerTime = Stopwatch()..start();
+      final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
-      bool firstCompile = false;
+      var firstCompile = false;
       if (compiler == null) {
         compiler = await createCompiler();
         firstCompile = true;
       }
 
-      final List<Uri> invalidatedRegistrantFiles = <Uri>[];
+      final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
         final String mainUriString =

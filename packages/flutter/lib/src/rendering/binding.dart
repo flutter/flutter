@@ -402,7 +402,7 @@ mixin RendererBinding
   @protected
   @visibleForTesting
   void handleMetricsChanged() {
-    bool forceFrame = false;
+    var forceFrame = false;
     for (final RenderView view in renderViews) {
       forceFrame = forceFrame || view.child != null;
       view.configuration = createViewConfigurationFor(view);
@@ -455,7 +455,7 @@ mixin RendererBinding
     _mouseTracker =
         tracker ??
         MouseTracker((Offset position, int viewId) {
-          final HitTestResult result = HitTestResult();
+          final result = HitTestResult();
           hitTestInView(result, position, viewId);
           return result;
         });
@@ -487,7 +487,7 @@ mixin RendererBinding
 
   void _handleWebFirstFrame(Duration _) {
     assert(kIsWeb);
-    const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
+    const methodChannel = MethodChannel('flutter/service_worker');
     methodChannel.invokeMethod<void>('first-frame');
   }
 
@@ -717,18 +717,18 @@ String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
   if (RendererBinding.instance.renderViews.isEmpty) {
     return 'No render tree root was added to the binding.';
   }
-  const String explanation =
+  const explanation =
       'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
       'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
       'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
-  final List<String> trees = <String>[];
-  bool printedExplanation = false;
+  final trees = <String>[];
+  var printedExplanation = false;
   for (final RenderView renderView in RendererBinding.instance.renderViews) {
     final String? tree = renderView.debugSemantics?.toStringDeep(childOrder: childOrder);
     if (tree != null) {
       trees.add(tree);
     } else {
-      String message = 'Semantics not generated for $renderView.';
+      var message = 'Semantics not generated for $renderView.';
       if (!printedExplanation) {
         printedExplanation = true;
         message = '$message\n$explanation';

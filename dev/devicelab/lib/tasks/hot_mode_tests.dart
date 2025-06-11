@@ -48,7 +48,7 @@ TaskFunction createHotModeTest({
     }
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
-    final List<String> options = <String>[
+    final options = <String>[
       '--hot',
       '-d',
       deviceIdOverride!,
@@ -60,7 +60,7 @@ TaskFunction createHotModeTest({
       '--uninstall-first',
       if (additionalOptions != null) ...additionalOptions,
     ];
-    int hotReloadCount = 0;
+    var hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;
     late Map<String, dynamic> mediumReloadData;
     late Map<String, dynamic> largeReloadData;
@@ -73,7 +73,7 @@ TaskFunction createHotModeTest({
 
       final String rootPubspec =
           File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
-      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
       File(
         path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
@@ -157,8 +157,8 @@ TaskFunction createHotModeTest({
           // state. Frontend loads up from previously generated kernel files.
           {
             final Process process = await startFlutter('run', options: options);
-            final Completer<void> stdoutDone = Completer<void>();
-            final Completer<void> stderrDone = Completer<void>();
+            final stdoutDone = Completer<void>();
+            final stderrDone = Completer<void>();
             process.stdout
                 .transform<String>(utf8.decoder)
                 .transform<String>(const LineSplitter())
@@ -296,8 +296,8 @@ Future<Map<String, dynamic>> captureReloadData({
 }) async {
   final Process process = await startFlutter('run', options: options);
 
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
     String line,
   ) {
@@ -312,7 +312,7 @@ Future<Map<String, dynamic>> captureReloadData({
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   await process.exitCode;
-  final Map<String, dynamic> result =
+  final result =
       json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
@@ -320,8 +320,8 @@ Future<Map<String, dynamic>> captureReloadData({
 
 Future<void> _checkAppRunning(bool shouldBeRunning) async {
   late Set<RunningProcessInfo> galleryProcesses;
-  for (int i = 0; i < 10; i++) {
-    final String exe = Platform.isWindows ? '.exe' : '';
+  for (var i = 0; i < 10; i++) {
+    final exe = Platform.isWindows ? '.exe' : '';
     galleryProcesses = await getRunningProcesses(
       processName: 'Flutter Gallery$exe',
       processManager: const LocalProcessManager(),

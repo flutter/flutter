@@ -15,10 +15,10 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test("Clearing images while they're pending does not crash", () async {
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
+    final bytes = Uint8List.fromList(kTransparentImage);
+    final memoryImage = MemoryImage(bytes);
     final ImageStream stream = memoryImage.resolve(ImageConfiguration.empty);
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     FlutterError.onError = (FlutterErrorDetails error) {
       completer.completeError(error.exception, error.stack);
     };

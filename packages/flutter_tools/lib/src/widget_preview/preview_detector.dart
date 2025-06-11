@@ -204,7 +204,7 @@ class PreviewDetector {
     // Find the initial set of previews.
     _pathToPreviews = await findPreviewFunctions(projectRoot);
 
-    final Watcher watcher = Watcher(projectRoot.path);
+    final watcher = Watcher(projectRoot.path);
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
       final String eventPath = event.path;
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
@@ -300,7 +300,7 @@ class PreviewDetector {
             for (final ResolvedUnitResult libUnit in lib.units) {
               final List<PreviewDetails> previewEntries =
                   previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
-              final PreviewVisitor visitor = PreviewVisitor();
+              final visitor = PreviewVisitor();
               libUnit.unit.visitChildren(visitor);
               previewEntries.addAll(visitor.previewEntries);
               if (previewEntries.isNotEmpty) {
@@ -372,21 +372,21 @@ class PreviewVisitor extends RecursiveAstVisitor<void> {
     }
     assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
     if (_currentFunction != null) {
-      final NamedType returnType = _currentFunction!.returnType! as NamedType;
+      final returnType = _currentFunction!.returnType! as NamedType;
       _currentPreview = PreviewDetails(
         functionName: _currentFunction!.name.toString(),
         isBuilder: returnType.name2.isWidgetBuilder,
       );
     } else if (_currentConstructor != null) {
-      final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
+      final returnType = _currentConstructor!.returnType as SimpleIdentifier;
       final Token? name = _currentConstructor!.name;
       _currentPreview = PreviewDetails(
         functionName: '$returnType${name == null ? '' : '.$name'}',
         isBuilder: false,
       );
     } else if (_currentMethod != null) {
-      final NamedType returnType = _currentMethod!.returnType! as NamedType;
-      final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
+      final returnType = _currentMethod!.returnType! as NamedType;
+      final parentClass = _currentMethod!.parent! as ClassDeclaration;
       _currentPreview = PreviewDetails(
         functionName: '${parentClass.name}.${_currentMethod!.name}',
         isBuilder: returnType.name2.isWidgetBuilder,
@@ -437,7 +437,7 @@ class PreviewDetectorMutex {
       return;
     }
 
-    final Completer<void> request = Completer<void>();
+    final request = Completer<void>();
     _outstandingRequests.add(request);
     await request.future;
   }

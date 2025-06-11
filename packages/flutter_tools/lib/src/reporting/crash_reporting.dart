@@ -90,7 +90,7 @@ class CrashReporter {
       emphasis: true,
     );
 
-    final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
+    final gitHubTemplateCreator = GitHubTemplateCreator(
       fileSystem: _fileSystem,
       logger: _logger,
       flutterProjectFactory: _flutterProjectFactory,
@@ -170,7 +170,7 @@ class CrashReportSender {
         queryParameters: <String, String>{'product': _kProductId, 'version': flutterVersion},
       );
 
-      final http.MultipartRequest req = http.MultipartRequest('POST', uri);
+      final req = http.MultipartRequest('POST', uri);
       req.fields['uuid'] = _analytics.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;

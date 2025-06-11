@@ -500,7 +500,7 @@ class ButtonThemeData with Diagnosticable {
 
       case ButtonTextTheme.primary:
         final Color? fillColor = getFillColor(button);
-        final bool fillIsDark =
+        final fillIsDark =
             fillColor != null
                 ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
                 : getBrightness(button) == Brightness.dark;
@@ -752,7 +752,7 @@ class ButtonThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const ButtonThemeData defaultTheme = ButtonThemeData();
+    const defaultTheme = ButtonThemeData();
     properties.add(
       EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme),
     );

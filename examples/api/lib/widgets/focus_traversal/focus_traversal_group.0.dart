@@ -138,7 +138,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(3, (int index) {
                   // Order as "C" "B", "A".
-                  final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
+                  final order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
                   return OrderedButton<String>(name: 'String: $order', order: order);
                 }),
               ),

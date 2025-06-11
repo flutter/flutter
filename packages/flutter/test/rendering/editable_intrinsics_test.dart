@@ -10,7 +10,7 @@ void main() {
   final TextSelectionDelegate delegate = _FakeEditableTextState();
 
   test('editable intrinsics', () {
-    final RenderEditable editable = RenderEditable(
+    final editable = RenderEditable(
       text: const TextSpan(style: TextStyle(height: 1.0, fontSize: 10.0), text: '12345'),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -52,7 +52,7 @@ void main() {
   });
 
   test('textScaler affects intrinsics', () {
-    final RenderEditable editable = RenderEditable(
+    final editable = RenderEditable(
       text: const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
       textDirection: TextDirection.ltr,
       startHandleLayerLink: LayerLink(),
@@ -68,7 +68,7 @@ void main() {
   });
 
   test('maxLines affects intrinsics', () {
-    final RenderEditable editable = RenderEditable(
+    final editable = RenderEditable(
       text: TextSpan(
         style: const TextStyle(fontSize: 10),
         text: List<String>.filled(5, 'A').join('\n'),
@@ -88,7 +88,7 @@ void main() {
   });
 
   test('strutStyle affects intrinsics', () {
-    final RenderEditable editable = RenderEditable(
+    final editable = RenderEditable(
       text: const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
       textDirection: TextDirection.ltr,
       startHandleLayerLink: LayerLink(),

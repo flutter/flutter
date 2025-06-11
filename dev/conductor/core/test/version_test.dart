@@ -9,7 +9,7 @@ import 'common.dart';
 void main() {
   group('Version.fromString()', () {
     test('parses commits past a tagged stable', () {
-      const String versionString = '2.8.0-1-g2ef5ad67fe';
+      const versionString = '2.8.0-1-g2ef5ad67fe';
       final Version version;
       try {
         version = Version.fromString(versionString);
@@ -29,9 +29,9 @@ void main() {
     'Version.increment()',
     () {
       test('throws exception on nonsensical `level`', () {
-        final List<String> levels = <String>['f', '0', 'xyz'];
-        for (final String level in levels) {
-          final Version version = Version.fromString('1.0.0-0.0.pre');
+        final levels = <String>['f', '0', 'xyz'];
+        for (final level in levels) {
+          final version = Version.fromString('1.0.0-0.0.pre');
           expect(
             () => Version.increment(version, level).toString(),
             throwsExceptionWith('Unknown increment level $level.'),
@@ -40,9 +40,9 @@ void main() {
       });
 
       test('does not support incrementing x', () {
-        const String level = 'x';
+        const level = 'x';
 
-        final Version version = Version.fromString('1.0.0-0.0.pre');
+        final version = Version.fromString('1.0.0-0.0.pre');
         expect(
           () => Version.increment(version, level).toString(),
           throwsExceptionWith('Incrementing $level is not supported by this tool'),
@@ -50,9 +50,9 @@ void main() {
       });
 
       test('successfully increments y', () {
-        const String level = 'y';
+        const level = 'y';
 
-        Version version = Version.fromString('1.0.0-0.0.pre');
+        var version = Version.fromString('1.0.0-0.0.pre');
         expect(Version.increment(version, level).toString(), '1.1.0-0.0.pre');
 
         version = Version.fromString('10.20.0-40.50.pre');
@@ -63,9 +63,9 @@ void main() {
       });
 
       test('successfully increments z', () {
-        const String level = 'z';
+        const level = 'z';
 
-        Version version = Version.fromString('1.0.0');
+        var version = Version.fromString('1.0.0');
         expect(Version.increment(version, level).toString(), '1.0.1');
 
         version = Version.fromString('10.20.0');
@@ -76,9 +76,9 @@ void main() {
       });
 
       test('does not support incrementing m', () {
-        const String level = 'm';
+        const level = 'm';
 
-        final Version version = Version.fromString('1.0.0-0.0.pre');
+        final version = Version.fromString('1.0.0-0.0.pre');
         expect(
           () => Version.increment(version, level).toString(),
           throwsAssertionWith("Do not increment 'm' via Version.increment"),
@@ -86,9 +86,9 @@ void main() {
       });
 
       test('successfully increments n', () {
-        const String level = 'n';
+        const level = 'n';
 
-        Version version = Version.fromString('1.0.0-0.0.pre');
+        var version = Version.fromString('1.0.0-0.0.pre');
         expect(Version.increment(version, level).toString(), '1.0.0-0.1.pre');
 
         version = Version.fromString('10.20.0-40.50.pre');

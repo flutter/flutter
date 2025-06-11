@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
-    int outerTickCount = 0;
-    int innerTickCount = 0;
+    var outerTickCount = 0;
+    var innerTickCount = 0;
 
     Widget nestedTickerModes({required bool innerEnabled, required bool outerEnabled}) {
       return Directionality(

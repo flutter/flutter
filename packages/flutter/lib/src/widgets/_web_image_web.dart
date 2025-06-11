@@ -33,10 +33,10 @@ class ImgElementPlatformView extends StatelessWidget {
     assert(!_registered);
     _registered = true;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
+      final paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
-      final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
+      final img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
       return img;
     });
@@ -339,7 +339,7 @@ class RenderWebImage extends RenderShiftedBox {
       return;
     }
 
-    final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
+    final inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
     fit ??= BoxFit.scaleDown;
     final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
     final Size childSize = fittedSizes.destination;
@@ -350,7 +350,7 @@ class RenderWebImage extends RenderShiftedBox {
         halfWidthDelta +
         (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
     final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     childParentData.offset = Offset(dx, dy);
   }
 

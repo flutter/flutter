@@ -17,13 +17,13 @@ class MailboxBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isTablet = isDisplaySmallDesktop(context);
-    final double startPadding =
+    final startPadding =
         isTablet
             ? 60.0
             : isDesktop
             ? 120.0
             : 4.0;
-    final double endPadding =
+    final endPadding =
         isTablet
             ? 30.0
             : isDesktop

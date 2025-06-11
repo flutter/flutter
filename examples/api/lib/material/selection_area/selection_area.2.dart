@@ -53,9 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
   late final Map<LocalSpanRange, TextSpan> originBulletSourceData;
 
   void _initData() {
-    const String bulletListTitle = 'This is some bulleted list:\n';
-    final List<String> bullets = <String>[for (int i = 1; i <= 7; i += 1) '• Bullet $i'];
-    final TextSpan bulletedList = TextSpan(
+    const bulletListTitle = 'This is some bulleted list:\n';
+    final bullets = <String>[for (int i = 1; i <= 7; i += 1) '• Bullet $i'];
+    final bulletedList = TextSpan(
       text: bulletListTitle,
       children: <InlineSpan>[
         WidgetSpan(
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
 
-    int currentOffset = 0;
+    var currentOffset = 0;
     // Map bulleted list span to a local range using its concrete length calculated
     // from the length of its title and each individual bullet.
     dataSourceMap[(
@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
     currentOffset += bulletListTitle.length;
     widgetSpanMaps[currentOffset] = bulletSourceMap;
     // Map individual bullets to a local range.
-    for (final String bullet in bullets) {
+    for (final bullet in bullets) {
       bulletSourceMap[(
         startOffset: currentOffset,
         endOffset: currentOffset + bullet.length,
@@ -88,11 +88,11 @@ class _MyHomePageState extends State<MyHomePage> {
       currentOffset += bullet.length;
     }
 
-    const TextSpan secondTextParagraph = TextSpan(
+    const secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
       children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
     );
-    const TextSpan thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
+    const thirdTextParagraph = TextSpan(text: 'This is some text in another text widget.');
     // Map second and third paragraphs to local ranges.
     dataSourceMap[(
           startOffset: currentOffset,
@@ -209,10 +209,10 @@ class _MyHomePageState extends State<MyHomePage> {
               : normalizedEndOffset;
       final int startOffset = (clampedLocalStart - entryLocalRange.startOffset).abs();
       final int endOffset = startOffset + (clampedLocalEnd - clampedLocalStart).abs();
-      final List<InlineSpan> beforeSelection = <InlineSpan>[];
-      final List<InlineSpan> insideSelection = <InlineSpan>[];
-      final List<InlineSpan> afterSelection = <InlineSpan>[];
-      int count = 0;
+      final beforeSelection = <InlineSpan>[];
+      final insideSelection = <InlineSpan>[];
+      final afterSelection = <InlineSpan>[];
+      var count = 0;
       rawSpan.visitChildren((InlineSpan child) {
         if (child is TextSpan) {
           final String? rawText = child.text;

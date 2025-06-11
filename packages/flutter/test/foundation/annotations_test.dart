@@ -7,17 +7,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('test Category constructor', () {
-    const List<String> sections = <String>['First section', 'Second section', 'Third section'];
-    const Category category = Category(sections);
+    const sections = <String>['First section', 'Second section', 'Third section'];
+    const category = Category(sections);
     expect(category.sections, sections);
   });
   test('test DocumentationIcon constructor', () {
-    const DocumentationIcon docIcon = DocumentationIcon('Test String');
+    const docIcon = DocumentationIcon('Test String');
     expect(docIcon.url, contains('Test String'));
   });
 
   test('test Summary constructor', () {
-    const Summary summary = Summary('Test String');
+    const summary = Summary('Test String');
     expect(summary.text, contains('Test String'));
   });
 }

@@ -28,7 +28,7 @@ void main() {
     group('cpu check', () {
       test('arm64', () async {
         FakeDevice.pretendArm64();
-        final AndroidDevice androidDevice = device as AndroidDevice;
+        final androidDevice = device as AndroidDevice;
         expect(await androidDevice.isArm64(), isTrue);
         expectLog(<CommandArgs>[
           cmd(
@@ -404,7 +404,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
@@ -426,7 +426,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);

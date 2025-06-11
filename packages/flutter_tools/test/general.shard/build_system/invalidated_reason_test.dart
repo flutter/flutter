@@ -8,18 +8,18 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('InvalidatedReason formats message per invalidation kind', () {
-    final InvalidatedReason inputChanged = InvalidatedReason(InvalidatedReasonKind.inputChanged)
+    final inputChanged = InvalidatedReason(InvalidatedReasonKind.inputChanged)
       ..data.add('a.dart');
-    final InvalidatedReason outputChanged = InvalidatedReason(InvalidatedReasonKind.outputChanged)
+    final outputChanged = InvalidatedReason(InvalidatedReasonKind.outputChanged)
       ..data.add('b.dart');
-    final InvalidatedReason inputMissing = InvalidatedReason(InvalidatedReasonKind.inputMissing)
+    final inputMissing = InvalidatedReason(InvalidatedReasonKind.inputMissing)
       ..data.add('c.dart');
-    final InvalidatedReason outputMissing = InvalidatedReason(InvalidatedReasonKind.outputMissing)
+    final outputMissing = InvalidatedReason(InvalidatedReasonKind.outputMissing)
       ..data.add('d.dart');
-    final InvalidatedReason outputSetRemoval = InvalidatedReason(
+    final outputSetRemoval = InvalidatedReason(
       InvalidatedReasonKind.outputSetRemoval,
     )..data.add('e.dart');
-    final InvalidatedReason outputSetAddition = InvalidatedReason(
+    final outputSetAddition = InvalidatedReason(
       InvalidatedReasonKind.outputSetAddition,
     )..data.add('e.dart');
 

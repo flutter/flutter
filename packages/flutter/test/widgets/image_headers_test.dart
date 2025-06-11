@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 
 void main() {
-  final MockHttpClient client = MockHttpClient();
+  final client = MockHttpClient();
 
   testWidgets('Headers', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(

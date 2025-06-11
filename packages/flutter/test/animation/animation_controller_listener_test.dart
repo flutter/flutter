@@ -7,12 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Disposing controller removes listeners to avoid memory leaks', () {
-    final _TestAnimationController controller = _TestAnimationController(
+    final controller = _TestAnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    int statusListener = 0;
-    int listener = 0;
+    var statusListener = 0;
+    var listener = 0;
     controller.addListener(() {
       listener++;
     });

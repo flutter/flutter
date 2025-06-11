@@ -119,7 +119,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     late StreamSubscription<List<int>> sub;
     sub = stream.listen(
       (List<int> data) {
@@ -155,7 +155,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);

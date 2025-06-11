@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Expanded widgets in a Row', (WidgetTester tester) async {
-    const double rowWidth = 800.0;
-    const double rowHeight = 100.0;
+    const rowWidth = 800.0;
+    const rowHeight = 100.0;
     const double containerOneWidth = (rowWidth - 50) * 2 / 3;
     const double containerTwoWidth = 50;
     const double containerThreeWidth = (rowWidth - 50) * 1 / 3;

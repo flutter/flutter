@@ -80,8 +80,8 @@ void main() {
   }
 
   testWidgets('MaterialState.pressed is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isPressed,
       materialState: MaterialState.pressed,
@@ -90,8 +90,8 @@ void main() {
   });
 
   testWidgets('MaterialState.focused is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isFocused,
       materialState: MaterialState.focused,
@@ -100,8 +100,8 @@ void main() {
   });
 
   testWidgets('MaterialState.hovered is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isHovered,
       materialState: MaterialState.hovered,
@@ -110,8 +110,8 @@ void main() {
   });
 
   testWidgets('MaterialState.disabled is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDisabled,
       materialState: MaterialState.disabled,
@@ -120,8 +120,8 @@ void main() {
   });
 
   testWidgets('MaterialState.selected is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isSelected,
       materialState: MaterialState.selected,
@@ -130,8 +130,8 @@ void main() {
   });
 
   testWidgets('MaterialState.scrolledUnder is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isScrolledUnder,
       materialState: MaterialState.scrolledUnder,
@@ -140,8 +140,8 @@ void main() {
   });
 
   testWidgets('MaterialState.dragged is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isDragged,
       materialState: MaterialState.dragged,
@@ -150,8 +150,8 @@ void main() {
   });
 
   testWidgets('MaterialState.error is tracked', (WidgetTester tester) async {
-    final StreamController<bool> controller = StreamController<bool>();
-    final _MyWidget widget = _MyWidget(
+    final controller = StreamController<bool>();
+    final widget = _MyWidget(
       controller: controller,
       evaluator: (_MyWidgetState state) => state.isErrored,
       materialState: MaterialState.error,

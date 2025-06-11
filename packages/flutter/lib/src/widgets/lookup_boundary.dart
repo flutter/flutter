@@ -266,8 +266,8 @@ class LookupBoundary extends InheritedWidget {
   static bool debugIsHidingAncestorWidgetOfExactType<T extends Widget>(BuildContext context) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor.widget.runtimeType == T) {
           ancestorFound = true;
@@ -289,8 +289,8 @@ class LookupBoundary extends InheritedWidget {
   static bool debugIsHidingAncestorStateOfType<T extends State>(BuildContext context) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is StatefulElement && ancestor.state is T) {
           ancestorFound = true;
@@ -315,8 +315,8 @@ class LookupBoundary extends InheritedWidget {
   ) {
     bool? result;
     assert(() {
-      bool hiddenByBoundary = false;
-      bool ancestorFound = false;
+      var hiddenByBoundary = false;
+      var ancestorFound = false;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is RenderObjectElement && ancestor.renderObject is T) {
           ancestorFound = true;

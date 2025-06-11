@@ -26,8 +26,8 @@ class FakeCodec implements ui.Codec {
   static Future<FakeCodec> fromData(Uint8List data) async {
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final int frameCount = codec.frameCount;
-    final List<ui.FrameInfo> frameInfos = <ui.FrameInfo>[];
-    for (int i = 0; i < frameCount; i += 1) {
+    final frameInfos = <ui.FrameInfo>[];
+    for (var i = 0; i < frameCount; i += 1) {
       frameInfos.add(await codec.getNextFrame());
     }
     final int repetitionCount = codec.repetitionCount;
@@ -46,7 +46,7 @@ class FakeCodec implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() {
     _numFramesAsked += 1;
-    final Future<ui.FrameInfo> result = Future<ui.FrameInfo>.value(_frameInfos[_nextFrame]);
+    final result = Future<ui.FrameInfo>.value(_frameInfos[_nextFrame]);
     _nextFrame = (_nextFrame + 1) % _frameCount;
     return result;
   }

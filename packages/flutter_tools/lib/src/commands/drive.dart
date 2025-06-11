@@ -328,7 +328,7 @@ class DriveCommand extends RunCommandBase {
     final File? applicationBinary =
         applicationBinaryPath == null ? null : _fileSystem.file(applicationBinaryPath);
 
-    bool screenshotTaken = false;
+    var screenshotTaken = false;
     try {
       if (stringArg(_kUseExistingApp) == null) {
         await driverService.start(
@@ -439,7 +439,7 @@ class DriveCommand extends RunCommandBase {
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
     _logger.printTrace('Registering signal handlers...');
-    final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
+    final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();

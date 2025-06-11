@@ -79,7 +79,7 @@ class _MyHomePage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                final CupertinoPageRoute<void> route = CupertinoPageRoute<void>(
+                final route = CupertinoPageRoute<void>(
                   builder: (BuildContext context) {
                     return const _MyHomePage(title: 'Cupertino Page');
                   },

@@ -82,7 +82,7 @@ class TestBuildSystem implements BuildSystem {
 /// // RkxVVFRFUl9XRUI9dHJ1ZQo=,RkxVVFRFUl9XRUJfQ0FOVkFTS0lUX1VSTD1odHRwczovL2V4YW1wbGUuY29t
 /// ```
 String encodeDartDefinesMap(Map<String, String> defines) {
-  final List<String> flattened = <String>[
+  final flattened = <String>[
     for (final MapEntry<String, String> entry in defines.entries) '${entry.key}=${entry.value}',
   ];
   return encodeDartDefines(flattened);

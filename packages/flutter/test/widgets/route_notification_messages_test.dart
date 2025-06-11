@@ -31,7 +31,7 @@ class OnTapPage extends StatelessWidget {
 
 void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+    final routes = <String, WidgetBuilder>{
       '/':
           (BuildContext context) => OnTapPage(
             id: '/',
@@ -48,7 +48,7 @@ void main() {
           ),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -97,7 +97,7 @@ void main() {
   });
 
   testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -132,7 +132,7 @@ void main() {
   });
 
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+    final routes = <String, WidgetBuilder>{
       '/':
           (BuildContext context) => OnTapPage(
             id: '/',
@@ -150,7 +150,7 @@ void main() {
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -199,7 +199,7 @@ void main() {
   });
 
   testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -244,7 +244,7 @@ void main() {
   });
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -252,11 +252,11 @@ void main() {
       return null;
     });
 
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleRouterDelegate delegate = SimpleRouterDelegate(
+    final delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());

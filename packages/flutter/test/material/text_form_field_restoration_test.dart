@@ -9,8 +9,8 @@ void main() {
   testWidgets('TextFormField restorationId is passed to inner TextField', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
-    const String restorationId = 'text_form_field';
+    final formState = GlobalKey<FormFieldState<String>>();
+    const restorationId = 'text_form_field';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -33,7 +33,7 @@ void main() {
   });
 
   testWidgets('TextFormField value is restorable', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
+    final formState = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
       MaterialApp(

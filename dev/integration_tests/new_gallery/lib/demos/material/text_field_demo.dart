@@ -177,7 +177,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> with RestorationMi
     if (value == null || value.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldNameRequired;
     }
-    final RegExp nameExp = RegExp(r'^[A-Za-z ]+$');
+    final nameExp = RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value)) {
       return GalleryLocalizations.of(context)!.demoTextFieldOnlyAlphabeticalChars;
     }
@@ -185,7 +185,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> with RestorationMi
   }
 
   String? _validatePhoneNumber(String? value) {
-    final RegExp phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
+    final phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value!)) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterUSPhoneNumber;
     }
@@ -205,7 +205,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> with RestorationMi
 
   @override
   Widget build(BuildContext context) {
-    const SizedBox sizedBoxSpace = SizedBox(height: 24);
+    const sizedBoxSpace = SizedBox(height: 24);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Form(
@@ -371,9 +371,9 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final int newTextLength = newValue.text.length;
-    final StringBuffer newText = StringBuffer();
+    final newText = StringBuffer();
     int selectionIndex = newValue.selection.end;
-    int usedSubstringIndex = 0;
+    var usedSubstringIndex = 0;
     if (newTextLength >= 1) {
       newText.write('(');
       if (newValue.selection.end >= 1) {

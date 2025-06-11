@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Perform an action on CupertinoAlertDialog', (WidgetTester tester) async {
-    const String actionText = 'Yes';
+    const actionText = 'Yes';
     await tester.pumpWidget(const example.AlertDialogApp());
 
     // Launch the CupertinoAlertDialog.

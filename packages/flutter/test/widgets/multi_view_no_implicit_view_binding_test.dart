@@ -10,7 +10,7 @@ import 'multi_view_testing.dart';
 void main() {
   // Overrides the default test bindings so we have the ability to hide the
   // implicitView inside the body of a test.
-  final NoImplicitViewWidgetsBinding binding = NoImplicitViewWidgetsBinding();
+  final binding = NoImplicitViewWidgetsBinding();
 
   testWidgets('NoImplicitViewWidgetsBinding self-test', (WidgetTester tester) async {
     expect(tester.platformDispatcher.implicitView, isNotNull);

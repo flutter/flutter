@@ -23,8 +23,8 @@ void beginFrame(Duration timeStamp) {
   // PAINT
 
   final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);
 
   // Here we determine the rotation according to the timeStamp given to us by
@@ -41,13 +41,13 @@ void beginFrame(Duration timeStamp) {
   // COMPOSITE
 
   final double devicePixelRatio = view.devicePixelRatio;
-  final Float64List deviceTransform =
+  final deviceTransform =
       Float64List(16)
         ..[0] = devicePixelRatio
         ..[5] = devicePixelRatio
         ..[10] = 1.0
         ..[15] = 1.0;
-  final ui.SceneBuilder sceneBuilder =
+  final sceneBuilder =
       ui.SceneBuilder()
         ..pushTransform(deviceTransform)
         ..addPicture(ui.Offset.zero, picture)

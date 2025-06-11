@@ -39,7 +39,7 @@ class ThemeDataExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = ColorScheme.fromSeed(
+    final colorScheme = ColorScheme.fromSeed(
       brightness: MediaQuery.platformBrightnessOf(context),
       seedColor: Colors.indigo,
     );

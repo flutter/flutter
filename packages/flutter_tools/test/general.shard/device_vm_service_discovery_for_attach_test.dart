@@ -13,8 +13,8 @@ import '../src/fake_devices.dart';
 void main() {
   group('LogScanningVMServiceDiscoveryForAttach', () {
     testWithoutContext('can discover the port', () async {
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-      final LogScanningVMServiceDiscoveryForAttach discovery =
+      final logReader = FakeDeviceLogReader();
+      final discovery =
           LogScanningVMServiceDiscoveryForAttach(
             Future<FakeDeviceLogReader>.value(logReader),
             ipv6: false,
@@ -27,8 +27,8 @@ void main() {
     });
 
     testWithoutContext('ignores the port that does not match devicePort', () async {
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-      final LogScanningVMServiceDiscoveryForAttach discovery =
+      final logReader = FakeDeviceLogReader();
+      final discovery =
           LogScanningVMServiceDiscoveryForAttach(
             Future<FakeDeviceLogReader>.value(logReader),
             devicePort: 9998,
@@ -43,9 +43,9 @@ void main() {
     });
 
     testWithoutContext('forwards the port if given a port forwarder', () async {
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-      final FakePortForwarder portForwarder = FakePortForwarder(9900);
-      final LogScanningVMServiceDiscoveryForAttach discovery =
+      final logReader = FakeDeviceLogReader();
+      final portForwarder = FakePortForwarder(9900);
+      final discovery =
           LogScanningVMServiceDiscoveryForAttach(
             Future<FakeDeviceLogReader>.value(logReader),
             portForwarder: portForwarder,
@@ -61,9 +61,9 @@ void main() {
     });
 
     testWithoutContext('uses the host port if given', () async {
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-      final FakePortForwarder portForwarder = FakePortForwarder(9900);
-      final LogScanningVMServiceDiscoveryForAttach discovery =
+      final logReader = FakeDeviceLogReader();
+      final portForwarder = FakePortForwarder(9900);
+      final discovery =
           LogScanningVMServiceDiscoveryForAttach(
             Future<FakeDeviceLogReader>.value(logReader),
             portForwarder: portForwarder,
