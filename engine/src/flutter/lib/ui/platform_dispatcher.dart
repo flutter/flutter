@@ -1869,6 +1869,7 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    // TODO: is this where we add the ViewConstraints?
   });
 
   /// The identifier for a display for this view, in
