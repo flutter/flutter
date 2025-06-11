@@ -650,14 +650,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
-  protobuf:
-    dependency: "direct main"
-    description:
-      name: protobuf
-      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   provider:
     dependency: "direct main"
     description:
@@ -995,10 +987,10 @@ packages:
     dependency: "direct main"
     description:
       name: watcher
-      sha256: "69da27e49efa56a15f8afe8f4438c4ec02eff0a117df1b22ea4aad194fe1c104"
+      sha256: "0b7fd4a0bbc4b92641dbf20adfd7e3fd1398fe17102d94b674234563e110088a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.2"
   web:
     dependency: "direct main"
     description:

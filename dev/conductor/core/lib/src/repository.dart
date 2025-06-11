@@ -12,7 +12,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import './git.dart';
-import './globals.dart';
 import './stdio.dart';
 
 /// Allowed git remote names.
@@ -82,7 +81,7 @@ abstract class Repository {
     required this.parentDirectory,
     this.initialRef,
     String? previousCheckoutLocation,
-    this.mirrorRemote,
+    required this.mirrorRemote,
   }) : _previousCheckoutLocation = previousCheckoutLocation,
        git = Git(processManager),
        assert(upstreamRemote.url.isNotEmpty);
@@ -91,10 +90,7 @@ abstract class Repository {
   final Remote upstreamRemote;
 
   /// Remote for user's mirror.
-  ///
-  /// This value can be null, in which case attempting to access it will lead to
-  /// a [ConductorException].
-  final Remote? mirrorRemote;
+  final Remote mirrorRemote;
 
   /// The initial ref (branch or commit name) to check out.
   final String? initialRef;
@@ -119,7 +115,7 @@ abstract class Repository {
     if (_previousCheckoutLocation != null) {
       _checkoutDirectory = fileSystem.directory(_previousCheckoutLocation);
       if (!_checkoutDirectory!.existsSync()) {
-        throw ConductorException(
+        throw Exception(
           'Provided previousCheckoutLocation $_previousCheckoutLocation does not exist on disk!',
         );
       }
@@ -193,18 +189,16 @@ abstract class Repository {
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
     );
-    if (mirrorRemote != null) {
-      await git.run(
-        <String>['remote', 'add', mirrorRemote!.name, mirrorRemote!.url],
-        'Adding remote ${mirrorRemote!.url} as ${mirrorRemote!.name}',
-        workingDirectory: checkoutDirectory.path,
-      );
-      await git.run(
-        <String>['fetch', mirrorRemote!.name],
-        'Fetching git remote ${mirrorRemote!.name}',
-        workingDirectory: checkoutDirectory.path,
-      );
-    }
+    await git.run(
+      <String>['remote', 'add', mirrorRemote.name, mirrorRemote.url],
+      'Adding remote ${mirrorRemote.url} as ${mirrorRemote.name}',
+      workingDirectory: checkoutDirectory.path,
+    );
+    await git.run(
+      <String>['fetch', mirrorRemote.name],
+      'Fetching git remote ${mirrorRemote.name}',
+      workingDirectory: checkoutDirectory.path,
+    );
 
     if (initialRef != null) {
       await git.run(
@@ -287,9 +281,7 @@ abstract class Repository {
             workingDirectory: (await checkoutDirectory).path,
           )).trim().isNotEmpty;
       if (!hasChanges) {
-        throw ConductorException(
-          'Tried to commit with message $message but no changes were present',
-        );
+        throw Exception('Tried to commit with message $message but no changes were present');
       }
       await git.run(
         <String>['add', '--all'],
@@ -340,7 +332,7 @@ final class FrameworkRepository extends Repository {
     super.upstreamRemote = const Remote.upstream(FrameworkRepository.defaultUpstream),
     super.previousCheckoutLocation,
     String super.initialRef = FrameworkRepository.defaultBranch,
-    super.mirrorRemote,
+    required super.mirrorRemote,
   }) : super(
          fileSystem: checkouts.fileSystem,
          parentDirectory: checkouts.directory,

@@ -418,7 +418,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       throwToolExit(
         'Pubspec in ${directory.path} has out of date dependencies. '
         'Please run "flutter update-packages --force-upgrade" to update them correctly. '
-        'The hash does not match the expectation.',
+        'The hash ($checksum) does not match the expectation ($actualChecksum).',
       );
     }
   }

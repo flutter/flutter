@@ -6,8 +6,6 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 
-import './globals.dart';
-
 /// A wrapper around git process calls that can be mocked for unit testing.
 ///
 /// The `Git` class is a relatively (compared to `Repository`) lightweight
@@ -28,7 +26,7 @@ final class Git {
   }) async {
     final ProcessResult result = await _run(args, workingDirectory);
     if (result.exitCode == 0) {
-      return stdoutToString(result.stdout);
+      return (result.stdout as String).trim();
     }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
   }

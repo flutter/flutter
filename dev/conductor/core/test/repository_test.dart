@@ -46,6 +46,8 @@ void main() {
             fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
           ],
         ),
+        const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
         const FakeCommand(command: <String>['git', 'status', '--porcelain']),
@@ -60,7 +62,10 @@ void main() {
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       expect(
         () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
@@ -83,6 +88,8 @@ void main() {
             fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
           ],
         ),
+        const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
         const FakeCommand(command: <String>['git', 'commit', '--message', message]),
@@ -96,7 +103,10 @@ void main() {
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
@@ -126,6 +136,8 @@ Extraneous debug information that should be ignored.
             '${rootDir}flutter_conductor_checkouts/framework',
           ],
         ),
+        FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         FakeCommand(command: <String>['git', 'checkout', 'master']),
         FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision),
         FakeCommand(
@@ -140,7 +152,10 @@ Extraneous debug information that should be ignored.
         stdio: stdio,
       );
 
-      final Repository repo = FrameworkRepository(checkouts);
+      final Repository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       final List<String> branchNames = await repo.listRemoteBranches(remoteName);
       expect(
         branchNames,
