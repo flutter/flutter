@@ -42,6 +42,7 @@ Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
   InputDecorationThemeData? inputDecorationTheme,
+  InputDecorationThemeData? localInputDecorationTheme,
   IconButtonThemeData? iconButtonTheme,
   TextDirection textDirection = TextDirection.ltr,
   bool expands = false,
@@ -71,6 +72,10 @@ Widget buildInputDecorator({
 
   if (useIntrinsicWidth) {
     widget = IntrinsicWidth(child: widget);
+  }
+
+  if (localInputDecorationTheme != null) {
+    widget = InputDecorationTheme(data: localInputDecorationTheme, child: widget);
   }
 
   return MaterialApp(
@@ -9066,6 +9071,421 @@ void main() {
     expect(merged.border, overrideTheme.border);
     expect(merged.alignLabelWithHint, isNot(overrideTheme.alignLabelWithHint));
     expect(merged.constraints, overrideTheme.constraints);
+  });
+
+  group('Local InputDecorationTheme overrides default', () {
+    testWidgets('labelStyle', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(labelStyle: labelStyle),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, labelStyle.color);
+    });
+
+    testWidgets('floatingLabelStyle', (WidgetTester tester) async {
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true, // Label appears floating above input field.
+          localInputDecorationTheme: const InputDecorationThemeData(
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+    });
+
+    testWidgets('helperStyle', (WidgetTester tester) async {
+      const TextStyle helperStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(helperStyle: helperStyle),
+          decoration: const InputDecoration(labelText: labelText, helperText: helperText),
+        ),
+      );
+
+      expect(getHelperStyle(tester).color, helperStyle.color);
+    });
+
+    testWidgets('helperMaxLines', (WidgetTester tester) async {
+      const int helperMaxLines = 2;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(helperMaxLines: helperMaxLines),
+          decoration: const InputDecoration(labelText: labelText, helperText: threeLines),
+        ),
+      );
+
+      const double helperGap = 4.0;
+      const double helperHeight = 16.0;
+      const double containerHeight = 56.0;
+      final Rect helperRect = tester.getRect(find.text(threeLines));
+      expect(helperRect.height, closeTo(helperHeight * helperMaxLines, 0.25));
+      expect(
+        getDecoratorRect(tester).height,
+        closeTo(containerHeight + helperGap + helperHeight * helperMaxLines, 0.25),
+      );
+    });
+
+    testWidgets('hintStyle', (WidgetTester tester) async {
+      const TextStyle hintStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(hintStyle: hintStyle),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
+        ),
+      );
+
+      expect(getHintStyle(tester).color, hintStyle.color);
+    });
+
+    testWidgets('hintFadeDuration', (WidgetTester tester) async {
+      const Duration hintFadeDuration = Duration(milliseconds: 404);
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          localInputDecorationTheme: const InputDecorationThemeData(
+            hintFadeDuration: hintFadeDuration,
+          ),
+          decoration: const InputDecoration(hintText: hintText),
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            hintFadeDuration: hintFadeDuration,
+          ),
+          decoration: const InputDecoration(hintText: hintText),
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 200));
+      final double hintOpacity200ms = getHintOpacity(tester);
+      expect(hintOpacity200ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 200));
+      final double hintOpacity400ms = getHintOpacity(tester);
+      expect(hintOpacity400ms, inExclusiveRange(0.0, hintOpacity200ms));
+      await tester.pump(const Duration(milliseconds: 4));
+      expect(getHintOpacity(tester), 0.0);
+    });
+
+    testWidgets('hintMaxLines', (WidgetTester tester) async {
+      const int hintMaxLines = 2;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(hintMaxLines: hintMaxLines),
+          decoration: const InputDecoration.collapsed(hintText: threeLines),
+        ),
+      );
+
+      const double hintLineHeight = 24.0; // Font size = 16 and font height = 1.5.
+      expect(getDecoratorRect(tester).size, const Size(800.0, hintMaxLines * hintLineHeight));
+    });
+
+    testWidgets('errorStyle', (WidgetTester tester) async {
+      const TextStyle errorStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(errorStyle: errorStyle),
+          decoration: const InputDecoration(labelText: labelText, errorText: errorText),
+        ),
+      );
+
+      expect(getErrorStyle(tester).color, errorStyle.color);
+    });
+
+    testWidgets('errorMaxLines', (WidgetTester tester) async {
+      const int errorMaxLines = 2;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(errorMaxLines: errorMaxLines),
+          decoration: const InputDecoration(
+            errorText: threeLines,
+            labelText: 'label',
+            filled: true,
+          ),
+        ),
+      );
+
+      const double helperGap = 4.0;
+      const double containerHeight = 56.0;
+      const double errorHeight = 16.0;
+
+      final Rect errorRect = tester.getRect(find.text(threeLines));
+      expect(errorRect.height, closeTo(errorHeight * errorMaxLines, 0.25));
+      expect(
+        getDecoratorRect(tester).height,
+        closeTo(containerHeight + helperGap + errorHeight * errorMaxLines, 0.25),
+      );
+    });
+
+    testWidgets('isCollapsed', (WidgetTester tester) async {
+      // Overall height for a collapsed InputDecorator is 24dp which is the input
+      // height (font size = 16, line height = 1.5).
+      const double inputHeight = 24.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(isCollapsed: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
+    });
+
+    testWidgets('iconColor', (WidgetTester tester) async {
+      const Color iconColor = Colors.indigo;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(iconColor: iconColor),
+          decoration: const InputDecoration(icon: Icon(Icons.cabin)),
+        ),
+      );
+
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color,
+        iconColor,
+      );
+    });
+
+    testWidgets('prefixStyle', (WidgetTester tester) async {
+      const TextStyle prefixStyle = TextStyle(color: Colors.indigo);
+      const String prefixLabel = 'prefix';
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(prefixStyle: prefixStyle),
+          decoration: const InputDecoration(prefix: Text(prefixLabel)),
+        ),
+      );
+      final TextStyle effectivePrefixStyle =
+          tester
+              .widget<RichText>(
+                find.descendant(of: find.text(prefixLabel), matching: find.byType(RichText)),
+              )
+              .text
+              .style!;
+      expect(effectivePrefixStyle.color, prefixStyle.color);
+    });
+
+    testWidgets('prefixIconColor', (WidgetTester tester) async {
+      const Color prefixIconColor = Colors.indigo;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            prefixIconColor: prefixIconColor,
+          ),
+          decoration: const InputDecoration(prefixIcon: Icon(Icons.cabin)),
+        ),
+      );
+
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color,
+        prefixIconColor,
+      );
+    });
+
+    testWidgets('prefixIconConstraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            prefixIconConstraints: BoxConstraints(minWidth: 60, minHeight: 60),
+          ),
+          decoration: const InputDecoration(prefixIcon: Icon(Icons.cabin)),
+        ),
+      );
+
+      expect(tester.getSize(find.byIcon(Icons.cabin)), const Size(60, 60));
+    });
+
+    testWidgets('suffixStyle', (WidgetTester tester) async {
+      const TextStyle suffixStyle = TextStyle(color: Colors.indigo);
+      const String suffixLabel = 'suffix';
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          localInputDecorationTheme: const InputDecorationThemeData(suffixStyle: suffixStyle),
+          decoration: const InputDecoration(suffix: Text(suffixLabel)),
+        ),
+      );
+      final TextStyle effectiveSuffixStyle =
+          tester
+              .widget<RichText>(
+                find.descendant(of: find.text(suffixLabel), matching: find.byType(RichText)),
+              )
+              .text
+              .style!;
+      expect(effectiveSuffixStyle.color, suffixStyle.color);
+    });
+
+    testWidgets('suffixIconColor', (WidgetTester tester) async {
+      const Color suffixIconColor = Colors.indigo;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            suffixIconColor: suffixIconColor,
+          ),
+          decoration: const InputDecoration(suffixIcon: Icon(Icons.cabin)),
+        ),
+      );
+
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color,
+        suffixIconColor,
+      );
+    });
+
+    testWidgets('suffixIconConstraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            suffixIconConstraints: BoxConstraints(minWidth: 60, minHeight: 60),
+          ),
+          decoration: const InputDecoration(suffixIcon: Icon(Icons.cabin)),
+        ),
+      );
+
+      expect(tester.getSize(find.byIcon(Icons.cabin)), const Size(60, 60));
+    });
+
+    testWidgets('counterStyle', (WidgetTester tester) async {
+      const TextStyle counterStyle = TextStyle(color: Colors.indigo);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(counterStyle: counterStyle),
+          decoration: const InputDecoration(labelText: labelText, counterText: counterText),
+        ),
+      );
+
+      expect(getCounterStyle(tester).color, counterStyle.color);
+    });
+
+    testWidgets('filled and fillColor', (WidgetTester tester) async {
+      const Color fillColor = Colors.indigo;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            filled: true,
+            fillColor: fillColor,
+          ),
+          decoration: const InputDecoration(labelText: labelText, counterText: counterText),
+        ),
+      );
+
+      expect(findBorderPainter(), paints..path(style: PaintingStyle.fill, color: fillColor));
+    });
+
+    testWidgets('hoverColor', (WidgetTester tester) async {
+      const Color hoverColor = Colors.indigo;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            filled: true,
+            hoverColor: hoverColor,
+          ),
+          isFocused: true,
+          isHovering: true,
+          decoration: const InputDecoration(labelText: labelText, helperText: helperText),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(tester.element(findDecorator()));
+      final Color focusColor = theme.colorScheme.surfaceContainerHighest;
+      expect(
+        findBorderPainter(),
+        paints..path(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
+      );
+    });
+
+    testWidgets('alignLabelWithHint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(alignLabelWithHint: true),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.ac_unit),
+            labelText: labelText,
+            border: OutlineInputBorder(),
+          ),
+          isFocused: true,
+        ),
+      );
+
+      expect(getLabelRect(tester).left, getInputRect(tester).left);
+    });
+
+    testWidgets('constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+          ),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      // Theme settings should make it 300x40 pixels.
+      expect(getDecoratorRect(tester).size, const Size(300, 40));
+    });
+
+    testWidgets('visualDensity', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          localInputDecorationTheme: const InputDecorationThemeData(
+            visualDensity: VisualDensity(horizontal: 2.0, vertical: 2.0),
+          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
+        ),
+      );
+
+      // Overall height for this InputDecorator is 64dp:
+      //   12 - top padding (8 plus 4 due to increased visual density)
+      //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+      //    4 - gap between label and input (this is not part of the M3 spec)
+      //   24 - input text (font size = 16, line height = 1.5)
+      //   12 - bottom padding (8 plus 4 due to increased visual density)
+      expect(getDecoratorRect(tester).size.height, 64.0);
+    });
+  });
+
+  testWidgets('Helper and counter are correctly styled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: labelText,
+          helperText: helperText,
+          counterText: counterText,
+        ),
+      ),
+    );
+
+    final ThemeData theme = Theme.of(tester.element(findDecorator()));
+    final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+    final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
+    expect(getHelperStyle(tester), expectedStyle);
+    expect(getCounterStyle(tester), expectedStyle);
   });
 
   testWidgets('Prefix IconButton inherits IconButtonTheme', (WidgetTester tester) async {
