@@ -474,8 +474,13 @@ void main() {
     name: test
     version: 1.0.0+3
     ''', logger: BufferLogger.test())!;
-        final project = FlutterProject(fileSystem.systemTempDirectory, manifest, manifest);
-        final versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
+        final project = FlutterProject(
+          fileSystem.systemTempDirectory,
+          manifest,
+          manifest,
+        );
+        final versionInfo =
+            jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'], 'test');
         expect(versionInfo['version'], '1.0.0');
         expect(versionInfo['build_number'], '3');
@@ -1071,7 +1076,10 @@ plugins {
           const entitlementFilePath = 'myEntitlement.Entitlement';
           project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-          const buildContext = XcodeProjectBuildContext(target: 'Runner', configuration: 'config');
+          const buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            configuration: 'config',
+          );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
             IosProject.kTeamIdKey: 'ABC',
@@ -1098,7 +1106,8 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+          final json =
+              jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
 
           expect(
             json['associatedDomains'],
@@ -1115,7 +1124,10 @@ plugins {
           const entitlementFilePath = 'nested/somewhere/myEntitlement.Entitlement';
           project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-          const buildContext = XcodeProjectBuildContext(target: 'Runner', configuration: 'config');
+          const buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            configuration: 'config',
+          );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
             IosProject.kTeamIdKey: 'ABC',
@@ -1142,7 +1154,8 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+          final json =
+              jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(
             json['associatedDomains'],
             unorderedEquals(<String>['example.com', 'example2.com']),
@@ -1156,7 +1169,10 @@ plugins {
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
 
-          const buildContext = XcodeProjectBuildContext(target: 'Runner', configuration: 'config');
+          const buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            configuration: 'config',
+          );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
             IosProject.kTeamIdKey: 'ABC',
@@ -1176,7 +1192,8 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+          final json =
+              jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(json['teamIdentifier'], 'ABC');
           expect(json['bundleIdentifier'], 'io.flutter.someProject');
           expect(json['associatedDomains'], unorderedEquals(<String>[]));
@@ -1804,7 +1821,10 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          const buildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            deviceId: '123',
+          );
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
@@ -1845,7 +1865,10 @@ resolution: workspace
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
 ''');
 
-          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          const buildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            deviceId: '123',
+          );
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
@@ -1887,7 +1910,10 @@ resolution: workspace
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
 ''');
-          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          const buildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            deviceId: '123',
+          );
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };

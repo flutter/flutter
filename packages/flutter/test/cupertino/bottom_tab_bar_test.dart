@@ -643,7 +643,8 @@ Future<void> main() async {
     );
 
     final DecoratedBox decoratedBoxHiddenBorder = tester.widget(find.byType(DecoratedBox));
-    final boxDecorationHiddenBorder = decoratedBoxHiddenBorder.decoration as BoxDecoration;
+    final boxDecorationHiddenBorder =
+        decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 

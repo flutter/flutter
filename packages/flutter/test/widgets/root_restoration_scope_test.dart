@@ -72,7 +72,10 @@ void main() {
 
     // Complete the future.
     final rawData = <String, dynamic>{};
-    final root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
+    final root = RestorationBucket.root(
+      manager: binding.restorationManager,
+      rawData: rawData,
+    );
     addTearDown(root.dispose);
     bucketCompleter.complete(root);
     await tester.pump(const Duration(milliseconds: 100));
@@ -88,7 +91,10 @@ void main() {
 
   testWidgets('no delay when root is available synchronously', (WidgetTester tester) async {
     final rawData = <String, dynamic>{};
-    final root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
+    final root = RestorationBucket.root(
+      manager: binding.restorationManager,
+      rawData: rawData,
+    );
     addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 
@@ -174,7 +180,10 @@ void main() {
     final manager = MockRestorationManager();
     addTearDown(manager.dispose);
     final inScopeRawData = <String, dynamic>{};
-    final inScopeRootBucket = RestorationBucket.root(manager: manager, rawData: inScopeRawData);
+    final inScopeRootBucket = RestorationBucket.root(
+      manager: manager,
+      rawData: inScopeRawData,
+    );
     addTearDown(inScopeRootBucket.dispose);
 
     await tester.pumpWidget(
@@ -337,7 +346,10 @@ void main() {
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket, isNull);
 
-    final root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    final root = RestorationBucket.root(
+      manager: binding.restorationManager,
+      rawData: null,
+    );
     addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
     await tester.pump();
@@ -348,7 +360,10 @@ void main() {
   });
 
   testWidgets('can switch to null', (WidgetTester tester) async {
-    final root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    final root = RestorationBucket.root(
+      manager: binding.restorationManager,
+      rawData: null,
+    );
     addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 

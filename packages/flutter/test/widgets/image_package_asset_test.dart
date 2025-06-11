@@ -12,7 +12,11 @@ void main() {
   });
 
   test('ExactAssetImage from package', () {
-    const image = ExactAssetImage('assets/image.png', scale: 1.5, package: 'test_package');
+    const image = ExactAssetImage(
+      'assets/image.png',
+      scale: 1.5,
+      package: 'test_package',
+    );
     expect(image.keyName, 'packages/test_package/assets/image.png');
   });
 

@@ -86,7 +86,9 @@ void main() {
       count += 1;
     }
 
-    final controller = MaterialStatesController(const <MaterialState>{MaterialState.selected});
+    final controller = MaterialStatesController(const <MaterialState>{
+      MaterialState.selected,
+    });
     controller.addListener(valueChanged);
 
     controller.update(MaterialState.selected, true);

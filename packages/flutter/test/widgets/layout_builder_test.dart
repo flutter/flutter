@@ -1059,7 +1059,10 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      final extraOffset = Offset(size.width * offsetPercentage, size.height * offsetPercentage);
+      final extraOffset = Offset(
+        size.width * offsetPercentage,
+        size.height * offsetPercentage,
+      );
       context.paintChild(child!, offset + extraOffset);
       onChildWasPainted(extraOffset);
     }

@@ -176,7 +176,9 @@ void main() {
 
   test('LinearGradient.lerp identical a,b', () {
     expect(LinearGradient.lerp(null, null, 0), null);
-    const gradient = LinearGradient(colors: <Color>[Color(0x33333333), Color(0x66666666)]);
+    const gradient = LinearGradient(
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+    );
     expect(identical(LinearGradient.lerp(gradient, gradient, 0.5), gradient), true);
   });
 
@@ -209,7 +211,9 @@ void main() {
   });
 
   test('LinearGradient lerp test with unequal number of colors', () {
-    const testGradient1 = LinearGradient(colors: <Color>[Color(0x22222222), Color(0x66666666)]);
+    const testGradient1 = LinearGradient(
+      colors: <Color>[Color(0x22222222), Color(0x66666666)],
+    );
     const testGradient2 = LinearGradient(
       colors: <Color>[Color(0x44444444), Color(0x66666666), Color(0x88888888)],
     );
@@ -426,7 +430,9 @@ void main() {
 
   test('RadialGradient.lerp identical a,b', () {
     expect(RadialGradient.lerp(null, null, 0), null);
-    const gradient = RadialGradient(colors: <Color>[Color(0x33333333), Color(0x66666666)]);
+    const gradient = RadialGradient(
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+    );
     expect(identical(RadialGradient.lerp(gradient, gradient, 0.5), gradient), true);
   });
 
@@ -462,7 +468,9 @@ void main() {
   });
 
   test('RadialGradient lerp test with unequal number of colors', () {
-    const testGradient1 = RadialGradient(colors: <Color>[Color(0x22222222), Color(0x66666666)]);
+    const testGradient1 = RadialGradient(
+      colors: <Color>[Color(0x22222222), Color(0x66666666)],
+    );
     const testGradient2 = RadialGradient(
       colors: <Color>[Color(0x44444444), Color(0x66666666), Color(0x88888888)],
     );
@@ -654,7 +662,9 @@ void main() {
 
   test('SweepGradient.lerp identical a,b', () {
     expect(SweepGradient.lerp(null, null, 0), null);
-    const gradient = SweepGradient(colors: <Color>[Color(0x33333333), Color(0x66666666)]);
+    const gradient = SweepGradient(
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+    );
     expect(identical(SweepGradient.lerp(gradient, gradient, 0.5), gradient), true);
   });
 
@@ -689,7 +699,9 @@ void main() {
   });
 
   test('SweepGradient lerp test with unequal number of colors', () {
-    const testGradient1 = SweepGradient(colors: <Color>[Color(0x22222222), Color(0x66666666)]);
+    const testGradient1 = SweepGradient(
+      colors: <Color>[Color(0x22222222), Color(0x66666666)],
+    );
     const testGradient2 = SweepGradient(
       colors: <Color>[Color(0x44444444), Color(0x66666666), Color(0x88888888)],
     );

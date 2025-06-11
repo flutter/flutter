@@ -598,7 +598,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '$previewPackageConfigPath',
       );
     }
-    final packageConfigJson = json.decode(packageConfig.readAsStringSync()) as Map<String, Object?>;
+    final packageConfigJson =
+        json.decode(packageConfig.readAsStringSync()) as Map<String, Object?>;
     (packageConfigJson['packages'] as List<dynamic>?)!.cast<Map<String, String>>().add(
       flutterGenPackageConfigEntry,
     );

@@ -4845,7 +4845,11 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/10531.
 
-      const tabs = <Widget>[Tab(text: 'NEW MEXICO'), Tab(text: 'GABBA'), Tab(text: 'HEY')];
+      const tabs = <Widget>[
+        Tab(text: 'NEW MEXICO'),
+        Tab(text: 'GABBA'),
+        Tab(text: 'HEY'),
+      ];
       final TabController controller = createTabController(
         vsync: const TestVSync(),
         length: tabs.length,
@@ -4961,7 +4965,9 @@ void main() {
 
     const selectedColor = Color(0xff00ff00);
     const unselectedColor = Color(0xffff0000);
-    final labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final labelColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.selected)) {
         return selectedColor;
       }
@@ -4999,7 +5005,9 @@ void main() {
 
     const selectedStateColor = Color(0xff00ff00);
     const unselectedStateColor = Color(0xffff0000);
-    final labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final labelColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.selected)) {
         return selectedStateColor;
       }
@@ -5333,7 +5341,9 @@ void main() {
   testWidgets(
     'TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.',
     (WidgetTester tester) async {
-      const tabListWithText = <Widget>[Tab(icon: Icon(Icons.notifications), text: 'Test')];
+      const tabListWithText = <Widget>[
+        Tab(icon: Icon(Icons.notifications), text: 'Test'),
+      ];
       const tabListWithTextChild = <Widget>[
         Tab(icon: Icon(Icons.notifications), child: Text('Test')),
       ];
@@ -6957,7 +6967,10 @@ void main() {
     const tab2 = 'Tab 2';
 
     const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
-    const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
+    const unselectedLabelStyle = TextStyle(
+      color: Color(0x950000ff),
+      fontStyle: FontStyle.italic,
+    );
 
     // Test tab bar with labelStyle & unselectedLabelStyle.
     await tester.pumpWidget(
@@ -6999,7 +7012,10 @@ void main() {
       const labelColor = Color(0xfff00000);
       const unselectedLabelColor = Color(0x95ff0000);
       const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
-      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
+      const unselectedLabelStyle = TextStyle(
+        color: Color(0x950000ff),
+        fontStyle: FontStyle.italic,
+      );
 
       Widget buildTabBar({Color? labelColor, Color? unselectedLabelColor}) {
         return boilerplate(
@@ -7766,7 +7782,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/155518.
   testWidgets('Tabs icon respects ambient icon theme', (WidgetTester tester) async {
-    final theme = ThemeData(iconTheme: const IconThemeData(color: Color(0xffff0000), size: 38.0));
+    final theme = ThemeData(
+      iconTheme: const IconThemeData(color: Color(0xffff0000), size: 38.0),
+    );
     const IconData selectedIcon = Icons.ac_unit;
     const IconData unselectedIcon = Icons.access_alarm;
     await tester.pumpWidget(

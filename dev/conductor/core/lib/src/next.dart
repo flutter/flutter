@@ -80,7 +80,10 @@ class NextContext extends Context {
   final bool force;
 
   Future<void> run(pb.ConductorState state) async {
-    const finishedStates = <CherrypickState>[CherrypickState.COMPLETED, CherrypickState.ABANDONED];
+    const finishedStates = <CherrypickState>[
+      CherrypickState.COMPLETED,
+      CherrypickState.ABANDONED,
+    ];
     switch (state.currentPhase) {
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
         final upstream = Remote.upstream(state.framework.upstream.url);

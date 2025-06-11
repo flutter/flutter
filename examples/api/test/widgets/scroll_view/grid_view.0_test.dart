@@ -8,8 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('$CustomGridLayout', (WidgetTester tester) async {
-    const layout = CustomGridLayout(crossAxisCount: 2, fullRowPeriod: 3, dimension: 100);
-    final scrollOffsets = List<double>.generate(10, (int i) => layout.computeMaxScrollOffset(i));
+    const layout = CustomGridLayout(
+      crossAxisCount: 2,
+      fullRowPeriod: 3,
+      dimension: 100,
+    );
+    final scrollOffsets = List<double>.generate(
+      10,
+      (int i) => layout.computeMaxScrollOffset(i),
+    );
     expect(scrollOffsets, <double>[
       0.0,
       0.0,

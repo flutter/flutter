@@ -764,7 +764,8 @@ class _RailDestinationState extends State<_RailDestination> {
               _verticalDestinationPaddingWithLabel,
               appearingAnimationValue,
             )!;
-        final interval = widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
+        final interval =
+            widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = widget.destinationAnimation.drive(
           CurveTween(curve: interval),
         );

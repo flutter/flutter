@@ -59,7 +59,8 @@ void main() {
 
     testUsingContext('Error on no info.plist', () {
       fileSystem.directory('bundle.app').createSync();
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
       expect(
@@ -74,7 +75,8 @@ void main() {
       fileSystem
           .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
           .writeAsStringSync(badPlistData);
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
       expect(
@@ -89,7 +91,8 @@ void main() {
       fileSystem
           .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
           .writeAsStringSync(badPlistDataNoExecutable);
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
       expect(
@@ -105,7 +108,8 @@ void main() {
           .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
           .writeAsStringSync(plistData);
       fileSystem.file(fileSystem.path.join(appDirectory, executableName)).createSync();
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app'))! as PrebuiltMacOSApp;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app'))! as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
       expect(macosApp.uncompressedBundle.path, 'bundle.app');
@@ -115,7 +119,8 @@ void main() {
 
     testUsingContext('Bad zipped app, no payload dir', () {
       fileSystem.file('app.zip').createSync();
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp?;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
       expect(logger.errorText, contains('Archive "app.zip" does not contain a single app bundle.'));
@@ -132,7 +137,8 @@ void main() {
         fileSystem.directory(bundlePath1).createSync(recursive: true);
         fileSystem.directory(bundlePath2).createSync(recursive: true);
       };
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp?;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
       expect(logger.errorText, contains('Archive "app.zip" does not contain a single app bundle.'));
@@ -156,7 +162,8 @@ void main() {
             .file(fileSystem.path.join(bundleAppContentsDir.path, 'MacOS', executableName))
             .createSync();
       };
-      final macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip'))! as PrebuiltMacOSApp;
+      final macosApp =
+          MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip'))! as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
       expect(macosApp.uncompressedBundle.path, endsWith('bundle.app'));

@@ -736,7 +736,8 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   void initState() {
     super.initState();
     if (widget.controller is FixedExtentScrollController) {
-      final controller = widget.controller! as FixedExtentScrollController;
+      final controller =
+          widget.controller! as FixedExtentScrollController;
       _lastReportedItemIndex = controller.initialItem;
     }
   }
@@ -900,9 +901,11 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
-    final oldParentData = child?.renderObject?.parentData as ListWheelParentData?;
+    final oldParentData =
+        child?.renderObject?.parentData as ListWheelParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
-    final newParentData = newChild?.renderObject?.parentData as ListWheelParentData?;
+    final newParentData =
+        newChild?.renderObject?.parentData as ListWheelParentData?;
     if (newParentData != null) {
       newParentData.index = newSlot! as int;
       if (oldParentData != null) {

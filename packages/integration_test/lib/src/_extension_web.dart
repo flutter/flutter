@@ -31,7 +31,8 @@ void registerWebServiceExtension(
     (JSAny message) {
       (() async {
         try {
-          final messageJson = jsonDecode((message as JSString).toDart) as Map<String, dynamic>;
+          final messageJson =
+              jsonDecode((message as JSString).toDart) as Map<String, dynamic>;
           final Map<String, String> params = messageJson.cast<String, String>();
           final Map<String, dynamic> result = await callback(params);
           _window.setProperty(r'$flutterDriverResult'.toJS, json.encode(result).toJS);

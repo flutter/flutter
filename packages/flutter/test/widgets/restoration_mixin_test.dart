@@ -43,7 +43,10 @@ void main() {
   testWidgets('claimed bucket with data', (WidgetTester tester) async {
     final manager = MockRestorationManager();
     addTearDown(manager.dispose);
-    final root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    final root = RestorationBucket.root(
+      manager: manager,
+      rawData: _createRawDataSet(),
+    );
     addTearDown(root.dispose);
 
     await tester.pumpWidget(
@@ -67,7 +70,10 @@ void main() {
   ) async {
     final manager = MockRestorationManager();
     addTearDown(manager.dispose);
-    final root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    final root = RestorationBucket.root(
+      manager: manager,
+      rawData: _createRawDataSet(),
+    );
     addTearDown(root.dispose);
 
     await tester.pumpWidget(
@@ -109,7 +115,10 @@ void main() {
   ) async {
     final manager = MockRestorationManager();
     addTearDown(manager.dispose);
-    final root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    final root = RestorationBucket.root(
+      manager: manager,
+      rawData: _createRawDataSet(),
+    );
     addTearDown(root.dispose);
 
     await tester.pumpWidget(

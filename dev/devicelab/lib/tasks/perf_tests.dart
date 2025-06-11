@@ -517,7 +517,11 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       void addResult(dynamic data, String suffix) {
         assert(data is Map<String, dynamic>);
         if (data is Map<String, dynamic>) {
-          const metricKeys = <String>['janky_count', 'average_abs_jerk', 'dropped_frame_count'];
+          const metricKeys = <String>[
+            'janky_count',
+            'average_abs_jerk',
+            'dropped_frame_count',
+          ];
           for (final key in metricKeys) {
             result[key + suffix] = data[key];
           }
@@ -2216,7 +2220,8 @@ class DevToolsMemoryTest {
 
       final data =
           json.decode(file('$project/$_kJsonFileName').readAsStringSync()) as Map<String, dynamic>;
-      final samples = (data['samples'] as Map<String, dynamic>)['data'] as List<dynamic>;
+      final samples =
+          (data['samples'] as Map<String, dynamic>)['data'] as List<dynamic>;
       var maxRss = 0;
       var maxAdbTotal = 0;
       for (final Map<String, dynamic> sample in samples.cast<Map<String, dynamic>>()) {

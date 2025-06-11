@@ -1051,7 +1051,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
 
     // First, determine which semantics actions apply.
-    final semanticsActions = <CustomSemanticsAction, VoidCallback>{};
+    final semanticsActions =
+        <CustomSemanticsAction, VoidCallback>{};
 
     // Create the appropriate semantics actions.
     void moveToStart() => reorder(index, 0);

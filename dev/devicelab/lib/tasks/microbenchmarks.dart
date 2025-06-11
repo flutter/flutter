@@ -63,7 +63,9 @@ TaskFunction createMicrobenchmarkTask({
       return run();
     }
 
-    final allResults = <String, double>{...await runMicrobench('lib/benchmark_collection.dart')};
+    final allResults = <String, double>{
+      ...await runMicrobench('lib/benchmark_collection.dart'),
+    };
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };

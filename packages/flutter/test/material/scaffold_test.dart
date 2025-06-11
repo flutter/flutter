@@ -2949,7 +2949,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/115924.
   testWidgets('Default ScaffoldMessenger can access ambient theme', (WidgetTester tester) async {
-    final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+    final scaffoldMessengerKey =
+        GlobalKey<ScaffoldMessengerState>();
 
     final colorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
     final customTheme = ThemeData(

@@ -51,7 +51,8 @@ class AndroidStudio {
       return null;
     }
 
-    final versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
+    final versionString =
+        plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
 
     Version? version;
     if (versionString != null) {

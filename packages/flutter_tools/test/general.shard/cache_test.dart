@@ -73,7 +73,10 @@ void main() {
       Cache.flutterRoot = '';
       try {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        final cache = Cache.test(
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        );
         fileSystem
             .file(fileSystem.path.join('bin', 'cache', 'lockfile'))
             .createSync(recursive: true);
@@ -90,7 +93,10 @@ void main() {
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final cache = Cache.test(
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.any(),
+      );
       fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile')).createSync(recursive: true);
 
       expect(() async => cache.lock(), throwsToolExit());
@@ -158,7 +164,10 @@ void main() {
       'Gradle wrapper should not be up to date, if some cached artifact is not available',
       () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        final cache = Cache.test(
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        );
         final gradleWrapper = GradleWrapper(cache);
         final Directory directory = cache.getCacheDir(
           fileSystem.path.join('artifacts', 'gradle_wrapper'),
@@ -204,7 +213,10 @@ void main() {
       'Gradle wrapper should be up to date, only if all cached artifact are available',
       () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        final cache = Cache.test(
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        );
         final gradleWrapper = GradleWrapper(cache);
         final Directory directory = cache.getCacheDir(
           fileSystem.path.join('artifacts', 'gradle_wrapper'),
@@ -355,7 +367,10 @@ void main() {
       engineRealmFile.createSync(recursive: true);
       engineRealmFile.writeAsStringSync('flutter_archives_v2');
 
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+      final cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+      );
 
       expect(cache.storageBaseUrl, contains('flutter_archives_v2'));
     });
@@ -490,7 +505,10 @@ void main() {
     'IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final cache = Cache.test(
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.any(),
+      );
       final iosUsbArtifacts = IosUsbArtifacts(
         'libimobiledevice',
         cache,
@@ -511,7 +529,10 @@ void main() {
 
   testWithoutContext('IosUsbArtifacts verifies iproxy for libusbmuxd in isUpToDateInner', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+    final cache = Cache.test(
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.any(),
+    );
     final iosUsbArtifacts = IosUsbArtifacts(
       'libusbmuxd',
       cache,
@@ -531,7 +552,10 @@ void main() {
     'IosUsbArtifacts does not verify executables for openssl in isUpToDateInner',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final cache = Cache.test(
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.any(),
+      );
       final iosUsbArtifacts = IosUsbArtifacts(
         'openssl',
         cache,
@@ -646,7 +670,10 @@ void main() {
     ]);
 
     final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
-    final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
+    final artifacts = FontSubsetArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -731,7 +758,10 @@ void main() {
 
   testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
-    final artifacts = WindowsEngineArtifacts(cache, platform: FakePlatform());
+    final artifacts = WindowsEngineArtifacts(
+      cache,
+      platform: FakePlatform(),
+    );
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'windows'};
 
@@ -755,7 +785,10 @@ void main() {
     fakeProcessManager.addCommand(unameCommandForX64);
 
     final Cache cache = createCache(FakePlatform());
-    final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
+    final artifacts = LinuxEngineArtifacts(
+      cache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'linux'};
 
@@ -877,7 +910,10 @@ void main() {
       engineVersionFile.createSync(recursive: true);
       engineVersionFile.writeAsStringSync('hijklmnop');
 
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+      final cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+      );
       final Directory webCacheDirectory = cache.getWebSdkDirectory();
       final artifactUpdater = FakeArtifactUpdater();
       final webSdk = FlutterWebSdk(cache);
@@ -961,7 +997,10 @@ void main() {
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
     final handler = FileExceptionHandler();
     final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-    final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+    );
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final artifactUpdater = FakeArtifactUpdater();
     final webSdk = FlutterWebSdk(cache);
@@ -997,7 +1036,10 @@ void main() {
     () async {
       final handler = FileExceptionHandler();
       final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+      final cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+      );
       final File canvasKitWasm = fileSystem.file(
         fileSystem.path.join(cache.getRoot().path, 'canvaskit', 'canvaskit.wasm'),
       );

@@ -14,7 +14,8 @@ void main() {
 
 class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
-    final service = StructureErrorTestWidgetInspectorService();
+    final service =
+        StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
     test('ext.flutter.inspector.structuredErrors - custom FlutterError.onError', () async {

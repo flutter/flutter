@@ -232,19 +232,20 @@ class DesktopColumns extends StatelessWidget {
       smallImageWidth: smallImageWidth,
     );
 
-    final productCardColumns = List<DesktopProductCardColumn>.generate(columnCount, (int column) {
-      final bool alignToEnd = column.isOdd || (column == columnCount - 1);
-      final bool startLarge = column.isOdd;
-      final bool lowerStart = column.isOdd;
-      return DesktopProductCardColumn(
-        alignToEnd: alignToEnd,
-        startLarge: startLarge,
-        lowerStart: lowerStart,
-        products: productCardLists[column],
-        largeImageWidth: largeImageWidth,
-        smallImageWidth: smallImageWidth,
-      );
-    });
+    final productCardColumns =
+        List<DesktopProductCardColumn>.generate(columnCount, (int column) {
+          final bool alignToEnd = column.isOdd || (column == columnCount - 1);
+          final bool startLarge = column.isOdd;
+          final bool lowerStart = column.isOdd;
+          return DesktopProductCardColumn(
+            alignToEnd: alignToEnd,
+            startLarge: startLarge,
+            lowerStart: lowerStart,
+            products: productCardLists[column],
+            largeImageWidth: largeImageWidth,
+            smallImageWidth: smallImageWidth,
+          );
+        });
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),

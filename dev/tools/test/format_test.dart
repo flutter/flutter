@@ -78,7 +78,9 @@ void main() {
   test(
     'Can fix Dart formatting errors',
     () {
-      final fixture = TestFileFixture(<FileContentPair>[dartContentPair], flutterRoot);
+      final fixture = TestFileFixture(<FileContentPair>[
+        dartContentPair,
+      ], flutterRoot);
       try {
         fixture.gitAdd();
         io.Process.runSync(formatterPath, <String>['--fix'], workingDirectory: flutterRoot.path);

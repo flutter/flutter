@@ -634,7 +634,8 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    final wrapped = builderThrowsDelegate.build(_NullBuildContext(), 0)! as KeyedSubtree;
+    final wrapped =
+        builderThrowsDelegate.build(_NullBuildContext(), 0)! as KeyedSubtree;
     expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;

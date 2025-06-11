@@ -475,7 +475,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
     final trackRadius = Radius.circular(trackRect.height / 2);
-    final activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
+    final activeTrackRadius = Radius.circular(
+      (trackRect.height + additionalActiveTrackHeight) / 2,
+    );
     final isLTR = textDirection == TextDirection.ltr;
     final isRTL = textDirection == TextDirection.rtl;
 
@@ -622,7 +624,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
         sliderTheme.activeTickMarkColor,
       ),
     };
-    final paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final paint =
+        Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius =
@@ -734,7 +737,10 @@ class RoundSliderThumbShape extends SliderComponentShape {
     assert(sliderTheme.thumbColor != null);
 
     final Canvas canvas = context.canvas;
-    final radiusTween = Tween<double>(begin: _disabledThumbRadius, end: enabledThumbRadius);
+    final radiusTween = Tween<double>(
+      begin: _disabledThumbRadius,
+      end: enabledThumbRadius,
+    );
     final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,

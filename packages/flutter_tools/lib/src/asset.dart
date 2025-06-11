@@ -740,7 +740,8 @@ class ManifestAssetBundle implements AssetBundle {
     String? flavor,
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
-    final deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
+    final deferredComponentsAssetVariants =
+        <String, Map<_Asset, List<_Asset>>>{};
     if (components == null) {
       return deferredComponentsAssetVariants;
     }

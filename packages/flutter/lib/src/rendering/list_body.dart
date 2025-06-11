@@ -70,7 +70,9 @@ class RenderListBody extends RenderBox
     switch (axisDirection) {
       case AxisDirection.right:
       case AxisDirection.left:
-        final childConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        final childConstraints = BoxConstraints.tightFor(
+          height: constraints.maxHeight,
+        );
         BaselineOffset baselineOffset = BaselineOffset.noBaseline;
         for (child = firstChild; child != null; child = childAfter(child)) {
           baselineOffset = baselineOffset.minOf(
@@ -106,7 +108,9 @@ class RenderListBody extends RenderBox
     switch (axisDirection) {
       case AxisDirection.right:
       case AxisDirection.left:
-        final innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        final innerConstraints = BoxConstraints.tightFor(
+          height: constraints.maxHeight,
+        );
         while (child != null) {
           final Size childSize = child.getDryLayout(innerConstraints);
           mainAxisExtent += childSize.width;
@@ -115,7 +119,9 @@ class RenderListBody extends RenderBox
         return constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
       case AxisDirection.up:
       case AxisDirection.down:
-        final innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        final innerConstraints = BoxConstraints.tightFor(
+          width: constraints.maxWidth,
+        );
         while (child != null) {
           final Size childSize = child.getDryLayout(innerConstraints);
           mainAxisExtent += childSize.height;
@@ -193,7 +199,9 @@ class RenderListBody extends RenderBox
     RenderBox? child = firstChild;
     switch (axisDirection) {
       case AxisDirection.right:
-        final innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        final innerConstraints = BoxConstraints.tightFor(
+          height: constraints.maxHeight,
+        );
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
           final childParentData = child.parentData! as ListBodyParentData;
@@ -204,7 +212,9 @@ class RenderListBody extends RenderBox
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
       case AxisDirection.left:
-        final innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        final innerConstraints = BoxConstraints.tightFor(
+          height: constraints.maxHeight,
+        );
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
           final childParentData = child.parentData! as ListBodyParentData;
@@ -223,7 +233,9 @@ class RenderListBody extends RenderBox
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
       case AxisDirection.down:
-        final innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        final innerConstraints = BoxConstraints.tightFor(
+          width: constraints.maxWidth,
+        );
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
           final childParentData = child.parentData! as ListBodyParentData;
@@ -234,7 +246,9 @@ class RenderListBody extends RenderBox
         }
         size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
       case AxisDirection.up:
-        final innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        final innerConstraints = BoxConstraints.tightFor(
+          width: constraints.maxWidth,
+        );
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
           final childParentData = child.parentData! as ListBodyParentData;

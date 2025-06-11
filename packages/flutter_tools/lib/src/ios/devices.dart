@@ -1066,14 +1066,15 @@ class IOSDevice extends Device {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
-      device: this,
-      appId: appId,
-      deviceVmservicePort: filterDevicePort,
-      hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
-      useDeviceIPAsHost: isWirelesslyConnected,
-    );
+    final mdnsVMServiceDiscoveryForAttach =
+        MdnsVMServiceDiscoveryForAttach(
+          device: this,
+          appId: appId,
+          deviceVmservicePort: filterDevicePort,
+          hostVmservicePort: expectedHostPort,
+          usesIpv6: ipv6,
+          useDeviceIPAsHost: isWirelesslyConnected,
+        );
 
     if (compatibleWithProtocolDiscovery) {
       return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[

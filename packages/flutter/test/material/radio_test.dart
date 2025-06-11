@@ -1938,7 +1938,10 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
       await tester.pumpWidget(buildApp(platform));
       await tester.pumpAndSettle();
 

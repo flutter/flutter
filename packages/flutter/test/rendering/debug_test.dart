@@ -174,7 +174,10 @@ void main() {
     );
     layout(root);
     dynamic error;
-    final context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+    final context = PaintingContext(
+      ContainerLayer(),
+      const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+    );
     try {
       s.debugPaint(context, const Offset(0.0, 500));
     } catch (e) {
@@ -202,7 +205,10 @@ void main() {
     );
     layout(root);
     dynamic error;
-    final context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+    final context = PaintingContext(
+      ContainerLayer(),
+      const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+    );
     try {
       s.debugPaint(context, const Offset(0.0, 500));
     } catch (e) {
@@ -221,7 +227,10 @@ void main() {
         additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
       ),
     );
-    final root = RenderOpacity(opacity: .5, child: RenderRepaintBoundary(child: blackBox));
+    final root = RenderOpacity(
+      opacity: .5,
+      child: RenderRepaintBoundary(child: blackBox),
+    );
     layout(root, phase: EnginePhase.compositingBits);
 
     final rootLayer = OffsetLayer();

@@ -64,7 +64,10 @@ void main() {
           processManager: processManager,
           stdio: stdio,
         );
-        final command = StartCommand(checkouts: checkouts, conductorVersion: conductorVersion);
+        final command = StartCommand(
+          checkouts: checkouts,
+          conductorVersion: conductorVersion,
+        );
         return CommandRunner<void>('codesign-test', '')..addCommand(command);
       }
 

@@ -10,7 +10,10 @@ import 'restoration.dart';
 void main() {
   group('UnmanagedRestorationScope', () {
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
-      final bucket1 = RestorationBucket.empty(restorationId: 'foo', debugOwner: 'owner');
+      final bucket1 = RestorationBucket.empty(
+        restorationId: 'foo',
+        debugOwner: 'owner',
+      );
       addTearDown(bucket1.dispose);
 
       await tester.pumpWidget(UnmanagedRestorationScope(bucket: bucket1, child: const BucketSpy()));
@@ -19,7 +22,10 @@ void main() {
       expect(state.bucket, bucket1);
 
       // Notifies when bucket changes.
-      final bucket2 = RestorationBucket.empty(restorationId: 'foo2', debugOwner: 'owner');
+      final bucket2 = RestorationBucket.empty(
+        restorationId: 'foo2',
+        debugOwner: 'owner',
+      );
       addTearDown(bucket2.dispose);
 
       await tester.pumpWidget(UnmanagedRestorationScope(bucket: bucket2, child: const BucketSpy()));
@@ -115,7 +121,10 @@ void main() {
     ) async {
       final manager = MockRestorationManager();
       addTearDown(manager.dispose);
-      final root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+      final root = RestorationBucket.root(
+        manager: manager,
+        rawData: _createRawDataSet(),
+      );
       addTearDown(root.dispose);
 
       await tester.pumpWidget(
@@ -134,7 +143,10 @@ void main() {
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
       final manager = MockRestorationManager();
       addTearDown(manager.dispose);
-      final root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+      final root = RestorationBucket.root(
+        manager: manager,
+        rawData: _createRawDataSet(),
+      );
       addTearDown(root.dispose);
 
       await tester.pumpWidget(
@@ -191,7 +203,10 @@ void main() {
     testWidgets('no bucket for descendants when id is null', (WidgetTester tester) async {
       final manager = MockRestorationManager();
       addTearDown(manager.dispose);
-      final root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
+      final root = RestorationBucket.root(
+        manager: manager,
+        rawData: <String, dynamic>{},
+      );
       addTearDown(root.dispose);
 
       await tester.pumpWidget(
@@ -237,7 +252,10 @@ void main() {
       // Move it under a valid scope.
       final manager = MockRestorationManager();
       addTearDown(manager.dispose);
-      final root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
+      final root = RestorationBucket.root(
+        manager: manager,
+        rawData: <String, dynamic>{},
+      );
       addTearDown(root.dispose);
 
       await tester.pumpWidget(

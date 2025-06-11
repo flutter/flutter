@@ -60,7 +60,9 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
-  final environmentDefines = <String, String>{kBuildMode: buildInfo.mode.cliName};
+  final environmentDefines = <String, String>{
+    kBuildMode: buildInfo.mode.cliName,
+  };
 
   // First perform the dart build.
   final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(

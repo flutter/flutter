@@ -62,7 +62,8 @@ class FlutterManifest {
       pubspec._descriptor = yamlMap.cast<String, Object?>();
     }
 
-    final flutterMap = pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
+    final flutterMap =
+        pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
     if (flutterMap != null) {
       pubspec._flutterDescriptor = flutterMap.cast<String, Object?>();
     }

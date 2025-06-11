@@ -66,7 +66,8 @@ void main() {
   });
 
   test('Framework ensures repaint boundary layer is not overwritten', () {
-    final faultyRenderObject = _TestRepaintBoundaryThatOverwritesItsLayer();
+    final faultyRenderObject =
+        _TestRepaintBoundaryThatOverwritesItsLayer();
     final opacity = RenderOpacity(child: faultyRenderObject);
 
     late FlutterErrorDetails error;

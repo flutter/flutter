@@ -175,7 +175,8 @@ class Plugin {
       WindowsPlugin.kConfigKey,
     ];
     final defaultPackages = <String, String>{};
-    final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
+    final dartPluginClasses =
+        <String, DartPluginClassAndFilePair>{};
     for (final platform in sharedHandlingPlatforms) {
       final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
       if (defaultPackage != null) {

@@ -35,7 +35,8 @@ void main() {
     await tester.tap(find.byType(example.ClickableTooltipWidget));
     await tester.pump();
 
-    final textSpan = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text as TextSpan;
+    final textSpan =
+        tester.renderObject<RenderParagraph>(find.text(tooltipText)).text as TextSpan;
     expect(textSpan.style?.fontSize, 50);
   });
 }

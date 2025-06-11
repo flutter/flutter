@@ -1000,7 +1000,11 @@ class _TrianglePainter extends CustomPainter {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;
-    final points = <Offset>[Offset(0.0, height), Offset(base, height), Offset(halfBase, 0.0)];
+    final points = <Offset>[
+      Offset(0.0, height),
+      Offset(base, height),
+      Offset(halfBase, 0.0),
+    ];
 
     canvas.drawPath(Path()..addPolygon(points, true), Paint()..color = color);
   }

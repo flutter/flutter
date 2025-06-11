@@ -36,7 +36,8 @@ void main() {
   });
 
   testWithoutContext('FirstRunMessenger requires redisplay if the license terms have changed', () {
-    final messenger = setUpFirstRunMessenger(test: true) as TestFirstRunMessenger;
+    final messenger =
+        setUpFirstRunMessenger(test: true) as TestFirstRunMessenger;
     messenger.confirmLicenseTermsDisplayed();
 
     expect(messenger.shouldDisplayLicenseTerms(), false);

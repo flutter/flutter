@@ -19,7 +19,10 @@ void main() {
     }
 
     final lightTheme = ThemeData(colorSchemeSeed: Colors.green);
-    final darkTheme = ThemeData(colorSchemeSeed: Colors.green, brightness: Brightness.dark);
+    final darkTheme = ThemeData(
+      colorSchemeSeed: Colors.green,
+      brightness: Brightness.dark,
+    );
 
     // Test the default animation.
     expect(getScaffoldMaterial().color, lightTheme.colorScheme.surface);

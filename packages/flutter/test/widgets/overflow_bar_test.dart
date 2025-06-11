@@ -321,7 +321,10 @@ void main() {
       MainAxisAlignment.spaceEvenly,
     ];
 
-    const allTextDirections = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
+    const allTextDirections = <TextDirection>[
+      TextDirection.ltr,
+      TextDirection.rtl,
+    ];
 
     Widget buildFrame(MainAxisAlignment alignment, TextDirection textDirection) {
       return Directionality(

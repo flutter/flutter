@@ -2385,7 +2385,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // otherwise may cause duplicate GlobalKey assertion if the sheet sub-tree contains
       // GlobalKey widgets.
       if (_dismissedBottomSheets.isNotEmpty) {
-        final sheets = List<_StandardBottomSheet>.of(_dismissedBottomSheets, growable: false);
+        final sheets = List<_StandardBottomSheet>.of(
+          _dismissedBottomSheets,
+          growable: false,
+        );
         for (final sheet in sheets) {
           sheet.animationController.reset();
         }
@@ -2473,7 +2476,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }());
 
     final completer = Completer<void>();
-    final bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
+    final bottomSheetKey =
+        GlobalKey<_StandardBottomSheetState>();
     late _StandardBottomSheet bottomSheet;
 
     var removedEntry = false;

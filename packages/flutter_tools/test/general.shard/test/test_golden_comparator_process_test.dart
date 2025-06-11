@@ -31,12 +31,18 @@ void main() {
     });
 
     testWithoutContext('can pass data', () async {
-      final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
+      final expectedResponse = <String, dynamic>{
+        'success': true,
+        'message': 'some message',
+      };
 
       final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse)}\n');
       final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
+      final process = TestGoldenComparatorProcess(
+        mockProcess,
+        logger: BufferLogger.test(),
+      );
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();
@@ -50,7 +56,10 @@ void main() {
     });
 
     testWithoutContext('can handle multiple requests', () async {
-      final expectedResponse1 = <String, dynamic>{'success': true, 'message': 'some message'};
+      final expectedResponse1 = <String, dynamic>{
+        'success': true,
+        'message': 'some message',
+      };
       final expectedResponse2 = <String, dynamic>{
         'success': false,
         'message': 'some other message',
@@ -61,7 +70,10 @@ void main() {
       );
       final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
+      final process = TestGoldenComparatorProcess(
+        mockProcess,
+        logger: BufferLogger.test(),
+      );
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response1 = await process.getResponse();
@@ -80,7 +92,10 @@ void main() {
     });
 
     testWithoutContext('ignores anything that does not look like JSON', () async {
-      final expectedResponse = <String, dynamic>{'success': true, 'message': 'some message'};
+      final expectedResponse = <String, dynamic>{
+        'success': true,
+        'message': 'some message',
+      };
 
       final FakeProcess mockProcess = createFakeProcess('''
 Some random data including {} curly bracket
@@ -91,7 +106,10 @@ Other JSON data after the initial data
 ''');
       final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
+      final process = TestGoldenComparatorProcess(
+        mockProcess,
+        logger: BufferLogger.test(),
+      );
       process.sendCommand(imageFile, goldenKey, false);
 
       final Map<String, dynamic> response = await process.getResponse();

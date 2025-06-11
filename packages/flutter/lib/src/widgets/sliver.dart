@@ -897,7 +897,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
         if (newChild != null) {
           childrenUpdated = childrenUpdated || _childElements[index] != newChild;
           _childElements[index] = newChild;
-          final parentData = newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+          final parentData =
+              newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           if (index == 0) {
             parentData.layoutOffset = 0.0;
           } else if (indexToLayoutOffset.containsKey(index)) {
@@ -994,9 +995,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
 
   @override
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
-    final oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
+    final oldParentData =
+        child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
-    final newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
+    final newParentData =
+        newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
     // Preserve the old layoutOffset if the renderObject was swapped out.
     if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
@@ -1149,7 +1152,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    final childParentData =
+        child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -1166,7 +1170,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
     assert(() {
-      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData =
+          child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
       return true;
     }());
@@ -1197,7 +1202,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     _childElements.values
         .cast<Element>()
         .where((Element child) {
-          final parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
+          final parentData =
+              child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           final double itemExtent = switch (renderObject.constraints.axis) {
             Axis.horizontal => child.renderObject!.paintBounds.width,
             Axis.vertical => child.renderObject!.paintBounds.height,
@@ -1499,7 +1505,8 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is KeepAliveParentDataMixin);
-    final parentData = renderObject.parentData! as KeepAliveParentDataMixin;
+    final parentData =
+        renderObject.parentData! as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       // No need to redo layout if it became true.
       parentData.keepAlive = keepAlive;
@@ -1587,7 +1594,8 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is SliverPhysicalParentData);
-    final parentData = renderObject.parentData! as SliverPhysicalParentData;
+    final parentData =
+        renderObject.parentData! as SliverPhysicalParentData;
     var needsLayout = false;
     if (parentData.crossAxisFlex != 0) {
       parentData.crossAxisFlex = 0;
@@ -1649,7 +1657,8 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is SliverPhysicalContainerParentData);
     assert(renderObject.parent is RenderSliverCrossAxisGroup);
-    final parentData = renderObject.parentData! as SliverPhysicalParentData;
+    final parentData =
+        renderObject.parentData! as SliverPhysicalParentData;
     var needsLayout = false;
 
     if (parentData.crossAxisFlex != flex) {

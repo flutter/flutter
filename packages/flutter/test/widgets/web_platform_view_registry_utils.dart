@@ -78,7 +78,8 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
       );
     }
 
-    final viewFactory = registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
+    final viewFactory =
+        registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
 
     _views.add((
       id: id,

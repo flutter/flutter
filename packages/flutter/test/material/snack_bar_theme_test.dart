@@ -289,7 +289,9 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final actionBackgroundColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }
@@ -356,7 +358,9 @@ void main() {
       return Colors.cyan;
     });
 
-    final actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final actionBackgroundColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }
@@ -418,7 +422,9 @@ void main() {
   testWidgets(
     'SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      final actionBackgroundColor = MaterialStateColor.resolveWith((
+        Set<MaterialState> states,
+      ) {
         if (states.contains(MaterialState.disabled)) {
           return Colors.blue;
         }

@@ -63,7 +63,9 @@ void main() {
         'version unknown',
         () async {
           const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+          final fakeFlutterVersion = FakeFlutterVersion(
+            frameworkVersion: frameworkVersion,
+          );
 
           final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
@@ -92,7 +94,13 @@ void main() {
         'throws when not on a released version',
         () async {
           const frameworkVersion = 'v1.13.10+hotfix-pre.2';
-          const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 10, hotfix: 13, commits: 2);
+          const gitTagVersion = GitTagVersion(
+            x: 1,
+            y: 13,
+            z: 10,
+            hotfix: 13,
+            commits: 2,
+          );
           final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
             frameworkVersion: frameworkVersion,
@@ -164,7 +172,13 @@ void main() {
           testUsingContext(
             'created when forced',
             () async {
-              const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 11, hotfix: 13, commits: 100);
+              const gitTagVersion = GitTagVersion(
+                x: 1,
+                y: 13,
+                z: 11,
+                hotfix: 13,
+                commits: 100,
+              );
               final fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
                 frameworkVersion: frameworkVersion,
@@ -193,7 +207,13 @@ void main() {
         group('not on master channel', () {
           late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
-            const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 11, hotfix: 13, commits: 0);
+            const gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 0,
+            );
             fakeFlutterVersion = FakeFlutterVersion(
               gitTagVersion: gitTagVersion,
               frameworkVersion: frameworkVersion,
@@ -335,7 +355,9 @@ void main() {
         'version unknown',
         () async {
           const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+          final fakeFlutterVersion = FakeFlutterVersion(
+            frameworkVersion: frameworkVersion,
+          );
 
           final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
@@ -364,7 +386,13 @@ void main() {
         'throws when not on a released version',
         () async {
           const frameworkVersion = 'v1.13.10+hotfix-pre.2';
-          const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 10, hotfix: 13, commits: 2);
+          const gitTagVersion = GitTagVersion(
+            x: 1,
+            y: 13,
+            z: 10,
+            hotfix: 13,
+            commits: 2,
+          );
           final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
             frameworkVersion: frameworkVersion,
@@ -436,7 +464,13 @@ void main() {
           testUsingContext(
             'created when forced',
             () async {
-              const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 11, hotfix: 13, commits: 100);
+              const gitTagVersion = GitTagVersion(
+                x: 1,
+                y: 13,
+                z: 11,
+                hotfix: 13,
+                commits: 100,
+              );
               final fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
                 frameworkVersion: frameworkVersion,
@@ -465,7 +499,13 @@ void main() {
         group('not on master channel', () {
           late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
-            const gitTagVersion = GitTagVersion(x: 1, y: 13, z: 11, hotfix: 13, commits: 0);
+            const gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 0,
+            );
             fakeFlutterVersion = FakeFlutterVersion(
               gitTagVersion: gitTagVersion,
               frameworkVersion: frameworkVersion,

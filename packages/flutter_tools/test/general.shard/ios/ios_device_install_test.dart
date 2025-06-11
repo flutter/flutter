@@ -354,7 +354,10 @@ IOSDevice setUpIOSDevice({
   bool isCoreDevice = false,
 }) {
   logger ??= BufferLogger.test();
-  final platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+  final platform = FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{},
+  );
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
     platform: platform,

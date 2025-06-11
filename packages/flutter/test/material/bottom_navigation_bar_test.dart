@@ -754,7 +754,10 @@ void main() {
     const selectedIconThemeColor = Color(0xFF1E7723);
     const unselectedIconThemeColor = Color(0xFF009688);
     const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(
+      size: 18,
+      color: unselectedIconThemeColor,
+    );
     const selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
     const unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
 
@@ -797,7 +800,10 @@ void main() {
     const selectedIconThemeColor = Color(0xFF1E7723);
     const unselectedIconThemeColor = Color(0xFF009688);
     const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(
+      size: 18,
+      color: unselectedIconThemeColor,
+    );
     const selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
     const unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
 
@@ -836,7 +842,10 @@ void main() {
     const selectedIconThemeColor = Color(0xFF1E7723);
     const unselectedIconThemeColor = Color(0xFF009688);
     const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(
+      size: 18,
+      color: unselectedIconThemeColor,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -873,7 +882,10 @@ void main() {
     const selectedIconThemeColor = Color(0xFF1E7723);
     const unselectedIconThemeColor = Color(0xFF009688);
     const selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const unselectedIconTheme = IconThemeData(
+      size: 18,
+      color: unselectedIconThemeColor,
+    );
 
     await tester.pumpWidget(
       MaterialApp(

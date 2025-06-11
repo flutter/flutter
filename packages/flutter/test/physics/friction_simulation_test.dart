@@ -49,7 +49,12 @@ void main() {
   });
 
   test('Friction simulation constant deceleration', () {
-    final friction = FrictionSimulation(0.135, 100.0, -100.0, constantDeceleration: 100);
+    final friction = FrictionSimulation(
+      0.135,
+      100.0,
+      -100.0,
+      constantDeceleration: 100,
+    );
 
     expect(friction.x(0.0), moreOrLessEquals(100.0));
     expect(friction.dx(0.0), moreOrLessEquals(-100.0));

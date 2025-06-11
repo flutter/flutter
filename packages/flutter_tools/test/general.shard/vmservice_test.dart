@@ -607,7 +607,9 @@ void main() {
     });
 
     testWithoutContext('throws when the service is disposed', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[],
+      );
 
       await fakeVmServiceHost.vmService.dispose();
 

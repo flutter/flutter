@@ -1103,7 +1103,8 @@ class LocalizationsGenerator {
 
   String _generateSubclass(String className, AppResourceBundle bundle) {
     final LocaleInfo locale = bundle.locale;
-    final baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+    final baseClassName =
+        '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
     _allMessages.where((Message message) => message.messages[locale] == null).forEach((
       Message message,

@@ -564,7 +564,8 @@ class _CupertinoTextSelectionToolbarContentState
   }
 
   void _handleNextPage() {
-    final renderToolbar = _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderToolbar =
+        _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderToolbar is _RenderCupertinoTextSelectionToolbarItems && renderToolbar.hasNextPage) {
       _controller.reverse();
@@ -574,7 +575,8 @@ class _CupertinoTextSelectionToolbarContentState
   }
 
   void _handlePreviousPage() {
-    final renderToolbar = _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderToolbar =
+        _toolbarItemsKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderToolbar is _RenderCupertinoTextSelectionToolbarItems &&
         renderToolbar.hasPreviousPage) {
@@ -882,7 +884,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
     if (slotToChild.containsKey(child.slot)) {
-      final slot = child.slot! as _CupertinoTextSelectionToolbarItemsSlot;
+      final slot =
+          child.slot! as _CupertinoTextSelectionToolbarItemsSlot;
       slotToChild.remove(slot);
     } else {
       _forgottenChildren.add(child);
@@ -906,7 +909,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
-    final toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
+    final toolbarItems =
+        widget as _CupertinoTextSelectionToolbarItems;
     _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
@@ -942,7 +946,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(widget == newWidget);
 
     // Update slotted children.
-    final toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
+    final toolbarItems =
+        widget as _CupertinoTextSelectionToolbarItems;
     _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
@@ -1133,8 +1138,10 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
 
     // Position page nav buttons.
     if (currentPage > 0) {
-      final nextButtonParentData = _nextButton!.parentData! as ToolbarItemsParentData;
-      final backButtonParentData = _backButton!.parentData! as ToolbarItemsParentData;
+      final nextButtonParentData =
+          _nextButton!.parentData! as ToolbarItemsParentData;
+      final backButtonParentData =
+          _backButton!.parentData! as ToolbarItemsParentData;
       // The forward button only shows when there's a page after this one.
       if (page != currentPage) {
         nextButtonParentData.offset = Offset(toolbarWidth, 0.0);

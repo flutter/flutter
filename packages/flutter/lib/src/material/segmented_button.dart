@@ -816,7 +816,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     RenderBox? child = firstChild;
     var minWidth = 0.0;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       minWidth = math.max(minWidth, childWidth);
       child = childParentData.nextSibling;
@@ -829,7 +830,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     RenderBox? child = firstChild;
     var maxWidth = 0.0;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxWidth = math.max(maxWidth, childWidth);
       child = childParentData.nextSibling;
@@ -842,7 +844,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     RenderBox? child = firstChild;
     var minHeight = 0.0;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       minHeight = math.max(minHeight, childHeight);
       child = childParentData.nextSibling;
@@ -855,7 +858,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     RenderBox? child = firstChild;
     var maxHeight = 0.0;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxHeight = math.max(maxHeight, childHeight);
       child = childParentData.nextSibling;
@@ -879,7 +883,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     RenderBox? child = leftChild;
     var start = 0.0;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       late final RRect rChildRect;
       if (direction == Axis.vertical) {
         childParentData.offset = Offset(0.0, start);
@@ -1023,7 +1028,8 @@ class _RenderSegmentedButton<T> extends RenderBox
     Path? disabledClipPath;
 
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
 
       context.canvas
@@ -1116,7 +1122,8 @@ class _RenderSegmentedButton<T> extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
-      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       if (childParentData.surroundingRect!.contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,

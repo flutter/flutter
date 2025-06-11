@@ -38,7 +38,11 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     expect(
       Border.merge(const Border(top: yellow2), const Border(right: magenta3)),
       const Border(top: yellow2, right: magenta3),
@@ -62,7 +66,11 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     expect(
       const Border(top: yellow2) + const Border(right: magenta3),
       const Border(top: yellow2, right: magenta3),
@@ -95,7 +103,11 @@ void main() {
     const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     const b3 = Border(left: magenta3);
     const b6 = Border(left: magenta6);
     expect(b3.scale(2.0), b6);
@@ -281,7 +293,10 @@ void main() {
     );
     expect(centerBorderDirectional.dimensions, const EdgeInsetsDirectional.all(5));
 
-    const outsideSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
+    const outsideSide = BorderSide(
+      width: 10,
+      strokeAlign: BorderSide.strokeAlignOutside,
+    );
     const outsideBorderDirectional = BorderDirectional(
       top: outsideSide,
       bottom: outsideSide,

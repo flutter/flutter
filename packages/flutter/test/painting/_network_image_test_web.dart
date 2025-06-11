@@ -162,7 +162,10 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.fallback);
+    final networkImage = NetworkImage(
+      url,
+      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+    );
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -262,7 +265,10 @@ void runTests() {
     };
 
     final String url = _uniqueUrl(tester.testDescription);
-    final networkImage = NetworkImage(url, webHtmlElementStrategy: WebHtmlElementStrategy.prefer);
+    final networkImage = NetworkImage(
+      url,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+    );
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;

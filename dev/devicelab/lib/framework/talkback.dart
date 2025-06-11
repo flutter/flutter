@@ -42,7 +42,9 @@ Future<Version> getTalkbackVersion() async {
   }
 
   // Android doesn't quite use semver, so convert the version string to semver form.
-  final startVersion = RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
+  final startVersion = RegExp(
+    r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?',
+  );
   final RegExpMatch? match = startVersion.firstMatch(version);
   if (match == null) {
     return Version(0, 0, 0);

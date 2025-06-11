@@ -71,7 +71,8 @@ name: my_app
         ),
       );
 
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
@@ -168,7 +169,8 @@ name: my_app
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
       );
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       final OperationResult result = await residentWebRunner.restart(fullRestart: true);
@@ -202,7 +204,8 @@ name: my_app
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
       );
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       final OperationResult result = await residentWebRunner.restart(fullRestart: true);

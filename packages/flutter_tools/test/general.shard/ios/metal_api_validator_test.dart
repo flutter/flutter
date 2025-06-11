@@ -33,7 +33,10 @@ void main() {
     allowLocationSimulation = "YES">
 ''');
     final project = FakeIosProject(file);
-    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
+    final validator = MetalAPIValidationMigrator.ios(
+      project,
+      BufferLogger.test(),
+    );
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -66,7 +69,10 @@ void main() {
         allowLocationSimulation = "YES">
 ''');
     final project = FakeIosProject(file);
-    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
+    final validator = MetalAPIValidationMigrator.ios(
+      project,
+      BufferLogger.test(),
+    );
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -100,7 +106,10 @@ void main() {
     allowLocationSimulation = "YES">
 ''');
     final project = FakeIosProject(file);
-    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
+    final validator = MetalAPIValidationMigrator.ios(
+      project,
+      BufferLogger.test(),
+    );
 
     final String initialContents = file.readAsStringSync();
 
@@ -116,7 +125,10 @@ void main() {
           ..createSync()
           ..writeAsStringSync('NO_OP');
     final project = FakeIosProject(file);
-    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
+    final validator = MetalAPIValidationMigrator.ios(
+      project,
+      BufferLogger.test(),
+    );
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -126,7 +138,10 @@ void main() {
   testWithoutContext('No-op on missing file', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final project = FakeIosProject(fs.file('does_not_exist'));
-    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
+    final validator = MetalAPIValidationMigrator.ios(
+      project,
+      BufferLogger.test(),
+    );
 
     expect(() async => validator.migrate(), returnsNormally);
   });

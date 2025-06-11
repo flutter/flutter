@@ -1186,7 +1186,9 @@ void main() {
   testGesture('Scale gesture from pan/zoom events properly handles DragStartBehavior.start', (
     GestureTester tester,
   ) {
-    final scale = ScaleGestureRecognizer(dragStartBehavior: DragStartBehavior.start);
+    final scale = ScaleGestureRecognizer(
+      dragStartBehavior: DragStartBehavior.start,
+    );
     addTearDown(scale.dispose);
     final drag = HorizontalDragGestureRecognizer();
     addTearDown(drag.dispose);

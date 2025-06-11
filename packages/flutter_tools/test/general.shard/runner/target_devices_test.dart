@@ -78,11 +78,16 @@ void main() {
       deviceSupportForProject: false,
     );
 
-    final nonEphemeralDevice = FakeDevice(deviceName: 'target-device-9', ephemeral: false);
+    final nonEphemeralDevice = FakeDevice(
+      deviceName: 'target-device-9',
+      ephemeral: false,
+    );
     final fuchsiaDevice = FakeDevice.fuchsia(deviceName: 'target-device-10');
 
     final exactMatchAndroidDevice = FakeDevice(deviceName: 'target-device');
-    final exactMatchWirelessAndroidDevice = FakeDevice.wireless(deviceName: 'target-device');
+    final exactMatchWirelessAndroidDevice = FakeDevice.wireless(
+      deviceName: 'target-device',
+    );
     final exactMatchAttachedUnsupportedAndroidDevice = FakeDevice(
       deviceName: 'target-device',
       deviceSupported: false,
@@ -106,7 +111,10 @@ void main() {
       });
 
       testUsingContext('does not search for devices', () async {
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+        final deviceManager = TestDeviceManager(
+          logger: logger,
+          platform: platform,
+        );
         deviceManager.androidDiscoverer.deviceList = <Device>[attachedAndroidDevice1];
 
         final targetDevices = TargetDevices(
@@ -158,7 +166,10 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
       () async {
         final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+        final deviceManager = TestDeviceManager(
+          logger: logger,
+          platform: platform,
+        );
         deviceManager.androidDiscoverer.deviceList = <Device>[
           attachedUnsupportedAndroidDevice,
           attachedUnsupportedForProjectAndroidDevice,
@@ -1097,24 +1108,27 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
     final connectedWirelessIOSDevice2 = FakeIOSDevice.connectedWireless(
       deviceName: 'target-device-6',
     );
-    final disconnectedWirelessUnsupportedIOSDevice = FakeIOSDevice.notConnectedWireless(
-      deviceName: 'target-device-7',
-      deviceSupported: false,
-    );
+    final disconnectedWirelessUnsupportedIOSDevice =
+        FakeIOSDevice.notConnectedWireless(deviceName: 'target-device-7', deviceSupported: false);
     final connectedWirelessUnsupportedIOSDevice = FakeIOSDevice.connectedWireless(
       deviceName: 'target-device-7',
       deviceSupported: false,
     );
-    final disconnectedWirelessUnsupportedForProjectIOSDevice = FakeIOSDevice.notConnectedWireless(
-      deviceName: 'target-device-8',
-      deviceSupportForProject: false,
-    );
-    final connectedWirelessUnsupportedForProjectIOSDevice = FakeIOSDevice.connectedWireless(
-      deviceName: 'target-device-8',
-      deviceSupportForProject: false,
-    );
+    final disconnectedWirelessUnsupportedForProjectIOSDevice =
+        FakeIOSDevice.notConnectedWireless(
+          deviceName: 'target-device-8',
+          deviceSupportForProject: false,
+        );
+    final connectedWirelessUnsupportedForProjectIOSDevice =
+        FakeIOSDevice.connectedWireless(
+          deviceName: 'target-device-8',
+          deviceSupportForProject: false,
+        );
 
-    final nonEphemeralDevice = FakeIOSDevice(deviceName: 'target-device-9', ephemeral: false);
+    final nonEphemeralDevice = FakeIOSDevice(
+      deviceName: 'target-device-9',
+      ephemeral: false,
+    );
     final fuchsiaDevice = FakeDevice.fuchsia(deviceName: 'target-device-10');
 
     final exactMatchAttachedIOSDevice = FakeIOSDevice(deviceName: 'target-device');
@@ -1141,13 +1155,17 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
       });
 
       testUsingContext('does not search for devices', () async {
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+        final deviceManager = TestDeviceManager(
+          logger: logger,
+          platform: platform,
+        );
         deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
 
-        final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-          deviceManager: deviceManager,
-          logger: logger,
-        );
+        final targetDevices =
+            TargetDevicesWithExtendedWirelessDeviceDiscovery(
+              deviceManager: deviceManager,
+              logger: logger,
+            );
         final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
         expect(
@@ -1168,10 +1186,11 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
       deviceManager.iosDiscoverer.refreshDeviceList = <Device>[connectedWirelessIOSDevice1];
 
-      final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-        deviceManager: deviceManager,
-        logger: logger,
-      );
+      final targetDevices =
+          TargetDevicesWithExtendedWirelessDeviceDiscovery(
+            deviceManager: deviceManager,
+            logger: logger,
+          );
       final List<Device>? devices = await targetDevices.findAllTargetDevices(
         deviceDiscoveryTimeout: const Duration(seconds: 2),
       );
@@ -1188,11 +1207,12 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       final deviceManager = TestDeviceManager(logger: logger, platform: platform);
       deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
 
-      final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-        deviceManager: deviceManager,
-        logger: logger,
-        deviceConnectionInterface: DeviceConnectionInterface.attached,
-      );
+      final targetDevices =
+          TargetDevicesWithExtendedWirelessDeviceDiscovery(
+            deviceManager: deviceManager,
+            logger: logger,
+            deviceConnectionInterface: DeviceConnectionInterface.attached,
+          );
       final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
       expect(logger.statusText, equals(''));
@@ -1206,16 +1226,20 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
       () async {
         final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+        final deviceManager = TestDeviceManager(
+          logger: logger,
+          platform: platform,
+        );
         deviceManager.iosDiscoverer.deviceList = <Device>[
           attachedUnsupportedIOSDevice,
           attachedUnsupportedForProjectIOSDevice,
         ];
 
-        final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-          deviceManager: deviceManager,
-          logger: logger,
-        );
+        final targetDevices =
+            TargetDevicesWithExtendedWirelessDeviceDiscovery(
+              deviceManager: deviceManager,
+              logger: logger,
+            );
         final List<Device>? devices = await targetDevices.findAllTargetDevices(
           includeDevicesUnsupportedByProject: true,
         );
@@ -1328,11 +1352,12 @@ No supported devices connected.
             deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
             deviceManager.iosDiscoverer.refreshDeviceList = <Device>[attachedIOSDevice1];
 
-            final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
-              deviceManager: deviceManager,
-              logger: logger,
-              deviceConnectionInterface: DeviceConnectionInterface.wireless,
-            );
+            final targetDevices =
+                TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+                  deviceManager: deviceManager,
+                  logger: logger,
+                  deviceConnectionInterface: DeviceConnectionInterface.wireless,
+                );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
             expect(
@@ -1376,8 +1401,12 @@ No supported devices found with name or id matching 'target-device'.
 
         testUsingContext('when no devices match', () async {
           final device1 = FakeIOSDevice(deviceName: 'no-match-1');
-          final device2 = FakeIOSDevice.notConnectedWireless(deviceName: 'no-match-2');
-          final device2Connected = FakeIOSDevice.connectedWireless(deviceName: 'no-match-2');
+          final device2 = FakeIOSDevice.notConnectedWireless(
+            deviceName: 'no-match-2',
+          );
+          final device2Connected = FakeIOSDevice.connectedWireless(
+            deviceName: 'no-match-2',
+          );
           deviceManager.iosDiscoverer.deviceList = <Device>[device1, device2];
           deviceManager.iosDiscoverer.refreshDeviceList = <Device>[device1, device2Connected];
 
@@ -1535,19 +1564,24 @@ No supported devices found with name or id matching 'target-device'.
 
         group('when deviceConnectionInterface does not match', () {
           testUsingContext('filter of wireless', () async {
-            final device1 = FakeIOSDevice.notConnectedWireless(deviceName: 'not-a-match');
-            final device1Connected = FakeIOSDevice.connectedWireless(deviceName: 'not-a-match');
+            final device1 = FakeIOSDevice.notConnectedWireless(
+              deviceName: 'not-a-match',
+            );
+            final device1Connected = FakeIOSDevice.connectedWireless(
+              deviceName: 'not-a-match',
+            );
             deviceManager.iosDiscoverer.deviceList = <Device>[exactMatchAttachedIOSDevice, device1];
             deviceManager.iosDiscoverer.refreshDeviceList = <Device>[
               exactMatchAttachedIOSDevice,
               device1Connected,
             ];
 
-            final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
-              deviceManager: deviceManager,
-              logger: logger,
-              deviceConnectionInterface: DeviceConnectionInterface.wireless,
-            );
+            final targetDevices =
+                TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+                  deviceManager: deviceManager,
+                  logger: logger,
+                  deviceConnectionInterface: DeviceConnectionInterface.wireless,
+                );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
             expect(
@@ -1707,10 +1741,11 @@ No devices found yet. Checking for wireless devices...
             () async {
               deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
 
-              final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
-                deviceManager: deviceManager,
-                logger: logger,
-              );
+              final targetDevices =
+                  TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+                    deviceManager: deviceManager,
+                    logger: logger,
+                  );
               targetDevices.waitForWirelessBeforeInput = true;
               targetDevices.deviceSelection.input = <String>['1'];
               logger.originalStatusText = '''
@@ -1748,10 +1783,11 @@ Please choose one (or "q" to quit): '''),
             () async {
               deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
 
-              final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
-                deviceManager: deviceManager,
-                logger: logger,
-              );
+              final targetDevices =
+                  TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+                    deviceManager: deviceManager,
+                    logger: logger,
+                  );
               targetDevices.waitForWirelessBeforeInput = true;
 
               // Having the '0' first is an invalid choice for a device, the second

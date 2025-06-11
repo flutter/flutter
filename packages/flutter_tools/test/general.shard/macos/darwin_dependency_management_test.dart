@@ -18,7 +18,10 @@ import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  const supportedPlatforms = <SupportedPlatform>[SupportedPlatform.ios, SupportedPlatform.macos];
+  const supportedPlatforms = <SupportedPlatform>[
+    SupportedPlatform.ios,
+    SupportedPlatform.macos,
+  ];
 
   group('DarwinDependencyManagement', () {
     for (final platform in supportedPlatforms) {
@@ -69,7 +72,9 @@ void main() {
                   pluginPodspecPath: cocoapodPluginPodspec.path,
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
 
               final dependencyManagement = DarwinDependencyManagement(
@@ -127,7 +132,9 @@ void main() {
                     pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
                   ),
                 ];
-                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final swiftPackageManager = FakeSwiftPackageManager(
+                  expectedPlugins: plugins,
+                );
                 final cocoaPods = FakeCocoaPods();
                 final FlutterProject project = FakeFlutterProject(
                   usesSwiftPackageManager: true,
@@ -193,7 +200,9 @@ void main() {
                     pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
                   ),
                 ];
-                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final swiftPackageManager = FakeSwiftPackageManager(
+                  expectedPlugins: plugins,
+                );
                 final File projectPodfile = testFileSystem.file('/path/to/Podfile')
                   ..createSync(recursive: true);
                 projectPodfile.writeAsStringSync('Standard Podfile template');
@@ -260,7 +269,9 @@ void main() {
                     pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
                   ),
                 ];
-                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final swiftPackageManager = FakeSwiftPackageManager(
+                  expectedPlugins: plugins,
+                );
                 final File projectPodfile = testFileSystem.file('/path/to/Podfile')
                   ..createSync(recursive: true);
                 projectPodfile.writeAsStringSync('Standard Podfile template');
@@ -345,7 +356,9 @@ void main() {
                     pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
                   ),
                 ];
-                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final swiftPackageManager = FakeSwiftPackageManager(
+                  expectedPlugins: plugins,
+                );
                 final File projectPodfile = testFileSystem.file('/path/to/Podfile')
                   ..createSync(recursive: true);
                 projectPodfile.writeAsStringSync('Standard Podfile template');
@@ -445,7 +458,9 @@ void main() {
                   platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
               final project = FakeFlutterProject(
                 usesSwiftPackageManager: true,
@@ -510,7 +525,9 @@ void main() {
                   pluginPodspecPath: cocoapodPluginPodspec.path,
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
               final project = FakeFlutterProject(
                 usesSwiftPackageManager: true,
@@ -573,7 +590,9 @@ void main() {
                   pluginPodspecPath: cocoapodPluginPodspec.path,
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
 
               final dependencyManagement = DarwinDependencyManagement(
@@ -626,7 +645,9 @@ void main() {
                   pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
 
               final dependencyManagement = DarwinDependencyManagement(
@@ -671,7 +692,9 @@ void main() {
                   pluginPodspecPath: cocoapodPluginPodspec.path,
                 ),
               ];
-              final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+              final swiftPackageManager = FakeSwiftPackageManager(
+                expectedPlugins: plugins,
+              );
               final cocoaPods = FakeCocoaPods();
 
               final dependencyManagement = DarwinDependencyManagement(

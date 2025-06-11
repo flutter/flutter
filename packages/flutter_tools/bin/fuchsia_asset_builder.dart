@@ -96,8 +96,13 @@ Future<void> run(List<String> args) async {
 }
 
 Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
-  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[globals.fs.file(outputManifest)]);
-  final depfileService = DepfileService(fileSystem: globals.fs, logger: globals.logger);
+  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[
+    globals.fs.file(outputManifest),
+  ]);
+  final depfileService = DepfileService(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  );
 
   final libfs.File depfile = globals.fs.file(depfilePath);
   await depfile.create(recursive: true);

@@ -2001,7 +2001,8 @@ void main() {
       );
       await tester.pump();
 
-      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData =
+          mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
     }, variant: allExceptApple);
 
@@ -2013,7 +2014,8 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
       await tester.pump();
 
-      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData =
+          mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
     }, variant: appleOnly);
 
@@ -2028,7 +2030,8 @@ void main() {
       );
       await tester.pump();
 
-      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData =
+          mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
     }, variant: allExceptApple);
@@ -2041,7 +2044,8 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyX, meta: true));
       await tester.pump();
 
-      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData =
+          mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'empty');
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
     }, variant: appleOnly);
@@ -2173,7 +2177,10 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select right', (WidgetTester tester) async {
-      const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
+      const selectRight = SingleActivator(
+        LogicalKeyboardKey.arrowRight,
+        shift: true,
+      );
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2192,7 +2199,10 @@ void main() {
     testWidgets(
       'select left should not expand selection if selection is disabled',
       (WidgetTester tester) async {
-        const selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+        const selectLeft = SingleActivator(
+          LogicalKeyboardKey.arrowLeft,
+          shift: true,
+        );
         controller.text = 'testing';
         controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2213,7 +2223,10 @@ void main() {
     testWidgets(
       'select right should not expand selection if selection is disabled',
       (WidgetTester tester) async {
-        const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
+        const selectRight = SingleActivator(
+          LogicalKeyboardKey.arrowRight,
+          shift: true,
+        );
         controller.text = 'testing';
         controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2743,7 +2756,11 @@ void main() {
       testWidgets(
         'end + shift + ctrl scrolls to the end of the text field and highlights everything on Windows',
         (WidgetTester tester) async {
-          const end = SingleActivator(LogicalKeyboardKey.end, control: true, shift: true);
+          const end = SingleActivator(
+            LogicalKeyboardKey.end,
+            control: true,
+            shift: true,
+          );
 
           controller.text = longText;
           controller.selection = const TextSelection.collapsed(offset: 0);
@@ -2810,7 +2827,11 @@ void main() {
       testWidgets(
         'home + shift + ctrl scrolls to the beginning of the text field and highlights everything on Windows',
         (WidgetTester tester) async {
-          const home = SingleActivator(LogicalKeyboardKey.home, control: true, shift: true);
+          const home = SingleActivator(
+            LogicalKeyboardKey.home,
+            control: true,
+            shift: true,
+          );
 
           controller.text = longText;
           controller.selection = TextSelection.collapsed(offset: controller.text.length);

@@ -138,7 +138,9 @@ void main() {
       () async {
         const flavor = 'free';
         final command = InstallCommand(verboseHelp: false);
-        final fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
+        final fakeAppFactory = FakeApplicationPackageFactory(
+          FakeIOSApp(),
+        );
         command.applicationPackages = fakeAppFactory;
 
         final device = FakeIOSDevice();

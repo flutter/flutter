@@ -88,7 +88,8 @@ void main() {
     'intellij(2020.1) plugins check on linux (installed via JetBrains ToolBox app)',
     () async {
       const cachePath = '/foo/bar/.cache/JetBrains/IntelliJIdea2020.10';
-      const installPath = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
+      const installPath =
+          '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
       const pluginPath =
           '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1.plugins';
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -120,7 +121,8 @@ void main() {
     'intellij(>=2020.2) plugins check on linux (installed via JetBrains ToolBox app)',
     () async {
       const cachePath = '/foo/bar/.cache/JetBrains/IntelliJIdea2020.10';
-      const installPath = '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
+      const installPath =
+          '/foo/bar/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-1/2020.10.1';
       const pluginPath = '/foo/bar/.local/share/JetBrains/IntelliJIdea2020.10';
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -177,7 +179,8 @@ void main() {
 
   testWithoutContext('legacy intellij(<2020) plugins check on windows', () async {
     const cachePath = r'C:\Users\foo\.IntelliJIdea2019.10\system';
-    const installPath = r'C:\Program Files\JetBrains\IntelliJ IDEA Ultimate Edition 2019.10.1';
+    const installPath =
+        r'C:\Program Files\JetBrains\IntelliJ IDEA Ultimate Edition 2019.10.1';
     const pluginPath = r'C:\Users\foo\.IntelliJIdea2019.10\config\plugins';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
@@ -209,7 +212,8 @@ void main() {
       const cachePath = r'C:\Users\foo\AppData\Local\JetBrains\IntelliJIdea2020.10';
       const installPath =
           r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00';
-      const pluginPath = r'C:\Users\foo\AppData\Roaming\JetBrains\IntelliJIdea2020.10\plugins';
+      const pluginPath =
+          r'C:\Users\foo\AppData\Roaming\JetBrains\IntelliJIdea2020.10\plugins';
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
       final Directory cacheDirectory = fileSystem.directory(cachePath)..createSync(recursive: true);
@@ -272,7 +276,8 @@ void main() {
     'intellij(2020.1~) plugins check on windows (installed via installer)',
     () async {
       const cachePath = r'C:\Users\foo\AppData\Local\JetBrains\IdeaIC2020.10';
-      const installPath = r'C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2020.10.1';
+      const installPath =
+          r'C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2020.10.1';
       const pluginPath = r'C:\Users\foo\AppData\Roaming\JetBrains\IdeaIC2020.10\plugins';
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 

@@ -47,7 +47,8 @@ void main() {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
             final arguments = methodCall.arguments as Map<String, dynamic>;
-            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
+            final untypedTargetRect =
+                arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -79,7 +80,9 @@ void main() {
 
     // Showing calls the platform.
     const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
+    final items = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCopy(),
+    ];
     controller.showWithItems(rect1, items);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -141,7 +144,8 @@ void main() {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
             final arguments = methodCall.arguments as Map<String, dynamic>;
-            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
+            final untypedTargetRect =
+                arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -179,7 +183,9 @@ void main() {
 
     // Showing calls the platform.
     const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
+    final items = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCopy(),
+    ];
     controller.showWithItems(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
@@ -221,7 +227,9 @@ void main() {
     });
     expect(controller1.isVisible, isFalse);
     const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
+    final items = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCopy(),
+    ];
     expect(() {
       controller1.showWithItems(rect1, items);
     }, isNot(throwsAssertionError));
@@ -261,7 +269,8 @@ void main() {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
             final arguments = methodCall.arguments as Map<String, dynamic>;
-            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
+            final untypedTargetRect =
+                arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -293,7 +302,9 @@ void main() {
 
     // Showing calls the platform.
     const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
+    final items = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCopy(),
+    ];
     controller1.showWithItems(rect1, items);
     expect(controller1.isVisible, isTrue);
     expect(targetRects, hasLength(1));
@@ -341,7 +352,8 @@ void main() {
       connection.close();
     });
 
-    final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+    final itemsReceived =
+        <List<IOSSystemContextMenuItemData>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
@@ -397,7 +409,9 @@ void main() {
     expect(itemsReceived, hasLength(1));
 
     // Showing new items calls the platform.
-    final items2 = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCut()];
+    final items2 = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCut(),
+    ];
     controller.showWithItems(rect, items2);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(2));
@@ -416,7 +430,8 @@ void main() {
       connection.close();
     });
 
-    final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+    final itemsReceived =
+        <List<IOSSystemContextMenuItemData>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {

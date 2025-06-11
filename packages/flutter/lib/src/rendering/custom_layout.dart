@@ -198,12 +198,14 @@ abstract class MultiChildLayoutDelegate {
       }
       return true;
     }());
-    final childParentData = child!.parentData! as MultiChildLayoutParentData;
+    final childParentData =
+        child!.parentData! as MultiChildLayoutParentData;
     childParentData.offset = offset;
   }
 
   DiagnosticsNode _debugDescribeChild(RenderBox child) {
-    final childParentData = child.parentData! as MultiChildLayoutParentData;
+    final childParentData =
+        child.parentData! as MultiChildLayoutParentData;
     return DiagnosticsProperty<RenderBox>('${childParentData.id}', child);
   }
 
@@ -224,7 +226,8 @@ abstract class MultiChildLayoutDelegate {
       _idToChild = <Object, RenderBox>{};
       RenderBox? child = firstChild;
       while (child != null) {
-        final childParentData = child.parentData! as MultiChildLayoutParentData;
+        final childParentData =
+            child.parentData! as MultiChildLayoutParentData;
         assert(() {
           if (childParentData.id == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[

@@ -37,7 +37,10 @@ void main() {
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
+      final device = FakeDevice(
+        targetPlatform: TargetPlatform.darwin,
+        sdkNameAndVersion: 'Macos',
+      );
       final residentCompiler = FakeResidentCompiler();
       final flutterDevice =
           FakeFlutterDevice()

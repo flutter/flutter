@@ -32,7 +32,10 @@ Matcher _matchDoctorValidation({
 void main() {
   testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
       'downloaded and exits with code 1', () async {
-    final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
+    final flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+      branch: 'beta',
+    );
     final fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
     final flutterValidator = FlutterValidator(
@@ -69,7 +72,10 @@ void main() {
   });
 
   testWithoutContext('FlutterValidator shows an error message if Rosetta is needed', () async {
-    final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
+    final flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+      branch: 'beta',
+    );
     final fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
     final flutterValidator = FlutterValidator(
@@ -114,7 +120,10 @@ void main() {
   testWithoutContext(
     'FlutterValidator does not run gen_snapshot binary check if it is not already downloaded',
     () async {
-      final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
+      final flutterVersion = FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        branch: 'beta',
+      );
       final flutterValidator = FlutterValidator(
         platform: FakePlatform(
           operatingSystem: 'windows',
@@ -171,7 +180,10 @@ void main() {
   });
 
   testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
-    final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
+    final flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+      branch: 'beta',
+    );
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
       localeName: 'en_US.UTF-8',

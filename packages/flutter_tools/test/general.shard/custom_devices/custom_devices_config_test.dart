@@ -107,7 +107,8 @@ void main() {
       logger: logger,
     );
 
-    const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    const msg =
+        'Could not load custom device from config index 0: Expected id to be a string.';
     expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
     expect(logger.errorText, contains(msg));
   });
@@ -130,7 +131,8 @@ void main() {
       logger: logger,
     );
 
-    const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
+    const msg =
+        'Could not load custom device from config index 0: Expected id to be a string.';
     expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
     expect(logger.errorText, contains(msg));
   });
@@ -153,7 +155,8 @@ void main() {
       logger: logger,
     );
 
-    const msg = 'Could not load custom device from config index 0: Expected label to be a string.';
+    const msg =
+        'Could not load custom device from config index 0: Expected label to be a string.';
     expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
     expect(logger.errorText, contains(msg));
   });

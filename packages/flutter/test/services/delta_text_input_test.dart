@@ -71,7 +71,9 @@ void main() {
         record.add(details);
       };
 
-      final client = FakeDeltaTextInputClient(const TextEditingValue(text: '1'));
+      final client = FakeDeltaTextInputClient(
+        const TextEditingValue(text: '1'),
+      );
       const configuration = TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
@@ -222,7 +224,9 @@ void main() {
           record.add(details);
         };
 
-        final client = FakeDeltaTextInputClient(const TextEditingValue(text: 'worl'));
+        final client = FakeDeltaTextInputClient(
+          const TextEditingValue(text: 'worl'),
+        );
         const configuration = TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
 

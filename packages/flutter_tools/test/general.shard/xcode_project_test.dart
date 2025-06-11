@@ -31,7 +31,9 @@ void main() {
 
     testWithoutContext('module managedDirectory', () {
       final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true),
+      );
       expect(project.managedDirectory.path, 'app_name/.ios/Flutter');
     });
 
@@ -43,7 +45,9 @@ void main() {
 
     testWithoutContext('module ephemeralDirectory', () {
       final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true),
+      );
       expect(project.ephemeralDirectory.path, 'app_name/.ios/Flutter/ephemeral');
     });
 
@@ -73,7 +77,9 @@ void main() {
 
     testWithoutContext('module flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true),
+      );
       expect(
         project.flutterPluginSwiftPackageDirectory.path,
         'app_name/.ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
@@ -334,7 +340,11 @@ void main() {
             final Directory projectDirectory = fs.directory('path');
             projectDirectory.childDirectory('ios').createSync(recursive: true);
             final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+            final flutterProject = FlutterProject(
+              projectDirectory,
+              manifest,
+              manifest,
+            );
             final project = IosProject.fromFlutter(flutterProject);
             expect(project.lldbInitFile, isNot(exists));
             expect(project.lldbHelperPythonFile, isNot(exists));
@@ -354,7 +364,11 @@ void main() {
             final Directory projectDirectory = fs.directory('path');
             projectDirectory.childDirectory('ios').createSync(recursive: true);
             final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+            final flutterProject = FlutterProject(
+              projectDirectory,
+              manifest,
+              manifest,
+            );
             final project = IosProject.fromFlutter(flutterProject);
             project.lldbInitFile.createSync(recursive: true);
             project.lldbInitFile.writeAsStringSync('old');
@@ -391,7 +405,11 @@ void main() {
               final Directory projectDirectory = fs.directory('path');
               projectDirectory.childDirectory('ios').createSync(recursive: true);
               final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-              final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+              final flutterProject = FlutterProject(
+                projectDirectory,
+                manifest,
+                manifest,
+              );
               final project = IosProject.fromFlutter(flutterProject);
 
               cache.filesOlderThanToolsStamp[project.lldbInitFile.basename] = true;

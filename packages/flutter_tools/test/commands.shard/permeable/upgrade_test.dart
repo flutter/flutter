@@ -26,7 +26,14 @@ void main() {
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
-    const gitTagVersion = GitTagVersion(x: 1, y: 2, z: 3, hotfix: 4, commits: 5, hash: 'asd');
+    const gitTagVersion = GitTagVersion(
+      x: 1,
+      y: 2,
+      z: 3,
+      hotfix: 4,
+      commits: 5,
+      hash: 'asd',
+    );
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
@@ -46,7 +53,9 @@ void main() {
       () async {
         final flutterVersion = FakeFlutterVersion(branch: 'beta');
         const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+        final latestVersion = FakeFlutterVersion(
+          frameworkRevision: upstreamRevision,
+        );
         fakeCommandRunner.remoteVersion = latestVersion;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
@@ -68,7 +77,9 @@ void main() {
       () async {
         final flutterVersion = FakeFlutterVersion(branch: 'beta');
         const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+        final latestVersion = FakeFlutterVersion(
+          frameworkRevision: upstreamRevision,
+        );
         fakeCommandRunner.remoteVersion = latestVersion;
         fakeCommandRunner.willHaveUncommittedChanges = true;
 
@@ -91,7 +102,10 @@ void main() {
       () async {
         const revision = 'abc123';
         final latestVersion = FakeFlutterVersion(frameworkRevision: revision);
-        final flutterVersion = FakeFlutterVersion(branch: 'beta', frameworkRevision: revision);
+        final flutterVersion = FakeFlutterVersion(
+          branch: 'beta',
+          frameworkRevision: revision,
+        );
         fakeCommandRunner.alreadyUpToDate = true;
         fakeCommandRunner.remoteVersion = latestVersion;
 

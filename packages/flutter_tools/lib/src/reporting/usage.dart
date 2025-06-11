@@ -133,7 +133,8 @@ class _DefaultUsage implements Usage {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version =
         versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    final suppressEnvFlag =
+        globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String? logFilePath =
         logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;

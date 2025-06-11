@@ -83,7 +83,10 @@ void main() {
   });
 
   test('screencap invokes "exec-out screencap -p"', () async {
-    final processManager = FakeProcessManager((String exec, List<String> args) async {
+    final processManager = FakeProcessManager((
+      String exec,
+      List<String> args,
+    ) async {
       switch (args) {
         case ['shell', 'echo', 'connected']:
           return FakeProcessManager.ok('connected');
@@ -101,7 +104,10 @@ void main() {
   });
 
   test('tap invokes "shell input tap"', () async {
-    final processManager = FakeProcessManager((String exec, List<String> args) async {
+    final processManager = FakeProcessManager((
+      String exec,
+      List<String> args,
+    ) async {
       switch (args) {
         case ['shell', 'echo', 'connected']:
           return FakeProcessManager.ok('connected');

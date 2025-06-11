@@ -196,7 +196,8 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final destination = buildInfo.isDebug ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
+  final destination =
+      buildInfo.isDebug ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
 
   try {
     result = await globals.processUtils.stream(

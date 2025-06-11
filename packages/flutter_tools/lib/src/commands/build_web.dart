@@ -169,7 +169,10 @@ class BuildWebCommand extends BuildSubCommand {
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
-    final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
+    final webRenderer = WebRendererMode.fromDartDefines(
+      dartDefines,
+      useWasm: useWasm,
+    );
 
     final bool sourceMaps = boolArg('source-maps');
     final bool? minify = argResults!.wasParsed('minify') ? boolArg('minify') : null;

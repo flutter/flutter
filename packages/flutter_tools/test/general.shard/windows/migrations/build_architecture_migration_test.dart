@@ -41,7 +41,11 @@ void main() {
       executable.createSync();
       expect(oldRunnerDirectory.existsSync(), isTrue);
 
-      final migration = BuildArchitectureMigration(mockProject, buildDirectory, testLogger);
+      final migration = BuildArchitectureMigration(
+        mockProject,
+        buildDirectory,
+        testLogger,
+      );
       await migration.migrate();
 
       expect(oldRunnerDirectory.existsSync(), isFalse);
@@ -56,7 +60,11 @@ void main() {
     });
 
     testWithoutContext('skipped if CMake file is missing', () async {
-      final migration = BuildArchitectureMigration(mockProject, buildDirectory, testLogger);
+      final migration = BuildArchitectureMigration(
+        mockProject,
+        buildDirectory,
+        testLogger,
+      );
       await migration.migrate();
       expect(cmakeFile.existsSync(), isFalse);
 

@@ -86,7 +86,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   DateTime dateTime = DateTime.now();
 
   Widget _buildColorPicker(BuildContext context) {
-    final scrollController = FixedExtentScrollController(initialItem: _selectedColorIndex);
+    final scrollController = FixedExtentScrollController(
+      initialItem: _selectedColorIndex,
+    );
 
     return GestureDetector(
       onTap: () async {

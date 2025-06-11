@@ -889,7 +889,9 @@ void main() {
   testWidgets('Time picker dayPeriodColor does the right thing with MaterialStateColor', (
     WidgetTester tester,
   ) async {
-    final testColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final testColor = MaterialStateColor.resolveWith((
+      Set<MaterialState> states,
+    ) {
       if (states.contains(MaterialState.selected)) {
         return Colors.green;
       }

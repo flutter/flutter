@@ -61,7 +61,9 @@ void main() {
 
   group('RestorableTimeOfDay tests', () {
     testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
-      final property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
+      final property = RestorableTimeOfDay(
+        const TimeOfDay(hour: 20, minute: 4),
+      );
       addTearDown(property.dispose);
       expect(() => property.value, throwsAssertionError);
     });

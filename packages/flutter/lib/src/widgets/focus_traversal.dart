@@ -456,7 +456,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ) {
     final FocusTraversalPolicy defaultPolicy =
         scopeGroupNode?.policy ?? ReadingOrderTraversalPolicy();
-    final groups = <FocusNode?, _FocusTraversalGroupInfo>{};
+    final groups =
+        <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in _getDescendantsWithoutExpandingScope(scope)) {
       final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(node);
       // Group nodes need to be added to their parent's node, or to the "null"
@@ -1192,7 +1193,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusNode focusedChild,
   ) {
     final _DirectionalPolicyData? policyData = _policyData[nearestScope];
-    final newEntry = _DirectionalPolicyDataEntry(node: focusedChild, direction: direction);
+    final newEntry = _DirectionalPolicyDataEntry(
+      node: focusedChild,
+      direction: direction,
+    );
     if (policyData != null) {
       policyData.history.add(newEntry);
     } else {

@@ -10,7 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('ClampingScrollSimulation has a stable initial conditions', () {
     void checkInitialConditions(double position, double velocity) {
-      final simulation = ClampingScrollSimulation(position: position, velocity: velocity);
+      final simulation = ClampingScrollSimulation(
+        position: position,
+        velocity: velocity,
+      );
       expect(simulation.x(0.0), moreOrLessEquals(position));
       expect(simulation.dx(0.0), moreOrLessEquals(velocity));
     }
@@ -28,7 +31,10 @@ void main() {
 
   test('ClampingScrollSimulation only decelerates, never speeds up', () {
     // Regression test for https://github.com/flutter/flutter/issues/113424
-    final simulation = ClampingScrollSimulation(position: 0, velocity: 8000.0);
+    final simulation = ClampingScrollSimulation(
+      position: 0,
+      velocity: 8000.0,
+    );
     var time = 0.0;
     double velocity = simulation.dx(time);
     while (!simulation.isDone(time)) {
@@ -46,7 +52,10 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/113424
       const initialVelocity = 8000.0;
       const maxDeceleration = 5130.0; // -acceleration(initialVelocity), from formula below
-      final simulation = ClampingScrollSimulation(position: 0, velocity: initialVelocity);
+      final simulation = ClampingScrollSimulation(
+        position: 0,
+        velocity: initialVelocity,
+      );
 
       var time = 0.0;
       double velocity = simulation.dx(time);
@@ -65,7 +74,10 @@ void main() {
   test('ClampingScrollSimulation is ballistic', () {
     // Regression test for https://github.com/flutter/flutter/issues/120338
     const double delta = 1 / 90;
-    final undisturbed = ClampingScrollSimulation(position: 0, velocity: 8000.0);
+    final undisturbed = ClampingScrollSimulation(
+      position: 0,
+      velocity: 8000.0,
+    );
 
     var time = 0.0;
     var restarted = undisturbed;
@@ -142,7 +154,10 @@ void main() {
     }
 
     void checkAcceleration(double position, double velocity) {
-      final simulation = ClampingScrollSimulation(position: position, velocity: velocity);
+      final simulation = ClampingScrollSimulation(
+        position: position,
+        velocity: velocity,
+      );
       var time = 0.0;
       const double delta = 1 / 60;
       for (; time < 2.0; time += delta) {

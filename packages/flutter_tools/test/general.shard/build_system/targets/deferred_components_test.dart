@@ -40,13 +40,16 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
-      nonDeferredComponentsDependencies: <Target>[],
-      title: 'test checks',
-      exitOnFail: false,
+    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+      androidAotBundle,
     );
+    final validatorTarget =
+        DeferredComponentsGenSnapshotValidatorTarget(
+          deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+          nonDeferredComponentsDependencies: <Target>[],
+          title: 'test checks',
+          exitOnFail: false,
+        );
 
     await validatorTarget.build(environment);
 
@@ -74,13 +77,16 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
-      nonDeferredComponentsDependencies: <Target>[],
-      title: 'test checks',
-      exitOnFail: false,
+    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+      androidAotBundle,
     );
+    final validatorTarget =
+        DeferredComponentsGenSnapshotValidatorTarget(
+          deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+          nonDeferredComponentsDependencies: <Target>[],
+          title: 'test checks',
+          exitOnFail: false,
+        );
 
     await validatorTarget.build(environment);
 
@@ -107,13 +113,16 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
-    final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
-      nonDeferredComponentsDependencies: <Target>[],
-      title: 'test checks',
-      exitOnFail: false,
+    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+      androidAotBundle,
     );
+    final validatorTarget =
+        DeferredComponentsGenSnapshotValidatorTarget(
+          deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
+          nonDeferredComponentsDependencies: <Target>[],
+          title: 'test checks',
+          exitOnFail: false,
+        );
 
     await validatorTarget.build(environment);
 

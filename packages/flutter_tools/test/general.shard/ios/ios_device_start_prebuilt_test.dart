@@ -130,7 +130,9 @@ void main() {
     'IOSDevice.startApp attaches in debug mode via log reading on iOS 13+',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.list(<FakeCommand>[attachDebuggerCommand()]);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        attachDebuggerCommand(),
+      ]);
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
@@ -221,7 +223,9 @@ void main() {
     'IOSDevice.startApp launches in debug mode via log reading on <iOS 13',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchDebugCommand]);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        kLaunchDebugCommand,
+      ]);
       final IOSDevice device = setUpIOSDevice(
         sdkVersion: '12.4.4',
         processManager: processManager,
@@ -469,7 +473,9 @@ void main() {
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchReleaseCommand]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      kLaunchReleaseCommand,
+    ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, fileSystem: fileSystem);
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',

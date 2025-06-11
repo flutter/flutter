@@ -1484,7 +1484,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
-      final semanticsGestureHandler = context.findRenderObject()! as RenderSemanticsGestureHandler;
+      final semanticsGestureHandler =
+          context.findRenderObject()! as RenderSemanticsGestureHandler;
       _updateSemanticsForRenderObject(semanticsGestureHandler);
     }
   }
@@ -1505,7 +1506,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return;
     }
 
-    final semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
+    final semanticsGestureHandler =
+        context.findRenderObject() as RenderSemanticsGestureHandler?;
     assert(() {
       if (semanticsGestureHandler == null) {
         throw FlutterError(
@@ -1645,7 +1647,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final renderObject = RenderSemanticsGestureHandler()..behavior = behavior;
+    final renderObject =
+        RenderSemanticsGestureHandler()..behavior = behavior;
     assignSemantics(renderObject);
     return renderObject;
   }
@@ -1717,7 +1720,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
   }
 
   GestureLongPressCallback? _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
-    final longPress = recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
+    final longPress =
+        recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
     if (longPress == null) {
       return null;
     }
@@ -1770,7 +1774,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
   GestureDragUpdateCallback? _getVerticalDragUpdateHandler(
     Map<Type, GestureRecognizer> recognizers,
   ) {
-    final vertical = recognizers[VerticalDragGestureRecognizer] as VerticalDragGestureRecognizer?;
+    final vertical =
+        recognizers[VerticalDragGestureRecognizer] as VerticalDragGestureRecognizer?;
     final pan = recognizers[PanGestureRecognizer] as PanGestureRecognizer?;
 
     final GestureDragUpdateCallback? verticalHandler =

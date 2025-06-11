@@ -49,13 +49,16 @@ void main() {
     bool selectionEnabled = true,
   }) async {
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: forcePressEnabled,
-      selectionEnabled: selectionEnabled,
-    );
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: forcePressEnabled,
+          selectionEnabled: selectionEnabled,
+        );
 
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
+    );
 
     await tester.pumpWidget(
       MaterialApp(

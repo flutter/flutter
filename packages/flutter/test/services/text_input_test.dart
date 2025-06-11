@@ -15,7 +15,11 @@ void main() {
 
   group('TextSelection', () {
     test('The invalid selection is a singleton', () {
-      const invalidSelection1 = TextSelection(baseOffset: -1, extentOffset: 0, isDirectional: true);
+      const invalidSelection1 = TextSelection(
+        baseOffset: -1,
+        extentOffset: 0,
+        isDirectional: true,
+      );
       const invalidSelection2 = TextSelection(
         baseOffset: 123,
         extentOffset: -1,
@@ -597,7 +601,10 @@ void main() {
       const signed = TextInputType.numberWithOptions(signed: true);
       const signed2 = TextInputType.numberWithOptions(signed: true);
       const decimal = TextInputType.numberWithOptions(decimal: true);
-      const signedDecimal = TextInputType.numberWithOptions(signed: true, decimal: true);
+      const signedDecimal = TextInputType.numberWithOptions(
+        signed: true,
+        decimal: true,
+      );
 
       expect(
         text.toString(),
@@ -1250,9 +1257,15 @@ void main() {
       TextInput.setInputControl(control);
 
       const textConfig = TextInputConfiguration();
-      const numberConfig = TextInputConfiguration(inputType: TextInputType.number);
-      const multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
-      const noneConfig = TextInputConfiguration(inputType: TextInputType.none);
+      const numberConfig = TextInputConfiguration(
+        inputType: TextInputType.number,
+      );
+      const multilineConfig = TextInputConfiguration(
+        inputType: TextInputType.multiline,
+      );
+      const noneConfig = TextInputConfiguration(
+        inputType: TextInputType.none,
+      );
 
       // Test for https://github.com/flutter/flutter/issues/125875.
       // When there's a custom text input control installed on Web, the platform text
@@ -1260,12 +1273,14 @@ void main() {
       // isMultiline flag is set to true when the input type is multiline.
       // isMultiline flag is set to false when the input type is not multiline.
       final Map<String, dynamic> noneIsMultilineFalseJson = noneConfig.toJson();
-      final noneInputType = noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
+      final noneInputType =
+          noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
       if (kIsWeb) {
         noneInputType['isMultiline'] = false;
       }
       final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
-      final noneInputType1 = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      final noneInputType1 =
+          noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
       if (kIsWeb) {
         noneInputType1['isMultiline'] = true;
       }
@@ -1341,7 +1356,8 @@ void main() {
       expect(control.methodCalls, expectedMethodCalls);
       expect(fakeTextChannel.outgoingCalls.length, 8);
       expect(fakeTextChannel.outgoingCalls.last.arguments, const TypeMatcher<List<List<num>>>());
-      final sentList = fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
+      final sentList =
+          fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
       expect(sentList.length, 1);
       expect(sentList[0].length, 6);
       expect(sentList[0][0], 2); // left
@@ -1382,8 +1398,12 @@ void main() {
       final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      const multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
-      const noneConfig = TextInputConfiguration(inputType: TextInputType.none);
+      const multilineConfig = TextInputConfiguration(
+        inputType: TextInputType.multiline,
+      );
+      const noneConfig = TextInputConfiguration(
+        inputType: TextInputType.none,
+      );
 
       // Test for https://github.com/flutter/flutter/issues/125875.
       // When there's a custom text input control installed, the platform text
@@ -1391,7 +1411,8 @@ void main() {
       // isMultiline flag is set to true when the input type is multiline.
       // isMultiline flag is set to false when the input type is not multiline.
       final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
-      final noneInputType = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      final noneInputType =
+          noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
       noneInputType['isMultiline'] = true;
 
       final client = FakeTextInputClient(TextEditingValue.empty);

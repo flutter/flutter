@@ -758,7 +758,10 @@ class RestorationBucket {
 
     // Case 1+2: Adopt and return an empty bucket.
     if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
-      final child = RestorationBucket.empty(debugOwner: debugOwner, restorationId: restorationId);
+      final child = RestorationBucket.empty(
+        debugOwner: debugOwner,
+        restorationId: restorationId,
+      );
       adoptChild(child);
       return child;
     }

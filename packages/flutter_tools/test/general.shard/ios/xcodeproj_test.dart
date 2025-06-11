@@ -786,9 +786,12 @@ Information about project "Runner":
   });
 
   testWithoutContext('scheme for default project is Runner', () {
-    final info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
-      'Runner',
-    ], logger);
+    final info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+      logger,
+    );
 
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
@@ -875,7 +878,9 @@ Information about project "Runner":
   });
 
   testWithoutContext('reports default scheme error and exit', () {
-    final defaultInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+    final defaultInfo = XcodeProjectInfo(<String>[], <String>[], <String>[
+      'Runner',
+    ], logger);
 
     expect(
       defaultInfo.reportFlavorNotFoundAndExit,
@@ -887,7 +892,10 @@ Information about project "Runner":
   });
 
   testWithoutContext('reports custom scheme error and exit', () {
-    final info = XcodeProjectInfo(<String>[], <String>[], <String>['Free', 'Paid'], logger);
+    final info = XcodeProjectInfo(<String>[], <String>[], <String>[
+      'Free',
+      'Paid',
+    ], logger);
 
     expect(
       info.reportFlavorNotFoundAndExit,

@@ -3332,7 +3332,8 @@ void main() {
   ) async {
     const values = RangeValues(25.0, 75.0);
     final log = <InlineSpan>[];
-    final loggingValueIndicatorShape = LoggingRangeSliderValueIndicatorShape(log);
+    final loggingValueIndicatorShape =
+        LoggingRangeSliderValueIndicatorShape(log);
     final theme = ThemeData(
       sliderTheme: SliderThemeData(rangeValueIndicatorShape: loggingValueIndicatorShape),
     );

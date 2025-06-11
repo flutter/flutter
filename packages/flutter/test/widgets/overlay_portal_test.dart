@@ -61,7 +61,8 @@ void verifyTreeIsClean() {
 }
 
 void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
-  final layoutSurrogate = overlayWidgetKey.currentContext!.findRenderObject()! as RenderBox;
+  final layoutSurrogate =
+      overlayWidgetKey.currentContext!.findRenderObject()! as RenderBox;
   assert(
     layoutSurrogate.runtimeType.toString() == '_RenderLayoutSurrogateProxyBox',
     layoutSurrogate.runtimeType,
@@ -416,7 +417,9 @@ void main() {
     experimentalLeakTesting:
         LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      final controller = OverlayPortalController(debugLabel: 'local controller');
+      final controller = OverlayPortalController(
+        debugLabel: 'local controller',
+      );
       late final OverlayEntry entry;
       addTearDown(() {
         entry.remove();
@@ -504,7 +507,9 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    final controller = OverlayPortalController(debugLabel: 'local controller');
+    final controller = OverlayPortalController(
+      debugLabel: 'local controller',
+    );
 
     const Widget target = SizedBox();
     final Widget widget = Directionality(
@@ -552,7 +557,9 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    final controller = OverlayPortalController(debugLabel: 'local controller');
+    final controller = OverlayPortalController(
+      debugLabel: 'local controller',
+    );
 
     final Widget widget = Directionality(
       textDirection: TextDirection.ltr,
@@ -1575,14 +1582,18 @@ void main() {
               ..remove()
               ..dispose(),
       );
-      final overlayEntry2 = OverlayEntry(builder: (BuildContext context) => const Placeholder());
+      final overlayEntry2 = OverlayEntry(
+        builder: (BuildContext context) => const Placeholder(),
+      );
       addTearDown(
         () =>
             overlayEntry2
               ..remove()
               ..dispose(),
       );
-      final overlayEntry3 = OverlayEntry(builder: (BuildContext context) => const Placeholder());
+      final overlayEntry3 = OverlayEntry(
+        builder: (BuildContext context) => const Placeholder(),
+      );
       addTearDown(
         () =>
             overlayEntry3

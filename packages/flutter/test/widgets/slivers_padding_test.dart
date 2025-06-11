@@ -565,7 +565,9 @@ void main() {
     (WidgetTester tester) async {
       final mock = _MockRenderSliver();
       addTearDown(mock.dispose);
-      final renderObject = RenderSliverPadding(padding: const EdgeInsets.only(top: 20));
+      final renderObject = RenderSliverPadding(
+        padding: const EdgeInsets.only(top: 20),
+      );
       addTearDown(renderObject.dispose);
       renderObject.child = mock;
       renderObject.layout(
@@ -594,7 +596,9 @@ void main() {
   ) async {
     final mock = _MockRenderSliver();
     addTearDown(mock.dispose);
-    final renderObject = RenderSliverPadding(padding: const EdgeInsets.only(top: 20));
+    final renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
     addTearDown(renderObject.dispose);
     renderObject.child = mock;
     renderObject.layout(
@@ -620,7 +624,9 @@ void main() {
   testWidgets('SliverPadding passes the paintOrigin of the child on', (WidgetTester tester) async {
     final mock = _MockRenderSliver();
     addTearDown(mock.dispose);
-    final renderObject = RenderSliverPadding(padding: const EdgeInsets.only(top: 20));
+    final renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
     addTearDown(renderObject.dispose);
     renderObject.child = mock;
     renderObject.layout(

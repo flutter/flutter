@@ -31,7 +31,10 @@ void main() {
     });
 
     test('failed', () {
-      final expectedJson = <String, dynamic>{'success': false, 'reason': 'failure message'};
+      final expectedJson = <String, dynamic>{
+        'success': false,
+        'reason': 'failure message',
+      };
       final result = TaskResult.fromJson(expectedJson);
       expect(result.toJson(), expectedJson);
     });

@@ -310,7 +310,11 @@ class DapTestClient {
     bool captureVmServiceTraffic = false,
     Logger? logger,
   }) async {
-    final channel = ByteStreamServerChannel(server.stream, server.sink, logger);
+    final channel = ByteStreamServerChannel(
+      server.stream,
+      server.sink,
+      logger,
+    );
     return DapTestClient._(channel, logger, captureVmServiceTraffic: captureVmServiceTraffic);
   }
 }

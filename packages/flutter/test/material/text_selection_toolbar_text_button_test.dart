@@ -61,7 +61,10 @@ void main() {
     expect(onlySize.width, greaterThan(lastSize.width));
   });
 
-  for (final colorScheme in <ColorScheme>[ThemeData().colorScheme, ThemeData.dark().colorScheme]) {
+  for (final colorScheme in <ColorScheme>[
+    ThemeData().colorScheme,
+    ThemeData.dark().colorScheme,
+  ]) {
     testWidgets('foreground color by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

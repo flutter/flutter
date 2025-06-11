@@ -113,13 +113,16 @@ void main() {
     bool selectionEnabled = true,
   }) async {
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: forcePressEnabled,
-      selectionEnabled: selectionEnabled,
-    );
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: forcePressEnabled,
+          selectionEnabled: selectionEnabled,
+        );
 
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
+    );
     final controller = TextEditingController();
     addTearDown(controller.dispose);
     final focusNode = FocusNode();
@@ -854,12 +857,15 @@ void main() {
     final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
     );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -917,12 +923,15 @@ void main() {
     final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
     );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -973,12 +982,15 @@ void main() {
     final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
     );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -1029,12 +1041,15 @@ void main() {
     final controller = TextEditingController(text: 'I love flutter!');
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
     );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -1607,16 +1622,19 @@ void main() {
     final controller = TextEditingController(text: 'I love flutter!\n' * 8);
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
-    );
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
 
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     const kLineHeight = 16.0;
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
+    );
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -1685,16 +1703,19 @@ void main() {
       final controller = TextEditingController(text: 'I love flutter!\n' * 8);
       addTearDown(controller.dispose);
       final editableTextKey = GlobalKey<EditableTextState>();
-      final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-        editableTextKey: editableTextKey,
-        forcePressEnabled: false,
-        selectionEnabled: true,
-      );
+      final delegate =
+          FakeTextSelectionGestureDetectorBuilderDelegate(
+            editableTextKey: editableTextKey,
+            forcePressEnabled: false,
+            selectionEnabled: true,
+          );
 
       final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       const kLineHeight = 16.0;
-      final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+      final provider = TextSelectionGestureDetectorBuilder(
+        delegate: delegate,
+      );
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -1815,15 +1836,20 @@ void main() {
   });
 
   testWidgets('Context menus', (WidgetTester tester) async {
-    final controller = TextEditingController(text: 'You make wine from sour grapes');
+    final controller = TextEditingController(
+      text: 'You make wine from sour grapes',
+    );
     addTearDown(controller.dispose);
     final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
+    final delegate =
+        FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+    final provider = TextSelectionGestureDetectorBuilder(
+      delegate: delegate,
     );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 

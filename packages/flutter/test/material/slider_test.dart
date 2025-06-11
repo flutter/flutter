@@ -2850,7 +2850,10 @@ void main() {
   );
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
-    final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
+    final baseTheme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
     SliderThemeData theme = baseTheme.sliderTheme;
     var value = 0.45;
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
@@ -3099,7 +3102,10 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
       value = 0.5;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(Slider), findsOneWidget);
@@ -4488,7 +4494,10 @@ void main() {
       const startOfTheSliderTrack = Offset(overlayRadius, 300);
       const centerOfTheSliderTrack = Offset(400, 300);
       const endOfTheSliderTrack = Offset(800 - overlayRadius, 300);
-      final xPosThumb = Tween<double>(begin: startOfTheSliderTrack.dx, end: endOfTheSliderTrack.dx);
+      final xPosThumb = Tween<double>(
+        begin: startOfTheSliderTrack.dx,
+        end: endOfTheSliderTrack.dx,
+      );
       final logs = <String>[];
 
       Widget buildApp() {
@@ -4768,7 +4777,10 @@ void main() {
 
     // Calculate a specific position on the Slider.
     final Rect sliderRect = tester.getRect(find.byType(Slider));
-    final tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+    final tapPositionLeft = Offset(
+      sliderRect.left + sliderRect.width * 0.25,
+      sliderRect.center.dy,
+    );
     final tapPositionRight = Offset(
       sliderRect.left + sliderRect.width * 0.75,
       sliderRect.center.dy,
@@ -5285,7 +5297,9 @@ void main() {
     WidgetTester tester,
   ) async {
     final log = <Offset?>[];
-    final loggingTrackShape = LoggingRoundedRectSliderTrackShape(secondaryOffsetLog: log);
+    final loggingTrackShape = LoggingRoundedRectSliderTrackShape(
+      secondaryOffsetLog: log,
+    );
     final theme = ThemeData(sliderTheme: SliderThemeData(trackShape: loggingTrackShape));
     Widget buildSlider(double? secondaryTrackValue) {
       return MaterialApp(

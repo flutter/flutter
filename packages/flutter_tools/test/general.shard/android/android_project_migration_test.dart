@@ -141,7 +141,8 @@ void main() {
       });
 
       testUsingContext('skipped if files are missing', () async {
-        final androidProjectMigration = TopLevelGradleBuildFileMigration(project, bufferLogger);
+        final androidProjectMigration =
+            TopLevelGradleBuildFileMigration(project, bufferLogger);
         await androidProjectMigration.migrate();
         expect(topLevelGradleBuildFile.existsSync(), isFalse);
         expect(
@@ -157,7 +158,8 @@ tasks.register("clean", Delete) {
 }
         ''');
 
-        final androidProjectMigration = TopLevelGradleBuildFileMigration(project, bufferLogger);
+        final androidProjectMigration =
+            TopLevelGradleBuildFileMigration(project, bufferLogger);
         final DateTime previousLastModified = topLevelGradleBuildFile.lastModifiedSync();
         await androidProjectMigration.migrate();
 
@@ -171,7 +173,8 @@ task clean(type: Delete) {
 }
 ''');
 
-        final androidProjectMigration = TopLevelGradleBuildFileMigration(project, bufferLogger);
+        final androidProjectMigration =
+            TopLevelGradleBuildFileMigration(project, bufferLogger);
         await androidProjectMigration.migrate();
 
         expect(
@@ -213,23 +216,25 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if files are missing', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
+            );
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.existsSync(), isFalse);
         expect(bufferLogger.traceText, contains(gradleWrapperNotFound));
       });
 
       testWithoutContext('skipped if android studio is null', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(bufferLogger.traceText, contains(androidStudioNotFound));
@@ -237,12 +242,13 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is null', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: null),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: null),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(bufferLogger.traceText, contains(androidStudioNotFound));
@@ -250,12 +256,13 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if error is encountered in migrate()', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeErroringJava(),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeErroringJava(),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(bufferLogger.traceText, contains(errorWhileMigrating));
@@ -263,12 +270,13 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
@@ -276,12 +284,13 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if bundled java version is less than 17', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion16),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion16),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
@@ -290,12 +299,13 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('nothing is changed if gradle version not one that was '
           'used by flutter create', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(otherGradleVersionWrapper);
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), otherGradleVersionWrapper);
@@ -304,12 +314,13 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('change is made with one of the specific gradle versions'
           ' we migrate for', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrateTo);
@@ -324,12 +335,13 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('change is not made when opt out flag is set', () async {
-        final migration = AndroidStudioJavaGradleConflictMigration(
-          java: FakeJava(version: _javaVersion17),
-          bufferLogger,
-          project: project,
-          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-        );
+        final migration =
+            AndroidStudioJavaGradleConflictMigration(
+              java: FakeJava(version: _javaVersion17),
+              bufferLogger,
+              project: project,
+              androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+            );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate + optOutFlag);
         await migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate + optOutFlag);

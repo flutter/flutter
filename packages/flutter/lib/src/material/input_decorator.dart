@@ -1667,7 +1667,8 @@ class _RenderDecoration extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final builder = ChildSemanticsConfigurationsResultBuilder();
+    final builder =
+        ChildSemanticsConfigurationsResultBuilder();
     List<SemanticsConfiguration>? prefixMergeGroup;
     List<SemanticsConfiguration>? suffixMergeGroup;
     for (final SemanticsConfiguration childConfig in childConfigs) {

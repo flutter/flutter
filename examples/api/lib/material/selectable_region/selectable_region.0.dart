@@ -188,7 +188,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         _end = Offset.infinite;
       case SelectionEventType.granularlyExtendSelection:
         result = SelectionResult.end;
-        final extendSelectionEvent = event as GranularlyExtendSelectionEvent;
+        final extendSelectionEvent =
+            event as GranularlyExtendSelectionEvent;
         // Initialize the offset it there is no ongoing selection.
         if (_start == null || _end == null) {
           if (extendSelectionEvent.forward) {
@@ -212,7 +213,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         }
       case SelectionEventType.directionallyExtendSelection:
         result = SelectionResult.end;
-        final extendSelectionEvent = event as DirectionallyExtendSelectionEvent;
+        final extendSelectionEvent =
+            event as DirectionallyExtendSelectionEvent;
         // Convert to local coordinates.
         final double horizontalBaseLine = globalToLocal(Offset(event.dx, 0)).dx;
         final Offset newOffset;

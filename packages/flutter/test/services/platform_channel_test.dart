@@ -50,7 +50,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          final methodCall =
+              jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>['${methodCall['args']} world']);
           } else {
@@ -66,7 +67,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          final methodCall =
+              jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[
               <String>['${methodCall['args']}', 'world'],
@@ -87,7 +89,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          final methodCall =
+              jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {
@@ -102,7 +105,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          final methodCall =
+              jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[
               <String, String>{'${methodCall['args']}': 'world'},
@@ -125,7 +129,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData? message) async {
-          final methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
+          final methodCall =
+              jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {

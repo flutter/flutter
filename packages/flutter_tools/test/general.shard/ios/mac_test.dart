@@ -463,7 +463,10 @@ Could not build the precompiled application for the device.''',
         ),
       );
       final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      final project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
@@ -509,7 +512,10 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ),
       );
       final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      final project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
@@ -552,7 +558,10 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ),
       );
       final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      final project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,
@@ -594,7 +603,10 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ),
       );
       final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      final project = FakeFlutterProject(
+        fileSystem: fs,
+        usesSwiftPackageManager: true,
+      );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
         buildResult,

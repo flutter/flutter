@@ -1033,6 +1033,7 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 }
 
 BorderSide _findBorder(WidgetTester tester, Finder finder) {
-  final decoration = tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
+  final decoration =
+      tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
   return (decoration.shape as RoundedSuperellipseBorder).side;
 }

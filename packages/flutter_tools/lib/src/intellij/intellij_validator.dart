@@ -58,7 +58,10 @@ abstract class IntelliJValidator extends DoctorValidator {
     required PlistParser plistParser,
     required ProcessManager processManager,
   }) {
-    final fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+    final fileSystemUtils = FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: platform,
+    );
     if (platform.isWindows) {
       return IntelliJValidatorOnWindows.installed(
         fileSystem: fileSystem,

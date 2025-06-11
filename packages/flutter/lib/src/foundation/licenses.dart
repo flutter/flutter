@@ -163,7 +163,10 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
+      final result = LicenseParagraph(
+        lines.join(' '),
+        currentParagraphIndentation!,
+      );
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();

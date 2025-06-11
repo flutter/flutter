@@ -886,7 +886,10 @@ void main() {
     expect(find.text('initial'), findsOneWidget);
 
     // Pushes through the `pushRouteInformation` in the navigation method channel.
-    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': 'state'};
+    const testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': 'state',
+    };
     final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -989,7 +992,9 @@ void main() {
         },
       );
       final initial = RouteInformation(uri: Uri.parse('initial?a=ws/abcd'));
-      final provider = PlatformRouteInformationProvider(initialRouteInformation: initial);
+      final provider = PlatformRouteInformationProvider(
+        initialRouteInformation: initial,
+      );
       addTearDown(provider.dispose);
       // Make sure engine is updated with initial route
       provider.routerReportsNewRouteInformation(initial);
@@ -1659,7 +1664,9 @@ void main() {
     final provider = SimpleRouteInformationProvider();
     addTearDown(provider.dispose);
     provider.value = RouteInformation(uri: Uri.parse('/'));
-    final delegate = SimpleRouterDelegate(builder: (_, _) => const Text(expected));
+    final delegate = SimpleRouterDelegate(
+      builder: (_, _) => const Text(expected),
+    );
     addTearDown(delegate.dispose);
     final config = RouterConfig<RouteInformation>(
       routeInformationProvider: provider,
@@ -1707,7 +1714,9 @@ void main() {
       expect(info1.uri.toString(), 'http://mydomain.com');
       expect(info1.location, '/');
 
-      final info2 = RouteInformation(uri: Uri.parse('http://mydomain.com/abc?def=ghi&def=jkl#mno'));
+      final info2 = RouteInformation(
+        uri: Uri.parse('http://mydomain.com/abc?def=ghi&def=jkl#mno'),
+      );
       expect(info2.uri.toString(), 'http://mydomain.com/abc?def=ghi&def=jkl#mno');
       expect(info2.location, '/abc?def=ghi&def=jkl#mno');
     });

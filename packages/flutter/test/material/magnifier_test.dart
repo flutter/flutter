@@ -59,7 +59,9 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo.empty,
+        );
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -80,7 +82,9 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo.empty,
+        );
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -101,7 +105,9 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        final magnifierPositioner = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo.empty,
+        );
         addTearDown(magnifierPositioner.dispose);
 
         final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
@@ -147,7 +153,8 @@ void main() {
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
         // Magnifier should be positioned directly over the red square.
-        final tapPointRenderBox = tester.firstRenderObject(find.byKey(textField)) as RenderBox;
+        final tapPointRenderBox =
+            tester.firstRenderObject(find.byKey(textField)) as RenderBox;
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 

@@ -116,7 +116,9 @@ void main() {
   testUsingContext(
     'flutter assemble sets required artifacts from target platform',
     () async {
-      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+      final command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',
@@ -139,7 +141,9 @@ void main() {
   testUsingContext(
     'flutter assemble sends assemble-deferred-components',
     () async {
-      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+      final command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',
@@ -170,7 +174,9 @@ void main() {
   testUsingContext(
     'flutter assemble sends usage values correctly with platform',
     () async {
-      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+      final command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',

@@ -32,7 +32,8 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final androidPlugin =
+        plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
     final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
 
     expect(iosPlugin.pluginClass, 'SamplePlugin');
@@ -74,12 +75,14 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final androidPlugin =
+        plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
     final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
     final linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
     final macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
-    final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final windowsPlugin =
+        plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
 
     expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
@@ -128,12 +131,14 @@ void main() {
         fileSystem: fileSystem,
       );
 
-      final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+      final androidPlugin =
+          plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
       final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
       final linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
       final macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
       final webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
-      final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+      final windowsPlugin =
+          plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
 
       expect(iosPlugin.pluginClass, 'ISamplePlugin');
       expect(iosPlugin.classPrefix, '');
@@ -176,11 +181,13 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final androidPlugin =
+        plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
     final iOSPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
     final linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
     final macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
-    final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final windowsPlugin =
+        plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
 
     expect(androidPlugin.pluginClass, isNull);
     expect(iOSPlugin.pluginClass, isNull);
@@ -481,7 +488,8 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final windowsPlugin =
+        plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[PluginPlatformVariant.win32]);
   });
 
@@ -528,7 +536,8 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final windowsPlugin =
+        plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[PluginPlatformVariant.win32]);
   });
 
@@ -552,7 +561,8 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    final windowsPlugin =
+        plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{});
   });
 

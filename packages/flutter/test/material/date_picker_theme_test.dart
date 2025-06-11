@@ -650,7 +650,8 @@ void main() {
       year2023Decoration.color,
       datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}),
     );
-    final roundedRectangleBorder = year2023Decoration.shape as RoundedRectangleBorder;
+    final roundedRectangleBorder =
+        year2023Decoration.shape as RoundedRectangleBorder;
     expect(roundedRectangleBorder.side.width, datePickerTheme.todayBorder?.width);
     expect(
       roundedRectangleBorder.side.color,

@@ -106,7 +106,8 @@ import 'package:intl/date_symbols.dart' as intl;
   symbolFiles.forEach((String locale, File data) {
     currentLocale = locale;
     if (supportedLocales.contains(locale)) {
-      final objData = json.decode(data.readAsStringSync()) as Map<String, Object?>;
+      final objData =
+          json.decode(data.readAsStringSync()) as Map<String, Object?>;
       buffer.writeln("'$locale': intl.DateSymbols(");
       objData.forEach((String key, Object? value) {
         if (value == null) {
@@ -130,7 +131,8 @@ import 'package:intl/date_symbols.dart' as intl;
   );
   patternFiles.forEach((String locale, File data) {
     if (supportedLocales.contains(locale)) {
-      final patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
+      final patterns =
+          json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);

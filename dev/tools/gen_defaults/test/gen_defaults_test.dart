@@ -43,7 +43,11 @@ void main() {
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final tokens = <String, dynamic>{'version': '0.0', 'foo': 'Foobar', 'bar': 'Barfoo'};
+      final tokens = <String, dynamic>{
+        'version': '0.0',
+        'foo': 'Foobar',
+        'bar': 'Barfoo',
+      };
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -98,7 +102,11 @@ static final String tokenBar = 'Barfoo';
 
       // Have a test template append new parameterized content to the end of
       // the file.
-      final tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
+      final tokens = <String, dynamic>{
+        'version': '0.0',
+        'foo': 'foo',
+        'bar': 'bar',
+      };
       TestTemplate('Test', tempFile.path, tokens).updateFile();
 
       expect(tempFile.readAsStringSync(), '''
@@ -139,7 +147,11 @@ static final String tokenBar = 'bar';
 
       // Update file with a template for 'Block 1'
       {
-        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'foo', 'bar': 'bar'};
+        final tokens = <String, dynamic>{
+          'version': '0.0',
+          'foo': 'foo',
+          'bar': 'bar',
+        };
         TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -165,7 +177,11 @@ static final String tokenBar = 'bar';
       // Update file with a template for 'Block 2', which should append but not
       // disturb the code in 'Block 1'.
       {
-        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'bar', 'bar': 'foo'};
+        final tokens = <String, dynamic>{
+          'version': '0.0',
+          'foo': 'bar',
+          'bar': 'foo',
+        };
         TestTemplate('Block 2', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''
@@ -205,7 +221,11 @@ static final String tokenBar = 'foo';
       // Update 'Block 1' again which should just update that block,
       // leaving 'Block 2' undisturbed.
       {
-        final tokens = <String, dynamic>{'version': '0.0', 'foo': 'FOO', 'bar': 'BAR'};
+        final tokens = <String, dynamic>{
+          'version': '0.0',
+          'foo': 'FOO',
+          'bar': 'BAR',
+        };
         TestTemplate('Block 1', tempFile.path, tokens).updateFile();
       }
       expect(tempFile.readAsStringSync(), '''

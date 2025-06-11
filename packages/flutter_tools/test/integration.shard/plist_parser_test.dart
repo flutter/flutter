@@ -291,7 +291,10 @@ void main() {
       'project.pbxproj',
     );
 
-    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
+    final logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
 
     final parser = PlistParser(
       fileSystem: fileSystem,
@@ -341,7 +344,10 @@ void main() {
   );
 
   testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
-    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
+    final logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
 
     final parser = PlistParser(
       fileSystem: fileSystem,

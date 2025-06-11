@@ -1754,7 +1754,10 @@ void main() {
         assert(!focusNode.isModified);
         addTearDown(focusNode.dispose);
 
-        final focusWidget = Focus.withExternalFocusNode(focusNode: focusNode, child: Container());
+        final focusWidget = Focus.withExternalFocusNode(
+          focusNode: focusNode,
+          child: Container(),
+        );
 
         await tester.pumpWidget(focusWidget);
         expect(focusNode.isModified, isFalse);

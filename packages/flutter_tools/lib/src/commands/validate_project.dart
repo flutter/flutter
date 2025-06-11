@@ -35,7 +35,8 @@ class ValidateProject {
         userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project = FlutterProject.fromDirectory(workingDirectory);
-    final results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
+    final results =
+        <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
 
     var hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {

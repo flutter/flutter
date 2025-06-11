@@ -29,7 +29,8 @@ class FrameTimingSummarizer {
     final frameRasterizerTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.rasterDuration),
     );
-    final frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)..sort();
+    final frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)
+      ..sort();
     final vsyncOverhead = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
     );

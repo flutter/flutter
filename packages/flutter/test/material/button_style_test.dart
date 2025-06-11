@@ -219,8 +219,12 @@ void main() {
     const whiteSide = BorderSide(color: Color(0xFFFFFFFF));
     const emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
-    const blackStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(blackSide));
-    const whiteStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(whiteSide));
+    const blackStyle = ButtonStyle(
+      side: MaterialStatePropertyAll<BorderSide>(blackSide),
+    );
+    const whiteStyle = ButtonStyle(
+      side: MaterialStatePropertyAll<BorderSide>(whiteSide),
+    );
 
     // MaterialState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.

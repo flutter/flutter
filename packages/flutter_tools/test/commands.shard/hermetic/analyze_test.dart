@@ -145,7 +145,8 @@ void main() {
                 )
                 as Map<String, Object?>;
         expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
-        final params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
+        final params =
+            setAnalysisRootsCommand['params']! as Map<String, Object?>;
         expect(params['included'], <String?>[Cache.flutterRoot]);
         expect(params['excluded'], isEmpty);
       },

@@ -114,7 +114,10 @@ void main() {
             child: Container(),
           ),
         );
-        final sc2 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc2 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2]));
 
@@ -132,9 +135,18 @@ void main() {
       });
 
       testWidgets('with two other sensitive widgets', (WidgetTester tester) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
-        final sc2 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
-        final sc3 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+        final sc2 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+        final sc3 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, sc3]));
 
@@ -156,8 +168,14 @@ void main() {
             child: Container(),
           ),
         );
-        final sc2 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
-        final sc3 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc2 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
+        final sc3 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2, sc3]));
 
@@ -176,7 +194,10 @@ void main() {
 
       // Tests with auto sensitive widget(s):
       testWidgets('with one auto sensitive widget', (WidgetTester tester) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
@@ -229,7 +250,10 @@ void main() {
       });
 
       testWidgets('with one auto sensitive widget that gets disposed', (WidgetTester tester) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         const asc1Key = Key('asc1');
         final asc1 = DisposeTester(
           child: SensitiveContent(
@@ -258,7 +282,10 @@ void main() {
       testWidgets('with two auto sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         const asc1Key = Key('asc1');
         final asc1 = DisposeTester(
           child: SensitiveContent(
@@ -290,7 +317,10 @@ void main() {
 
       // Tests with not sensitive widget(s):
       testWidgets('with one not sensitive widget', (WidgetTester tester) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
@@ -342,7 +372,10 @@ void main() {
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         const nsc1Key = Key('nsc1');
         final nsc1 = DisposeTester(
           child: SensitiveContent(
@@ -370,7 +403,10 @@ void main() {
       testWidgets('with two not sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         const nsc1Key = Key('nsc1');
         final asc1 = DisposeTester(
           child: SensitiveContent(
@@ -403,7 +439,10 @@ void main() {
       testWidgets('with one not sensitive widget and one auto sensitive widget', (
         WidgetTester tester,
       ) async {
-        final sc1 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc1 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
         final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
@@ -1396,7 +1435,10 @@ void main() {
           key: sc1Key,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final sc2 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc2 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2]));
 
@@ -1429,7 +1471,10 @@ void main() {
           key: sc1Key,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final sc2 = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc2 = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[sc1, sc2]));
 
@@ -1618,7 +1663,10 @@ void main() {
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
@@ -1651,7 +1699,10 @@ void main() {
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[asc, sc]));
 
@@ -1828,7 +1879,10 @@ void main() {
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
 
@@ -1867,7 +1921,10 @@ void main() {
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container());
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: Container(),
+        );
 
         await tester.pumpWidget(Column(children: <Widget>[nsc, sc]));
 
@@ -2073,8 +2130,14 @@ void main() {
           // Ignore ContentSensitivity.unknown for this test.
           break;
         }
-        final scChild = SensitiveContent(sensitivity: contentSensitivity, child: Container());
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: scChild);
+        final scChild = SensitiveContent(
+          sensitivity: contentSensitivity,
+          child: Container(),
+        );
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: scChild,
+        );
 
         await tester.pumpWidget(sc);
 
@@ -2093,7 +2156,10 @@ void main() {
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final sc = SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: ascChild);
+        final sc = SensitiveContent(
+          sensitivity: ContentSensitivity.sensitive,
+          child: ascChild,
+        );
 
         await tester.pumpWidget(sc);
 
@@ -2156,7 +2222,10 @@ void main() {
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final nsc = SensitiveContent(sensitivity: ContentSensitivity.notSensitive, child: scChild);
+        final nsc = SensitiveContent(
+          sensitivity: ContentSensitivity.notSensitive,
+          child: scChild,
+        );
 
         await tester.pumpWidget(nsc);
         await tester.pump();
@@ -2179,7 +2248,10 @@ void main() {
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final nsc = SensitiveContent(sensitivity: ContentSensitivity.notSensitive, child: ascChild);
+        final nsc = SensitiveContent(
+          sensitivity: ContentSensitivity.notSensitive,
+          child: ascChild,
+        );
 
         await tester.pumpWidget(nsc);
         await tester.pump();

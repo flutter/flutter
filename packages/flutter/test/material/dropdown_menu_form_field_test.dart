@@ -20,7 +20,10 @@ void main() {
   final menuEntries = <DropdownMenuEntry<MenuItem>>[];
 
   for (final MenuItem value in MenuItem.values) {
-    final entry = DropdownMenuEntry<MenuItem>(value: value, label: value.label);
+    final entry = DropdownMenuEntry<MenuItem>(
+      value: value,
+      label: value.label,
+    );
     menuEntries.add(entry);
   }
 
@@ -1128,7 +1131,8 @@ void main() {
   );
 
   testWidgets('Selected value is restorable', (WidgetTester tester) async {
-    final formFieldState = GlobalKey<FormFieldState<MenuItem>>();
+    final formFieldState =
+        GlobalKey<FormFieldState<MenuItem>>();
     const restorationId = 'dropdown_menu_form_field';
 
     await tester.pumpWidget(

@@ -1929,7 +1929,9 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (var index = 0; index < tabCount; index += 1) {
-      final selectedState = <MaterialState>{if (index == _currentIndex) MaterialState.selected};
+      final selectedState = <MaterialState>{
+        if (index == _currentIndex) MaterialState.selected,
+      };
 
       final MouseCursor effectiveMouseCursor =
           MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, selectedState) ??

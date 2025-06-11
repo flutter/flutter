@@ -919,7 +919,10 @@ void main() {
   test('TextPainter requires textDirection', () {
     final painter1 = TextPainter(text: const TextSpan(text: ''));
     expect(painter1.layout, throwsStateError);
-    final painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
+    final painter2 = TextPainter(
+      text: const TextSpan(text: ''),
+      textDirection: TextDirection.rtl,
+    );
     expect(painter2.layout, isNot(throwsStateError));
   });
 
@@ -956,7 +959,10 @@ void main() {
   });
 
   test('TextPainter default text height is 14 pixels', () {
-    final painter = TextPainter(text: const TextSpan(text: 'x'), textDirection: TextDirection.ltr);
+    final painter = TextPainter(
+      text: const TextSpan(text: 'x'),
+      textDirection: TextDirection.ltr,
+    );
     painter.layout();
     expect(painter.preferredLineHeight, 14.0);
     expect(painter.size, const Size(14.0, 14.0));

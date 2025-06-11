@@ -56,9 +56,13 @@ class TestAssetBundle extends CachingAssetBundle {
 void main() {
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
-      final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
+      final assetBundleMap =
+          <String, List<Map<Object?, Object?>>>{};
 
-      final assetImage = AssetImage(mainAssetPath, bundle: TestAssetBundle(assetBundleMap));
+      final assetImage = AssetImage(
+        mainAssetPath,
+        bundle: TestAssetBundle(assetBundleMap),
+      );
       const ImageConfiguration configuration = ImageConfiguration.empty;
 
       assetImage
@@ -113,7 +117,8 @@ void main() {
       const mainAssetPath = 'assets/normalFolder/normalFile.png';
       const variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
+      final assetBundleMap =
+          <String, List<Map<Object?, Object?>>>{};
 
       final mainAssetVariantManifestEntry = <Object?, Object?>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;
@@ -147,13 +152,17 @@ void main() {
       () {
         const mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-        final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
+        final assetBundleMap =
+            <String, List<Map<Object?, Object?>>>{};
 
         assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
         final testAssetBundle = TestAssetBundle(assetBundleMap);
 
-        final assetImage = AssetImage(mainAssetPath, bundle: TestAssetBundle(assetBundleMap));
+        final assetImage = AssetImage(
+          mainAssetPath,
+          bundle: TestAssetBundle(assetBundleMap),
+        );
 
         assetImage
             .obtainKey(ImageConfiguration.empty)
@@ -187,12 +196,13 @@ void main() {
         double chosenAssetRatio,
         String expectedAssetPath,
       ) {
-        const assetManifest = <String, List<Map<Object?, Object?>>>{
-          'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
-            <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
-            <Object?, Object?>{'asset': 'assets/normalFolder/3.0x/normalFile.png', 'dpr': 3.0},
-          ],
-        };
+        const assetManifest =
+            <String, List<Map<Object?, Object?>>>{
+              'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
+                <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
+                <Object?, Object?>{'asset': 'assets/normalFolder/3.0x/normalFile.png', 'dpr': 3.0},
+              ],
+            };
         final testAssetBundle = TestAssetBundle(assetManifest);
 
         final assetImage = AssetImage(mainAssetPath, bundle: testAssetBundle);

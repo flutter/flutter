@@ -402,7 +402,12 @@ void main() {
           tempDir.absolute.path,
           'flutter_${platformName}_v1.2.3-beta${platform.isLinux ? '.tar.xz' : '.zip'}',
         );
-        final codesignFailure = ProcessResult(1, 1, '', 'code object is not signed at all');
+        final codesignFailure = ProcessResult(
+          1,
+          1,
+          '',
+          'code object is not signed at all',
+        );
         final String binPath = path.join(
           tempDir.path,
           'flutter',
@@ -491,7 +496,8 @@ void main() {
       final releasesName = 'releases_$platformName.json';
       final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
-      final gsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
+      final gsArchivePath =
+          'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         fs = MemoryFileSystem.test(

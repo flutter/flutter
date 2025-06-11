@@ -36,7 +36,10 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400 - size.width / 2.0));
 
-    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
 
@@ -3238,7 +3241,10 @@ void main() {
     });
 
     testWidgets('Material2 - AppBar drawer icon has default color', (WidgetTester tester) async {
-      final themeData = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false);
+      final themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: false,
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -3250,7 +3256,10 @@ void main() {
     });
 
     testWidgets('Material2 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
-      final themeData = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false);
+      final themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: false,
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,

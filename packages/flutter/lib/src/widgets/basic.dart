@@ -2467,7 +2467,8 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final parentData = renderObject.parentData! as MultiChildLayoutParentData;
+    final parentData =
+        renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       renderObject.parent?.markNeedsLayout();

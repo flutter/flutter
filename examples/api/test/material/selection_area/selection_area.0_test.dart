@@ -15,7 +15,12 @@ void main() {
       findsExactly(4),
     );
 
-    final selectableTexts = <String>['SelectionArea Sample', 'Row 1', 'Row 2', 'Row 3'];
+    final selectableTexts = <String>[
+      'SelectionArea Sample',
+      'Row 1',
+      'Row 2',
+      'Row 3',
+    ];
 
     for (final text in selectableTexts) {
       expect(

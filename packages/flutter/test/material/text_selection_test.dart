@@ -491,7 +491,9 @@ void main() {
     testWidgets(
       'When renders below a block of text, menu appears below bottom endpoint',
       (WidgetTester tester) async {
-        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        final controller = TextEditingController(
+          text: 'abc\ndef\nghi\njkl\nmno\npqr',
+        );
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -564,7 +566,9 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
-        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        final controller = TextEditingController(
+          text: 'abc\ndef\nghi\njkl\nmno\npqr',
+        );
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -716,7 +720,9 @@ void main() {
   testWidgets(
     'Paste only appears when clipboard has contents',
     (WidgetTester tester) async {
-      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
+      final controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(

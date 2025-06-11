@@ -77,7 +77,9 @@ class _BackdropTitle extends AnimatedWidget {
 
     final textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    const slantedMenuIcon = ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png'));
+    const slantedMenuIcon = ImageIcon(
+      AssetImage('packages/shrine_images/slanted_menu.png'),
+    );
 
     final Widget directionalSlantedMenuIcon =
         Directionality.of(context) == TextDirection.ltr

@@ -36,7 +36,9 @@ void main() {
   }();
 
   const FileSystem localFs = LocalFileSystem();
-  final flutterRoot = _FlutterRootUnderTest.findWithin(forcePowershell: usePowershellOnPosix);
+  final flutterRoot = _FlutterRootUnderTest.findWithin(
+    forcePowershell: usePowershellOnPosix,
+  );
 
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;

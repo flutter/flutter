@@ -12,9 +12,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/35426.
   test('RenderSliverFloatingPersistentHeader maxScrollObstructionExtent is 0', () {
-    final header = TestRenderSliverFloatingPersistentHeader(
-      child: RenderSizedBox(const Size(400.0, 100.0)),
-    );
+    final header =
+        TestRenderSliverFloatingPersistentHeader(child: RenderSizedBox(const Size(400.0, 100.0)));
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
@@ -27,9 +26,10 @@ void main() {
   });
 
   test('RenderSliverFloatingPinnedPersistentHeader maxScrollObstructionExtent is minExtent', () {
-    final header = TestRenderSliverFloatingPinnedPersistentHeader(
-      child: RenderSizedBox(const Size(400.0, 100.0)),
-    );
+    final header =
+        TestRenderSliverFloatingPinnedPersistentHeader(
+          child: RenderSizedBox(const Size(400.0, 100.0)),
+        );
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),

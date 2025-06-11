@@ -1322,7 +1322,10 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
       expect(find.byType(Switch), findsOneWidget);
@@ -1361,7 +1364,10 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
       expect(find.byType(Switch), findsOneWidget);

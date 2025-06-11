@@ -375,7 +375,8 @@ void main() {
   test(
     'throws if base path is relative',
     () => testbed.run(() async {
-      const htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
+      const htmlContent =
+          '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
       final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
       webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -399,7 +400,8 @@ void main() {
   test(
     'throws if base path does not end with slash',
     () => testbed.run(() async {
-      const htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
+      const htmlContent =
+          '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
       final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
       webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -1436,7 +1438,8 @@ void main() {
   test(
     'WebAssetServer strips leading base href off of asset requests',
     () => testbed.run(() async {
-      const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+      const htmlContent =
+          '<html><head><base href="/foo/"></head><body id="test"></body></html>';
       globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
         ..createSync(recursive: true)
         ..writeAsStringSync(htmlContent);
@@ -1466,7 +1469,8 @@ void main() {
     () => testbed.run(() async {
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
         ..createSync(recursive: true);
-      const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+      const htmlContent =
+          '<html><head><base href="/foo/"></head><body id="test"></body></html>';
       globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
         ..createSync(recursive: true)
         ..writeAsStringSync(htmlContent);

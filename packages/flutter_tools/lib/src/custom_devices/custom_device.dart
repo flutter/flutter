@@ -165,7 +165,8 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // forwarded port.
     // If that regex never matches, this will potentially run forever
     // and the forwarding will never complete.
-    final reader = CustomDeviceLogReader(_deviceName)..listenToProcessOutput(process);
+    final reader = CustomDeviceLogReader(_deviceName)
+      ..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
         completer.complete(ForwardedPort.withContext(hostPort, devicePort, process));

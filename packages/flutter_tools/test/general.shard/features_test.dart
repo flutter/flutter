@@ -150,7 +150,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterLinuxDesktopFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterLinuxDesktopFeature,
+      );
       expect(checkFlags.isLinuxEnabled, isTrue);
     });
   });
@@ -166,7 +168,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterMacOSDesktopFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterMacOSDesktopFeature,
+      );
       expect(checkFlags.isMacOSEnabled, isTrue);
     });
   });
@@ -182,7 +186,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWindowsDesktopFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterWindowsDesktopFeature,
+      );
       expect(checkFlags.isWindowsEnabled, isTrue);
     });
   });
@@ -198,7 +204,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWebFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterWebFeature,
+      );
       expect(checkFlags.isWebEnabled, isTrue);
     });
   });
@@ -214,7 +222,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterAndroidFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterAndroidFeature,
+      );
       expect(checkFlags.isAndroidEnabled, isTrue);
     });
   });
@@ -230,7 +240,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterIOSFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterIOSFeature,
+      );
       expect(checkFlags.isIOSEnabled, isTrue);
     });
   });
@@ -253,7 +265,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterFuchsiaFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterFuchsiaFeature,
+      );
       expect(checkFlags.isFuchsiaEnabled, isTrue);
     });
   });
@@ -276,7 +290,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterCustomDevicesFeature);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: flutterCustomDevicesFeature,
+      );
       expect(checkFlags.areCustomDevicesEnabled, isTrue);
     });
   });
@@ -297,7 +313,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: cliAnimation);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: cliAnimation,
+      );
       expect(checkFlags.isCliAnimationEnabled, isTrue);
     });
   });
@@ -320,7 +338,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: nativeAssets);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: nativeAssets,
+      );
       expect(checkFlags.isNativeAssetsEnabled, isTrue);
     });
   });
@@ -343,7 +363,9 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(shouldInvoke: swiftPackageManager);
+      final checkFlags = _TestIsGetterForwarding(
+        shouldInvoke: swiftPackageManager,
+      );
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
     });
   });

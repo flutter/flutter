@@ -99,7 +99,14 @@ void main() {
 
       // Loop through all platforms supported by default to verify that the
       // dependency and dev dependency are handled appropriately.
-      final platformsToVerify = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
+      final platformsToVerify = <String>[
+        'ios',
+        'android',
+        'windows',
+        'linux',
+        'macos',
+        'web',
+      ];
 
       for (final platform in platformsToVerify) {
         final pluginsForPlatform = plugins[platform] as List<dynamic>;

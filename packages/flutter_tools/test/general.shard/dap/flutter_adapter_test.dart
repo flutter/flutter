@@ -43,7 +43,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
@@ -79,7 +82,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
@@ -102,7 +108,10 @@ void main() {
               supportsRestart: supportsRestart,
             );
 
-            final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+            final args = FlutterLaunchRequestArguments(
+              cwd: '.',
+              program: 'foo.dart',
+            );
 
             // Listen for a Capabilities event that modifies 'supportsRestartRequest'.
             final Future<CapabilitiesEventBody> capabilitiesUpdate = adapter.dapToClientMessages
@@ -135,7 +144,10 @@ void main() {
           platform: platform,
         );
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         final launchCompleter = Completer<void>();
@@ -160,7 +172,10 @@ void main() {
           simulateAppStarted: false,
         );
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         final launchCompleter = Completer<void>();
@@ -186,7 +201,10 @@ void main() {
         );
 
         final launchCompleter = Completer<void>();
-        final launchArgs = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final launchArgs = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
         final restartCompleter = Completer<void>();
         final restartArgs = RestartArguments();
 
@@ -206,7 +224,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         // Begin listening for progress events up until `progressEnd` (but don't await yet).
         final Future<List<List<Object?>>> progressEventsFuture =
@@ -253,7 +274,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         // Begin listening for progress events up until `progressEnd` (but don't await yet).
         final Future<List<List<Object?>>> progressEventsFuture =
@@ -301,7 +325,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         // Capture any progress events.
         final progressEvents = <List<Object?>>[];
@@ -379,7 +406,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterAttachRequestArguments(cwd: '.', program: 'program/main.dart');
+        final args = FlutterAttachRequestArguments(
+          cwd: '.',
+          program: 'program/main.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.attachRequest(MockRequest(), args, responseCompleter.complete);
@@ -614,7 +644,10 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
@@ -630,7 +663,11 @@ void main() {
         );
         final responseCompleter = Completer<void>();
 
-        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart', noDebug: true);
+        final args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+          noDebug: true,
+        );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);

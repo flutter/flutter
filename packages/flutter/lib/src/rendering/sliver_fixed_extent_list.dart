@@ -343,7 +343,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         );
         return;
       }
-      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData =
+          child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -351,7 +352,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
-      final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData =
+          firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
@@ -374,7 +376,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         child.layout(_getChildConstraints(index));
       }
       trailingChildWithLayout = child;
-      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData =
+          child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(
         deprecatedExtraItemExtent,

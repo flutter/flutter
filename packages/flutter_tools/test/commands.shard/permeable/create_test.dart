@@ -2505,7 +2505,13 @@ void main() {
     final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final args = <String>['create', '--no-pub', '--empty', '--template=plugin', outputDir];
+    final args = <String>[
+      'create',
+      '--no-pub',
+      '--empty',
+      '--template=plugin',
+      outputDir,
+    ];
 
     await expectLater(
       runner.run(args),
@@ -5117,7 +5123,12 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
 
   await _getPackages(workingDir);
 
-  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', if (target != null) target];
+  final args = <String>[
+    flutterToolsSnapshotPath,
+    'test',
+    '--no-color',
+    if (target != null) target,
+  ];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
