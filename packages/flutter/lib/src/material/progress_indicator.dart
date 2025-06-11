@@ -428,7 +428,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
-   /// The animation controller for the linear progress indicator.
+  /// The animation controller for the linear progress indicator.
   final AnimationController? controller;
 
   /// The default duration for [LinearProgressIndicator] animation.
