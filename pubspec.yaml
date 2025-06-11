@@ -150,7 +150,6 @@ dependencies:
   pool: 1.5.1
   process: 5.0.4
   process_runner: 4.2.0
-  protobuf: 4.1.0
   provider: 6.1.5
   pub_semver: 2.2.0
   pubspec_parse: 1.5.0
@@ -191,7 +190,7 @@ dependencies:
   video_player_web: 2.3.5
   vm_service: 15.0.2
   vm_snapshot_analysis: 0.7.6
-  watcher: 1.1.1
+  watcher: 1.1.2
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
@@ -213,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: i7mrk3
+# PUBSPEC CHECKSUM: 1ho2t

@@ -262,7 +262,7 @@ class ResidentWebRunner extends ResidentRunner {
       _logger.printStatus('This application is not configured to build on the web.');
       _logger.printStatus('To add web support to a project, run `flutter create .`.');
     }
-    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = debuggingOptions.buildInfo.mode.friendlyName;
     _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
       'on ${device!.device!.displayName} in $modeName mode...',
