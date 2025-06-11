@@ -101,58 +101,6 @@ void main() {
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    test(
-      'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
-      () async {
-        const String commit = 'deadbeef';
-        const String candidateBranch = 'flutter-1.2-candidate.3';
-        bool createdCandidateBranch = false;
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              FrameworkRepository.defaultUpstream,
-              fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-            ],
-          ),
-          FakeCommand(
-            command: const <String>['git', 'checkout', candidateBranch, '--'],
-            onRun: (_) => createdCandidateBranch = true,
-          ),
-          const FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
-          const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
-          ),
-          const FakeCommand(
-            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit),
-        ]);
-        final Checkouts checkouts = Checkouts(
-          parentDirectory: fileSystem.directory(rootDir),
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        );
-
-        final Repository repo = FrameworkRepository(
-          checkouts,
-          additionalRequiredLocalBranches: <String>[candidateBranch],
-          localUpstream: true,
-        );
-        // call this so that repo.lazilyInitialize() is called.
-        await repo.checkoutDirectory;
-
-        expect(processManager.hasRemainingExpectations, false);
-        expect(createdCandidateBranch, true);
-      },
-    );
-
     test('.listRemoteBranches() parses git output', () async {
       const String remoteName = 'mirror';
       const String lsRemoteOutput = '''
@@ -178,9 +126,6 @@ Extraneous debug information that should be ignored.
             '${rootDir}flutter_conductor_checkouts/framework',
           ],
         ),
-        FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
-        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
-        FakeCommand(command: <String>['git', 'checkout', 'master', '--']),
         FakeCommand(command: <String>['git', 'checkout', 'master']),
         FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision),
         FakeCommand(
@@ -195,7 +140,7 @@ Extraneous debug information that should be ignored.
         stdio: stdio,
       );
 
-      final Repository repo = FrameworkRepository(checkouts, localUpstream: true);
+      final Repository repo = FrameworkRepository(checkouts);
       final List<String> branchNames = await repo.listRemoteBranches(remoteName);
       expect(
         branchNames,

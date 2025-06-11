@@ -4,23 +4,6 @@
 
 import 'package:args/args.dart';
 
-import 'repository.dart';
-
-const String gsutilBinary = 'gsutil.py';
-
-const String kFrameworkDefaultBranch = 'master';
-const String kForceFlag = 'force';
-
-const List<String> kBaseReleaseChannels = <String>['stable', 'beta'];
-
-const List<String> kReleaseChannels = <String>[
-  ...kBaseReleaseChannels,
-  FrameworkRepository.defaultBranch,
-];
-
-const String kReleaseDocumentationUrl =
-    'https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md';
-
 const String kLuciPackagingConsoleLink =
     'https://ci.chromium.org/p/dart-internal/g/flutter_packaging/console';
 
