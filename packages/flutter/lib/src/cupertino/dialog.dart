@@ -2277,8 +2277,7 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
 
     return MouseRegion(
       cursor:
-          widget.mouseCursor ??
-          (enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
+          widget.mouseCursor ?? (enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
