@@ -700,7 +700,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    if (globals.platform.isWindows && apkAnalyzerPath.contains(' ')) {
+    if (apkAnalyzerPath.contains(' ')) {
       apkAnalyzerPath.replaceAll(r' ', r'\ ');
     }
 
