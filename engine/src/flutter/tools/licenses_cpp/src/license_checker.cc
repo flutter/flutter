@@ -119,6 +119,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       errors.push_back(git_files.status());
       return errors;
     }
+    bool is_first_write = true;
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
@@ -146,6 +147,13 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                         if (RE2::PartialMatch(comment, pattern, &match)) {
                           did_find_copyright = true;
                           VLOG(1) << comment;
+                          if (!is_first_write) {
+                            for (int i = 0; i < 80; ++i) {
+                              licenses.put('-');
+                            }
+                            licenses.put('\n');
+                          }
+                          is_first_write = false;
                           licenses << "engine\n\n" << comment << "\n";
                         }
                       });

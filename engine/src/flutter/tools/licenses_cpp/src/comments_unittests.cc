@@ -47,7 +47,7 @@ dfdd
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "/*\nhello world\n*/");
+  EXPECT_EQ(comments[0], "hello world\n");
 }
 
 TEST(CommentsTest, MultilineCpp) {
