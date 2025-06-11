@@ -72,7 +72,7 @@ void main() {
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
-          runZoned<Future<void>?>(
+          runZonedGuarded<Future<void>?>(
             () {
               unawaited(
                 runner.run(
@@ -86,7 +86,7 @@ void main() {
               );
               return null;
             },
-            onError: (Object error, StackTrace stack) {
+            (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
               expect(error.toString(), 'Exception: test exit');
@@ -133,7 +133,7 @@ void main() {
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
-          runZoned<Future<void>?>(
+          runZonedGuarded<Future<void>?>(
             () {
               unawaited(
                 runner.run(
@@ -149,7 +149,7 @@ void main() {
               );
               return null;
             },
-            onError: (Object error, StackTrace stack) {
+            (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
               expect(error.toString(), 'Exception: test exit');
@@ -190,7 +190,7 @@ void main() {
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
-          runZoned<Future<void>?>(
+          runZonedGuarded<Future<void>?>(
             () {
               unawaited(
                 runner.run(
@@ -204,7 +204,7 @@ void main() {
               );
               return null;
             },
-            onError: (Object error, StackTrace stack) {
+            (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
               expect(error.toString(), 'Exception: test exit');
@@ -297,7 +297,7 @@ void main() {
           // runner.run() asynchronously calls the exit function set above, so we
           // catch it in a zone.
           unawaited(
-            runZoned<Future<void>?>(
+            runZonedGuarded<Future<void>?>(
               () {
                 unawaited(
                   runner.run(
@@ -311,7 +311,7 @@ void main() {
                 );
                 return null;
               },
-              onError: (Object error, StackTrace stack) {
+              (Object error, StackTrace stack) {
                 expect(firstExitCode, isNotNull);
                 expect(firstExitCode, isNot(0));
                 expect(error.toString(), 'Exception: test exit');

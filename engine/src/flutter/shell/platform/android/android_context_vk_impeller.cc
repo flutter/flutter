@@ -10,6 +10,7 @@
 #include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
+#include "shell/platform/android/android_rendering_selector.h"
 #include "shell/platform/android/context/android_context.h"
 
 namespace flutter {
@@ -75,14 +76,18 @@ AndroidContextVKImpeller::AndroidContextVKImpeller(
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
   auto impeller_context = CreateImpellerContext(vulkan_dylib_, settings);
-  SetImpellerContext(impeller_context);
   is_valid_ = !!impeller_context;
+  SetImpellerContext(impeller_context);
 }
 
 AndroidContextVKImpeller::~AndroidContextVKImpeller() = default;
 
 bool AndroidContextVKImpeller::IsValid() const {
   return is_valid_;
+}
+
+AndroidRenderingAPI AndroidContextVKImpeller::RenderingApi() const {
+  return AndroidRenderingAPI::kImpellerVulkan;
 }
 
 }  // namespace flutter

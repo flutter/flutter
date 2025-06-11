@@ -6,11 +6,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
-import 'widget_preview_scaffold/test/widget_preview_scaffold_test_utils.dart';
+import 'widget_preview_scaffold/test/widget_preview_scaffold_change_detector.dart';
 
 /// Regenerates the widget_preview_scaffold if needed.
 void main() {
-  if (WidgetPreviewScaffoldTestUtils.checkForTemplateUpdates(
+  if (WidgetPreviewScaffoldChangeDetector.checkForTemplateUpdates(
     widgetPreviewScaffoldProject: Directory(
       Platform.script.resolve('widget_preview_scaffold/').path,
     ),

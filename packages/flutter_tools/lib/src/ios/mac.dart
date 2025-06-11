@@ -18,7 +18,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -165,7 +164,6 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
-      features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -418,6 +416,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 
       Future<void> listenToScriptOutputLine() async {
         final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        bool inWarningBlock = false;
+        bool inNoteBlock = false;
         for (final String line in lines) {
           if (line == 'done' || line == 'all done') {
             buildSubStatus?.stop();
@@ -426,6 +426,25 @@ Future<XcodeBuildResult> buildXcodeProject({
               return;
             }
           } else {
+            if (!globals.logger.isVerbose) {
+              if (line.contains('error:')) {
+                globals.printError(line);
+              } else if (line.contains('warning:')) {
+                globals.printWarning(line);
+                inWarningBlock = true;
+              } else if (inNoteBlock) {
+                globals.printWarning(line);
+                inNoteBlock = false;
+              } else if (inWarningBlock) {
+                if (line.startsWith(RegExp(r'\s+?note[:]'))) {
+                  // Xcode doesn't echo this, so we don't.
+                  inNoteBlock = true;
+                }
+                inWarningBlock = false;
+              }
+              continue;
+            }
+
             initialBuildStatus?.cancel();
             initialBuildStatus = null;
             buildSubStatus = globals.logger.startProgress(
@@ -713,7 +732,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
@@ -977,7 +996,8 @@ Future<bool> _handleIssues(
         'to learn more about understanding Podlock dependency tree. \n\n'
         'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n',
+        '  config:'
+        '    enable-swift-package-manager: false\n',
       );
     }
   } else if (missingModules.isNotEmpty) {

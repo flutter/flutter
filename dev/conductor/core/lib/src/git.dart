@@ -6,8 +6,6 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 
-import './globals.dart';
-
 /// A wrapper around git process calls that can be mocked for unit testing.
 ///
 /// The `Git` class is a relatively (compared to `Repository`) lightweight
@@ -15,7 +13,7 @@ import './globals.dart';
 /// motivation for creating this class was so that it could be overridden in
 /// tests. However, now that tests rely on the [FakeProcessManager] this
 /// abstraction is redundant.
-class Git {
+final class Git {
   const Git(this.processManager);
 
   final ProcessManager processManager;
@@ -28,7 +26,7 @@ class Git {
   }) async {
     final ProcessResult result = await _run(args, workingDirectory);
     if (result.exitCode == 0) {
-      return stdoutToString(result.stdout);
+      return (result.stdout as String).trim();
     }
     _reportFailureAndExit(args, workingDirectory, result, explanation);
   }
@@ -110,7 +108,7 @@ enum GitExceptionType {
 ///
 /// Known git failures will be assigned a [GitExceptionType] in the [type]
 /// field. If this field is null it means and unknown git failure.
-class GitException implements Exception {
+final class GitException implements Exception {
   GitException(this.message, this.args) {
     if (_pushRejectedPattern.hasMatch(message)) {
       type = GitExceptionType.PushRejected;

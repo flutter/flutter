@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
@@ -86,7 +85,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         releaseMode: buildInfo.mode.isRelease,
       );
 
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -212,7 +211,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.osx.deployment_target = '10.14'
+  s.osx.deployment_target = '10.15'
   s.vendored_frameworks   = 'FlutterMacOS.framework'
   s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
 end

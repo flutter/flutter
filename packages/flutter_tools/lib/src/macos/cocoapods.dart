@@ -263,16 +263,8 @@ class CocoaPods {
   }
 
   Future<File> getPodfileTemplate(XcodeBasedProject xcodeProject, Directory runnerProject) async {
-    String podfileTemplateName;
-    if (xcodeProject is MacOSProject) {
-      podfileTemplateName = 'Podfile-macos';
-    } else {
-      final bool isSwift = (await _xcodeProjectInterpreter.getBuildSettings(
-        runnerProject.path,
-        buildContext: const XcodeProjectBuildContext(),
-      )).containsKey('SWIFT_VERSION');
-      podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
-    }
+    final String podfileTemplateName =
+        (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
         Cache.flutterRoot!,

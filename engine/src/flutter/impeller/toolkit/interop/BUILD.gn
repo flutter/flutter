@@ -219,7 +219,7 @@ zip_bundle("sdk") {
         destination = "lib/libimpeller.dylib"
       },
     ]
-  } else if (is_linux || is_android) {
+  } else if (is_linux || is_android || is_qnx) {
     files += [
       {
         source = "$root_build_dir/libimpeller.so"

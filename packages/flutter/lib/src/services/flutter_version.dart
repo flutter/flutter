@@ -7,7 +7,7 @@
 /// Details about the Flutter version this app was compiled with,
 /// corresponding to the output of `flutter --version`.
 ///
-/// When this Flutter version was build from a fork, or when Flutter runs in a
+/// When this Flutter version was built from a fork, or when Flutter runs in a
 /// custom embedder, these values might be unreliable.
 ///
 /// See also:

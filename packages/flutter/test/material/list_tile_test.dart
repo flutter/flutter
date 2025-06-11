@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -2300,6 +2301,109 @@ void main() {
     },
   );
 
+  testWidgets(
+    'IconButtonTheme.style.foregroundColor is preserved in ListTile in non-overriding scenario',
+    (WidgetTester tester) async {
+      const Color iconButtonThemeColor = Colors.blue;
+      const Icon leadingIcon = Icon(Icons.favorite);
+      const Icon trailingIcon = Icon(Icons.close);
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: ThemeData(
+            iconButtonTheme: IconButtonThemeData(
+              style: IconButton.styleFrom(foregroundColor: iconButtonThemeColor),
+            ),
+          ),
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                    trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
+          tester
+              .widget<RichText>(
+                find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+              )
+              .text
+              .style;
+
+      await tester.pumpWidget(buildFrame());
+      expect(getIconStyle(tester, leadingIcon.icon!)?.color, iconButtonThemeColor);
+      expect(getIconStyle(tester, trailingIcon.icon!)?.color, iconButtonThemeColor);
+    },
+  );
+
+  testWidgets('ListTile respects and combines parent IconButtonThemeData style', (
+    WidgetTester tester,
+  ) async {
+    const Color customIconColor = Colors.green;
+    const Icon leadingIcon = Icon(Icons.favorite);
+    const Icon trailingIcon = Icon(Icons.close);
+    const WidgetStateProperty<OutlinedBorder> customShape = WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(side: BorderSide()),
+    );
+    // Specially treated in ButtonStyle.merge, thus check these, too.
+    const WidgetStateProperty<Color> overlayColor = WidgetStatePropertyAll<Color>(Colors.purple);
+    const WidgetStateProperty<MouseCursor> mouseCursor = WidgetStatePropertyAll<MouseCursor>(
+      SystemMouseCursors.resizeUpRightDownLeft,
+    );
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              overlayColor: overlayColor,
+              mouseCursor: mouseCursor,
+              shape: customShape,
+            ),
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: ListTile(
+              iconColor: customIconColor,
+              leading: IconButton(icon: leadingIcon, onPressed: () {}),
+              trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    // Verify that the merged theme retains the parent shape and other critical fields.
+    for (final BuildContext iconButtonContext in find.byType(IconButton).evaluate()) {
+      final IconButtonThemeData mergedTheme = IconButtonTheme.of(iconButtonContext);
+      expect(mergedTheme.style?.shape, customShape);
+      expect(mergedTheme.style?.overlayColor, overlayColor);
+      expect(mergedTheme.style?.mouseCursor, mouseCursor);
+    }
+
+    // Verify that ListTile's iconColor overrides the inherited color.
+    Color? getIconColor(IconData iconData) {
+      final RichText richText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(iconData), matching: find.byType(RichText)),
+      );
+      return richText.text.style?.color;
+    }
+
+    expect(getIconColor(leadingIcon.icon!), customIconColor);
+    expect(getIconColor(trailingIcon.icon!), customIconColor);
+  });
+
   testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
 
@@ -4360,6 +4464,138 @@ void main() {
       expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
       expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/165453
+  testWidgets('ListTile isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double avatarTop = 130.0;
+    const double placeholderTop = 138.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme:
+            themeDataIsThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+                : null,
+        home: Material(
+          child: ListTileTheme(
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            child: ListView(
+              children: <Widget>[
+                ListTile(
+                  isThreeLine: isThreeLine,
+                  leading: const CircleAvatar(),
+                  trailing: const SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                ),
+                ListTile(
+                  isThreeLine: isThreeLine,
+                  leading: const CircleAvatar(),
+                  trailing: const SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
   });
 }
 

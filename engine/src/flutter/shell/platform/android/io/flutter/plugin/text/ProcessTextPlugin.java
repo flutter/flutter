@@ -6,7 +6,6 @@ package io.flutter.plugin.text;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -136,7 +135,6 @@ public class ProcessTextPlugin
    * <p>When an activity does not return a value. the request is completed successfully and returns
    * null.
    */
-  @TargetApi(API_LEVELS.API_23)
   @RequiresApi(API_LEVELS.API_23)
   public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
     // Return early if the result is not related to a request sent by this plugin.

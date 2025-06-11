@@ -35,7 +35,7 @@ typedef DDSLauncherCallback =
 @visibleForTesting
 DDSLauncherCallback ddsLauncherCallback = DartDevelopmentServiceLauncher.start;
 
-/// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
+/// Helper class to launch a [DartDevelopmentServiceLauncher]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   DartDevelopmentService({required Logger logger}) : _logger = logger;

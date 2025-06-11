@@ -30,29 +30,32 @@ class OutputPreferences {
 
   final io.Stdio? _stdio;
 
-  /// If [wrapText] is true, then any text sent to the context's [Logger]
-  /// instance (e.g. from the [printError] or [printStatus] functions) will be
-  /// wrapped (newlines added between words) to be no longer than the
-  /// [wrapColumn] specifies. Defaults to true if there is a terminal. To
-  /// determine if there's a terminal, [OutputPreferences] asks the context's
-  /// stdio.
+  /// If `true`, then any text sent to the context's [Logger] instance,
+  /// such as from the [Logger.printError] and [Logger.printStatus] functions,
+  /// will be wrapped (newlines added between words) to
+  /// be no longer than the [wrapColumn] specifies.
+  /// Defaults to `true` if there is a terminal.
+  ///
+  /// To determine if there's a terminal,
+  /// [OutputPreferences] asks the context's stdio.
   final bool wrapText;
 
   /// The terminal width used by the [wrapText] function if there is no terminal
   /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
   static const int kDefaultTerminalColumns = 100;
 
-  /// The column at which output sent to the context's [Logger] instance
-  /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
-  /// Ignored if [wrapText] is false. Defaults to the width of the output
-  /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
+  /// The column at which output sent to the context's [Logger] instance,
+  /// such as from the [Logger.printError] and [Logger.printStatus] functions,
+  /// will be wrapped. Ignored if [wrapText] is `false`.
+  /// Defaults to the width of the output terminal, or to
+  /// [kDefaultTerminalColumns] if not writing to a terminal.
   final int? _overrideWrapColumn;
   int get wrapColumn {
     return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
-  /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if
+  /// terminal. Defaults to whatever [Platform.stdoutSupportsAnsi] says if
   /// writing to a terminal, and false otherwise.
   final bool showColor;
 

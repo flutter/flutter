@@ -11,6 +11,12 @@ Flutter other than the actual writing of the code. For guidance on
 designing APIs, documenting, and formatting your code, see the
 [Style guide for Flutter repo](Style-guide-for-Flutter-repo.md) document.
 
+Across the document we use the word "tree" to mean "the health state of flutter/flutter repository". Tree status is shown:
+
+- On our [build dashboard](https://flutter-dashboard.appspot.com/)
+- On every PR (referred to as "Tree Status")
+- In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
+
 ## Overview
 
 The general process for submitting code to a Flutter repository is as follows:
@@ -84,7 +90,7 @@ _See also: [What should I work on?](What-should-I-work-on.md)_
 
 ## Tests
 
-Every change in the flutter/engine, flutter/flutter, and flutter/packages repos
+Every change in the flutter/flutter and flutter/packages repos
 must be tested; consider using the code coverage tools to check that all your
 new code is covered by tests (see [Test coverage for package:flutter](./testing/Test-coverage-for-package-flutter.md)).
 
@@ -140,7 +146,7 @@ feel empowered to ask for tests.
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../engine/contributing/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:
@@ -301,12 +307,6 @@ the repository yet, then wait for one of the project maintainers to submit it fo
 
 If you do have access, add the "autosubmit" label. A bot will land the PR for you.
 
-
-### Squashing commits
-
-When you squash commits, by default, GitHub will concatenate all your commit messages to form a unified commit message.  This often yields an overly verbose commit message with many unhelpful entries (e.g. "fix typo").  Please double-check (and hand-edit if necessary) your commit message before merging such that the message contains a helpful description of the overall change.
-
-
 ## Tree breakage (regressions in functionality)
 
 If a check-in has caused a regression on the main branch (sometimes "master") for any of the flutter repositories,
@@ -369,9 +369,9 @@ behavior, reverting an [auto-roller](../infra/Autorollers.md)
 (e.g., an engine-roller commit like https://github.com/flutter/flutter/commit/fdcb57b69eff2162e9aead6dec0f8058788e7608)
 commit could cause some complications:
 
-1. The auto-roller commit usually include multiple commits of the source repo (e.g., engine-roller
-commit includes multiple commits of https://github.com/flutter/engine). This can be applied
-recursively as the engine-roller commit includes a dart-roller commit, or a skia-roller commit.
+1. The auto-roller commit usually include multiple commits of the source repo (e.g., skia-roller
+commit includes multiple commits of https://github.com/google/skia). This can be applied
+recursively as some rollers might include a commit from another roller.
 Therefore, a roller commit could actually include a ton of leaf-level commits, which makes it
 really hard to triage which leaf commit actually caused the regression.
 

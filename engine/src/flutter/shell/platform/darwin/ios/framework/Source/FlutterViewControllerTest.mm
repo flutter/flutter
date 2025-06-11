@@ -13,6 +13,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
@@ -22,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/testing/ios/IosUnitTests/App/AppDelegate.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
 FLUTTER_ASSERT_ARC
@@ -116,6 +118,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @interface FlutterEmbedderKeyResponder (Tests)
 @property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
+@end
+
+@interface NSObject (Tests)
+@property(nonatomic, strong) FlutterEngine* mockLaunchEngine;
 @end
 
 @interface FlutterViewController (Tests)
@@ -474,26 +480,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                   }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == NO);
-
-  if (@available(iOS 13.0, *)) {
-    // noop
-  } else {
-    // Valid keyboard, keyboard is in background
-    OCMStub([viewControllerMock isKeyboardInOrTransitioningFromBackground]).andReturn(YES);
-
-    isLocal = YES;
-    notification =
-        [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
-                                      object:nil
-                                    userInfo:@{
-                                      @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
-                                      @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                      @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                    }];
-    shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
-    XCTAssertTrue(shouldIgnore == YES);
-  }
 }
+
 - (void)testKeyboardAnimationWillNotCrashWhenEngineDestroyed {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
@@ -1251,12 +1239,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsDarkPlatformBrightnessWhenTraitCollectionRequestsIt {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1297,12 +1279,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1324,11 +1300,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsPlatformContrastWhenViewWillAppear {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
 
@@ -1352,12 +1323,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsHighContrastWhenTraitCollectionRequestsIt {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1417,12 +1382,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
@@ -1437,12 +1396,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagSet {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
@@ -1660,16 +1613,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       } else {
         OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
       }
-      if (@available(iOS 13.0, *)) {
-        mockWindowScene = OCMClassMock([UIWindowScene class]);
-        mockVC = OCMPartialMock(realVC);
-        OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
-        OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation)
-            .andReturn(currentOrientation);
-      } else {
-        OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-        OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
-      }
+      mockWindowScene = OCMClassMock([UIWindowScene class]);
+      mockVC = OCMPartialMock(realVC);
+      OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
+      OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation).andReturn(currentOrientation);
     }
 
     [realVC performOrientationUpdate:mask];
@@ -2528,6 +2475,40 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
+}
+
+- (void)testAppDelegatePluginRegistrant {
+  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
+  [appDelegate setPluginRegistrant:mockRegistrant];
+  FlutterViewController* viewController = [[FlutterViewController alloc] init];
+  [appDelegate setPluginRegistrant:nil];
+  OCMVerify([mockRegistrant registerWithRegistry:viewController]);
+}
+
+- (void)testGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
+  XCTAssertTrue(storyboard);
+  FlutterViewController* viewController =
+      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  XCTAssertTrue(viewController);
+  XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
+  XCTAssertEqual(viewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
+}
+
+- (void)testDoesntGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
+  XCTAssertNotNil(flutterViewController.engine);
+  XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 @end

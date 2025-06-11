@@ -44,8 +44,8 @@ void RasterCacheResult::draw(DlCanvas& canvas,
       RasterCacheUtil::GetIntegralTransCTM(ToSkMatrix(canvas.GetMatrix()));
   SkRect bounds =
       RasterCacheUtil::GetRoundedOutDeviceBounds(logical_rect_, matrix);
-  FML_DCHECK(std::abs(bounds.width() - image_->dimensions().width()) <= 1 &&
-             std::abs(bounds.height() - image_->dimensions().height()) <= 1);
+  FML_DCHECK(std::abs(bounds.width() - image_->GetSize().width) <= 1 &&
+             std::abs(bounds.height() - image_->GetSize().height) <= 1);
   canvas.TransformReset();
   flow_.Step();
   if (!preserve_rtree || !rtree_) {

@@ -79,7 +79,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
        input_coverage](const ContentContext& renderer, const Entity& entity,
                        RenderPass& pass) -> bool {
     RuntimeEffectContents contents;
-    RectGeometry geom(Rect::MakeSize(input_coverage.GetSize()));
+    FillRectGeometry geom(Rect::MakeSize(input_coverage.GetSize()));
     contents.SetRuntimeStage(runtime_stage);
     contents.SetUniformData(uniforms);
     contents.SetTextureInputs(texture_inputs);

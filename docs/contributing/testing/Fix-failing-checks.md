@@ -30,6 +30,19 @@ might be due to changes in the PR (See
 for more info).
 Google employees can view the test output and give feedback accordingly.
 
+The correct course of action in this case will likely be further changes in the pull request to make
+it non-breaking. The Google employee assisting will be able to advise. Breaking changes create churn
+for users and decay the ecosystem, so most often updating to a non-breaking change is
+the correct course of action to unblock the PR.
+
+If the breaking change _is_ approved, the [breaking change policy](../Tree-hygiene.md#handling-breaking-changes)
+must be followed. This means these changes should include a dart fix when they can, or a migration guide.
+
+Pull requests that are blocked by a Google Testing failure are tracked in the
+[Google testing queue project](https://github.com/orgs/flutter/projects/200/views/1)
+for resolution. Ping your reviewer if the PR has not been added to the project
+for tracking.
+
 **What to do:** If 2 weeks have gone by and nobody's looked into it,
 feel free to [reach out on Discord](../Chat.md).
 

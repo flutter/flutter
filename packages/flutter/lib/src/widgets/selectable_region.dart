@@ -1122,17 +1122,24 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _onAnyDragEnd(DragEndDetails details) {
+    final bool draggingHandles =
+        _selectionOverlay != null &&
+        (_selectionOverlay!.isDraggingStartHandle || _selectionOverlay!.isDraggingEndHandle);
     if (widget.selectionControls is! TextSelectionHandleControls) {
-      _selectionOverlay!.hideMagnifier();
-      _selectionOverlay!.showToolbar();
+      if (!draggingHandles) {
+        _selectionOverlay!.hideMagnifier();
+        _selectionOverlay!.showToolbar();
+      }
     } else {
-      _selectionOverlay!.hideMagnifier();
-      _selectionOverlay!.showToolbar(
-        context: context,
-        contextMenuBuilder: (BuildContext context) {
-          return widget.contextMenuBuilder!(context, this);
-        },
-      );
+      if (!draggingHandles) {
+        _selectionOverlay!.hideMagnifier();
+        _selectionOverlay!.showToolbar(
+          context: context,
+          contextMenuBuilder: (BuildContext context) {
+            return widget.contextMenuBuilder!(context, this);
+          },
+        );
+      }
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
@@ -2830,7 +2837,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     bool foundStart = false;
     bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
     if (currentSelectionEndIndex == currentSelectionStartIndex) {
-      // Determining selection direction is innacurate if currentSelectionStartIndex == currentSelectionEndIndex.
+      // Determining selection direction is inaccurate if currentSelectionStartIndex == currentSelectionEndIndex.
       // Use the range from the selectable within the selection as the source of truth for selection direction.
       final SelectedContentRange rangeAtSelectableInSelection =
           selectables[currentSelectionStartIndex].getSelection()!;

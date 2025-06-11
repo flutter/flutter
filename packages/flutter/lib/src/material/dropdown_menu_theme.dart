@@ -119,7 +119,7 @@ class DropdownMenuTheme extends InheritedTheme {
   /// widgets.
   final DropdownMenuThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [DropdownMenuThemeData] from the closest ancestor [DropdownMenuTheme].
   ///
   /// If there is no enclosing [DropdownMenuTheme] widget, then
   /// [ThemeData.dropdownMenuTheme] is used.

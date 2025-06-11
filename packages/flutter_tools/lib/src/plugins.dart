@@ -294,7 +294,6 @@ class Plugin {
           'See: https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
-
     if (!usesOldPluginFormat && !usesNewPluginFormat) {
       const String errorMessage =
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
@@ -407,7 +406,7 @@ class Plugin {
   final String path;
 
   /// The name of the interface package that this plugin implements.
-  /// If [null], this plugin doesn't implement an interface.
+  /// If `null`, this plugin doesn't implement an interface.
   final String? implementsPackage;
 
   /// The required version of Flutter, if specified.
@@ -426,12 +425,12 @@ class Plugin {
   final Map<String, DartPluginClassAndFilePair> pluginDartClassPlatforms;
 
   /// Whether this plugin is a direct dependency of the app.
-  /// If [false], the plugin is a dependency of another plugin.
+  /// If `false`, the plugin is a dependency of another plugin.
   final bool isDirectDependency;
 
   /// Whether this plugin is exclusively used as a dev dependency of the app.
   ///
-  /// If [false], the plugin is either:
+  /// If `false`, the plugin is either:
   /// - _Not_ a dev dependency
   /// - _Not_ a dev dependency of some dependency that itself is not a dev
   ///   dependency
@@ -439,14 +438,29 @@ class Plugin {
   /// Dev dependencies are intended to be stripped out in release builds.
   final bool isDevDependency;
 
-  /// Expected path to the plugin's Package.swift. Returns null if the plugin
-  /// does not support the [platform] or the [platform] is not iOS or macOS.
-  String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
+  /// Expected path to the plugin's swift package, which contains the Package.swift.
+  ///
+  /// This path should be `/path/to/[package_name]/[platform]/[package_name]`
+  /// (e.g. `/path/to/my_plugin/ios/my_plugin`).
+  ///
+  /// Returns null if the plugin does not support the [platform] or the
+  /// [platform] is not iOS or macOS.
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform) {
     final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
     if (platformDirectoryName == null) {
       return null;
     }
-    return fileSystem.path.join(path, platformDirectoryName, name, 'Package.swift');
+    return fileSystem.path.join(path, platformDirectoryName, name);
+  }
+
+  /// Expected path to the plugin's Package.swift. Returns null if the plugin
+  /// does not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
+    final String? packagePath = pluginSwiftPackagePath(fileSystem, platform);
+    if (packagePath == null) {
+      return null;
+    }
+    return fileSystem.path.join(packagePath, 'Package.swift');
   }
 
   /// Expected path to the plugin's podspec. Returns null if the plugin does
@@ -481,7 +495,8 @@ class PluginInterfaceResolution {
 
   /// The plugin.
   final Plugin plugin;
-  // The name of the platform that this plugin implements.
+
+  /// The name of the platform that this plugin implements.
   final String platform;
 
   Map<String, String> toMap() {
@@ -502,10 +517,12 @@ class PluginInterfaceResolution {
 /// A record representing pair of dartPluginClass and dartFileName used as metadata
 /// in [PluginInterfaceResolution].
 ///
-/// The [dartClass] and [dartFileName] fields are guaranteed to be non-null:
+/// The `dartClass` and `dartFileName` fields are guaranteed to be non-null:
+///
 /// - record should be created only if dartClassName exists in plugin configuration.
 /// - dartFileName either taken from configuration, or, if absent, should be
-/// constructed from plugin name.
+///   constructed from plugin name.
+///
 /// See also:
 /// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
 typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});

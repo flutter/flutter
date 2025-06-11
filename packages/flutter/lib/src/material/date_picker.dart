@@ -42,7 +42,7 @@ import 'theme.dart';
 // The M3 sizes are coming from the tokens, but are hand coded,
 // as the current token DB does not contain landscape versions.
 const Size _calendarPortraitDialogSizeM2 = Size(330.0, 518.0);
-const Size _calendarPortraitDialogSizeM3 = Size(328.0, 512.0);
+const Size _calendarPortraitDialogSizeM3 = Size(360.0, 568.0);
 const Size _calendarLandscapeDialogSize = Size(496.0, 346.0);
 const Size _inputPortraitDialogSizeM2 = Size(330.0, 270.0);
 const Size _inputPortraitDialogSizeM3 = Size(328.0, 270.0);
@@ -777,13 +777,21 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
               switch (orientation) {
                 case Orientation.portrait:
+                  final bool isInputMode =
+                      _entryMode.value == DatePickerEntryMode.inputOnly ||
+                      _entryMode.value == DatePickerEntryMode.input;
+                  // When the portrait dialog does not fit vertically, hide the header when the entry mode
+                  // is input, or hide the picker when the entry mode is not input.
+                  final bool showHeader = isFullyPortrait || !isInputMode;
+                  final bool showPicker = isFullyPortrait || isInputMode;
+
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      header,
+                      if (showHeader) header,
                       if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                      if (isFullyPortrait) ...<Widget>[Expanded(child: picker), actions],
+                      if (showPicker) ...<Widget>[Expanded(child: picker), actions],
                     ],
                   );
                 case Orientation.landscape:
@@ -1251,6 +1259,7 @@ Future<DateTimeRange?> showDateRangePicker({
     keyboardType: keyboardType,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+    calendarDelegate: calendarDelegate,
   );
 
   if (textDirection != null) {
@@ -1871,7 +1880,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             preferredSize: const Size(double.infinity, 64),
             child: Row(
               children: <Widget>[
-                SizedBox(width: MediaQuery.sizeOf(context).width < 360 ? 42 : 72),
+                SizedBox(width: MediaQuery.widthOf(context) < 360 ? 42 : 72),
                 Expanded(
                   child: Semantics(
                     label: '$helpText $startDateText to $endDateText',
@@ -3175,10 +3184,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                header,
-                if (isFullyPortrait) ...<Widget>[Expanded(child: picker), actions],
-              ],
+              // When the portrait dialog does not fit vertically, hide the header.
+              children: <Widget>[if (isFullyPortrait) header, Expanded(child: picker), actions],
             );
           },
         );

@@ -269,8 +269,9 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
     }
     exts = maybe_exts.value();
   } else {
-    exts = std::set(embedder_device_extensions_.begin(),
-                    embedder_device_extensions_.end());
+    for (const auto& ext : embedder_device_extensions_) {
+      exts.insert(ext);
+    }
   }
 
   std::vector<std::string> enabled;
@@ -520,11 +521,11 @@ bool CapabilitiesVK::SetPhysicalDevice(
     default_color_format_ = PixelFormat::kUnknown;
   }
 
-  if (HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint)) {
-    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
-  } else if (HasSuitableDepthStencilFormat(device,
-                                           vk::Format::eD24UnormS8Uint)) {
+  if (HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint)) {
     default_depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
+  } else if (HasSuitableDepthStencilFormat(device,
+                                           vk::Format::eD32SfloatS8Uint)) {
+    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
   } else {
     default_depth_stencil_format_ = PixelFormat::kUnknown;
   }
@@ -580,8 +581,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
       }
       exts = maybe_exts.value();
     } else {
-      exts = std::set(embedder_device_extensions_.begin(),
-                      embedder_device_extensions_.end());
+      for (const auto& ext : embedder_device_extensions_) {
+        exts.insert(ext);
+      }
     }
 
     IterateExtensions<RequiredCommonDeviceExtensionVK>([&](auto ext) -> bool {
@@ -639,6 +641,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
       HasExtension(OptionalAndroidDeviceExtensionVK::kKHRExternalSemaphoreFd)) {
     supports_external_fence_and_semaphore_ = true;
   }
+
+  minimum_uniform_alignment_ =
+      device_properties_.limits.minUniformBufferOffsetAlignment;
 
   return true;
 }
@@ -716,6 +721,10 @@ CapabilitiesVK::GetPhysicalDeviceProperties() const {
 
 PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
   return PixelFormat::kR8UNormInt;
+}
+
+size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
+  return minimum_uniform_alignment_;
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {

@@ -14,7 +14,7 @@ import 'material_localizations.dart';
 import 'theme_data.dart';
 import 'typography.dart';
 
-export 'theme_data.dart' show Brightness, ThemeData;
+export 'theme_data.dart' show Brightness, MaterialTapTargetSize, ThemeData;
 
 /// The duration over which theme changes animate by default.
 const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
@@ -37,7 +37,7 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 /// from the nearest ancestor [CupertinoTheme] or if none exists, derived from the
 /// Material [data] for the [Theme]. The values in the Material derived [CupertinoThemeData]
 /// are overridable through [ThemeData.cupertinoOverrideTheme]. The values from an
-/// inherited [CupertinoThemeData] can be overriden by wrapping the desired subtree
+/// inherited [CupertinoThemeData] can be overridden by wrapping the desired subtree
 /// with a [CupertinoTheme].
 ///
 /// See also:

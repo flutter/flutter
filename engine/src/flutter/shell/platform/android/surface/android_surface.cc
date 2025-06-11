@@ -19,4 +19,6 @@ std::shared_ptr<impeller::Context> AndroidSurface::GetImpellerContext() {
   return nullptr;
 }
 
+void AndroidSurface::SetupImpellerSurface() {}
+
 }  // namespace flutter

@@ -156,6 +156,11 @@ class _MenuControllerScope extends InheritedWidget {
 /// Users are responsible for managing the positioning, semantics, and focus of
 /// the menu.
 ///
+/// To programmatically control a [RawMenuAnchor], like opening or closing it, or checking its state,
+/// you can get its associated [MenuController]. Use `MenuController.maybeOf(BuildContext context)`
+/// to retrieve the controller for the closest [RawMenuAnchor] ancestor of a given `BuildContext`.
+/// More detailed usage of [MenuController] is available in its class documentation.
+///
 /// {@tool dartpad}
 ///
 /// This example uses a [RawMenuAnchor] to build a basic select menu with
@@ -293,7 +298,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
   ///
-  /// If an overridding widget does not provide a [MenuController], then
+  /// If an overriding widget does not provide a [MenuController], then
   /// [_RawMenuAnchorBaseMixin] will create and manage its own.
   MenuController get menuController;
 

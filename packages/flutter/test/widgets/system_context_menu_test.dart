@@ -698,4 +698,34 @@ void main() {
       );
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemLookUp debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemLookUp item = IOSSystemContextMenuItemLookUp(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemSearchWeb debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemSearchWeb item = IOSSystemContextMenuItemSearchWeb(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemShare debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
 }
