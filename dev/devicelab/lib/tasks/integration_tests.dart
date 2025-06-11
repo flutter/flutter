@@ -245,7 +245,7 @@ class DriverTest {
       }
       await flutter('packages', options: <String>['get']);
 
-      final options = <String>[
+      final List<String> options = <String>[
         '--no-android-gradle-daemon',
         '-v',
         '-t',
@@ -309,7 +309,7 @@ class IntegrationTest {
         await enableTalkBack();
       }
 
-      final options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
+      final List<String> options = <String>['-v', '-d', deviceId, testTarget, ...extraOptions];
       await flutter('test', options: options, environment: environment);
       await tearDown?.call(await devices.workingDevice);
 

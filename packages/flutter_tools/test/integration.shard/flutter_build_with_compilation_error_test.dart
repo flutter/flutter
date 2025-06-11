@@ -11,7 +11,7 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  final targetPlatforms = <String>[
+  final List<String> targetPlatforms = <String>[
     'apk',
     'web',
     if (platform.isWindows) 'windows',
@@ -45,7 +45,7 @@ int x = 'String';
     tryToDelete(tempDir);
   });
 
-  for (final targetPlatform in targetPlatforms) {
+  for (final String targetPlatform in targetPlatforms) {
     testWithoutContext(
       'flutter build $targetPlatform shows dart compilation error in non-verbose',
       () {
@@ -58,7 +58,7 @@ int x = 'String';
           if (targetPlatform == 'ios') '--no-codesign',
         ], workingDirectory: projectRoot.path);
 
-        const errorMessage =
+        const String errorMessage =
             "A value of type 'String' can't be assigned to a variable of type 'int'.";
 
         // Xcode 16 moved the xcodebuild error details from stderr to stdout.

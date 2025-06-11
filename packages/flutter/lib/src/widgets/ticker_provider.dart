@@ -318,7 +318,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     }
     assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
-    final result = _WidgetTicker(
+    final _WidgetTicker result = _WidgetTicker(
       onTick,
       this,
       debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null,

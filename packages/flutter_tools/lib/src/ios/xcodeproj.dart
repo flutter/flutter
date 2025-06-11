@@ -164,7 +164,7 @@ class XcodeProjectInterpreter {
   /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
-    final xcrunCommand = <String>[];
+    final List<String> xcrunCommand = <String>[];
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>['/usr/bin/arch', '-arm64e']);
@@ -193,7 +193,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
-    final showBuildSettingsCommand = <String>[
+    final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-project',
@@ -265,7 +265,7 @@ class XcodeProjectInterpreter {
     }
     final Status status = _logger.startSpinner();
     final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
-    final showBuildSettingsCommand = <String>[
+    final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-alltargets',
@@ -327,9 +327,9 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
-    const missingProjectExitCode = 66;
+    const int missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
-    const corruptedProjectExitCode = 74;
+    const int corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
@@ -355,7 +355,7 @@ class XcodeProjectInterpreter {
 /// for or be aware of each one. This could be used to set code signing build settings in a CI
 /// environment without requiring settings changes in the Xcode project.
 List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
-  const xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
+  const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
   return platform.environment.entries
       .where((MapEntry<String, String> mapEntry) {
         return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
@@ -371,7 +371,7 @@ List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
-  final settings = <String, String>{};
+  final Map<String, String> settings = <String, String>{};
   for (final Match? match in showBuildSettingsOutput
       .split('\n')
       .map<Match?>(_settingExpr.firstMatch)) {
@@ -438,9 +438,9 @@ class XcodeProjectInfo {
     : _logger = logger;
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
-    final targets = <String>[];
-    final buildConfigurations = <String>[];
-    final schemes = <String>[];
+    final List<String> targets = <String>[];
+    final List<String> buildConfigurations = <String>[];
+    final List<String> schemes = <String>[];
     List<String>? collector;
     for (final String line in output.split('\n')) {
       if (line.isEmpty) {

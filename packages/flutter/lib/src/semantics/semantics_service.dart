@@ -50,7 +50,7 @@ abstract final class SemanticsService {
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {
-    final event = AnnounceSemanticsEvent(
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
       message,
       textDirection,
       assertiveness: assertiveness,
@@ -63,7 +63,7 @@ abstract final class SemanticsService {
   /// Currently only honored on Android. The contents of [message] will be
   /// read by TalkBack.
   static Future<void> tooltip(String message) async {
-    final event = TooltipSemanticsEvent(message);
+    final TooltipSemanticsEvent event = TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
   }
 

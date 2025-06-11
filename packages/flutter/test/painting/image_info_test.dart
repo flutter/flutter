@@ -13,7 +13,7 @@ Future<void> main() async {
   final ui.Image bigImage = await createTestImage(width: 100, height: 200);
 
   test('ImageInfo sizeBytes', () {
-    var imageInfo = ImageInfo(image: smallImage);
+    ImageInfo imageInfo = ImageInfo(image: smallImage);
     expect(imageInfo.sizeBytes, equals(800));
 
     imageInfo = ImageInfo(image: middleImage);

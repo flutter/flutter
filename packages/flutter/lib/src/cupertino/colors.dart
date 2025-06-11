@@ -1092,11 +1092,11 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     String toString(String name, Color color) {
-      final marker = color == _effectiveColor ? '*' : '';
+      final String marker = color == _effectiveColor ? '*' : '';
       return '$marker$name = $color$marker';
     }
 
-    final xs = <String>[
+    final List<String> xs = <String>[
       toString('color', color),
       if (_isPlatformBrightnessDependent) toString('darkColor', darkColor),
       if (_isHighContrastDependent) toString('highContrastColor', highContrastColor),

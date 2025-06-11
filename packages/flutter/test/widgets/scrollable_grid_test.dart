@@ -19,7 +19,7 @@ void main() {
   testWidgets('GridView displays correct children with nonzero padding', (
     WidgetTester tester,
   ) async {
-    const padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,

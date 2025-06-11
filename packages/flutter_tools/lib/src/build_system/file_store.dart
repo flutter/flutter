@@ -22,10 +22,10 @@ class FileStorage {
     if (json == null) {
       throw Exception('File storage format invalid');
     }
-    final version = json['version'] as int;
+    final int version = json['version'] as int;
     final List<Map<String, dynamic>> rawCachedFiles =
         (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
-    final cachedFiles = <FileHash>[
+    final List<FileHash> cachedFiles = <FileHash>[
       for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
@@ -35,7 +35,7 @@ class FileStorage {
   final List<FileHash> files;
 
   List<int> toBuffer() {
-    final json = <String, Object>{
+    final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[for (final FileHash file in files) file.toJson()],
     };
@@ -150,11 +150,11 @@ class FileStore {
     if (!_cacheFile.existsSync()) {
       _cacheFile.createSync(recursive: true);
     }
-    final fileHashes = <FileHash>[];
+    final List<FileHash> fileHashes = <FileHash>[];
     for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
-    final fileStorage = FileStorage(_kVersion, fileHashes);
+    final FileStorage fileStorage = FileStorage(_kVersion, fileHashes);
     final List<int> buffer = fileStorage.toBuffer();
     try {
       _cacheFile.writeAsBytesSync(buffer);
@@ -178,7 +178,7 @@ class FileStore {
   /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
   List<File> diffFileList(List<File> files) {
-    final dirty = <File>[];
+    final List<File> dirty = <File>[];
     switch (_strategy) {
       case FileStoreStrategy.hash:
         for (final File file in files) {
@@ -203,7 +203,7 @@ class FileStore {
       dirty.add(file);
       return;
     }
-    final modifiedTime = file.lastModifiedSync().toString();
+    final String modifiedTime = file.lastModifiedSync().toString();
     if (modifiedTime != previousTime) {
       dirty.add(file);
     }
@@ -224,11 +224,11 @@ class FileStore {
       return;
     }
     final int fileBytes = file.lengthSync();
-    final hash = Md5Hash();
+    final Md5Hash hash = Md5Hash();
     RandomAccessFile? openFile;
     try {
       openFile = file.openSync();
-      var bytes = 0;
+      int bytes = 0;
       while (bytes < fileBytes) {
         final int bytesRead = openFile.readIntoSync(_readBuffer);
         hash.addChunk(_readBuffer, bytesRead);
@@ -237,8 +237,8 @@ class FileStore {
     } finally {
       openFile?.closeSync();
     }
-    final digest = Digest(hash.finalize().buffer.asUint8List());
-    final currentHash = digest.toString();
+    final Digest digest = Digest(hash.finalize().buffer.asUint8List());
+    final String currentHash = digest.toString();
     if (currentHash != previousHash) {
       dirty.add(file);
     }

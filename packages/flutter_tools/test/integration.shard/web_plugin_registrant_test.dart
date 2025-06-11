@@ -58,7 +58,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final buildDir =
+      final Directory buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -115,7 +115,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final buildDir =
+      final Directory buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -159,7 +159,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final buildDir =
+      final Directory buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -252,7 +252,7 @@ void main() {
       await _buildWebProject(projectDir);
 
       // Find the web_plugin_registrant, now that it lives outside "lib":
-      final buildDir =
+      final Directory buildDir =
           projectDir
                   .childDirectory('.dart_tool/flutter_build')
                   .listSync()
@@ -278,7 +278,7 @@ void main() {
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
-  final command = CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
 }
@@ -306,7 +306,7 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
     'Cannot only load a package from path or from Pub, not both.',
   );
   void editor(List<String> lines) {
-    for (var i = 0; i < lines.length; i++) {
+    for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('dependencies:')) {
         lines.insert(
@@ -324,12 +324,12 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
 
 PubspecEditor _setDartSDKVersionEditor(String version) {
   void editor(List<String> lines) {
-    for (var i = 0; i < lines.length; i++) {
+    for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('environment:')) {
         for (i++; i < lines.length; i++) {
           final String innerLine = lines[i];
-          final sdkLine = "  sdk: '$version'";
+          final String sdkLine = "  sdk: '$version'";
           if (innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
             lines.insert(i, sdkLine);
             break;
@@ -372,7 +372,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
     globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final args = <String>[flutterToolsSnapshotPath, 'analyze', target.path];
+  final List<String> args = <String>[flutterToolsSnapshotPath, 'analyze', target.path];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(
@@ -402,7 +402,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
     globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final args = <String>[
+  final List<String> args = <String>[
     globals.artifacts!.getArtifactPath(
       Artifact.engineDartBinary,
       platform: TargetPlatform.web_javascript,

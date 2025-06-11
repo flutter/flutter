@@ -24,12 +24,12 @@ void main() {
   });
 
   test('WidgetSpan.extractFromInlineSpan applies the correct scaling factor', () {
-    const a = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 0));
-    const b = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 10));
-    const c = WidgetSpan(child: SizedBox());
-    const d = WidgetSpan(child: SizedBox(), style: TextStyle(letterSpacing: 999));
+    const WidgetSpan a = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 0));
+    const WidgetSpan b = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 10));
+    const WidgetSpan c = WidgetSpan(child: SizedBox());
+    const WidgetSpan d = WidgetSpan(child: SizedBox(), style: TextStyle(letterSpacing: 999));
 
-    const span = TextSpan(
+    const TextSpan span = TextSpan(
       children: <InlineSpan>[
         a, // fontSize = 0.
         TextSpan(
@@ -44,9 +44,9 @@ void main() {
     );
 
     double effectiveTextScaleFactorFromWidget(Widget widget) {
-      final child = (widget as ProxyWidget).child as Semantics;
+      final Semantics child = (widget as ProxyWidget).child as Semantics;
       final dynamic grandChild = child.child;
-      final textScaleFactor =
+      final double textScaleFactor =
           grandChild.textScaleFactor as double; // ignore: avoid_dynamic_calls
       return textScaleFactor;
     }

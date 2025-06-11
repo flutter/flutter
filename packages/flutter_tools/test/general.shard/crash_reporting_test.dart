@@ -80,7 +80,7 @@ void main() {
   }
 
   testWithoutContext('CrashReporter.informUser provides basic instructions without PII', () async {
-    final crashReporter = CrashReporter(
+    final CrashReporter crashReporter = CrashReporter(
       fileSystem: fs,
       logger: logger,
       flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
@@ -108,7 +108,7 @@ void main() {
   testWithoutContext('suppress analytics', () async {
     fakeAnalytics.suppressTelemetry();
 
-    final crashReportSender = CrashReportSender(
+    final CrashReportSender crashReportSender = CrashReportSender(
       client: CrashingCrashReportSender(const SocketException('no internets')),
       platform: platform,
       logger: logger,
@@ -132,9 +132,9 @@ void main() {
     });
 
     testWithoutContext('should send crash reports', () async {
-      final requestInfo = RequestInfo();
+      final RequestInfo requestInfo = RequestInfo();
 
-      final crashReportSender = CrashReportSender(
+      final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
         platform: platform,
         logger: logger,
@@ -155,7 +155,7 @@ void main() {
     testWithoutContext(
       'should print an explanatory message when there is a SocketException',
       () async {
-        final crashReportSender = CrashReportSender(
+        final CrashReportSender crashReportSender = CrashReportSender(
           client: CrashingCrashReportSender(const SocketException('no internets')),
           platform: platform,
           logger: logger,
@@ -177,7 +177,7 @@ void main() {
     testWithoutContext(
       'should print an explanatory message when there is an HttpException',
       () async {
-        final crashReportSender = CrashReportSender(
+        final CrashReportSender crashReportSender = CrashReportSender(
           client: CrashingCrashReportSender(const HttpException('no internets')),
           platform: platform,
           logger: logger,
@@ -199,7 +199,7 @@ void main() {
     testWithoutContext(
       'should print an explanatory message when there is a ClientException',
       () async {
-        final crashReportSender = CrashReportSender(
+        final CrashReportSender crashReportSender = CrashReportSender(
           client: CrashingCrashReportSender(const HttpException('no internets')),
           platform: platform,
           logger: logger,
@@ -219,9 +219,9 @@ void main() {
     );
 
     testWithoutContext('should send only one crash report when sent many times', () async {
-      final requestInfo = RequestInfo();
+      final RequestInfo requestInfo = RequestInfo();
 
-      final crashReportSender = CrashReportSender(
+      final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
         platform: platform,
         logger: logger,
@@ -265,14 +265,14 @@ void main() {
       String? method;
       Uri? uri;
 
-      final mockClient = MockClient((Request request) async {
+      final MockClient mockClient = MockClient((Request request) async {
         method = request.method;
         uri = request.url;
 
         return Response('test-report-id', 200);
       });
 
-      final crashReportSender = CrashReportSender(
+      final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
         platform: platform,
         logger: logger,
@@ -296,7 +296,7 @@ void main() {
 
     testWithoutContext('can override base URL', () async {
       Uri? uri;
-      final mockClient = MockClient((Request request) async {
+      final MockClient mockClient = MockClient((Request request) async {
         uri = request.url;
         return Response('test-report-id', 200);
       });
@@ -309,7 +309,7 @@ void main() {
         script: Uri(scheme: 'data'),
       );
 
-      final crashReportSender = CrashReportSender(
+      final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
         platform: environmentPlatform,
         logger: logger,
@@ -367,11 +367,11 @@ class MockCrashReportSender extends MockClient {
             return <String>[name, value];
           }).whereType<List<String>>(),
           key: (dynamic key) {
-            final pair = key as List<String>;
+            final List<String> pair = key as List<String>;
             return pair[0];
           },
           value: (dynamic value) {
-            final pair = value as List<String>;
+            final List<String> pair = value as List<String>;
             return pair[1];
           },
         );

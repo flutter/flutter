@@ -59,7 +59,7 @@ class CopyFlutterBundle extends Target {
     }
     final String? flavor = environment.defines[kFlavor];
 
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -164,7 +164,7 @@ class KernelSnapshot extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final compiler = KernelCompiler(
+    final KernelCompiler compiler = KernelCompiler(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       processManager: environment.processManager,
@@ -179,13 +179,13 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = findPackageConfigFileOrDefault(environment.projectDir);
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
-    final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
     // This configuration is all optional.
@@ -327,7 +327,7 @@ abstract class AotElfBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final snapshotter = AOTSnapshotter(
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -347,10 +347,10 @@ abstract class AotElfBase extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
@@ -484,7 +484,7 @@ abstract final class Lipo {
       }
     }
 
-    final lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
+    final List<String> lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
 
     final ProcessResult result = await environment.processManager.run(lipoArgs);
     if (result.exitCode != 0) {

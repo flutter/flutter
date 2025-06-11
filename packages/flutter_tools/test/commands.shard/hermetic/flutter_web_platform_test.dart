@@ -52,11 +52,11 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
-    for (final artifact in <HostArtifact>[
+    for (final HostArtifact artifact in <HostArtifact>[
       HostArtifact.webPrecompiledAmdCanvaskitSdk,
       HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
     ]) {
-      final artifactFile = artifacts.getHostArtifact(artifact) as File;
+      final File artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
       artifactFile.writeAsStringSync(artifact.name);
     }
@@ -69,7 +69,7 @@ void main() {
   testUsingContext(
     'FlutterWebPlatform serves the correct dart_sdk.js (amd module system) for the passed web renderer',
     () async {
-      final chromiumLauncher = ChromiumLauncher(
+      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -77,7 +77,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final server = MockServer();
+      final MockServer server = MockServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
@@ -115,7 +115,7 @@ void main() {
   testUsingContext(
     'FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer',
     () async {
-      final chromiumLauncher = ChromiumLauncher(
+      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -123,7 +123,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final server = MockServer();
+      final MockServer server = MockServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),

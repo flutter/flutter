@@ -97,7 +97,7 @@ final String _flutter = path.join(
 );
 
 Future<void> main(List<String> arguments) async {
-  var asserts = false;
+  bool asserts = false;
   assert(() {
     asserts = true;
     return true;
@@ -112,7 +112,7 @@ Future<void> main(List<String> arguments) async {
   } on StdoutException {
     width = 80;
   }
-  final argParser = ArgParser(usageLineLength: width);
+  final ArgParser argParser = ArgParser(usageLineLength: width);
   argParser.addOption(
     'temp',
     valueHelp: 'path',
@@ -178,7 +178,7 @@ Future<void> main(List<String> arguments) async {
       if (entity is! Directory) {
         continue;
       }
-      final pubspec = File(path.join(entity.path, _pubspecName));
+      final File pubspec = File(path.join(entity.path, _pubspecName));
       if (!pubspec.existsSync()) {
         throw StateError("Unexpected package '${entity.path}' found in packages directory");
       }
@@ -308,8 +308,8 @@ class _SnippetCheckerException extends _ErrorBase implements Exception {
   @override
   String toString() {
     if (file != null || line != null) {
-      final fileStr = file == null ? '' : '$file:';
-      final lineStr = line == null ? '' : '$line:';
+      final String fileStr = file == null ? '' : '$file:';
+      final String lineStr = line == null ? '' : '$line:';
       return '$fileStr$lineStr $message';
     } else {
       return message;
@@ -476,7 +476,7 @@ class _SnippetChecker {
   final Directory _tempDirectory;
 
   Directory get _contentDirectory {
-    final directory = Directory(path.join(_tempDirectory.path, 'packages'));
+    final Directory directory = Directory(path.join(_tempDirectory.path, 'packages'));
     if (!directory.existsSync()) {
       directory.createSync();
     }
@@ -544,17 +544,17 @@ class _SnippetChecker {
   /// Checks all the snippets in the Dart files in [_flutterPackage] for errors.
   /// Returns true if any errors are found, false otherwise.
   Future<bool> checkSnippets() async {
-    final snippets = <String, _SnippetFile>{};
+    final Map<String, _SnippetFile> snippets = <String, _SnippetFile>{};
     if (_dartUiLocation != null && !_dartUiLocation.existsSync()) {
       stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation.path}.');
     }
-    final filesToAnalyze = <File>[
+    final List<File> filesToAnalyze = <File>[
       for (final Directory flutterPackage in _flutterPackages)
         ..._listDartFiles(flutterPackage, recursive: true),
       if (_dartUiLocation != null && _dartUiLocation.existsSync())
         ..._listDartFiles(_dartUiLocation, recursive: true),
     ];
-    final errors = <Object>{};
+    final Set<Object> errors = <Object>{};
     errors.addAll(await _extractSnippets(filesToAnalyze, snippetMap: snippets));
     errors.addAll(_analyze(snippets));
     (errors.toList()..sort()).map(_stringify).forEach(stderr.writeln);
@@ -565,7 +565,7 @@ class _SnippetChecker {
 
   static Directory _createTempDirectory(String? tempArg) {
     if (tempArg != null) {
-      final tempDirectory = Directory(
+      final Directory tempDirectory = Directory(
         path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)),
       );
       if (path.basename(tempArg) != tempArg) {
@@ -616,24 +616,24 @@ class _SnippetChecker {
     List<File> files, {
     required Map<String, _SnippetFile> snippetMap,
   }) async {
-    final errors = <Object>[];
+    final List<Object> errors = <Object>[];
     _SnippetFile? lastExample;
     for (final File file in files) {
       try {
         final String relativeFilePath = path.relative(file.path, from: _flutterRoot);
         final List<String> fileLines = file.readAsLinesSync();
-        final ignorePreambleLinesOnly = <_Line>[];
-        final preambleLines = <_Line>[];
-        final customImports = <_Line>[];
-        var inExamplesCanAssumePreamble =
+        final List<_Line> ignorePreambleLinesOnly = <_Line>[];
+        final List<_Line> preambleLines = <_Line>[];
+        final List<_Line> customImports = <_Line>[];
+        bool inExamplesCanAssumePreamble =
             false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
-        var inToolSection = false; // Whether or not we're in a code snippet
-        var inDartSection = false; // Whether or not we're in a '```dart' segment.
-        var inOtherBlock = false; // Whether we're in some other '```' segment.
-        var lineNumber = 0;
-        final block = <String>[];
+        bool inToolSection = false; // Whether or not we're in a code snippet
+        bool inDartSection = false; // Whether or not we're in a '```dart' segment.
+        bool inOtherBlock = false; // Whether we're in some other '```' segment.
+        int lineNumber = 0;
+        final List<String> block = <String>[];
         late _Line startLine;
-        for (final line in fileLines) {
+        for (final String line in fileLines) {
           lineNumber += 1;
           final String trimmedLine = line.trim();
           if (inExamplesCanAssumePreamble) {
@@ -647,7 +647,7 @@ class _SnippetChecker {
                 line: lineNumber,
               );
             } else {
-              final newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
+              final _Line newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
               if (newLine.code.startsWith('import ')) {
                 customImports.add(newLine);
               } else {
@@ -790,8 +790,8 @@ class _SnippetChecker {
         '${startingLine.asLocation(filename, 0)}: Empty ```dart block in snippet code.',
       );
     }
-    var hasEllipsis = false;
-    for (var index = 0; index < block.length; index += 1) {
+    bool hasEllipsis = false;
+    for (int index = 0; index < block.length; index += 1) {
       final Match? match = _ellipsisRegExp.matchAsPrefix(block[index]);
       if (match != null) {
         hasEllipsis =
@@ -799,8 +799,8 @@ class _SnippetChecker {
         break;
       }
     }
-    var hasStatefulWidgetComment = false;
-    var importPreviousExample = false;
+    bool hasStatefulWidgetComment = false;
+    bool importPreviousExample = false;
     int index = startingLine.line;
     for (final String line in block) {
       if (line == '// (e.g. in a stateful widget)') {
@@ -959,7 +959,7 @@ class _SnippetChecker {
         // ```
         //
         // This section removes the label.
-        for (var index = 0; index < block.length; index += 1) {
+        for (int index = 0; index < block.length; index += 1) {
           final Match? prefix = _namedArgumentRegExp.matchAsPrefix(block[index]);
           if (prefix != null) {
             block[index] = block[index].substring(prefix.group(0)!.length);
@@ -995,10 +995,10 @@ class _SnippetChecker {
   void _createConfigurationFiles() {
     final String targetWorkspacePubspecPath = path.join(_tempDirectory.path, _pubspecName);
     _copyPubspec(targetWorkspacePubspecPath, path.join(_flutterRoot, _pubspecName));
-    final targetWorkspacePubspec = File(targetWorkspacePubspecPath);
+    final File targetWorkspacePubspec = File(targetWorkspacePubspecPath);
     final String pubspec = targetWorkspacePubspec.readAsStringSync();
 
-    final yamlEditor = YamlEditor(pubspec);
+    final YamlEditor yamlEditor = YamlEditor(pubspec);
     yamlEditor.update(<String>['workspace'], <String>['packages']);
     targetWorkspacePubspec.writeAsStringSync(yamlEditor.toString());
 
@@ -1006,12 +1006,12 @@ class _SnippetChecker {
       path.join(_contentDirectory.path, _pubspecName),
       path.join(_flutterRoot, 'examples', 'api', _pubspecName),
     );
-    final targetAnalysisOptions = File(
+    final File targetAnalysisOptions = File(
       path.join(_contentDirectory.path, 'analysis_options.yaml'),
     );
     if (!targetAnalysisOptions.existsSync()) {
       // Use the same analysis_options.yaml configuration that's used for examples/api.
-      final sourceAnalysisOptions = File(
+      final File sourceAnalysisOptions = File(
         path.join(_flutterRoot, 'examples', 'api', 'analysis_options.yaml'),
       );
       if (!sourceAnalysisOptions.existsSync()) {
@@ -1024,10 +1024,10 @@ class _SnippetChecker {
   }
 
   void _copyPubspec(String targetPath, String sourcePath) {
-    final targetPubSpec = File(targetPath);
+    final File targetPubSpec = File(targetPath);
     if (!targetPubSpec.existsSync()) {
       // Copying pubspec.yaml from examples/api into temp directory.
-      final sourcePubSpec = File(sourcePath);
+      final File sourcePubSpec = File(sourcePath);
       if (!sourcePubSpec.existsSync()) {
         throw 'Cannot find pubspec.yaml at ${sourcePubSpec.path}, which is also used to analyze code snippets.';
       }
@@ -1044,7 +1044,7 @@ class _SnippetChecker {
       snippetFile.filename,
       snippetFile.indexLine,
     );
-    final outputFile = File(path.join(_contentDirectory.path, '$snippetFileId.dart'))
+    final File outputFile = File(path.join(_contentDirectory.path, '$snippetFileId.dart'))
       ..createSync(recursive: true);
     final String contents =
         snippetFile.code.map<String>((_Line line) => line.code).join('\n').trimRight();
@@ -1056,10 +1056,10 @@ class _SnippetChecker {
   /// and parsing its output. Returns the errors, if any.
   List<Object> _analyze(Map<String, _SnippetFile> snippets) {
     final List<String> analyzerOutput = _runAnalyzer();
-    final errors = <Object>[];
-    final kBullet = Platform.isWindows ? ' - ' : ' • ';
+    final List<Object> errors = <Object>[];
+    final String kBullet = Platform.isWindows ? ' - ' : ' • ';
     // RegExp to match an error output line of the analyzer.
-    final errorPattern = RegExp(
+    final RegExp errorPattern = RegExp(
       '^ *(?<type>[a-z]+)'
       '$kBullet(?<description>.+)'
       '$kBullet(?<file>.+):(?<line>[0-9]+):(?<column>[0-9]+)'
@@ -1067,14 +1067,14 @@ class _SnippetChecker {
       caseSensitive: false,
     );
 
-    for (final error in analyzerOutput) {
+    for (final String error in analyzerOutput) {
       final RegExpMatch? match = errorPattern.firstMatch(error);
       if (match == null) {
         errors.add(_SnippetCheckerException('Could not parse analyzer output: $error'));
         continue;
       }
       final String message = match.namedGroup('description')!;
-      final file = File(path.join(_contentDirectory.path, match.namedGroup('file')));
+      final File file = File(path.join(_contentDirectory.path, match.namedGroup('file')));
       final List<String> fileContents = file.readAsLinesSync();
       final String lineString = match.namedGroup('line')!;
       final String columnString = match.namedGroup('column')!;
@@ -1129,7 +1129,7 @@ class _SnippetChecker {
       late final int actualLine;
       late final int actualColumn;
       late final String actualMessage;
-      var delta = 0;
+      int delta = 0;
       while (true) {
         // find the nearest non-generated line to the error
         if ((lineNumber - delta > 0) &&
@@ -1251,7 +1251,7 @@ class _SnippetFile {
     String? prefix,
     String? postfix,
   }) {
-    final codeLines = <_Line>[
+    final List<_Line> codeLines = <_Line>[
       if (prefix != null) _Line.generated(code: prefix),
       for (int i = 0; i < code.length; i += 1)
         _Line(code: code[i], line: firstLine.line + i, indent: firstLine.indent),
@@ -1273,7 +1273,7 @@ Future<void> _runInteractive({
   required Directory? dartUiLocation,
 }) async {
   filePath = path.isAbsolute(filePath) ? filePath : path.join(path.current, filePath);
-  final file = File(filePath);
+  final File file = File(filePath);
   if (!file.existsSync()) {
     stderr.writeln('Specified file ${file.absolute.path} does not exist or is not a file.');
     exit(1);
@@ -1290,7 +1290,7 @@ Future<void> _runInteractive({
   print('Starting up in interactive mode on ${path.relative(filePath, from: _flutterRoot)} ...');
   print('Type "q" to quit, or "r" to force a reload.');
 
-  final checker = _SnippetChecker(flutterPackages, tempDirectory: tempDirectory)
+  final _SnippetChecker checker = _SnippetChecker(flutterPackages, tempDirectory: tempDirectory)
     .._createConfigurationFiles();
 
   ProcessSignal.sigint.watch().listen((_) {
@@ -1298,15 +1298,15 @@ Future<void> _runInteractive({
     exit(0);
   });
 
-  var busy = false;
+  bool busy = false;
   Future<void> rerun() async {
     assert(!busy);
     try {
       busy = true;
       print('\nAnalyzing...');
       checker.recreateTempDirectory();
-      final snippets = <String, _SnippetFile>{};
-      final errors = <Object>{};
+      final Map<String, _SnippetFile> snippets = <String, _SnippetFile>{};
+      final Set<Object> errors = <Object>{};
       errors.addAll(await checker._extractSnippets(<File>[file], snippetMap: snippets));
       errors.addAll(checker._analyze(snippets));
       stderr.writeln('\u001B[2J\u001B[H'); // Clears the old results from the terminal.

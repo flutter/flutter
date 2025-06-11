@@ -124,7 +124,7 @@ void main() {
   testUsingContext(
     'Windows build fails when there is no cmake path',
     () async {
-      final command = BuildWindowsCommand(
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = FakeVisualStudio(cmakePath: null);
@@ -146,8 +146,8 @@ void main() {
   testUsingContext(
     'Windows build fails when there is no windows project',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -174,8 +174,8 @@ void main() {
   testUsingContext(
     'Windows build fails on non windows platform',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -197,8 +197,8 @@ void main() {
   testUsingContext(
     'Windows build fails when feature is disabled',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -223,8 +223,8 @@ void main() {
   testUsingContext(
     'Windows build does not spew stdout to status logger',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -250,8 +250,8 @@ void main() {
   testUsingContext(
     'Windows build sends timing events',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -293,8 +293,8 @@ void main() {
   testUsingContext(
     'Windows build extracts errors from stdout',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -305,7 +305,7 @@ void main() {
       // edited down for compactness. For instance, where similar lines are
       // repeated in actual output, one or two representative lines are chosen
       // to be included here.
-      const stdout = r'''
+      const String stdout = r'''
 Microsoft (R) Build Engine version 16.6.0+5ff7b0c9e for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
@@ -353,8 +353,8 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
   testUsingContext(
     'Windows verbose build sets VERBOSE_SCRIPT_LOGGING',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -380,8 +380,8 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
   testUsingContext(
     'Windows build works around CMake generation bug',
     () async {
-      final fakeVisualStudio = FakeVisualStudio(displayVersion: '17.1.0');
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(displayVersion: '17.1.0');
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -395,7 +395,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
 
       // Relevant portions of an incorrectly generated project, with some
       // irrelevant details removed for length.
-      const fakeBadProjectContent = r'''
+      const String fakeBadProjectContent = r'''
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
@@ -489,7 +489,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       final List<String> projectLines = assembleProject.readAsLinesSync();
 
-      const commandBase =
+      const String commandBase =
           r'"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" '
           r'-E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64';
       // The duplicate commands will still be present, but with the order matching
@@ -522,8 +522,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build invokes build and writes generated files',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -603,8 +603,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows profile build passes Profile configuration',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -630,8 +630,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build outputs path when successful',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -658,9 +658,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build passes correct generator',
     () async {
-      const generator = 'A different generator';
-      final fakeVisualStudio = FakeVisualStudio(cmakeGenerator: generator);
-      final command = BuildWindowsCommand(
+      const String generator = 'A different generator';
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakeGenerator: generator);
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -686,8 +686,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     "Windows build uses pubspec's version",
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -736,8 +736,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build uses build-name and build-number',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -784,8 +784,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build build-name overrides pubspec',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -836,8 +836,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build build-number overrides pubspec',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -888,8 +888,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build build-name and build-number override pubspec',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -940,8 +940,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build warns on non-numeric build-number',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -997,8 +997,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build warns on complex build-number',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -1088,8 +1088,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Performs code size analysis and sends analytics',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -1150,8 +1150,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Test bad path characters',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
@@ -1182,14 +1182,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   testUsingContext(
     'Windows build extracts errors related to pubspec.yaml from stdout',
     () async {
-      final fakeVisualStudio = FakeVisualStudio();
-      final command = BuildWindowsCommand(
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+      final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
       setUpMockProjectFilesForBuild();
 
-      const stdout = r'''
+      const String stdout = r'''
 Error detected in pubspec.yaml:
 No file or variants found for asset: images/a_dot_burr.jpeg.
 ''';

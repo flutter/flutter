@@ -184,7 +184,7 @@ void main() {
   testWithoutContext(
     '--analyze-size is not supported in combination with --split-debug-info',
     () async {
-      final command = <String>[
+      final List<String> command = <String>[
         flutterBin,
         'build',
         'apk',
@@ -218,7 +218,7 @@ void main() {
     () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
-      final command = <String>[
+      final List<String> command = <String>[
         flutterBin,
         'build',
         'apk',

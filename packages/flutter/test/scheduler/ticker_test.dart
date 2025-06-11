@@ -19,12 +19,12 @@ void main() {
   }
 
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
-    var tickCount = 0;
+    int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final ticker = Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
 
     expect(ticker.isTicking, isFalse);
@@ -122,7 +122,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final ticker = Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -140,7 +140,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final ticker = Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -152,12 +152,12 @@ void main() {
   });
 
   testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
-    var tickCount = 0;
+    int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final ticker = Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
     ticker.start();
 
@@ -178,12 +178,12 @@ void main() {
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
     setAppLifeCycleState(AppLifecycleState.paused);
 
-    var tickCount = 0;
+    int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final ticker = Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
     ticker.start();
 

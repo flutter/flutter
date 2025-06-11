@@ -86,7 +86,7 @@ void main() {
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final launcher = DevtoolsServerLauncher(
+    final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
       artifacts: artifacts,
       logger: logger,
@@ -123,7 +123,7 @@ void main() {
       );
 
       // VM Service is intentionally null
-      final device = FakeFlutterDevice();
+      final FakeFlutterDevice device = FakeFlutterDevice();
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -140,7 +140,7 @@ void main() {
         BufferLogger.test(),
         _FakeChromiumLauncher(),
       );
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -166,7 +166,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+      final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -179,12 +179,12 @@ void main() {
       BufferLogger.test(),
       _FakeChromiumLauncher(),
     );
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[],
       httpAddress: Uri.parse('http://localhost:1234'),
     );
 
-    final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+    final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
   });
@@ -198,7 +198,7 @@ void main() {
       BufferLogger.test(),
       _FakeChromiumLauncher(),
     );
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'streamListen',
@@ -222,7 +222,7 @@ void main() {
       httpAddress: Uri.parse('http://localhost:1234'),
     );
 
-    final device =
+    final FakeFlutterDevice device =
         FakeFlutterDevice()
           ..vmService = fakeVmServiceHost.vmService
           ..targetPlatform = TargetPlatform.web_javascript;
@@ -239,7 +239,7 @@ void main() {
         BufferLogger.test(),
         _FakeChromiumLauncher(),
       );
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -253,7 +253,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+      final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
 
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
     },
@@ -271,7 +271,7 @@ void main() {
         _FakeChromiumLauncher(),
       );
 
-      final vmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost vmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -297,7 +297,7 @@ void main() {
         httpAddress: Uri.parse('http://localhost:1234'),
       );
 
-      final vmServiceHostThatDisappears = FakeVmServiceHost(
+      final FakeVmServiceHost vmServiceHostThatDisappears = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -321,7 +321,7 @@ void main() {
   );
 
   testWithoutContext('Does not launch devtools in browser if launcher is null', () async {
-    final handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
@@ -336,7 +336,7 @@ void main() {
   testWithoutContext(
     'Does not launch devtools in browser if ResidentRunner does not support the service protocol',
     () async {
-      final handler = FlutterResidentDevtoolsHandler(
+      final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
         FakeDevtoolsLauncher(),
         FakeResidentRunner()..supportsServiceProtocol = false,
         BufferLogger.test(),
@@ -352,8 +352,8 @@ void main() {
   testWithoutContext(
     'launchDevToolsInBrowser launches after _devToolsLauncher.ready completes',
     () async {
-      final completer = Completer<void>();
-      final handler = FlutterResidentDevtoolsHandler(
+      final Completer<void> completer = Completer<void>();
+      final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
         FakeDevtoolsLauncher()
           ..devToolsUrl = null
           // We need to set [activeDevToolsServer] to simulate the state we would
@@ -377,7 +377,7 @@ void main() {
   );
 
   testWithoutContext('launchDevToolsInBrowser launches successfully', () async {
-    final handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -391,7 +391,7 @@ void main() {
   });
 
   testWithoutContext('launchDevToolsInBrowser fails without Chrome installed', () async {
-    final handler = FlutterResidentDevtoolsHandler(
+    final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()
         ..devToolsUrl = Uri(host: 'localhost', port: 8080)
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
@@ -407,7 +407,7 @@ void main() {
   testWithoutContext(
     'Converts a VM Service URI with a query parameter to a pretty display string',
     () {
-      const value =
+      const String value =
           'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
       final Uri uri = Uri.parse(value);
 

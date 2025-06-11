@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('When snapToEnd is set, value is exactly `end` after completion', () {
-    final description = SpringDescription.withDampingRatio(
+    final SpringDescription description = SpringDescription.withDampingRatio(
       mass: 1.0,
       stiffness: 400,
     );
-    const time = 0.4;
+    const double time = 0.4;
 
-    final regularSimulation = SpringSimulation(
+    final SpringSimulation regularSimulation = SpringSimulation(
       description,
       0,
       1,
@@ -23,7 +23,7 @@ void main() {
     expect(regularSimulation.x(time), lessThan(1));
     expect(regularSimulation.dx(time), greaterThan(0));
 
-    final snappingSimulation = SpringSimulation(
+    final SpringSimulation snappingSimulation = SpringSimulation(
       description,
       0,
       1,
@@ -38,10 +38,10 @@ void main() {
 
   test('SpringSimulation results are continuous near critical damping', () {
     // Regression test for https://github.com/flutter/flutter/issues/163858
-    const time = 0.4;
-    const stiffness = 0.4;
-    const mass = 0.4;
-    final critical = SpringSimulation(
+    const double time = 0.4;
+    const double stiffness = 0.4;
+    const double mass = 0.4;
+    final SpringSimulation critical = SpringSimulation(
       SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass),
       0,
       1,
@@ -50,7 +50,7 @@ void main() {
     expect(critical.x(time), moreOrLessEquals(0.06155, epsilon: 0.01));
     expect(critical.dx(time), moreOrLessEquals(0.2681, epsilon: 0.01));
 
-    final slightlyOver = SpringSimulation(
+    final SpringSimulation slightlyOver = SpringSimulation(
       SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass, ratio: 1 + 1e-3),
       0,
       1,
@@ -59,7 +59,7 @@ void main() {
     expect(slightlyOver.x(time), moreOrLessEquals(0.06155, epsilon: 0.01));
     expect(slightlyOver.dx(time), moreOrLessEquals(0.2681, epsilon: 0.01));
 
-    final slightlyUnder = SpringSimulation(
+    final SpringSimulation slightlyUnder = SpringSimulation(
       SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass, ratio: 1 - 1e-3),
       0,
       1,
@@ -71,7 +71,7 @@ void main() {
 
   group('SpringDescription.withDurationAndBounce', () {
     test('creates spring with expected results', () {
-      final spring = SpringDescription.withDurationAndBounce(bounce: 0.3);
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: 0.3);
 
       expect(spring.mass, equals(1.0));
       expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('creates spring with negative bounce', () {
-      final spring = SpringDescription.withDurationAndBounce(bounce: -0.3);
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: -0.3);
 
       expect(spring.mass, equals(1.0));
       expect(spring.stiffness, moreOrLessEquals(157.91, epsilon: 0.01));
@@ -95,7 +95,7 @@ void main() {
     });
 
     test('get duration and bounce based on mass and stiffness', () {
-      const spring = SpringDescription(
+      const SpringDescription spring = SpringDescription(
         mass: 1.0,
         stiffness: 157.91,
         damping: 17.59,
@@ -106,7 +106,7 @@ void main() {
     });
 
     test('custom duration', () {
-      final spring = SpringDescription.withDurationAndBounce(
+      final SpringDescription spring = SpringDescription.withDurationAndBounce(
         duration: const Duration(milliseconds: 100),
       );
 

@@ -16,12 +16,12 @@ void main() {
 
   test('IconButtonThemeData lerp special cases', () {
     expect(IconButtonThemeData.lerp(null, null, 0), null);
-    const data = IconButtonThemeData();
+    const IconButtonThemeData data = IconButtonThemeData();
     expect(identical(IconButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Passing no IconButtonTheme returns defaults', (WidgetTester tester) async {
-    const colorScheme = ColorScheme.light();
+    const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
@@ -53,14 +53,14 @@ void main() {
   });
 
   group('[Theme, IconTheme, IconButton style overrides]', () {
-    const foregroundColor = Color(0xff000001);
-    const disabledForegroundColor = Color(0xff000002);
-    const backgroundColor = Color(0xff000003);
-    const shadowColor = Color(0xff000004);
+    const Color foregroundColor = Color(0xff000001);
+    const Color disabledForegroundColor = Color(0xff000002);
+    const Color backgroundColor = Color(0xff000003);
+    const Color shadowColor = Color(0xff000004);
     const double elevation = 3;
-    const padding = EdgeInsets.all(3);
-    const minimumSize = Size(200, 200);
-    const side = BorderSide(color: Colors.green, width: 2);
+    const EdgeInsets padding = EdgeInsets.all(3);
+    const Size minimumSize = Size(200, 200);
+    const BorderSide side = BorderSide(color: Colors.green, width: 2);
     const OutlinedBorder shape = RoundedRectangleBorder(
       side: side,
       borderRadius: BorderRadius.all(Radius.circular(2)),
@@ -68,8 +68,8 @@ void main() {
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
     const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const animationDuration = Duration(milliseconds: 25);
-    const enableFeedback = false;
+    const Duration animationDuration = Duration(milliseconds: 25);
+    const bool enableFeedback = false;
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = IconButton.styleFrom(
@@ -127,11 +127,11 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const enabled = <MaterialState>{};
-    const disabled = <MaterialState>{MaterialState.disabled};
-    const hovered = <MaterialState>{MaterialState.hovered};
-    const focused = <MaterialState>{MaterialState.focused};
-    const pressed = <MaterialState>{MaterialState.pressed};
+    const Set<MaterialState> enabled = <MaterialState>{};
+    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -221,9 +221,9 @@ void main() {
   });
 
   testWidgets('Theme shadowColor', (WidgetTester tester) async {
-    const colorScheme = ColorScheme.light();
-    const shadowColor = Color(0xff000001);
-    const overriddenColor = Color(0xff000002);
+    const ColorScheme colorScheme = ColorScheme.light();
+    const Color shadowColor = Color(0xff000001);
+    const Color overriddenColor = Color(0xff000002);
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
@@ -289,7 +289,7 @@ void main() {
   testWidgets('IconButtonTheme IconButton.styleFrom overlayColor overrides default overlay color', (
     WidgetTester tester,
   ) async {
-    const overlayColor = Color(0xffff0000);
+    const Color overlayColor = Color(0xffff0000);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

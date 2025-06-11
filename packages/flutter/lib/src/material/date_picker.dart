@@ -566,7 +566,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
-    final isLandscapeOrientation = orientation == Orientation.landscape;
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
     final TextTheme textTheme = theme.textTheme;
@@ -946,9 +946,9 @@ class _DatePickerHeader extends StatelessWidget {
     final double scaledFontSize = MediaQuery.textScalerOf(
       context,
     ).scale(titleStyle?.fontSize ?? 32);
-    final headerScaleFactor = textScaleFactor > 1 ? textScaleFactor : 1.0;
+    final double headerScaleFactor = textScaleFactor > 1 ? textScaleFactor : 1.0;
 
-    final help = Text(
+    final Text help = Text(
       helpText,
       style: helpStyle,
       maxLines: 1,
@@ -962,7 +962,7 @@ class _DatePickerHeader extends StatelessWidget {
         ),
       ),
     );
-    final title = Text(
+    final Text title = Text(
       titleText,
       semanticsLabel: titleSemanticsLabel ?? titleText,
       style: titleStyle,
@@ -1857,7 +1857,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
       foregroundColor: headerForeground,
       disabledForegroundColor: headerDisabledForeground,
     );
-    final iconTheme = IconThemeData(color: headerForeground);
+    final IconThemeData iconTheme = IconThemeData(color: headerForeground);
 
     return SafeArea(
       top: false,
@@ -2124,7 +2124,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
-    const sliverAfterKey = Key('sliverAfterKey');
+    const Key sliverAfterKey = Key('sliverAfterKey');
 
     return Column(
       children: <Widget>[
@@ -2354,7 +2354,7 @@ class _DayHeaders extends StatelessWidget {
   ///     4 5 6 7 8 9 10
   ///
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
-    final result = <Widget>[];
+    final List<Widget> result = <Widget>[];
     for (
       int i = localizations.firstDayOfWeekIndex;
       result.length < DateTime.daysPerWeek;
@@ -2694,7 +2694,7 @@ class _MonthItemState extends State<_MonthItem> {
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
     final double gridHeight =
         weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
-    final dayItems = <Widget>[];
+    final List<Widget> dayItems = <Widget>[];
 
     // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
     // a leap year.
@@ -2710,8 +2710,8 @@ class _MonthItemState extends State<_MonthItem> {
 
     // Add the leading/trailing edge containers to each week in order to
     // correctly extend the range highlight.
-    final paddedDayItems = <Widget>[];
-    for (var i = 0; i < weeks; i++) {
+    final List<Widget> paddedDayItems = <Widget>[];
+    for (int i = 0; i < weeks; i++) {
       final int start = i * DateTime.daysPerWeek;
       final int end = math.min(start + DateTime.daysPerWeek, dayItems.length);
       final List<Widget> weekList = dayItems.sublist(start, end);
@@ -2871,7 +2871,7 @@ class _DayItemState extends State<_DayItem> {
       });
     }
 
-    final states = <WidgetState>{
+    final Set<WidgetState> states = <WidgetState>{
       if (widget.isDisabled) WidgetState.disabled,
       if (widget.isSelectedDayStart || widget.isSelectedDayEnd) WidgetState.selected,
     };
@@ -2944,8 +2944,8 @@ class _DayItemState extends State<_DayItem> {
     // day of month before the rest of the date, as they are looking
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
-    final semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
-    var semanticLabel =
+    final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
+    String semanticLabel =
         '$dayText, ${widget.calendarDelegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix';
     if (widget.isSelectedDayStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
@@ -3021,7 +3021,7 @@ class _HighlightPainter extends CustomPainter {
       return;
     }
 
-    final paint =
+    final Paint paint =
         Paint()
           ..color = color
           ..style = PaintingStyle.fill;
@@ -3116,7 +3116,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       selectedEndDate,
       currentDate!,
     );
-    final semanticDateText =
+    final String semanticDateText =
         selectedStartDate != null && selectedEndDate != null
             ? '${calendarDelegate.formatMediumDate(selectedStartDate!, localizations)} – ${calendarDelegate.formatMediumDate(selectedEndDate!, localizations)}'
             : '';

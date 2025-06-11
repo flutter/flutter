@@ -10,8 +10,8 @@ import '../src/common.dart';
 void main() {
   group('parsing of assets section in flutter manifests with asset transformers', () {
     testWithoutContext('parses an asset with a simple transformation', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -41,8 +41,8 @@ flutter:
     });
 
     testWithoutContext('parses an asset with a transformation that has args', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -72,8 +72,8 @@ flutter:
     });
 
     testWithoutContext('fails when a transformers section is not a list', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -94,9 +94,9 @@ flutter:
       );
     });
     testWithoutContext('fails when a transformers section package is not a string', () async {
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
 
-      const manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -119,8 +119,8 @@ flutter:
     });
 
     testWithoutContext('fails when a transformer is missing the package field', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -144,8 +144,8 @@ flutter:
     testWithoutContext(
       'fails when a transformer has args field that is not a list of strings',
       () async {
-        final logger = BufferLogger.test();
-        const manifest = '''
+        final BufferLogger logger = BufferLogger.test();
+        const String manifest = '''
 name: test
 dependencies:
   flutter:

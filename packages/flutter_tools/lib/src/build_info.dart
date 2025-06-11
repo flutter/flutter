@@ -456,7 +456,7 @@ String? validatedBuildNumberForPlatform(
   }
   if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-    final disallowed = RegExp(r'[^\d\.]');
+    final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
     if (tmpBuildNumber.isEmpty) {
       return null;
@@ -480,7 +480,7 @@ String? validatedBuildNumberForPlatform(
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
-    final disallowed = RegExp(r'[^\d]');
+    final RegExp disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
     int tmpBuildNumberInt = int.tryParse(tmpBuildNumberStr) ?? 0;
     if (tmpBuildNumberInt < 1) {
@@ -508,7 +508,7 @@ String? validatedBuildNameForPlatform(
   }
   if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-    final disallowed = RegExp(r'[^\d\.]');
+    final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
     if (tmpBuildName.isEmpty) {
       return null;
@@ -860,7 +860,7 @@ String getWebBuildDirectory() {
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
   final String arch =
       (targetPlatform == null) ? _getCurrentHostPlatformArchName() : targetPlatform.simpleName;
-  final subDirs = 'linux/$arch';
+  final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
@@ -1073,8 +1073,8 @@ _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArg
   DdcModuleFormat? ddcModuleFormat;
   bool? canaryFeatures;
   if (extraFrontEndArgs != null) {
-    const ddcModuleFormatArg = '--dartdevc-module-format=';
-    const canaryFeaturesArg = '--dartdevc-canary';
+    const String ddcModuleFormatArg = '--dartdevc-module-format=';
+    const String canaryFeaturesArg = '--dartdevc-canary';
     for (final String flag in extraFrontEndArgs) {
       if (flag.startsWith(ddcModuleFormatArg)) {
         final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);

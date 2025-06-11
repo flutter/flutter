@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
-    final children = <Widget>[
+    final List<Widget> children = <Widget>[
       const DecoratedBox(decoration: BoxDecoration()),
       const DecoratedBox(decoration: BoxDecoration()),
       const DecoratedBox(decoration: BoxDecoration()),

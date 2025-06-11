@@ -14,12 +14,12 @@ void main() {
 
   test('SnackBarThemeData lerp special cases', () {
     expect(SnackBarThemeData.lerp(null, null, 0), const SnackBarThemeData());
-    const data = SnackBarThemeData();
+    const SnackBarThemeData data = SnackBarThemeData();
     expect(identical(SnackBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('SnackBarThemeData null fields by default', () {
-    const snackBarTheme = SnackBarThemeData();
+    const SnackBarThemeData snackBarTheme = SnackBarThemeData();
     expect(snackBarTheme.backgroundColor, null);
     expect(snackBarTheme.actionTextColor, null);
     expect(snackBarTheme.disabledActionTextColor, null);
@@ -42,7 +42,7 @@ void main() {
   });
 
   testWidgets('Default SnackBarThemeData debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       actionTextColor: Color(0xFF0000AA),
@@ -98,7 +98,7 @@ void main() {
   testWidgets('Material2 - Passing no SnackBarThemeData returns defaults', (
     WidgetTester tester,
   ) async {
-    const text = 'I am a snack bar.';
+    const String text = 'I am a snack bar.';
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -138,8 +138,8 @@ void main() {
   testWidgets('Material3 - Passing no SnackBarThemeData returns defaults', (
     WidgetTester tester,
   ) async {
-    const text = 'I am a snack bar.';
-    final theme = ThemeData();
+    const String text = 'I am a snack bar.';
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -185,8 +185,8 @@ void main() {
   });
 
   testWidgets('SnackBar uses values from SnackBarThemeData', (WidgetTester tester) async {
-    const text = 'I am a snack bar.';
-    const action = 'ACTION';
+    const String text = 'I am a snack bar.';
+    const String action = 'ACTION';
     final SnackBarThemeData snackBarTheme = _snackBarTheme(showCloseIcon: true);
 
     await tester.pumpWidget(
@@ -232,12 +232,12 @@ void main() {
   testWidgets('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color textColor = Colors.pink;
-    const elevation = 7.0;
-    const action = 'ACTION';
+    const double elevation = 7.0;
+    const String action = 'ACTION';
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
-    const snackBarWidth = 400.0;
+    const double snackBarWidth = 400.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -289,7 +289,7 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final actionBackgroundColor = MaterialStateColor.resolveWith((
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.disabled)) {
@@ -349,7 +349,7 @@ void main() {
   testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (
     WidgetTester tester,
   ) async {
-    final snackBarActionBackgroundColor = MaterialStateColor.resolveWith((
+    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.disabled)) {
@@ -358,7 +358,7 @@ void main() {
       return Colors.cyan;
     });
 
-    final actionBackgroundColor = MaterialStateColor.resolveWith((
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
       Set<MaterialState> states,
     ) {
       if (states.contains(MaterialState.disabled)) {
@@ -422,7 +422,7 @@ void main() {
   testWidgets(
     'SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final actionBackgroundColor = MaterialStateColor.resolveWith((
+      final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
         Set<MaterialState> states,
       ) {
         if (states.contains(MaterialState.disabled)) {
@@ -625,7 +625,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    var exception = tester.takeException() as AssertionError?;
+    AssertionError? exception = tester.takeException() as AssertionError?;
     expect(exception, isNull);
 
     // SnackBarBehavior.fixed set in theme will still assert with margin
@@ -643,7 +643,7 @@ void main() {
     );
   });
 
-  for (final overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
+  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
     test('SnackBar theme will assert for actionOverflowThreshold outside of 0-1 range', () {
       expect(
         () => SnackBarThemeData(actionOverflowThreshold: overflowThreshold),
@@ -660,7 +660,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-    var exception = tester.takeException() as AssertionError?;
+    AssertionError? exception = tester.takeException() as AssertionError?;
     expect(exception, isNull);
 
     // SnackBarBehavior.fixed set in theme will still assert with width

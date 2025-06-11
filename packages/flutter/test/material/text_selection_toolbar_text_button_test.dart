@@ -10,8 +10,8 @@ void main() {
 
   testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
     late StateSetter setState;
-    var index = 1;
-    var total = 3;
+    int index = 1;
+    int total = 3;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -61,7 +61,7 @@ void main() {
     expect(onlySize.width, greaterThan(lastSize.width));
   });
 
-  for (final colorScheme in <ColorScheme>[
+  for (final ColorScheme colorScheme in <ColorScheme>[
     ThemeData().colorScheme,
     ThemeData.dark().colorScheme,
   ]) {

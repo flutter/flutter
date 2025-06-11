@@ -306,9 +306,9 @@ abstract class Repository {
   /// Obtain the version tag at the tip of a release branch.
   Future<String> getFullTag(String remoteName, String branchName, {bool exact = true}) async {
     // includes both stable (e.g. 1.2.3) and dev tags (e.g. 1.2.3-4.5.pre)
-    const glob = '*.*.*';
+    const String glob = '*.*.*';
     // describe the latest dev release
-    final ref = 'refs/remotes/$remoteName/$branchName';
+    final String ref = 'refs/remotes/$remoteName/$branchName';
     return git.getOutput(
       <String>['describe', '--match', glob, if (exact) '--exact-match', '--tags', ref],
       'obtain last released version number',
@@ -396,7 +396,7 @@ abstract class Repository {
     bool force = false,
     bool dryRun = false,
   }) async {
-    final args = <String>['push', if (force) '--force', remote, '$fromRef:$toRef'];
+    final List<String> args = <String>['push', if (force) '--force', remote, '$fromRef:$toRef'];
     final String command = <String>['git', ...args].join(' ');
     if (dryRun) {
       stdio.printStatus('About to execute command: `$command`');
@@ -440,7 +440,7 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    final commitCmd = <String>[
+    final List<String> commitCmd = <String>[
       'commit',
       '--message',
       message,
@@ -452,11 +452,11 @@ abstract class Repository {
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
-    final stdout = commitResult.stdout as String;
+    final String stdout = commitResult.stdout as String;
     if (stdout.isNotEmpty) {
       stdio.printTrace(stdout);
     }
-    final stderr = commitResult.stderr as String;
+    final String stderr = commitResult.stderr as String;
     if (stderr.isNotEmpty) {
       stdio.printTrace(stderr);
     }
@@ -648,7 +648,7 @@ class FrameworkRepository extends Repository {
   Future<Version> flutterVersion() async {
     // Check version
     final io.ProcessResult result = await runFlutter(<String>['--version', '--machine']);
-    final versionJson =
+    final Map<String, dynamic> versionJson =
         jsonDecode(stdoutToString(result.stdout)) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
@@ -821,7 +821,7 @@ Future<void> _updateDartRevision(
   assert(newRevision.length == 40);
   depsFile ??= (await repo.checkoutDirectory).childFile('DEPS');
   final String fileContent = depsFile.readAsStringSync();
-  final dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
+  final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
   final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
   if (allMatches.length != 1) {
     throw ConductorException(

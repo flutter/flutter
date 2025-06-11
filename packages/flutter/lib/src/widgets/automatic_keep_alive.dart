@@ -152,7 +152,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   /// the first build of that child has not completed yet.
   ParentDataElement<KeepAliveParentDataMixin>? _getChildElement() {
     assert(mounted);
-    final element = context as Element;
+    final Element element = context as Element;
     Element? childElement;
     // We use Element.visitChildren rather than context.visitChildElements
     // because we might be called during build, and context.visitChildElements

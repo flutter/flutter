@@ -12,12 +12,12 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
     // Regression test for b/151732341.
-    final semantics = SemanticsTester(tester);
-    final recognizer1 = TapGestureRecognizer();
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
     addTearDown(recognizer1.dispose);
-    final recognizer2 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
     addTearDown(recognizer2.dispose);
-    final recognizer3 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer3 = TapGestureRecognizer();
     addTearDown(recognizer3.dispose);
 
     await tester.pumpWidget(
@@ -37,7 +37,7 @@ void main() {
     );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode node = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final labelToNodeId = <String, int>{};
+    final Map<String, int> labelToNodeId = <String, int>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.id;
       return true;
@@ -53,7 +53,7 @@ void main() {
     await tester.pump();
 
     final SemanticsNode nodeAfterRebuild = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final labelToNodeIdAfterRebuild = <String, int>{};
+    final Map<String, int> labelToNodeIdAfterRebuild = <String, int>{};
     nodeAfterRebuild.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterRebuild[node.label] = node.id;
       return true;
@@ -66,9 +66,9 @@ void main() {
     expect(labelToNodeIdAfterRebuild['!!!'], labelToNodeId['!!!']);
     expect(labelToNodeIdAfterRebuild.length, 3);
 
-    final recognizer4 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer4 = TapGestureRecognizer();
     addTearDown(recognizer4.dispose);
-    final recognizer5 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer5 = TapGestureRecognizer();
     addTearDown(recognizer5.dispose);
 
     // Remove one node.
@@ -86,7 +86,7 @@ void main() {
     );
 
     final SemanticsNode nodeAfterRemoval = tester.getSemantics(find.text('Hallo Welt '));
-    final labelToNodeIdAfterRemoval = <String, int>{};
+    final Map<String, int> labelToNodeIdAfterRemoval = <String, int>{};
     nodeAfterRemoval.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterRemoval[node.label] = node.id;
       return true;
@@ -98,11 +98,11 @@ void main() {
     expect(labelToNodeIdAfterRemoval['Welt '], labelToNodeId['Welt ']);
     expect(labelToNodeIdAfterRemoval.length, 2);
 
-    final recognizer6 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer6 = TapGestureRecognizer();
     addTearDown(recognizer6.dispose);
-    final recognizer7 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer7 = TapGestureRecognizer();
     addTearDown(recognizer7.dispose);
-    final recognizer8 = TapGestureRecognizer();
+    final TapGestureRecognizer recognizer8 = TapGestureRecognizer();
     addTearDown(recognizer8.dispose);
 
     await tester.pumpWidget(
@@ -122,7 +122,7 @@ void main() {
     );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode nodeAfterAddition = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final labelToNodeIdAfterAddition = <String, int>{};
+    final Map<String, int> labelToNodeIdAfterAddition = <String, int>{};
     nodeAfterAddition.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterAddition[node.label] = node.id;
       return true;
@@ -162,7 +162,7 @@ void main() {
     final SemanticsNode node = tester.getSemantics(
       find.text('Hello, 1 new semantics node has been created.'),
     );
-    final labelToNodeId = <String, String>{};
+    final Map<String, String> labelToNodeId = <String, String>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.identifier;
       return true;

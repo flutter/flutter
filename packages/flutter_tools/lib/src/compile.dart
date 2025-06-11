@@ -103,7 +103,7 @@ class StdoutHandler {
   StringBuffer _errorBuffer = StringBuffer();
 
   void handler(String message) {
-    const kResultPrefix = 'result ';
+    const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
       return;
@@ -127,7 +127,7 @@ class StdoutHandler {
       if (_readFile) {
         expressionData = _fileSystem.file(fileName).readAsBytesSync();
       }
-      final output = CompilerOutput(
+      final CompilerOutput output = CompilerOutput(
         fileName,
         errorCount,
         sources,
@@ -713,7 +713,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         dartPluginRegistrant.existsSync()) {
       additionalSourceUri = dartPluginRegistrant.uri;
     }
-    final completer = Completer<CompilerOutput?>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(
       _RecompileRequest(
         completer,
@@ -751,7 +751,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           );
     }
 
-    final nativeAssets = request.nativeAssetsYamlUri?.toString();
+    final String? nativeAssets = request.nativeAssetsYamlUri?.toString();
     final Process? server = _server;
     if (server == null) {
       return _compile(
@@ -937,8 +937,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final completer = Completer<CompilerOutput?>();
-    final request = _CompileExpressionRequest(
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
+    final _CompileExpressionRequest request = _CompileExpressionRequest(
       completer,
       expression,
       definitions,
@@ -1002,7 +1002,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final completer = Completer<CompilerOutput?>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(
       _CompileExpressionToJsRequest(
         completer,
@@ -1064,7 +1064,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final completer = Completer<CompilerOutput?>();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(_RejectRequest(completer));
     return completer.future;
   }

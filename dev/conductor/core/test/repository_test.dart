@@ -12,8 +12,8 @@ import './common.dart';
 void main() {
   group('repository', () {
     late FakePlatform platform;
-    const rootDir = '/';
-    const revision = 'deadbeef';
+    const String rootDir = '/';
+    const String revision = 'deadbeef';
     late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
     late TestStdio stdio;
@@ -32,10 +32,10 @@ void main() {
     });
 
     test('updateDartRevision() updates the DEPS file', () async {
-      const previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-      const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
 
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
@@ -43,7 +43,7 @@ void main() {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       final File depsFile = fileSystem.file('/DEPS');
       depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
       await repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
@@ -52,9 +52,9 @@ void main() {
     });
 
     test('updateDartRevision() throws exception on malformed DEPS file', () {
-      const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
 
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
@@ -62,7 +62,7 @@ void main() {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       final File depsFile = fileSystem.file('/DEPS');
       depsFile.writeAsStringSync('''
 vars = {
@@ -74,9 +74,9 @@ vars = {
     });
 
     test('commit() throws if there are no local changes to commit and addFirst = true', () {
-      const commit1 = 'abc123';
-      const commit2 = 'def456';
-      const message = 'This is a commit message.';
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      const String message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -96,7 +96,7 @@ vars = {
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
@@ -104,7 +104,7 @@ vars = {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       expect(
         () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
@@ -112,9 +112,9 @@ vars = {
     });
 
     test('commit() passes correct commit message', () async {
-      const commit1 = 'abc123';
-      const commit2 = 'def456';
-      const message = 'This is a commit message.';
+      const String commit1 = 'abc123';
+      const String commit2 = 'def456';
+      const String message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -133,7 +133,7 @@ vars = {
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
@@ -141,7 +141,7 @@ vars = {
         stdio: stdio,
       );
 
-      final repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
@@ -149,11 +149,11 @@ vars = {
     test(
       'updateCandidateBranchVersion() returns false if branch is the same as version file',
       () async {
-        const branch = 'flutter-2.15-candidate.3';
+        const String branch = 'flutter-2.15-candidate.3';
         final File versionFile = fileSystem.file('/release-candidate-branch.version')
           ..writeAsStringSync(branch);
 
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(rootDir),
           platform: platform,
@@ -161,7 +161,7 @@ vars = {
           stdio: stdio,
         );
 
-        final repo = FrameworkRepository(checkouts);
+        final FrameworkRepository repo = FrameworkRepository(checkouts);
         final bool didUpdate = await repo.updateCandidateBranchVersion(
           branch,
           versionFile: versionFile,
@@ -173,9 +173,9 @@ vars = {
     test(
       'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
       () async {
-        const commit = 'deadbeef';
-        const candidateBranch = 'flutter-1.2-candidate.3';
-        var createdCandidateBranch = false;
+        const String commit = 'deadbeef';
+        const String candidateBranch = 'flutter-1.2-candidate.3';
+        bool createdCandidateBranch = false;
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
@@ -202,7 +202,7 @@ vars = {
           ),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit),
         ]);
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(rootDir),
           platform: platform,
@@ -224,8 +224,8 @@ vars = {
     );
 
     test('.listRemoteBranches() parses git output', () async {
-      const remoteName = 'mirror';
-      const lsRemoteOutput = '''
+      const String remoteName = 'mirror';
+      const String lsRemoteOutput = '''
 Extraneous debug information that should be ignored.
 
 4d44dca340603e25d4918c6ef070821181202e69        refs/heads/experiment
@@ -258,7 +258,7 @@ Extraneous debug information that should be ignored.
           stdout: lsRemoteOutput,
         ),
       ]);
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,

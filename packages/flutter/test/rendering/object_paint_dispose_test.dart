@@ -29,13 +29,13 @@ void main() {
 
     final RenderObject renderObject = key.currentContext!.findRenderObject()!;
 
-    for (final layer in layers) {
+    for (final Layer layer in layers) {
       expect(layer.debugDisposed, false);
     }
 
     await tester.pumpWidget(const SizedBox());
 
-    for (final layer in layers) {
+    for (final Layer layer in layers) {
       expect(layer.debugDisposed, true);
     }
     expect(renderObject.debugDisposed, true);

@@ -86,7 +86,7 @@ void main() {
   ) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -150,7 +150,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -229,7 +229,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, reverse: true));
@@ -264,7 +264,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -303,7 +303,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -393,7 +393,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -474,7 +474,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -518,7 +518,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     double indicatorNotification = 0;
@@ -761,7 +761,7 @@ void main() {
         ),
       ),
     );
-    const maxStretchLocation = 52.63178407049861;
+    const double maxStretchLocation = 52.63178407049861;
 
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
@@ -860,7 +860,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -935,7 +935,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1011,7 +1011,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -1053,7 +1053,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -1107,7 +1107,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, boxHeight: 205.0));
@@ -1174,7 +1174,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1201,7 +1201,7 @@ void main() {
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
       late final OverscrollNotification overscrollNotification;
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(

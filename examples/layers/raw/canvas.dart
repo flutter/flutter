@@ -16,16 +16,16 @@ ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
-  final recorder = ui.PictureRecorder();
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
 
   // Next, we create a canvas from the recorder. The canvas is an interface
   // which can receive drawing commands. The canvas interface is modeled after
   // the SkCanvas interface from Skia. The paintBounds establishes a "cull rect"
   // for the canvas, which lets the implementation discard any commands that
   // are entirely outside this rectangle.
-  final canvas = ui.Canvas(recorder, paintBounds);
+  final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
 
-  final paint = ui.Paint();
+  final ui.Paint paint = ui.Paint();
   canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFFFFFFFF));
 
   final ui.Size size = paintBounds.size;
@@ -56,7 +56,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.translate(mid.dx, mid.dy);
   canvas.rotate(math.pi / 4);
 
-  final yellowBlue = ui.Gradient.linear(
+  final ui.Gradient yellowBlue = ui.Gradient.linear(
     ui.Offset(-radius, -radius),
     ui.Offset.zero,
     <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
@@ -72,7 +72,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   // yellow circle.
 
   // Scale x and y by 0.5.
-  final scaleMatrix = Float64List.fromList(<double>[
+  final Float64List scaleMatrix = Float64List.fromList(<double>[
     0.5,
     0.0,
     0.0,
@@ -117,13 +117,13 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
-  final deviceTransform =
+  final Float64List deviceTransform =
       Float64List(16)
         ..[0] = devicePixelRatio
         ..[5] = devicePixelRatio
         ..[10] = 1.0
         ..[15] = 1.0;
-  final sceneBuilder =
+  final ui.SceneBuilder sceneBuilder =
       ui.SceneBuilder()
         ..pushTransform(deviceTransform)
         ..addPicture(ui.Offset.zero, picture)

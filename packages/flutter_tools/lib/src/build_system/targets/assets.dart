@@ -58,19 +58,19 @@ Future<Depfile> copyAssets(
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
   }
-  final copyFilesPool = Pool(kMaxOpenFiles);
-  final transformPool = Pool(
+  final Pool copyFilesPool = Pool(kMaxOpenFiles);
+  final Pool transformPool = Pool(
     (environment.platform.numberOfProcessors ~/ 2).clamp(1, kMaxOpenFiles),
   );
-  final inputs = <File>[
+  final List<File> inputs = <File>[
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
     pubspecFile,
     ...additionalInputs,
   ];
-  final outputs = <File>[];
+  final List<File> outputs = <File>[];
 
-  final iconTreeShaker = IconTreeShaker(
+  final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
     assetBundle.entries[kFontManifestJson]?.content as DevFSStringContent?,
     processManager: environment.processManager,
@@ -79,20 +79,20 @@ Future<Depfile> copyAssets(
     artifacts: environment.artifacts,
     targetPlatform: targetPlatform,
   );
-  final shaderCompiler = ShaderCompiler(
+  final ShaderCompiler shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
-  final assetTransformer = AssetTransformer(
+  final AssetTransformer assetTransformer = AssetTransformer(
     processManager: environment.processManager,
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
     buildMode: buildMode,
   );
 
-  final assetEntries = <String, AssetBundleEntry>{
+  final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
     ...assetBundle.entries,
     ...additionalContent.map((String key, DevFSContent value) {
       return MapEntry<String, AssetBundleEntry>(
@@ -125,7 +125,7 @@ Future<Depfile> copyAssets(
         final DevFSContent content = entry.value.content;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
-          var doCopy = true;
+          bool doCopy = true;
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
@@ -236,7 +236,7 @@ Future<Depfile> copyAssets(
       }),
     );
   }
-  final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
   return depfile;
 }
 
@@ -271,7 +271,7 @@ class CopyAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final Depfile depfile = await copyAssets(

@@ -42,14 +42,14 @@ void main() {
     });
 
     test('passes for valid version strings', () async {
-      const valid_versions = <String>[
+      const List<String> valid_versions = <String>[
         '1.2.3',
         '12.34.56',
         '1.2.3.pre.1',
         '1.2.3-4.5.pre',
         '1.2.3-5.0.pre.12',
       ];
-      for (final version in valid_versions) {
+      for (final String version in valid_versions) {
         final File file = fileSystem.file('version');
         file.writeAsStringSync(version);
 
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('fails for invalid version strings', () async {
-      const invalid_versions = <String>[
+      const List<String> invalid_versions = <String>[
         '1.2.3.4',
         '1.2.3.',
         '1.2.pre.1',
@@ -71,7 +71,7 @@ void main() {
         '  1.2.3',
         '1.2.3-hotfix.1',
       ];
-      for (final version in invalid_versions) {
+      for (final String version in invalid_versions) {
         final File file = fileSystem.file('version');
         file.writeAsStringSync(version);
 
@@ -85,11 +85,11 @@ void main() {
   });
 
   group('flutter/packages version', () {
-    final memoryFileSystem = MemoryFileSystem();
+    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     final fs.File packagesVersionFile = memoryFileSystem.file(
       path.join('bin', 'internal', 'flutter_packages.version'),
     );
-    const kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
+    const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
       packagesVersionFile.createSync(recursive: true);
     });
@@ -183,7 +183,7 @@ void main() {
       }
 
       final List<int> tests = makeTests(testCount);
-      final subshards = List<List<int>>.generate(subshardCount, (int index) {
+      final List<List<int>> subshards = List<List<int>>.generate(subshardCount, (int index) {
         final int subShardIndex = index + 1;
         final (int start, int end) = selectTestsForSubShard(
           testCount: tests.length,
@@ -194,7 +194,7 @@ void main() {
       });
 
       final List<int> testedTests = subshards.flattened.toList();
-      final deduped = Set<int>.from(subshards.flattened);
+      final Set<int> deduped = Set<int>.from(subshards.flattened);
       expect(
         testedTests,
         hasLength(deduped.length),
@@ -207,7 +207,7 @@ void main() {
       );
 
       final int minimumTestsPerShard = (testCount / subshardCount).floor();
-      for (var i = 0; i < subshards.length; i++) {
+      for (int i = 0; i < subshards.length; i++) {
         final int extraTestsInThisShard = subshards[i].length - minimumTestsPerShard;
         expect(
           extraTestsInThisShard,

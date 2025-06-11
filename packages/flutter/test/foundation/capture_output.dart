@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 List<String> captureOutput(VoidCallback fn) {
-  final log = <String>[];
+  final List<String> log = <String>[];
 
   runZoned<void>(
     fn,

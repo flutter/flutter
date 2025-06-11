@@ -23,7 +23,7 @@ const FileSystem fs = LocalFileSystem();
 /// Archives contain the executables and customizations for the platform that
 /// they are created on.
 Future<void> main(List<String> rawArguments) async {
-  final argParser = ArgParser();
+  final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
     help:
@@ -83,7 +83,7 @@ Future<void> main(List<String> rawArguments) async {
   if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
-  final revision = parsedArguments['revision'] as String;
+  final String revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
@@ -92,9 +92,9 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
-  final tempDirArg = parsedArguments['temp_dir'] as String?;
+  final String? tempDirArg = parsedArguments['temp_dir'] as String?;
   final Directory tempDir;
-  var removeTempDir = false;
+  bool removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_package.');
     removeTempDir = true;
@@ -115,10 +115,10 @@ Future<void> main(List<String> rawArguments) async {
     }
   }
 
-  final publish = parsedArguments['publish'] as bool;
-  final dryRun = parsedArguments['dry_run'] as bool;
+  final bool publish = parsedArguments['publish'] as bool;
+  final bool dryRun = parsedArguments['dry_run'] as bool;
   final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
-  final creator = ArchiveCreator(
+  final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,
     revision,
@@ -126,12 +126,12 @@ Future<void> main(List<String> rawArguments) async {
     fs: fs,
     strict: publish && !dryRun,
   );
-  var exitCode = 0;
+  int exitCode = 0;
   late String message;
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
-    final publisher = ArchivePublisher(
+    final ArchivePublisher publisher = ArchivePublisher(
       tempDir,
       revision,
       branch,

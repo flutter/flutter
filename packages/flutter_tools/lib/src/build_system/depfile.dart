@@ -29,7 +29,7 @@ class DepfileService {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     _writeFilesToBuffer(depfile.outputs, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(depfile.inputs, buffer);
@@ -56,7 +56,7 @@ class DepfileService {
   /// The [file] contains a list of newline separated file URIs. The output
   /// file must be manually specified.
   Depfile parseDart2js(File file, File output) {
-    final inputs = <File>[
+    final List<File> inputs = <File>[
       for (final String rawUri in file.readAsLinesSync())
         if (rawUri.trim().isNotEmpty)
           if (Uri.tryParse(rawUri) case final Uri fileUri when fileUri.scheme == 'file')
@@ -66,7 +66,7 @@ class DepfileService {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-    final backslash = _fileSystem.path.style.separator == r'\';
+    final bool backslash = _fileSystem.path.style.separator == r'\';
     for (final File outputFile in files) {
       String path = _fileSystem.path.normalize(outputFile.path);
       if (backslash) {

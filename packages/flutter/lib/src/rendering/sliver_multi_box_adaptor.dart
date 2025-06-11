@@ -255,7 +255,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void adoptChild(RenderObject child) {
     super.adoptChild(child);
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     if (!childParentData._keptAlive) {
       childManager.didAdoptChild(child as RenderBox);
@@ -299,7 +299,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     // 2. The child is keptAlive.
     // In this case, the child is no longer in the childList but might be stored in
     // [_keepAliveBucket]. We need to update the location of the child in the bucket.
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     if (!childParentData.keptAlive) {
       super.move(child, after: after);
@@ -334,7 +334,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void remove(RenderBox child) {
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     if (!childParentData._keptAlive) {
       super.remove(child);
@@ -361,7 +361,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       assert(constraints == this.constraints);
       if (_keepAliveBucket.containsKey(index)) {
         final RenderBox child = _keepAliveBucket.remove(index)!;
-        final childParentData =
+        final SliverMultiBoxAdaptorParentData childParentData =
             child.parentData! as SliverMultiBoxAdaptorParentData;
         assert(childParentData._keptAlive);
         dropChild(child);
@@ -375,7 +375,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   void _destroyOrCacheChild(RenderBox child) {
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     if (childParentData.keepAlive) {
       assert(!childParentData._keptAlive);
@@ -461,7 +461,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     if (firstChild != null) {
       assert(firstChild == lastChild);
       assert(indexOf(firstChild!) == index);
-      final firstChildParentData =
+      final SliverMultiBoxAdaptorParentData firstChildParentData =
           firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       firstChildParentData.layoutOffset = layoutOffset;
       return true;
@@ -543,7 +543,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   int calculateLeadingGarbage({required int firstIndex}) {
     RenderBox? walker = firstChild;
-    var leadingGarbage = 0;
+    int leadingGarbage = 0;
     while (walker != null && indexOf(walker) < firstIndex) {
       leadingGarbage += 1;
       walker = childAfter(walker);
@@ -564,7 +564,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   int calculateTrailingGarbage({required int lastIndex}) {
     RenderBox? walker = lastChild;
-    var trailingGarbage = 0;
+    int trailingGarbage = 0;
     while (walker != null && indexOf(walker) > lastIndex) {
       trailingGarbage += 1;
       walker = childBefore(walker);
@@ -606,7 +606,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       // to prepare our list ahead of time.)
       _keepAliveBucket.values
           .where((RenderBox child) {
-            final childParentData =
+            final SliverMultiBoxAdaptorParentData childParentData =
                 child.parentData! as SliverMultiBoxAdaptorParentData;
             return !childParentData.keepAlive;
           })
@@ -614,7 +614,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
           .forEach(_childManager.removeChild);
       assert(
         _keepAliveBucket.values.where((RenderBox child) {
-          final childParentData =
+          final SliverMultiBoxAdaptorParentData childParentData =
               child.parentData! as SliverMultiBoxAdaptorParentData;
           return !childParentData.keepAlive;
         }).isEmpty,
@@ -625,7 +625,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Returns the index of the given child, as given by the
   /// [SliverMultiBoxAdaptorParentData.index] field of the child's [parentData].
   int indexOf(RenderBox child) {
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     assert(childParentData.index != null);
     return childParentData.index!;
@@ -649,7 +649,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     required double crossAxisPosition,
   }) {
     RenderBox? child = lastChild;
-    final boxResult = BoxHitTestResult.wrap(result);
+    final BoxHitTestResult boxResult = BoxHitTestResult.wrap(result);
     while (child != null) {
       if (hitTestBoxChild(
         boxResult,
@@ -672,14 +672,14 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   double? childScrollOffset(RenderObject child) {
     assert(child.parent == this);
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     return childParentData.layoutOffset;
   }
 
   @override
   bool paintsChild(RenderBox child) {
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData? childParentData =
         child.parentData as SliverMultiBoxAdaptorParentData?;
     return childParentData?.index != null && !_keepAliveBucket.containsKey(childParentData!.index);
   }
@@ -738,7 +738,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     while (child != null) {
       final double mainAxisDelta = childMainAxisPosition(child);
       final double crossAxisDelta = childCrossAxisPosition(child);
-      var childOffset = Offset(
+      Offset childOffset = Offset(
         originOffset.dx + mainAxisUnit.dx * mainAxisDelta + crossAxisUnit.dx * crossAxisDelta,
         originOffset.dy + mainAxisUnit.dy * mainAxisDelta + crossAxisUnit.dy * crossAxisDelta,
       );
@@ -790,11 +790,11 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final children = <DiagnosticsNode>[];
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     if (firstChild != null) {
       RenderBox? child = firstChild;
       while (true) {
-        final childParentData =
+        final SliverMultiBoxAdaptorParentData childParentData =
             child!.parentData! as SliverMultiBoxAdaptorParentData;
         children.add(child.toDiagnosticsNode(name: 'child with index ${childParentData.index}'));
         if (child == lastChild) {
@@ -805,7 +805,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     }
     if (_keepAliveBucket.isNotEmpty) {
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
-      for (final index in indices) {
+      for (final int index in indices) {
         children.add(
           _keepAliveBucket[index]!.toDiagnosticsNode(
             name: 'child with index $index (kept alive but not laid out)',

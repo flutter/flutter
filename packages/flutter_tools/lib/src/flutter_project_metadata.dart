@@ -133,7 +133,7 @@ enum FlutterTemplateType implements ParsedFlutterTemplateType {
 
 /// Verifies the expected yaml keys are present in the file.
 bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger logger) {
-  var isValid = true;
+  bool isValid = true;
   for (final MapEntry<String, Object> entry in validations.entries) {
     if (!map.keys.contains(entry.key)) {
       isValid = false;
@@ -349,12 +349,12 @@ class MigrateConfig {
 
   /// Returns the string that should be written to the .metadata file.
   String getOutputFileString() {
-    var unmanagedFilesString = '';
+    String unmanagedFilesString = '';
     for (final String path in unmanagedFiles) {
       unmanagedFilesString += "\n    - '$path'";
     }
 
-    var platformsString = '';
+    String platformsString = '';
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry
         in platformConfigs.entries) {
       platformsString +=

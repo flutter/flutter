@@ -144,7 +144,7 @@ class AppContext {
     Map<Type, Generator>? fallbacks,
     ZoneSpecification? zoneSpecification,
   }) async {
-    final child = AppContext._(
+    final AppContext child = AppContext._(
       this,
       name,
       Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
@@ -159,8 +159,8 @@ class AppContext {
 
   @override
   String toString() {
-    final buf = StringBuffer();
-    var indent = '';
+    final StringBuffer buf = StringBuffer();
+    String indent = '';
     AppContext? ctx = this;
     while (ctx != null) {
       buf.write('AppContext');

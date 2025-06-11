@@ -92,7 +92,7 @@ void main() {
     'Default text selection color',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final overlayEntry = OverlayEntry(
+      final OverlayEntry overlayEntry = OverlayEntry(
         builder:
             (BuildContext context) => SelectableRegion(
               selectionControls: emptyTextSelectionControls,
@@ -184,8 +184,8 @@ Future<void> _expectColors(
       (await binding.runAsync<ByteData?>(
         () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
       ))!;
-  final actualColorValues = <int>{};
-  for (var offset = 0; offset < bytes.lengthInBytes; offset += 4) {
+  final Set<int> actualColorValues = <int>{};
+  for (int offset = 0; offset < bytes.lengthInBytes; offset += 4) {
     actualColorValues.add(
       (bytes.getUint8(offset + 3) << 24) +
           (bytes.getUint8(offset + 0) << 16) +

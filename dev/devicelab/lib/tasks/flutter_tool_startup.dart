@@ -24,7 +24,7 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
     rmTree(dir(path.join(projectDirectory.path, 'test')));
   });
 
-  final data = <String, dynamic>{
+  final Map<String, dynamic> data = <String, dynamic>{
     // `flutter test` in dir with no `test` folder.
     ...(await _Benchmark(projectDirectory, 'test startup', 'test').run()).asMap(
       'flutter_tool_startup_test',
@@ -74,14 +74,14 @@ String pathWithoutWhereHits(List<String> whats) {
     paths = pathEnvironment.split(':');
   }
   // This isn't great but will probably work for our purposes.
-  final extensions = <String>['', '.exe', '.bat', '.com'];
+  final List<String> extensions = <String>['', '.exe', '.bat', '.com'];
 
-  final notFound = <String>[];
-  for (final path in paths) {
-    var found = false;
-    for (final extension in extensions) {
+  final List<String> notFound = <String>[];
+  for (final String path in paths) {
+    bool found = false;
+    for (final String extension in extensions) {
       for (final String what in whats) {
-        final f = File('$path${Platform.pathSeparator}$what$extension');
+        final File f = File('$path${Platform.pathSeparator}$what$extension');
         if (f.existsSync()) {
           found = true;
           break;
@@ -138,7 +138,7 @@ class _Benchmark {
 
   Future<int> execute(int iteration, int targetIterations) async {
     section('Benchmark $title - ${iteration + 1} / $targetIterations');
-    final stopwatch = Stopwatch();
+    final Stopwatch stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {
       stopwatch.start();
       // canFail is set to true, as e.g. `flutter test` in a dir with no `test`
@@ -151,9 +151,9 @@ class _Benchmark {
 
   /// Runs `benchmark` several times and reports the results.
   Future<_BenchmarkResult> run() async {
-    final results = <int>[];
-    var sum = 0;
-    for (var i = 0; i < _kRunsPerBenchmark; i++) {
+    final List<int> results = <int>[];
+    int sum = 0;
+    for (int i = 0; i < _kRunsPerBenchmark; i++) {
       final int thisRuntime = await execute(i, _kRunsPerBenchmark);
       results.add(thisRuntime);
       sum += thisRuntime;

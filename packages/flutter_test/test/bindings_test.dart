@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final binding = AutomatedTestWidgetsFlutterBinding();
+  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
 
   group(TestViewConfiguration, () {
     test('is initialized with top-level window if one is not provided', () {
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('sets the DPR to match the window', () {
-      final configuration = TestViewConfiguration(
+      final TestViewConfiguration configuration = TestViewConfiguration(
         size: const Size(1280.0, 800.0),
       );
       expect(configuration.devicePixelRatio, binding.window.devicePixelRatio);
@@ -48,7 +48,7 @@ void main() {
 
   // The next three tests must run in order -- first using `test`, then `testWidgets`, then `test` again.
 
-  var order = 0;
+  int order = 0;
 
   test('Initializes httpOverrides and testTextInput', () async {
     assert(order == 0);
@@ -84,7 +84,7 @@ void main() {
 
   group('elapseBlocking', () {
     testWidgets('timer is not called', (WidgetTester tester) async {
-      var timerCalled = false;
+      bool timerCalled = false;
       Timer.run(() => timerCalled = true);
 
       binding.elapseBlocking(const Duration(seconds: 1));
@@ -99,7 +99,7 @@ void main() {
       await tester.pumpWidget(
         Builder(
           builder: (_) {
-            var timerCalled = false;
+            bool timerCalled = false;
             Timer.run(() => timerCalled = true);
 
             binding.elapseBlocking(const Duration(seconds: 1));
@@ -123,7 +123,7 @@ void main() {
   testWidgets('Assets in the tester can be loaded without turning event loop', (
     WidgetTester tester,
   ) async {
-    var responded = false;
+    bool responded = false;
     // The particular asset does not matter, as long as it exists.
     rootBundle.load('AssetManifest.json').then((ByteData data) {
       responded = true;

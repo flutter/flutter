@@ -53,7 +53,7 @@ class AndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
     final String studioVersionText =
@@ -63,7 +63,7 @@ class AndroidStudioValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidStudioLocation(_studio.directory)));
 
     if (_studio.pluginsPath != null) {
-      final plugins = IntelliJPlugins(
+      final IntelliJPlugins plugins = IntelliJPlugins(
         _studio.pluginsPath!,
         fileSystem: _fileSystem,
       );
@@ -126,9 +126,9 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final cfgAndroidStudio = _config.getValue('android-studio-dir') as String?;
+    final String? cfgAndroidStudio = _config.getValue('android-studio-dir') as String?;
     if (cfgAndroidStudio != null) {
       messages.add(ValidationMessage.error(_userMessages.androidStudioMissing(cfgAndroidStudio)));
     }

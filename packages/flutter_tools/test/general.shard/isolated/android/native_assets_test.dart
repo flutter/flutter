@@ -49,7 +49,7 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
     testUsingContext(
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
@@ -67,7 +67,7 @@ void main() {
         // The mock doesn't create the file, so create it here.
         await dylibAfterCompiling.create();
 
-        final codeAssets = <CodeAsset>[
+        final List<CodeAsset> codeAssets = <CodeAsset>[
           CodeAsset(
             package: 'bar',
             name: 'bar.dart',
@@ -75,12 +75,12 @@ void main() {
             file: Uri.file('libbar.so'),
           ),
         ];
-        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         );
-        final environmentDefines = <String, String>{
+        final Map<String, String> environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kMinSdkVersion: minSdkVersion,
         };

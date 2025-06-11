@@ -12,10 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('RawRadio control test', (WidgetTester tester) async {
-    final node = FocusNode();
+    final FocusNode node = FocusNode();
     addTearDown(node.dispose);
     ToggleableStateMixin? actualState;
-    final registry = TestRegistry<int>();
+    final TestRegistry<int> registry = TestRegistry<int>();
 
     Widget buildWidget() {
       return RawRadio<int>(
@@ -50,9 +50,9 @@ void main() {
   });
 
   testWidgets('RawRadio disabled', (WidgetTester tester) async {
-    final node = FocusNode();
+    final FocusNode node = FocusNode();
     addTearDown(node.dispose);
-    final registry = TestRegistry<int>();
+    final TestRegistry<int> registry = TestRegistry<int>();
 
     Widget buildWidget() {
       return RawRadio<int>(
@@ -76,7 +76,7 @@ void main() {
   });
 
   testWidgets('RawRadio enabled without registry throws', (WidgetTester tester) async {
-    final node = FocusNode();
+    final FocusNode node = FocusNode();
     addTearDown(node.dispose);
 
     Widget buildWidget() {

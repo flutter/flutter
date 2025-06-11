@@ -15,7 +15,7 @@ import '../../src/fakes.dart';
 void main() {
   group('output preferences', () {
     testWithoutContext('can wrap output', () async {
-      final bufferLogger = BufferLogger(
+      final BufferLogger bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
@@ -25,7 +25,7 @@ void main() {
     });
 
     testWithoutContext('can turn off wrapping', () async {
-      final bufferLogger = BufferLogger(
+      final BufferLogger bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
@@ -171,7 +171,7 @@ void main() {
     });
 
     testWithoutContext('character prompt', () async {
-      final bufferLogger = BufferLogger(
+      final BufferLogger bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
       );
@@ -197,7 +197,7 @@ void main() {
     });
 
     testWithoutContext('default character choice without displayAcceptedCharacters', () async {
-      final bufferLogger = BufferLogger(
+      final BufferLogger bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
       );
@@ -220,7 +220,7 @@ void main() {
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
-      final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+      final AnsiTerminal ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
 
       expect(() => ansiTerminal.singleCharMode = true, returnsNormally);
     });
@@ -502,8 +502,8 @@ void main() {
   });
 
   testWithoutContext('set singleCharMode resilient to StdinException', () async {
-    final stdio = FakeStdio();
-    final terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+    final FakeStdio stdio = FakeStdio();
+    final AnsiTerminal terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
     stdio.stdinHasTerminal = true;
     stdio._stdin =
         FakeStdin()
@@ -516,9 +516,9 @@ void main() {
   });
 
   testWithoutContext('singleCharMode is reset by shutdown hook', () {
-    final shutdownHooks = ShutdownHooks();
-    final stdio = FakeStdio();
-    final terminal = AnsiTerminal(
+    final ShutdownHooks shutdownHooks = ShutdownHooks();
+    final FakeStdio stdio = FakeStdio();
+    final AnsiTerminal terminal = AnsiTerminal(
       stdio: stdio,
       platform: const LocalPlatform(),
       shutdownHooks: shutdownHooks,

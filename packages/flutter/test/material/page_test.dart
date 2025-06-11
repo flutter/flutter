@@ -127,7 +127,7 @@ void main() {
       // rather than relative to the screen so assert that the shadow starts at
       // offset.dx = 0.
       final PaintPattern paintsShadow = paints;
-      for (var i = 0; i < 0.05 * 800; i += 1) {
+      for (int i = 0; i < 0.05 * 800; i += 1) {
         paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0, 0.0, 1.0, 600));
       }
       expect(box, paintsShadow);
@@ -571,7 +571,7 @@ void main() {
   );
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
-    final routes = <String, WidgetBuilder>{
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/':
           (BuildContext context) => Material(
             child: TextButton(
@@ -838,7 +838,7 @@ void main() {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                final pageNumber = settings.name == '/' ? '1' : '2';
+                final String pageNumber = settings.name == '/' ? '1' : '2';
                 return Center(child: Text('Page $pageNumber'));
               },
             );
@@ -880,7 +880,7 @@ void main() {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                final pageNumber = settings.name == '/' ? '1' : '2';
+                final String pageNumber = settings.name == '/' ? '1' : '2';
                 return Center(child: Text('Page $pageNumber'));
               },
             );
@@ -1025,8 +1025,8 @@ void main() {
 
       final GlobalKey homeScaffoldKey = GlobalKey();
       final GlobalKey pageScaffoldKey = GlobalKey();
-      var homeTapCount = 0;
-      var pageTapCount = 0;
+      int homeTapCount = 0;
+      int pageTapCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1105,8 +1105,8 @@ void main() {
 
       final GlobalKey homeScaffoldKey = GlobalKey();
       final GlobalKey pageScaffoldKey = GlobalKey();
-      var homeTapCount = 0;
-      var pageTapCount = 0;
+      int homeTapCount = 0;
+      int pageTapCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1217,8 +1217,8 @@ void main() {
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
-    final detector = TransitionDetector();
-    var myPages = <Page<void>>[
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
       MaterialPage<void>(key: pageKey, child: const Text('first')),
     ];
     await tester.pumpWidget(
@@ -1259,8 +1259,8 @@ void main() {
   testWidgets('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
-    final detector = TransitionDetector();
-    var myPages = <Page<void>>[
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
       MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
       MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
@@ -1308,7 +1308,7 @@ void main() {
   testWidgets('MaterialPage does not lose its state when transitioning out', (
     WidgetTester tester,
   ) async {
-    final navigator = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsNothing);
@@ -1426,7 +1426,7 @@ void main() {
     'Setting MaterialPageRoute.requestFocus to false does not request focus on the page',
     (WidgetTester tester) async {
       late BuildContext savedContext;
-      const pageTwoText = 'Page Two';
+      const String pageTwoText = 'Page Two';
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(

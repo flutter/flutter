@@ -99,7 +99,7 @@ class DaemonInputStreamConverter {
 
   // Processes a single chunk received in the input stream.
   void _processChunk(List<int> chunk) {
-    var start = 0;
+    int start = 0;
     while (start < chunk.length) {
       switch (state) {
         case _InputStreamParseState.json:
@@ -119,7 +119,7 @@ class DaemonInputStreamConverter {
 
   /// Processes a chunk in JSON mode, and returns the number of bytes processed.
   int _processChunkInJsonMode(List<int> chunk, int start) {
-    const LF = 10; // The '\n' character
+    const int LF = 10; // The '\n' character
 
     // Search for newline character.
     final int indexOfNewLine = chunk.indexOf(LF, start);
@@ -189,8 +189,8 @@ class DaemonStreams {
   /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
   factory DaemonStreams.connect(String host, int port, {required Logger logger}) {
     final Future<Socket> socketFuture = Socket.connect(host, port);
-    final inputStreamController = StreamController<List<int>>();
-    final outputStreamController = StreamController<List<int>>();
+    final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
+    final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
     socketFuture.then<void>(
       (Socket socket) {
         inputStreamController.addStream(socket);
@@ -280,10 +280,10 @@ class DaemonConnection {
   ///
   /// Returns a [Future] that resolves with the content.
   Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
-    final id = '${++_outgoingRequestId}';
-    final completer = Completer<Object?>();
+    final String id = '${++_outgoingRequestId}';
+    final Completer<Object?> completer = Completer<Object?>();
     _outgoingRequestCompleters[id] = completer;
-    final data = <String, Object?>{
+    final Map<String, Object?> data = <String, Object?>{
       'id': id,
       'method': method,
       if (params != null) 'params': params,
@@ -338,7 +338,7 @@ class DaemonConnection {
     if (data['id'] != null) {
       if (data['method'] == null) {
         // This is a response to previously sent request.
-        final id = data['id']! as String;
+        final String id = data['id']! as String;
         if (data['error'] != null) {
           // This is an error response.
           _logger.printTrace('<- Error response received from daemon, id = $id');

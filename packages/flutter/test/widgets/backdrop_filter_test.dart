@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Backdrop key is passed to backdrop Layer', (WidgetTester tester) async {
-    final backdropKey = BackdropKey();
+    final BackdropKey backdropKey = BackdropKey();
 
     Widget build({required bool enableKeys}) {
       return MaterialApp(

@@ -35,7 +35,7 @@ class _GesturePainter extends CustomPainter {
               ? <Color>[swatch.shade50, swatch.shade900]
               : <Color>[swatch.shade900, swatch.shade50],
     );
-    final paint =
+    final Paint paint =
         Paint()..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, paint);
   }

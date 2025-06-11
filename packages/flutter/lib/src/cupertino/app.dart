@@ -705,7 +705,7 @@ class _CupertinoInspectorButton extends InspectorButton {
 
   @override
   Widget build(BuildContext context) {
-    final buttonIcon = Icon(
+    final Icon buttonIcon = Icon(
       icon,
       semanticLabel: semanticsLabel,
       size: iconSizeForVariant,

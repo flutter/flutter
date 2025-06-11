@@ -10,11 +10,11 @@ final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', a
 
 void main() {
   testWidgets('AutofillGroup has the right clients', (WidgetTester tester) async {
-    const outerKey = Key('outer');
-    const innerKey = Key('inner');
+    const Key outerKey = Key('outer');
+    const Key innerKey = Key('inner');
 
-    const client1 = TextField(autofillHints: <String>['1']);
-    const client2 = TextField(autofillHints: <String>['2']);
+    const TextField client1 = TextField(autofillHints: <String>['1']);
+    const TextField client2 = TextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -47,10 +47,10 @@ void main() {
   });
 
   testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {
-    const scopeKey = Key('scope');
+    const Key scopeKey = Key('scope');
 
-    const client1 = TextField(autofillHints: <String>['1']);
-    var client2 = const TextField(autofillHints: null);
+    const TextField client1 = TextField(autofillHints: <String>['1']);
+    TextField client2 = const TextField(autofillHints: null);
 
     late StateSetter setState;
 
@@ -99,12 +99,12 @@ void main() {
   });
 
   testWidgets('AutofillGroup has the right clients after reparenting', (WidgetTester tester) async {
-    const outerKey = Key('outer');
-    const innerKey = Key('inner');
+    const Key outerKey = Key('outer');
+    const Key innerKey = Key('inner');
     final GlobalKey keyClient3 = GlobalKey();
 
-    const client1 = TextField(autofillHints: <String>['1']);
-    const client2 = TextField(autofillHints: <String>['2']);
+    const TextField client1 = TextField(autofillHints: <String>['1']);
+    const TextField client2 = TextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -162,12 +162,12 @@ void main() {
 
   testWidgets('disposing AutofillGroups', (WidgetTester tester) async {
     late StateSetter setState;
-    const group1 = Key('group1');
-    const group2 = Key('group2');
-    const group3 = Key('group3');
-    const placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
+    const Key group1 = Key('group1');
+    const Key group2 = Key('group2');
+    const Key group3 = Key('group3');
+    const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
 
-    var children = const <Widget>[
+    List<Widget> children = const <Widget>[
       AutofillGroup(key: group1, child: AutofillGroup(child: placeholder)),
       AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
       AutofillGroup(key: group3, child: AutofillGroup(child: placeholder)),

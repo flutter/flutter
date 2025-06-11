@@ -110,7 +110,7 @@ void main() {
   });
 
   test('Intrinsic checks are turned on', () async {
-    final errorDetails = <FlutterErrorDetails>[];
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
     layout(
       RenderInvalidIntrinsics(),
       constraints: const BoxConstraints(maxWidth: 1000.0, maxHeight: 1000.0),

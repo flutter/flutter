@@ -70,7 +70,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = ThemeData(colorSchemeSeed: selectedColorSeed);
+    final ThemeData themeData = ThemeData(colorSchemeSeed: selectedColorSeed);
     final ColorScheme colors = themeData.colorScheme;
 
     return MaterialApp(

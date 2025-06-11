@@ -34,7 +34,7 @@ class VsCode {
 
     // If the extensions directory doesn't exist at all, the listSync()
     // below will fail, so just bail out early.
-    const notInstalledMessage = ValidationMessage(
+    const ValidationMessage notInstalledMessage = ValidationMessage(
       'Flutter extension can be installed from:',
       contextUrl: extensionMarketplaceUrl,
     );
@@ -135,8 +135,8 @@ class VsCode {
     final String? homeDirPath =
         FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
 
-    var vsCodeSpotlightResult = '';
-    var vsCodeInsiderSpotlightResult = '';
+    String vsCodeSpotlightResult = '';
+    String vsCodeInsiderSpotlightResult = '';
     // Query Spotlight for unexpected installation locations.
     try {
       final ProcessResult vsCodeSpotlightQueryResult = processManager.runSync(<String>[
@@ -209,7 +209,7 @@ class VsCode {
     final String? progFiles = platform.environment['programfiles'];
     final String? localAppData = platform.environment['localappdata'];
 
-    final searchLocations = <VsCodeInstallLocation>[
+    final List<VsCodeInstallLocation> searchLocations = <VsCodeInstallLocation>[
       if (localAppData != null)
         VsCodeInstallLocation(
           fileSystem.path.join(localAppData, r'Programs\Microsoft VS Code'),
@@ -294,7 +294,7 @@ class VsCode {
     FileSystem fileSystem,
     Platform platform,
   ) {
-    final results = <VsCode>[];
+    final List<VsCode> results = <VsCode>[];
 
     for (final VsCodeInstallLocation searchLocation in allLocations) {
       final String? homeDirPath =

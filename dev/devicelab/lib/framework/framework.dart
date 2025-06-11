@@ -59,7 +59,7 @@ Future<TaskResult> task(TaskFunction task, {ProcessManager? processManager}) asy
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  final runner = _TaskRunner(task, processManager);
+  final _TaskRunner runner = _TaskRunner(task, processManager);
   runner.keepVmAliveUntilTaskRunRequested();
   return runner.whenDone;
 }
@@ -73,10 +73,10 @@ class _TaskRunner {
           parameters.containsKey('timeoutInMinutes')
               ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
               : null;
-      final runFlutterConfig =
+      final bool runFlutterConfig =
           parameters['runFlutterConfig'] !=
           'false'; // used by tests to avoid changing the configuration
-      final runProcessCleanup = parameters['runProcessCleanup'] != 'false';
+      final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
       final String? localEngine = parameters['localEngine'];
       final String? localEngineHost = parameters['localEngineHost'];
       final TaskResult result = await run(
@@ -86,7 +86,7 @@ class _TaskRunner {
         localEngine: localEngine,
         localEngineHost: localEngineHost,
       );
-      const taskResultReceivedTimeout = Duration(seconds: 30);
+      const Duration taskResultReceivedTimeout = Duration(seconds: 30);
       _taskResultReceivedTimeout = Timer(taskResultReceivedTimeout, () {
         logger.severe(
           'Task runner did not acknowledge task results in $taskResultReceivedTimeout.',
@@ -145,7 +145,7 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
-      final exe = Platform.isWindows ? '.exe' : '';
+      final String exe = Platform.isWindows ? '.exe' : '';
       late Set<RunningProcessInfo> beforeRunningDartInstances;
       if (runProcessCleanup) {
         section('Checking running Dart$exe processes');
@@ -157,7 +157,7 @@ class _TaskRunner {
           processManager: processManager,
         );
         beforeRunningDartInstances.forEach(print);
-        for (final info in allProcesses) {
+        for (final RunningProcessInfo info in allProcesses) {
           if (info.commandLine.contains('iproxy')) {
             print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
           }
@@ -216,7 +216,7 @@ class _TaskRunner {
           processName: 'dart$exe',
           processManager: processManager,
         );
-        for (final info in afterRunningDartInstances) {
+        for (final RunningProcessInfo info in afterRunningDartInstances) {
           if (!beforeRunningDartInstances.contains(info)) {
             print('$info was leaked by this test.');
             if (result is TaskResultCheckProcesses) {
@@ -285,7 +285,7 @@ class _TaskRunner {
     _keepAlivePort = RawReceivePort();
 
     // Timeout if nothing bothers to connect and ask us to run the task.
-    const taskStartTimeout = Duration(seconds: 60);
+    const Duration taskStartTimeout = Duration(seconds: 60);
     _startTaskTimeout = Timer(taskStartTimeout, () {
       if (!_taskStarted) {
         logger.severe('Task did not start in $taskStartTimeout.');
@@ -303,13 +303,13 @@ class _TaskRunner {
   }
 
   Future<TaskResult> _performTask() {
-    final completer = Completer<TaskResult>();
+    final Completer<TaskResult> completer = Completer<TaskResult>();
     Chain.capture(
       () async {
         completer.complete(await task());
       },
       onError: (dynamic taskError, Chain taskErrorStack) {
-        final message = 'Task failed: $taskError';
+        final String message = 'Task failed: $taskError';
         stderr
           ..writeln(message)
           ..writeln('\nStack trace:')

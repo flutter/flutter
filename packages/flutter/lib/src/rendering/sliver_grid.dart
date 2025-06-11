@@ -87,7 +87,7 @@ class SliverGridGeometry {
 
   @override
   String toString() {
-    final properties = <String>[
+    final List<String> properties = <String>[
       'scrollOffset: $scrollOffset',
       'crossAxisOffset: $crossAxisOffset',
       'mainAxisExtent: $mainAxisExtent',
@@ -586,7 +586,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
   @override
   double childCrossAxisPosition(RenderBox child) {
-    final childParentData = child.parentData! as SliverGridParentData;
+    final SliverGridParentData childParentData = child.parentData! as SliverGridParentData;
     return childParentData.crossAxisOffset!;
   }
 
@@ -633,13 +633,13 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
     RenderBox? trailingChildWithLayout;
-    var reachedEnd = false;
+    bool reachedEnd = false;
 
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final RenderBox child =
           insertAndLayoutLeadingChild(gridGeometry.getBoxConstraints(constraints))!;
-      final childParentData = child.parentData! as SliverGridParentData;
+      final SliverGridParentData childParentData = child.parentData! as SliverGridParentData;
       childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);
@@ -649,7 +649,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(firstChildGridGeometry.getBoxConstraints(constraints));
-      final childParentData = firstChild!.parentData! as SliverGridParentData;
+      final SliverGridParentData childParentData = firstChild!.parentData! as SliverGridParentData;
       childParentData.layoutOffset = firstChildGridGeometry.scrollOffset;
       childParentData.crossAxisOffset = firstChildGridGeometry.crossAxisOffset;
       trailingChildWithLayout = firstChild;
@@ -674,7 +674,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
         child.layout(childConstraints);
       }
       trailingChildWithLayout = child;
-      final childParentData = child.parentData! as SliverGridParentData;
+      final SliverGridParentData childParentData = child.parentData! as SliverGridParentData;
       childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);

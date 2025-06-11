@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
-    final action = TestAction();
+    final TestAction action = TestAction();
     bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -185,7 +185,7 @@ void main() {
     }
 
     testWidgets('push unknown route when onUnknownRoute is null', (WidgetTester tester) async {
-      final key = GlobalKey<NavigatorState>();
+      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
       expectFlutterError(
         key: key,
         tester: tester,
@@ -209,7 +209,7 @@ void main() {
     });
 
     testWidgets('push unknown route when onUnknownRoute returns null', (WidgetTester tester) async {
-      final key = GlobalKey<NavigatorState>();
+      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
       expectFlutterError(
         key: key,
         tester: tester,
@@ -231,7 +231,7 @@ void main() {
   });
 
   testWidgets('WidgetsApp can customize initial routes', (WidgetTester tester) async {
-    final navigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       WidgetsApp(
         navigatorKey: navigatorKey,
@@ -284,11 +284,11 @@ void main() {
   });
 
   testWidgets('WidgetsApp.router works', (WidgetTester tester) async {
-    final provider = PlatformRouteInformationProvider(
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final delegate = SimpleNavigatorRouterDelegate(
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -322,7 +322,7 @@ void main() {
   testWidgets('WidgetsApp.router route information parser is optional', (
     WidgetTester tester,
   ) async {
-    final delegate = SimpleNavigatorRouterDelegate(
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -352,7 +352,7 @@ void main() {
   testWidgets(
     'WidgetsApp.router throw if route information provider is provided but no route information parser',
     (WidgetTester tester) async {
-      final delegate = SimpleNavigatorRouterDelegate(
+      final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
         builder: (BuildContext context, RouteInformation information) {
           return Text(information.uri.toString());
         },
@@ -363,7 +363,7 @@ void main() {
       );
       addTearDown(delegate.dispose);
       delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-      final provider = PlatformRouteInformationProvider(
+      final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
         initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
       );
       addTearDown(provider.dispose);
@@ -382,7 +382,7 @@ void main() {
   testWidgets(
     'WidgetsApp.router throw if route configuration is provided along with other delegate',
     (WidgetTester tester) async {
-      final delegate = SimpleNavigatorRouterDelegate(
+      final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
         builder: (BuildContext context, RouteInformation information) {
           return Text(information.uri.toString());
         },
@@ -393,7 +393,7 @@ void main() {
       );
       addTearDown(delegate.dispose);
       delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-      final routerConfig = RouterConfig<RouteInformation>(
+      final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
         routerDelegate: delegate,
       );
       await expectLater(() async {
@@ -409,7 +409,7 @@ void main() {
   );
 
   testWidgets('WidgetsApp.router router config works', (WidgetTester tester) async {
-    final delegate = SimpleNavigatorRouterDelegate(
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -419,11 +419,11 @@ void main() {
       },
     );
     addTearDown(delegate.dispose);
-    final provider = PlatformRouteInformationProvider(
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final routerConfig = RouterConfig<RouteInformation>(
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
       routerDelegate: delegate,
@@ -446,7 +446,7 @@ void main() {
   });
 
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
-    final delegate = SimpleNavigatorRouterDelegate(
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
@@ -579,7 +579,7 @@ void main() {
   });
 
   testWidgets("WidgetsApp doesn't have dependency on MediaQuery", (WidgetTester tester) async {
-    var routeBuildCount = 0;
+    int routeBuildCount = 0;
 
     final Widget widget = WidgetsApp(
       color: const Color.fromARGB(255, 255, 255, 255),
@@ -609,13 +609,13 @@ void main() {
   testWidgets(
     'WidgetsApp provides meta based shortcuts for iOS and macOS',
     (WidgetTester tester) async {
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
-      final selectAllSpy = SelectAllSpy();
-      final copySpy = CopySpy();
-      final pasteSpy = PasteSpy();
-      final actions = <Type, Action<Intent>>{
+      final SelectAllSpy selectAllSpy = SelectAllSpy();
+      final CopySpy copySpy = CopySpy();
+      final PasteSpy pasteSpy = PasteSpy();
+      final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
         // Copy Paste
         SelectAllTextIntent: selectAllSpy,
         CopySelectionTextIntent: copySpy,
@@ -687,7 +687,7 @@ void main() {
       );
     }
 
-    final frameworkHandlesBacks = <bool>[];
+    final List<bool> frameworkHandlesBacks = <bool>[];
     setUp(() async {
       frameworkHandlesBacks.clear();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(

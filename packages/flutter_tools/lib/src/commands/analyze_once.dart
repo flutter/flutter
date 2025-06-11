@@ -34,7 +34,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
-      final dependencies = PackageDependencyTracker();
+      final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
@@ -50,10 +50,10 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final analysisCompleter = Completer<void>();
-    final errors = <AnalysisError>[];
+    final Completer<void> analysisCompleter = Completer<void>();
+    final List<AnalysisError> errors = <AnalysisError>[];
 
-    final server = AnalysisServer(
+    final AnalysisServer server = AnalysisServer(
       sdkPath,
       items.toList(),
       fileSystem: fileSystem,
@@ -134,7 +134,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger.printStatus('');
     }
     errors.sort();
-    for (final error in errors) {
+    for (final AnalysisError error in errors) {
       logger.printStatus(error.toString(), hangingIndent: 7);
     }
 

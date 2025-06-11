@@ -30,22 +30,22 @@ void main() {
     });
 
     test('WaitForCondition deserialize', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'command': 'waitForCondition',
         'conditionName': 'NoTransientCallbacksCondition',
       };
-      final waitForCondition = WaitForCondition.deserialize(jsonMap);
+      final WaitForCondition waitForCondition = WaitForCondition.deserialize(jsonMap);
       expect(waitForCondition.kind, 'waitForCondition');
       expect(waitForCondition.condition, equals(const NoTransientCallbacks()));
     });
 
     test('WaitForCondition deserialize with timeout', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'command': 'waitForCondition',
         'timeout': '10',
         'conditionName': 'NoTransientCallbacksCondition',
       };
-      final waitForCondition = WaitForCondition.deserialize(jsonMap);
+      final WaitForCondition waitForCondition = WaitForCondition.deserialize(jsonMap);
       expect(waitForCondition.kind, 'waitForCondition');
       expect(waitForCondition.condition, equals(const NoTransientCallbacks()));
       expect(waitForCondition.timeout, equals(const Duration(milliseconds: 10)));
@@ -65,10 +65,10 @@ void main() {
     });
 
     test('NoTransientCallbacksCondition deserialize', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'NoTransientCallbacksCondition',
       };
-      final condition = NoTransientCallbacks.deserialize(jsonMap);
+      final NoTransientCallbacks condition = NoTransientCallbacks.deserialize(jsonMap);
       expect(condition, equals(const NoTransientCallbacks()));
       expect(condition.serialize(), equals(jsonMap));
     });
@@ -95,10 +95,10 @@ void main() {
     });
 
     test('NoPendingFrameCondition deserialize', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'NoPendingFrameCondition',
       };
-      final condition = NoPendingFrame.deserialize(jsonMap);
+      final NoPendingFrame condition = NoPendingFrame.deserialize(jsonMap);
       expect(condition, equals(const NoPendingFrame()));
       expect(condition.serialize(), equals(jsonMap));
     });
@@ -125,10 +125,10 @@ void main() {
     });
 
     test('FirstFrameRasterizedCondition deserialize', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'FirstFrameRasterizedCondition',
       };
-      final condition = FirstFrameRasterized.deserialize(jsonMap);
+      final FirstFrameRasterized condition = FirstFrameRasterized.deserialize(jsonMap);
       expect(condition, equals(const FirstFrameRasterized()));
       expect(condition.serialize(), equals(jsonMap));
     });
@@ -153,7 +153,7 @@ void main() {
 
   group('CombinedCondition', () {
     test('CombinedCondition serialize', () {
-      const combinedCondition = CombinedCondition(<SerializableWaitCondition>[
+      const CombinedCondition combinedCondition = CombinedCondition(<SerializableWaitCondition>[
         NoTransientCallbacks(),
         NoPendingFrame(),
       ]);
@@ -166,7 +166,7 @@ void main() {
     });
 
     test('CombinedCondition serialize - empty condition list', () {
-      const combinedCondition = CombinedCondition(<SerializableWaitCondition>[]);
+      const CombinedCondition combinedCondition = CombinedCondition(<SerializableWaitCondition>[]);
 
       expect(combinedCondition.serialize(), <String, String>{
         'conditionName': 'CombinedCondition',
@@ -175,22 +175,22 @@ void main() {
     });
 
     test('CombinedCondition deserialize - empty condition list', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'CombinedCondition',
         'conditions': '[]',
       };
-      final condition = CombinedCondition.deserialize(jsonMap);
+      final CombinedCondition condition = CombinedCondition.deserialize(jsonMap);
       expect(condition.conditions, equals(<SerializableWaitCondition>[]));
       expect(condition.serialize(), equals(jsonMap));
     });
 
     test('CombinedCondition deserialize', () {
-      final jsonMap = <String, String>{
+      final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'CombinedCondition',
         'conditions':
             '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
       };
-      final condition = CombinedCondition.deserialize(jsonMap);
+      final CombinedCondition condition = CombinedCondition.deserialize(jsonMap);
       expect(
         condition.conditions,
         equals(<SerializableWaitCondition>[const NoPendingFrame(), const NoTransientCallbacks()]),
@@ -199,7 +199,7 @@ void main() {
     });
 
     test('CombinedCondition deserialize - no condition list', () {
-      final condition = CombinedCondition.deserialize(<String, String>{
+      final CombinedCondition condition = CombinedCondition.deserialize(<String, String>{
         'conditionName': 'CombinedCondition',
       });
       expect(condition.conditions, equals(<SerializableWaitCondition>[]));

@@ -101,7 +101,7 @@ class TimelineEvent {
 }
 
 List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
-  final jsonEvents = json['traceEvents'] as List<dynamic>?;
+  final List<dynamic>? jsonEvents = json['traceEvents'] as List<dynamic>?;
 
   if (jsonEvents == null) {
     return null;

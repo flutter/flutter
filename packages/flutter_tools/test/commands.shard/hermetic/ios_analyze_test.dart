@@ -57,19 +57,19 @@ void main() {
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
-      const homePath = '/home/user/flutter';
+      const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
+      for (final String dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
     testWithoutContext('can output json file', () async {
-      final ios = MockIosProject();
-      final project = MockFlutterProject(ios);
-      const expectedConfig = 'someConfig';
-      const expectedTarget = 'someTarget';
-      const expectedOutputFile = '/someFile';
+      final MockIosProject ios = MockIosProject();
+      final MockFlutterProject project = MockFlutterProject(ios);
+      const String expectedConfig = 'someConfig';
+      const String expectedTarget = 'someTarget';
+      const String expectedOutputFile = '/someFile';
       ios.outputFileLocation = expectedOutputFile;
       await IOSAnalyze(
         project: project,
@@ -84,17 +84,17 @@ void main() {
     });
 
     testWithoutContext('can list build options', () async {
-      final ios = MockIosProject();
-      final project = MockFlutterProject(ios);
-      const targets = <String>['target1', 'target2'];
-      const configs = <String>['config1', 'config2'];
+      final MockIosProject ios = MockIosProject();
+      final MockFlutterProject project = MockFlutterProject(ios);
+      const List<String> targets = <String>['target1', 'target2'];
+      const List<String> configs = <String>['config1', 'config2'];
       ios.expectedProjectInfo = XcodeProjectInfo(targets, configs, const <String>[], logger);
       await IOSAnalyze(
         project: project,
         option: IOSAnalyzeOption.listBuildOptions,
         logger: logger,
       ).analyze();
-      final jsonOutput = jsonDecode(logger.statusText) as Map<String, Object?>;
+      final Map<String, Object?> jsonOutput = jsonDecode(logger.statusText) as Map<String, Object?>;
       expect(jsonOutput['targets'], unorderedEquals(targets));
       expect(jsonOutput['configurations'], unorderedEquals(configs));
     });

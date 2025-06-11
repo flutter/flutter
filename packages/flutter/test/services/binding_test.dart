@@ -67,7 +67,7 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 }
 
 void main() {
-  final binding = TestBinding();
+  final TestBinding binding = TestBinding();
 
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
@@ -98,7 +98,7 @@ void main() {
   });
 
   test('didHaveMemoryPressure clears asset caches', () async {
-    var flutterAssetsCallCount = 0;
+    int flutterAssetsCallCount = 0;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
       ByteData? message,
     ) async {
@@ -143,7 +143,7 @@ void main() {
   });
 
   test('Calling exitApplication sends a method call to the engine', () async {
-    var sentMessage = false;
+    bool sentMessage = false;
     MethodCall? methodCall;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (
       ByteData? message,
@@ -160,10 +160,10 @@ void main() {
   });
 
   test('Default handleRequestAppExit returns exit', () async {
-    const incomingCall = MethodCall('System.requestAppExit', <dynamic>[
+    const MethodCall incomingCall = MethodCall('System.requestAppExit', <dynamic>[
       <String, dynamic>{'type': 'cancelable'},
     ]);
-    var receivedReply = false;
+    bool receivedReply = false;
     Map<String, dynamic>? result;
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/platform',
@@ -192,7 +192,7 @@ void main() {
   });
 
   test('Default handleViewFocusChanged propagates event', () async {
-    const event = ViewFocusEvent(
+    const ViewFocusEvent event = ViewFocusEvent(
       viewId: 0,
       direction: ViewFocusDirection.forward,
       state: ViewFocusState.focused,

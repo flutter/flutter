@@ -106,7 +106,7 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
+  const FakeCommand xattrCommand = FakeCommand(
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
   );
 
@@ -199,7 +199,7 @@ void main() {
   testUsingContext(
     'ios build fails when there is no ios project',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -224,7 +224,7 @@ void main() {
   testUsingContext(
     'ios build fails in debug with code analysis',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -251,7 +251,7 @@ void main() {
   testUsingContext(
     'ios build fails on non-macOS platform',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -280,7 +280,7 @@ void main() {
   testUsingContext(
     'ios build outputs path and size when successful',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
@@ -318,7 +318,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -354,7 +354,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build with disable port publication setting',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -392,7 +392,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build without disable port publication setting when not in CI',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -429,7 +429,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build with renamed xcodeproj and xcworkspace',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         osUtils: FakeOperatingSystemUtils(),
@@ -476,7 +476,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build with device ID',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -514,7 +514,7 @@ void main() {
   testUsingContext(
     'ios simulator build invokes xcode build',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -551,7 +551,7 @@ void main() {
   testUsingContext(
     'ios build invokes xcode build with verbosity',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -586,7 +586,7 @@ void main() {
   testUsingContext(
     'Performs code size analysis and sends analytics',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -647,7 +647,7 @@ void main() {
   );
 
   group('Analytics for impeller plist setting', () {
-    const plistContents = '''
+    const String plistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -657,7 +657,7 @@ void main() {
 </dict>
 </plist>
 ''';
-    const plutilCommand = FakeCommand(
+    const FakeCommand plutilCommand = FakeCommand(
       command: <String>['/usr/bin/plutil', '-convert', 'xml1', '-o', '-', '/ios/Runner/Info.plist'],
       stdout: plistContents,
     );
@@ -665,7 +665,7 @@ void main() {
     testUsingContext(
       'Sends an analytics event when Impeller is enabled',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: MemoryFileSystem.test(),
@@ -714,7 +714,7 @@ void main() {
     testUsingContext(
       'Sends an analytics event when Impeller is disabled',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -784,7 +784,7 @@ void main() {
     testUsingContext(
       'Trace error if xcresult is empty.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -825,7 +825,7 @@ void main() {
     testUsingContext(
       'Display xcresult issues on console if parsed, suppress Xcode output',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -873,7 +873,7 @@ void main() {
     testUsingContext(
       'Do not display xcresult issues that needs to be discarded.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -926,7 +926,7 @@ void main() {
     testUsingContext(
       'Trace if xcresult bundle does not exist.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -964,7 +964,7 @@ void main() {
     testUsingContext(
       'Extra error message for provision profile issue in xcresult bundle.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1020,7 +1020,7 @@ void main() {
     testUsingContext(
       'Display xcresult issues with no provisioning profile.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1067,7 +1067,7 @@ void main() {
     testUsingContext(
       'Extra error message for missing simulator platform in xcresult bundle.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1108,7 +1108,7 @@ void main() {
     testUsingContext(
       'Delete xcresult bundle before each xcodebuild command.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1166,7 +1166,7 @@ void main() {
     testUsingContext(
       'Failed to parse xcresult but display missing provisioning profile issue from stdout.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1210,7 +1210,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'Failed to parse xcresult but detected no development team issue.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1252,7 +1252,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'xcresult did not detect issue but detected by stdout.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1298,7 +1298,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'xcresult did not detect issue, no development team is detected from build setting.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1339,7 +1339,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'No development team issue error message is not displayed if no provisioning profile issue is detected from xcresult first.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1382,7 +1382,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'General provisioning profile issue error message is not displayed if no development team issue is detected first.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1434,7 +1434,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'Trace error if xcresult is empty.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1478,7 +1478,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'Display xcresult issues on console if parsed.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1526,7 +1526,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'Do not display xcresult issues that needs to be discarded.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1583,7 +1583,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testUsingContext(
       'Trace if xcresult bundle does not exist.',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = BuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,

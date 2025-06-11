@@ -18,12 +18,12 @@ void main() {
   });
 
   test('BottomNavigationBarThemeData lerp special cases', () {
-    const data = BottomNavigationBarThemeData();
+    const BottomNavigationBarThemeData data = BottomNavigationBarThemeData();
     expect(identical(BottomNavigationBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('BottomNavigationBarThemeData defaults', () {
-    const themeData = BottomNavigationBarThemeData();
+    const BottomNavigationBarThemeData themeData = BottomNavigationBarThemeData();
     expect(themeData.backgroundColor, null);
     expect(themeData.elevation, null);
     expect(themeData.selectedIconTheme, null);
@@ -38,7 +38,7 @@ void main() {
     expect(themeData.landscapeLayout, null);
     expect(themeData.mouseCursor, null);
 
-    const theme = BottomNavigationBarTheme(
+    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(
       data: BottomNavigationBarThemeData(),
       child: SizedBox(),
     );
@@ -60,7 +60,7 @@ void main() {
   testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (
     WidgetTester tester,
   ) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -75,7 +75,7 @@ void main() {
   testWidgets('BottomNavigationBarThemeData implements debugFillProperties', (
     WidgetTester tester,
   ) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData(
       backgroundColor: Color(0xfffffff0),
       elevation: 10.0,
@@ -117,14 +117,14 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
-    const backgroundColor = Color(0xFF000001);
-    const selectedItemColor = Color(0xFF000002);
-    const unselectedItemColor = Color(0xFF000003);
-    const selectedIconTheme = IconThemeData(size: 10);
-    const unselectedIconTheme = IconThemeData(size: 11);
-    const selectedTextStyle = TextStyle(fontSize: 22);
-    const unselectedTextStyle = TextStyle(fontSize: 21);
-    const elevation = 9.0;
+    const Color backgroundColor = Color(0xFF000001);
+    const Color selectedItemColor = Color(0xFF000002);
+    const Color unselectedItemColor = Color(0xFF000003);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 10);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 11);
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 22);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 21);
+    const double elevation = 9.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -222,26 +222,26 @@ void main() {
   testWidgets('BottomNavigationBar properties are taken over the theme values', (
     WidgetTester tester,
   ) async {
-    const themeBackgroundColor = Color(0xFF000001);
-    const themeSelectedItemColor = Color(0xFF000002);
-    const themeUnselectedItemColor = Color(0xFF000003);
-    const themeSelectedIconTheme = IconThemeData(size: 10);
-    const themeUnselectedIconTheme = IconThemeData(size: 11);
-    const themeSelectedTextStyle = TextStyle(fontSize: 22);
-    const themeUnselectedTextStyle = TextStyle(fontSize: 21);
-    const themeElevation = 9.0;
+    const Color themeBackgroundColor = Color(0xFF000001);
+    const Color themeSelectedItemColor = Color(0xFF000002);
+    const Color themeUnselectedItemColor = Color(0xFF000003);
+    const IconThemeData themeSelectedIconTheme = IconThemeData(size: 10);
+    const IconThemeData themeUnselectedIconTheme = IconThemeData(size: 11);
+    const TextStyle themeSelectedTextStyle = TextStyle(fontSize: 22);
+    const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
+    const double themeElevation = 9.0;
     const BottomNavigationBarLandscapeLayout themeLandscapeLayout =
         BottomNavigationBarLandscapeLayout.centered;
     const MaterialStateMouseCursor themeCursor = MaterialStateMouseCursor.clickable;
 
-    const backgroundColor = Color(0xFF000004);
-    const selectedItemColor = Color(0xFF000005);
-    const unselectedItemColor = Color(0xFF000006);
-    const selectedIconTheme = IconThemeData(size: 15);
-    const unselectedIconTheme = IconThemeData(size: 16);
-    const selectedTextStyle = TextStyle(fontSize: 25);
-    const unselectedTextStyle = TextStyle(fontSize: 26);
-    const elevation = 7.0;
+    const Color backgroundColor = Color(0xFF000004);
+    const Color selectedItemColor = Color(0xFF000005);
+    const Color unselectedItemColor = Color(0xFF000006);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 15);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 16);
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 25);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
+    const double elevation = 7.0;
     const BottomNavigationBarLandscapeLayout landscapeLayout =
         BottomNavigationBarLandscapeLayout.spread;
     const MaterialStateMouseCursor cursor = MaterialStateMouseCursor.textable;

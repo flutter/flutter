@@ -130,7 +130,7 @@ class BuildApkCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
-    final androidBuildInfo = AndroidBuildInfo(
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
@@ -149,7 +149,7 @@ class BuildApkCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final buildLabel =
+    final String buildLabel =
         impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 

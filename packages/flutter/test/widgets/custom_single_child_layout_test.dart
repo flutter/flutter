@@ -96,7 +96,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 
 void main() {
   testWidgets('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
-    final delegate = TestSingleChildLayoutDelegate();
+    final TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     expect(delegate.constraintsFromGetSize.minWidth, 0.0);
@@ -117,7 +117,7 @@ void main() {
   });
 
   testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
-    var delegate = TestSingleChildLayoutDelegate();
+    TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     // Layout happened because the delegate was set.
@@ -152,7 +152,7 @@ void main() {
   });
 
   testWidgets('Can use listener for relayout', (WidgetTester tester) async {
-    final size = ValueNotifier<Size>(const Size(100.0, 200.0));
+    final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
     addTearDown(size.dispose);
 
     await tester.pumpWidget(buildFrame(NotifierLayoutDelegate(size)));

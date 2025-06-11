@@ -615,14 +615,14 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final activePressedStates = activeStates..add(MaterialState.pressed);
+    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor =
         widget.overlayColor?.resolve(activePressedStates) ??
         radioTheme.overlayColor?.resolve(activePressedStates) ??
         activeColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor =
         widget.overlayColor?.resolve(inactivePressedStates) ??
         radioTheme.overlayColor?.resolve(inactivePressedStates) ??
@@ -688,7 +688,7 @@ class _RadioPainter extends ToggleablePainter {
     final Offset center = (Offset.zero & size).center;
 
     // Outer circle
-    final paint =
+    final Paint paint =
         Paint()
           ..color = Color.lerp(inactiveColor, activeColor, position.value)!
           ..style = PaintingStyle.stroke

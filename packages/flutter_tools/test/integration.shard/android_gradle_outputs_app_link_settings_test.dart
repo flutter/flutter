@@ -208,7 +208,7 @@ void main() {
     expect(deeplink['scheme'], scheme);
     expect(deeplink['host'], host);
     expect(deeplink['path'], path);
-    final intentFilterCheck =
+    final Map<String, dynamic> intentFilterCheck =
         deeplink['intentFilterCheck'] as Map<String, dynamic>;
     expect(intentFilterCheck['hasAutoVerify'], hasAutoVerify);
     expect(intentFilterCheck['hasActionView'], hasActionView);
@@ -237,8 +237,8 @@ void main() {
         'main',
         'AndroidManifest.xml',
       );
-      final androidManifestFile = io.File(androidManifestPath);
-      final androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
+      final io.File androidManifestFile = io.File(androidManifestPath);
+      final XmlDocument androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
       final XmlElement activity = androidManifest.findAllElements('activity').first;
       activity.children.add(deeplinkFlagMetaData);
       activity.children.add(pureHttpIntentFilter);
@@ -276,11 +276,11 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final json =
+      final Map<String, dynamic> json =
           jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], true);
-      final deeplinks = json['deeplinks']! as List<dynamic>;
+      final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
       expect(deeplinks.length, 10);
       testDeeplink(
         deeplinks[0],
@@ -421,11 +421,11 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final json =
+      final Map<String, dynamic> json =
           jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], false);
-      final deeplinks = json['deeplinks']! as List<dynamic>;
+      final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
       expect(deeplinks.length, 0);
     },
   );

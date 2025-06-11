@@ -76,7 +76,7 @@ void main() {
   });
 
   testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
-    var layoutBuilderBuildCount = 0;
+    int layoutBuilderBuildCount = 0;
 
     late StateSetter keyedSetState;
     late StateSetter layoutBuilderSetState;
@@ -92,7 +92,7 @@ void main() {
       },
     );
 
-    var layoutBuilderChild = keyedWidget;
+    Widget layoutBuilderChild = keyedWidget;
     Widget deepChild = Container();
 
     await tester.pumpWidget(

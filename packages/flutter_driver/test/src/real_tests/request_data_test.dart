@@ -8,7 +8,7 @@ import '../../common.dart';
 
 void main() {
   test('RequestData does not insert "null" string when no message is provided', () {
-    const data = RequestData(null);
+    const RequestData data = RequestData(null);
 
     expect(data.serialize(), <String, String>{'command': 'request_data'});
   });

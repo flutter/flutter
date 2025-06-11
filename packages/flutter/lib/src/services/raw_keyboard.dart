@@ -246,7 +246,7 @@ abstract class RawKeyEventData with Diagnosticable {
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
-    final result = <ModifierKey, KeyboardSide>{};
+    final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
     for (final ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
         final KeyboardSide? side = getModifierSide(key);
@@ -387,7 +387,7 @@ abstract class RawKeyEvent with Diagnosticable {
   factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
     RawKeyEventData dataFromWeb() {
-      final key = message['key'] as String?;
+      final String? key = message['key'] as String?;
       if (key != null && key.isNotEmpty && key.length == 1) {
         character = key;
       }
@@ -404,7 +404,7 @@ abstract class RawKeyEvent with Diagnosticable {
     if (kIsWeb) {
       data = dataFromWeb();
     } else {
-      final keymap = message['keymap']! as String;
+      final String keymap = message['keymap']! as String;
       switch (keymap) {
         case 'android':
           data = RawKeyEventDataAndroid(
@@ -490,7 +490,7 @@ abstract class RawKeyEvent with Diagnosticable {
       }
     }
     final bool repeat = RawKeyboard.instance.physicalKeysPressed.contains(data.physicalKey);
-    final type = message['type']! as String;
+    final String type = message['type']! as String;
     return switch (type) {
       'keydown' => RawKeyDownEvent(data: data, character: character, repeat: repeat),
       'keyup' => RawKeyUpEvent(data: data),
@@ -869,7 +869,7 @@ class RawKeyboard {
       '${event.data}',
     );
     // Send the event to passive listeners.
-    for (final listener in List<ValueChanged<RawKeyEvent>>.of(
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.of(
       _listeners,
     )) {
       try {
@@ -1021,11 +1021,11 @@ class RawKeyboard {
     // a state change.
 
     final Map<ModifierKey, KeyboardSide?> modifiersPressed = event.data.modifiersPressed;
-    final modifierKeys =
+    final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys =
         <PhysicalKeyboardKey, LogicalKeyboardKey>{};
     // Physical keys that whose modifiers are pressed at any side.
-    final anySideKeys = <PhysicalKeyboardKey>{};
-    final keysPressedAfterEvent = <PhysicalKeyboardKey>{
+    final Set<PhysicalKeyboardKey> anySideKeys = <PhysicalKeyboardKey>{};
+    final Set<PhysicalKeyboardKey> keysPressedAfterEvent = <PhysicalKeyboardKey>{
       ..._keysPressed.keys,
       if (event is RawKeyDownEvent) event.physicalKey,
     };

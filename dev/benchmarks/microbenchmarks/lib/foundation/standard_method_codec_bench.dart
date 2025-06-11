@@ -10,13 +10,13 @@ const int _kNumIterations = 100000;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
-  const codec = StandardMethodCodec();
-  final watch = Stopwatch();
-  const methodName = 'something';
+  const StandardMethodCodec codec = StandardMethodCodec();
+  final Stopwatch watch = Stopwatch();
+  const String methodName = 'something';
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(const MethodCall(methodName));
   }
   watch.stop();
@@ -30,7 +30,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(const MethodCall(methodName, 12345));
   }
   watch.stop();
@@ -45,7 +45,7 @@ Future<void> execute() async {
   watch.reset();
 
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(const MethodCall(methodName, 'This is a performance test.'));
   }
   watch.stop();
@@ -59,7 +59,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(
       const MethodCall(methodName, <Object>[1234, 'This is a performance test.', 1.25, true]),
     );
@@ -75,7 +75,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(
       const MethodCall(methodName, <String, Object>{
         'integer': 1234,

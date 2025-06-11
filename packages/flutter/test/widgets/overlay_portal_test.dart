@@ -61,7 +61,7 @@ void verifyTreeIsClean() {
 }
 
 void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
-  final layoutSurrogate =
+  final RenderBox layoutSurrogate =
       overlayWidgetKey.currentContext!.findRenderObject()! as RenderBox;
   assert(
     layoutSurrogate.runtimeType.toString() == '_RenderLayoutSurrogateProxyBox',
@@ -74,7 +74,7 @@ void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
 }
 
 List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
-  final results = <RenderObject>[];
+  final List<RenderObject> results = <RenderObject>[];
   RenderObject? node = child;
   while (node != null) {
     if (node.runtimeType.toString() == '_RenderTheater') {
@@ -87,10 +87,10 @@ List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
 }
 
 void main() {
-  final controller1 = OverlayPortalController(debugLabel: 'controller1');
-  final controller2 = OverlayPortalController(debugLabel: 'controller2');
-  final controller3 = OverlayPortalController(debugLabel: 'controller3');
-  final controller4 = OverlayPortalController(debugLabel: 'controller4');
+  final OverlayPortalController controller1 = OverlayPortalController(debugLabel: 'controller1');
+  final OverlayPortalController controller2 = OverlayPortalController(debugLabel: 'controller2');
+  final OverlayPortalController controller3 = OverlayPortalController(debugLabel: 'controller3');
+  final OverlayPortalController controller4 = OverlayPortalController(debugLabel: 'controller4');
 
   setUp(() {
     controller1.show();
@@ -101,7 +101,7 @@ void main() {
   });
 
   testWidgets('The overlay child sees the right inherited widgets', (WidgetTester tester) async {
-    var buildCount = 0;
+    int buildCount = 0;
     TextDirection? directionSeenByOverlayChild;
     TextDirection textDirection = TextDirection.rtl;
     late StateSetter setState;
@@ -159,8 +159,8 @@ void main() {
   ) async {
     late StateSetter setState;
     late final OverlayEntry overlayEntry;
-    final overlayKey = UniqueKey();
-    var msg = 'msg';
+    final UniqueKey overlayKey = UniqueKey();
+    String msg = 'msg';
     addTearDown(
       () =>
           overlayEntry
@@ -287,14 +287,14 @@ void main() {
   testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame', (
     WidgetTester tester,
   ) async {
-    final overlayPortal = OverlayPortal(
+    final OverlayPortal overlayPortal = OverlayPortal(
       key: GlobalKey(debugLabel: 'key'),
       controller: controller1,
       overlayChildBuilder: (BuildContext context) => const SizedBox(),
       child: const SizedBox(),
     );
 
-    var children = <Widget>[const SizedBox(), overlayPortal];
+    List<Widget> children = <Widget>[const SizedBox(), overlayPortal];
 
     late final OverlayEntry overlayEntry;
     addTearDown(
@@ -417,7 +417,7 @@ void main() {
     experimentalLeakTesting:
         LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      final controller = OverlayPortalController(
+      final OverlayPortalController controller = OverlayPortalController(
         debugLabel: 'local controller',
       );
       late final OverlayEntry entry;
@@ -470,7 +470,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    const size = Size.square(40);
+    const Size size = Size.square(40);
 
     final Widget widget = Directionality(
       key: GlobalKey(debugLabel: 'key'),
@@ -507,7 +507,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    final controller = OverlayPortalController(
+    final OverlayPortalController controller = OverlayPortalController(
       debugLabel: 'local controller',
     );
 
@@ -557,7 +557,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    final controller = OverlayPortalController(
+    final OverlayPortalController controller = OverlayPortalController(
       debugLabel: 'local controller',
     );
 
@@ -644,7 +644,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    var isHit = false;
+    bool isHit = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -744,7 +744,7 @@ void main() {
             ..dispose(),
     );
     late StateSetter setState;
-    var shouldShowChild = false;
+    bool shouldShowChild = false;
 
     Widget layoutBuilder(BuildContext context, BoxConstraints constraints) {
       return OverlayPortal(
@@ -792,7 +792,7 @@ void main() {
             ..dispose(),
     );
     late StateSetter setState;
-    var shouldShowChild = false;
+    bool shouldShowChild = false;
 
     Widget layoutBuilder(BuildContext context, BoxConstraints constraints) {
       return OverlayPortal(
@@ -882,7 +882,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    var layoutCount = 0;
+    int layoutCount = 0;
 
     await tester.pumpWidget(
       Directionality(
@@ -947,7 +947,7 @@ void main() {
     final RenderBox overlayChildBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(),
     );
-    final overlayLayoutCounter = _RenderLayoutCounter();
+    final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
     late final OverlayEntry overlayEntry1;
     addTearDown(
       () =>
@@ -962,7 +962,7 @@ void main() {
             ..remove()
             ..dispose(),
     );
-    var layoutCount = 0;
+    int layoutCount = 0;
     controller1.hide();
 
     await tester.pumpWidget(
@@ -1030,8 +1030,8 @@ void main() {
 
   group('Adding/removing overlay child causes repaint', () {
     // Regression test for https://github.com/flutter/flutter/issues/134656.
-    const childKey = Key('child');
-    final overlayEntry = OverlayEntry(
+    const Key childKey = Key('child');
+    final OverlayEntry overlayEntry = OverlayEntry(
       builder: (BuildContext context) {
         return RepaintBoundary(
           child: OverlayPortal(
@@ -1166,8 +1166,8 @@ void main() {
     final RenderBox overlayChildBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(),
     );
-    final overlayLayoutCounter = _RenderLayoutCounter();
-    var layoutCount = 0;
+    final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
+    int layoutCount = 0;
     late StateSetter setState;
     double dimension = 100;
 
@@ -1259,8 +1259,8 @@ void main() {
     final RenderBox overlayChildBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(),
     );
-    final overlayLayoutCounter = _RenderLayoutCounter();
-    var layoutCount = 0;
+    final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
+    int layoutCount = 0;
     OverlayPortal Function({
       Widget? child,
       required OverlayPortalController controller,
@@ -1368,10 +1368,10 @@ void main() {
   testWidgets('PortalController can be assigned to another after deactivate', (
     WidgetTester tester,
   ) async {
-    final controller1 = OverlayPortalController();
-    final overlayKey = GlobalKey<OverlayState>();
+    final OverlayPortalController controller1 = OverlayPortalController();
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
 
-    final overlayEntry1 = OverlayEntry(
+    final OverlayEntry overlayEntry1 = OverlayEntry(
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller1,
@@ -1380,7 +1380,7 @@ void main() {
       },
     );
 
-    final overlayEntry2 = OverlayEntry(
+    final OverlayEntry overlayEntry2 = OverlayEntry(
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller1,
@@ -1415,8 +1415,8 @@ void main() {
   });
 
   testWidgets('Reactivation maintains portal state', (WidgetTester tester) async {
-    final controller1 = OverlayPortalController();
-    final portalKey = GlobalKey<State<OverlayPortal>>();
+    final OverlayPortalController controller1 = OverlayPortalController();
+    final GlobalKey<State<OverlayPortal>> portalKey = GlobalKey<State<OverlayPortal>>();
 
     late OverlayEntry overlayEntry1, overlayEntry2;
     addTearDown(() {
@@ -1473,18 +1473,18 @@ void main() {
   });
 
   testWidgets('attachTarget is restored after reparenting', (WidgetTester tester) async {
-    final portalKey = GlobalKey<State<OverlayPortal>>();
+    final GlobalKey<State<OverlayPortal>> portalKey = GlobalKey<State<OverlayPortal>>();
     final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
     final RenderBox overlayChildBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints(),
     );
 
-    var moveToSecondOverlay = false;
+    bool moveToSecondOverlay = false;
 
     final Widget child = WidgetToRenderBoxAdapter(renderBox: childBox);
     final Widget overlayChild = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
 
-    final overlayEntry1 = OverlayEntry(
+    final OverlayEntry overlayEntry1 = OverlayEntry(
       builder: (BuildContext context) {
         return !moveToSecondOverlay
             ? OverlayPortal(
@@ -1496,7 +1496,7 @@ void main() {
             : const SizedBox();
       },
     );
-    final overlayEntry2 = OverlayEntry(
+    final OverlayEntry overlayEntry2 = OverlayEntry(
       builder: (BuildContext context) {
         return moveToSecondOverlay
             ? OverlayPortal(
@@ -1542,7 +1542,7 @@ void main() {
     testWidgets('child is laid out before overlay child after OverlayEntry shuffle', (
       WidgetTester tester,
     ) async {
-      var layoutCount = 0;
+      int layoutCount = 0;
 
       final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
       final RenderBox childBox = RenderConstrainedBox(
@@ -1551,7 +1551,7 @@ void main() {
       final RenderBox overlayChildBox = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints(),
       );
-      final overlayEntry1 = OverlayEntry(
+      final OverlayEntry overlayEntry1 = OverlayEntry(
         builder: (BuildContext context) {
           return _ManyRelayoutBoundaries(
             levels: 50,
@@ -1582,7 +1582,7 @@ void main() {
               ..remove()
               ..dispose(),
       );
-      final overlayEntry2 = OverlayEntry(
+      final OverlayEntry overlayEntry2 = OverlayEntry(
         builder: (BuildContext context) => const Placeholder(),
       );
       addTearDown(
@@ -1591,7 +1591,7 @@ void main() {
               ..remove()
               ..dispose(),
       );
-      final overlayEntry3 = OverlayEntry(
+      final OverlayEntry overlayEntry3 = OverlayEntry(
         builder: (BuildContext context) => const Placeholder(),
       );
       addTearDown(
@@ -1641,10 +1641,10 @@ void main() {
       );
 
       late StateSetter setState1, setState2;
-      var targetMovedToOverlayEntry3 = false;
+      bool targetMovedToOverlayEntry3 = false;
 
-      var layoutCount1 = 0;
-      var layoutCount2 = 0;
+      int layoutCount1 = 0;
+      int layoutCount2 = 0;
 
       await tester.pumpWidget(
         Directionality(
@@ -1738,7 +1738,7 @@ void main() {
       );
 
       late StateSetter setState;
-      var swapChildAndRemoteChild = false;
+      bool swapChildAndRemoteChild = false;
 
       // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
       final Widget child1 = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
@@ -1797,7 +1797,7 @@ void main() {
 
       late StateSetter setState1;
       late StateSetter setState2;
-      var takeChildren = false;
+      bool takeChildren = false;
 
       // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
       final Widget child1 = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
@@ -1888,7 +1888,7 @@ void main() {
       addTearDown(overlayChildBox.dispose);
 
       late StateSetter setState;
-      var swapped = false;
+      bool swapped = false;
 
       // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
       final Widget child1 = WidgetToRenderBoxAdapter(renderBox: child1Box);
@@ -2051,7 +2051,7 @@ void main() {
 
     group('Swapping', () {
       StateSetter? setState1, setState2;
-      var swapped = false;
+      bool swapped = false;
 
       void setState({required bool newValue}) {
         swapped = newValue;
@@ -2066,8 +2066,8 @@ void main() {
       });
 
       testWidgets('between OverlayEntry & overlayChild', (WidgetTester tester) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry1;
         addTearDown(
@@ -2132,8 +2132,8 @@ void main() {
       testWidgets('between OverlayEntry & overlayChild, featuring LayoutBuilder', (
         WidgetTester tester,
       ) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry1;
         addTearDown(
@@ -2200,8 +2200,8 @@ void main() {
       });
 
       testWidgets('between overlayChild & overlayChild', (WidgetTester tester) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry1;
         addTearDown(
@@ -2272,8 +2272,8 @@ void main() {
       testWidgets('between overlayChild & overlayChild, featuring LayoutBuilder', (
         WidgetTester tester,
       ) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry1;
         addTearDown(
@@ -2351,8 +2351,8 @@ void main() {
       });
 
       testWidgets('between child & overlayChild', (WidgetTester tester) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry;
         addTearDown(
@@ -2404,8 +2404,8 @@ void main() {
       testWidgets('between child & overlayChild, featuring LayoutBuilder', (
         WidgetTester tester,
       ) async {
-        final counter1 = _RenderLayoutCounter();
-        final counter2 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
+        final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
         late final OverlayEntry overlayEntry;
         addTearDown(
@@ -2542,8 +2542,8 @@ void main() {
     testWidgets('show bringsToTop', (WidgetTester tester) async {
       controller1.hide();
 
-      const child1 = _PaintOrder();
-      const child2 = _PaintOrder();
+      const _PaintOrder child1 = _PaintOrder();
+      const _PaintOrder child2 = _PaintOrder();
 
       late final OverlayEntry overlayEntry;
       addTearDown(
@@ -2605,7 +2605,7 @@ void main() {
       final GlobalKey key = GlobalKey();
 
       late StateSetter setState;
-      var reparented = false;
+      bool reparented = false;
 
       // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
       final RenderBox child1Box = RenderConstrainedBox(
@@ -2664,7 +2664,7 @@ void main() {
       );
 
       final RenderObject theater = tester.renderObject<RenderObject>(find.byType(Overlay));
-      final childrenVisited = <RenderObject>[];
+      final List<RenderObject> childrenVisited = <RenderObject>[];
       theater.visitChildren(childrenVisited.add);
       expect(childrenVisited.length, 3);
       expect(
@@ -2688,7 +2688,7 @@ void main() {
 
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
       final double rowOriginY = TestSemantics.fullScreen.height - 10;
 
@@ -2732,13 +2732,13 @@ void main() {
       );
 
       await tester.pumpWidget(widget);
-      final node1Transform =
+      final Matrix4 node1Transform =
           Matrix4.identity()
             ..scale(3.0, 3.0, 1.0)
             ..translate(0.0, TestSemantics.fullScreen.height - 10.0);
       final Matrix4 node4Transform = node1Transform.clone()..translate(10.0);
 
-      final expected = TestSemantics.root(
+      final TestSemantics expected = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
@@ -2769,7 +2769,7 @@ void main() {
     });
 
     testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
       late final OverlayEntry entry;
       addTearDown(() {
@@ -2835,7 +2835,7 @@ void main() {
     });
 
     testWidgets("OverlayPortal's semantics node is hidden", (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
       late final OverlayEntry entry;
       addTearDown(() {
@@ -2892,9 +2892,9 @@ void main() {
     testWidgets("OverlayPortal's semantics node is dropped but the element is kept alive", (
       WidgetTester tester,
     ) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-      final controller = ScrollController(initialScrollOffset: 10);
+      final ScrollController controller = ScrollController(initialScrollOffset: 10);
       addTearDown(controller.dispose);
 
       late final OverlayEntry entry;
@@ -2971,9 +2971,9 @@ void main() {
     'overlay child can compute the paint transform of the regular child relative to the Overlay',
     (WidgetTester tester) async {
       late StateSetter setState;
-      var padding = const EdgeInsets.only(left: 10.0);
+      EdgeInsets padding = const EdgeInsets.only(left: 10.0);
       late Matrix4 computedPaintTransform;
-      var zOffset = 123.0;
+      double zOffset = 123.0;
 
       late final OverlayEntry entry;
       addTearDown(() {

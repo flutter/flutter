@@ -9,7 +9,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('installDeferredComponent test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.deferredComponent,
@@ -32,7 +32,7 @@ void main() {
   });
 
   test('uninstallDeferredComponent test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.deferredComponent,

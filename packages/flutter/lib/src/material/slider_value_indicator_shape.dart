@@ -214,7 +214,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    final radiusTween = Tween<double>(begin: 0.0, end: overlayRadius);
+    final Tween<double> radiusTween = Tween<double>(begin: 0.0, end: overlayRadius);
 
     canvas.drawCircle(
       center,
@@ -393,7 +393,7 @@ class _RectangularSliderValueIndicatorPathPainter {
   }) {
     assert(!sizeWithOverflow.isEmpty);
 
-    const edgePadding = 8.0;
+    const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
 
     /// Value indicator draws on the Overlay and by using the global Offset
@@ -453,20 +453,20 @@ class _RectangularSliderValueIndicatorPathPainter {
     );
 
     final double rectHeight = labelPainter.height + _labelPadding;
-    final upperRect = Rect.fromLTWH(
+    final Rect upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
       -_triangleHeight - rectHeight,
       rectangleWidth,
       rectHeight,
     );
 
-    final trianglePath =
+    final Path trianglePath =
         Path()
           ..lineTo(-_triangleHeight, -_triangleHeight)
           ..lineTo(_triangleHeight, -_triangleHeight)
           ..close();
-    final fillPaint = Paint()..color = backgroundPaintColor;
-    final upperRRect = RRect.fromRectAndRadius(
+    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+    final RRect upperRRect = RRect.fromRectAndRadius(
       upperRect,
       const Radius.circular(_upperRectRadius),
     );
@@ -478,7 +478,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
     if (strokePaintColor != null) {
-      final strokePaint =
+      final Paint strokePaint =
           Paint()
             ..color = strokePaintColor
             ..strokeWidth = 1.0
@@ -490,8 +490,8 @@ class _RectangularSliderValueIndicatorPathPainter {
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
     canvas.translate(0, bottomTipToUpperRectTranslateY);
-    final boxCenter = Offset(horizontalShift, upperRect.height / 2);
-    final halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
+    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2);
+    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
     labelPainter.paint(canvas, labelOffset);
     canvas.restore();
@@ -543,7 +543,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     assert(!sizeWithOverflow.isEmpty);
-    final enableColor = ColorTween(
+    final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
@@ -624,7 +624,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
     Size? sizeWithOverflow,
   }) {
     assert(!sizeWithOverflow!.isEmpty);
-    final enableColor = ColorTween(
+    final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
@@ -695,7 +695,7 @@ class _PaddleSliderValueIndicatorPathPainter {
   // a convenience to make adding arcs have less boilerplate.
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
     assert(center.isFinite);
-    final arcRect = Rect.fromCircle(center: center, radius: radius);
+    final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
   }
 
@@ -730,8 +730,8 @@ class _PaddleSliderValueIndicatorPathPainter {
     Offset center,
     double widthWithOverflow,
   ) {
-    const edgeMargin = 8.0;
-    final topLobeRect = Rect.fromLTWH(
+    const double edgeMargin = 8.0;
+    final Rect topLobeRect = Rect.fromLTWH(
       -_topLobeRadius - halfWidthNeeded,
       -_topLobeRadius - _distanceBetweenTopBottomCenters,
       2.0 * (_topLobeRadius + halfWidthNeeded),
@@ -741,7 +741,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     // around (0, 0).
     final Offset topLeft = (topLobeRect.topLeft * scale) + center;
     final Offset bottomRight = (topLobeRect.bottomRight * scale) + center;
-    var shift = 0.0;
+    double shift = 0.0;
 
     if (topLeft.dx < edgeMargin) {
       shift = edgeMargin - topLeft.dx;
@@ -798,7 +798,7 @@ class _PaddleSliderValueIndicatorPathPainter {
         );
     final double rightBottomNeckAngleEnd =
         math.pi + math.atan(rightBottomNeckCenterY / _rightBottomNeckCenterX);
-    final path = Path()..moveTo(_middleNeckWidth / 2, rightBottomNeckCenterY);
+    final Path path = Path()..moveTo(_middleNeckWidth / 2, rightBottomNeckCenterY);
     _addArc(
       path,
       Offset(_rightBottomNeckCenterX, rightBottomNeckCenterY),
@@ -847,11 +847,11 @@ class _PaddleSliderValueIndicatorPathPainter {
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
-    final leftTopNeckCenter = Offset(
+    final Offset leftTopNeckCenter = Offset(
       -_neckTriangleBase,
       _topLobeCenter.dy + math.cos(leftTheta) * _neckTriangleHypotenuse,
     );
-    final neckRightCenter = Offset(
+    final Offset neckRightCenter = Offset(
       _neckTriangleBase,
       _topLobeCenter.dy + math.cos(rightTheta) * _neckTriangleHypotenuse,
     );
@@ -864,22 +864,22 @@ class _PaddleSliderValueIndicatorPathPainter {
       0.0,
       rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy),
     );
-    final t = math.pow(inverseTextScale, 3.0) as double;
+    final double t = math.pow(inverseTextScale, 3.0) as double;
     final double stretch = clampDouble(neckStretchBaseline * t, 0.0, 10.0 * neckStretchBaseline);
-    final neckStretch = Offset(0.0, neckStretchBaseline - stretch);
+    final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(
       !_debuggingLabelLocation ||
           () {
             final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
             final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
-            final valueRect = Rect.fromLTRB(
+            final Rect valueRect = Rect.fromLTRB(
               leftCenter.dx - _topLobeRadius,
               leftCenter.dy - _topLobeRadius,
               rightCenter.dx + _topLobeRadius,
               rightCenter.dy + _topLobeRadius,
             );
-            final outlinePaint =
+            final Paint outlinePaint =
                 Paint()
                   ..color = const Color(0xffff0000)
                   ..style = PaintingStyle.stroke
@@ -907,7 +907,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     _addArc(path, neckRightCenter + neckStretch, _topNeckRadius, rightNeckArcAngle, math.pi);
 
     if (strokePaintColor != null) {
-      final strokePaint =
+      final Paint strokePaint =
           Paint()
             ..color = strokePaintColor
             ..strokeWidth = 1.0

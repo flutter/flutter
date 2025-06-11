@@ -93,7 +93,7 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final result = TestResult();
+    final TestResult result = TestResult();
 
     await tester.pumpWidget(
       MaterialApp(title: 'Scroll Bug', home: NestedScrollableCase(testResult: result)),
@@ -117,7 +117,7 @@ void main() {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
-    final result = TestResult();
+    final TestResult result = TestResult();
 
     await tester.pumpWidget(
       MaterialApp(title: 'Scroll Bug', home: NestedDraggableCase(testResult: result)),

@@ -11,12 +11,12 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 // Connect and disconnect from the empty app.
 void main() {
   // Load the license file from disk to compare it with the one in the app.
-  final licenseFile = File(path.join('..', '..', '..', 'packages', 'flutter', 'LICENSE'));
+  final File licenseFile = File(path.join('..', '..', '..', 'packages', 'flutter', 'LICENSE'));
   if (!licenseFile.existsSync()) {
     print('Test failed. Unable to find LICENSE file at ${licenseFile.path}');
     exit(-1);
   }
-  final newlineSplit = RegExp(r'\s+');
+  final RegExp newlineSplit = RegExp(r'\s+');
   final String license = licenseFile.readAsStringSync().split(newlineSplit).join(' ').trim();
 
   group('License file check', () {

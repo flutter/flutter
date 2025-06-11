@@ -323,7 +323,7 @@ class TargetDevices {
 
   Future<void> _printUnsupportedDevice(List<Device> unsupportedDevices) async {
     if (unsupportedDevices.isNotEmpty) {
-      final result = StringBuffer();
+      final StringBuffer result = StringBuffer();
       result.writeln();
       result.writeln(_foundButUnsupportedDevicesMessage);
       result.writeAll(
@@ -350,7 +350,7 @@ class TargetDevices {
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    var count = 1;
+    int count = 1;
     for (final Device device in devices) {
       _logger.printStatus(_chooseDeviceOptionMessage(count, device.displayName, device.id));
       count++;
@@ -776,7 +776,7 @@ class TargetDeviceSelection {
   /// Only allow input of a number or `q`.
   @visibleForTesting
   Future<String> readUserInput() async {
-    final pattern = RegExp(r'\d+$|q', caseSensitive: false);
+    final RegExp pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
     globals.terminal.singleCharMode = true;
     while (choice == null || choice.length > 1 || !pattern.hasMatch(choice)) {

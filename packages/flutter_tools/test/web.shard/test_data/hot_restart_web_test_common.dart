@@ -69,7 +69,7 @@ Future<void> _testProject(
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
-  final testName =
+  final String testName =
       'Hot restart (index.html: $name), DDC library bundle format: $useDDCLibraryBundleFormat';
 
   setUp(() async {
@@ -102,7 +102,7 @@ Future<void> _testProject(
   testWithoutContext(
     '$testName: newly added code executes during hot restart - canvaskit',
     () async {
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         printOnFailure(line);
         if (line.contains('(((((RELOAD WORKED)))))')) {

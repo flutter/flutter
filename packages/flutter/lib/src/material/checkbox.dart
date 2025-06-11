@@ -583,14 +583,14 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         checkboxTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final activePressedStates = activeStates..add(MaterialState.pressed);
+    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor =
         widget.overlayColor?.resolve(activePressedStates) ??
         checkboxTheme.overlayColor?.resolve(activePressedStates) ??
         activeColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor =
         widget.overlayColor?.resolve(inactivePressedStates) ??
         checkboxTheme.overlayColor?.resolve(inactivePressedStates) ??
@@ -725,7 +725,7 @@ class _CheckboxPainter extends ToggleablePainter {
   Rect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
-    final rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
+    final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
     return rect;
   }
 
@@ -754,10 +754,10 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
-    final path = Path();
-    const start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    final Path path = Path();
+    const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+    const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+    const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -777,9 +777,9 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
-    const mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    const Offset start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+    const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
+    const Offset end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
@@ -790,7 +790,7 @@ class _CheckboxPainter extends ToggleablePainter {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
+    final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
     final double tNormalized = switch (position.status) {
       AnimationStatus.forward || AnimationStatus.completed => position.value,
       AnimationStatus.reverse || AnimationStatus.dismissed => 1.0 - position.value,
@@ -800,7 +800,7 @@ class _CheckboxPainter extends ToggleablePainter {
     if (previousValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final Rect outer = _outerRectAt(origin, t);
-      final paint = Paint()..color = _colorAt(t);
+      final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
         final BorderSide border = BorderSide.lerp(inactiveSide, activeSide, t);
@@ -817,7 +817,7 @@ class _CheckboxPainter extends ToggleablePainter {
     } else {
       // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
-      final paint = Paint()..color = _colorAt(1.0);
+      final Paint paint = Paint()..color = _colorAt(1.0);
 
       _drawBox(canvas, outer, paint, activeSide);
       if (tNormalized <= 0.5) {

@@ -11,16 +11,16 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('only send semantics update if semantics have changed', () {
-    final testRender =
+    final TestRender testRender =
         TestRender()
           ..properties = const SemanticsProperties(label: 'hello')
           ..textDirection = TextDirection.ltr;
 
-    final tree = RenderConstrainedBox(
+    final RenderConstrainedBox tree = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
       child: testRender,
     );
-    var semanticsUpdateCount = 0;
+    int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
     TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
       ++semanticsUpdateCount;

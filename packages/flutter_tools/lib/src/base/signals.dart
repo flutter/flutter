@@ -82,7 +82,7 @@ class LocalSignals implements Signals {
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    final token = Object();
+    final Object token = Object();
     _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{});
     _handlersTable[signal]![token] = handler;
 
@@ -134,7 +134,7 @@ class LocalSignals implements Signals {
     final List<SignalHandler>? handlers = _handlersList[s];
     if (handlers != null) {
       final List<SignalHandler> handlersCopy = handlers.toList();
-      for (final handler in handlersCopy) {
+      for (final SignalHandler handler in handlersCopy) {
         try {
           await asyncGuard<void>(() async => handler(s));
         } on Exception catch (e) {

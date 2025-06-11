@@ -23,7 +23,7 @@ void main() {
   test('Image cache resizing based on count', () async {
     imageCache.maximumSize = 2;
 
-    final a =
+    final TestImageInfo a =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -32,7 +32,7 @@ void main() {
               ).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final b =
+    final TestImageInfo b =
         await extractOneFrame(
               TestImageProvider(
                 2,
@@ -41,7 +41,7 @@ void main() {
               ).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final c =
+    final TestImageInfo c =
         await extractOneFrame(
               TestImageProvider(
                 3,
@@ -50,7 +50,7 @@ void main() {
               ).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final d =
+    final TestImageInfo d =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -66,7 +66,7 @@ void main() {
 
     imageCache.maximumSize = 0;
 
-    final e =
+    final TestImageInfo e =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -77,7 +77,7 @@ void main() {
             as TestImageInfo;
     expect(e.value, equals(5));
 
-    final f =
+    final TestImageInfo f =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -90,7 +90,7 @@ void main() {
 
     imageCache.maximumSize = 3;
 
-    final g =
+    final TestImageInfo g =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -101,7 +101,7 @@ void main() {
             as TestImageInfo;
     expect(g.value, equals(7));
 
-    final h =
+    final TestImageInfo h =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -117,22 +117,22 @@ void main() {
     final ui.Image testImage = await createTestImage(width: 8, height: 8); // 256 B.
     imageCache.maximumSizeBytes = 256 * 2;
 
-    final a =
+    final TestImageInfo a =
         await extractOneFrame(
               TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final b =
+    final TestImageInfo b =
         await extractOneFrame(
               TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final c =
+    final TestImageInfo c =
         await extractOneFrame(
               TestImageProvider(3, 3, image: testImage).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
-    final d =
+    final TestImageInfo d =
         await extractOneFrame(
               TestImageProvider(1, 4, image: testImage).resolve(ImageConfiguration.empty),
             )
@@ -144,14 +144,14 @@ void main() {
 
     imageCache.maximumSizeBytes = 0;
 
-    final e =
+    final TestImageInfo e =
         await extractOneFrame(
               TestImageProvider(1, 5, image: testImage).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
     expect(e.value, equals(5));
 
-    final f =
+    final TestImageInfo f =
         await extractOneFrame(
               TestImageProvider(1, 6, image: testImage).resolve(ImageConfiguration.empty),
             )
@@ -160,14 +160,14 @@ void main() {
 
     imageCache.maximumSizeBytes = 256 * 3;
 
-    final g =
+    final TestImageInfo g =
         await extractOneFrame(
               TestImageProvider(1, 7, image: testImage).resolve(ImageConfiguration.empty),
             )
             as TestImageInfo;
     expect(g.value, equals(7));
 
-    final h =
+    final TestImageInfo h =
         await extractOneFrame(
               TestImageProvider(1, 8, image: testImage).resolve(ImageConfiguration.empty),
             )

@@ -25,7 +25,7 @@ void main() {
     );
 
     final DecoratedSliver decoratedSliver = tester.widget(find.byType(DecoratedSliver));
-    final shapeDecoration = decoratedSliver.decoration as ShapeDecoration;
+    final ShapeDecoration shapeDecoration = decoratedSliver.decoration as ShapeDecoration;
 
     expect(shapeDecoration.shadows, isNotEmpty);
   });

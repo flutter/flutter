@@ -21,7 +21,7 @@ class CupertinoTabBarDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final tabInfo = <_TabInfo>[
+    final List<_TabInfo> tabInfo = <_TabInfo>[
       _TabInfo(localizations.cupertinoTabBarHomeTab, CupertinoIcons.home),
       _TabInfo(localizations.cupertinoTabBarChatTab, CupertinoIcons.conversation_bubble),
       _TabInfo(localizations.cupertinoTabBarProfileTab, CupertinoIcons.profile_circled),

@@ -14,7 +14,7 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/100358.
 
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(

@@ -18,7 +18,7 @@ void main() {
   testWithoutContext(
     'IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second',
     () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         // iproxy does not exit with 0 when it cannot forward;
         // the FakeCommands below expect an exitCode of 0.
         const FakeCommand(
@@ -32,9 +32,9 @@ void main() {
           environment: kDyLdLibEntry,
         ),
       ]);
-      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
 
-      final portForwarder = IOSDevicePortForwarder.test(
+      final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder.test(
         processManager: processManager,
         logger: BufferLogger.test(),
         operatingSystemUtils: operatingSystemUtils,

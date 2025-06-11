@@ -10,7 +10,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('can press', (WidgetTester tester) async {
-    var pressed = false;
+    bool pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

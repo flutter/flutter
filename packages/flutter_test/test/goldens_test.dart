@@ -280,7 +280,7 @@ void main() {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
       expect(goldenFileComparator, isA<LocalFileComparator>());
-      final comparator = goldenFileComparator as LocalFileComparator;
+      final LocalFileComparator comparator = goldenFileComparator as LocalFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
 
@@ -340,7 +340,7 @@ void main() {
           ),
         );
         expectSync(lines.length, 3);
-        final propertiesBuilder = DiagnosticPropertiesBuilder();
+        final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
         e.debugFillProperties(propertiesBuilder);
         final List<DiagnosticsNode> information = propertiesBuilder.properties;
         expectSync(information.length, 3);
@@ -531,14 +531,14 @@ void main() {
     group('update', () {
       test('updates existing file', () async {
         fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedPngBytes);
-        const newBytes = <int>[11, 12, 13];
+        const List<int> newBytes = <int>[11, 12, 13];
         await comparator.update(fs.file('golden.png').uri, Uint8List.fromList(newBytes));
         expect(fs.file(fix('/golden.png')).readAsBytesSync(), newBytes);
       });
 
       test('creates non-existent file', () async {
         expect(fs.file(fix('/foo.png')).existsSync(), isFalse);
-        const newBytes = <int>[11, 12, 13];
+        const List<int> newBytes = <int>[11, 12, 13];
         await comparator.update(fs.file('foo.png').uri, Uint8List.fromList(newBytes));
         expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);
@@ -566,7 +566,7 @@ void main() {
         final ui.Image image2 = await createTestImage(width: 15, height: 5, cache: false);
         final ui.Image image3 = await createTestImage(width: 5, height: 10, cache: false);
 
-        final result = ComparisonResult(
+        final ComparisonResult result = ComparisonResult(
           passed: false,
           diffPercent: 1.0,
           diffs: <String, ui.Image>{'image1': image1, 'image2': image2, 'image3': image3},

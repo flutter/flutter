@@ -176,7 +176,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   @override
   void update(AbstractLayoutBuilder<LayoutInfoType> newWidget) {
     assert(widget != newWidget);
-    final oldWidget =
+    final AbstractLayoutBuilder<LayoutInfoType> oldWidget =
         widget as AbstractLayoutBuilder<LayoutInfoType>;
     super.update(newWidget);
     assert(widget == newWidget);
@@ -495,7 +495,7 @@ FlutterErrorDetails _reportException(
   StackTrace stack, {
   InformationCollector? informationCollector,
 }) {
-  final details = FlutterErrorDetails(
+  final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',

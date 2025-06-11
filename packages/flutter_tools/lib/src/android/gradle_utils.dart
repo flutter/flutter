@@ -240,7 +240,7 @@ class GradleUtils {
     }
     propertiesDirectory.createSync(recursive: true);
     final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
-    final propertyContents = '''
+    final String propertyContents = '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
@@ -330,7 +330,7 @@ Future<String?> getGradleVersion(
   // System installed Gradle version.
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
-    final gradleVersionsVerbose =
+    final String gradleVersionsVerbose =
         (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
     // Expected format:
     /*
@@ -352,7 +352,7 @@ OS:           Mac OS X 13.2.1 aarch64
     // Inner parentheticals `(\.\d+)?` denote the optional third value.
     // Outer parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
-    final gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
+    final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
     final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
     if (version == null) {
       // Most likely a bug in our parse implementation/regex.
@@ -394,11 +394,11 @@ Future<String?> getKgpVersion(
       '-q',
     ], workingDirectory: androidDirectory.path);
     if (command.exitCode == 0) {
-      final kgpVersionOutput = command.stdout as String;
+      final String kgpVersionOutput = command.stdout as String;
 
       // See expected output defined in
       // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
-      final kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
+      final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
       final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
       if (version != null) {
         return version.group(1);
@@ -617,7 +617,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       'AGP version ($agpV) older than oldest supported $oldestConsideredAgpVersion.',
     );
   }
-  const maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
+  const String maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
 
   if (isWithinVersionRange(
         kgpV,
@@ -805,8 +805,8 @@ bool validateJavaAndGradle(
   required String? gradleVersion,
 }) {
   // https://docs.gradle.org/current/userguide/compatibility.html#java
-  const oldestConsideredJavaVersion = '1.8';
-  const oldestDocumentedJavaGradleCompatibility = '2.0';
+  const String oldestConsideredJavaVersion = '1.8';
+  const String oldestDocumentedJavaGradleCompatibility = '2.0';
 
   // Begin Java <-> Gradle validation.
 
@@ -978,7 +978,7 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 String getGradleVersionFor(String androidPluginVersion) {
-  final compatList = <GradleForAgp>[
+  final List<GradleForAgp> compatList = <GradleForAgp>[
     GradleForAgp(agpMin: '1.0.0', agpMax: '1.1.3', minRequiredGradle: '2.3'),
     GradleForAgp(agpMin: '1.2.0', agpMax: '1.3.1', minRequiredGradle: '2.9'),
     GradleForAgp(agpMin: '1.5.0', agpMax: '1.5.0', minRequiredGradle: '2.2.1'),
@@ -1011,7 +1011,7 @@ String getGradleVersionFor(String androidPluginVersion) {
       minRequiredGradle: maxKnownAndSupportedGradleVersion,
     ),
   ];
-  for (final data in compatList) {
+  for (final GradleForAgp data in compatList) {
     if (isWithinVersionRange(androidPluginVersion, min: data.agpMin, max: data.agpMax)) {
       return data.minRequiredGradle;
     }
@@ -1036,7 +1036,7 @@ void updateLocalProperties({
     exitWithNoSdkMessage();
   }
   final File localProperties = project.android.localPropertiesFile;
-  var changed = false;
+  bool changed = false;
 
   SettingsFile settings;
   if (localProperties.existsSync()) {
@@ -1089,7 +1089,7 @@ void updateLocalProperties({
 ///
 /// Writes the path to the Android SDK, if known.
 void writeLocalProperties(File properties) {
-  final settings = SettingsFile();
+  final SettingsFile settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
     settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);

@@ -156,15 +156,15 @@ class GalleryTransitionTest {
 
     final String testOutputDirectory =
         Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
-    final summary =
+    final Map<String, dynamic> summary =
         json.decode(file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync())
             as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
-      final original =
+      final Map<String, dynamic> original =
           json.decode(file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync())
               as Map<String, dynamic>;
-      final transitions = <String, List<int>>{};
+      final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
         transitions[key] = List<int>.from(original[key] as List<dynamic>);
       }
@@ -172,7 +172,7 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
-    final isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
     return TaskResult.success(
       summary,
       detailFiles: <String>[
@@ -309,15 +309,15 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   Future<TaskResult> parseTaskResult() async {
-    final summary =
+    final Map<String, dynamic> summary =
         json.decode(file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync())
             as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
-      final original =
+      final Map<String, dynamic> original =
           json.decode(file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync())
               as Map<String, dynamic>;
-      final transitions = <String, List<int>>{};
+      final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
         transitions[key] = List<int>.from(original[key] as List<dynamic>);
       }
@@ -325,7 +325,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
-    final isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
     return TaskResult.success(
       summary,
       detailFiles: <String>[
@@ -386,8 +386,8 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 }
 
 int _countMissedTransitions(Map<String, List<int>> transitions) {
-  const kTransitionBudget = 100000; // µs
-  var count = 0;
+  const int kTransitionBudget = 100000; // µs
+  int count = 0;
   transitions.forEach((String demoName, List<int> durations) {
     final int longestDuration = durations.reduce(math.max);
     if (longestDuration > kTransitionBudget) {

@@ -7,13 +7,13 @@ import 'package:flutter_driver/flutter_driver.dart';
 import '../../common.dart';
 
 void main() {
-  final fakeDeserialize = FakeDeserialize();
+  final FakeDeserialize fakeDeserialize = FakeDeserialize();
 
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final a = Ancestor(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
+    final Ancestor a = Ancestor(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
     expect(a.serialize(), <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
@@ -24,7 +24,7 @@ void main() {
   });
 
   test('Ancestor finder deserialize', () {
-    final serialized = <String, String>{
+    final Map<String, String> serialized = <String, String>{
       'finderType': 'Ancestor',
       'of': '{"finderType":"ByType","type":"Text"}',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
@@ -43,7 +43,7 @@ void main() {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final a = Descendant(
+    final Descendant a = Descendant(
       of: of,
       matching: matching,
       matchRoot: true,
@@ -59,7 +59,7 @@ void main() {
   });
 
   test('Descendant finder deserialize', () {
-    final serialized = <String, String>{
+    final Map<String, String> serialized = <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',
       'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',

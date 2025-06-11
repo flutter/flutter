@@ -61,7 +61,7 @@ void main() {
       darkColor: Color(0xEE333333),
     );
 
-    const backgroundColor = CupertinoDynamicColor.withBrightness(
+    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFFFFFFF),
       darkColor: Color(0xFF000000),
     );
@@ -205,7 +205,7 @@ void main() {
   );
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    const page1Center = Center();
+    const Center page1Center = Center();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -244,7 +244,7 @@ void main() {
   testWidgets('Contents have automatic sliver padding between translucent bars', (
     WidgetTester tester,
   ) async {
-    const content = SizedBox(height: 600.0, width: 600.0);
+    const SizedBox content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -403,11 +403,11 @@ void main() {
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Center())));
 
-    final decoratedBox =
+    final DecoratedBox decoratedBox =
         tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final decoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -418,11 +418,11 @@ void main() {
       ),
     );
 
-    final decoratedBox =
+    final DecoratedBox decoratedBox =
         tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final decoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
   });
 
@@ -511,7 +511,7 @@ void main() {
     }
 
     // CupertinoPageScaffold should consume the viewInsets in all cases
-    final expectedViewInsets = EdgeInsets.zero.toString();
+    final String expectedViewInsets = EdgeInsets.zero.toString();
 
     // When there is a nav bar and no keyboard.
     await tester.pumpWidget(buildFrame(true, false));

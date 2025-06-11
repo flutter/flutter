@@ -19,7 +19,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Can customize url strategy', (WidgetTester tester) async {
-    final strategy = TestUrlStrategy.fromEntry(
+    final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/'),
     );
     setUrlStrategy(strategy);
@@ -137,11 +137,11 @@ class TestUrlStrategy extends UrlStrategy {
   /// like a real browser.
   void _firePopStateEvent() {
     assert(withinAppHistory);
-    final event = web.PopStateEvent(
+    final web.PopStateEvent event = web.PopStateEvent(
       'popstate',
       PopStateEventInit(state: currentEntry.state?.toJSBox),
     );
-    for (var i = 0; i < listeners.length; i++) {
+    for (int i = 0; i < listeners.length; i++) {
       listeners[i](event);
     }
   }
@@ -151,8 +151,8 @@ class TestUrlStrategy extends UrlStrategy {
 
   @override
   String toString() {
-    final lines = <String>[];
-    for (var i = 0; i < history.length; i++) {
+    final List<String> lines = <String>[];
+    for (int i = 0; i < history.length; i++) {
       final TestHistoryEntry entry = history[i];
       lines.add(_currentEntryIndex == i ? '* $entry' : '  $entry');
     }

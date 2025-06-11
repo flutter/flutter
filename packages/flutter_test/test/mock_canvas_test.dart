@@ -35,7 +35,7 @@ class MethodAndArguments {
     if (!(other is MethodAndArguments && other.method == method)) {
       return false;
     }
-    for (var i = 0; i < arguments.length; i++) {
+    for (int i = 0; i < arguments.length; i++) {
       if (arguments[i] != other.arguments[i]) {
         return false;
       }
@@ -60,7 +60,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -85,7 +85,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -112,7 +112,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -147,7 +147,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -172,7 +172,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -200,7 +200,7 @@ void main() {
         ),
       );
 
-      final methodsAndArguments = <MethodAndArguments>[];
+      final List<MethodAndArguments> methodsAndArguments = <MethodAndArguments>[];
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
@@ -227,8 +227,8 @@ void main() {
     final Rect rect = Offset.zero & const Size.square(50);
     const double startAngle = math.pi / 4;
     const double sweepAngle = math.pi / 2;
-    const useCenter = false;
-    final paint = Paint()..color = Colors.blue;
+    const bool useCenter = false;
+    final Paint paint = Paint()..color = Colors.blue;
 
     Future<void> pumpPainter(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -353,11 +353,11 @@ void main() {
   });
 
   group('rsuperellipse', () {
-    final rsuperellipse = RSuperellipse.fromRectAndRadius(
+    final RSuperellipse rsuperellipse = RSuperellipse.fromRectAndRadius(
       Offset.zero & const Size.square(50),
       const Radius.circular(5),
     );
-    final paint = Paint()..color = Colors.blue;
+    final Paint paint = Paint()..color = Colors.blue;
 
     Future<void> pumpPainter(WidgetTester tester) async {
       await tester.pumpWidget(

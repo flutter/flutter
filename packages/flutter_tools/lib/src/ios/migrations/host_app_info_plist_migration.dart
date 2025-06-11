@@ -31,11 +31,11 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
     String newContents = fileContents;
     if (!newContents.contains(_kDisableMinimumFrameDurationKey)) {
       logger.printTrace('Adding $_kDisableMinimumFrameDurationKey to Info.plist');
-      const plistEnd = '''
+      const String plistEnd = '''
 </dict>
 </plist>
 ''';
-      const plistWithKey = '''
+      const String plistWithKey = '''
 	<key>$_kDisableMinimumFrameDurationKey</key>
 	<true/>
 </dict>
@@ -46,11 +46,11 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 
     if (!newContents.contains(_kIndirectInputEventsKey)) {
       logger.printTrace('Adding $_kIndirectInputEventsKey to Info.plist');
-      const plistEnd = '''
+      const String plistEnd = '''
 </dict>
 </plist>
 ''';
-      const plistWithKey = '''
+      const String plistWithKey = '''
 	<key>$_kIndirectInputEventsKey</key>
 	<true/>
 </dict>

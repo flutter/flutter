@@ -24,7 +24,7 @@ void main() {
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
 
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       flutter = FlutterRunTestDriver(tempDir);

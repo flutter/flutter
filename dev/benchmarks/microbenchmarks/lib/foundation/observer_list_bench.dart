@@ -22,23 +22,23 @@ class TestAnimationController extends AnimationController {
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   void runNotifyListenersLoopWithObserverList(
     int totalIterations, {
     bool failRemoval = false,
     bool addResult = true,
   }) {
-    final suffix = failRemoval ? 'removalFail' : 'removalSuccess';
-    final name = 'notifyListeners:ObserverList:$suffix';
+    final String suffix = failRemoval ? 'removalFail' : 'removalSuccess';
+    final String name = 'notifyListeners:ObserverList:$suffix';
 
     void miss() {}
 
     for (final int callbackCount in callbackCounts) {
       final int iterations = totalIterations ~/ callbackCount;
 
-      final observerList = ObserverList<VoidCallback>();
-      for (var i = 0; i < callbackCount; ++i) {
+      final ObserverList<VoidCallback> observerList = ObserverList<VoidCallback>();
+      for (int i = 0; i < callbackCount; ++i) {
         observerList.add(switch (failRemoval) {
           false => () {
             final VoidCallback first = (observerList.iterator..moveNext()).current;
@@ -50,11 +50,11 @@ Future<void> execute() async {
         });
       }
 
-      final watch = Stopwatch()..start();
+      final Stopwatch watch = Stopwatch()..start();
 
-      for (var i = 0; i < iterations; ++i) {
+      for (int i = 0; i < iterations; ++i) {
         final List<VoidCallback> list = observerList.toList(growable: false);
-        for (final cb in list) {
+        for (final VoidCallback cb in list) {
           if (observerList.contains(cb)) {
             cb();
           }
@@ -75,13 +75,13 @@ Future<void> execute() async {
   }
 
   void runNotifyListenersLoopWithHashedObserverList(int totalIterations, {bool addResult = true}) {
-    const name = 'notifyListeners:HashedObserverList';
+    const String name = 'notifyListeners:HashedObserverList';
 
     for (final int callbackCount in callbackCounts) {
       final int iterations = totalIterations ~/ callbackCount;
 
-      final observerList = HashedObserverList<VoidCallback>();
-      for (var i = 0; i < callbackCount; ++i) {
+      final HashedObserverList<VoidCallback> observerList = HashedObserverList<VoidCallback>();
+      for (int i = 0; i < callbackCount; ++i) {
         observerList.add(() {
           final VoidCallback first = (observerList.iterator..moveNext()).current;
 
@@ -90,11 +90,11 @@ Future<void> execute() async {
         });
       }
 
-      final watch = Stopwatch()..start();
+      final Stopwatch watch = Stopwatch()..start();
 
-      for (var i = 0; i < iterations; ++i) {
+      for (int i = 0; i < iterations; ++i) {
         final List<VoidCallback> list = observerList.toList(growable: false);
-        for (final cb in list) {
+        for (final VoidCallback cb in list) {
           if (observerList.contains(cb)) {
             cb();
           }
@@ -115,13 +115,13 @@ Future<void> execute() async {
   }
 
   void runNotifyListenersLoopWithAnimationController(int totalIterations, {bool addResult = true}) {
-    const name = 'notifyListeners:AnimationController';
+    const String name = 'notifyListeners:AnimationController';
 
     for (final int callbackCount in callbackCounts) {
       final int iterations = totalIterations ~/ callbackCount;
 
-      final controller = TestAnimationController();
-      for (var i = 0; i < callbackCount; ++i) {
+      final TestAnimationController controller = TestAnimationController();
+      for (int i = 0; i < callbackCount; ++i) {
         late final VoidCallback cb;
         cb = () {
           controller.removeListener(cb);
@@ -130,9 +130,9 @@ Future<void> execute() async {
         controller.addListener(cb);
       }
 
-      final watch = Stopwatch()..start();
+      final Stopwatch watch = Stopwatch()..start();
 
-      for (var i = 0; i < iterations; ++i) {
+      for (int i = 0; i < iterations; ++i) {
         controller.notifyListeners();
       }
 

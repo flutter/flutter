@@ -11,10 +11,10 @@ void main() {
   testWidgets('DropdownEntryLabelWidget appears', (WidgetTester tester) async {
     await tester.pumpWidget(const example.DropdownMenuEntryLabelWidgetExampleApp());
 
-    const longText =
+    const String longText =
         'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
     Finder findMenuItemText(String label) {
-      final labelText = '$label $longText\n';
+      final String labelText = '$label $longText\n';
       return find
           .descendant(
             of: find.widgetWithText(MenuItemButton, labelText),

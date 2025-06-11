@@ -10,7 +10,7 @@ void main() {
   testWidgets('Increments counter on button tap', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AnimatedSwitcherExampleApp());
 
-    var counter = 0;
+    int counter = 0;
 
     expect(find.text('$counter'), findsOneWidget);
 
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(const example.AnimatedSwitcherExampleApp());
 
     // The animation duration defined in the example app.
-    const animationDuration = Duration(milliseconds: 500);
+    const Duration animationDuration = Duration(milliseconds: 500);
 
     final Finder zeroTransitionFinder = find.ancestor(
       of: find.text('0'),

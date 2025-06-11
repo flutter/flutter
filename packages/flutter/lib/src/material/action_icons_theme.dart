@@ -83,7 +83,7 @@ class ActionIconThemeData with Diagnosticable {
 
   @override
   int get hashCode {
-    final values = <Object?>[
+    final List<Object?> values = <Object?>[
       backButtonIconBuilder,
       closeButtonIconBuilder,
       drawerButtonIconBuilder,

@@ -11,13 +11,13 @@ void main() {
   testWidgets('DatePickerThemeData.dayShape updates day selection shape decoration', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     final OutlinedBorder dayShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8.0),
     );
     const Color todayBackgroundColor = Colors.amber;
     const Color todayForegroundColor = Colors.black;
-    const todayBorder = BorderSide(width: 2);
+    const BorderSide todayBorder = BorderSide(width: 2);
 
     ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
       return tester

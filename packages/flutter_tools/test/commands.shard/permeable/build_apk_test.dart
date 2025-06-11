@@ -837,7 +837,7 @@ void main() {
 }
 
 Future<BuildApkCommand> runBuildApkCommand(String target, {List<String>? arguments}) async {
-  final command = BuildApkCommand(logger: BufferLogger.test());
+  final BuildApkCommand command = BuildApkCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',

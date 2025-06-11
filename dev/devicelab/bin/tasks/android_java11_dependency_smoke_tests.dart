@@ -58,7 +58,7 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 // https://docs.gradle.org/current/userguide/compatibility.html
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
-  const fileSystem = LocalFileSystem();
+  const LocalFileSystem fileSystem = LocalFileSystem();
 
   final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
     'flutter_android_dependency_version_tests',

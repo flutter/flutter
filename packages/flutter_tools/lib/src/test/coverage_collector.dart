@@ -245,7 +245,7 @@ class CoverageCollector extends TestWatcher {
           ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    const baseCoverageData = 'coverage/lcov.base.info';
+    const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
@@ -253,7 +253,7 @@ class CoverageCollector extends TestWatcher {
       }
 
       if (globals.os.which('lcov') == null) {
-        var installMessage = 'Please install lcov.';
+        String installMessage = 'Please install lcov.';
         if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
         } else if (globals.platform.isMacOS) {

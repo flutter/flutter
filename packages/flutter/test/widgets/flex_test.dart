@@ -34,7 +34,7 @@ void main() {
   }
 
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
-    var didReceiveTap = false;
+    bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -145,7 +145,7 @@ void main() {
       phase: EnginePhase.layout,
     );
     debugCheckIntrinsicSizes = true;
-    final message = tester.takeException().toString();
+    final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
   });
 

@@ -169,7 +169,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
-    final webRenderer = WebRendererMode.fromDartDefines(
+    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(
       dartDefines,
       useWasm: useWasm,
     );
@@ -250,7 +250,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    final webBuilder = WebBuilder(
+    final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,

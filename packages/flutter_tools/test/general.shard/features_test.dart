@@ -16,14 +16,14 @@ import '../src/fakes.dart';
 void main() {
   group('Features', () {
     testWithoutContext('setting has safe defaults', () {
-      const featureSetting = FeatureChannelSetting();
+      const FeatureChannelSetting featureSetting = FeatureChannelSetting();
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
     });
 
     testWithoutContext('has safe defaults', () {
-      const feature = Feature(name: 'example');
+      const Feature feature = Feature(name: 'example');
 
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
@@ -31,10 +31,10 @@ void main() {
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
-      const masterSetting = FeatureChannelSetting(available: true);
-      const betaSetting = FeatureChannelSetting(available: true);
-      const stableSetting = FeatureChannelSetting(available: true);
-      const feature = Feature(
+      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: true);
+      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: true);
+      const Feature feature = Feature(
         name: 'example',
         master: masterSetting,
         beta: betaSetting,
@@ -48,12 +48,12 @@ void main() {
     });
 
     testWithoutContext('reads from configuration if available', () {
-      const exampleFeature = Feature(
+      const Feature exampleFeature = Feature(
         name: 'example',
         master: FeatureChannelSetting(available: true),
       );
 
-      final flags = FlutterFeatureFlags(
+      final FlutterFeatureFlags flags = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
         platform: FakePlatform(),
@@ -62,9 +62,9 @@ void main() {
     });
 
     testWithoutContext('returns false if not available', () {
-      const exampleFeature = Feature(name: 'example');
+      const Feature exampleFeature = Feature(name: 'example');
 
-      final flags = FlutterFeatureFlags(
+      final FlutterFeatureFlags flags = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
         platform: FakePlatform(),
@@ -150,7 +150,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterLinuxDesktopFeature,
       );
       expect(checkFlags.isLinuxEnabled, isTrue);
@@ -168,7 +168,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterMacOSDesktopFeature,
       );
       expect(checkFlags.isMacOSEnabled, isTrue);
@@ -186,7 +186,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterWindowsDesktopFeature,
       );
       expect(checkFlags.isWindowsEnabled, isTrue);
@@ -204,7 +204,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterWebFeature,
       );
       expect(checkFlags.isWebEnabled, isTrue);
@@ -222,7 +222,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterAndroidFeature,
       );
       expect(checkFlags.isAndroidEnabled, isTrue);
@@ -240,7 +240,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterIOSFeature,
       );
       expect(checkFlags.isIOSEnabled, isTrue);
@@ -265,7 +265,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterFuchsiaFeature,
       );
       expect(checkFlags.isFuchsiaEnabled, isTrue);
@@ -290,7 +290,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: flutterCustomDevicesFeature,
       );
       expect(checkFlags.areCustomDevicesEnabled, isTrue);
@@ -303,7 +303,7 @@ void main() {
     });
 
     test('can be disabled by TERM=dumb', () {
-      final features = FlutterFeatureFlags(
+      final FlutterFeatureFlags features = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig(),
         platform: FakePlatform(environment: <String, String>{'TERM': 'dumb'}),
@@ -313,7 +313,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: cliAnimation,
       );
       expect(checkFlags.isCliAnimationEnabled, isTrue);
@@ -338,7 +338,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: nativeAssets,
       );
       expect(checkFlags.isNativeAssetsEnabled, isTrue);
@@ -363,7 +363,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final checkFlags = _TestIsGetterForwarding(
+      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
         shouldInvoke: swiftPackageManager,
       );
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);

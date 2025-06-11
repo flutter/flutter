@@ -28,7 +28,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('GestureRecognizer smoketest', () {
-    final recognizer = TestGestureRecognizer(debugOwner: 0);
+    final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
     expect(recognizer, hasAGoodToStringDeep);
   });
 
@@ -40,12 +40,12 @@ void main() {
   });
 
   test('OffsetPair', () {
-    const offset1 = OffsetPair(local: Offset(10, 20), global: Offset(30, 40));
+    const OffsetPair offset1 = OffsetPair(local: Offset(10, 20), global: Offset(30, 40));
 
     expect(offset1.local, const Offset(10, 20));
     expect(offset1.global, const Offset(30, 40));
 
-    const offset2 = OffsetPair(local: Offset(50, 60), global: Offset(70, 80));
+    const OffsetPair offset2 = OffsetPair(local: Offset(50, 60), global: Offset(70, 80));
 
     final OffsetPair sum = offset2 + offset1;
     expect(sum.local, const Offset(60, 80));
@@ -58,10 +58,10 @@ void main() {
 
   group('PrimaryPointerGestureRecognizer', () {
     testGesture('cleans up state after winning arena', (GestureTester tester) {
-      final resolutions = <String>[];
-      final indefinite = IndefiniteGestureRecognizer();
+      final List<String> resolutions = <String>[];
+      final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       addTearDown(indefinite.dispose);
-      final accepting =
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting =
           TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
             GestureDisposition.accepted,
             onAcceptGesture: () => resolutions.add('accepted'),
@@ -92,10 +92,10 @@ void main() {
     });
 
     testGesture('cleans up state after losing arena', (GestureTester tester) {
-      final resolutions = <String>[];
-      final indefinite = IndefiniteGestureRecognizer();
+      final List<String> resolutions = <String>[];
+      final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       addTearDown(indefinite.dispose);
-      final rejecting =
+      final TestPrimaryPointerGestureRecognizer<PointerMoveEvent> rejecting =
           TestPrimaryPointerGestureRecognizer<PointerMoveEvent>(
             GestureDisposition.rejected,
             onAcceptGesture: () => resolutions.add('accepted'),
@@ -133,10 +133,10 @@ void main() {
     });
 
     testGesture('works properly when recycled', (GestureTester tester) {
-      final resolutions = <String>[];
-      final indefinite = IndefiniteGestureRecognizer();
+      final List<String> resolutions = <String>[];
+      final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       addTearDown(indefinite.dispose);
-      final accepting =
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting =
           TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
             GestureDisposition.accepted,
             preAcceptSlopTolerance: 15,
@@ -169,10 +169,10 @@ void main() {
     });
 
     testGesture('uses expected pre-accept slop tolerance', (GestureTester tester) {
-      final resolutions = <String>[];
-      final indefinite = IndefiniteGestureRecognizer();
+      final List<String> resolutions = <String>[];
+      final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       addTearDown(indefinite.dispose);
-      final defaultSlop =
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> defaultSlop =
           TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
             GestureDisposition.accepted,
             postAcceptSlopTolerance: null,
@@ -180,7 +180,7 @@ void main() {
             onRejectGesture: () => resolutions.add('rejected'),
           );
       addTearDown(defaultSlop.dispose);
-      final setSlop =
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> setSlop =
           TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
             GestureDisposition.accepted,
             preAcceptSlopTolerance: 5,
@@ -189,7 +189,7 @@ void main() {
             onRejectGesture: () => resolutions.add('rejected'),
           );
       addTearDown(setSlop.dispose);
-      final nullSlop =
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> nullSlop =
           TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
             GestureDisposition.accepted,
             preAcceptSlopTolerance: null,

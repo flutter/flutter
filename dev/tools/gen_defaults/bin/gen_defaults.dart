@@ -67,20 +67,20 @@ const String dataDir = 'dev/tools/gen_defaults/data';
 
 Future<void> main(List<String> args) async {
   // Parse arguments
-  final parser = ArgParser();
+  final ArgParser parser = ArgParser();
   parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output', negatable: false);
   final ArgResults argResults = parser.parse(args);
-  final verbose = argResults['verbose'] as bool;
+  final bool verbose = argResults['verbose'] as bool;
 
   // Map of version number to list of data files that use that version.
-  final versionMap = <String, List<String>>{};
+  final Map<String, List<String>> versionMap = <String, List<String>>{};
   // Map of all tokens to their values.
-  final tokens = <String, dynamic>{};
+  final Map<String, dynamic> tokens = <String, dynamic>{};
 
   // Initialize.
   for (final FileSystemEntity tokenFile in Directory(dataDir).listSync()) {
     final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
-    final version = tokenFileTokens['version'] as String;
+    final String version = tokenFileTokens['version'] as String;
     tokenFileTokens.remove('version');
     versionMap[version] ??= <String>[];
     versionMap[version]!.add(tokenFile.uri.pathSegments.last);

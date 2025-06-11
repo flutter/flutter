@@ -216,7 +216,7 @@ const String htmlSample3 = '''
 ''';
 
 void main() {
-  final fs = MemoryFileSystem();
+  final MemoryFileSystem fs = MemoryFileSystem();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
@@ -241,7 +241,7 @@ void main() {
   });
 
   test('applies substitutions', () {
-    const indexHtml = WebTemplate(htmlSample2);
+    const WebTemplate indexHtml = WebTemplate(htmlSample2);
 
     expect(
       indexHtml.withSubstitutions(
@@ -254,7 +254,7 @@ void main() {
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    const indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/foo/333/',
@@ -266,7 +266,7 @@ void main() {
   });
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
-    const indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -281,7 +281,7 @@ void main() {
   });
 
   test('applies substitutions to full flutter_bootstrap.js replacement', () {
-    const indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -297,7 +297,7 @@ void main() {
   });
 
   test('re-parses after substitutions', () {
-    const indexHtml = WebTemplate(htmlSample2);
+    const WebTemplate indexHtml = WebTemplate(htmlSample2);
     expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
 
     final String substituted = indexHtml.withSubstitutions(
@@ -310,7 +310,7 @@ void main() {
   });
 
   test('warns on legacy service worker patterns', () {
-    const indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
     expect(warnings.length, 2);
 
@@ -319,7 +319,7 @@ void main() {
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
-    const indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
 
     expect(warnings.length, 1);

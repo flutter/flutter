@@ -22,7 +22,7 @@ class _ProtectPublicStateSubtypes implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final visitor = _StateSubclassVisitor();
+    final _StateSubclassVisitor visitor = _StateSubclassVisitor();
     unit.unit.visitChildren(visitor);
     final List<MethodDeclaration> unprotected = visitor.unprotectedMethods;
     if (unprotected.isNotEmpty) {

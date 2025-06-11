@@ -12,7 +12,7 @@ void main() {
     late StateSetter setState;
     const double toolbarOverlap = 100;
     const double height = 500;
-    var anchorY = 200.0;
+    double anchorY = 200.0;
 
     await tester.pumpWidget(
       MediaQuery(

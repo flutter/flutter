@@ -87,7 +87,7 @@ class FlutterTesterTestDevice extends TestDevice {
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
-    final command = <String>[
+    final List<String> command = <String>[
       flutterTesterBinPath,
       if (enableVmService) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
@@ -130,7 +130,7 @@ class FlutterTesterTestDevice extends TestDevice {
         platform.environment.containsKey('FLUTTER_TEST')
             ? platform.environment['FLUTTER_TEST']!
             : 'true';
-    final environment = <String, String>{
+    final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
@@ -298,7 +298,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   String toString() {
-    final status =
+    final String status =
         _process != null
             ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
             : 'not started';
@@ -309,7 +309,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required Process process,
     required Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
-    for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
+    for (final Stream<List<int>> stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
@@ -353,7 +353,7 @@ String _getExitCodeMessage(int exitCode) {
 }
 
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
-  final controller = StreamChannelController<String>();
+  final StreamChannelController<String> controller = StreamChannelController<String>();
 
   controller.local.stream.map<dynamic>((String message) => message as dynamic).pipe(webSocket);
   webSocket

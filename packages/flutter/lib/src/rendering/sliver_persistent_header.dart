@@ -240,7 +240,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver
         DoubleProperty('The specified minExtent was', minExtent),
       ]);
     }());
-    var stretchOffset = 0.0;
+    double stretchOffset = 0.0;
     if (stretchConfiguration != null && constraints.scrollOffset == 0.0) {
       stretchOffset += constraints.overlap.abs();
     }
@@ -363,7 +363,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   /// This is used by [performLayout].
   @protected
   double updateGeometry() {
-    var stretchOffset = 0.0;
+    double stretchOffset = 0.0;
     if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }
@@ -582,7 +582,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// This is used by [performLayout].
   @protected
   double updateGeometry() {
-    var stretchOffset = 0.0;
+    double stretchOffset = 0.0;
     if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }

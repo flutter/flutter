@@ -11,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  const kOpenScale = 1.15;
-  const kMinScaleFactor = 1.02;
+  const double kOpenScale = 1.15;
+  const double kMinScaleFactor = 1.02;
 
   Widget getChild() {
     return Container(width: 300.0, height: 100.0, color: CupertinoColors.activeOrange);
@@ -281,9 +281,9 @@ void main() {
         of: decoyChild,
         matching: find.byType(Container),
       );
-      final boxDecoration =
+      final BoxDecoration? boxDecoration =
           (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
-      const expectedColors = <Color?>[null, Color(0x00000000)];
+      const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
 
       // `Color(0x00000000)` -> Is `CupertinoColors.transparent`.
       // `null`              -> Default when no color argument is given in `BoxDecoration`.
@@ -393,18 +393,18 @@ void main() {
         );
       }
 
-      final decoyContainer =
+      final Container decoyContainer =
           tester.firstElement(findBuilderDecoyChild()).widget as Container;
-      final decoyDecoration = decoyContainer.decoration as BoxDecoration?;
+      final BoxDecoration? decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
 
       expect(findBuilderDecoyChild(), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
-      final decoyLaterContainer =
+      final Container decoyLaterContainer =
           tester.firstElement(findBuilderDecoyChild()).widget as Container;
-      final decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
+      final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
 
       // Finish gesture to release resources.
@@ -698,7 +698,7 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final previewWidget =
+      final ClipRSuperellipse previewWidget =
           tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
@@ -889,7 +889,7 @@ void main() {
 
   group("Open layout differs depending on child's position on screen", () {
     testWidgets('Portrait', (WidgetTester tester) async {
-      const portraitScreenSize = Size(600.0, 800.0);
+      const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
 
       // Pump a CupertinoContextMenu in the center of the screen and open it.
@@ -1021,11 +1021,11 @@ void main() {
   testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
     int? onPointerDownTime;
     int? onPointerUpTime;
-    var insideTapTriggered = false;
+    bool insideTapTriggered = false;
     // The required duration of the route to be pushed in is [500, 900]ms.
     // 500ms is calculated from kPressTimeout+_previewLongPressTimeout/2.
     // 900ms is calculated from kPressTimeout+_previewLongPressTimeout.
-    const pressDuration = Duration(milliseconds: 501);
+    const Duration pressDuration = Duration(milliseconds: 501);
 
     int now() => clock.now().millisecondsSinceEpoch;
 
@@ -1061,7 +1061,7 @@ void main() {
     // the user keeps pressing and requesting frames.
     // If there is only one frame,
     // the animation is mutant and cannot drive the value of the animation controller.
-    for (var i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
       await tester.pump(pressDuration ~/ 100);
     }
     await gesture.up();
@@ -1093,7 +1093,7 @@ void main() {
   });
 
   testWidgets('CupertinoContextMenu scrolls correctly', (WidgetTester tester) async {
-    const numMenuItems = 100;
+    const int numMenuItems = 100;
     final Widget child = getChild();
     await tester.pumpWidget(
       CupertinoApp(

@@ -292,7 +292,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///  * [focusNode] and [textEditingController], which contain a code example
   ///    showing how to create a separate field outside of fieldViewBuilder.
   static void onFieldSubmitted<T extends Object>(GlobalKey key) {
-    final rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
+    final _RawAutocompleteState<T> rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
     rawAutocomplete._onFieldSubmitted();
   }
 
@@ -413,7 +413,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final TextEditingValue value = _textEditingController.value;
 
     // Makes sure that options change only when content of the field changes.
-    var shouldUpdateOptions = false;
+    bool shouldUpdateOptions = false;
     if (value.text != _lastFieldText) {
       shouldUpdateOptions = true;
       _onChangedCallId += 1;
@@ -532,7 +532,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
     };
 
-    final optionsViewBoundingBox = Size(
+    final Size optionsViewBoundingBox = Size(
       fieldSize.width,
       math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );

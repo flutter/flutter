@@ -74,8 +74,8 @@ abstract class TokenTemplate {
   /// the content will just be appended to the end of the file.
   Future<void> updateFile() async {
     final String contents = File(fileName).readAsStringSync();
-    final beginComment = '$beginGeneratedComment - $blockName\n';
-    final endComment = '$endGeneratedComment - $blockName\n';
+    final String beginComment = '$beginGeneratedComment - $blockName\n';
+    final String endComment = '$endGeneratedComment - $blockName\n';
     final int beginPreviousBlock = contents.indexOf(beginComment);
     final int endPreviousBlock = contents.indexOf(endComment);
     late String contentBeforeBlock;
@@ -94,7 +94,7 @@ abstract class TokenTemplate {
       contentAfterBlock = '';
     }
 
-    final buffer = StringBuffer(contentBeforeBlock);
+    final StringBuffer buffer = StringBuffer(contentBeforeBlock);
     buffer.write(beginComment);
     buffer.write(headerComment);
     buffer.write(generate());
@@ -153,12 +153,12 @@ abstract class TokenTemplate {
   /// See also:
   ///   * [color], that provides support for looking up a raw color token.
   String componentColor(String componentToken) {
-    final colorToken = '$componentToken.color';
+    final String colorToken = '$componentToken.color';
     if (!tokenAvailable(colorToken)) {
       return 'null';
     }
     String value = color(colorToken);
-    final opacityToken = '$componentToken.opacity';
+    final String opacityToken = '$componentToken.opacity';
     if (tokenAvailable(opacityToken)) {
       value += '.withOpacity(${opacity(opacityToken)})';
     }
@@ -189,10 +189,10 @@ abstract class TokenTemplate {
   ///
   /// Non-square sizes are specified as width and height.
   String size(String componentToken) {
-    final sizeToken = '$componentToken.size';
+    final String sizeToken = '$componentToken.size';
     if (!tokenAvailable(sizeToken)) {
-      final widthToken = '$componentToken.width';
-      final heightToken = '$componentToken.height';
+      final String widthToken = '$componentToken.width';
+      final String heightToken = '$componentToken.height';
       if (!tokenAvailable(widthToken) && !tokenAvailable(heightToken)) {
         throw Exception('Unable to find width, height, or size tokens for $componentToken');
       }
@@ -215,14 +215,14 @@ abstract class TokenTemplate {
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken, [String prefix = 'const ']) {
-    final shape =
+    final Map<String, dynamic> shape =
         getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
-        final topLeft = shape['topLeft'] as double;
-        final topRight = shape['topRight'] as double;
-        final bottomLeft = shape['bottomLeft'] as double;
-        final bottomRight = shape['bottomRight'] as double;
+        final double topLeft = shape['topLeft'] as double;
+        final double topRight = shape['topRight'] as double;
+        final double bottomLeft = shape['bottomLeft'] as double;
+        final double bottomRight = shape['bottomRight'] as double;
         if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
           if (topLeft == 0) {
             return '${prefix}RoundedRectangleBorder()';
@@ -255,7 +255,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final width =
+    final double width =
         (getToken('$componentToken.width', optional: true) ??
                 getToken('$componentToken.height', optional: true) ??
                 1.0)

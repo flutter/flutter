@@ -170,7 +170,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     );
 
     // The raw position, tracking the gesture directly.
-    final rawMagnifierPosition = Offset(
+    final Offset rawMagnifierPosition = Offset(
       textEditingContext.globalGesturePosition.dx - CupertinoMagnifier.kDefaultSize.width / 2,
       verticalPositionOfLens -
           (CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint),
@@ -346,7 +346,7 @@ class CupertinoMagnifier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var focalPointOffset = Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
+    Offset focalPointOffset = Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);
     focalPointOffset += additionalFocalPointOffset;
 

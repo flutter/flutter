@@ -112,7 +112,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (value!.isEmpty) {
       return 'Name is required.';
     }
-    final nameExp = RegExp(r'^[A-Za-z ]+$');
+    final RegExp nameExp = RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value)) {
       return 'Please enter only alphabetical characters.';
     }
@@ -121,7 +121,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   String? _validatePhoneNumber(String? value) {
     _formWasEdited = true;
-    final phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
+    final RegExp phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value!)) {
       return '(###) ###-#### - Enter a US phone number.';
     }
@@ -322,8 +322,8 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;
-    var usedSubstringIndex = 0;
-    final newText = StringBuffer();
+    int usedSubstringIndex = 0;
+    final StringBuffer newText = StringBuffer();
     if (newTextLength >= 1) {
       newText.write('(');
       if (newValue.selection.end >= 1) {

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IconTheme.of works', (WidgetTester tester) async {
-    const data = IconThemeData(
+    const IconThemeData data = IconThemeData(
       size: 16.0,
       fill: 0.0,
       weight: 400.0,

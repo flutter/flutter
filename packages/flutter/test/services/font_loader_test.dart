@@ -18,15 +18,15 @@ class TestFontLoader extends FontLoader {
 
 void main() {
   test('Font loader test', () async {
-    final tfl = TestFontLoader('TestFamily');
+    final TestFontLoader tfl = TestFontLoader('TestFamily');
 
-    final expectedAssets = <Uint8List>[
+    final List<Uint8List> expectedAssets = <Uint8List>[
       Uint8List.fromList(<int>[100]),
       Uint8List.fromList(<int>[10, 20, 30]),
       Uint8List.fromList(<int>[200]),
     ];
 
-    for (final asset in expectedAssets) {
+    for (final Uint8List asset in expectedAssets) {
       tfl.addFont(Future<ByteData>.value(ByteData.view(asset.buffer)));
     }
     await tfl.load();

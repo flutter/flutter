@@ -10,7 +10,7 @@ void main() {
   testWidgets('CustomScrollView.center update test 1', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     late StateSetter setState;
-    var hasKey = false;
+    bool hasKey = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -47,13 +47,13 @@ void main() {
   });
 
   testWidgets('CustomScrollView.center update test 2', (WidgetTester tester) async {
-    const slivers1 = <Widget>[
+    const List<Widget> slivers1 = <Widget>[
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('c'), child: SizedBox(height: 100.0)),
     ];
 
-    const slivers2 = <Widget>[
+    const List<Widget> slivers2 = <Widget>[
       SliverToBoxAdapter(key: Key('c'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('d'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),

@@ -15,14 +15,14 @@ void main() {
       findsExactly(4),
     );
 
-    final selectableTexts = <String>[
+    final List<String> selectableTexts = <String>[
       'SelectionArea Sample',
       'Row 1',
       'Row 2',
       'Row 3',
     ];
 
-    for (final text in selectableTexts) {
+    for (final String text in selectableTexts) {
       expect(
         find.descendant(of: find.byType(SelectionArea), matching: find.text(text)),
         findsExactly(1),

@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'test_step.dart';
 
 Future<TestStepResult> systemNavigatorPop() {
-  const channel = BasicMessageChannel<String>(
+  const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
     'navigation-test',
     StringCodec(),
   );
 
-  final completer = Completer<TestStepResult>();
+  final Completer<TestStepResult> completer = Completer<TestStepResult>();
 
   channel.setMessageHandler((String? message) async {
     completer.complete(const TestStepResult('System navigation pop', '', TestStatus.ok));

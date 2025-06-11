@@ -501,7 +501,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
         );
 
-    final iconThemeData = IconThemeData(
+    final IconThemeData iconThemeData = IconThemeData(
       color: CupertinoDynamicColor.resolve(widget.itemColor, context),
       size: _scaledIconSize,
     );

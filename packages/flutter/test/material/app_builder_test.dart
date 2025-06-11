@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
     final Widget app = MaterialApp(
       home: const Placeholder(),
       builder: (BuildContext context, Widget? child) {
@@ -24,7 +24,7 @@ void main() {
   });
 
   testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(

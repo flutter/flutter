@@ -21,7 +21,7 @@ class CocoaPodsValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
     final CocoaPodsStatus cocoaPodsStatus = await _cocoaPods.evaluateCocoaPodsInstallation;
 
@@ -63,7 +63,7 @@ class CocoaPodsValidator extends DoctorValidator {
       case CocoaPodsStatus.belowMinimumVersion:
       case CocoaPodsStatus.belowRecommendedVersion:
         status = ValidationType.partial;
-        final currentVersionText = (await _cocoaPods.cocoaPodsVersionText).toString();
+        final String currentVersionText = (await _cocoaPods.cocoaPodsVersionText).toString();
         messages.add(
           ValidationMessage.hint(
             _userMessages.cocoaPodsOutdated(

@@ -66,7 +66,7 @@ abstract class UnpackDarwin extends Target {
       '-info',
       frameworkBinaryPath,
     ]);
-    final lipoInfo = infoResult.stdout as String;
+    final String lipoInfo = infoResult.stdout as String;
 
     final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',

@@ -73,7 +73,7 @@ Future<void> analyzeProject(
     globals.fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final args = <String>[flutterToolsSnapshotPath, 'analyze'];
+  final List<String> args = <String>[flutterToolsSnapshotPath, 'analyze'];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
@@ -90,7 +90,7 @@ Future<void> analyzeProject(
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
     try {
-      final analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
       final List<String> lineComponents = line.trim().split(analyzerSeparator);
       final String lintName = lineComponents.removeLast();
       final String location = lineComponents.removeLast();
@@ -100,10 +100,10 @@ Future<void> analyzeProject(
     }
   }
 
-  final stdout = exec.stdout.toString();
-  final errors = <String>[];
+  final String stdout = exec.stdout.toString();
+  final List<String> errors = <String>[];
   try {
-    var analyzeLineFound = false;
+    bool analyzeLineFound = false;
     const LineSplitter().convert(stdout).forEach((String line) {
       // Conditional to filter out any stdout from `pub get`
       if (!analyzeLineFound && line.startsWith('Analyzing')) {
@@ -137,7 +137,7 @@ Future<void> ensureFlutterToolsSnapshot() async {
     snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
-  final snapshotArgs = <String>[
+  final List<String> snapshotArgs = <String>[
     '--snapshot=$flutterToolsSnapshotPath',
     '--packages=$packageConfig',
     flutterToolsPath,

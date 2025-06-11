@@ -48,14 +48,14 @@ void main() {
     androidSdk = FakeAndroidSdk();
   });
 
-  for (final targetPlatform in <TargetPlatform>[
+  for (final TargetPlatform targetPlatform in <TargetPlatform>[
     TargetPlatform.android_arm,
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
       final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
-      final device = AndroidDevice(
+      final AndroidDevice device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
         fileSystem: fileSystem,
@@ -65,7 +65,7 @@ void main() {
         androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-      final apk = AndroidApk(
+      final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
@@ -129,7 +129,7 @@ void main() {
   }
 
   testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
-    final device = AndroidDevice(
+    final AndroidDevice device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
       fileSystem: fileSystem,
@@ -139,7 +139,7 @@ void main() {
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final apk = AndroidApk(
+    final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
       applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
@@ -169,7 +169,7 @@ void main() {
   });
 
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
-    final device = AndroidDevice(
+    final AndroidDevice device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
       fileSystem: fileSystem,
@@ -179,7 +179,7 @@ void main() {
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final apk = AndroidApk(
+    final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
       applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',

@@ -68,7 +68,7 @@ Container(
     );
 
     // Put all the sliders to the middle.
-    for (var i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
       await tester.tap(find.byType(Slider).at(i));
       await tester.pump();
     }
@@ -133,7 +133,7 @@ Container(
     );
 
     // Put all the sliders to the middle.
-    for (var i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
       await tester.tap(find.byType(Slider).at(i));
       await tester.pump();
     }
@@ -200,7 +200,7 @@ Container(
     expect(find.text('0.40'), findsOne);
 
     // Put all the sliders to the middle.
-    for (var i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
       await tester.tap(find.byType(Slider).at(i));
       await tester.pump();
     }

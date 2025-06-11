@@ -73,8 +73,8 @@ void main() {
   });
 
   testWidgets('Table widget calculate depth', (WidgetTester tester) async {
-    final outerTable = UniqueKey();
-    final innerTable = UniqueKey();
+    final UniqueKey outerTable = UniqueKey();
+    final UniqueKey innerTable = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -299,7 +299,7 @@ void main() {
 
   testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27083
-    const cell = SizedBox(width: 16, height: 16);
+    const SizedBox cell = SizedBox(width: 16, height: 16);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -315,7 +315,7 @@ void main() {
   });
 
   testWidgets('Calculating flex columns with small width deficit', (WidgetTester tester) async {
-    const cell = SizedBox(width: 1, height: 1);
+    const SizedBox cell = SizedBox(width: 1, height: 1);
     // If the error is present, pumpWidget() will fail due to an unsatisfied
     // assertion during the layout phase.
     await tester.pumpWidget(
@@ -478,7 +478,7 @@ void main() {
   });
 
   testWidgets('Table widget - moving test', (WidgetTester tester) async {
-    final contexts = <BuildContext>[];
+    final List<BuildContext> contexts = <BuildContext>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -711,7 +711,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(table);
-    final element = key0.currentContext! as RenderObjectElement;
+    final RenderObjectElement element = key0.currentContext! as RenderObjectElement;
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -869,7 +869,7 @@ void main() {
 
   testWidgets('TableRow with no children throws an error message', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119541.
-    var result = 'no exception';
+    String result = 'no exception';
 
     // Test TableRow with children.
     try {
@@ -953,7 +953,7 @@ void main() {
   });
 
   testWidgets('Table has correct roles in semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -971,7 +971,7 @@ void main() {
       ),
     );
 
-    final expectedSemantics = TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           textDirection: TextDirection.ltr,

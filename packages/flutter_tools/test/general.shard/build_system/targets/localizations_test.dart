@@ -16,7 +16,7 @@ import '../../../src/fake_process_manager.dart';
 void main() {
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final environment = Environment.test(
+    final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,

@@ -45,7 +45,7 @@ Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async
 }
 
 Future<void> run(List<String> args) async {
-  final parser =
+  final ArgParser parser =
       ArgParser()
         ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
         ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
@@ -60,7 +60,7 @@ Future<void> run(List<String> args) async {
   }
   Cache.flutterRoot = globals.platform.environment['FLUTTER_ROOT'];
 
-  final assetDir = argResults[_kOptionAsset] as String;
+  final String assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
@@ -74,14 +74,14 @@ Future<void> run(List<String> args) async {
     throwToolExit('Unable to find assets.', exitCode: 1);
   }
 
-  final calls = <Future<void>>[];
+  final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, AssetBundleEntry entry) {
     final libfs.File outputFile = globals.fs.file(globals.fs.path.join(assetDir, fileName));
     calls.add(writeAssetFile(outputFile, entry));
   });
   await Future.wait<void>(calls);
 
-  final outputMan = argResults[_kOptionAssetManifestOut] as String;
+  final String outputMan = argResults[_kOptionAssetManifestOut] as String;
   await writeFuchsiaManifest(
     assets,
     argResults[_kOptionAsset] as String,
@@ -89,17 +89,17 @@ Future<void> run(List<String> args) async {
     argResults[_kOptionComponentName] as String,
   );
 
-  final depfilePath = argResults[_kOptionDepfile] as String?;
+  final String? depfilePath = argResults[_kOptionDepfile] as String?;
   if (depfilePath != null) {
     await writeDepfile(assets, outputMan, depfilePath);
   }
 }
 
 Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
-  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[
+  final Depfile depfileContent = Depfile(assets.inputFiles, <libfs.File>[
     globals.fs.file(outputManifest),
   ]);
-  final depfileService = DepfileService(
+  final DepfileService depfileService = DepfileService(
     fileSystem: globals.fs,
     logger: globals.logger,
   );

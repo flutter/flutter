@@ -104,7 +104,7 @@ void main() {
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
       final FileSystem fs = LocalFileSystem.test(signals: Signals.test());
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
       final Directory projectDir =
           fs.systemTempDirectory.createTempSync('project')
@@ -124,7 +124,7 @@ void main() {
         onPubspecChangeDetected: () {},
       );
       codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
-      final pub = Pub.test(
+      final Pub pub = Pub.test(
         fileSystem: fs,
         logger: logger,
         processManager: const LocalProcessManager(),
@@ -164,7 +164,7 @@ void main() {
         // - A top-level function 'List<WidgetPreview> previews()'
         // - A returned list containing function calls to 'preview()' from 'foo.dart' and
         //   'barPreview1()', 'barPreview2()', and 'barPreview3()' from 'src/bar.dart'
-        const expectedGeneratedPreviewFileContents = '''
+        const String expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 import 'package:foo_project/foo.dart' as _i2;
@@ -206,7 +206,7 @@ List<_i1.WidgetPreview> previews() => [
         // The generated file should only contain:
         // - An import of the widget preview library
         // - A top-level function 'List<WidgetPreview> previews()' that returns an empty list.
-        const emptyGeneratedPreviewFileContents = '''
+        const String emptyGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 

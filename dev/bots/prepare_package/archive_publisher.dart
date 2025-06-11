@@ -51,7 +51,7 @@ class ArchivePublisher {
       'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
-    final digestSink = AccumulatorSink<Digest>();
+    final AccumulatorSink<Digest> digestSink = AccumulatorSink<Digest>();
     final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
 
     final Stream<List<int>> stream = archiveFile.openRead();
@@ -67,7 +67,7 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    final destGsPath = '$gsReleaseFolder/$destinationArchivePath';
+    final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
         throw PreparePackageException('File $destGsPath already exists on cloud storage!');
@@ -75,7 +75,7 @@ class ArchivePublisher {
     }
     await _cloudCopy(src: outputFile.absolute.path, dest: destGsPath);
     assert(tempDir.existsSync());
-    final gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
     await _publishMetadata(gcsPath);
   }
 
@@ -94,7 +94,7 @@ class ArchivePublisher {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }
 
-    final newEntry = <String, dynamic>{};
+    final Map<String, dynamic> newEntry = <String, dynamic>{};
     newEntry['hash'] = revision;
     newEntry['channel'] = branch.name;
     newEntry['version'] = version[frameworkVersionTag];
@@ -105,7 +105,7 @@ class ArchivePublisher {
     newEntry['sha256'] = await _getChecksum(outputFile);
 
     // Search for any entries with the same hash and channel and remove them.
-    final releases = jsonData['releases'] as List<dynamic>;
+    final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
       for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
         if (entry['hash'] != newEntry['hash'] ||
@@ -130,7 +130,7 @@ class ArchivePublisher {
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
-    var jsonData = <String, dynamic>{};
+    Map<String, dynamic> jsonData = <String, dynamic>{};
     if (!dryRun) {
       final String currentMetadata = metadataFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
@@ -147,7 +147,7 @@ class ArchivePublisher {
     // release.
     jsonData = await _addRelease(jsonData);
 
-    const encoder = JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
   }
 

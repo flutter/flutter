@@ -33,7 +33,7 @@ void main() {
   testUsingContext(
     'devices can display no connected devices with the --machine flag',
     () async {
-      final command = DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['devices', '--machine']);
 
@@ -46,7 +46,7 @@ void main() {
     'devices can display via the --machine flag',
     () async {
       deviceManager.devices = <Device>[WebServerDevice(logger: logger)];
-      final command = DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['devices', '--machine']);
 

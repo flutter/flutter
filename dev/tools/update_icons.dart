@@ -177,26 +177,26 @@ void main(List<String> args) {
 
   final ArgResults argResults = _handleArguments(args);
 
-  final iconsFile = File(
+  final File iconsFile = File(
     path.normalize(path.absolute(argResults[_iconsPathOption] as String)),
   );
   if (!iconsFile.existsSync()) {
     stderr.writeln('Error: Icons file not found: ${iconsFile.path}');
     exit(1);
   }
-  final iconsTemplateFile = File(
+  final File iconsTemplateFile = File(
     path.normalize(path.absolute(argResults[_iconsTemplatePathOption] as String)),
   );
   if (!iconsTemplateFile.existsSync()) {
     stderr.writeln('Error: Icons template file not found: ${iconsTemplateFile.path}');
     exit(1);
   }
-  final newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
+  final File newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
   if (!newCodepointsFile.existsSync()) {
     stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
-  final oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
+  final File oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
   if (!oldCodepointsFile.existsSync()) {
     stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);
@@ -232,7 +232,7 @@ void main(List<String> args) {
   } else {
     iconsFile.writeAsStringSync(newIconsContents);
 
-    final sortedNewTokenPairMap = SplayTreeMap<String, String>.of(
+    final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(
       newTokenPairMap,
     );
     _regenerateCodepointsFile(oldCodepointsFile, sortedNewTokenPairMap);
@@ -245,7 +245,7 @@ void main(List<String> args) {
 }
 
 ArgResults _handleArguments(List<String> args) {
-  final argParser =
+  final ArgParser argParser =
       ArgParser()
         ..addOption(
           _iconsPathOption,
@@ -310,9 +310,9 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
     codepointData,
   ).map((String line) => line.trim()).where((String line) => line.isNotEmpty);
 
-  final pairs = <String, String>{};
+  final Map<String, String> pairs = <String, String>{};
 
-  for (final line in cleanData) {
+  for (final String line in cleanData) {
     final List<String> tokens = line.split(' ');
     if (tokens.length != 2) {
       throw FormatException('Unexpected codepoint data: $line');
@@ -339,8 +339,8 @@ String _regenerateIconsFile(
           .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
-  final buf = StringBuffer();
-  var generating = false;
+  final StringBuffer buf = StringBuffer();
+  bool generating = false;
 
   for (final String line in LineSplitter.split(templateFileContents)) {
     if (!generating) {
@@ -350,10 +350,10 @@ String _regenerateIconsFile(
     // Generate for PlatformAdaptiveIcons
     if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
-      final platformAdaptiveDeclarations = <String>[];
+      final List<String> platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates all icon declarations.
-        for (final style in <String>['', '_outlined', '_rounded', '_sharp']) {
+        for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final Icon agnosticIcon = newIcons.firstWhere(
               (Icon icon) => icon.id == '${ids[0]}$style',
@@ -426,7 +426,7 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
 @visibleForTesting
 bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
-  final unstable = <String>[
+  final List<String> unstable = <String>[
     for (final MapEntry<String, String>(:String key, :String value) in oldCodepoints.entries)
       if (newCodepoints.containsKey(key) && value != newCodepoints[key]) key,
   ];
@@ -445,7 +445,7 @@ bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCode
 void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> tokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
-  final buf = StringBuffer();
+  final StringBuffer buf = StringBuffer();
   tokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
@@ -457,11 +457,11 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
   }
   stderr.writeln('Generating icon demo at $_defaultDemoFilePath');
 
-  final newIconUsages = StringBuffer();
+  final StringBuffer newIconUsages = StringBuffer();
   for (final MapEntry<String, String> entry in tokenPairMap.entries) {
     newIconUsages.writeln(Icon(entry).usage);
   }
-  final demoFileContents = '''
+  final String demoFileContents = '''
     import 'package:flutter/material.dart';
 
     void main() => runApp(const IconDemo());

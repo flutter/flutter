@@ -13,9 +13,9 @@ int getLength(ReceivePort s) {
 }
 
 Future<void> main() async {
-  final s = ReceivePort();
+  final ReceivePort s = ReceivePort();
 
-  var wasError = false;
+  bool wasError = false;
   try {
     await compute(getLength, s);
   } on Object {

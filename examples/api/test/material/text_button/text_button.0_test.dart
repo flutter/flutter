@@ -60,8 +60,8 @@ void main() {
       final AnimatedContainer container = tester.widget<AnimatedContainer>(
         find.descendant(of: smileyButton, matching: find.byType(AnimatedContainer)),
       );
-      final decoration = container.decoration! as BoxDecoration;
-      final image = decoration.image!.image as NetworkImage;
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final NetworkImage image = decoration.image!.image as NetworkImage;
       return image.url;
     }
 

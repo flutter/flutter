@@ -10,12 +10,12 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Traversal Order of SliverList', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final controller = ScrollController(initialScrollOffset: 3000.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
     addTearDown(controller.dispose);
 
-    final listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -160,12 +160,12 @@ void main() {
   });
 
   testWidgets('Traversal Order of SliverFixedExtentList', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final controller = ScrollController(initialScrollOffset: 3000.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
     addTearDown(controller.dispose);
 
-    final listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -280,12 +280,12 @@ void main() {
   });
 
   testWidgets('Traversal Order of SliverGrid', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final controller = ScrollController(initialScrollOffset: 1600.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 1600.0);
     addTearDown(controller.dispose);
 
-    final listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(height: 200.0, child: Text('Item $i'));
     });
     await tester.pumpWidget(
@@ -392,12 +392,12 @@ void main() {
   });
 
   testWidgets('Traversal Order of List of individual slivers', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final controller = ScrollController(initialScrollOffset: 3000.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
     addTearDown(controller.dispose);
 
-    final listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: 200.0,
@@ -506,12 +506,12 @@ void main() {
   });
 
   testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final controller = ScrollController(initialScrollOffset: 3000.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
     addTearDown(controller.dispose);
 
-    final listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -539,8 +539,8 @@ void main() {
       ),
     );
 
-    final children = <TestSemantics>[];
-    for (var index = 0; index < 30; index += 1) {
+    final List<TestSemantics> children = <TestSemantics>[];
+    for (int index = 0; index < 30; index += 1) {
       final bool isHidden = index < 15 || index > 17;
       children.add(
         TestSemantics(
@@ -589,7 +589,7 @@ void main() {
   });
 
   testWidgets('Traversal Order with center child', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Semantics(

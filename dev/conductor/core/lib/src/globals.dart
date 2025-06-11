@@ -43,7 +43,7 @@ final RegExp releaseCandidateBranchRegex = RegExp(r'flutter-(\d+)\.(\d+)-candida
 
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
-  final str = input as String;
+  final String str = input as String;
   return str.trim();
 }
 
@@ -58,7 +58,7 @@ class ConductorException implements Exception {
 
 bool assertsEnabled() {
   // Verify asserts enabled
-  var assertsEnabled = false;
+  bool assertsEnabled = false;
 
   assert(() {
     assertsEnabled = true;
@@ -84,7 +84,7 @@ String? getValueFromEnvOrArgs(
   if (env[envName] != null) {
     return env[envName];
   }
-  final argValue = argResults[name] as String?;
+  final String? argValue = argResults[name] as String?;
   if (argValue != null) {
     return argValue;
   }
@@ -120,7 +120,7 @@ List<String> getValuesFromEnvOrArgs(String name, ArgResults argResults, Map<Stri
   if (env[envName] != null && env[envName] != '') {
     return env[envName]!.split(',');
   }
-  final argValues = argResults[name] as List<String>?;
+  final List<String>? argValues = argResults[name] as List<String>?;
   if (argValues != null) {
     return argValues;
   }
@@ -160,10 +160,10 @@ String getNewPrLink({
   final String workingBranch = repository.workingBranch;
   assert(candidateBranch.isNotEmpty);
   assert(workingBranch.isNotEmpty);
-  final title =
+  final String title =
       '[flutter_releases] Flutter ${state.releaseChannel} '
       '${state.releaseVersion} $repoLabel Cherrypicks';
-  final body = StringBuffer();
+  final StringBuffer body = StringBuffer();
   body.write('''
 # Flutter ${state.releaseChannel} ${state.releaseVersion} $repoLabel
 

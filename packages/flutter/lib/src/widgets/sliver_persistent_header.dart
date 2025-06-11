@@ -178,7 +178,7 @@ class SliverPersistentHeader extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
-    final flags = <String>[if (pinned) 'pinned', if (floating) 'floating'];
+    final List<String> flags = <String>[if (pinned) 'pinned', if (floating) 'floating'];
     if (flags.isEmpty) {
       flags.add('normal');
     }
@@ -273,7 +273,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
-    final oldWidget =
+    final _SliverPersistentHeaderRenderObjectWidget oldWidget =
         widget as _SliverPersistentHeaderRenderObjectWidget;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
@@ -306,7 +306,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   void _build(double shrinkOffset, bool overlapsContent) {
     owner!.buildScope(this, () {
-      final sliverPersistentHeaderRenderObjectWidget =
+      final _SliverPersistentHeaderRenderObjectWidget sliverPersistentHeaderRenderObjectWidget =
           widget as _SliverPersistentHeaderRenderObjectWidget;
       _updateChild(
         sliverPersistentHeaderRenderObjectWidget.delegate,

@@ -103,22 +103,22 @@ abstract class TextEditingDelta with Diagnosticable {
     // A non text update delta occurs when the selection and/or composing region
     // has been changed by the platform, and there have been no changes to the
     // text value.
-    final oldText = encoded['oldText'] as String;
-    final replacementDestinationStart = encoded['deltaStart'] as int;
-    final replacementDestinationEnd = encoded['deltaEnd'] as int;
-    final replacementSource = encoded['deltaText'] as String;
-    const replacementSourceStart = 0;
+    final String oldText = encoded['oldText'] as String;
+    final int replacementDestinationStart = encoded['deltaStart'] as int;
+    final int replacementDestinationEnd = encoded['deltaEnd'] as int;
+    final String replacementSource = encoded['deltaText'] as String;
+    const int replacementSourceStart = 0;
     final int replacementSourceEnd = replacementSource.length;
 
     // This delta is explicitly a non text update.
     final bool isNonTextUpdate =
         replacementDestinationStart == -1 &&
         replacementDestinationStart == replacementDestinationEnd;
-    final newComposing = TextRange(
+    final TextRange newComposing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
     );
-    final newSelection = TextSelection(
+    final TextSelection newSelection = TextSelection(
       baseOffset: encoded['selectionBase'] as int? ?? -1,
       extentOffset: encoded['selectionExtent'] as int? ?? -1,
       affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
@@ -165,7 +165,7 @@ abstract class TextEditingDelta with Diagnosticable {
       'The composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}',
     );
 
-    final isEqual = oldText == newText;
+    final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne =
         (replacementDestinationEnd - replacementDestinationStart) -
@@ -183,7 +183,7 @@ abstract class TextEditingDelta with Diagnosticable {
     final bool isReplacedByLonger =
         replacementSourceEnd - replacementSourceStart >
         replacementDestinationEnd - replacementDestinationStart;
-    final isReplacedBySame =
+    final bool isReplacedBySame =
         replacementSourceEnd - replacementSourceStart ==
         replacementDestinationEnd - replacementDestinationStart;
 
@@ -228,7 +228,7 @@ abstract class TextEditingDelta with Diagnosticable {
     } else if ((isDeletingByReplacingWithEmpty || isDeletingInsideComposingRegion) &&
         !isOriginalComposingRegionTextChanged) {
       // Deletion.
-      var actualStart = replacementDestinationStart;
+      int actualStart = replacementDestinationStart;
 
       if (!isDeletionGreaterThanOne) {
         actualStart = replacementDestinationEnd - 1;

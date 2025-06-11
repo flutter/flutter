@@ -46,7 +46,7 @@ void main() {
   });
 
   test('AssetImageProvider - evicts on failure to load', () async {
-    final error = Completer<FlutterError>();
+    final Completer<FlutterError> error = Completer<FlutterError>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as FlutterError);
     };
@@ -68,10 +68,10 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 
   test('ImageProvider can evict images', () async {
-    final bytes = Uint8List.fromList(kTransparentImage);
-    final imageProvider = MemoryImage(bytes);
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     stream.addListener(
       ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()),
     );
@@ -83,17 +83,17 @@ void main() {
   });
 
   test('ImageProvider.evict respects the provided ImageCache', () async {
-    final otherCache = ImageCache();
-    final bytes = Uint8List.fromList(kTransparentImage);
-    final imageProvider = MemoryImage(bytes);
+    final ImageCache otherCache = ImageCache();
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStreamCompleter cacheStream =
         otherCache.putIfAbsent(
           imageProvider,
           () => imageProvider.loadBuffer(imageProvider, basicDecoder),
         )!;
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    final completer = Completer<void>();
-    final cacheCompleter = Completer<void>();
+    final Completer<void> completer = Completer<void>();
+    final Completer<void> cacheCompleter = Completer<void>();
     stream.addListener(
       ImageStreamListener((ImageInfo info, bool syncCall) {
         completer.complete();
@@ -114,8 +114,8 @@ void main() {
   });
 
   test('ImageProvider errors can always be caught', () async {
-    final imageProvider = ErrorImageProvider();
-    final caughtError = Completer<bool>();
+    final ErrorImageProvider imageProvider = ErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
     FlutterError.onError = (FlutterErrorDetails details) {
       caughtError.complete(false);
     };

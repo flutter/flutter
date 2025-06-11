@@ -10,7 +10,7 @@ void main() {
   testWidgets('ThemeData basics', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ThemeDataExampleApp());
 
-    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.indigo);
+    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.indigo);
 
     final Material fabMaterial = tester.widget<Material>(
       find.descendant(of: find.byType(FloatingActionButton), matching: find.byType(Material)),

@@ -43,7 +43,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   final Platform platform;
 
   String _toJsonValue(Object? obj) {
-    var value = obj.toString();
+    String value = obj.toString();
     if (obj is String) {
       value = '"$obj"';
     }
@@ -53,8 +53,8 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem);
-    final result = <String, Object?>{
+    final FlutterVersion version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem);
+    final Map<String, Object?> result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,
       'FlutterProject.android.exists': project.android.existsSync(),
@@ -116,14 +116,14 @@ class GeneralInfoProjectValidator extends ProjectValidator {
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
-    final result = <ProjectValidatorResult>[];
+    final List<ProjectValidatorResult> result = <ProjectValidatorResult>[];
     final ProjectValidatorResult appNameValidatorResult = _getAppNameResult(flutterManifest);
     result.add(appNameValidatorResult);
     final String supportedPlatforms = _getSupportedPlatforms(project);
     if (supportedPlatforms.isEmpty) {
       return result;
     }
-    final supportedPlatformsResult = ProjectValidatorResult(
+    final ProjectValidatorResult supportedPlatformsResult = ProjectValidatorResult(
       name: 'Supported Platforms',
       value: supportedPlatforms,
       status: StatusProjectValidator.success,
@@ -142,7 +142,7 @@ class GeneralInfoProjectValidator extends ProjectValidator {
 
   ProjectValidatorResult _getAppNameResult(FlutterManifest flutterManifest) {
     final String appName = flutterManifest.appName;
-    const name = 'App Name';
+    const String name = 'App Name';
     if (appName.isEmpty) {
       return const ProjectValidatorResult(
         name: name,

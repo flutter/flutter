@@ -822,7 +822,7 @@ class ListTile extends StatelessWidget {
         theme.useMaterial3
             ? _LisTileDefaultsM3(context)
             : _LisTileDefaultsM2(context, listTileStyle);
-    final states = <MaterialState>{
+    final Set<MaterialState> states = <MaterialState>{
       if (!enabled) MaterialState.disabled,
       if (selected) MaterialState.selected,
     };
@@ -869,8 +869,8 @@ class ListTile extends StatelessWidget {
           defaults.textColor,
           theme.disabledColor,
         );
-    final iconThemeData = IconThemeData(color: effectiveIconColor);
-    final iconButtonThemeData = IconButtonThemeData(
+    final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
+    final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
       style: IconButton.styleFrom(
         foregroundColor: effectiveIconColor,
       ).merge(IconButtonTheme.of(context).style),
@@ -882,7 +882,7 @@ class ListTile extends StatelessWidget {
           leadingAndTrailingTextStyle ??
           tileTheme.leadingAndTrailingTextStyle ??
           defaults.leadingAndTrailingTextStyle!;
-      final leadingAndTrailingTextColor = effectiveColor;
+      final Color? leadingAndTrailingTextColor = effectiveColor;
       leadingAndTrailingStyle = leadingAndTrailingStyle.copyWith(
         color: leadingAndTrailingTextColor,
       );
@@ -898,7 +898,7 @@ class ListTile extends StatelessWidget {
     }
 
     TextStyle titleStyle = titleTextStyle ?? tileTheme.titleTextStyle ?? defaults.titleTextStyle!;
-    final titleColor = effectiveColor;
+    final Color? titleColor = effectiveColor;
     titleStyle = titleStyle.copyWith(
       color: titleColor,
       fontSize: _isDenseLayout(theme, tileTheme) ? 13.0 : null,
@@ -914,7 +914,7 @@ class ListTile extends StatelessWidget {
     if (subtitle != null) {
       subtitleStyle =
           subtitleTextStyle ?? tileTheme.subtitleTextStyle ?? defaults.subtitleTextStyle!;
-      final subtitleColor = effectiveColor;
+      final Color? subtitleColor = effectiveColor;
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -942,7 +942,7 @@ class ListTile extends StatelessWidget {
         defaults.contentPadding!.resolve(textDirection);
 
     // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
-    final mouseStates = <MaterialState>{
+    final Set<MaterialState> mouseStates = <MaterialState>{
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
     };
     final MouseCursor effectiveMouseCursor =
@@ -1456,7 +1456,7 @@ class _RenderListTile extends RenderBox
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    final parentData = title.parentData! as BoxParentData;
+    final BoxParentData parentData = title.parentData! as BoxParentData;
     final BaselineOffset offset =
         BaselineOffset(title.getDistanceToActualBaseline(baseline)) + parentData.offset.dy;
     return offset.offset;
@@ -1472,7 +1472,7 @@ class _RenderListTile extends RenderBox
   );
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final parentData = box.parentData! as BoxParentData;
+    final BoxParentData parentData = box.parentData! as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1663,7 +1663,7 @@ class _RenderListTile extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
       if (child != null) {
-        final parentData = child.parentData! as BoxParentData;
+        final BoxParentData parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1680,7 +1680,7 @@ class _RenderListTile extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     for (final RenderBox child in children) {
-      final parentData = child.parentData! as BoxParentData;
+      final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

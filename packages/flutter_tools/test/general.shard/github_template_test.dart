@@ -113,7 +113,7 @@ void main() {
       });
 
       testWithoutContext('DevFSException', () {
-        final stackTrace = StackTrace.fromString('''
+        final StackTrace stackTrace = StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
         expect(
@@ -172,8 +172,8 @@ void main() {
     group('new issue template URL', () {
       late StackTrace stackTrace;
       late Error error;
-      const command = 'flutter test';
-      const doctorText = ' [✓] Flutter (Channel report';
+      const String command = 'flutter test';
+      const String doctorText = ' [✓] Flutter (Channel report';
 
       setUp(() async {
         stackTrace = StackTrace.fromString('trace');
@@ -183,7 +183,7 @@ void main() {
       testUsingContext(
         'shows GitHub issue URL',
         () async {
-          final creator = GitHubTemplateCreator(
+          final GitHubTemplateCreator creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
             flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
@@ -208,7 +208,7 @@ void main() {
       testUsingContext(
         'app metadata',
         () async {
-          final creator = GitHubTemplateCreator(
+          final GitHubTemplateCreator creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
             flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
@@ -245,7 +245,7 @@ project_type: app
             doctorText,
           );
           final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
-          const expectedBody = '''
+          const String expectedBody = '''
 ## Command
 ```sh
 flutter test

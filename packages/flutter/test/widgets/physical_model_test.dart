@@ -59,7 +59,7 @@ void main() {
   testWidgets('PhysicalModel - clips when overflows and elevation is 0', (
     WidgetTester tester,
   ) async {
-    const key = Key('test');
+    const Key key = Key('test');
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),

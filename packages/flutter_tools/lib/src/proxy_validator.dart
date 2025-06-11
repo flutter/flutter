@@ -35,7 +35,7 @@ class ProxyValidator extends DoctorValidator {
       return ValidationResult(ValidationType.success, const <ValidationMessage>[]);
     }
 
-    final messages = <ValidationMessage>[
+    final List<ValidationMessage> messages = <ValidationMessage>[
       const ValidationMessage('HTTP_PROXY is set'),
       if (_noProxy.isEmpty)
         const ValidationMessage.hint('NO_PROXY is not set')

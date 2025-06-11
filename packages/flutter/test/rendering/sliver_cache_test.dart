@@ -13,13 +13,13 @@ void main() {
   test(
     'RenderViewport calculates correct constraints, RenderSliverToBoxAdapter calculates correct geometry',
     () {
-      final children = List<RenderSliver>.generate(30, (int index) {
+      final List<RenderSliver> children = List<RenderSliver>.generate(30, (int index) {
         return RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, 100.0)));
       });
 
       // Viewport is 800x600, can show 6 children at a time.
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: 250.0,
@@ -278,14 +278,14 @@ void main() {
 
   test('RenderSliverFixedExtentList calculates correct geometry', () {
     // Viewport is 800x600, can show 6 full children at a time
-    final children = List<RenderBox>.generate(30, (int index) {
+    final List<RenderBox> children = List<RenderBox>.generate(30, (int index) {
       return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverFixedExtentList inner;
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -354,14 +354,14 @@ void main() {
 
   test('RenderSliverList calculates correct geometry', () {
     // Viewport is 800x600, can show 6 full children at a time
-    final children = List<RenderBox>.generate(30, (int index) {
+    final List<RenderBox> children = List<RenderBox>.generate(30, (int index) {
       return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverList inner;
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -430,14 +430,14 @@ void main() {
 
   test('RenderSliverGrid calculates correct geometry', () {
     // Viewport is 800x600, each grid element is 400x100, giving us space for 12 visible children
-    final children = List<RenderBox>.generate(60, (int index) {
+    final List<RenderBox> children = List<RenderBox>.generate(60, (int index) {
       return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverGrid inner;
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -507,10 +507,10 @@ void main() {
   test('RenderSliverPadding calculates correct geometry', () {
     // Viewport is 800x600, each item is 100px high with 50px before and after = 200px
 
-    final adapters = <RenderSliverToBoxAdapter>[];
-    final paddings = List<RenderSliverPadding>.generate(30, (int index) {
+    final List<RenderSliverToBoxAdapter> adapters = <RenderSliverToBoxAdapter>[];
+    final List<RenderSliverPadding> paddings = List<RenderSliverPadding>.generate(30, (int index) {
       RenderSliverToBoxAdapter adapter;
-      final padding = RenderSliverPadding(
+      final RenderSliverPadding padding = RenderSliverPadding(
         padding: const EdgeInsets.symmetric(vertical: 50.0),
         child: adapter = RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, 100.0))),
       );
@@ -518,7 +518,7 @@ void main() {
       return padding;
     });
 
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -791,19 +791,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
       const double firstSliverHeight = 400;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemaining(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -833,7 +833,7 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of the child's minExtent/maxExtent or the
       // remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
       const double extentOfChild = viewportHeight - firstSliverHeight;
       double remainingPaintExtent = viewportHeight - firstSliverHeight;
@@ -894,19 +894,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
-      const firstSliverHeight = beginningViewportCacheExtent;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double firstSliverHeight = beginningViewportCacheExtent;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemaining(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -936,9 +936,9 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of the child's minExtent/maxExtent or the
       // remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
-      const extentOfChild = sliverFillRemainingChildHeight;
+      const double extentOfChild = sliverFillRemainingChildHeight;
       double remainingPaintExtent = 0;
       double remainingCacheExtent = 0;
       expectSliverConstraints(
@@ -1082,19 +1082,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
       const double firstSliverHeight = 400;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemainingAndOverscroll(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -1126,7 +1126,7 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of the child's minExtent or the
       // remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
       const double minExtentOfChild = viewportHeight - firstSliverHeight;
       double maxExtentOfChild = viewportHeight - firstSliverHeight;
@@ -1189,19 +1189,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
-      const firstSliverHeight = beginningViewportCacheExtent;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double firstSliverHeight = beginningViewportCacheExtent;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemainingAndOverscroll(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -1233,10 +1233,10 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of the child's minExtent or the
       // remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
-      const minExtentOfChild = sliverFillRemainingChildHeight;
-      var maxExtentOfChild = sliverFillRemainingChildHeight;
+      const double minExtentOfChild = sliverFillRemainingChildHeight;
+      double maxExtentOfChild = sliverFillRemainingChildHeight;
       double remainingPaintExtent = 0;
       double remainingCacheExtent = 0;
       expectSliverConstraints(
@@ -1385,19 +1385,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
       const double firstSliverHeight = 400;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemainingWithScrollable(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -1429,12 +1429,12 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of either the viewportMainAxisExtent or
       // the remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
       double remainingPaintExtent = viewportHeight - firstSliverHeight;
       double remainingCacheExtent = beginningViewportCacheExtent - firstSliverHeight;
-      var minExtentOfChild = remainingPaintExtent;
-      var maxExtentOfChild = remainingPaintExtent;
+      double minExtentOfChild = remainingPaintExtent;
+      double maxExtentOfChild = remainingPaintExtent;
 
       expectSliverConstraints(
         sliver: sliverFillRemaining,
@@ -1520,19 +1520,19 @@ void main() {
       // Viewport is 800x600
       const double viewportHeight = 600;
       const double viewportWidth = 800;
-      const cacheExtent = 250.0;
+      const double cacheExtent = 250.0;
       const double beginningViewportCacheExtent = viewportHeight + cacheExtent;
-      const firstSliverHeight = beginningViewportCacheExtent;
-      const sliverFillRemainingChildHeight = 100.0;
+      const double firstSliverHeight = beginningViewportCacheExtent;
+      const double sliverFillRemainingChildHeight = 100.0;
 
-      final slivers = <RenderSliver>[
+      final List<RenderSliver> slivers = <RenderSliver>[
         RenderSliverToBoxAdapter(child: RenderSizedBox(const Size(400.0, firstSliverHeight))),
         RenderSliverFillRemainingWithScrollable(
           child: RenderSizedBox(const Size(100.0, sliverFillRemainingChildHeight)),
         ),
       ];
 
-      final root = RenderViewport(
+      final RenderViewport root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: cacheExtent,
@@ -1564,12 +1564,12 @@ void main() {
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of either the viewportMainAxisExtent or
       // the remainingCacheExtent - whichever is smaller.
-      final sliverFillRemaining =
+      final RenderSliverSingleBoxAdapter sliverFillRemaining =
           slivers[1] as RenderSliverSingleBoxAdapter;
       double remainingPaintExtent = 0;
       double remainingCacheExtent = 0;
-      var minExtentOfChild = remainingPaintExtent;
-      var maxExtentOfChild = remainingPaintExtent;
+      double minExtentOfChild = remainingPaintExtent;
+      double maxExtentOfChild = remainingPaintExtent;
       expectSliverConstraints(
         sliver: sliverFillRemaining,
         cacheOrigin: 0.0,
@@ -1802,7 +1802,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }

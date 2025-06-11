@@ -678,7 +678,7 @@ class _LicensePageState extends State<LicensePage> {
 
   Widget _packageLicensePage(BuildContext _, Object? args, ScrollController? scrollController) {
     assert(args is _DetailArguments);
-    final detailArguments = args! as _DetailArguments;
+    final _DetailArguments detailArguments = args! as _DetailArguments;
     return _PackageLicensePage(
       packageName: detailArguments.packageName,
       licenseEntries: detailArguments.licenseEntries,
@@ -1003,7 +1003,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   bool _loaded = false;
 
   Future<void> _initLicenses() async {
-    var debugFlowId = -1;
+    int debugFlowId = -1;
     assert(() {
       final Flow flow = Flow.begin();
       Timeline.timeSync('_initLicenses()', () {}, flow: flow);
@@ -1029,7 +1029,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       }
       setState(() {
         _licenses.add(const Padding(padding: EdgeInsets.all(18.0), child: Divider()));
-        for (final paragraph in paragraphs) {
+        for (final LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(
               Padding(
@@ -1070,8 +1070,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
-    final listWidgets = <Widget>[
+    final EdgeInsets padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
+    final List<Widget> listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
         const Padding(

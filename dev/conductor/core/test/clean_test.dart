@@ -15,9 +15,9 @@ void main() {
   group(
     'clean command',
     () {
-      const flutterRoot = '/flutter';
-      const checkoutsParentDirectory = '$flutterRoot/dev/tools/';
-      const stateFilePath = '/state-file.json';
+      const String flutterRoot = '/flutter';
+      const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
+      const String stateFilePath = '/state-file.json';
 
       late MemoryFileSystem fileSystem;
       late FakePlatform platform;
@@ -29,21 +29,21 @@ void main() {
         stdio = TestStdio();
         fileSystem = MemoryFileSystem.test();
         final String operatingSystem = const LocalPlatform().operatingSystem;
-        final pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
+        final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
 
         processManager = FakeProcessManager.empty();
         platform = FakePlatform(
           environment: <String, String>{'HOME': '/path/to/user/home'},
           pathSeparator: pathSeparator,
         );
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory),
           platform: platform,
           processManager: processManager,
           stdio: stdio,
         );
-        final command = CleanCommand(checkouts: checkouts);
+        final CleanCommand command = CleanCommand(checkouts: checkouts);
         runner = CommandRunner<void>('clean-test', '')..addCommand(command);
       });
 

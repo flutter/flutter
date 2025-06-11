@@ -288,7 +288,7 @@ class TestSemantics {
   final SemanticsHintOverrides? hintOverrides;
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
-    final result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null) {
       result.multiply(transform);
     }
@@ -476,7 +476,7 @@ class TestSemantics {
     if (children.isEmpty) {
       return true;
     }
-    var result = true;
+    bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
     for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
       it.moveNext();
@@ -502,7 +502,7 @@ class TestSemantics {
   @override
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
-    final buf = StringBuffer();
+    final StringBuffer buf = StringBuffer();
     buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
     if (id != null) {
       buf.writeln('$indent  id: $id,');
@@ -626,7 +626,7 @@ class SemanticsTester {
     if (first.length != second.length) {
       return false;
     }
-    for (var i = 0; i < first.length; i++) {
+    for (int i = 0; i < first.length; i++) {
       if (first[i] is SpellOutStringAttribute &&
           (second[i] is! SpellOutStringAttribute || second[i].range != first[i].range)) {
         return false;
@@ -758,7 +758,7 @@ class SemanticsTester {
       return true;
     }
 
-    final result = <SemanticsNode>[];
+    final List<SemanticsNode> result = <SemanticsNode>[];
     bool visit(SemanticsNode node) {
       if (checkNode(node)) {
         result.add(node);
@@ -864,9 +864,9 @@ class SemanticsTester {
       return 'null';
     }
     final String indent = '  ' * indentAmount;
-    final buf = StringBuffer();
+    final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
-    final isRoot = node.id == 0;
+    final bool isRoot = node.id == 0;
     buf.writeln('TestSemantics${isRoot ? '.root' : ''}(');
     if (!isRoot) {
       buf.writeln('  id: ${node.id},');
@@ -1133,7 +1133,7 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    final strings = <String>[
+    final List<String> strings = <String>[
       if (label != null) 'label "$label"',
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',

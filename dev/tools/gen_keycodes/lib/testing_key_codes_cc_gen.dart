@@ -20,7 +20,7 @@ class KeyCodesCcGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final lines = OutputLines<int>('Physical Key list');
+    final OutputLines<int> lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
 constexpr uint64_t kPhysical${_toUpperCamel(entry.constantName)} = ${toHex(entry.usbHidCode)};''');
@@ -30,7 +30,7 @@ constexpr uint64_t kPhysical${_toUpperCamel(entry.constantName)} = ${toHex(entry
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _logicalDefinitions {
-    final lines = OutputLines<int>(
+    final OutputLines<int> lines = OutputLines<int>(
       'Logical Key list',
       behavior: DeduplicateBehavior.kSkip,
     );

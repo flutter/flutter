@@ -66,14 +66,14 @@ class CustomAppBarShape extends OutlinedBorder {
   const CustomAppBarShape({super.side});
 
   Path _getPath(Rect rect) {
-    final path = Path();
-    final size = Size(rect.width, rect.height * 1.5);
+    final Path path = Path();
+    final Size size = Size(rect.width, rect.height * 1.5);
 
     final double p0 = size.height * 0.75;
     path.lineTo(0.0, p0);
 
-    final controlPoint = Offset(size.width * 0.4, size.height);
-    final endPoint = Offset(size.width, size.height / 2);
+    final Offset controlPoint = Offset(size.width * 0.4, size.height);
+    final Offset endPoint = Offset(size.width, size.height / 2);
     path.quadraticBezierTo(controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
 
     path.lineTo(size.width, 0.0);

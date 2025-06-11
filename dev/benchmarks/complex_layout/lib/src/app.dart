@@ -505,7 +505,7 @@ class ItemGalleryBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabNames = <String>['A', 'B', 'C', 'D'];
+    final List<String> tabNames = <String>['A', 'B', 'C', 'D'];
 
     return SizedBox(
       height: 200.0,

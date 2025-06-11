@@ -278,7 +278,7 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
           },
           child: Builder(
             builder: (BuildContext context) {
-              final highlight = highlightedIndex == index;
+              final bool highlight = highlightedIndex == index;
               return Container(
                 color: highlight ? Theme.of(context).focusColor : null,
                 padding: const EdgeInsets.all(16.0),

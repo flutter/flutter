@@ -10,7 +10,7 @@ void main() {
   testWidgets('Visibility and interaction of crucial widgets', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AppBarLargeApp());
 
-    const title = 'Large App Bar';
+    const String title = 'Large App Bar';
 
     expect(
       find.descendant(

@@ -33,7 +33,7 @@ void main() {
   });
 
   test('SliverConstraints are the same when copied', () {
-    const original = SliverConstraints(
+    const SliverConstraints original = SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -58,7 +58,7 @@ void main() {
   test(
     'SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection',
     () {
-      const a = SliverConstraints(
+      const SliverConstraints a = SliverConstraints(
         axisDirection: AxisDirection.down,
         growthDirection: GrowthDirection.forward,
         userScrollDirection: ScrollDirection.idle,
@@ -83,7 +83,7 @@ void main() {
         crossAxisExtent: 40.0,
         viewportMainAxisExtent: 30.0,
       );
-      const d = SliverConstraints(
+      const SliverConstraints d = SliverConstraints(
         axisDirection: AxisDirection.up,
         growthDirection: GrowthDirection.reverse,
         userScrollDirection: ScrollDirection.forward,

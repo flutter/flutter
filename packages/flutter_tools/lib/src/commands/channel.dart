@@ -81,8 +81,8 @@ class ChannelCommand extends FlutterCommand {
       'potential PII leak in channel name: "$currentChannel"',
     );
     final String currentBranch = globals.flutterVersion.getBranchName();
-    final seenUnofficialChannels = <String>{};
-    final rawOutput = <String>[];
+    final Set<String> seenUnofficialChannels = <String>{};
+    final List<String> rawOutput = <String>[];
 
     globals.printStatus('Flutter channels:');
     final int result = await globals.processUtils.stream(
@@ -94,13 +94,13 @@ class ChannelCommand extends FlutterCommand {
       },
     );
     if (result != 0) {
-      final details = verbose ? '\n${rawOutput.join('\n')}' : '';
+      final String details = verbose ? '\n${rawOutput.join('\n')}' : '';
       throwToolExit('List channels failed: $result$details', exitCode: result);
     }
 
-    final availableChannels = <String>{};
+    final Set<String> availableChannels = <String>{};
 
-    for (final line in rawOutput) {
+    for (final String line in rawOutput) {
       final List<String> split = line.split('/');
       if (split.length != 2) {
         // We don't know how to parse this line, skip it.
@@ -114,13 +114,13 @@ class ChannelCommand extends FlutterCommand {
       }
     }
 
-    var currentChannelIsOfficial = false;
+    bool currentChannelIsOfficial = false;
 
     // print all available official channels in sorted manner
     for (final String channel in kOfficialChannels) {
       // only print non-missing channels
       if (availableChannels.contains(channel)) {
-        var currentIndicator = ' ';
+        String currentIndicator = ' ';
         if (channel == currentChannel) {
           currentIndicator = '*';
           currentChannelIsOfficial = true;
@@ -131,7 +131,7 @@ class ChannelCommand extends FlutterCommand {
 
     // print all remaining channels if showAll is true
     if (showAll) {
-      for (final branch in seenUnofficialChannels) {
+      for (final String branch in seenUnofficialChannels) {
         if (currentBranch == branch) {
           globals.printStatus('* $branch');
         } else if (!branch.startsWith('HEAD ')) {

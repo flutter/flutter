@@ -72,7 +72,7 @@ class _ClipperCachePageState extends State<ClipperCachePage> with TickerProvider
   }
 
   Widget _makeChild(int itemIndex, bool complex) {
-    final decoration = BoxDecoration(
+    final BoxDecoration decoration = BoxDecoration(
       color: Colors.white70,
       boxShadow: const <BoxShadow>[BoxShadow(blurRadius: 5.0)],
       borderRadius: BorderRadius.circular(5.0),

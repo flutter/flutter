@@ -47,11 +47,11 @@ Future<void> execute() async {
   ]);
 
   // Wait for frame rendering to stabilize.
-  for (var i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
     await SchedulerBinding.instance.endOfFrame;
   }
 
-  final watch = Stopwatch();
+  final Stopwatch watch = Stopwatch();
 
   print('flutter_test allElements benchmark... (${WidgetsBinding.instance.rootElement})');
   // Make sure we get enough elements to process for consistent benchmark runs
@@ -65,14 +65,14 @@ Future<void> execute() async {
   print('element count: $elementCount');
 
   watch.start();
-  for (var i = 0; i < _kNumIters; i += 1) {
+  for (int i = 0; i < _kNumIters; i += 1) {
     final List<Element> allElements =
         collectAllElementsFrom(WidgetsBinding.instance.rootElement!, skipOffstage: false).toList();
     allElements.clear();
   }
   watch.stop();
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'All elements iterate',
     value: watch.elapsedMicroseconds / _kNumIters,

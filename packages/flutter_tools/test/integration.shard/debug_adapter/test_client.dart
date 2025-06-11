@@ -20,7 +20,7 @@ class DapTestClient {
     // emitted by the debug adapter so tests have easy access to it.
     vmServiceUri = event('dart.debuggerUris')
         .then<Uri?>((Event event) {
-          final body = event.body! as Map<String, Object?>;
+          final Map<String, Object?> body = event.body! as Map<String, Object?>;
           return Uri.parse(body['vmServiceUri']! as String);
         })
         .then((Uri? uri) => uri, onError: (Object? e) => null);
@@ -87,7 +87,7 @@ class DapTestClient {
 
   /// Returns a stream of progress events.
   Stream<Event> progressEvents() {
-    const progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
+    const Set<String> progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
     return _eventController.stream.where((Event e) => progressEvents.contains(e.event));
   }
 
@@ -225,8 +225,8 @@ class DapTestClient {
     String? overrideCommand,
   }) {
     final String command = overrideCommand ?? commandTypes[arguments.runtimeType]!;
-    final request = Request(seq: _seq++, command: command, arguments: arguments);
-    final completer = Completer<Response>();
+    final Request request = Request(seq: _seq++, command: command, arguments: arguments);
+    final Completer<Response> completer = Completer<Response>();
     _pendingRequests[request.seq] = _OutgoingRequest(completer, command, allowFailure);
     _channel.sendRequest(request);
     return completer.future;
@@ -310,7 +310,7 @@ class DapTestClient {
     bool captureVmServiceTraffic = false,
     Logger? logger,
   }) async {
-    final channel = ByteStreamServerChannel(
+    final ByteStreamServerChannel channel = ByteStreamServerChannel(
       server.stream,
       server.sink,
       logger,

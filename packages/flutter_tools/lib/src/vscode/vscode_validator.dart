@@ -28,11 +28,11 @@ class VsCodeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final validationMessages = List<ValidationMessage>.from(
+    final List<ValidationMessage> validationMessages = List<ValidationMessage>.from(
       _vsCode.validationMessages,
     );
 
-    final vsCodeVersionText =
+    final String vsCodeVersionText =
         _vsCode.version == null ? 'version unknown' : 'version ${_vsCode.version}';
 
     if (_vsCode.version == null) {

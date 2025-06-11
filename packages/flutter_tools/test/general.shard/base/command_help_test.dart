@@ -34,7 +34,7 @@ void _testMessageLength({
   int expectedWidth = maxTestLineLength;
 
   if (stdoutSupportsAnsi) {
-    const ansiMetaCharactersLength = 33;
+    const int ansiMetaCharactersLength = 33;
     expectedWidth += ansiMetaCharactersLength;
   }
 
@@ -69,9 +69,9 @@ void main() {
       testWithoutContext('ends with a resetBold when it has parenthetical text', () {
         // This is apparently required to work around bugs in some terminal clients.
         final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
-        final terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
+        final AnsiTerminal terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
 
-        final commandHelpOption = CommandHelpOption(
+        final CommandHelpOption commandHelpOption = CommandHelpOption(
           'tester',
           'for testing',
           platform: platform,

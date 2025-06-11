@@ -14,12 +14,12 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/20313.
 
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-      const initialLabel = 'Foo';
-      const bottomScrollOffset = 3000.0;
+      const String initialLabel = 'Foo';
+      const double bottomScrollOffset = 3000.0;
 
-      final controller = ScrollController(initialScrollOffset: bottomScrollOffset);
+      final ScrollController controller = ScrollController(initialScrollOffset: bottomScrollOffset);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -55,7 +55,7 @@ void main() {
       expect(semantics, isNot(includesNodeWith(label: initialLabel)));
 
       // Change the semantics of the offstage ProblemWidget without crashing.
-      const newLabel = 'Bar';
+      const String newLabel = 'Bar';
       expect(newLabel, isNot(equals(initialLabel)));
       await tester.pumpWidget(
         _buildTestWidget(extraPadding: true, text: newLabel, controller: controller),

@@ -32,7 +32,7 @@ void main(List<String> args) async {
   }
 
   final String flutterRootPath = p.canonicalize('../../');
-  final testsCacheDir = io.Directory(
+  final io.Directory testsCacheDir = io.Directory(
     p.join(flutterRootPath, 'bin', 'cache', 'pkg', 'tests'),
   );
 

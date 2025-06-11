@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('IconThemeData control test', () {
-    const data = IconThemeData(
+    const IconThemeData data = IconThemeData(
       size: 16.0,
       fill: 0.5,
       weight: 600,
@@ -37,7 +37,7 @@ void main() {
   });
 
   group('IconThemeData lerp', () {
-    const data = IconThemeData(
+    const IconThemeData data = IconThemeData(
       size: 16.0,
       fill: 0.5,
       weight: 600,
@@ -67,7 +67,7 @@ void main() {
 
     test('IconThemeData lerp special cases', () {
       expect(IconThemeData.lerp(null, null, 0), const IconThemeData());
-      const data = IconThemeData();
+      const IconThemeData data = IconThemeData();
       expect(identical(IconThemeData.lerp(data, data, 0.5), data), true);
     });
 

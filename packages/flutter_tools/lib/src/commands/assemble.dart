@@ -192,10 +192,10 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argumentResults.rest.first;
-    final targetMap = <String, Target>{
+    final Map<String, Target> targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets) target.name: target,
     };
-    final results = <Target>[
+    final List<Target> results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName)) targetMap[targetName]!,
     ];
@@ -236,7 +236,7 @@ class AssembleCommand extends FlutterCommand {
       output = globals.fs.path.join(_flutterProject.directory.path, output);
     }
     final Artifacts artifacts = globals.artifacts!;
-    final result = Environment(
+    final Environment result = Environment(
       outputDir: globals.fs.directory(output),
       buildDir: _flutterProject.directory
           .childDirectory('.dart_tool')
@@ -260,7 +260,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   Map<String, String> _parseDefines(List<String> values) {
-    final results = <String, String>{};
+    final Map<String, String> results = <String, String>{};
     for (final String chunk in values) {
       final int indexEquals = chunk.indexOf('=');
       if (indexEquals == -1) {
@@ -298,9 +298,9 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final nonDeferredTargets = <Target>[];
+    final List<Target> nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
-    for (final target in targets) {
+    for (final Target target in targets) {
       if (deferredComponentsTargets.contains(target.name)) {
         deferredTargets.add(target);
       } else {
@@ -378,7 +378,7 @@ class AssembleCommand extends FlutterCommand {
     }
     if (argumentResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
-      final depfile = Depfile(result.inputFiles, result.outputFiles);
+      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       _environment.depFileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
     return FlutterCommandResult.success();
@@ -388,12 +388,12 @@ class AssembleCommand extends FlutterCommand {
 @visibleForTesting
 void writeListIfChanged(List<File> files, String path) {
   final File file = globals.fs.file(path);
-  final buffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
   for (final File file in files) {
     buffer.writeln(file.path);
   }
-  final newContents = buffer.toString();
+  final String newContents = buffer.toString();
   if (!file.existsSync()) {
     file.writeAsStringSync(newContents);
   }
@@ -406,7 +406,7 @@ void writeListIfChanged(List<File> files, String path) {
 /// Output performance measurement data in [outFile].
 @visibleForTesting
 void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File outFile) {
-  final jsonData = <String, Object>{
+  final Map<String, Object> jsonData = <String, Object>{
     'targets': <Object>[
       for (final PerformanceMeasurement measurement in measurements)
         <String, Object>{

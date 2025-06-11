@@ -19,8 +19,8 @@ class TrackerBenchmark {
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final printer = BenchmarkResultPrinter();
-  final benchmarks = <TrackerBenchmark>[
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
     TrackerBenchmark(
       name: 'velocity_tracker_iteration',
       tracker: VelocityTracker.withKind(PointerDeviceKind.touch),
@@ -30,15 +30,15 @@ Future<void> execute() async {
       tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch),
     ),
   ];
-  final watch = Stopwatch();
+  final Stopwatch watch = Stopwatch();
 
   await benchmarkWidgets((WidgetTester tester) async {
-    for (final benchmark in benchmarks) {
+    for (final TrackerBenchmark benchmark in benchmarks) {
       print('${benchmark.name} benchmark...');
       final VelocityTracker tracker = benchmark.tracker;
       watch.reset();
       watch.start();
-      for (var i = 0; i < _kNumIters; i += 1) {
+      for (int i = 0; i < _kNumIters; i += 1) {
         for (final PointerEvent event in velocityEventData) {
           if (event is PointerDownEvent || event is PointerMoveEvent) {
             tracker.addPosition(event.timeStamp, event.position);

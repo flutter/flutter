@@ -198,18 +198,18 @@ class CommandHelpOption {
 
   @override
   String toString() {
-    final message = StringBuffer();
+    final StringBuffer message = StringBuffer();
     message.writeAll(<String>[_terminal.bolden(key), description], ' ');
     if (!_hasTextInParenthesis) {
       return message.toString();
     }
 
-    var wrap = false;
+    bool wrap = false;
     final int maxWidth = math.max(_outputPreferences.wrapColumn, maxLineWidth);
     final int adjustedMessageLength =
         _platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length;
     int width = maxWidth - adjustedMessageLength;
-    final parentheticalText = '($inParenthesis)';
+    final String parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {
       width = maxWidth;
       wrap = true;

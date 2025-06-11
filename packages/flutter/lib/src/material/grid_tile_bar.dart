@@ -67,12 +67,12 @@ class GridTileBar extends StatelessWidget {
       decoration = BoxDecoration(color: backgroundColor);
     }
 
-    final padding = EdgeInsetsDirectional.only(
+    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,
       end: trailing != null ? 8.0 : 16.0,
     );
 
-    final darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark();
     return Container(
       padding: padding,
       decoration: decoration,

@@ -81,10 +81,10 @@ const List<String> assets = <String>[
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
-  final watch = Stopwatch();
+  final Stopwatch watch = Stopwatch();
   await benchmarkWidgets((WidgetTester tester) async {
     watch.start();
-    for (var i = 0; i < 10; i += 1) {
+    for (int i = 0; i < 10; i += 1) {
       await Future.wait(<Future<ui.ImmutableBuffer>>[
         for (final String asset in assets) rootBundle.loadBuffer(asset),
       ]);
@@ -92,7 +92,7 @@ Future<void> execute() async {
     watch.stop();
   });
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Image loading',
     value: watch.elapsedMilliseconds.toDouble(),

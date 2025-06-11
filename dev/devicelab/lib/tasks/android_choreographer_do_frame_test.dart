@@ -37,7 +37,7 @@ TaskFunction androidChoreographerDoFrameTest({Map<String, String>? environment})
         );
       });
 
-      final mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
+      final File mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
       if (!mainDart.existsSync()) {
         return TaskResult.failure('${mainDart.path} does not exist');
       }
@@ -69,8 +69,8 @@ Future<void> main() async {
 ''', flush: true);
 
       Future<TaskResult> runTestFor(String mode) async {
-        var nextCompleterIdx = 0;
-        final sentinelCompleters = <String, Completer<void>>{};
+        int nextCompleterIdx = 0;
+        final Map<String, Completer<void>> sentinelCompleters = <String, Completer<void>>{};
         for (final String sentinel in kSentinelStr) {
           sentinelCompleters[sentinel] = Completer<void>();
         }
@@ -81,7 +81,7 @@ Future<void> main() async {
           run = await startFlutter('run', options: <String>['--$mode', '--verbose']);
         });
 
-        var currSentinelIdx = 0;
+        int currSentinelIdx = 0;
         final StreamSubscription<void> stdout = run.stdout
             .transform<String>(utf8.decoder)
             .transform<String>(const LineSplitter())
@@ -103,7 +103,7 @@ Future<void> main() async {
               print('stderr: $line');
             });
 
-        final exitCompleter = Completer<void>();
+        final Completer<void> exitCompleter = Completer<void>();
 
         unawaited(
           run.exitCode.then((int exitCode) {

@@ -263,7 +263,7 @@ class _ChipDemoState extends State<ChipDemo> {
           );
         }).toList();
 
-    var allowedActions = <String>{};
+    Set<String> allowedActions = <String>{};
     if (_selectedMaterial.isNotEmpty) {
       for (final String tool in _selectedTools) {
         allowedActions.addAll(_toolActions[tool]!);
@@ -283,7 +283,7 @@ class _ChipDemoState extends State<ChipDemo> {
           );
         }).toList();
 
-    final tiles = <Widget>[
+    final List<Widget> tiles = <Widget>[
       const SizedBox(height: 8.0, width: 0.0),
       _ChipsTile(label: 'Available Materials (Chip)', children: chips),
       _ChipsTile(label: 'Available Tools (InputChip)', children: inputChips),

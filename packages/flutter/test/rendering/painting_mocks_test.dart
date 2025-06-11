@@ -18,7 +18,7 @@ void main() {
       PaintingMocksTestRenderingFlutterBinding.ensureInitialized();
 
   test('createSceneBuilder et al', () async {
-    final root = RenderView(
+    final RenderView root = RenderView(
       view: binding.platformDispatcher.views.single,
       configuration: const ViewConfiguration(),
     );
@@ -28,7 +28,7 @@ void main() {
     root.compositeFrame();
     expect(log, <String>['createSceneBuilder']);
     log.clear();
-    final context = PaintingContext(ContainerLayer(), Rect.zero);
+    final PaintingContext context = PaintingContext(ContainerLayer(), Rect.zero);
     expect(log, isEmpty);
     context.canvas;
     expect(log, <String>['createPictureRecorder', 'createCanvas']);

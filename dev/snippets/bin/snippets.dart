@@ -64,7 +64,7 @@ String getChannelName({
       return 'stable';
   }
 
-  final gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
+  final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
   final ProcessResult gitResult = processManager.runSync(
     <String>['git', 'status', '-b', '--porcelain'],
     // Use the FLUTTER_ROOT, if defined.
@@ -94,7 +94,7 @@ String getChannelNameWithRetries({
   Platform platform = const LocalPlatform(),
   ProcessManager processManager = const LocalProcessManager(),
 }) {
-  var retryCount = 0;
+  int retryCount = 0;
 
   while (retryCount < 2) {
     try {
@@ -112,7 +112,7 @@ String getChannelNameWithRetries({
 /// applications needed by the snippet.
 void main(List<String> argList) {
   final Map<String, String> environment = platform.environment;
-  final parser = ArgParser();
+  final ArgParser parser = ArgParser();
 
   parser.addOption(
     _kTypeOption,
@@ -178,7 +178,7 @@ void main(List<String> argList) {
     return;
   }
 
-  final sampleType = args[_kTypeOption]! as String;
+  final String sampleType = args[_kTypeOption]! as String;
 
   if (args[_kInputOption] == null) {
     stderr.writeln(parser.usage);
@@ -213,7 +213,7 @@ void main(List<String> argList) {
       output = filesystem.file(path.join(outputDirectory.path, outputPath.path));
     }
   } else {
-    final idParts = <String>[];
+    final List<String> idParts = <String>[];
     if (packageName.isNotEmpty && packageName != 'flutter') {
       idParts.add(packageName.replaceAll(RegExp(r'\W'), '_').toLowerCase());
     }
@@ -242,7 +242,7 @@ void main(List<String> argList) {
   final int? sourceLine =
       environment['SOURCE_LINE'] != null ? int.tryParse(environment['SOURCE_LINE']!) : null;
   final String sourcePath = environment['SOURCE_PATH'] ?? 'unknown.dart';
-  final sampleParser = SnippetDartdocParser(filesystem);
+  final SnippetDartdocParser sampleParser = SnippetDartdocParser(filesystem);
   final SourceElement element = sampleParser.parseFromDartdocToolFile(
     input,
     startLine: sourceLine,
@@ -250,7 +250,7 @@ void main(List<String> argList) {
     sourceFile: filesystem.file(sourcePath),
     type: sampleType,
   );
-  final metadata = <String, Object?>{
+  final Map<String, Object?> metadata = <String, Object?>{
     'channel': getChannelNameWithRetries(platform: platform, processManager: processManager),
     'serial': serial,
     'id': id,

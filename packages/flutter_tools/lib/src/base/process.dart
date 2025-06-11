@@ -66,7 +66,7 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     );
     _shutdownHooksRunning = true;
     try {
-      final futures = <Future<dynamic>>[
+      final List<Future<dynamic>> futures = <Future<dynamic>>[
         for (final ShutdownHook shutdownHook in registeredHooks)
           if (shutdownHook() case final Future<dynamic> result) result,
       ];
@@ -103,7 +103,7 @@ class RunResult {
 
   @override
   String toString() {
-    final out = StringBuffer();
+    final StringBuffer out = StringBuffer();
     if (stdout.isNotEmpty) {
       out.writeln(stdout);
     }
@@ -277,7 +277,7 @@ abstract class ProcessUtils {
     required String content,
     required bool isLine,
   }) {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
 
     void handleError(Object error, StackTrace stackTrace) {
       completer.completeError(error, stackTrace);
@@ -336,7 +336,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
       );
-      final runResult = RunResult(results, cmd);
+      final RunResult runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
       if (throwOnError &&
           runResult.exitCode != 0 &&
@@ -361,8 +361,8 @@ class _DefaultProcessUtils implements ProcessUtils {
         environment: environment,
       );
 
-      final stdoutBuffer = StringBuffer();
-      final stderrBuffer = StringBuffer();
+      final StringBuffer stdoutBuffer = StringBuffer();
+      final StringBuffer stderrBuffer = StringBuffer();
       final Future<void> stdoutFuture =
           process.stdout
               .transform<String>(const Utf8Decoder(reportErrors: false))
@@ -404,13 +404,13 @@ class _DefaultProcessUtils implements ProcessUtils {
       stdoutString = stdoutBuffer.toString();
       stderrString = stderrBuffer.toString();
 
-      final result = ProcessResult(
+      final ProcessResult result = ProcessResult(
         process.pid,
         exitCode ?? -1,
         stdoutString,
         stderrString,
       );
-      final runResult = RunResult(result, cmd);
+      final RunResult runResult = RunResult(result, cmd);
 
       // If the process did not timeout. We are done.
       if (exitCode != null) {
@@ -460,11 +460,11 @@ class _DefaultProcessUtils implements ProcessUtils {
       stderrEncoding: encoding,
       stdoutEncoding: encoding,
     );
-    final runResult = RunResult(results, cmd);
+    final RunResult runResult = RunResult(results, cmd);
 
     _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
-    var failedExitCode = runResult.exitCode != 0;
+    bool failedExitCode = runResult.exitCode != 0;
     if (allowedFailures != null && failedExitCode) {
       failedExitCode = !allowedFailures(runResult.exitCode);
     }
@@ -486,7 +486,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      var message = 'The command failed with exit code ${runResult.exitCode}';
+      String message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message =
             'The command failed\nStdout:\n${runResult.stdout}\n'
@@ -543,7 +543,7 @@ class _DefaultProcessUtils implements ProcessUtils {
             mappedLine = mapFunction(line);
           }
           if (mappedLine != null) {
-            final message = '$prefix$mappedLine';
+            final String message = '$prefix$mappedLine';
             if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
               _logger.printError(message, wrap: false);
             } else if (trace) {
@@ -654,7 +654,7 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
   // Run shutdown hooks before flushing logs
   await shutdownHooks.runShutdownHooks(globals.logger);
 
-  final completer = Completer<void>();
+  final Completer<void> completer = Completer<void>();
 
   await globals.analytics.close();
 

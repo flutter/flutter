@@ -7,6 +7,6 @@ import 'chip_template.dart';
 const String materialLib = 'packages/flutter/lib/src/material';
 
 Future<void> main(List<String> args) async {
-  final tokens = <String, dynamic>{};
+  final Map<String, dynamic> tokens = <String, dynamic>{};
   ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
 }

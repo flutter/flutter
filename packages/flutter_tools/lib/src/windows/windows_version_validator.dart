@@ -53,8 +53,8 @@ class WindowsVersionValidator extends DoctorValidator {
         ValidationMessage.hint('Get-Process failed to complete'),
       ]);
     }
-    final topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false, multiLine: true);
-    final processes = getProcessesResult.stdout as String;
+    final RegExp topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false, multiLine: true);
+    final String processes = getProcessesResult.stdout as String;
     final bool topazFound = topazRegex.hasMatch(processes);
     if (topazFound) {
       return ValidationResult(ValidationType.missing, const <ValidationMessage>[
@@ -69,14 +69,14 @@ class WindowsVersionValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final regex = RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    final RegExp regex = RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
     final String commandResult = _operatingSystemUtils.name;
     final Iterable<RegExpMatch> matches = regex.allMatches(commandResult);
 
     // Use the string split method to extract the major version
     // and check against the [kUnsupportedVersions] list
     ValidationType windowsVersionStatus;
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     String statusInfo;
     if (matches.length == 1 && !kUnsupportedVersions.contains(matches.elementAt(0).group(1))) {
       windowsVersionStatus = ValidationType.success;
@@ -99,8 +99,8 @@ class WindowsVersionValidator extends DoctorValidator {
 
       // Check if the Topaz OFD security module is running, and warn the user if it is.
       // See https://github.com/flutter/flutter/issues/121366
-      final subResults = <ValidationResult>[await _topazScan()];
-      for (final subResult in subResults) {
+      final List<ValidationResult> subResults = <ValidationResult>[await _topazScan()];
+      for (final ValidationResult subResult in subResults) {
         if (subResult.type != ValidationType.success) {
           statusInfo = 'Problem detected with Windows installation';
           windowsVersionStatus = ValidationType.partial;
@@ -129,8 +129,8 @@ class ProcessLister {
   }
 
   Future<ProcessResult> getProcessesWithPath() async {
-    const argument = 'Get-Process | Format-List Path';
-    const psArgs = <String>['-command', argument];
+    const String argument = 'Get-Process | Format-List Path';
+    const List<String> psArgs = <String>['-command', argument];
     if (processManager.canRun(powershell)) {
       return processManager.run(<String>[powershell, ...psArgs]);
     }
@@ -165,7 +165,7 @@ class WindowsVersionExtractor {
       ]);
 
       if (captionResult.exitCode == 0) {
-        final output = captionResult.stdout as String?;
+        final String? output = captionResult.stdout as String?;
         if (output != null) {
           final List<String> parts = output.split('\n');
           if (parts.length >= 2) {
@@ -187,9 +187,9 @@ class WindowsVersionExtractor {
       ]);
 
       if (osDetails.exitCode == 0) {
-        final output = osDetails.stdout as String?;
+        final String? output = osDetails.stdout as String?;
         if (output != null) {
-          final data = Map<String, String>.fromEntries(
+          final Map<String, String> data = Map<String, String>.fromEntries(
             output.split('\n').where((String line) => line.contains('REG_SZ')).map((String line) {
               final List<String> parts = line.split('REG_SZ');
               return MapEntry<String, String>(parts.first.trim(), parts.last.trim());

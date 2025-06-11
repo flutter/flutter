@@ -19,9 +19,9 @@ void main() {
     Slider slider2 = tester.widget(slider2Finder);
     expect(slider1.secondaryTrackValue, slider2.value);
 
-    const targetValue = 0.8;
+    const double targetValue = 0.8;
     final Rect rect = tester.getRect(slider2Finder);
-    final target = Offset(
+    final Offset target = Offset(
       rect.left + (rect.right - rect.left) * targetValue,
       rect.top + (rect.bottom - rect.top) / 2,
     );

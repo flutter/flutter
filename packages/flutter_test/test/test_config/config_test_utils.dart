@@ -11,7 +11,7 @@ void testConfig(
   String? expectedStringValue, {
   Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
 }) {
-  final actualStringValue = Zone.current[String] as String?;
+  final String? actualStringValue = Zone.current[String] as String?;
   final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>((
     Type key,
     dynamic value,

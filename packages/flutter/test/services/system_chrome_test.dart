@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -80,7 +80,7 @@ void main() {
   });
 
   test('setPreferredOrientations control test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -103,7 +103,7 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription control test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -146,7 +146,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode control test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -181,7 +181,7 @@ void main() {
   });
 
   test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -207,7 +207,7 @@ void main() {
   });
 
   test('setSystemUIChangeCallback control test', () async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -226,7 +226,7 @@ void main() {
   });
 
   test('toString works as intended', () async {
-    const systemUiOverlayStyle = SystemUiOverlayStyle();
+    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
 
     expect(
       systemUiOverlayStyle.toString(),
@@ -243,7 +243,7 @@ void main() {
   });
 
   testWidgets('SystemChrome handles detached lifecycle state', (WidgetTester tester) async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -253,7 +253,7 @@ void main() {
       },
     );
 
-    const systemUiOverlayStyle = SystemUiOverlayStyle();
+    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     await tester.idle();
     expect(log.length, equals(1));

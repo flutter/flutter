@@ -261,12 +261,12 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final path =
+  final Path path =
       Path()
         ..fillType = PathFillType.evenOdd
         ..addRect(outerRect)
         ..addRect(innerRect);
-  final paint = Paint()..color = color;
+  final Paint paint = Paint()..color = color;
   canvas.drawPath(path, paint);
 }
 
@@ -299,7 +299,7 @@ void debugPaintPadding(
         const Color(0xFF0090FF),
       );
     } else {
-      final paint = Paint()..color = const Color(0x90909090);
+      final Paint paint = Paint()..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
     return true;

@@ -119,13 +119,13 @@ class MDnsVmServiceDiscovery {
         timeout: timeout,
       );
     } else if (results.length > 1) {
-      final buffer = StringBuffer();
+      final StringBuffer buffer = StringBuffer();
       buffer.writeln('There are multiple Dart VM Services available.');
       buffer.writeln(
         'Rerun this command with one of the following passed in as the app-id and device-vmservice-port:',
       );
       buffer.writeln();
-      for (final result in results) {
+      for (final MDnsVmServiceDiscoveryResult result in results) {
         buffer.writeln(
           '  flutter attach --app-id "${result.domainName.replaceAll('.$dartVmServiceName', '')}" --device-vmservice-port ${result.port}',
         );
@@ -233,7 +233,7 @@ class MDnsVmServiceDiscovery {
     // socket exceptions are routed to the current zone. Create an error zone to
     // catch the socket exception.
     // See: https://github.com/flutter/flutter/issues/150131
-    final completer =
+    final Completer<List<MDnsVmServiceDiscoveryResult>> completer =
         Completer<List<MDnsVmServiceDiscoveryResult>>();
     unawaited(
       runZonedGuarded(
@@ -292,17 +292,17 @@ class MDnsVmServiceDiscovery {
     try {
       await client.start();
 
-      final results = <MDnsVmServiceDiscoveryResult>[];
+      final List<MDnsVmServiceDiscoveryResult> results = <MDnsVmServiceDiscoveryResult>[];
 
       // uniqueDomainNames is used to track all domain names of Dart VM services
       // It is later used in this function to determine whether or not to throw an error.
       // We do not want to throw the error if it was unable to find any domain
       // names because that indicates it may be a problem with mDNS, which has
       // a separate error message in _checkForIPv4LinkLocal.
-      final uniqueDomainNames = <String>{};
+      final Set<String> uniqueDomainNames = <String>{};
       // uniqueDomainNamesInResults is used to filter out duplicates with exactly
       // the same domain name from the results.
-      final uniqueDomainNamesInResults = <String>{};
+      final Set<String> uniqueDomainNamesInResults = <String>{};
 
       // Listen for mDNS connections until timeout.
       final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
@@ -394,7 +394,7 @@ class MDnsVmServiceDiscovery {
         final List<TxtResourceRecord> txt =
             await client.lookup<TxtResourceRecord>(ResourceRecordQuery.text(domainName)).toList();
 
-        var authCode = '';
+        String authCode = '';
         if (txt.isNotEmpty) {
           authCode = _getAuthCode(txt.first.text);
         }
@@ -410,7 +410,7 @@ class MDnsVmServiceDiscovery {
       // If applicationId is set and quitOnFind is true and no results matching
       // the applicationId were found but other results were found, throw an error.
       if (applicationId != null && quitOnFind && results.isEmpty && uniqueDomainNames.isNotEmpty) {
-        var message = 'Did not find a Dart VM Service advertised for $applicationId';
+        String message = 'Did not find a Dart VM Service advertised for $applicationId';
         if (deviceVmServicePort != null) {
           message += ' on port $deviceVmServicePort';
         }
@@ -426,7 +426,7 @@ class MDnsVmServiceDiscovery {
   @visibleForTesting
   bool deviceNameMatchesTargetName(String deviceName, String targetName) {
     // Remove `.local` from the name along with any non-word, non-digit characters.
-    final cleanedNameRegex = RegExp(r'\.local|\W');
+    final RegExp cleanedNameRegex = RegExp(r'\.local|\W');
     final String cleanedDeviceName = deviceName.trim().toLowerCase().replaceAll(
       cleanedNameRegex,
       '',
@@ -436,7 +436,7 @@ class MDnsVmServiceDiscovery {
   }
 
   String _getAuthCode(String txtRecord) {
-    const authCodePrefix = 'authCode=';
+    const String authCodePrefix = 'authCode=';
     final Iterable<String> matchingRecords = LineSplitter.split(
       txtRecord,
     ).where((String record) => record.startsWith(authCodePrefix));
@@ -616,7 +616,7 @@ class MDnsVmServiceDiscovery {
       if (_logger.isVerbose) {
         _logger.printTrace('Found interface "${interface.name}":');
         for (final InternetAddress address in interface.addresses) {
-          final linkLocal = address.isLinkLocal ? 'link local' : '';
+          final String linkLocal = address.isLinkLocal ? 'link local' : '';
           _logger.printTrace('\tBound address: "${address.address}" $linkLocal');
         }
       }
@@ -640,7 +640,7 @@ Future<Uri> buildVMServiceUri(
   String? authCode,
   bool useDeviceIPAsHost = false,
 ]) async {
-  var path = '/';
+  String path = '/';
   if (authCode != null) {
     path = authCode;
   }

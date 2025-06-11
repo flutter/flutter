@@ -160,7 +160,7 @@ class View extends StatefulWidget {
       if (result == null) {
         final bool hiddenByBoundary =
             LookupBoundary.debugIsHidingAncestorWidgetOfExactType<_ViewScope>(context);
-        final information = <DiagnosticsNode>[
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
           if (hiddenByBoundary) ...<DiagnosticsNode>[
             ErrorSummary(
               'View.of() was called with a context that does not have access to a View widget.',
@@ -480,7 +480,7 @@ class _RawViewElement extends RenderTreeRootElement {
       final Widget child = (widget as _RawViewInternal).builder(this, _effectivePipelineOwner);
       _child = updateChild(_child, child, null);
     } catch (e, stack) {
-      final details = FlutterErrorDetails(
+      final FlutterErrorDetails details = FlutterErrorDetails(
         exception: e,
         stack: stack,
         library: 'widgets library',
@@ -737,7 +737,7 @@ class _MultiChildComponentElement extends Element {
   Element? _childElement;
 
   bool _debugAssertChildren() {
-    final typedWidget = widget as _MultiChildComponentWidget;
+    final _MultiChildComponentWidget typedWidget = widget as _MultiChildComponentWidget;
     // Each view widget must have a corresponding element.
     assert(_viewElements.length == typedWidget._views.length);
     // Iff there is a child widget, it must have a corresponding element.
@@ -774,8 +774,8 @@ class _MultiChildComponentElement extends Element {
     if (!kDebugMode || (widget as _MultiChildComponentWidget)._child != null) {
       return true;
     }
-    var hasAncestorRenderObjectElement = false;
-    var ancestorWantsRenderObject = true;
+    bool hasAncestorRenderObjectElement = false;
+    bool ancestorWantsRenderObject = true;
     visitAncestorElements((Element ancestor) {
       if (!ancestor.debugExpectsRenderObjectForSlot(slot)) {
         ancestorWantsRenderObject = false;
@@ -830,7 +830,7 @@ class _MultiChildComponentElement extends Element {
 
   @override
   void performRebuild() {
-    final typedWidget = widget as _MultiChildComponentWidget;
+    final _MultiChildComponentWidget typedWidget = widget as _MultiChildComponentWidget;
 
     _childElement = updateChild(_childElement, typedWidget._child, slot);
 

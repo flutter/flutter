@@ -30,10 +30,10 @@ class FlutterErrorFormatter {
   /// If this is not the first error since the reload, only a summary will be
   /// included.
   void formatError(Map<String, Object?> errorData) {
-    final data = _ErrorData(errorData);
+    final _ErrorData data = _ErrorData(errorData);
 
-    const assumedTerminalSize = 80;
-    const barChar = '═';
+    const int assumedTerminalSize = 80;
+    const String barChar = '═';
     final String headerPrefix = barChar * 8;
     final String headerSuffix =
         barChar *
@@ -41,7 +41,7 @@ class FlutterErrorFormatter {
           assumedTerminalSize - (data.description?.length ?? 0) - 2 - headerPrefix.length,
           0,
         );
-    final header = '$headerPrefix ${data.description} $headerSuffix';
+    final String header = '$headerPrefix ${data.description} $headerSuffix';
     _write('');
     _write(header, isError: true);
 
@@ -74,7 +74,7 @@ class FlutterErrorFormatter {
   void _write(String? text, {int indent = 0, bool isError = false, bool parseStackFrames = false}) {
     if (text != null) {
       final String indentString = '    ' * indent;
-      final message = '$indentString${text.trim()}';
+      final String message = '$indentString${text.trim()}';
 
       _BatchedOutput? output = batchedOutput.lastOrNull;
       if (output == null ||

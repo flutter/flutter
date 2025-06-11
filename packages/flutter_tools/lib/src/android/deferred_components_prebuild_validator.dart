@@ -57,9 +57,9 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     if (components.isEmpty) {
       return false;
     }
-    var changesMade = false;
+    bool changesMade = false;
     for (final DeferredComponent component in components) {
-      final androidFiles = _DeferredComponentAndroidFiles(
+      final _DeferredComponentAndroidFiles androidFiles = _DeferredComponentAndroidFiles(
         name: component.name,
         projectDir: projectDir,
         logger: logger,
@@ -132,12 +132,12 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     if (components.isEmpty) {
       return true;
     }
-    final requiredEntriesMap = <String, String>{};
+    final Map<String, String> requiredEntriesMap = <String, String>{};
     for (final DeferredComponent component in components) {
       requiredEntriesMap['${component.name}Name'] = component.name;
     }
     if (stringRes.existsSync()) {
-      var modified = false;
+      bool modified = false;
       XmlDocument document;
       try {
         document = XmlDocument.parse(stringRes.readAsStringSync());
@@ -163,7 +163,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
         }
         requiredEntriesMap.forEach((String key, String value) {
           modified = true;
-          final newStringElement = XmlElement(
+          final XmlElement newStringElement = XmlElement(
             XmlName.fromString('string'),
             <XmlAttribute>[XmlAttribute(XmlName.fromString('name'), key)],
             <XmlNode>[XmlText(value)],
@@ -182,7 +182,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     }
     // strings.xml does not exist, generate completely new file.
     stringResOutput.createSync(recursive: true);
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     buffer.writeln('''
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -251,10 +251,10 @@ class _DeferredComponentAndroidFiles {
     if (clearAlternateOutputDir && alternateAndroidDir != null) {
       ErrorHandlingFileSystem.deleteIfExists(outputDir);
     }
-    final inputs = <File>[];
+    final List<File> inputs = <File>[];
     inputs.add(androidManifestFile);
     inputs.add(buildGradleFile);
-    final results = <String, List<File>>{'inputs': inputs};
+    final Map<String, List<File>> results = <String, List<File>>{'inputs': inputs};
     results['outputs'] = await _setupComponentFiles(outputDir);
     return results;
   }
@@ -283,7 +283,7 @@ class _DeferredComponentAndroidFiles {
         templateRenderer: globals.templateRenderer,
       );
     }
-    final context = <String, Object>{
+    final Map<String, Object> context = <String, Object>{
       'androidIdentifier':
           FlutterProject.current().manifest.androidPackage ??
           'com.example.${FlutterProject.current().manifest.appName}',
@@ -292,7 +292,7 @@ class _DeferredComponentAndroidFiles {
 
     template.render(outputDir, context);
 
-    final generatedFiles = <File>[];
+    final List<File> generatedFiles = <File>[];
 
     final File tempBuildGradle = outputDir.childFile('build.gradle');
     if (!buildGradleFile.existsSync()) {

@@ -21,14 +21,14 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     bool supportsRestart = true,
     FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
   }) {
-    final stdinController = StreamController<List<int>>();
-    final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
+    final StreamController<List<int>> stdinController = StreamController<List<int>>();
+    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+    final ByteStreamServerChannel channel = ByteStreamServerChannel(
       stdinController.stream,
       stdoutController.sink,
       null,
     );
-    final clientChannel = ByteStreamServerChannel(
+    final ByteStreamServerChannel clientChannel = ByteStreamServerChannel(
       stdoutController.stream,
       stdinController.sink,
       null,
@@ -85,7 +85,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// A stream of all progress events sent from the adapter back to the client.
   Stream<Map<String, Object?>> get dapToClientProgressEvents {
-    const progressEventTypes = <String>[
+    const List<String> progressEventTypes = <String>[
       'progressStart',
       'progressUpdate',
       'progressEnd',
@@ -162,9 +162,9 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     // Pretend to be the client, delegating any reverse-requests to the relevant
     // handler that is provided by the test.
     if (message is Event && message.event == 'flutter.forwardedRequest') {
-      final body = message.body! as Map<String, Object?>;
-      final method = body['method']! as String;
-      final params = body['params'] as Map<String, Object?>?;
+      final Map<String, Object?> body = message.body! as Map<String, Object?>;
+      final String method = body['method']! as String;
+      final Map<String, Object?>? params = body['params'] as Map<String, Object?>?;
 
       final Object? result = _handleReverseRequest(method, params);
 
@@ -182,7 +182,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   Object? _handleReverseRequest(String method, Map<String, Object?>? params) {
     switch (method) {
       case 'app.exposeUrl':
-        final url = params!['url']! as String;
+        final String url = params!['url']! as String;
         return exposeUrlHandler!(url);
       default:
         throw ArgumentError('Reverse-request $method is unknown');
@@ -229,9 +229,9 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
   }) {
-    final stdinController = StreamController<List<int>>();
-    final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
+    final StreamController<List<int>> stdinController = StreamController<List<int>>();
+    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+    final ByteStreamServerChannel channel = ByteStreamServerChannel(
       stdinController.stream,
       stdoutController.sink,
       null,

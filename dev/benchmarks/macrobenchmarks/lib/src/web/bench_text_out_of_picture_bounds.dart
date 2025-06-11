@@ -29,8 +29,8 @@ import 'test_data.dart';
 /// performance issues: https://github.com/flutter/flutter/issues/48516
 class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
   BenchTextOutOfPictureBounds() : super(name: benchmarkName) {
-    const red = Color.fromARGB(255, 255, 0, 0);
-    const green = Color.fromARGB(255, 0, 255, 0);
+    const Color red = Color.fromARGB(255, 255, 0, 0);
+    const Color green = Color.fromARGB(255, 0, 255, 0);
 
     // We don't want paragraph generation and layout to pollute benchmark numbers.
     singleLineParagraphs = generateLaidOutParagraphs(
@@ -59,10 +59,10 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
-    final pictureRecorder = PictureRecorder();
-    final canvas = Canvas(pictureRecorder);
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
     final Size viewSize = view.physicalSize;
-    const padding = 10.0;
+    const double padding = 10.0;
 
     // Fills a single cell with random text.
     void fillCellWithText(List<Paragraph> textSource) {
@@ -83,9 +83,9 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
 
     // Starting with the top-left cell, fill every cell with text.
     canvas.translate(-viewSize.width, -viewSize.height);
-    for (var row = 0; row < 3; row++) {
+    for (int row = 0; row < 3; row++) {
       canvas.save();
-      for (var col = 0; col < 3; col++) {
+      for (int col = 0; col < 3; col++) {
         canvas.drawRect(
           Offset.zero & viewSize,
           Paint()

@@ -12,7 +12,7 @@ const int _kNumIters = 300;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final watch = Stopwatch();
+  final Stopwatch watch = Stopwatch();
   print('GestureDetector semantics benchmark...');
 
   await benchmarkWidgets((WidgetTester tester) async {
@@ -28,19 +28,19 @@ Future<void> execute() async {
 
     // Warm up runs get the app into steady state, making benchmark
     // results more credible
-    for (var i = 0; i < _kNumWarmUpIters; i += 1) {
+    for (int i = 0; i < _kNumWarmUpIters; i += 1) {
       await iter();
     }
     await tester.pumpAndSettle();
 
     watch.start();
-    for (var i = 0; i < _kNumIters; i += 1) {
+    for (int i = 0; i < _kNumIters; i += 1) {
       await iter();
     }
     watch.stop();
   }, semanticsEnabled: true);
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'GestureDetector',
     value: watch.elapsedMicroseconds / _kNumIters,

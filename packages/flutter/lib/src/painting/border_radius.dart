@@ -229,9 +229,9 @@ abstract class BorderRadiusGeometry {
       }
     } else {
       // visuals aren't the same and at least one isn't zero
-      final result = StringBuffer();
+      final StringBuffer result = StringBuffer();
       result.write('BorderRadius.only(');
-      var comma = false;
+      bool comma = false;
       if (_topLeft != Radius.zero) {
         result.write('topLeft: $_topLeft');
         comma = true;
@@ -269,9 +269,9 @@ abstract class BorderRadiusGeometry {
       }
     } else {
       // logicals aren't the same and at least one isn't zero
-      final result = StringBuffer();
+      final StringBuffer result = StringBuffer();
       result.write('BorderRadiusDirectional.only(');
-      var comma = false;
+      bool comma = false;
       if (_topStart != Radius.zero) {
         result.write('topStart: $_topStart');
         comma = true;

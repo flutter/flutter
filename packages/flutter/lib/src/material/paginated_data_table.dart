@@ -423,7 +423,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   DataRow _getProgressIndicatorRowFor(int index) {
-    var haveProgressIndicator = false;
+    bool haveProgressIndicator = false;
     final List<DataCell> cells =
         widget.columns.map<DataCell>((DataColumn column) {
           if (!column.numeric) {
@@ -440,9 +440,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   List<DataRow> _getRows(int firstRowIndex, int rowsPerPage) {
-    final result = <DataRow>[];
+    final List<DataRow> result = <DataRow>[];
     final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
-    var haveProgressIndicator = false;
+    bool haveProgressIndicator = false;
     for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
       DataRow? row;
       if (index < _rowCount || _rowCountApproximate) {
@@ -493,7 +493,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
-    final headerWidgets = <Widget>[];
+    final List<Widget> headerWidgets = <Widget>[];
     if (_selectedRowCount == 0 && widget.header != null) {
       headerWidgets.add(Expanded(child: widget.header!));
     } else if (widget.header != null) {
@@ -515,7 +515,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // FOOTER
     final TextStyle? footerTextStyle = themeData.textTheme.bodySmall;
-    final footerWidgets = <Widget>[];
+    final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage =
           widget.availableRowsPerPage

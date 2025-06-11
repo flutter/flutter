@@ -356,7 +356,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         );
       }
     } else {
-      for (final uri in testUris) {
+      for (final Uri uri in testUris) {
         // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
         String testPath = uri.replace(query: '').toFilePath();
@@ -456,7 +456,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final debuggingOptions = DebuggingOptions.enabled(
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
@@ -725,7 +725,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final packagesToInclude = <String>{};
+    final Set<String> packagesToInclude = <String>{};
     if (packagesRegExps.isEmpty) {
       void addProject(FlutterProject project) {
         packagesToInclude.add(project.manifest.appName);
@@ -736,7 +736,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     try {
       for (final String regExpStr in packagesRegExps) {
-        final regExp = RegExp(regExpStr);
+        final RegExp regExp = RegExp(regExpStr);
         packagesToInclude.addAll(
           packageConfig.packages.map((Package e) => e.name).where((String e) => regExp.hasMatch(e)),
         );
@@ -823,7 +823,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     final Iterable<DevFSFileContent> files =
         entries.values.map((AssetBundleEntry asset) => asset.content).whereType<DevFSFileContent>();
-    for (final entry in files) {
+    for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

@@ -44,7 +44,7 @@ class CustomNetworkImage extends ImageProvider<Uri> {
 
   @override
   ImageStreamCompleter loadImage(Uri key, ImageDecoderCallback decode) {
-    final chunkEvents = StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
     debugPrint('Fetching "$key"...');
     return MultiFrameImageStreamCompleter(
       codec: _httpClient

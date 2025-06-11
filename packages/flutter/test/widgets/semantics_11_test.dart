@@ -13,7 +13,7 @@ void main() {
   testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Semantics(

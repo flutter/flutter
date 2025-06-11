@@ -13,9 +13,9 @@ void main() {
   testWidgets('attach and detach correctly handle gesture', (_) async {
     expect(WidgetsBinding.instance, binding);
     final TextSelectionDelegate delegate = FakeEditableTextState();
-    final offset = ViewportOffset.zero();
+    final ViewportOffset offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
-    final editable = RenderEditable(
+    final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
       textDirection: TextDirection.ltr,
@@ -34,9 +34,9 @@ void main() {
     addTearDown(editable.dispose);
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
-    final owner = PipelineOwner(onNeedVisualUpdate: () {});
+    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {});
     addTearDown(owner.dispose);
-    final spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
+    final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
     editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10, 10)));

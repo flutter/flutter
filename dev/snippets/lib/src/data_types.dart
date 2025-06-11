@@ -93,8 +93,8 @@ abstract class CodeSample {
     if (sourceFile != null && _sourceFileContents == null) {
       // Strip lines until the first non-comment line. This gets rid of the
       // copyright and comment directing the reader to the original source file.
-      final stripped = <String>[];
-      var doneStrippingHeaders = false;
+      final List<String> stripped = <String>[];
+      bool doneStrippingHeaders = false;
       try {
         for (final String line in sourceFile!.readAsLinesSync()) {
           if (!doneStrippingHeaders && RegExp(r'^\s*(\/\/.*)?$').hasMatch(line)) {
@@ -111,7 +111,7 @@ abstract class CodeSample {
         );
       }
       // Remove any section markers
-      final sectionMarkerRegExp = RegExp(
+      final RegExp sectionMarkerRegExp = RegExp(
         r'(\/\/\*\*+\n)?\/\/\* [▼▲]+.*$(\n\/\/\*\*+)?\n\n?',
         multiLine: true,
       );
@@ -133,7 +133,7 @@ abstract class CodeSample {
   SourceLine get start => input.isEmpty ? _lineProto : input.first;
 
   String get template {
-    final parser = ArgParser();
+    final ArgParser parser = ArgParser();
     parser.addOption('template', defaultsTo: '');
     final ArgResults parsedArgs = parser.parse(args);
     return parsedArgs['template']! as String;
@@ -141,7 +141,7 @@ abstract class CodeSample {
 
   @override
   String toString() {
-    final buf = StringBuffer('${args.join(' ')}:\n');
+    final StringBuffer buf = StringBuffer('${args.join(' ')}:\n');
     for (final SourceLine line in input) {
       buf.writeln('${(line.line == -1 ? '??' : line.line).toString().padLeft(4)}: ${line.text} ');
     }
@@ -172,9 +172,9 @@ class SnippetSample extends CodeSample {
   }
 
   factory SnippetSample.fromStrings(SourceLine firstLine, List<String> code, {required int index}) {
-    final codeLines = <SourceLine>[];
+    final List<SourceLine> codeLines = <SourceLine>[];
     int startPos = firstLine.startChar;
-    for (var i = 0; i < code.length; ++i) {
+    for (int i = 0; i < code.length; ++i) {
       codeLines.add(
         firstLine.copyWith(text: code[i], line: firstLine.line + i, startChar: startPos),
       );
@@ -468,12 +468,12 @@ class SourceElement {
   bool get hasSeeAlso => commentStringWithoutTools.contains('See also:');
 
   int get referenceCount {
-    final regex = RegExp(r'\[[. \w]*\](?!\(.*\))');
+    final RegExp regex = RegExp(r'\[[. \w]*\](?!\(.*\))');
     return regex.allMatches(commentStringWithoutCode).length;
   }
 
   int get linkCount {
-    final regex = RegExp(r'\[[. \w]*\]\(.*\)');
+    final RegExp regex = RegExp(r'\[[. \w]*\]\(.*\)');
     return regex.allMatches(commentStringWithoutCode).length;
   }
 

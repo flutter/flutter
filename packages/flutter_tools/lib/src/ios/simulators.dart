@@ -148,7 +148,7 @@ class SimControl {
     //   }
     // }
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'simctl',
       'list',
@@ -289,7 +289,7 @@ class SimControl {
 
   /// Runs `simctl list runtimes available iOS --json` and returns all available iOS simulator runtimes.
   Future<List<IOSSimulatorRuntime>> listAvailableIOSRuntimes() async {
-    final runtimes = <IOSSimulatorRuntime>[];
+    final List<IOSSimulatorRuntime> runtimes = <IOSSimulatorRuntime>[];
     final RunResult results = await _processUtils.run(<String>[
       ..._xcode.xcrunCommand(),
       'simctl',
@@ -420,7 +420,7 @@ class IOSSimulator extends Device {
 
     // Check if the device is part of a blocked category.
     // We do not yet support WatchOS or tvOS devices.
-    final blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+    final RegExp blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
     if (blocklist.hasMatch(name)) {
       _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
@@ -643,7 +643,7 @@ class IOSSimulator extends Device {
     required bool ipv6,
     required Logger logger,
   }) {
-    final mdnsVMServiceDiscoveryForAttach =
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
         MdnsVMServiceDiscoveryForAttach(
           device: this,
           appId: appId,
@@ -975,7 +975,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       if (_lastLine != null) {
         int repeat = int.parse(multi.group(1)!);
         repeat = math.max(0, math.min(100, repeat));
-        for (var i = 1; i < repeat; i++) {
+        for (int i = 1; i < repeat; i++) {
           _linesController.add(_lastLine!);
         }
       }
@@ -1065,8 +1065,8 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    final portsCopy = List<ForwardedPort>.of(_ports);
-    for (final port in portsCopy) {
+    final List<ForwardedPort> portsCopy = List<ForwardedPort>.of(_ports);
+    for (final ForwardedPort port in portsCopy) {
       await unforward(port);
     }
   }

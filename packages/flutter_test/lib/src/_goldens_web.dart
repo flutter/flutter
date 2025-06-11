@@ -46,7 +46,7 @@ final class HttpProxyGoldenComparator extends GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List bytes, Uri golden) async {
-    final key = golden.toString();
+    final String key = golden.toString();
     final String bytesEncoded = base64.encode(bytes);
     final web.Response response =
         await web.window
@@ -107,7 +107,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
 
   @override
   Future<bool> compare(double width, double height, Uri golden) async {
-    final key = golden.toString();
+    final String key = golden.toString();
     final web.Response response =
         await web.window
             .fetch(

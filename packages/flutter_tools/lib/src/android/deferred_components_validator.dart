@@ -184,7 +184,7 @@ The recommended changes can be quickly applied by running:
       if (loadingUnitComparisonResults != null) {
         if ((loadingUnitComparisonResults!['new'] as List<LoadingUnit>).isNotEmpty) {
           logger.printStatus('New loading units were found:', emphasis: true);
-          for (final unit
+          for (final LoadingUnit unit
               in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
@@ -192,7 +192,7 @@ The recommended changes can be quickly applied by running:
         }
         if ((loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>).isNotEmpty) {
           logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
-          for (final unit
+          for (final LoadingUnit unit
               in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }

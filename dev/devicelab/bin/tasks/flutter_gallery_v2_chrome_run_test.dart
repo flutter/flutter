@@ -44,13 +44,13 @@ class NewGalleryChromeRunTest {
 
         await flutter('build', options: <String>['web', '-v', '--release', '--no-pub']);
 
-        final options = <String>['-d', 'chrome', '--resident'];
+        final List<String> options = <String>['-d', 'chrome', '--resident'];
         final Process process = await startFlutter('run', options: options);
 
-        final stdoutDone = Completer<void>();
-        final stderrDone = Completer<void>();
+        final Completer<void> stdoutDone = Completer<void>();
+        final Completer<void> stderrDone = Completer<void>();
 
-        var success = true;
+        bool success = true;
 
         process.stdout
             .transform<String>(utf8.decoder)

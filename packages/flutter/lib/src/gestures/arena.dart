@@ -75,7 +75,7 @@ class _GestureArena {
 
   @override
   String toString() {
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (members.isEmpty) {
       buffer.write('<empty>');
     } else {
@@ -172,7 +172,7 @@ class GestureArenaManager {
       assert(_debugLogDiagnostic(pointer, 'Winner: ${state.members.first}'));
       state.members.first.acceptGesture(pointer);
       // Give all the other members the bad news.
-      for (var i = 1; i < state.members.length; i++) {
+      for (int i = 1; i < state.members.length; i++) {
         state.members[i].rejectGesture(pointer);
       }
     }
@@ -292,7 +292,7 @@ class GestureArenaManager {
     assert(() {
       if (debugPrintGestureArenaDiagnostics) {
         final int? count = state?.members.length;
-        final s = count != 1 ? 's' : '';
+        final String s = count != 1 ? 's' : '';
         debugPrint(
           'Gesture arena ${pointer.toString().padRight(4)} ❙ $message${count != null ? " with $count member$s." : ""}',
         );

@@ -47,8 +47,8 @@ TaskFunction createKeyboardHotRestartTest({
   // The test turns off this behavior by mutating the app's source code from
   // `forceKeyboardOn` to `forceKeyboardOff`.
   // See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
-  const forceKeyboardOn = 'const bool forceKeyboard = true;';
-  const forceKeyboardOff = 'const bool forceKeyboard = false;';
+  const String forceKeyboardOn = 'const bool forceKeyboard = true;';
+  const String forceKeyboardOff = 'const bool forceKeyboard = false;';
 
   return () async {
     if (deviceIdOverride == null) {
@@ -68,7 +68,7 @@ TaskFunction createKeyboardHotRestartTest({
 
         section('Launch app');
 
-        var success = false;
+        bool success = false;
         TestState state = TestState.waitUntilDartVmAvailable;
 
         final int exitCode = await runApp(
@@ -152,8 +152,8 @@ Future<int> runApp({
 }) async {
   final Process process = await startFlutter('run', options: options);
 
-  final stdoutDone = Completer<void>();
-  final stderrDone = Completer<void>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
 
   void onStdout(String line) {
     print('stdout: $line');

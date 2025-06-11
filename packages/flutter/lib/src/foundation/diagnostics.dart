@@ -836,7 +836,7 @@ class _PrefixedStringBuilder {
 
   void _finalizeLine(bool addTrailingLineBreak) {
     final bool firstLine = _buffer.isEmpty;
-    final text = _currentLine.toString();
+    final String text = _currentLine.toString();
     _currentLine.clear();
 
     if (_wrappableRanges.isEmpty) {
@@ -851,9 +851,9 @@ class _PrefixedStringBuilder {
       startOffset: firstLine ? prefixLineOne.length : _prefixOtherLines!.length,
       otherLineOffset: _prefixOtherLines!.length,
     );
-    var i = 0;
+    int i = 0;
     final int length = lines.length;
-    for (final line in lines) {
+    for (final String line in lines) {
       i++;
       _writeLine(line, includeLineBreak: addTrailingLineBreak || i < length, firstLine: firstLine);
     }
@@ -881,16 +881,16 @@ class _PrefixedStringBuilder {
       // Nothing to do. The line doesn't wrap.
       return <String>[message];
     }
-    final wrappedLine = <String>[];
+    final List<String> wrappedLine = <String>[];
     int startForLengthCalculations = -startOffset;
-    var addPrefix = false;
-    var index = 0;
+    bool addPrefix = false;
+    int index = 0;
     _WordWrapParseMode mode = _WordWrapParseMode.inSpace;
     late int lastWordStart;
     int? lastWordEnd;
-    var start = 0;
+    int start = 0;
 
-    var currentChunk = 0;
+    int currentChunk = 0;
 
     // This helper is called with increasing indexes.
     bool noWrap(int index) {
@@ -975,7 +975,7 @@ class _PrefixedStringBuilder {
     }
 
     final List<String> lines = s.split('\n');
-    for (var i = 0; i < lines.length; i += 1) {
+    for (int i = 0; i < lines.length; i += 1) {
       if (i > 0) {
         _finalizeLine(true);
         _updatePrefix();
@@ -1165,11 +1165,11 @@ class TextTreeRenderer {
     if (node.style == DiagnosticsTreeStyle.truncateChildren) {
       // This style is different enough that it isn't worthwhile to reuse the
       // existing logic.
-      final descendants = <String>[];
-      const maxDepth = 5;
-      var depth = 0;
-      const maxLines = 25;
-      var lines = 0;
+      final List<String> descendants = <String>[];
+      const int maxDepth = 5;
+      int depth = 0;
+      const int maxLines = 25;
+      int lines = 0;
       void visitor(DiagnosticsNode node) {
         for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
@@ -1189,7 +1189,7 @@ class TextTreeRenderer {
       }
 
       visitor(node);
-      final information = StringBuffer(prefixLineOne);
+      final StringBuffer information = StringBuffer(prefixLineOne);
       if (lines > 1) {
         information.writeln(
           'This ${node.name} had the following descendants (showing up to depth $maxDepth):',
@@ -1202,7 +1202,7 @@ class TextTreeRenderer {
       information.writeAll(descendants, '\n');
       return information.toString();
     }
-    final builder = _PrefixedStringBuilder(
+    final _PrefixedStringBuilder builder = _PrefixedStringBuilder(
       prefixLineOne: prefixLineOne,
       prefixOtherLines: prefixOtherLines,
       wrapWidth: math.max(_wrapWidth, prefixOtherLines.length + _wrapWidthProperties),
@@ -1216,7 +1216,7 @@ class TextTreeRenderer {
     }
     final bool wrapName = !isSingleLine && node.allowNameWrap;
     final bool wrapDescription = !isSingleLine && node.allowWrap;
-    final uppercaseTitle = node.style == DiagnosticsTreeStyle.error;
+    final bool uppercaseTitle = node.style == DiagnosticsTreeStyle.error;
     String? name = node.name;
     if (uppercaseTitle) {
       name = name?.toUpperCase();
@@ -1226,7 +1226,7 @@ class TextTreeRenderer {
         builder.write(name, allowWrap: wrapName);
       }
     } else {
-      var includeName = false;
+      bool includeName = false;
       if (name != null && name.isNotEmpty && node.showName) {
         includeName = true;
         builder.write(name, allowWrap: wrapName);
@@ -1314,7 +1314,7 @@ class TextTreeRenderer {
       }
     }
 
-    for (var i = 0; i < properties.length; ++i) {
+    for (int i = 0; i < properties.length; ++i) {
       final DiagnosticsNode property = properties[i];
       if (i > 0) {
         builder.write(config.propertySeparator);
@@ -1362,7 +1362,7 @@ class TextTreeRenderer {
     }
 
     final String prefixChildren = config.bodyIndent;
-    final prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
+    final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
         builder.requiresMultipleLines &&
@@ -1379,13 +1379,13 @@ class TextTreeRenderer {
 
       builder.prefixOtherLines = prefixOtherLines;
 
-      for (var i = 0; i < children.length; i++) {
+      for (int i = 0; i < children.length; i++) {
         final DiagnosticsNode child = children[i];
         final TextTreeConfiguration childConfig = _childTextConfiguration(child, config)!;
         if (i == children.length - 1) {
-          final lastChildPrefixLineOne =
+          final String lastChildPrefixLineOne =
               '$prefixChildrenRaw${childConfig.prefixLastChildLineOne}';
-          final childPrefixOtherLines =
+          final String childPrefixOtherLines =
               '$prefixChildrenRaw${childConfig.childLinkSpace}${childConfig.prefixOtherLines}';
           builder.writeRawLines(
             render(
@@ -1409,8 +1409,8 @@ class TextTreeRenderer {
         } else {
           final TextTreeConfiguration nextChildStyle =
               _childTextConfiguration(children[i + 1], config)!;
-          final childPrefixLineOne = '$prefixChildrenRaw${childConfig.prefixLineOne}';
-          final childPrefixOtherLines =
+          final String childPrefixLineOne = '$prefixChildrenRaw${childConfig.prefixLineOne}';
+          final String childPrefixOtherLines =
               '$prefixChildrenRaw${nextChildStyle.linkCharacter}${childConfig.prefixOtherLines}';
           builder.writeRawLines(
             render(
@@ -1613,7 +1613,7 @@ abstract class DiagnosticsNode {
           'this application is compiled in profile mode and yet still invoked the method.',
         );
       }
-      final result = <String, String>{};
+      final Map<String, String> result = <String, String>{};
       for (final DiagnosticsNode property in getProperties()) {
         if (property.name != null) {
           result[property.name!] = property.toDescription(
@@ -1639,7 +1639,7 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    var result = <String, Object?>{};
+    Map<String, Object?> result = <String, Object?>{};
     assert(() {
       final bool hasChildren = getChildren().isNotEmpty;
       result = <String, Object?>{
@@ -1681,9 +1681,9 @@ abstract class DiagnosticsNode {
   /// See https://github.com/flutter/devtools/issues/8553 for details about this
   /// iterative approach.
   Map<String, Object?> toJsonMapIterative(DiagnosticsSerializationDelegate delegate) {
-    final childrenToJsonify =
+    final _NodesToJsonifyStack childrenToJsonify =
         ListQueue<(DiagnosticsNode, void Function(_JsonDiagnosticsNode))>();
-    var result = <String, Object?>{};
+    _JsonDiagnosticsNode result = <String, Object?>{};
     assert(() {
       result = _toJson(delegate, childrenToJsonify: childrenToJsonify);
       _jsonifyNextNodesInStack(childrenToJsonify, delegate: delegate);
@@ -1702,7 +1702,7 @@ abstract class DiagnosticsNode {
     DiagnosticsNode? parent,
     DiagnosticsSerializationDelegate delegate,
   ) {
-    var truncated = false;
+    bool truncated = false;
     if (nodes == null) {
       return const <Map<String, Object?>>[];
     }
@@ -1739,7 +1739,7 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration? parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
-    var result = super.toString();
+    String result = super.toString();
     assert(style != null);
     assert(() {
       if (_isSingleLine(style)) {
@@ -1815,7 +1815,7 @@ abstract class DiagnosticsNode {
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     int wrapWidth = 65,
   }) {
-    var result = '';
+    String result = '';
     assert(() {
       result = TextTreeRenderer(minLevel: minLevel, wrapWidth: wrapWidth).render(
         this,
@@ -1847,11 +1847,11 @@ abstract class DiagnosticsNode {
     DiagnosticsSerializationDelegate delegate, {
     required _NodesToJsonifyStack childrenToJsonify,
   }) {
-    final childrenJsonList = <_JsonDiagnosticsNode>[];
+    final List<_JsonDiagnosticsNode> childrenJsonList = <_JsonDiagnosticsNode>[];
     final bool includeChildren = getChildren().isNotEmpty && delegate.subtreeDepth > 0;
 
     // Collect the children nodes to convert to JSON later.
-    var truncated = false;
+    bool truncated = false;
     if (includeChildren) {
       List<DiagnosticsNode> childrenNodes = delegate.filterChildren(getChildren(), this);
       final int originalNodeCount = childrenNodes.length;
@@ -1860,7 +1860,7 @@ abstract class DiagnosticsNode {
         childrenNodes.add(DiagnosticsNode.message('...'));
         truncated = true;
       }
-      for (final child in childrenNodes) {
+      for (final DiagnosticsNode child in childrenNodes) {
         childrenToJsonify.add((
           child,
           (_JsonDiagnosticsNode jsonChild) {
@@ -2950,7 +2950,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   String toDescription({TextTreeConfiguration? parentConfiguration}) {
-    var result = '';
+    String result = '';
     assert(() {
       result = value.toStringShort();
       return true;
@@ -3021,7 +3021,7 @@ String describeEnum(Object enumEntry) {
   if (enumEntry is Enum) {
     return enumEntry.name;
   }
-  final description = enumEntry.toString();
+  final String description = enumEntry.toString();
   final int indexOfDot = description.indexOf('.');
   assert(
     indexOfDot != -1 && indexOfDot < description.length - 1,
@@ -3372,10 +3372,10 @@ abstract class DiagnosticableTree with Diagnosticable {
   String toStringShallow({String joiner = ', ', DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     String? shallowString;
     assert(() {
-      final result = StringBuffer();
+      final StringBuffer result = StringBuffer();
       result.write(toString());
       result.write(joiner);
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       debugFillProperties(builder);
       result.write(
         builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
@@ -3463,10 +3463,10 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   String toStringShallow({String joiner = ', ', DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     String? shallowString;
     assert(() {
-      final result = StringBuffer();
+      final StringBuffer result = StringBuffer();
       result.write(toStringShort());
       result.write(joiner);
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       debugFillProperties(builder);
       result.write(
         builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),

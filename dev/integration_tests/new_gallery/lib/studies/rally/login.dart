@@ -121,7 +121,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const spacing = SizedBox(width: 30);
+    const SizedBox spacing = SizedBox(width: 30);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Container(
       width: double.infinity,

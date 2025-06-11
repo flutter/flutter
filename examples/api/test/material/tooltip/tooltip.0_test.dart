@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tooltip is visible when hovering over text', (WidgetTester tester) async {
-    const tooltipText = 'I am a Tooltip';
+    const String tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(const example.TooltipExampleApp());
 

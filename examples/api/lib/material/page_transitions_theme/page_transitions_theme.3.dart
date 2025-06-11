@@ -57,11 +57,11 @@ class HomePage extends StatelessWidget {
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
                   children: List<Widget>.generate(Colors.primaries.length, (int index) {
-                    final kittenName = Text('Kitten $index');
-                    final avatar = CircleAvatar(
+                    final Text kittenName = Text('Kitten $index');
+                    final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],
                     );
-                    final message =
+                    final String message =
                         index.isEven
                             ? 'Hello hooman! My name is Kitten $index'
                             : "What's up hooman! My name is Kitten $index";

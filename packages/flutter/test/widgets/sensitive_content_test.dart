@@ -22,7 +22,7 @@ void main() {
   testWidgets(
     'while SensitiveContent widget is being registered, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {
-      final setContentSensitivityCompleter = Completer<void>();
+      final Completer<void> setContentSensitivityCompleter = Completer<void>();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) {
@@ -38,14 +38,14 @@ void main() {
         },
       );
 
-      final childWidget = Container();
+      final Container childWidget = Container();
 
       await tester.pumpWidget(
         SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: childWidget),
       );
 
       expect(find.byWidget(childWidget), findsNothing);
-      final shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
+      final SizedBox shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
       expect(shrinkBox.width, 0);
       expect(shrinkBox.height, 0);
 
@@ -63,8 +63,8 @@ void main() {
   testWidgets(
     'when SensitiveContent widget changes sensitivity, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {
-      final setContentSensitivityCompleter = Completer<void>();
-      var setContentSensitivityCall = 0;
+      final Completer<void> setContentSensitivityCompleter = Completer<void>();
+      int setContentSensitivityCall = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) {
@@ -85,8 +85,8 @@ void main() {
         },
       );
 
-      const scKey = Key('scKey');
-      final childWidget = Container();
+      const Key scKey = Key('scKey');
+      final Container childWidget = Container();
 
       await tester.pumpWidget(
         ChangeContentSensitivityTester(
@@ -104,7 +104,7 @@ void main() {
       await tester.pump();
 
       expect(find.byWidget(childWidget), findsNothing);
-      final shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
+      final SizedBox shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
       expect(shrinkBox.width, 0);
       expect(shrinkBox.height, 0);
 

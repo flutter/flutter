@@ -10,14 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final pageTransitionsBuilder in <PageTransitionsBuilder>[
+  for (final PageTransitionsBuilder pageTransitionsBuilder in <PageTransitionsBuilder>[
     const PredictiveBackPageTransitionsBuilder(),
     const PredictiveBackFullscreenPageTransitionsBuilder(),
   ]) {
     testWidgets(
       'PredictiveBackPageTransitionsBuilder supports predictive back on Android',
       (WidgetTester tester) async {
-        final routes = <String, WidgetBuilder>{
+        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           '/':
               (BuildContext context) => Material(
                 child: TextButton(
@@ -128,7 +128,7 @@ void main() {
     testWidgets(
       'PredictiveBackPageTransitionsBuilder supports canceling a predictive back gesture',
       (WidgetTester tester) async {
-        final routes = <String, WidgetBuilder>{
+        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           '/':
               (BuildContext context) => Material(
                 child: TextButton(
@@ -238,9 +238,9 @@ void main() {
     testWidgets(
       'if there are multiple PredictiveBackPageTransitionBuilder observers, only one gets called for a given back gesture',
       (WidgetTester tester) async {
-        var includingNestedNavigator = false;
+        bool includingNestedNavigator = false;
         late StateSetter setState;
-        final routes = <String, WidgetBuilder>{
+        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           '/':
               (BuildContext context) => Material(
                 child: TextButton(
@@ -429,7 +429,7 @@ void main() {
     );
 
     testWidgets('two back gestures back to back dismiss two routes', (WidgetTester tester) async {
-      final routes = <String, WidgetBuilder>{
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => Material(
               child: TextButton(

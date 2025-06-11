@@ -119,7 +119,7 @@ class Template {
       }
     }
 
-    final templateFiles = <FileSystemEntity, Directory>{
+    final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
       for (final Directory sourceDirectory in templateSources)
         for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
           entity: sourceDirectory,
@@ -220,7 +220,7 @@ class Template {
       _logger.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
-    var fileCount = 0;
+    int fileCount = 0;
     final bool implementationTests = (context['implementationTests'] as bool?) ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
@@ -232,7 +232,7 @@ class Template {
       final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1)!;
-        final language = context['${platform}Language'] as String?;
+        final String? language = context['${platform}Language'] as String?;
         if (language != match.group(2)) {
           return null;
         }
@@ -273,10 +273,10 @@ class Template {
         return null;
       }
 
-      final projectName = context['projectName'] as String?;
-      final androidIdentifier = context['androidIdentifier'] as String?;
-      final pluginClass = context['pluginClass'] as String?;
-      final pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
+      final String? projectName = context['projectName'] as String?;
+      final String? androidIdentifier = context['androidIdentifier'] as String?;
+      final String? pluginClass = context['pluginClass'] as String?;
+      final String? pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
@@ -364,7 +364,7 @@ class Template {
       //         to be copied from the template image package.
 
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
-        final potentials = <File>[
+        final List<File> potentials = <File>[
           for (final Directory imageSourceDir in imageSourceDirectories)
             _fileSystem.file(
               _fileSystem.path.join(
@@ -390,7 +390,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final androidIdentifier = context['androidIdentifier'] as String?;
+        final String? androidIdentifier = context['androidIdentifier'] as String?;
         if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
           context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
@@ -425,9 +425,9 @@ class Template {
 ///
 /// Returns the copied context.
 Map<String, Object?> _createEscapedContextCopy(Map<String, Object?> context) {
-  final localContext = Map<String, Object?>.of(context);
+  final Map<String, Object?> localContext = Map<String, Object?>.of(context);
 
-  final description = localContext['description'] as String?;
+  final String? description = localContext['description'] as String?;
 
   if (description != null && description.isNotEmpty) {
     localContext['description'] = escapeYamlString(description);
@@ -448,7 +448,7 @@ String _escapeKotlinKeywords(String androidIdentifier) {
 }
 
 String escapeYamlString(String value) {
-  final result = StringBuffer();
+  final StringBuffer result = StringBuffer();
   result.write('"');
   for (final int rune in value.runes) {
     result.write(switch (rune) {

@@ -67,7 +67,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
   }
 
   Widget _buildIndicators(BuildContext context, Widget? child) {
-    final indicators = <Widget>[
+    final List<Widget> indicators = <Widget>[
       const SizedBox(width: 200.0, child: LinearProgressIndicator()),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),

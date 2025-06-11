@@ -10,9 +10,9 @@ import '../src/common.dart';
 void main() {
   group('parsing of assets section in flutter manifests', () {
     testWithoutContext('ignores empty list of assets', () {
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
 
-      const manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -31,8 +31,8 @@ flutter:
     });
 
     testWithoutContext('parses two simple asset declarations', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -54,8 +54,8 @@ flutter:
     });
 
     testWithoutContext('does not crash on empty entry', () {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -73,9 +73,9 @@ flutter:
     });
 
     testWithoutContext('handles special characters in asset URIs', () {
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
 
-      const manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -100,8 +100,8 @@ flutter:
     });
 
     testWithoutContext('parses an asset with flavors', () async {
-      final logger = BufferLogger.test();
-      const manifest = '''
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -124,9 +124,9 @@ flutter:
     });
 
     testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
 
-      const manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:

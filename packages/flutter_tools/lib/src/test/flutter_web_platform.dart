@@ -38,7 +38,7 @@ import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
 
 shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOriginIsolated}) {
-  final resolver = mime.MimeTypeResolver();
+  final mime.MimeTypeResolver resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
   return (shelf.Request request) async {
     String uriPath = request.requestedUri.path;
@@ -421,7 +421,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           _fileSystem.directory(dirname),
           crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
         );
-        final modifiedRequest = shelf.Request(
+        final shelf.Request modifiedRequest = shelf.Request(
           request.method,
           request.requestedUri.replace(path: basename),
           protocolVersion: request.protocolVersion,
@@ -439,7 +439,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
-      final body =
+      final Map<String, Object?> body =
           json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
@@ -483,7 +483,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       case '.wasm':
         contentType = 'application/wasm';
       default:
-        final error = 'Failed to determine Content-Type for "${request.url.path}".';
+        final String error = 'Failed to determine Content-Type for "${request.url.path}".';
         _logger.printError(error);
         return shelf.Response.internalServerError(body: error);
     }
@@ -518,7 +518,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = _fileSystem.path.fromUri(request.url);
     if (path.endsWith('.html')) {
-      final test = '${_fileSystem.path.withoutExtension(path)}.dart';
+      final String test = '${_fileSystem.path.withoutExtension(path)}.dart';
       return shelf.Response.ok(
         '''
         <!DOCTYPE html>
@@ -625,7 +625,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       throw StateError('Another browser is currently running.');
     }
 
-    final completer = Completer<WebSocketChannel>.sync();
+    final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>.sync();
     final String path = _webSocketHandler.create(
       webSocketHandler((WebSocketChannel webSocket, _) {
         completer.complete(webSocket);
@@ -686,7 +686,7 @@ class OneOffHandler {
   ///
   /// [handler] will be unmounted as soon as it receives a request.
   String create(shelf.Handler handler) {
-    final path = _counter.toString();
+    final String path = _counter.toString();
     _handlers[path] = handler;
     _counter++;
     return path;
@@ -815,7 +815,7 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    final completer = Completer<BrowserManager>();
+    final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     unawaited(
       chrome.onExit

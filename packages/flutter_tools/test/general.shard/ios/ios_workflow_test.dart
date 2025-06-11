@@ -14,7 +14,7 @@ import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('iOS workflow is disabled if feature is disabled', () {
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macOS'),
       xcode: Xcode.test(processManager: FakeProcessManager.any()),
       featureFlags: TestFeatureFlags(isIOSEnabled: false),
@@ -26,7 +26,7 @@ void main() {
   });
 
   testWithoutContext('iOS workflow is disabled on Linux', () {
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(),
       xcode: Xcode.test(processManager: FakeProcessManager.any()),
       featureFlags: TestFeatureFlags(),
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWithoutContext('iOS workflow is disabled on windows', () {
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
       xcode: Xcode.test(processManager: FakeProcessManager.any()),
       featureFlags: TestFeatureFlags(),
@@ -50,13 +50,13 @@ void main() {
   });
 
   testWithoutContext('iOS workflow applies on macOS, no Xcode or simctl', () {
-    final xcodeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager xcodeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
         exitCode: 1,
       ),
     ]);
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: Xcode.test(
         processManager: xcodeProcessManager,
@@ -76,7 +76,7 @@ void main() {
   });
 
   testWithoutContext('iOS workflow can list devices even when Xcode version is too low', () {
-    final xcode = Xcode.test(
+    final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: FakeProcessManager.any(),
@@ -84,7 +84,7 @@ void main() {
       ),
     );
 
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: xcode,
       featureFlags: TestFeatureFlags(),
@@ -99,7 +99,7 @@ void main() {
   });
 
   testWithoutContext('iOS workflow can launch devices when Xcode is set up', () {
-    final xcode = Xcode.test(
+    final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: FakeProcessManager.any(),
@@ -107,7 +107,7 @@ void main() {
       ),
     );
 
-    final iosWorkflow = IOSWorkflow(
+    final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: xcode,
       featureFlags: TestFeatureFlags(),

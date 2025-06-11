@@ -62,7 +62,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     Uri? devToolsServerAddress,
   }) async {
     assert(_ddsInstance == null);
-    final ddsUri = Uri(
+    final Uri ddsUri = Uri(
       scheme: 'http',
       host:
           ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)

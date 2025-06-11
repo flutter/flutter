@@ -45,7 +45,7 @@ void main() {
 
   group('pushAndRemoveUntil', () {
     testWidgets('notifies appropriately', (WidgetTester tester) async {
-      final observer = TestObserver();
+      final TestObserver observer = TestObserver();
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
@@ -58,7 +58,7 @@ void main() {
       await tester.pumpWidget(myApp);
 
       final NavigatorState navigator = tester.state(find.byType(Navigator));
-      final log = <String>[];
+      final List<String> log = <String>[];
       observer
         ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
           log.add(
@@ -153,7 +153,7 @@ void main() {
     testWidgets(
       'Hero transition triggers when preceding route contains hero, and predicate route does not',
       (WidgetTester tester) async {
-        const kHeroTag = 'hero';
+        const String kHeroTag = 'hero';
         final Widget myApp = MaterialApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
@@ -200,7 +200,7 @@ void main() {
     testWidgets(
       'Hero transition does not trigger when preceding route does not contain hero, but predicate route does',
       (WidgetTester tester) async {
-        const kHeroTag = 'hero';
+        const String kHeroTag = 'hero';
         final Widget myApp = MaterialApp(
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(

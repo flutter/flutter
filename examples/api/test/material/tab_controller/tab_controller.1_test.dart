@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets('Verify tabs can be changed', (WidgetTester tester) async {
-    final log = <String?>[];
+    final List<String?> log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
     debugPrint = (String? message, {int? wrapWidth}) {
@@ -30,14 +30,14 @@ void main() {
     await tester.pumpWidget(const example.TabControllerExampleApp());
 
     const List<Tab> tabs = example.TabControllerExampleApp.tabs;
-    final tabsTraversalOrder = <Tab>[];
+    final List<Tab> tabsTraversalOrder = <Tab>[];
 
     // The traverse order is from the second tab from the start to the last,
     // and then from the second tab from the end to the first.
     tabsTraversalOrder.addAll(tabs.skip(1));
     tabsTraversalOrder.addAll(tabs.reversed.skip(1));
 
-    for (final tab in tabsTraversalOrder) {
+    for (final Tab tab in tabsTraversalOrder) {
       // Tap on the TabBar's tab to select it.
       await tester.tap(find.descendant(of: find.byType(TabBar), matching: find.text(tab.text!)));
       await tester.pumpAndSettle();
@@ -66,7 +66,7 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
 
-    final error = exception as FlutterError;
+    final FlutterError error = exception as FlutterError;
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(

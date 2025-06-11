@@ -73,7 +73,7 @@ class SpringDescription {
   }) {
     assert(duration.inMilliseconds > 0, 'Duration must be positive');
     final double durationInSeconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
-    const mass = 1.0;
+    const double mass = 1.0;
     final double stiffness = (4 * math.pi * math.pi * mass) / math.pow(durationInSeconds, 2);
     final double dampingRatio = bounce > 0 ? (1.0 - bounce) : (1 / (bounce + 1));
     final double damping = dampingRatio * 2.0 * math.sqrt(mass * stiffness);
@@ -319,7 +319,7 @@ class _CriticalSolution implements _SpringSolution {
 
   @override
   double dx(double time) {
-    final power = math.pow(math.e, _r * time) as double;
+    final double power = math.pow(math.e, _r * time) as double;
     return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
 
@@ -386,7 +386,7 @@ class _UnderdampedSolution implements _SpringSolution {
 
   @override
   double dx(double time) {
-    final power = math.pow(math.e, _r * time) as double;
+    final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
     return power * (_c2 * _w * cosine - _c1 * _w * sine) + _r * power * (_c2 * sine + _c1 * cosine);

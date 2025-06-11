@@ -47,10 +47,10 @@ class FileSystemUtils {
   /// directory.
   Directory getUniqueDirectory(Directory dir, String baseName) {
     final FileSystem fs = dir.fileSystem;
-    var i = 1;
+    int i = 1;
 
     while (true) {
-      final name = '${baseName}_${i.toString().padLeft(2, '0')}';
+      final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
       final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
       if (!directory.existsSync()) {
         return directory;
@@ -172,10 +172,10 @@ void copyDirectory(
 
 File _getUniqueFile(Directory dir, String baseName, String ext) {
   final FileSystem fs = dir.fileSystem;
-  var i = 1;
+  int i = 1;
 
   while (true) {
-    final name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(dir.fileSystem.path.join(dir.path, name));
     if (!file.existsSync()) {
       file.createSync(recursive: true);

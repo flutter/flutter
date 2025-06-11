@@ -20,7 +20,7 @@ double _newtonsMethod({
   required int iterations,
 }) {
   double guess = initialGuess;
-  for (var i = 0; i < iterations; i++) {
+  for (int i = 0; i < iterations; i++) {
     guess = guess - (f(guess) - target) / df(guess);
   }
   return guess;

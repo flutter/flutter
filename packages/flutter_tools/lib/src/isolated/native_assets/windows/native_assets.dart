@@ -8,7 +8,7 @@ import '../../../globals.dart' as globals;
 import '../../../windows/visual_studio.dart';
 
 Future<CCompilerConfig?> cCompilerConfigWindows() async {
-  final visualStudio = VisualStudio(
+  final VisualStudio visualStudio = VisualStudio(
     fileSystem: globals.fs,
     platform: globals.platform,
     logger: globals.logger,

@@ -616,7 +616,7 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-    final testEnvironment = Environment.test(
+    final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,

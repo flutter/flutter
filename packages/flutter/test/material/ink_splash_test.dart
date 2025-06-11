@@ -128,8 +128,8 @@ void main() {
   testWidgets('PageView item can dispose when widget with NoSplash.splashFactory is tapped', (
     WidgetTester tester,
   ) async {
-    final controller = PageController();
-    final disposedPageIndexes = <int>[];
+    final PageController controller = PageController();
+    final List<int> disposedPageIndexes = <int>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(splashFactory: NoSplash.splashFactory),

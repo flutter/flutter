@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final textField = TextField(
+    final TextField textField = TextField(
       key: const Key(keys.kDefaultTextField),
       controller: _controller,
       focusNode: FocusNode(),

@@ -17,18 +17,18 @@ void main() {
 
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     expect(renderObject, isNotNull);
-    final textureBox = renderObject as TextureBox;
+    final TextureBox textureBox = renderObject as TextureBox;
     expect(textureBox, isNotNull);
     expect(textureBox.textureId, 1);
     expect(textureBox.freeze, true);
 
-    final containerLayer = ContainerLayer();
+    final ContainerLayer containerLayer = ContainerLayer();
     addTearDown(containerLayer.dispose);
-    final paintingContext = PaintingContext(containerLayer, Rect.zero);
+    final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
-    final textureLayer = layer as TextureLayer;
+    final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
     expect(textureLayer.textureId, 1);
     expect(textureLayer.freeze, true);
@@ -44,18 +44,18 @@ void main() {
 
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     expect(renderObject, isNotNull);
-    final textureBox = renderObject as TextureBox;
+    final TextureBox textureBox = renderObject as TextureBox;
     expect(textureBox, isNotNull);
     expect(textureBox.textureId, 1);
     expect(textureBox.filterQuality, FilterQuality.low);
 
-    final containerLayer = ContainerLayer();
+    final ContainerLayer containerLayer = ContainerLayer();
     addTearDown(containerLayer.dispose);
-    final paintingContext = PaintingContext(containerLayer, Rect.zero);
+    final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
-    final textureLayer = layer as TextureLayer;
+    final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
     expect(textureLayer.textureId, 1);
     expect(textureLayer.filterQuality, FilterQuality.low);
@@ -73,18 +73,18 @@ void main() {
 
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     expect(renderObject, isNotNull);
-    final textureBox = renderObject as TextureBox;
+    final TextureBox textureBox = renderObject as TextureBox;
     expect(textureBox, isNotNull);
     expect(textureBox.textureId, 1);
     expect(textureBox.filterQuality, FilterQuality.none);
 
-    final containerLayer = ContainerLayer();
+    final ContainerLayer containerLayer = ContainerLayer();
     addTearDown(containerLayer.dispose);
-    final paintingContext = PaintingContext(containerLayer, Rect.zero);
+    final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
-    final textureLayer = layer as TextureLayer;
+    final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
     expect(textureLayer.textureId, 1);
     expect(textureLayer.filterQuality, FilterQuality.none);
@@ -100,18 +100,18 @@ void main() {
 
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     expect(renderObject, isNotNull);
-    final textureBox = renderObject as TextureBox;
+    final TextureBox textureBox = renderObject as TextureBox;
     expect(textureBox, isNotNull);
     expect(textureBox.textureId, 1);
     expect(textureBox.filterQuality, FilterQuality.low);
 
-    final containerLayer = ContainerLayer();
+    final ContainerLayer containerLayer = ContainerLayer();
     addTearDown(containerLayer.dispose);
-    final paintingContext = PaintingContext(containerLayer, Rect.zero);
+    final PaintingContext paintingContext = PaintingContext(containerLayer, Rect.zero);
     textureBox.paint(paintingContext, Offset.zero);
     final Layer layer = containerLayer.lastChild!;
     expect(layer, isNotNull);
-    final textureLayer = layer as TextureLayer;
+    final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
     expect(textureLayer.textureId, 1);
     expect(textureLayer.filterQuality, FilterQuality.low);

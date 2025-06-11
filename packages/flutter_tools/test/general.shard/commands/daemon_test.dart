@@ -13,14 +13,14 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
-    final socket = FakeServerSocket();
-    final logger = BufferLogger.test();
+    final FakeServerSocket socket = FakeServerSocket();
+    final BufferLogger logger = BufferLogger.test();
 
-    var bindCalledTimes = 0;
-    final bindAddresses = <Object?>[];
-    final bindPorts = <int>[];
+    int bindCalledTimes = 0;
+    final List<Object?> bindAddresses = <Object?>[];
+    final List<int> bindPorts = <int>[];
 
-    final server = DaemonServer(
+    final DaemonServer server = DaemonServer(
       port: 123,
       logger: logger,
       bind: (Object? address, int port) async {
@@ -37,14 +37,14 @@ void main() {
   });
 
   testWithoutContext('binds on ipv6 if ipv4 failed normally', () async {
-    final socket = FakeServerSocket();
-    final logger = BufferLogger.test();
+    final FakeServerSocket socket = FakeServerSocket();
+    final BufferLogger logger = BufferLogger.test();
 
-    var bindCalledTimes = 0;
-    final bindAddresses = <Object?>[];
-    final bindPorts = <int>[];
+    int bindCalledTimes = 0;
+    final List<Object?> bindAddresses = <Object?>[];
+    final List<int> bindPorts = <int>[];
 
-    final server = DaemonServer(
+    final DaemonServer server = DaemonServer(
       port: 123,
       logger: logger,
       bind: (Object? address, int port) async {

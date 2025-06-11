@@ -11,19 +11,19 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'windows.dart';
 
 void drawHelloWorld(ui.FlutterView view) {
-  final style = ui.ParagraphStyle();
-  final paragraphBuilder = ui.ParagraphBuilder(style)..addText('Hello world');
+  final ui.ParagraphStyle style = ui.ParagraphStyle();
+  final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)..addText('Hello world');
   final ui.Paragraph paragraph = paragraphBuilder.build();
 
   paragraph.layout(const ui.ParagraphConstraints(width: 100.0));
 
-  final recorder = ui.PictureRecorder();
-  final canvas = ui.Canvas(recorder);
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
 
   canvas.drawParagraph(paragraph, ui.Offset.zero);
 
   final ui.Picture picture = recorder.endRecording();
-  final sceneBuilder =
+  final ui.SceneBuilder sceneBuilder =
       ui.SceneBuilder()
         ..addPicture(ui.Offset.zero, picture)
         ..pop();
@@ -57,7 +57,7 @@ void main() async {
 
   // Create a completer to send the window visibility result back to the
   // integration test.
-  final visibilityCompleter = Completer<String>();
+  final Completer<String> visibilityCompleter = Completer<String>();
   enableFlutterDriverExtension(
     handler: (String? message) async {
       if (message == 'verifyWindowVisibility') {
@@ -74,8 +74,8 @@ void main() async {
         // The code points are passed a list of integers through the method channel,
         // which will use the UTF16 to UTF8 utility function to convert them to a
         // std::string, which should equate to the original expected string.
-        const expected = 'ABCℵ';
-        final codePoints = Int32List.fromList(expected.codeUnits);
+        const String expected = 'ABCℵ';
+        final Int32List codePoints = Int32List.fromList(expected.codeUnits);
         final String converted = await testStringConversion(codePoints);
         return (converted == expected)
             ? 'success'
@@ -91,7 +91,7 @@ void main() async {
       throw 'Window should be hidden at startup';
     }
 
-    var frameCount = 0;
+    int frameCount = 0;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
       // Our goal is to verify that it's `drawHelloWorld` that makes the window
       // appear, not anything else. This requires checking the visibility right

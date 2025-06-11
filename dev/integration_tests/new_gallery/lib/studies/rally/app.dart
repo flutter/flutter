@@ -58,7 +58,7 @@ class RallyApp extends StatelessWidget {
   }
 
   ThemeData _buildRallyTheme() {
-    final base = ThemeData.dark();
+    final ThemeData base = ThemeData.dark();
     return ThemeData(
       appBarTheme: const AppBarTheme(
         systemOverlayStyle: SystemUiOverlayStyle.light,

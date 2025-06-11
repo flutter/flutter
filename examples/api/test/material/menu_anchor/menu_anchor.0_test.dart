@@ -105,7 +105,7 @@ void main() {
   });
 
   testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
-    const safeAreaPadding = 100.0;
+    const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),

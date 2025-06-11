@@ -101,7 +101,7 @@ class ButtonsDemo {
 
     // START buttons_icon
     // Member variable holding toggle value.
-    late var value = true;
+    late bool value = true;
 
     // Toggleable icon button.
     IconButton(
@@ -184,7 +184,7 @@ class SelectionControls {
 
     // START selectioncontrols_switch
     // Member variable holding value.
-    var switchValue = false;
+    bool switchValue = false;
 
     // Create a switch.
     Switch(

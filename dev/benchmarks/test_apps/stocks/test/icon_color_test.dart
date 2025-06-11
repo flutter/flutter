@@ -41,7 +41,7 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile =
       findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
   final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
-  final richText = asset.widget as RichText;
+  final RichText richText = asset.widget as RichText;
   expect(richText.text.style!.color, equals(color));
 }
 
@@ -61,11 +61,11 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    final left = Offset(
+    final Offset left = Offset(
       0.0,
       (tester.view.physicalSize / tester.view.devicePixelRatio).height / 2.0,
     );
-    final right = Offset(
+    final Offset right = Offset(
       (tester.view.physicalSize / tester.view.devicePixelRatio).width,
       left.dy,
     );

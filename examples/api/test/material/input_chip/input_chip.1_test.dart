@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_chip/input_chip.1.dart' as ex
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final replacementChar = String.fromCharCode(
+  final String replacementChar = String.fromCharCode(
     example.ChipsInputEditingController.kObjectReplacementChar,
   );
 

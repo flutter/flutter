@@ -172,7 +172,7 @@ class CocoaPods {
       throwToolExit('Podfile missing');
     }
     _warnIfPodfileOutOfDate(xcodeProject);
-    var podsProcessed = false;
+    bool podsProcessed = false;
     if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
       if (!await _checkPodCondition()) {
         throwToolExit('CocoaPods not installed or not in valid state.');
@@ -180,7 +180,7 @@ class CocoaPods {
       await _runPodInstall(xcodeProject, buildMode);
 
       // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
-      final postPodMigration = ProjectMigration(<ProjectMigrator>[
+      final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
         CocoaPodsScriptReadlink(xcodeProject, _xcodeProjectInterpreter, _logger),
         CocoaPodsToolchainDirectoryMigration(xcodeProject, _xcodeProjectInterpreter, _logger),
       ]);
@@ -309,7 +309,7 @@ class CocoaPods {
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
       final String includeFile = includePodsXcconfig(mode);
-      final include = '#include? "$includeFile"';
+      final String include = '#include? "$includeFile"';
       if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);
       }
@@ -357,12 +357,12 @@ class CocoaPods {
     );
     status.stop();
     if (_logger.isVerbose || result.exitCode != 0) {
-      final stdout = result.stdout as String;
+      final String stdout = result.stdout as String;
       if (stdout.isNotEmpty) {
         _logger.printStatus("CocoaPods' output:\n↳");
         _logger.printStatus(stdout, indent: 4);
       }
-      final stderr = result.stderr as String;
+      final String stderr = result.stderr as String;
       if (stderr.isNotEmpty) {
         _logger.printStatus('Error output from CocoaPods:\n↳');
         _logger.printStatus(stderr, indent: 4);
@@ -497,8 +497,8 @@ class CocoaPods {
 
   ({String failingPod, String sourcePlugin, String podPluginSubdir})?
   _parseMinDeploymentFailureInfo(String podInstallOutput) {
-    final sourceLine = RegExp(r'\(from `.*\.symlinks/plugins/([^/]+)/([^/]+)`\)');
-    final dependencyLine = RegExp(
+    final RegExp sourceLine = RegExp(r'\(from `.*\.symlinks/plugins/([^/]+)/([^/]+)`\)');
+    final RegExp dependencyLine = RegExp(
       r'Specs satisfying the `([^ ]+).*` dependency were found, '
       'but they required a higher minimum deployment target',
     );
@@ -520,7 +520,7 @@ class CocoaPods {
     }
     // There are two ways the deployment target can be specified; see
     // https://guides.cocoapods.org/syntax/podspec.html#group_platform
-    final platformPattern = RegExp(
+    final RegExp platformPattern = RegExp(
       // Example: spec.platform = :osx, '10.8'
       // where "spec" is an arbitrary variable name.
       r'^\s*[a-zA-Z_]+\.platform\s*=\s*'
@@ -528,7 +528,7 @@ class CocoaPods {
       r'''\s*,\s*["']([^"']+)["']''',
       multiLine: true,
     );
-    final deploymentTargetPlatform = RegExp(
+    final RegExp deploymentTargetPlatform = RegExp(
       // Example: spec.osx.deployment_target = '10.8'
       // where "spec" is an arbitrary variable name.
       r'^\s*[a-zA-Z_]+\.'
@@ -548,7 +548,7 @@ class CocoaPods {
   }
 
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
-    final isIos = xcodeProject is IosProject;
+    final bool isIos = xcodeProject is IosProject;
     if (isIos) {
       // Previously, the Podfile created a symlink to the cached artifacts engine framework
       // and installed the Flutter pod from that path. This could get out of sync with the copy
@@ -575,7 +575,7 @@ class CocoaPods {
     // plugin_pods = parse_KV_file('../.flutter-plugins')
     if (xcodeProject.podfile.existsSync() &&
         xcodeProject.podfile.readAsStringSync().contains(".flutter-plugins'")) {
-      const warning =
+      const String warning =
           'Warning: Podfile is out of date\n'
           '$outOfDatePluginsPodfileConsequence\n'
           'To regenerate the Podfile, run:\n';

@@ -34,7 +34,7 @@ void main() {
   }
 
   void createDotPackages(String projectPath) {
-    final flutterRootUri = StringBuffer('file://');
+    final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
       flutterRootUri
@@ -43,7 +43,7 @@ void main() {
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
-    final dotPackagesSrc = '''
+    final String dotPackagesSrc = '''
 {
   "configVersion": 2,
   "packages": [
@@ -234,7 +234,7 @@ void bar() {
   });
 
   testWithoutContext('analyze once returns no issues when source is error-free', () async {
-    const contents = '''
+    const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
@@ -246,7 +246,7 @@ StringBuffer bar = StringBuffer('baz');
   });
 
   testWithoutContext('analyze once returns no issues for todo comments', () async {
-    const contents = '''
+    const String contents = '''
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
@@ -261,7 +261,7 @@ StringBuffer bar = StringBuffer('baz');
   testWithoutContext(
     'analyze once with default options has info issue finally exit code 1.',
     () async {
-      const infoSourceCode = '''
+      const String infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -278,7 +278,7 @@ void _analyze() {}
   testWithoutContext(
     'analyze once with no-fatal-infos has info issue finally exit code 0.',
     () async {
-      const infoSourceCode = '''
+      const String infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -303,7 +303,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-warnings has info issue finally exit code 0.',
     () async {
-      const infoSourceCode = '''
+      const String infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -328,7 +328,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-infos has warning issue finally exit code 0.',
     () async {
-      const warningSourceCode = '''
+      const String warningSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -353,7 +353,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-warnings has warning issue finally exit code 1.',
     () async {
-      const warningSourceCode = '''
+      const String warningSourceCode = '''
 void _analyze() {}
 ''';
 

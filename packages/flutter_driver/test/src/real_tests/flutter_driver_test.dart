@@ -25,7 +25,7 @@ const String _kWebScriptPrefix = r"window.$flutterDriver('";
 const String _kWebScriptSuffix = "')";
 
 void main() {
-  final log = <String>[];
+  final List<String> log = <String>[];
 
   driverLog = (String source, String message) {
     log.add('$source: $message');
@@ -62,9 +62,9 @@ void main() {
         expect(exists, true, reason: 'Not found ${logFile.path}');
 
         final String commandLog = await logFile.readAsString();
-        const waitForCommandLog =
+        const String waitForCommandLog =
             '>>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}';
-        const responseLog = '<<< {isError: false, response: {status: ok}}';
+        const String responseLog = '<<< {isError: false, response: {status: ok}}';
 
         expect(
           commandLog.contains(waitForCommandLog),
@@ -414,7 +414,7 @@ void main() {
           'tree': 'hello',
         });
         final LayerTree result = await driver.getLayerTree(timeout: _kTestTimeout);
-        final referenceTree = LayerTree.fromJson(<String, String>{'tree': 'hello'});
+        final LayerTree referenceTree = LayerTree.fromJson(<String, String>{'tree': 'hello'});
         expect(result.tree, referenceTree.tree);
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: get_layer_tree, timeout: $_kSerializedTestTimeout}',
@@ -636,7 +636,7 @@ void main() {
 
     group('traceAction with timeline streams', () {
       test('specify non-default timeline streams', () async {
-        var actionCalled = false;
+        bool actionCalled = false;
 
         final Timeline timeline = await driver.traceAction(
           () async {
@@ -814,9 +814,9 @@ void main() {
       expect(exists, true, reason: 'Not found ${logFile.path}');
 
       final String commandLog = await logFile.readAsString();
-      const waitForCommandLog =
+      const String waitForCommandLog =
           '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
-      const responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
+      const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
       expect(
         commandLog,
@@ -1138,7 +1138,7 @@ void main() {
 //   window.flutterDriver('[actual script]')
 String _checkAndEncode(dynamic script) {
   expect(script, isA<String>());
-  final scriptString = script as String;
+  final String scriptString = script as String;
   expect(scriptString.startsWith(_kWebScriptPrefix), isTrue);
   expect(scriptString.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
@@ -1167,7 +1167,7 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final decoded =
+    final Map<String, dynamic> decoded =
         jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
     assert(response != null, 'Missing ${decoded['command']} in responses.');

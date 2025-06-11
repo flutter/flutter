@@ -106,7 +106,7 @@ class DarwinDependencyManagement {
       _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
 
-    final event = Event.flutterInjectDarwinPlugins(
+    final Event event = Event.flutterInjectDarwinPlugins(
       platform: platform.name,
       isModule: _project.isModule,
       swiftPackageManagerUsable: xcodeProject.usesSwiftPackageManager,
@@ -136,9 +136,9 @@ class DarwinDependencyManagement {
     required SupportedPlatform platform,
     required XcodeBasedProject xcodeProject,
   }) async {
-    var pluginCount = 0;
-    var swiftPackageCount = 0;
-    var cocoapodCount = 0;
+    int pluginCount = 0;
+    int swiftPackageCount = 0;
+    int cocoapodCount = 0;
     for (final Plugin plugin in _plugins) {
       if (plugin.platforms[platform.name] == null) {
         continue;
@@ -201,7 +201,7 @@ class DarwinDependencyManagement {
           xcodeProject.xcodeProject,
         );
 
-        final configWarning =
+        final String configWarning =
             '${_podIncludeInConfigWarning(xcodeProject, 'Debug')}'
             '${_podIncludeInConfigWarning(xcodeProject, 'Release')}';
 

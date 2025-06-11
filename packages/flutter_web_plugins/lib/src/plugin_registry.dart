@@ -152,7 +152,7 @@ class Registrar extends BinaryMessenger {
   /// Sends a platform message from the platform side back to the framework.
   @override
   Future<ByteData?> send(String channel, ByteData? message) {
-    final completer = Completer<ByteData?>();
+    final Completer<ByteData?> completer = Completer<ByteData?>();
     ui.channelBuffers.push(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);

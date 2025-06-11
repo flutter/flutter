@@ -9,7 +9,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Traversal order handles touching elements', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -26,7 +26,7 @@ void main() {
       ),
     );
 
-    final expected = TestSemantics.root(
+    final TestSemantics expected = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           id: 1,

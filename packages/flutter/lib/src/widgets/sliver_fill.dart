@@ -86,7 +86,7 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
 
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
-    final element = context as SliverMultiBoxAdaptorElement;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
@@ -305,7 +305,7 @@ class SliverFillRemaining extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('child', child));
-    final flags = <String>[
+    final List<String> flags = <String>[
       if (hasScrollBody) 'scrollable',
       if (fillOverscroll) 'fillOverscroll',
     ];

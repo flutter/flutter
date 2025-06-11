@@ -51,7 +51,7 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
 
   @override
   Stream<Uri> get uris {
-    final controller = StreamController<Uri>();
+    final StreamController<Uri> controller = StreamController<Uri>();
     _protocolDiscovery.then((ProtocolDiscovery protocolDiscovery) async {
       await controller.addStream(protocolDiscovery.uris);
       await controller.close();

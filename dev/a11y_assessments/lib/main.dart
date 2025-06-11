@@ -20,13 +20,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lightTheme = ThemeData(
+    final ThemeData lightTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xff6750a4),
         contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
       ),
     );
-    final darkTheme = ThemeData(
+    final ThemeData darkTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         brightness: Brightness.dark,
         seedColor: const Color(0xff6750a4),
@@ -34,7 +34,7 @@ class App extends StatelessWidget {
       ),
     );
 
-    final routes = Map<String, WidgetBuilder>.fromEntries(
+    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
       useCases.map(
         (UseCase useCase) => MapEntry<String, WidgetBuilder>(
           useCase.route,

@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final body = SafeArea(
+    final SafeArea body = SafeArea(
       child: Padding(
         padding:
             isDesktop

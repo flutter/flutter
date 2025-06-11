@@ -54,7 +54,7 @@ abstract class DoctorValidator {
   ///
   /// Tracks time taken to execute the validation step.
   Future<ValidationResult> validate() async {
-    final stopwatch = Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     final ValidationResult result = await validateImpl();
     stopwatch.stop();
     result._executionTime = stopwatch.elapsed;
@@ -89,13 +89,13 @@ class GroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final tasks = <ValidatorTask>[
+    final List<ValidatorTask> tasks = <ValidatorTask>[
       for (final DoctorValidator validator in subValidators)
         ValidatorTask(validator, asyncGuard<ValidationResult>(() => validator.validate())),
     ];
 
-    final results = <ValidationResult>[];
-    for (final subValidator in tasks) {
+    final List<ValidationResult> results = <ValidationResult>[];
+    for (final ValidatorTask subValidator in tasks) {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
@@ -111,7 +111,7 @@ class GroupedValidator extends DoctorValidator {
     assert(results.isNotEmpty, 'Validation results should not be empty');
     _subResults = results;
     ValidationType mergedType = results[0].type;
-    final mergedMessages = <ValidationMessage>[];
+    final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String? statusInfo;
 
     for (final ValidationResult result in results) {

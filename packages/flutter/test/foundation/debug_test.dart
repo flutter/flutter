@@ -70,7 +70,7 @@ void main() {
       debugMaybeDispatchCreated('library', 'class', object);
 
       if (kFlutterMemoryAllocationsEnabled) {
-        final theEvent = dispatchedEvent;
+        final ObjectEvent? theEvent = dispatchedEvent;
 
         if (theEvent is! ObjectCreated) {
           fail('Expected ObjectCreated event');
@@ -88,7 +88,7 @@ void main() {
       debugMaybeDispatchDisposed(object);
 
       if (kFlutterMemoryAllocationsEnabled) {
-        final theEvent = dispatchedEvent;
+        final ObjectEvent? theEvent = dispatchedEvent;
 
         if (theEvent is! ObjectDisposed) {
           fail('Expected ObjectDisposed event');

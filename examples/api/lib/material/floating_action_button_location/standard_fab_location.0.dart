@@ -20,7 +20,7 @@ class StandardFabLocationExampleApp extends StatelessWidget {
 class AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final directionalAdjustment =
+    final double directionalAdjustment =
         scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
   }

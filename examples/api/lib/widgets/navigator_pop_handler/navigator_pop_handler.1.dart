@@ -204,7 +204,7 @@ class _BottomNavTabState extends State<_BottomNavTab> {
           if (tabPage == null) {
             return;
           }
-          final nextPages = <_TabPage>[...widget.pages]..remove(tabPage);
+          final List<_TabPage> nextPages = <_TabPage>[...widget.pages]..remove(tabPage);
           if (nextPages.length < widget.pages.length) {
             widget.onChangePages(nextPages);
           }
@@ -307,7 +307,7 @@ class _RestorableTab extends RestorableValue<_Tab> {
   @override
   _Tab fromPrimitives(Object? data) {
     if (data != null) {
-      final tabString = data as String;
+      final String tabString = data as String;
       return _Tab.values.firstWhere((_Tab tab) => tabString == tab.name);
     }
     return _Tab.home;
@@ -333,7 +333,7 @@ class _RestorableTabPageList extends RestorableValue<List<_TabPage>> {
   @override
   List<_TabPage> fromPrimitives(Object? data) {
     if (data != null) {
-      final dataString = data as String;
+      final String dataString = data as String;
       final List<String> listOfStrings = dataString.split(',');
       return listOfStrings.map((String tabPageName) {
         return _TabPage.values.firstWhere((_TabPage tabPage) => tabPageName == tabPage.name);

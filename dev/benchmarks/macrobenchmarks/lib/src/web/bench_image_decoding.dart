@@ -39,9 +39,9 @@ class BenchImageDecoding extends RawRecorder {
     }
     for (final String imageUrl in _imageUrls) {
       final Future<JSAny?> fetchFuture = web.window.fetch(imageUrl.toJS).toDart;
-      final image = (await fetchFuture)! as web.Response;
+      final web.Response image = (await fetchFuture)! as web.Response;
       final Future<JSAny?> imageFuture = image.arrayBuffer().toDart;
-      final imageBuffer = (await imageFuture)! as JSArrayBuffer;
+      final JSArrayBuffer imageBuffer = (await imageFuture)! as JSArrayBuffer;
       _imageData.add(imageBuffer.toDart.asUint8List());
     }
   }
@@ -58,7 +58,7 @@ class BenchImageDecoding extends RawRecorder {
   @override
   Future<void> body(Profile profile) async {
     await profile.recordAsync('recordImageDecode', () async {
-      final allDecodes = <Future<void>>[
+      final List<Future<void>> allDecodes = <Future<void>>[
         for (final Uint8List data in _imageData) _decodeImage(data),
       ];
       await Future.wait(allDecodes);
@@ -76,14 +76,14 @@ class BenchImageDecoding extends RawRecorder {
 
 Future<void> _decodeImage(Uint8List data) async {
   final ui.Codec codec = await ui.instantiateImageCodec(data);
-  const decodeFrameCount = 5;
+  const int decodeFrameCount = 5;
   if (codec.frameCount < decodeFrameCount) {
     throw Exception(
       'Test image contains too few frames for this benchmark (${codec.frameCount}). '
       'Choose a test image with at least $decodeFrameCount frames.',
     );
   }
-  for (var i = 0; i < decodeFrameCount; i++) {
+  for (int i = 0; i < decodeFrameCount; i++) {
     (await codec.getNextFrame()).image.dispose();
   }
   codec.dispose();

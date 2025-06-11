@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
-      var foundApkProjectName = false;
+      bool foundApkProjectName = false;
       await runProjectTest((FlutterProject flutterProject) async {
         section('APK content for task assembleRelease with --obfuscate');
         await inDirectory(flutterProject.rootPath, () async {
@@ -52,7 +52,7 @@ Future<void> main() async {
         });
       });
 
-      var foundAarProjectName = false;
+      bool foundAarProjectName = false;
       await runModuleProjectTest((FlutterModuleProject flutterProject) async {
         section('AAR content with --obfuscate');
 

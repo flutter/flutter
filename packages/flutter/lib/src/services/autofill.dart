@@ -767,7 +767,7 @@ class AutofillConfiguration {
 
   @override
   String toString() {
-    final description = <String>[
+    final List<String> description = <String>[
       'enabled: $enabled',
       'uniqueIdentifier: $uniqueIdentifier',
       'autofillHints: $autofillHints',

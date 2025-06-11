@@ -849,7 +849,7 @@ void main() {
   });
 
   testWidgets('Image - Switch needing direction', (WidgetTester tester) async {
-    final provider = _TestImageProvider(testImage);
+    final _TestImageProvider provider = _TestImageProvider(testImage);
 
     await tester.pumpWidget(
       Directionality(

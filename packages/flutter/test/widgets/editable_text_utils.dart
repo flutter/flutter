@@ -56,7 +56,7 @@ Future<void> sendKeys(
   bool shortcutModifier = false,
   required TargetPlatform targetPlatform,
 }) async {
-  final targetPlatformString = targetPlatform.toString();
+  final String targetPlatformString = targetPlatform.toString();
   final String platform =
       targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
   if (shift) {

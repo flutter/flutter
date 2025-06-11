@@ -333,7 +333,7 @@ TaskFunction createPlatformViewStartupTest() {
 
 TaskFunction createBasicMaterialCompileTest() {
   return () async {
-    const sampleAppName = 'sample_flutter_app';
+    const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
     rmTree(sampleDir);
@@ -483,8 +483,8 @@ TaskFunction createListTextLayoutPerfE2ETest({bool? enableImpeller}) {
 }
 
 TaskFunction createsScrollSmoothnessPerfTest() {
-  final testDirectory = '${flutterDirectory.path}/dev/benchmarks/complex_layout';
-  const testTarget = 'test/measure_scroll_smoothness.dart';
+  final String testDirectory = '${flutterDirectory.path}/dev/benchmarks/complex_layout';
+  const String testTarget = 'test/measure_scroll_smoothness.dart';
   return () {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
@@ -505,7 +505,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
           deviceId,
         ],
       );
-      final data =
+      final Map<String, dynamic> data =
           json.decode(
                 file(
                   '${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json',
@@ -513,16 +513,16 @@ TaskFunction createsScrollSmoothnessPerfTest() {
               )
               as Map<String, dynamic>;
 
-      final result = <String, dynamic>{};
+      final Map<String, dynamic> result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
         assert(data is Map<String, dynamic>);
         if (data is Map<String, dynamic>) {
-          const metricKeys = <String>[
+          const List<String> metricKeys = <String>[
             'janky_count',
             'average_abs_jerk',
             'dropped_frame_count',
           ];
-          for (final key in metricKeys) {
+          for (final String key in metricKeys) {
             result[key + suffix] = data[key];
           }
         }
@@ -740,7 +740,7 @@ TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({bool? enableImpeller
 }
 
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
-  final tally = <String, dynamic>{};
+  final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {
     item.forEach((String key, dynamic value) {
       if (tally.containsKey(key)) {
@@ -764,15 +764,15 @@ void _updateManifestSettings(
   required bool platformThreadMerged,
 }) {
   final String manifestPath = path.join(testDirectory, 'ios', 'Runner', 'Info.plist');
-  final file = File(manifestPath);
+  final File file = File(manifestPath);
 
   if (!file.existsSync()) {
     throw Exception('Info.plist not found at $manifestPath');
   }
 
   final String xmlStr = file.readAsStringSync();
-  final xmlDoc = XmlDocument.parse(xmlStr);
-  final keyPairs = <(String, String)>[
+  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
+  final List<(String, String)> keyPairs = <(String, String)>[
     if (disablePartialRepaint) ('FLTDisablePartialRepaint', disablePartialRepaint.toString()),
     if (platformThreadMerged) ('FLTEnableMergedPlatformUIThread', platformThreadMerged.toString()),
   ];
@@ -792,7 +792,7 @@ void _updateManifestSettings(
 
 Future<void> _resetPlist(String testDirectory) async {
   final String manifestPath = path.join(testDirectory, 'ios', 'Runner', 'Info.plist');
-  final file = File(manifestPath);
+  final File file = File(manifestPath);
 
   if (!file.existsSync()) {
     throw Exception('Info.plist not found at $manifestPath');
@@ -810,14 +810,14 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
     'main',
     'AndroidManifest.xml',
   );
-  final file = File(manifestPath);
+  final File file = File(manifestPath);
 
   if (!file.existsSync()) {
     throw Exception('AndroidManifest.xml not found at $manifestPath');
   }
 
   final String xmlStr = file.readAsStringSync();
-  final xmlDoc = XmlDocument.parse(xmlStr);
+  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
   final XmlElement applicationNode = xmlDoc.findAllElements('application').first;
 
   // Check if the meta-data node already exists.
@@ -830,7 +830,7 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
       final XmlElement existingEntry = existingMetaData.first;
       existingEntry.setAttribute('android:value', value);
     } else {
-      final metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
+      final XmlElement metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
         XmlAttribute(XmlName('android:name'), key),
         XmlAttribute(XmlName('android:value'), value),
       ]);
@@ -842,14 +842,14 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
 }
 
 void _addSurfaceControlSupportToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
+  final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableSurfaceControl', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
 
 void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
+  final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
@@ -860,7 +860,7 @@ void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
 ///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
 ///   android:value="true" />
 void _addVulkanGPUTracingToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
+  final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
@@ -871,7 +871,7 @@ void _addVulkanGPUTracingToManifest(String testDirectory) {
 ///   android:name="io.flutter.embedding.android.ImpellerShaderMode"
 ///   android:value="lazy" />
 void _addLazyShaderMode(String testDirectory) {
-  final keyPairs = <(String, String)>[
+  final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.ImpellerLazyShaderInitialization', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
@@ -886,7 +886,7 @@ void _addLazyShaderMode(String testDirectory) {
 ///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
 ///   android:value="true" />
 void _addOpenGLESToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
+  final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
     ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true'),
   ];
@@ -902,7 +902,7 @@ Future<void> _resetManifest(String testDirectory) async {
     'main',
     'AndroidManifest.xml',
   );
-  final file = File(manifestPath);
+  final File file = File(manifestPath);
 
   if (!file.existsSync()) {
     throw Exception('AndroidManifest.xml not found at $manifestPath');
@@ -933,8 +933,8 @@ class StartupTest {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
-      const iterations = 5;
-      final results = <Map<String, dynamic>>[];
+      const int iterations = 5;
+      final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
@@ -1007,7 +1007,7 @@ class StartupTest {
               options: <String>['windows', '-v', '--profile', '--target=$target'],
             );
             final String basename = path.basename(testDirectory);
-            final arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
+            final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
             applicationBinaryPath = path.join(
               testDirectory,
               'build',
@@ -1019,12 +1019,12 @@ class StartupTest {
             );
         }
 
-        const maxFailures = 3;
-        var currentFailures = 0;
-        for (var i = 0; i < iterations; i += 1) {
+        const int maxFailures = 3;
+        int currentFailures = 0;
+        for (int i = 0; i < iterations; i += 1) {
           // Startup should not take more than a few minutes. After 10 minutes,
           // take a screenshot to help debug.
-          final timer = Timer(const Duration(minutes: 10), () async {
+          final Timer timer = Timer(const Duration(minutes: 10), () async {
             print('Startup not completed within 10 minutes. Taking a screenshot...');
             await _flutterScreenshot(
               device.deviceId,
@@ -1049,7 +1049,7 @@ class StartupTest {
           );
           timer.cancel();
           if (result == 0) {
-            final data =
+            final Map<String, dynamic> data =
                 json.decode(
                       file(
                         '${testOutputDirectory(testDirectory)}/start_up_info.json',
@@ -1168,8 +1168,8 @@ class DevtoolsStartupTest {
           if (applicationBinaryPath != null) '--use-application-binary=$applicationBinaryPath',
         ],
       );
-      final completer = Completer<void>();
-      var sawLine = false;
+      final Completer<void> completer = Completer<void>();
+      bool sawLine = false;
       process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
         print('[STDOUT]: $line');
         // Wait for devtools output.
@@ -1178,7 +1178,7 @@ class DevtoolsStartupTest {
           completer.complete();
         }
       });
-      var didExit = false;
+      bool didExit = false;
       unawaited(
         process.exitCode.whenComplete(() {
           didExit = true;
@@ -1381,8 +1381,8 @@ class PerfTest {
         );
       }
 
-      var changedPlist = false;
-      var changedManifest = false;
+      bool changedPlist = false;
+      bool changedManifest = false;
 
       Future<void> resetManifest() async {
         if (!changedManifest) {
@@ -1432,7 +1432,7 @@ class PerfTest {
           );
         }
 
-        final options = <String>[
+        final List<String> options = <String>[
           if (localEngine != null) ...<String>['--local-engine', localEngine],
           if (localEngineHost != null) ...<String>['--local-engine-host', localEngineHost],
           if (localEngineSrcPath != null) ...<String>[
@@ -1465,7 +1465,7 @@ class PerfTest {
         await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
-      final data =
+      final Map<String, dynamic> data =
           json.decode(
                 file(
                   '${testOutputDirectory(testDirectory)}/$resultFilename.json',
@@ -1496,7 +1496,7 @@ class PerfTest {
           recordGPU = false;
       }
 
-      final isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+      final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
         detailFiles: <String>[
@@ -1566,7 +1566,7 @@ class WebCompileTest {
   const WebCompileTest();
 
   Future<TaskResult> run() async {
-    final metrics = <String, Object>{};
+    final Map<String, Object> metrics = <String, Object>{};
 
     metrics.addAll(
       await runSingleBuildTest(
@@ -1582,7 +1582,7 @@ class WebCompileTest {
       ),
     );
 
-    const sampleAppName = 'sample_flutter_app';
+    const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
     rmTree(sampleDir);
@@ -1608,7 +1608,7 @@ class WebCompileTest {
     bool measureBuildTime = false,
   }) {
     return inDirectory<Map<String, int>>(directory, () async {
-      final metrics = <String, int>{};
+      final Map<String, int> metrics = <String, int>{};
 
       await flutter('clean');
       await flutter('packages', options: <String>['get']);
@@ -1650,8 +1650,8 @@ class WebCompileTest {
     Map<String, String> files = const <String, String>{},
     required String metric,
   }) async {
-    const kGzipCompressionLevel = '-9';
-    final sizeMetrics = <String, int>{};
+    const String kGzipCompressionLevel = '-9';
+    final Map<String, int> sizeMetrics = <String, int>{};
 
     final Directory tempDir = Directory.systemTemp.createTempSync('perf_tests_gzips');
     try {
@@ -1725,7 +1725,7 @@ class CompileTest {
         metricKey: 'debug_second_compile_millis',
       );
 
-      final metrics = <String, dynamic>{
+      final Map<String, dynamic> metrics = <String, dynamic>{
         ...compileInitialRelease,
         ...compileFullRelease,
         ...compileInitialDebug,
@@ -1733,7 +1733,7 @@ class CompileTest {
         ...compileSecondDebug,
       };
 
-      final mainDart = File('$testDirectory/lib/main.dart');
+      final File mainDart = File('$testDirectory/lib/main.dart');
       if (mainDart.existsSync()) {
         final List<int> bytes = mainDart.readAsBytesSync();
         // "Touch" the file
@@ -1763,8 +1763,8 @@ class CompileTest {
 
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
-      var releaseSizeInBytes = 0;
-      final watch = Stopwatch();
+      int releaseSizeInBytes = 0;
+      final Stopwatch watch = Stopwatch();
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
@@ -1791,14 +1791,14 @@ class CompileTest {
         }
       });
 
-      final appPath =
+      final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
       // Zip up the .app file to get an approximation of the .ipa size.
       await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
-      final metrics = <String, dynamic>{};
+      final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
@@ -1810,13 +1810,13 @@ class CompileTest {
   Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
     await flutter('clean');
     if (deleteGradleCache) {
-      final gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
       rmTree(gradleCacheDir);
     }
-    final watch = Stopwatch();
+    final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
-    final options = <String>['--release'];
-    final metrics = <String, dynamic>{};
+    final List<String> options = <String>['--release'];
+    final Map<String, dynamic> metrics = <String, dynamic>{};
 
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
@@ -1862,7 +1862,7 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
         final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes) {
@@ -1876,7 +1876,7 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
         final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes) {
@@ -1897,7 +1897,7 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String basename = path.basename(cwd);
-        final arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
         final String exePath = path.join(
           cwd,
           'build',
@@ -1931,11 +1931,11 @@ class CompileTest {
       await flutter('clean');
     }
     if (deleteGradleCache) {
-      final gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
       rmTree(gradleCacheDir);
     }
-    final watch = Stopwatch();
-    final options = <String>['--debug'];
+    final Stopwatch watch = Stopwatch();
+    final List<String> options = <String>['--debug'];
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
@@ -1991,7 +1991,7 @@ class CompileTest {
         throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
     }
 
-    final appFramework = File(path.join(frameworkDirectory, 'App.framework', 'App'));
+    final File appFramework = File(path.join(frameworkDirectory, 'App.framework', 'App'));
 
     return <String, Object>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
@@ -2002,11 +2002,11 @@ class CompileTest {
   static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
     final String output = await eval('unzip', <String>['-v', apkPath]);
     final List<String> lines = output.split('\n');
-    final fileToMetadata = <String, _UnzipListEntry>{};
+    final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
 
     // First three lines are header, last two lines are footer.
-    for (var i = 3; i < lines.length - 2; i++) {
-      final entry = _UnzipListEntry.fromLine(lines[i]);
+    for (int i = 3; i < lines.length - 2; i++) {
+      final _UnzipListEntry entry = _UnzipListEntry.fromLine(lines[i]);
       fileToMetadata[entry.path] = entry;
     }
 
@@ -2067,7 +2067,7 @@ class MemoryTest {
         }
       });
 
-      for (var iteration = 0; iteration < iterationCount; iteration += 1) {
+      for (int iteration = 0; iteration < iterationCount; iteration += 1) {
         print('running memory test iteration $iteration...');
         _startMemoryUsage = null;
         await useMemory();
@@ -2083,11 +2083,11 @@ class MemoryTest {
       await adb.cancel();
       await device!.uninstallApp();
 
-      final startMemoryStatistics = ListStatistics(_startMemory);
-      final endMemoryStatistics = ListStatistics(_endMemory);
-      final diffMemoryStatistics = ListStatistics(_diffMemory);
+      final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
+      final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
+      final ListStatistics diffMemoryStatistics = ListStatistics(_diffMemory);
 
-      final memoryUsage = <String, dynamic>{
+      final Map<String, dynamic> memoryUsage = <String, dynamic>{
         ...startMemoryStatistics.asMap('start'),
         ...endMemoryStatistics.asMap('end'),
         ...diffMemoryStatistics.asMap('diff'),
@@ -2123,8 +2123,8 @@ class MemoryTest {
     // Keep "tapping" the device till it responds with the string we expect,
     // or throw an error instead of tying up the infrastructure for 30 minutes.
     prepareForNextMessage('TAPPED');
-    var tapped = false;
-    var tapCount = 0;
+    bool tapped = false;
+    int tapCount = 0;
     await Future.any(<Future<void>>[
       () async {
         while (true) {
@@ -2218,12 +2218,12 @@ class DevToolsMemoryTest {
         ],
       );
 
-      final data =
+      final Map<String, dynamic> data =
           json.decode(file('$project/$_kJsonFileName').readAsStringSync()) as Map<String, dynamic>;
-      final samples =
+      final List<dynamic> samples =
           (data['samples'] as Map<String, dynamic>)['data'] as List<dynamic>;
-      var maxRss = 0;
-      var maxAdbTotal = 0;
+      int maxRss = 0;
+      int maxAdbTotal = 0;
       for (final Map<String, dynamic> sample in samples.cast<Map<String, dynamic>>()) {
         if (sample['rss'] != null) {
           maxRss = math.max(maxRss, sample['rss'] as int);
@@ -2310,7 +2310,7 @@ class ReportedDurationTest {
 
       _device = null;
 
-      final reportedDuration = <String, dynamic>{'duration': duration};
+      final Map<String, dynamic> reportedDuration = <String, dynamic>{'duration': duration};
       _device = null;
 
       return TaskResult.success(
@@ -2369,8 +2369,8 @@ class _UnzipListEntry {
 
 /// Wait for up to 1 hour for the file to appear.
 Future<File> waitForFile(String path) async {
-  for (var i = 0; i < 180; i += 1) {
-    final file = File(path);
+  for (int i = 0; i < 180; i += 1) {
+    final File file = File(path);
     print('looking for ${file.path}');
     if (file.existsSync()) {
       return file;

@@ -86,7 +86,7 @@ void main() {
     });
 
     testUsingContext('can detect previews in existing files', () async {
-      final previewFiles = <PreviewPath>[
+      final List<PreviewPath> previewFiles = <PreviewPath>[
         addPreviewContainingFile(projectRoot, <String>['foo.dart']),
         addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']),
       ];
@@ -96,7 +96,7 @@ void main() {
     });
 
     testUsingContext('can detect previews in updated files', () async {
-      final expectedPreviewDetails = <PreviewDetailsMatcher>[
+      final List<PreviewDetailsMatcher> expectedPreviewDetails = <PreviewDetailsMatcher>[
         PreviewDetailsMatcher(
           functionName: 'previews',
           isBuilder: false,
@@ -135,7 +135,7 @@ void main() {
       ];
 
       // Create two files with existing previews and one without.
-      final expectedInitialMapping =
+      final Map<PreviewPath, List<PreviewDetailsMatcher>> expectedInitialMapping =
           <PreviewPath, List<PreviewDetailsMatcher>>{
             addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
             addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']):
@@ -146,7 +146,7 @@ void main() {
         <String>['baz.dart'],
       );
 
-      var completer = Completer<void>();
+      Completer<void> completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The new preview in baz.dart should be included in the preview mapping.
         expect(updated, <PreviewPath, List<PreviewDetailsMatcher>>{
@@ -178,7 +178,7 @@ void main() {
     });
 
     testUsingContext('can detect previews in newly added files', () async {
-      final expectedPreviewDetails = <PreviewDetailsMatcher>[
+      final List<PreviewDetailsMatcher> expectedPreviewDetails = <PreviewDetailsMatcher>[
         PreviewDetailsMatcher(
           functionName: 'previews',
           isBuilder: false,
@@ -217,9 +217,9 @@ void main() {
       ];
 
       // The initial mapping should be empty as there's no files containing previews.
-      final expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{};
+      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{};
 
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       late final PreviewPath previewContainingFilePath;
       onChangeDetected = (PreviewMapping updated) {
         if (completer.isCompleted) {
@@ -245,7 +245,7 @@ void main() {
       // Create an initial pubspec.
       populatePubspec(projectRoot, 'abc');
 
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       onPubspecChangeDetected = () {
         completer.complete();
       };
@@ -323,7 +323,7 @@ class PreviewDetailsMatcher extends Matcher {
       return false;
     }
 
-    var matches = true;
+    bool matches = true;
     void checkPropertyMatch({
       required String name,
       required Object? actual,

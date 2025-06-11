@@ -11,8 +11,8 @@ import '../../src/logging_logger.dart';
 void main() {
   testWithoutContext('Test phases prints correctly', () {
     const Duration zero = Duration.zero;
-    const combinedDuration = Duration(seconds: 42);
-    const wallClockDuration = Duration(seconds: 21);
+    const Duration combinedDuration = Duration(seconds: 42);
+    const Duration wallClockDuration = Duration(seconds: 21);
 
     for (final TestTimePhases phase in TestTimePhases.values) {
       final TestTimeRecorder recorder = createRecorderWithTimesForPhase(
@@ -56,13 +56,13 @@ TestTimeRecorder createRecorderWithTimesForPhase(
   Duration combinedDuration,
   Duration wallClockDuration,
 ) {
-  final logger = LoggingLogger();
-  final recorder = TestTimeRecorder(
+  final LoggingLogger logger = LoggingLogger();
+  final TestTimeRecorder recorder = TestTimeRecorder(
     logger,
     stopwatchFactory: FakeStopwatchFactory(),
   );
-  final combinedStopwatch = recorder.start(phase) as FakeStopwatch;
-  final wallClockStopwatch =
+  final FakeStopwatch combinedStopwatch = recorder.start(phase) as FakeStopwatch;
+  final FakeStopwatch wallClockStopwatch =
       recorder.getPhaseWallClockStopwatchForTesting(phase) as FakeStopwatch;
   wallClockStopwatch.elapsed = wallClockDuration;
   combinedStopwatch.elapsed = combinedDuration;

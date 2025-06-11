@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
-    final key0 = UniqueKey();
-    final key1 = UniqueKey();
+    final UniqueKey key0 = UniqueKey();
+    final UniqueKey key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -53,8 +53,8 @@ void main() {
   });
 
   testWidgets('Radio group can have disabled radio', (WidgetTester tester) async {
-    final key0 = UniqueKey();
-    final key1 = UniqueKey();
+    final UniqueKey key0 = UniqueKey();
+    final UniqueKey key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -91,10 +91,10 @@ void main() {
   });
 
   testWidgets('Radio group can use arrow key', (WidgetTester tester) async {
-    final key0 = UniqueKey();
-    final key1 = UniqueKey();
-    final key2 = UniqueKey();
-    final focusNode = FocusNode();
+    final UniqueKey key0 = UniqueKey();
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -147,16 +147,16 @@ void main() {
   });
 
   testWidgets('Radio group can tab in and out', (WidgetTester tester) async {
-    final key0 = UniqueKey();
-    final key1 = UniqueKey();
-    final key2 = UniqueKey();
-    final radio0 = FocusNode();
+    final UniqueKey key0 = UniqueKey();
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final FocusNode radio0 = FocusNode();
     addTearDown(radio0.dispose);
-    final radio1 = FocusNode();
+    final FocusNode radio1 = FocusNode();
     addTearDown(radio1.dispose);
-    final textFieldBefore = FocusNode();
+    final FocusNode textFieldBefore = FocusNode();
     addTearDown(textFieldBefore.dispose);
-    final textFieldAfter = FocusNode();
+    final FocusNode textFieldAfter = FocusNode();
     addTearDown(textFieldAfter.dispose);
     await tester.pumpWidget(
       MaterialApp(

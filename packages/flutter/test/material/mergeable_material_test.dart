@@ -53,8 +53,8 @@ void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
 BorderRadius? getBorderRadius(WidgetTester tester, int index) {
   final List<Element> containers = tester.elementList(find.byType(Container)).toList();
 
-  final container = containers[index].widget as Container;
-  final boxDecoration = container.decoration as BoxDecoration?;
+  final Container container = containers[index].widget as Container;
+  final BoxDecoration? boxDecoration = container.decoration as BoxDecoration?;
 
   return boxDecoration!.borderRadius as BorderRadius?;
 }
@@ -942,7 +942,7 @@ void main() {
   });
 
   bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
-    const side = BorderSide(color: Color(0x1F000000), width: 0.5);
+    const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
     return decoration ==
         BoxDecoration(
@@ -986,12 +986,12 @@ void main() {
     );
 
     List<Widget> animatedContainers = tester.widgetList(find.byType(AnimatedContainer)).toList();
-    var boxes = <BoxDecoration>[];
-    for (final container in animatedContainers) {
+    List<BoxDecoration> boxes = <BoxDecoration>[];
+    for (final Widget container in animatedContainers) {
       boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
-    var offset = 0;
+    int offset = 0;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
     expect(isDivider(boxes[offset + 1], true, true), isTrue);
@@ -1036,7 +1036,7 @@ void main() {
     animatedContainers = tester.widgetList(find.byType(AnimatedContainer)).toList();
     boxes = <BoxDecoration>[];
 
-    for (final container in animatedContainers) {
+    for (final Widget container in animatedContainers) {
       boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
@@ -1074,7 +1074,7 @@ void main() {
     );
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).last);
-    final decoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     // Since we are getting the last DecoratedBox, it will have a Border.top.
     expect(decoration.border!.top.color, dividerColor);
   });
@@ -1104,7 +1104,7 @@ void main() {
       ),
     );
 
-    var boxDecoration =
+    BoxDecoration boxDecoration =
         tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
     expect(boxDecoration.color, materialSliceColor);
 

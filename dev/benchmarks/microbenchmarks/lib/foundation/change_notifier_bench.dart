@@ -18,21 +18,21 @@ Future<void> execute() async {
   // GC'ed in the end.
   // Not removing listeners would cause memory leaks in a real application.
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   void runAddListenerBenchmark(int iteration, {bool addResult = true}) {
-    const name = 'add';
-    for (var listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
-      final notifiers = List<_Notifier>.generate(
+    const String name = 'add';
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(
         iteration,
         (_) => _Notifier(),
         growable: false,
       );
 
-      final watch = Stopwatch();
+      final Stopwatch watch = Stopwatch();
       watch.start();
-      for (var i = 0; i < iteration; i += 1) {
-        for (var l = 0; l < listenerCount; l += 1) {
+      for (int i = 0; i < iteration; i += 1) {
+        for (int l = 0; l < listenerCount; l += 1) {
           notifiers[i].addListener(() {});
         }
       }
@@ -51,16 +51,16 @@ Future<void> execute() async {
   }
 
   void runNotifyListenerBenchmark(int iteration, {bool addResult = true}) {
-    const name = 'notify';
+    const String name = 'notify';
 
-    for (var listenerCount = 0; listenerCount <= 5; listenerCount += 1) {
-      final notifier = _Notifier();
-      for (var i = 1; i <= listenerCount; i += 1) {
+    for (int listenerCount = 0; listenerCount <= 5; listenerCount += 1) {
+      final _Notifier notifier = _Notifier();
+      for (int i = 1; i <= listenerCount; i += 1) {
         notifier.addListener(() {});
       }
-      final watch = Stopwatch();
+      final Stopwatch watch = Stopwatch();
       watch.start();
-      for (var i = 0; i < iteration; i += 1) {
+      for (int i = 0; i < iteration; i += 1) {
         notifier.notify();
       }
       watch.stop();
@@ -78,21 +78,21 @@ Future<void> execute() async {
   }
 
   void runRemoveListenerBenchmark(int iteration, {bool addResult = true}) {
-    const name = 'remove';
-    final listeners = <VoidCallback>[() {}, () {}, () {}, () {}, () {}];
-    for (var listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
-      final notifiers = List<_Notifier>.generate(iteration, (_) {
-        final notifier = _Notifier();
-        for (var l = 0; l < listenerCount; l += 1) {
+    const String name = 'remove';
+    final List<VoidCallback> listeners = <VoidCallback>[() {}, () {}, () {}, () {}, () {}];
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(iteration, (_) {
+        final _Notifier notifier = _Notifier();
+        for (int l = 0; l < listenerCount; l += 1) {
           notifier.addListener(listeners[l]);
         }
         return notifier;
       }, growable: false);
 
-      final watch = Stopwatch();
+      final Stopwatch watch = Stopwatch();
       watch.start();
-      for (var i = 0; i < iteration; i += 1) {
-        for (var l = 0; l < listenerCount; l += 1) {
+      for (int i = 0; i < iteration; i += 1) {
+        for (int l = 0; l < listenerCount; l += 1) {
           notifiers[i].removeListener(listeners[l]);
         }
       }
@@ -111,28 +111,28 @@ Future<void> execute() async {
   }
 
   void runRemoveListenerWhileNotifyingBenchmark(int iteration, {bool addResult = true}) {
-    const name = 'removeWhileNotify';
+    const String name = 'removeWhileNotify';
 
-    final listeners = <VoidCallback>[() {}, () {}, () {}, () {}, () {}];
-    for (var listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
-      final notifiers = List<_Notifier>.generate(iteration, (_) {
-        final notifier = _Notifier();
+    final List<VoidCallback> listeners = <VoidCallback>[() {}, () {}, () {}, () {}, () {}];
+    for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
+      final List<_Notifier> notifiers = List<_Notifier>.generate(iteration, (_) {
+        final _Notifier notifier = _Notifier();
         notifier.addListener(() {
           // This listener will remove all other listeners. So that only this
           // one is called and measured.
-          for (var l = 0; l < listenerCount; l += 1) {
+          for (int l = 0; l < listenerCount; l += 1) {
             notifier.removeListener(listeners[l]);
           }
         });
-        for (var l = 0; l < listenerCount; l += 1) {
+        for (int l = 0; l < listenerCount; l += 1) {
           notifier.addListener(listeners[l]);
         }
         return notifier;
       }, growable: false);
 
-      final watch = Stopwatch();
+      final Stopwatch watch = Stopwatch();
       watch.start();
-      for (var i = 0; i < iteration; i += 1) {
+      for (int i = 0; i < iteration; i += 1) {
         notifiers[i].notify();
       }
       watch.stop();

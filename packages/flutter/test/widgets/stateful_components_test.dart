@@ -45,18 +45,18 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   testWidgets('resync stateful widget', (WidgetTester tester) async {
-    const innerKey = Key('inner');
-    const outerKey = Key('outer');
+    const Key innerKey = Key('inner');
+    const Key outerKey = Key('outer');
 
-    const inner1 = InnerWidget(key: innerKey);
+    const InnerWidget inner1 = InnerWidget(key: innerKey);
     InnerWidget inner2;
-    const outer1 = OuterContainer(key: outerKey, child: inner1);
+    const OuterContainer outer1 = OuterContainer(key: outerKey, child: inner1);
     OuterContainer outer2;
 
     await tester.pumpWidget(outer1);
 
     final StatefulElement innerElement = tester.element(find.byKey(innerKey));
-    final innerElementState = innerElement.state as InnerWidgetState;
+    final InnerWidgetState innerElementState = innerElement.state as InnerWidgetState;
     expect(innerElementState.widget, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject!.attached, isTrue);

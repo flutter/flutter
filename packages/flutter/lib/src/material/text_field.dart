@@ -1201,8 +1201,8 @@ class _TextFieldState extends State<TextField>
       return effectiveDecoration;
     } // No counter widget
 
-    var counterText = '$currentLength';
-    var semanticCounterText = '';
+    String counterText = '$currentLength';
+    String semanticCounterText = '';
 
     // Handle a real maxLength (positive number)
     if (widget.maxLength! > 0) {
@@ -1511,7 +1511,7 @@ class _TextFieldState extends State<TextField>
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final formatters = <TextInputFormatter>[
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)
         LengthLimitingTextInputFormatter(

@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 4', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     //    O
     //   / \       O=root

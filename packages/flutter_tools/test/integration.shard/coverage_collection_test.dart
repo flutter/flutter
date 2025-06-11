@@ -26,9 +26,9 @@ void main() {
   });
 
   testWithoutContext('Can collect coverage in machine mode', () async {
-    final project = TestProject();
+    final TestProject project = TestProject();
     await project.setUpIn(tempDir);
-    final flutter = FlutterTestTestDriver(tempDir);
+    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
     await flutter.test(coverage: true);
     await flutter.done;
 

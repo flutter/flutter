@@ -53,7 +53,7 @@ _ColorsAndStops _interpolateColorsAndStops(
   assert(bColors.length >= 2);
   assert(aStops.length == aColors.length);
   assert(bStops.length == bColors.length);
-  final stops =
+  final SplayTreeSet<double> stops =
       SplayTreeSet<double>()
         ..addAll(aStops)
         ..addAll(bStops);
@@ -547,7 +547,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    final description = <String>[
+    final List<String> description = <String>[
       'begin: $begin',
       'end: $end',
       'colors: $colors',
@@ -846,7 +846,7 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    final description = <String>[
+    final List<String> description = <String>[
       'center: $center',
       'radius: ${debugFormatDouble(radius)}',
       'colors: $colors',
@@ -1126,7 +1126,7 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    final description = <String>[
+    final List<String> description = <String>[
       'center: $center',
       'startAngle: ${debugFormatDouble(startAngle)}',
       'endAngle: ${debugFormatDouble(endAngle)}',

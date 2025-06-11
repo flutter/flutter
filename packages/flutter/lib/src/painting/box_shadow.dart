@@ -67,7 +67,7 @@ class BoxShadow extends ui.Shadow {
   /// tests that use [matchesGoldenFile].)
   @override
   Paint toPaint() {
-    final result =
+    final Paint result =
         Paint()
           ..color = color
           ..maskFilter = MaskFilter.blur(blurStyle, blurSigma);

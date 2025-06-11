@@ -25,13 +25,13 @@ import '../src/context.dart';
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
-    final residentCompiler = FakeResidentCompiler();
-    final device =
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+    final FakeDevice device =
         FakeDevice()
           ..supportsHotReload = true
           ..supportsHotRestart = false;
 
-    final devices = <FlutterDevice>[
+    final List<FlutterDevice> devices = <FlutterDevice>[
       TestFlutterDevice(
         device: device,
         generator: residentCompiler,
@@ -53,12 +53,12 @@ void main() {
 
   group('cleanupAtFinish()', () {
     testUsingContext('disposes each device', () async {
-      final device1 = FakeDevice();
-      final device2 = FakeDevice();
-      final flutterDevice1 = FakeFlutterDevice(device1);
-      final flutterDevice2 = FakeFlutterDevice(device2);
+      final FakeDevice device1 = FakeDevice();
+      final FakeDevice device2 = FakeDevice();
+      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
+      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
 
-      final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
       await ColdRunner(
         devices,
@@ -83,9 +83,9 @@ void main() {
     });
 
     testUsingContext('calls runCold on attached device', () async {
-      final device = FakeDevice();
-      final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
-      final devices = <FlutterDevice>[flutterDevice];
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
+      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result =
           await ColdRunner(
@@ -101,9 +101,9 @@ void main() {
     testUsingContext(
       'with traceStartup, no env variable',
       () async {
-        final device = FakeDevice();
-        final flutterDevice = FakeFlutterDevice(device);
-        final devices = <FlutterDevice>[flutterDevice];
+        final FakeDevice device = FakeDevice();
+        final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+        final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
         final int result =
             await ColdRunner(
@@ -135,9 +135,9 @@ void main() {
       () async {
         fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
-        final device = FakeDevice();
-        final flutterDevice = FakeFlutterDevice(device);
-        final devices = <FlutterDevice>[flutterDevice];
+        final FakeDevice device = FakeDevice();
+        final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
+        final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
         final int result =
             await ColdRunner(

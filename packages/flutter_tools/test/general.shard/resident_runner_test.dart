@@ -81,9 +81,9 @@ void main() {
     'ResidentRunner can attach to device successfully',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       final Future<int?> result = residentRunner.attach(
         appStartedCompleter: futureAppStart,
         connectionInfoCompleter: futureConnectionInfo,
@@ -112,7 +112,7 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -136,7 +136,7 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -201,7 +201,7 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -276,9 +276,9 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       final Future<int?> result = residentRunner.attach(
         appStartedCompleter: futureAppStart,
         connectionInfoCompleter: futureConnectionInfo,
@@ -299,9 +299,9 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews, listViews],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -334,9 +334,9 @@ void main() {
     'ResidentRunner fails its operation if the device initialization is not complete',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -360,9 +360,9 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews, listViews],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -422,9 +422,9 @@ void main() {
         ),
         analytics: fakeAnalytics,
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -481,9 +481,9 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -539,9 +539,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -603,9 +603,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -666,9 +666,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -725,7 +725,7 @@ void main() {
             ),
           ],
         );
-        final flutterDevice = FakeDelegateFlutterDevice(
+        final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
           device,
           BuildInfo.debug,
           FakeResidentCompiler(),
@@ -741,9 +741,9 @@ void main() {
         );
         devFS.nextUpdateReport = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
-        final futureConnectionInfo =
+        final Completer<DebugConnectionInfo> futureConnectionInfo =
             Completer<DebugConnectionInfo>.sync();
-        final futureAppStart = Completer<void>.sync();
+        final Completer<void> futureAppStart = Completer<void>.sync();
         unawaited(
           residentRunner.attach(
             appStartedCompleter: futureAppStart,
@@ -818,9 +818,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -903,9 +903,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -1034,9 +1034,9 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -1056,9 +1056,9 @@ void main() {
     'ResidentRunner Can handle an RPC exception from hot restart',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
+      final Completer<DebugConnectionInfo> futureConnectionInfo =
           Completer<DebugConnectionInfo>.sync();
-      final futureAppStart = Completer<void>.sync();
+      final Completer<void> futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
           appStartedCompleter: futureAppStart,
@@ -1265,7 +1265,7 @@ flutter:
       globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -1470,7 +1470,7 @@ flutter:
   testUsingContext(
     'FlutterDevice can exit from a release mode isolate with no VmService',
     () => testbed.run(() async {
-      final flutterDevice = TestFlutterDevice(device);
+      final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
 
       await flutterDevice.exitApps();
 
@@ -1482,7 +1482,7 @@ flutter:
     'FlutterDevice will exit an un-paused isolate using stopApp',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final flutterDevice = TestFlutterDevice(device);
+      final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
       flutterDevice.vmService = fakeVmServiceHost!.vmService;
 
       final Future<void> exitFuture = flutterDevice.exitApps();
@@ -1791,8 +1791,8 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
-      final residentCompiler =
+      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -1838,9 +1838,9 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
+      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
 
-      final residentCompiler =
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -1887,9 +1887,9 @@ flutter:
     'FlutterDevice passes alternative-invalidation-strategy flag',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice();
+      final FakeDevice device = FakeDevice();
 
-      final residentCompiler =
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -1920,9 +1920,9 @@ flutter:
     'FlutterDevice passes initializeFromDill parameter if specified',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice();
+      final FakeDevice device = FakeDevice();
 
-      final residentCompiler =
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -1952,9 +1952,9 @@ flutter:
     'FlutterDevice passes assumeInitializeFromDillUpToDate parameter if specified',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice();
+      final FakeDevice device = FakeDevice();
 
-      final residentCompiler =
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -1983,9 +1983,9 @@ flutter:
     'FlutterDevice passes frontendServerStarterPath parameter if specified',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice();
+      final FakeDevice device = FakeDevice();
 
-      final residentCompiler =
+      final DefaultResidentCompiler? residentCompiler =
           (await FlutterDevice.create(
                 device,
                 buildInfo: const BuildInfo(
@@ -2014,7 +2014,7 @@ flutter:
     () => testbed.run(
       () async {
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-        final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
+        final FakeDevice device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
         ddsLauncherCallback = ({
           required Uri remoteVmServiceUri,
           Uri? serviceUri,
@@ -2031,11 +2031,11 @@ flutter:
             ddsUri: Uri.parse('http://localhost/existingDdsInField'),
           );
         };
-        final flutterDevice = TestFlutterDevice(
+        final TestFlutterDevice flutterDevice = TestFlutterDevice(
           device,
           vmServiceUris: Stream<Uri>.value(testUri),
         );
-        final done = Completer<void>();
+        final Completer<void> done = Completer<void>();
         unawaited(
           runZonedGuarded(
             () => flutterDevice
@@ -2073,8 +2073,8 @@ flutter:
     () => testbed.run(
       () async {
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-        final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
-        final done = Completer<void>();
+        final FakeDevice device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
+        final Completer<void> done = Completer<void>();
         ddsLauncherCallback = ({
           required Uri remoteVmServiceUri,
           Uri? serviceUri,
@@ -2093,7 +2093,7 @@ flutter:
           done.complete();
           return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
         };
-        final flutterDevice = TestFlutterDevice(
+        final TestFlutterDevice flutterDevice = TestFlutterDevice(
           device,
           vmServiceUris: Stream<Uri>.value(testUri),
         );
@@ -2246,12 +2246,12 @@ flutter:
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(
+      final FakeDevice device = FakeDevice(
         targetPlatform: TargetPlatform.darwin,
         sdkNameAndVersion: 'Macos',
       );
-      final residentCompiler = FakeResidentCompiler();
-      final flutterDevice =
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+      final FakeFlutterDevice flutterDevice =
           FakeFlutterDevice()
             ..testUri = testUri
             ..vmServiceHost = (() => fakeVmServiceHost)

@@ -23,14 +23,14 @@ final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
 
 void main() {
   testWithoutContext('LinuxDevice defaults', () async {
-    final device = LinuxDevice(
+    final LinuxDevice device = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    final linuxApp = PrebuiltLinuxApp(executable: 'foo');
+    final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
     expect(device.name, 'Linux');
     expect(await device.installApp(linuxApp), true);
@@ -47,7 +47,7 @@ void main() {
   });
 
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
-    final deviceArm64Host = LinuxDevice(
+    final LinuxDevice deviceArm64Host = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -161,8 +161,8 @@ void main() {
   testWithoutContext(
     'LinuxDevice.executablePathForDevice uses the correct package executable',
     () async {
-      final mockApp = FakeLinuxApp();
-      final device = LinuxDevice(
+      final FakeLinuxApp mockApp = FakeLinuxApp();
+      final LinuxDevice device = LinuxDevice(
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
@@ -177,7 +177,7 @@ void main() {
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
-  final flutterProjectFactory = FlutterProjectFactory(
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
   );

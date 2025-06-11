@@ -38,7 +38,7 @@ void main() {
       const DropdownMenuThemeData().copyWith().hashCode,
     );
 
-    const custom = DropdownMenuThemeData(
+    const DropdownMenuThemeData custom = DropdownMenuThemeData(
       menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
       inputDecorationTheme: InputDecorationTheme(filled: true),
       textStyle: TextStyle(fontSize: 25.0),
@@ -53,12 +53,12 @@ void main() {
 
   test('DropdownMenuThemeData lerp special cases', () {
     expect(DropdownMenuThemeData.lerp(null, null, 0), const DropdownMenuThemeData());
-    const data = DropdownMenuThemeData();
+    const DropdownMenuThemeData data = DropdownMenuThemeData();
     expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -71,7 +71,7 @@ void main() {
   });
 
   testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
-    final themeData = ThemeData();
+    final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -122,7 +122,7 @@ void main() {
   });
 
   testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
           color: Colors.orange,
@@ -198,7 +198,7 @@ void main() {
   });
 
   testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
-    final global = DropdownMenuThemeData(
+    final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -219,7 +219,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final dropdownMenuTheme = DropdownMenuThemeData(
+    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -240,7 +240,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final theme = ThemeData(dropdownMenuTheme: global);
+    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -297,7 +297,7 @@ void main() {
   testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (
     WidgetTester tester,
   ) async {
-    final global = DropdownMenuThemeData(
+    final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -318,7 +318,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final dropdownMenuTheme = DropdownMenuThemeData(
+    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -339,7 +339,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final theme = ThemeData(dropdownMenuTheme: global);
+    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,

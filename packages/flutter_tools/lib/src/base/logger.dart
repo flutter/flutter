@@ -656,8 +656,8 @@ void _generateBox({
   required Terminal terminal,
   String? title,
 }) {
-  const kPaddingLeftRight = 1;
-  const kEdges = 2;
+  const int kPaddingLeftRight = 1;
+  const int kEdges = 2;
 
   final int maxTextWidthPerLine = wrapColumn - kEdges - kPaddingLeftRight * 2;
   final List<String> lines = wrapText(
@@ -685,7 +685,7 @@ void _generateBox({
   write('\n');
 
   // Write `│ [message] │`.
-  for (var lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+  for (int lineIdx = 0; lineIdx < lines.length; lineIdx++) {
     write('│');
     write(' ' * kPaddingLeftRight);
     write(lines[lineIdx]);
@@ -805,7 +805,7 @@ class BufferLogger extends Logger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
-    final errorMessage = StringBuffer();
+    final StringBuffer errorMessage = StringBuffer();
     errorMessage.write(message);
     if (stackTrace != null) {
       errorMessage.writeln();
@@ -1019,7 +1019,7 @@ class VerboseLogger extends DelegatingLogger {
 
   @override
   void printBox(String message, {String? title}) {
-    var composedMessage = '';
+    String composedMessage = '';
     _generateBox(
       title: title,
       message: message,
@@ -1069,7 +1069,7 @@ class VerboseLogger extends DelegatingLogger {
     _stopwatch.reset();
 
     String prefix;
-    const prefixWidth = 8;
+    const int prefixWidth = 8;
     if (millis == 0) {
       prefix = ''.padLeft(prefixWidth);
     } else {
@@ -1473,7 +1473,7 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   }
 
   void _printStatus() {
-    final line = '${_message.padRight(_padding)}$_margin';
+    final String line = '${_message.padRight(_padding)}$_margin';
     _totalMessageLength = line.length;
     _writeToStdOut(line);
   }

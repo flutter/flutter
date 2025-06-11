@@ -40,7 +40,7 @@ void main() {
         // Retaining path requires vm to be started, so skipping.
         continue;
       }
-      final execution = _TestExecution(
+      final _TestExecution execution = _TestExecution(
         settingName: settingsCase.key,
         test: test,
         settings: settings,

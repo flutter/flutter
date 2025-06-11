@@ -12,34 +12,34 @@ void main() {
 
     expect(find.widgetWithIcon(IconButton, Icons.settings_outlined), findsExactly(8));
     final Finder unselectedIconButtons = find.widgetWithIcon(IconButton, Icons.settings_outlined);
-    for (var i = 0; i <= 6; i++) {
+    for (int i = 0; i <= 6; i++) {
       final IconButton button = tester.widget<IconButton>(unselectedIconButtons.at(i));
       expect(button.onPressed, i.isEven ? isA<VoidCallback>() : isNull);
       expect(button.isSelected, isFalse);
     }
 
     // Select the icons buttons.
-    for (var i = 0; i <= 3; i++) {
+    for (int i = 0; i <= 3; i++) {
       await tester.tap(unselectedIconButtons.at(2 * i));
     }
     await tester.pump();
 
     expect(find.widgetWithIcon(IconButton, Icons.settings), findsExactly(8));
     final Finder selectedIconButtons = find.widgetWithIcon(IconButton, Icons.settings);
-    for (var i = 0; i <= 6; i++) {
+    for (int i = 0; i <= 6; i++) {
       final IconButton button = tester.widget<IconButton>(selectedIconButtons.at(i));
       expect(button.onPressed, i.isEven ? isA<VoidCallback>() : isNull);
       expect(button.isSelected, isTrue);
     }
 
     // Unselect the icons buttons.
-    for (var i = 0; i <= 3; i++) {
+    for (int i = 0; i <= 3; i++) {
       await tester.tap(selectedIconButtons.at(2 * i));
     }
     await tester.pump();
 
     expect(find.widgetWithIcon(IconButton, Icons.settings_outlined), findsExactly(8));
-    for (var i = 0; i <= 6; i++) {
+    for (int i = 0; i <= 6; i++) {
       final IconButton button = tester.widget<IconButton>(unselectedIconButtons.at(i));
       expect(button.onPressed, i.isEven ? isA<VoidCallback>() : isNull);
       expect(button.isSelected, isFalse);

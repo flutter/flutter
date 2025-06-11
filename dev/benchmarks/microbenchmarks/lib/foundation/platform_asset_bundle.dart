@@ -12,17 +12,17 @@ const int _kNumIterations = 100;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
-  final watch = Stopwatch();
-  final bundle = PlatformAssetBundle();
+  final Stopwatch watch = Stopwatch();
+  final PlatformAssetBundle bundle = PlatformAssetBundle();
 
-  final values = <double>[];
-  for (var j = 0; j < _kNumIterations; ++j) {
+  final List<double> values = <double>[];
+  for (int j = 0; j < _kNumIterations; ++j) {
     double tally = 0;
     watch.reset();
     watch.start();
-    for (var i = 0; i < _kBatchSize; i += 1) {
+    for (int i = 0; i < _kBatchSize; i += 1) {
       // We don't load images like this. PlatformAssetBundle is used for
       // other assets (like Rive animations). We are using an image because it's
       // conveniently sized and available for the test.

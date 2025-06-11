@@ -12,9 +12,9 @@ void main() {
   testWidgets('can change semantics in a branch blocked by BlockSemantics', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    final expectedSemantics = TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,

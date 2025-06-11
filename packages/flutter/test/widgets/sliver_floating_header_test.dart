@@ -57,7 +57,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const visibleItemCount = 4; // viewport height - header height = 400
+      const int visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -88,7 +88,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const visibleItemCount = 6; // 600 = viewport width - header width
+      const int visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -119,7 +119,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const visibleItemCount = 4; // viewport height - header height = 400
+      const int visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -150,7 +150,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const visibleItemCount = 6; // 600 = viewport width - header width
+      const int visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 

@@ -89,7 +89,7 @@ class OptionModel extends ChangeNotifier {
   bool _longText = false;
 
   void reset() {
-    final defaultModel = OptionModel();
+    final OptionModel defaultModel = OptionModel();
     _size = defaultModel.size;
     _enable = defaultModel.enable;
     _slowAnimations = defaultModel.slowAnimations;
@@ -396,14 +396,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(primarySwatch: m2Swatch);
+    final ThemeData theme = ThemeData(primarySwatch: m2Swatch);
     final Widget label = Text(_model.rtl ? 'اضغط علي' : 'Press Me');
     textController.text =
         _model.rtl
             ? 'يعتمد القرار الجيد على المعرفة وليس على الأرقام.'
             : 'A good decision is based on knowledge and not on numbers.';
 
-    final tiles = <Widget>[
+    final List<Widget> tiles = <Widget>[
       _ControlTile(
         label: _model.rtl ? 'حقل النص' : 'List Tile',
         child: SizedBox(

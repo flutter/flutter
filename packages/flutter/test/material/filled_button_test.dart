@@ -22,8 +22,8 @@ void main() {
   }
 
   testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
-    const colorScheme = ColorScheme.light();
-    final theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
 
     // Enabled FilledButton
     await tester.pumpWidget(
@@ -133,10 +133,10 @@ void main() {
   testWidgets('FilledButton.defaultStyle produces a ButtonStyle with appropriate non-null values', (
     WidgetTester tester,
   ) async {
-    const colorScheme = ColorScheme.light();
-    final theme = ThemeData.from(colorScheme: colorScheme);
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
-    final button = FilledButton(onPressed: () {}, child: const Text('button'));
+    final FilledButton button = FilledButton(onPressed: () {}, child: const Text('button'));
     BuildContext? capturedContext;
     // Enabled FilledButton
     await tester.pumpWidget(
@@ -186,10 +186,10 @@ void main() {
   testWidgets(
     'FilledButton.defaultStyle with an icon produces a ButtonStyle with appropriate non-null values',
     (WidgetTester tester) async {
-      const colorScheme = ColorScheme.light();
-      final theme = ThemeData.from(colorScheme: colorScheme);
+      const ColorScheme colorScheme = ColorScheme.light();
+      final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
-      final button = FilledButton.icon(
+      final FilledButton button = FilledButton.icon(
         onPressed: () {},
         icon: const SizedBox(),
         label: const Text('button'),
@@ -243,8 +243,8 @@ void main() {
   testWidgets('FilledButton.icon produces the correct widgets if icon is null', (
     WidgetTester tester,
   ) async {
-    const colorScheme = ColorScheme.light();
-    final theme = ThemeData.from(colorScheme: colorScheme);
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -284,8 +284,8 @@ void main() {
   testWidgets('FilledButton.tonalIcon produces the correct widgets if icon is null', (
     WidgetTester tester,
   ) async {
-    const colorScheme = ColorScheme.light();
-    final theme = ThemeData.from(colorScheme: colorScheme);
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -323,8 +323,8 @@ void main() {
   });
 
   testWidgets('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
-    const colorScheme = ColorScheme.light();
-    final theme = ThemeData.from(colorScheme: colorScheme);
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
     // Enabled FilledButton
     await tester.pumpWidget(
@@ -434,7 +434,7 @@ void main() {
   testWidgets(
     'Default FilledButton meets a11y contrast guidelines',
     (WidgetTester tester) async {
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
@@ -474,8 +474,8 @@ void main() {
   testWidgets('FilledButton default overlayColor and elevation resolve pressed state', (
     WidgetTester tester,
   ) async {
-    final focusNode = FocusNode();
-    final theme = ThemeData();
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -546,8 +546,8 @@ void main() {
   testWidgets('FilledButton.tonal default overlayColor and elevation resolve pressed state', (
     WidgetTester tester,
   ) async {
-    final focusNode = FocusNode();
-    final theme = ThemeData();
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -624,12 +624,12 @@ void main() {
   testWidgets('FilledButton uses stateful color for text color in different states', (
     WidgetTester tester,
   ) async {
-    const buttonText = 'FilledButton';
-    final focusNode = FocusNode();
-    const pressedColor = Color(0x00000001);
-    const hoverColor = Color(0x00000002);
-    const focusedColor = Color(0x00000003);
-    const defaultColor = Color(0x00000004);
+    const String buttonText = 'FilledButton';
+    final FocusNode focusNode = FocusNode();
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -698,13 +698,13 @@ void main() {
   testWidgets('FilledButton uses stateful color for icon color in different states', (
     WidgetTester tester,
   ) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
-    const pressedColor = Color(0x00000001);
-    const hoverColor = Color(0x00000002);
-    const focusedColor = Color(0x00000003);
-    const defaultColor = Color(0x00000004);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -828,8 +828,8 @@ void main() {
   testWidgets('FilledButton onPressed and onLongPress callbacks are distinctly recognized', (
     WidgetTester tester,
   ) async {
-    var didPressButton = false;
-    var didLongPressButton = false;
+    bool didPressButton = false;
+    bool didLongPressButton = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -860,9 +860,9 @@ void main() {
 
   testWidgets("FilledButton response doesn't hover when disabled", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
-    final focusNode = FocusNode(debugLabel: 'FilledButton Focus');
+    final FocusNode focusNode = FocusNode(debugLabel: 'FilledButton Focus');
     final GlobalKey childKey = GlobalKey();
-    var hovering = false;
+    bool hovering = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -916,7 +916,7 @@ void main() {
   testWidgets('disabled and hovered FilledButton responds to mouse-exit', (
     WidgetTester tester,
   ) async {
-    var onHoverCount = 0;
+    int onHoverCount = 0;
     late bool hover;
 
     Widget buildFrame({required bool enabled}) {
@@ -978,8 +978,8 @@ void main() {
   });
 
   testWidgets('Can set FilledButton focus and Can set unFocus.', (WidgetTester tester) async {
-    final node = FocusNode(debugLabel: 'FilledButton Focus');
-    var gotFocus = false;
+    final FocusNode node = FocusNode(debugLabel: 'FilledButton Focus');
+    bool gotFocus = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1010,8 +1010,8 @@ void main() {
   testWidgets('When FilledButton disable, Can not set FilledButton focus.', (
     WidgetTester tester,
   ) async {
-    final node = FocusNode(debugLabel: 'FilledButton Focus');
-    var gotFocus = false;
+    final FocusNode node = FocusNode(debugLabel: 'FilledButton Focus');
+    bool gotFocus = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1034,7 +1034,7 @@ void main() {
   });
 
   testWidgets('Does FilledButton work with hover', (WidgetTester tester) async {
-    const hoverColor = Color(0xff001122);
+    const Color hoverColor = Color(0xff001122);
 
     await tester.pumpWidget(
       Directionality(
@@ -1063,9 +1063,9 @@ void main() {
   });
 
   testWidgets('Does FilledButton work with focus', (WidgetTester tester) async {
-    const focusColor = Color(0xff001122);
+    const Color focusColor = Color(0xff001122);
 
-    final focusNode = FocusNode(debugLabel: 'FilledButton Node');
+    final FocusNode focusNode = FocusNode(debugLabel: 'FilledButton Node');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1094,13 +1094,13 @@ void main() {
   });
 
   testWidgets('Does FilledButton work with autofocus', (WidgetTester tester) async {
-    const focusColor = Color(0xff001122);
+    const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
       return states.contains(MaterialState.focused) ? focusColor : null;
     }
 
-    final focusNode = FocusNode(debugLabel: 'FilledButton Node');
+    final FocusNode focusNode = FocusNode(debugLabel: 'FilledButton Node');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1127,7 +1127,7 @@ void main() {
   });
 
   testWidgets('Does FilledButton contribute semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1178,7 +1178,7 @@ void main() {
   testWidgets('FilledButton size is configurable by ThemeData.materialTapTargetSize', (
     WidgetTester tester,
   ) async {
-    const style = ButtonStyle(
+    const ButtonStyle style = ButtonStyle(
       // Specifying minimumSize to mimic the original minimumSize for
       // RaisedButton so that the corresponding button size matches
       // the original version of this test.
@@ -1228,8 +1228,8 @@ void main() {
   });
 
   testWidgets('FilledButton responds to density changes.', (WidgetTester tester) async {
-    const key = Key('test');
-    const childKey = Key('test child');
+    const Key key = Key('test');
+    const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
@@ -1303,8 +1303,8 @@ void main() {
   });
 
   testWidgets('FilledButton.icon responds to applied padding', (WidgetTester tester) async {
-    const buttonKey = Key('test');
-    const labelKey = Key('label');
+    const Key buttonKey = Key('test');
+    const Key labelKey = Key('label');
     await tester.pumpWidget(
       // When textDirection is set to TextDirection.ltr, the label appears on the
       // right side of the icon. This is important in determining whether the
@@ -1338,25 +1338,25 @@ void main() {
     expect(paddingRect.right, equals(labelRect.right + 10));
     expect(paddingRect.left, equals(iconRect.left - 16));
     // Use the taller widget to check the top and bottom padding.
-    final tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
+    final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
     expect(paddingRect.top, closeOnWeb(tallerWidget.top - 6.5));
     expect(paddingRect.bottom, closeOnWeb(tallerWidget.bottom + 13.5));
   });
 
   group('Default FilledButton padding for textScaleFactor, textDirection', () {
-    const buttonKey = ValueKey<String>('button');
-    const labelKey = ValueKey<String>('label');
-    const iconKey = ValueKey<String>('icon');
+    const ValueKey<String> buttonKey = ValueKey<String>('button');
+    const ValueKey<String> labelKey = ValueKey<String>('label');
+    const ValueKey<String> iconKey = ValueKey<String>('icon');
 
-    const textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
-    const textDirectionOptions = <TextDirection>[
+    const List<double> textScaleFactorOptions = <double>[0.5, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0];
+    const List<TextDirection> textDirectionOptions = <TextDirection>[
       TextDirection.ltr,
       TextDirection.rtl,
     ];
-    const iconOptions = <Widget?>[null, Icon(Icons.add, size: 18, key: iconKey)];
+    const List<Widget?> iconOptions = <Widget?>[null, Icon(Icons.add, size: 18, key: iconKey)];
 
     // Expected values for each textScaleFactor.
-    final paddingWithoutIconStart = <double, double>{
+    final Map<double, double> paddingWithoutIconStart = <double, double>{
       0.5: 16,
       1: 16,
       1.25: 14,
@@ -1366,7 +1366,7 @@ void main() {
       3: 4,
       4: 4,
     };
-    final paddingWithoutIconEnd = <double, double>{
+    final Map<double, double> paddingWithoutIconEnd = <double, double>{
       0.5: 16,
       1: 16,
       1.25: 14,
@@ -1376,7 +1376,7 @@ void main() {
       3: 4,
       4: 4,
     };
-    final paddingWithIconStart = <double, double>{
+    final Map<double, double> paddingWithIconStart = <double, double>{
       0.5: 12,
       1: 12,
       1.25: 11,
@@ -1386,7 +1386,7 @@ void main() {
       3: 8,
       4: 8,
     };
-    final paddingWithIconEnd = <double, double>{
+    final Map<double, double> paddingWithIconEnd = <double, double>{
       0.5: 16,
       1: 16,
       1.25: 14,
@@ -1396,7 +1396,7 @@ void main() {
       3: 4,
       4: 4,
     };
-    final paddingWithIconGap = <double, double>{
+    final Map<double, double> paddingWithIconGap = <double, double>{
       0.5: 8,
       1: 8,
       1.25: 7,
@@ -1423,9 +1423,9 @@ void main() {
       );
     }
 
-    for (final textScaleFactor in textScaleFactorOptions) {
-      for (final textDirection in textDirectionOptions) {
-        for (final icon in iconOptions) {
+    for (final double textScaleFactor in textScaleFactorOptions) {
+      for (final TextDirection textDirection in textDirectionOptions) {
+        for (final Widget? icon in iconOptions) {
           final String testName = <String>[
             'FilledButton, text scale $textScaleFactor',
             if (icon != null) 'with icon',
@@ -1475,7 +1475,7 @@ void main() {
               find.descendant(of: find.byKey(buttonKey), matching: find.byType(Padding)),
             );
             expect(Directionality.of(paddingElement), textDirection);
-            final paddingWidget = paddingElement.widget as Padding;
+            final Padding paddingWidget = paddingElement.widget as Padding;
 
             // Compute expected padding, and check.
 
@@ -1661,7 +1661,7 @@ void main() {
   testWidgets('By default, FilledButton shape outline is defined by shape.side', (
     WidgetTester tester,
   ) async {
-    const borderColor = Color(0xff4caf50);
+    const Color borderColor = Color(0xff4caf50);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1768,7 +1768,7 @@ void main() {
   testWidgets(
     'FilledButton uses InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final theme = ThemeData();
+      final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2063,7 +2063,7 @@ void main() {
       );
     }
 
-    const borderSide = BorderSide(width: 10, color: Color(0xff00ff00));
+    const BorderSide borderSide = BorderSide(width: 10, color: Color(0xff00ff00));
     await tester.pumpWidget(buildFrame(side: borderSide));
     expect(
       tester.widget<InkWell>(find.byType(InkWell)).customBorder,
@@ -2104,12 +2104,12 @@ void main() {
   });
 
   Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
-    var count = 0;
+    int count = 0;
     void valueChanged() {
       count += 1;
     }
 
-    final controller = MaterialStatesController();
+    final MaterialStatesController controller = MaterialStatesController();
     addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
@@ -2220,12 +2220,12 @@ void main() {
   });
 
   testWidgets('Disabled FilledButton statesController', (WidgetTester tester) async {
-    var count = 0;
+    int count = 0;
     void valueChanged() {
       count += 1;
     }
 
-    final controller = MaterialStatesController();
+    final MaterialStatesController controller = MaterialStatesController();
     addTearDown(controller.dispose);
     controller.addListener(valueChanged);
     await tester.pumpWidget(
@@ -2244,8 +2244,8 @@ void main() {
   });
 
   testWidgets('FilledButton backgroundBuilder and foregroundBuilder', (WidgetTester tester) async {
-    const backgroundColor = Color(0xFF000011);
-    const foregroundColor = Color(0xFF000022);
+    const Color backgroundColor = Color(0xFF000011);
+    const Color foregroundColor = Color(0xFF000022);
 
     await tester.pumpWidget(
       Directionality(
@@ -2294,8 +2294,8 @@ void main() {
   testWidgets(
     'FilledButton backgroundBuilder drops button child and foregroundBuilder return value',
     (WidgetTester tester) async {
-      const backgroundColor = Color(0xFF000011);
-      const foregroundColor = Color(0xFF000022);
+      const Color backgroundColor = Color(0xFF000011);
+      const Color foregroundColor = Color(0xFF000022);
 
       await tester.pumpWidget(
         Directionality(
@@ -2326,7 +2326,7 @@ void main() {
   );
 
   testWidgets('FilledButton foregroundBuilder drops button child', (WidgetTester tester) async {
-    const foregroundColor = Color(0xFF000022);
+    const Color foregroundColor = Color(0xFF000022);
 
     await tester.pumpWidget(
       Directionality(
@@ -2355,9 +2355,9 @@ void main() {
   testWidgets('FilledButton foreground and background builders are applied to the correct states', (
     WidgetTester tester,
   ) async {
-    var foregroundStates = <MaterialState>{};
-    var backgroundStates = <MaterialState>{};
-    final focusNode = FocusNode();
+    Set<MaterialState> foregroundStates = <MaterialState>{};
+    Set<MaterialState> backgroundStates = <MaterialState>{};
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2395,12 +2395,12 @@ void main() {
     expect(backgroundStates.isEmpty, isTrue);
     expect(foregroundStates.isEmpty, isTrue);
 
-    const focusedStates = <MaterialState>{MaterialState.focused};
-    const focusedHoveredStates = <MaterialState>{
+    const Set<MaterialState> focusedStates = <MaterialState>{MaterialState.focused};
+    const Set<MaterialState> focusedHoveredStates = <MaterialState>{
       MaterialState.focused,
       MaterialState.hovered,
     };
-    const focusedHoveredPressedStates = <MaterialState>{
+    const Set<MaterialState> focusedHoveredPressedStates = <MaterialState>{
       MaterialState.focused,
       MaterialState.hovered,
       MaterialState.pressed,
@@ -2720,9 +2720,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/154798.
   testWidgets('FilledButton.styleFrom can customize the button icon', (WidgetTester tester) async {
-    const iconColor = Color(0xFFF000FF);
-    const iconSize = 32.0;
-    const disabledIconColor = Color(0xFFFFF000);
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
     Widget buildButton({bool enabled = true}) {
       return MaterialApp(
         home: Material(
@@ -2762,7 +2762,7 @@ void main() {
   testWidgets('FilledButton icon uses provided foregroundColor over default icon color', (
     WidgetTester tester,
   ) async {
-    const foregroundColor = Color(0xFFFF1234);
+    const Color foregroundColor = Color(0xFFFF1234);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2793,10 +2793,10 @@ void main() {
   });
 
   testWidgets('FilledButton text and icon respect animation duration', (WidgetTester tester) async {
-    const buttonText = 'Button';
+    const String buttonText = 'Button';
     const IconData buttonIcon = Icons.add;
-    const hoveredColor = Color(0xFFFF0000);
-    const idleColor = Color(0xFF000000);
+    const Color hoveredColor = Color(0xFFFF0000);
+    const Color idleColor = Color(0xFF000000);
 
     Widget buildButton({Duration? animationDuration}) {
       return MaterialApp(

@@ -227,7 +227,7 @@ class NavigationRailThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const defaultData = NavigationRailThemeData();
+    const NavigationRailThemeData defaultData = NavigationRailThemeData();
 
     properties.add(
       ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor),

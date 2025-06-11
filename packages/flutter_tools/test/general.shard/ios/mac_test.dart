@@ -49,14 +49,14 @@ void main() {
 
     group('startLogger', () {
       testWithoutContext('starts idevicesyslog when USB connected', () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['HostArtifact.idevicesyslog', '-u', '1234'],
             environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
           ),
         ]);
 
-        final iMobileDevice = IMobileDevice(
+        final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
           processManager: fakeProcessManager,
@@ -68,14 +68,14 @@ void main() {
       });
 
       testWithoutContext('starts idevicesyslog when wirelessly connected', () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['HostArtifact.idevicesyslog', '-u', '1234', '--network'],
             environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
           ),
         ]);
 
-        final iMobileDevice = IMobileDevice(
+        final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
           processManager: fakeProcessManager,
@@ -106,7 +106,7 @@ void main() {
           ),
         );
 
-        final iMobileDevice = IMobileDevice(
+        final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
           processManager: fakeProcessManager,
@@ -129,7 +129,7 @@ void main() {
           ),
         );
 
-        final iMobileDevice = IMobileDevice(
+        final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
           processManager: fakeProcessManager,
@@ -154,7 +154,7 @@ void main() {
           ),
         );
 
-        final iMobileDevice = IMobileDevice(
+        final IMobileDevice iMobileDevice = IMobileDevice(
           artifacts: artifacts,
           cache: cache,
           processManager: fakeProcessManager,
@@ -174,7 +174,7 @@ void main() {
     setUp(() {
       buildSettings = <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'test.app'};
 
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -182,8 +182,8 @@ void main() {
     });
 
     testWithoutContext('Sends analytics when bitcode fails', () async {
-      const buildCommands = <String>['xcrun', 'cc', 'blah'];
-      final buildResult = XcodeBuildResult(
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: 'BITCODE_ENABLED = YES',
         xcodeBuildExecution: XcodeBuildExecution(
@@ -193,7 +193,7 @@ void main() {
           buildSettings: buildSettings,
         ),
       );
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
         logger: logger,
@@ -216,11 +216,11 @@ void main() {
     });
 
     testWithoutContext('fallback to stdout: No provisioning profile shows message', () async {
-      final buildSettingsWithDevTeam = <String, String>{
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
         'DEVELOPMENT_TEAM': 'a team',
       };
-      final buildResult = XcodeBuildResult(
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
 Launching lib/main.dart on iPhone in debug mode...
@@ -284,7 +284,7 @@ Error launching application on iPhone.''',
           buildSettings: buildSettingsWithDevTeam,
         ),
       );
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
         logger: logger,
@@ -297,11 +297,11 @@ Error launching application on iPhone.''',
     });
 
     testWithoutContext('fallback to stdout: Ineligible destinations', () async {
-      final buildSettingsWithDevTeam = <String, String>{
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
         'DEVELOPMENT_TEAM': 'a team',
       };
-      final buildResult = XcodeBuildResult(
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stderr: '''
 Launching lib/main.dart on iPhone in debug mode...
@@ -326,7 +326,7 @@ Error launching application on iPhone.''',
           buildSettings: buildSettingsWithDevTeam,
         ),
       );
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
         logger: logger,
@@ -339,7 +339,7 @@ Error launching application on iPhone.''',
     });
 
     testWithoutContext('No development team shows message', () async {
-      final buildResult = XcodeBuildResult(
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
 Running "flutter pub get" in flutter_gallery...  0.6s
@@ -370,7 +370,7 @@ Could not build the precompiled application for the device.''',
           buildSettings: buildSettings,
         ),
       );
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       await diagnoseXcodeBuildFailure(
         buildResult,
         logger: logger,
@@ -390,7 +390,7 @@ Could not build the precompiled application for the device.''',
     testWithoutContext(
       'does not show no development team message when other Xcode issues detected',
       () async {
-        final buildResult = XcodeBuildResult(
+        final XcodeBuildResult buildResult = XcodeBuildResult(
           success: false,
           stdout: '''
 Running "flutter pub get" in flutter_gallery...  0.6s
@@ -427,7 +427,7 @@ Could not build the precompiled application for the device.''',
           ),
         );
 
-        final fs = MemoryFileSystem.test();
+        final MemoryFileSystem fs = MemoryFileSystem.test();
         await diagnoseXcodeBuildFailure(
           buildResult,
           logger: logger,
@@ -445,8 +445,8 @@ Could not build the precompiled application for the device.''',
     );
 
     testWithoutContext('parses redefinition of module error', () async {
-      const buildCommands = <String>['xcrun', 'cc', 'blah'];
-      final buildResult = XcodeBuildResult(
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '',
         xcodeBuildExecution: XcodeBuildExecution(
@@ -462,8 +462,8 @@ Could not build the precompiled application for the device.''',
           ],
         ),
       );
-      final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
         usesSwiftPackageManager: true,
       );
@@ -488,8 +488,8 @@ Could not build the precompiled application for the device.''',
     });
 
     testWithoutContext('parses duplicate symbols error with arch and number', () async {
-      const buildCommands = <String>['xcrun', 'cc', 'blah'];
-      final buildResult = XcodeBuildResult(
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: r'''
 duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
@@ -511,8 +511,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           ],
         ),
       );
-      final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
         usesSwiftPackageManager: true,
       );
@@ -537,8 +537,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     });
 
     testWithoutContext('parses duplicate symbols error with number', () async {
-      const buildCommands = <String>['xcrun', 'cc', 'blah'];
-      final buildResult = XcodeBuildResult(
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: r'''
 duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
@@ -557,8 +557,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           ],
         ),
       );
-      final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
         usesSwiftPackageManager: true,
       );
@@ -583,8 +583,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     });
 
     testWithoutContext('parses duplicate symbols error without arch and number', () async {
-      const buildCommands = <String>['xcrun', 'cc', 'blah'];
-      final buildResult = XcodeBuildResult(
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: r'''
 duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
@@ -602,8 +602,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           ],
         ),
       );
-      final fs = MemoryFileSystem.test();
-      final project = FakeFlutterProject(
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
         usesSwiftPackageManager: true,
       );
@@ -630,8 +630,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     testUsingContext(
       'parses missing module error',
       () async {
-        const buildCommands = <String>['xcrun', 'cc', 'blah'];
-        final buildResult = XcodeBuildResult(
+        const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+        final XcodeBuildResult buildResult = XcodeBuildResult(
           success: false,
           stdout: '',
           xcodeBuildExecution: XcodeBuildExecution(
@@ -647,11 +647,11 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
             ],
           ),
         );
-        final fs = MemoryFileSystem.test();
-        final project = FakeFlutterProject(fileSystem: fs);
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final FakeFlutterProject project = FakeFlutterProject(fileSystem: fs);
         project.ios.podfile.createSync(recursive: true);
         project.manifest = FakeFlutterManifest();
-        final pluginNames = <String>['plugin_1_name', 'plugin_2_name'];
+        final List<String> pluginNames = <String>['plugin_1_name', 'plugin_2_name'];
         project.manifest.dependencies.addAll(pluginNames);
         createFakePlugins(project, fs, pluginNames);
         fs.systemTempDirectory
@@ -684,22 +684,22 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
-    const flutterAssetPbxProjLines =
+    const String flutterAssetPbxProjLines =
         '/* flutter_assets */\n'
         '/* App.framework\n'
         'another line';
 
-    const appFlxPbxProjLines =
+    const String appFlxPbxProjLines =
         '/* app.flx\n'
         '/* App.framework\n'
         'another line';
 
-    const cleanPbxProjLines =
+    const String cleanPbxProjLines =
         '/* App.framework\n'
         'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
-      final project = FakeIosProject(fileSystem: MemoryFileSystem.test());
+      final FakeIosProject project = FakeIosProject(fileSystem: MemoryFileSystem.test());
       final File pbxprojFile =
           project.xcodeProjectInfoFile
             ..createSync(recursive: true)
@@ -726,12 +726,12 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
   group('remove Finder extended attributes', () {
     late Directory projectDirectory;
     setUp(() {
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       projectDirectory = fs.directory('flutter_project');
     });
 
     testWithoutContext('removes xattr', () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
         ),
@@ -746,7 +746,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     });
 
     testWithoutContext('ignores errors', () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
           exitCode: 1,
@@ -769,7 +769,7 @@ void createFakePlugins(
   FileSystem fileSystem,
   List<String> pluginNames,
 ) {
-  const pluginYamlTemplate = '''
+  const String pluginYamlTemplate = '''
   flutter:
     plugin:
       platforms:

@@ -20,9 +20,9 @@ const List<String> kEmulatorLaunchCommand = <String>['emulator', '-avd', emulato
 void main() {
   group('android_emulator', () {
     testWithoutContext('flags emulators without config', () {
-      const emulatorID = '1234';
+      const String emulatorID = '1234';
 
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -33,8 +33,8 @@ void main() {
     });
 
     testWithoutContext('flags emulators with config', () {
-      const emulatorID = '1234';
-      final emulator = AndroidEmulator(
+      const String emulatorID = '1234';
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         properties: const <String, String>{'name': 'test'},
         logger: BufferLogger.test(),
@@ -47,14 +47,14 @@ void main() {
     });
 
     testWithoutContext('reads expected metadata', () {
-      const emulatorID = '1234';
-      const manufacturer = 'Me';
-      const displayName = 'The best one';
-      final properties = <String, String>{
+      const String emulatorID = '1234';
+      const String manufacturer = 'Me';
+      const String displayName = 'The best one';
+      final Map<String, String> properties = <String, String>{
         'hw.device.manufacturer': manufacturer,
         'avd.ini.displayname': displayName,
       };
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -70,10 +70,10 @@ void main() {
     });
 
     testWithoutContext('prefers displayname for name', () {
-      const emulatorID = '1234';
-      const displayName = 'The best one';
-      final properties = <String, String>{'avd.ini.displayname': displayName};
-      final emulator = AndroidEmulator(
+      const String emulatorID = '1234';
+      const String displayName = 'The best one';
+      final Map<String, String> properties = <String, String>{'avd.ini.displayname': displayName};
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -87,11 +87,11 @@ void main() {
     testWithoutContext('uses cleaned up ID if no displayname is set', () {
       // Android Studio uses the ID with underscores replaced with spaces
       // for the name if displayname is not set so we do the same.
-      const emulatorID = 'This_is_my_ID';
-      final properties = <String, String>{
+      const String emulatorID = 'This_is_my_ID';
+      final Map<String, String> properties = <String, String>{
         'avd.ini.notadisplayname': 'this is not a display name',
       };
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -103,7 +103,7 @@ void main() {
     });
 
     testWithoutContext('parses ini files', () {
-      const iniFile = '''
+      const String iniFile = '''
         hw.device.name=My Test Name
         #hw.device.name=Bad Name
 
@@ -127,7 +127,7 @@ void main() {
     });
 
     testWithoutContext('succeeds', () async {
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: kEmulatorLaunchCommand),
@@ -140,11 +140,11 @@ void main() {
     });
 
     testWithoutContext('succeeds with coldboot launch', () async {
-      final kEmulatorLaunchColdBootCommand = <String>[
+      final List<String> kEmulatorLaunchColdBootCommand = <String>[
         ...kEmulatorLaunchCommand,
         '-no-snapshot-load',
       ];
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(command: kEmulatorLaunchColdBootCommand),
@@ -157,8 +157,8 @@ void main() {
     });
 
     testWithoutContext('prints error on failure', () async {
-      final logger = BufferLogger.test();
-      final emulator = AndroidEmulator(
+      final BufferLogger logger = BufferLogger.test();
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
@@ -178,8 +178,8 @@ void main() {
     });
 
     testWithoutContext('prints nothing on late failure with empty stderr', () async {
-      final logger = BufferLogger.test();
-      final emulator = AndroidEmulator(
+      final BufferLogger logger = BufferLogger.test();
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -200,7 +200,7 @@ void main() {
     testWithoutContext('throws if emulator not found', () async {
       mockSdk.emulatorPath = null;
 
-      final emulator = AndroidEmulator(
+      final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.empty(),
         androidSdk: mockSdk,

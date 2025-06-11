@@ -31,7 +31,7 @@ void main() {
 
   test('debugDumpSemantics prints explanation when semantics are unavailable', () {
     RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);
-    final log = <String?>[];
+    final List<String?> log = <String?>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add(message);
     };

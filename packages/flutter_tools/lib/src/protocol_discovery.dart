@@ -36,7 +36,7 @@ class ProtocolDiscovery {
     required bool ipv6,
     required Logger logger,
   }) {
-    const kVmServiceService = 'VM Service';
+    const String kVmServiceService = 'VM Service';
     return ProtocolDiscovery._(
       logReader,
       kVmServiceService,
@@ -161,7 +161,7 @@ class _BufferedStreamController<T> {
   }
 
   late final StreamController<T> _streamController = () {
-    final streamControllerInstance = StreamController<T>.broadcast();
+    final StreamController<T> streamControllerInstance = StreamController<T>.broadcast();
     streamControllerInstance.onListen = () {
       for (final dynamic event in _events) {
         if (event is T) {
@@ -214,13 +214,13 @@ StreamTransformer<S, S> _throttle<S>({required Duration waitDuration}) {
   S latestLine;
   int? lastExecution;
   Future<void>? throttleFuture;
-  var done = false;
+  bool done = false;
 
   return StreamTransformer<S, S>.fromHandlers(
     handleData: (S value, EventSink<S> sink) {
       latestLine = value;
 
-      final isFirstMessage = lastExecution == null;
+      final bool isFirstMessage = lastExecution == null;
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
       lastExecution ??= currentTime;
       final int remainingTime = currentTime - lastExecution!;

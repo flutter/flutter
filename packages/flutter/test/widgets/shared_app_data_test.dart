@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SharedAppData basics', (WidgetTester tester) async {
-    var columnBuildCount = 0;
-    var child1BuildCount = 0;
-    var child2BuildCount = 0;
+    int columnBuildCount = 0;
+    int child1BuildCount = 0;
+    int child2BuildCount = 0;
     late void Function(BuildContext context) setSharedAppDataValue;
 
     await tester.pumpWidget(
@@ -129,8 +129,8 @@ void main() {
   });
 
   testWidgets('WidgetsApp SharedAppData ', (WidgetTester tester) async {
-    var parentBuildCount = 0;
-    var childBuildCount = 0;
+    int parentBuildCount = 0;
+    int childBuildCount = 0;
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -169,8 +169,8 @@ void main() {
   });
 
   testWidgets('WidgetsApp SharedAppData Shadowing', (WidgetTester tester) async {
-    var innerTapCount = 0;
-    var outerTapCount = 0;
+    int innerTapCount = 0;
+    int outerTapCount = 0;
 
     await tester.pumpWidget(
       WidgetsApp(

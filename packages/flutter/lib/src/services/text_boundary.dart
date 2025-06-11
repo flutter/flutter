@@ -92,7 +92,7 @@ class CharacterBoundary extends TextBoundary {
     if (position >= _text.length) {
       return null;
     }
-    final rangeAtPosition = CharacterRange.at(_text, max(0, position + 1));
+    final CharacterRange rangeAtPosition = CharacterRange.at(_text, max(0, position + 1));
     final int nextBoundary = rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length;
     assert(nextBoundary == _text.length || CharacterRange.at(_text, nextBoundary).isEmpty);
     return nextBoundary;
@@ -105,7 +105,7 @@ class CharacterBoundary extends TextBoundary {
     } else if (position >= _text.length) {
       return TextRange(start: getLeadingTextBoundaryAt(position) ?? -1, end: -1);
     }
-    final rangeAtPosition = CharacterRange.at(_text, position);
+    final CharacterRange rangeAtPosition = CharacterRange.at(_text, position);
     return rangeAtPosition.isNotEmpty
         ? TextRange(
           start: rangeAtPosition.stringBeforeLength,

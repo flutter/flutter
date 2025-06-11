@@ -110,7 +110,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       return _validators!;
     }
 
-    final ideValidators = <DoctorValidator>[
+    final List<DoctorValidator> ideValidators = <DoctorValidator>[
       if (androidWorkflow!.appliesToHostPlatform)
         ...AndroidStudioValidator.allValidators(
           globals.config,
@@ -128,7 +128,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ),
       ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
     ];
-    final proxyValidator = ProxyValidator(platform: platform);
+    final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
     _validators = <DoctorValidator>[
       FlutterValidator(
         fileSystem: globals.fs,
@@ -233,8 +233,8 @@ class Doctor {
         // onError callback to it and translate errors into ValidationResults.
         asyncGuard<ValidationResult>(
           () {
-            final timeoutCompleter = Completer<ValidationResult>();
-            final timer = Timer(doctorDuration, () {
+            final Completer<ValidationResult> timeoutCompleter = Completer<ValidationResult>();
+            final Timer timer = Timer(doctorDuration, () {
               timeoutCompleter.completeError(
                 Exception(
                   '${validator.title} exceeded maximum allowed duration of $doctorDuration',
@@ -268,13 +268,13 @@ class Doctor {
   }
 
   Future<String> _summaryText() async {
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
 
-    var missingComponent = false;
-    var sawACrash = false;
+    bool missingComponent = false;
+    bool sawACrash = false;
 
     for (final DoctorValidator validator in validators) {
-      final lineBuffer = StringBuffer();
+      final StringBuffer lineBuffer = StringBuffer();
       ValidationResult result;
       try {
         result = await asyncGuard<ValidationResult>(() => validator.validateImpl());
@@ -362,8 +362,8 @@ class Doctor {
     if (!verbose) {
       _logger.printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
-    var doctorResult = true;
-    var issues = 0;
+    bool doctorResult = true;
+    int issues = 0;
 
     // This timestamp will be used on the backend of GA4 to group each of the events that
     // were sent for each doctor validator and its result
@@ -399,7 +399,7 @@ class Doctor {
       }
       if (sendEvent) {
         if (validator is GroupedValidator) {
-          for (var i = 0; i < validator.subValidators.length; i++) {
+          for (int i = 0; i < validator.subValidators.length; i++) {
             final DoctorValidator subValidator = validator.subValidators[i];
 
             // Ensure that all of the subvalidators in the group have
@@ -464,8 +464,8 @@ class Doctor {
 
       for (final ValidationMessage message in result.messages) {
         if (!message.isInformation || verbose) {
-          var hangingIndent = 2;
-          var indent = 4;
+          int hangingIndent = 2;
+          int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
@@ -562,7 +562,7 @@ class FlutterValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     String? versionChannel;
     String? frameworkVersion;
 
@@ -609,7 +609,7 @@ class FlutterValidator extends DoctorValidator {
     // not run this check.
     final String genSnapshotPath = _artifacts.getArtifactPath(Artifact.genSnapshot);
     if (_fileSystem.file(genSnapshotPath).existsSync() && !_genSnapshotRuns(genSnapshotPath)) {
-      final buffer = StringBuffer();
+      final StringBuffer buffer = StringBuffer();
       buffer.writeln(_userMessages.flutterBinariesDoNotRun);
       if (_platform.isLinux) {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
@@ -696,7 +696,7 @@ class FlutterValidator extends DoctorValidator {
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
     if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
-      final hint =
+      final String hint =
           'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
           'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
@@ -743,7 +743,7 @@ class FlutterValidator extends DoctorValidator {
   }
 
   bool _genSnapshotRuns(String genSnapshotPath) {
-    const kExpectedExitCode = 255;
+    const int kExpectedExitCode = 255;
     try {
       return _processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
     } on Exception {
@@ -770,7 +770,7 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.refreshAllDevices(
       timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );
-    var installedMessages = <ValidationMessage>[];
+    List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
       installedMessages =
           (await Device.descriptions(
@@ -778,7 +778,7 @@ class DeviceValidator extends DoctorValidator {
           )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
-    var diagnosticMessages = <ValidationMessage>[];
+    List<ValidationMessage> diagnosticMessages = <ValidationMessage>[];
     final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
       diagnosticMessages =

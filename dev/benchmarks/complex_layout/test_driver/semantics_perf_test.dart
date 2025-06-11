@@ -62,7 +62,7 @@ void main() {
           'Expected exactly two "SEMANTICS" events, got ${semanticsEvents?.length}:\n$semanticsEvents',
         );
       }
-      final semanticsTreeCreation = Duration(
+      final Duration semanticsTreeCreation = Duration(
         microseconds:
             semanticsEvents!.last.timestampMicros! - semanticsEvents.first.timestampMicros!,
       );

@@ -15,12 +15,12 @@ void main() {
 
   test('ButtonStyle lerp special cases', () {
     expect(ButtonStyle.lerp(null, null, 0), null);
-    const data = ButtonStyle();
+    const ButtonStyle data = ButtonStyle();
     expect(identical(ButtonStyle.lerp(data, data, 0.5), data), true);
   });
 
   test('ButtonStyle defaults', () {
-    const style = ButtonStyle();
+    const ButtonStyle style = ButtonStyle();
     expect(style.textStyle, isNull);
     expect(style.backgroundColor, isNull);
     expect(style.foregroundColor, isNull);
@@ -48,7 +48,7 @@ void main() {
   });
 
   testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
     final List<String> description =
@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
       backgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
@@ -152,10 +152,10 @@ void main() {
     );
     const VisualDensity visualDensity = VisualDensity.compact;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const animationDuration = Duration(seconds: 1);
-    const enableFeedback = true;
+    const Duration animationDuration = Duration(seconds: 1);
+    const bool enableFeedback = true;
 
-    const style = ButtonStyle(
+    const ButtonStyle style = ButtonStyle(
       textStyle: textStyle,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -215,20 +215,20 @@ void main() {
     expect(ButtonStyle.lerp(null, null, 0.5), null);
     expect(ButtonStyle.lerp(null, null, 1), null);
 
-    const blackSide = BorderSide();
-    const whiteSide = BorderSide(color: Color(0xFFFFFFFF));
-    const emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
+    const BorderSide blackSide = BorderSide();
+    const BorderSide whiteSide = BorderSide(color: Color(0xFFFFFFFF));
+    const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
-    const blackStyle = ButtonStyle(
+    const ButtonStyle blackStyle = ButtonStyle(
       side: MaterialStatePropertyAll<BorderSide>(blackSide),
     );
-    const whiteStyle = ButtonStyle(
+    const ButtonStyle whiteStyle = ButtonStyle(
       side: MaterialStatePropertyAll<BorderSide>(whiteSide),
     );
 
     // MaterialState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    const states = <MaterialState>{};
+    const Set<MaterialState> states = <MaterialState>{};
 
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);

@@ -102,7 +102,7 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final destination =
+    final String destination =
         configuration == 'Debug'
             ? 'platform=macOS,arch=$hostPlatformArch'
             : 'generic/platform=macOS';
@@ -158,7 +158,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails when there is no macos project',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -188,7 +188,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build successfully with renamed .xcodeproj/.xcworkspace files',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -229,7 +229,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails on non-macOS platform',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -256,7 +256,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails when feature is disabled',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -286,7 +286,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build forwards error stdout to status logger error',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -328,7 +328,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build outputs path and size when successful',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
@@ -357,7 +357,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (debug)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -384,7 +384,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (debug) with verbosity',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -413,7 +413,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (profile)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -441,7 +441,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (release)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -468,7 +468,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build supports standard desktop build options',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -574,7 +574,7 @@ STDERR STUFF
         ),
       ]);
 
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -602,7 +602,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build supports build-name and build-number',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -686,7 +686,7 @@ STDERR STUFF
   testUsingContext(
     'code size analysis throws StateError if no code size snapshot generated by gen_snapshot',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -732,7 +732,7 @@ STDERR STUFF
   testUsingContext(
     'Performs code size analysis and sends analytics from arm64 host',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -794,7 +794,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (debug)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -864,7 +864,7 @@ STDERR STUFF
   testUsingContext(
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (release)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -936,7 +936,7 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -965,7 +965,7 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -996,7 +996,7 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,

@@ -192,8 +192,8 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
       return;
     }
 
-    final localListeners = List<_ListenerEntry>.of(_listeners!);
-    for (final entry in localListeners) {
+    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
+    for (final _ListenerEntry entry in localListeners) {
       try {
         if (entry.list != null) {
           entry.listener(notification);

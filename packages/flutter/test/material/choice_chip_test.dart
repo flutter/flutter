@@ -65,8 +65,8 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 
 void main() {
   testWidgets('Material2 - ChoiceChip defaults', (WidgetTester tester) async {
-    final theme = ThemeData(useMaterial3: false);
-    const label = 'choice chip';
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    const String label = 'choice chip';
 
     // Test enabled ChoiceChip defaults.
     await tester.pumpWidget(
@@ -97,7 +97,7 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    var decoration =
+    ShapeDecoration decoration =
         tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
@@ -160,8 +160,8 @@ void main() {
   });
 
   testWidgets('Material3 - ChoiceChip defaults', (WidgetTester tester) async {
-    final theme = ThemeData();
-    const label = 'choice chip';
+    final ThemeData theme = ThemeData();
+    const String label = 'choice chip';
 
     // Test enabled ChoiceChip defaults.
     await tester.pumpWidget(
@@ -202,7 +202,7 @@ void main() {
       ),
     );
 
-    var decoration =
+    ShapeDecoration decoration =
         tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
@@ -286,8 +286,8 @@ void main() {
   });
 
   testWidgets('Material3 - ChoiceChip.elevated defaults', (WidgetTester tester) async {
-    final theme = ThemeData();
-    const label = 'choice chip';
+    final ThemeData theme = ThemeData();
+    const String label = 'choice chip';
 
     // Test enabled ChoiceChip.elevated defaults.
     await tester.pumpWidget(
@@ -328,7 +328,7 @@ void main() {
       ),
     );
 
-    var decoration =
+    ShapeDecoration decoration =
         tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
@@ -412,10 +412,10 @@ void main() {
   });
 
   testWidgets('ChoiceChip.color resolves material states', (WidgetTester tester) async {
-    const disabledSelectedColor = Color(0xffffff00);
-    const disabledColor = Color(0xff00ff00);
-    const backgroundColor = Color(0xff0000ff);
-    const selectedColor = Color(0xffff0000);
+    const Color disabledSelectedColor = Color(0xffffff00);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
     final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((
       Set<MaterialState> states,
     ) {
@@ -500,9 +500,9 @@ void main() {
   });
 
   testWidgets('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
-    const disabledColor = Color(0xff00ff00);
-    const backgroundColor = Color(0xff0000ff);
-    const selectedColor = Color(0xffff0000);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: Column(
@@ -575,7 +575,7 @@ void main() {
   testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (
     WidgetTester tester,
   ) async {
-    const label = Text('label');
+    const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
@@ -588,7 +588,7 @@ void main() {
   });
 
   testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
-    const iconTheme = IconThemeData(color: Colors.red);
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(
       wrapForChip(
         child: const ChoiceChip(label: Text('Test'), selected: true, iconTheme: iconTheme),
@@ -601,7 +601,7 @@ void main() {
   testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (
     WidgetTester tester,
   ) async {
-    const showCheckmark = false;
+    const bool showCheckmark = false;
     await tester.pumpWidget(
       wrapForChip(
         child: const ChipTheme(
@@ -615,8 +615,8 @@ void main() {
   });
 
   testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
-    const showCheckmark = false;
-    const checkmarkColor = Color(0xff0000ff);
+    const bool showCheckmark = false;
+    const Color checkmarkColor = Color(0xff0000ff);
     await tester.pumpWidget(
       wrapForChip(
         child: const ChoiceChip(
@@ -633,7 +633,7 @@ void main() {
   });
 
   testWidgets('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
 
     Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
@@ -664,11 +664,11 @@ void main() {
   testWidgets('ChoiceChip avatar layout constraints can be customized', (
     WidgetTester tester,
   ) async {
-    const border = 1.0;
-    const iconSize = 18.0;
-    const labelPadding = 8.0;
-    const padding = 8.0;
-    const labelSize = Size(100, 100);
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
       return wrapForChip(
@@ -721,7 +721,7 @@ void main() {
   });
 
   testWidgets('ChoiceChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final chipAnimationStyle = ChipAnimationStyle(
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
@@ -744,7 +744,7 @@ void main() {
   testWidgets('Elevated ChoiceChip.chipAnimationStyle is passed to RawChip', (
     WidgetTester tester,
   ) async {
-    final chipAnimationStyle = ChipAnimationStyle(
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
@@ -796,7 +796,7 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final focusNode = FocusNode(debugLabel: 'Chip');
+    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
     addTearDown(focusNode.dispose);
 
     Widget buildChip({required bool enabled}) {

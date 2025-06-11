@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('InputBorder appearance matches configuration', (WidgetTester tester) async {
-    const inputBorder = WidgetStateInputBorder.resolveWith(
+    const WidgetStateInputBorder inputBorder = WidgetStateInputBorder.resolveWith(
       example.WidgetStateInputBorderExample.veryCoolBorder,
     );
 

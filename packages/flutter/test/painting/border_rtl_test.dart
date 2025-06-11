@@ -371,8 +371,8 @@ void main() {
 
   test('BoxBorder.getInnerPath / BoxBorder.getOuterPath', () {
     // for Border, BorderDirectional
-    const border = Border(top: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
-    const borderDirectional = BorderDirectional(
+    const Border border = Border(top: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
+    const BorderDirectional borderDirectional = BorderDirectional(
       top: BorderSide(width: 10.0),
       end: BorderSide(width: 20.0),
     );
@@ -592,10 +592,10 @@ void main() {
   });
 
   test('BorderDirectional.merge', () {
-    const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
-    const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
-    const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
+    const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = BorderSide(
       color: Color(0xFFFFFF00),
       width: 0.0,
       style: BorderStyle.none,
@@ -705,10 +705,10 @@ void main() {
   });
 
   test('BorderDirectional.add - all directional', () {
-    const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
-    const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
-    const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
+    const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = BorderSide(
       color: Color(0xFFFFFF00),
       width: 0.0,
       style: BorderStyle.none,
@@ -731,11 +731,11 @@ void main() {
       const BorderDirectional(start: magenta3) + const BorderDirectional(start: yellow2),
       isNot(isA<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
     );
-    const b3 = BorderDirectional(top: magenta3);
-    const b6 = BorderDirectional(top: magenta6);
+    const BorderDirectional b3 = BorderDirectional(top: magenta3);
+    const BorderDirectional b6 = BorderDirectional(top: magenta6);
     expect(b3 + b3, b6);
-    const b0 = BorderDirectional(top: yellowNone0);
-    const bZ = BorderDirectional();
+    const BorderDirectional b0 = BorderDirectional(top: yellowNone0);
+    const BorderDirectional bZ = BorderDirectional();
     expect(b0 + b0, bZ);
     expect(bZ + bZ, bZ);
     expect(b0 + bZ, bZ);
@@ -743,10 +743,10 @@ void main() {
   });
 
   test('BorderDirectional.add', () {
-    const side1 = BorderSide(color: Color(0x11111111));
-    const doubleSide1 = BorderSide(color: Color(0x11111111), width: 2.0);
-    const side2 = BorderSide(color: Color(0x22222222));
-    const doubleSide2 = BorderSide(color: Color(0x22222222), width: 2.0);
+    const BorderSide side1 = BorderSide(color: Color(0x11111111));
+    const BorderSide doubleSide1 = BorderSide(color: Color(0x11111111), width: 2.0);
+    const BorderSide side2 = BorderSide(color: Color(0x22222222));
+    const BorderSide doubleSide2 = BorderSide(color: Color(0x22222222), width: 2.0);
 
     // adding tops and sides
     expect(
@@ -802,20 +802,20 @@ void main() {
       const Border(bottom: doubleSide1),
     );
 
-    const borderWithLeft = Border(left: side1, top: side2, bottom: side2);
-    const borderWithRight = Border(right: side1, top: side2, bottom: side2);
-    const borderWithoutSides = Border(top: side2, bottom: side2);
-    const borderDirectionalWithStart = BorderDirectional(
+    const Border borderWithLeft = Border(left: side1, top: side2, bottom: side2);
+    const Border borderWithRight = Border(right: side1, top: side2, bottom: side2);
+    const Border borderWithoutSides = Border(top: side2, bottom: side2);
+    const BorderDirectional borderDirectionalWithStart = BorderDirectional(
       start: side1,
       top: side2,
       bottom: side2,
     );
-    const borderDirectionalWithEnd = BorderDirectional(
+    const BorderDirectional borderDirectionalWithEnd = BorderDirectional(
       end: side1,
       top: side2,
       bottom: side2,
     );
-    const borderDirectionalWithoutSides = BorderDirectional(
+    const BorderDirectional borderDirectionalWithoutSides = BorderDirectional(
       top: side2,
       bottom: side2,
     );
@@ -896,46 +896,46 @@ void main() {
   });
 
   test('BorderDirectional.scale', () {
-    const magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
-    const magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
-    const yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const yellowNone0 = BorderSide(
+    const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = BorderSide(
       color: Color(0xFFFFFF00),
       width: 0.0,
       style: BorderStyle.none,
     );
-    const b3 = BorderDirectional(start: magenta3);
-    const b6 = BorderDirectional(start: magenta6);
+    const BorderDirectional b3 = BorderDirectional(start: magenta3);
+    const BorderDirectional b6 = BorderDirectional(start: magenta6);
     expect(b3.scale(2.0), b6);
-    const bY0 = BorderDirectional(top: yellowNone0);
+    const BorderDirectional bY0 = BorderDirectional(top: yellowNone0);
     expect(bY0.scale(3.0), bY0);
-    const bY2 = BorderDirectional(top: yellow2);
+    const BorderDirectional bY2 = BorderDirectional(top: yellow2);
     expect(bY2.scale(0.0), bY0);
   });
 
   test('BorderDirectional.lerp', () {
-    const directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
-    const atMinus100 = BorderDirectional(
+    const BorderDirectional directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
+    const BorderDirectional atMinus100 = BorderDirectional(
       start: BorderSide(width: 0.0),
       end: BorderSide(width: 300.0),
     );
-    const at0 = BorderDirectional(
+    const BorderDirectional at0 = BorderDirectional(
       start: BorderSide(width: 100.0),
       end: BorderSide(width: 200.0),
     );
-    const at25 = BorderDirectional(
+    const BorderDirectional at25 = BorderDirectional(
       start: BorderSide(width: 125.0),
       end: BorderSide(width: 175.0),
     );
-    const at75 = BorderDirectional(
+    const BorderDirectional at75 = BorderDirectional(
       start: BorderSide(width: 175.0),
       end: BorderSide(width: 125.0),
     );
-    const at100 = BorderDirectional(
+    const BorderDirectional at100 = BorderDirectional(
       start: BorderSide(width: 200.0),
       end: BorderSide(width: 100.0),
     );
-    const at200 = BorderDirectional(
+    const BorderDirectional at200 = BorderDirectional(
       start: BorderSide(width: 300.0),
       end: BorderSide(width: 0.0),
     );
@@ -1035,19 +1035,19 @@ void main() {
   });
 
   test('BorderDirectional hashCode', () {
-    final side = BorderSide(width: nonconst(2.0));
+    final BorderSide side = BorderSide(width: nonconst(2.0));
     expect(BorderDirectional(top: side).hashCode, BorderDirectional(top: side).hashCode);
     expect(BorderDirectional(top: side).hashCode, isNot(BorderDirectional(bottom: side).hashCode));
   });
 
   test('BoxDecoration.border takes a BorderDirectional', () {
-    const decoration2 = BoxDecoration(
+    const BoxDecoration decoration2 = BoxDecoration(
       border: BorderDirectional(start: BorderSide(width: 2.0)),
     );
-    const decoration4 = BoxDecoration(
+    const BoxDecoration decoration4 = BoxDecoration(
       border: BorderDirectional(start: BorderSide(width: 4.0)),
     );
-    const decoration6 = BoxDecoration(
+    const BoxDecoration decoration6 = BoxDecoration(
       border: BorderDirectional(start: BorderSide(width: 6.0)),
     );
     final BoxPainter painter = decoration2.createBoxPainter();

@@ -21,7 +21,7 @@ TaskFunction createMicrobenchmarkTask({
 }) {
   // Generate a seed for this test stable around the date.
   final DateTime seedDate = DateTime.now().toUtc().subtract(const Duration(hours: 7));
-  final seed = DateTime(seedDate.year, seedDate.month, seedDate.day).hashCode;
+  final int seed = DateTime(seedDate.year, seedDate.month, seedDate.day).hashCode;
 
   return () async {
     final Device device = await devices.workingDevice;
@@ -43,7 +43,7 @@ TaskFunction createMicrobenchmarkTask({
         print('Running $benchmarkPath with seed $seed');
 
         final Process flutterProcess = await inDirectory(appDir, () async {
-          final options = <String>[
+          final List<String> options = <String>[
             '-v',
             // --release doesn't work on iOS due to code signing issues
             '--profile',
@@ -63,7 +63,7 @@ TaskFunction createMicrobenchmarkTask({
       return run();
     }
 
-    final allResults = <String, double>{
+    final Map<String, double> allResults = <String, double>{
       ...await runMicrobench('lib/benchmark_collection.dart'),
     };
 

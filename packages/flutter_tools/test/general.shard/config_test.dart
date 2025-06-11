@@ -60,7 +60,7 @@ void main() {
   });
 
   testWithoutContext('Config does not error on a file with a deprecated field', () {
-    final bufferLogger = BufferLogger.test();
+    final BufferLogger bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('''
 {
   "is-bot": false,
@@ -82,7 +82,7 @@ void main() {
   });
 
   testWithoutContext('Config parse error', () {
-    final bufferLogger = BufferLogger.test();
+    final BufferLogger bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('{"hello":"bar');
     config = Config(
       'example',
@@ -96,7 +96,7 @@ void main() {
   });
 
   testWithoutContext('Config does not error on missing file', () {
-    final bufferLogger = BufferLogger.test();
+    final BufferLogger bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('example');
     config = Config(
       'example',
@@ -110,7 +110,7 @@ void main() {
   });
 
   testWithoutContext('Config does not error on a normally fatal file system exception', () {
-    final bufferLogger = BufferLogger.test();
+    final BufferLogger bufferLogger = BufferLogger.test();
     final Platform platform = FakePlatform();
     final File file = ErrorHandlingFile(
       platform: platform,
@@ -125,10 +125,10 @@ void main() {
   });
 
   testWithoutContext('Config.createForTesting does not error when failing to delete a file', () {
-    final bufferLogger = BufferLogger.test();
+    final BufferLogger bufferLogger = BufferLogger.test();
 
-    final handler = FileExceptionHandler();
-    final fs = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fs = MemoryFileSystem.test(opHandle: handler.opHandle);
     final File file = fs.file('testfile')
       // We write invalid JSON so that we test catching a `FormatException`
       ..writeAsStringSync('{"This is not valid JSON"');

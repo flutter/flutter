@@ -377,8 +377,8 @@ abstract final class MatrixUtils {
     final double ry = storage[1] * x + storage[5] * y + storage[13];
 
     if (storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0) {
-      var left = rx;
-      var right = rx;
+      double left = rx;
+      double right = rx;
       if (wx < 0) {
         left += wx;
       } else {
@@ -390,8 +390,8 @@ abstract final class MatrixUtils {
         right += hx;
       }
 
-      var top = ry;
-      var bottom = ry;
+      double top = ry;
+      double bottom = ry;
       if (wy < 0) {
         top += wy;
       } else {
@@ -514,7 +514,7 @@ abstract final class MatrixUtils {
     //  [0.0, 1.0, 0.0, 0.0],
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
-    var result =
+    Matrix4 result =
         Matrix4.identity()
           ..setEntry(3, 2, -perspective)
           ..setEntry(2, 3, -radius)
@@ -575,7 +575,7 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
-      final values = <String>[
+      final List<String> values = <String>[
         '${debugFormatDouble(value!.entry(0, 0))},${debugFormatDouble(value!.entry(0, 1))},${debugFormatDouble(value!.entry(0, 2))},${debugFormatDouble(value!.entry(0, 3))}',
         '${debugFormatDouble(value!.entry(1, 0))},${debugFormatDouble(value!.entry(1, 1))},${debugFormatDouble(value!.entry(1, 2))},${debugFormatDouble(value!.entry(1, 3))}',
         '${debugFormatDouble(value!.entry(2, 0))},${debugFormatDouble(value!.entry(2, 1))},${debugFormatDouble(value!.entry(2, 2))},${debugFormatDouble(value!.entry(2, 3))}',

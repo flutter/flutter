@@ -116,7 +116,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
@@ -125,7 +125,7 @@ abstract class ChromiumDevice extends Device {
     } else {
       url = platformArgs['uri']! as String;
     }
-    final launchChrome = platformArgs['no-launch-chrome'] != true;
+    final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(
         url,
@@ -195,7 +195,7 @@ class GoogleChromeDevice extends ChromiumDevice {
       return 'unknown';
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
-    var version = 'unknown';
+    String version = 'unknown';
     if (_platform.isWindows) {
       if (_processManager.canRun('reg')) {
         final ProcessResult result = await _processManager.run(<String>[
@@ -287,7 +287,7 @@ class WebDevices extends PollingDeviceDiscovery {
   }) : _featureFlags = featureFlags,
        _webServerDevice = WebServerDevice(logger: logger),
        super('Chrome') {
-    final operatingSystemUtils = OperatingSystemUtils(
+    final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
       logger: logger,
@@ -426,7 +426,7 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final url = platformArgs['uri'] as String?;
+    final String? url = platformArgs['uri'] as String?;
     if (debuggingOptions.startPaused) {
       _logger.printStatus(
         'Waiting for connection from Dart debug extension at $url',

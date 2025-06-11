@@ -36,8 +36,8 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester teste
 }
 
 void main() {
-  const durationBetweenActions = Duration(milliseconds: 20);
-  const defaultText = 'I am a magnifier, fear me!';
+  const Duration durationBetweenActions = Duration(milliseconds: 20);
+  const String defaultText = 'I am a magnifier, fear me!';
 
   Future<void> showMagnifier(WidgetTester tester, int textOffset) async {
     assert(textOffset >= 0);
@@ -92,8 +92,8 @@ void main() {
   );
 
   testWidgets('should show custom magnifier in RTL', (WidgetTester tester) async {
-    const text = 'أثارت زر';
-    const textToTapOn = 'ت';
+    const String text = 'أثارت زر';
+    const String textToTapOn = 'ت';
 
     await tester.pumpWidget(
       const example.TextMagnifierExampleApp(textDirection: TextDirection.rtl, text: text),

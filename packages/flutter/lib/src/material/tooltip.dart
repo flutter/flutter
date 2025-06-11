@@ -59,7 +59,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    var isHit = false;
+    bool isHit = false;
     final bool outermost = isOutermostMouseRegion;
     isOutermostMouseRegion = false;
     if (size.contains(position)) {
@@ -403,7 +403,7 @@ class Tooltip extends StatefulWidget {
     if (_openedTooltips.isNotEmpty) {
       // Avoid concurrent modification.
       final List<TooltipState> openedTooltips = _openedTooltips.toList();
-      for (final state in openedTooltips) {
+      for (final TooltipState state in openedTooltips) {
         assert(state.mounted);
         state._scheduleDismissTooltip(withDelay: Duration.zero);
       }
@@ -611,7 +611,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;
     }
     // PointerDeviceKinds that don't support hovering.
-    const triggerModeDeviceKinds = <PointerDeviceKind>{
+    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
       PointerDeviceKind.stylus,
       PointerDeviceKind.touch,
@@ -744,7 +744,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         Tooltip._openedTooltips
             .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
             .toList();
-    for (final tooltip in tooltipsToDismiss) {
+    for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
@@ -833,7 +833,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   Widget _buildTooltipOverlay(BuildContext context) {
     final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
-    final box = this.context.findRenderObject()! as RenderBox;
+    final RenderBox box = this.context.findRenderObject()! as RenderBox;
     final Offset target = box.localToGlobal(
       box.size.center(Offset.zero),
       ancestor: overlayState.context.findRenderObject(),
@@ -875,10 +875,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
-    final defaultConstraints = BoxConstraints(
+    final BoxConstraints defaultConstraints = BoxConstraints(
       minHeight: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
     );
-    final overlayChild = _TooltipOverlay(
+    final _TooltipOverlay overlayChild = _TooltipOverlay(
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
       constraints: widget.constraints ?? tooltipTheme.constraints ?? defaultConstraints,
       padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),

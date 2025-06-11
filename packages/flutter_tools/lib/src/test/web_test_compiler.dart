@@ -141,7 +141,7 @@ class WebTestCompiler {
       config: _config,
     );
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
-    final residentCompiler = ResidentCompiler(
+    final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -212,7 +212,7 @@ class WebTestCompiler {
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final File outputWasmFile = outputDirectory.childFile('main.dart.wasm');
 
-    final compilationArgs = <String>[
+    final List<String> compilationArgs = <String>[
       _artifacts.getArtifactPath(
         Artifact.engineDartBinary,
         platform: TargetPlatform.web_javascript,
@@ -239,7 +239,7 @@ class WebTestCompiler {
       testFile.path, // dartfile
     ];
 
-    final processUtils = ProcessUtils(
+    final ProcessUtils processUtils = ProcessUtils(
       logger: _logger,
       processManager: _processManager,
     );

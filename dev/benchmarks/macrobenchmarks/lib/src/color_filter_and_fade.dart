@@ -155,7 +155,7 @@ class _ShadowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
 
-    final paint = Paint();
+    final Paint paint = Paint();
     if (useColorFilter) {
       paint.colorFilter = ColorFilter.mode(shadow.color, BlendMode.srcIn);
     }

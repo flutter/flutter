@@ -83,7 +83,7 @@ void main() {
   });
 
   test('screencap invokes "exec-out screencap -p"', () async {
-    final processManager = FakeProcessManager((
+    final FakeProcessManager processManager = FakeProcessManager((
       String exec,
       List<String> args,
     ) async {
@@ -104,7 +104,7 @@ void main() {
   });
 
   test('tap invokes "shell input tap"', () async {
-    final processManager = FakeProcessManager((
+    final FakeProcessManager processManager = FakeProcessManager((
       String exec,
       List<String> args,
     ) async {

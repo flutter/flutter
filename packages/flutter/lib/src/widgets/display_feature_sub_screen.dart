@@ -199,8 +199,8 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   static Iterable<Rect> subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
-      final newSubScreens = <Rect>[];
-      for (final screen in subScreens) {
+      final List<Rect> newSubScreens = <Rect>[];
+      for (final Rect screen in subScreens) {
         if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
           // Display feature splits the screen vertically
           if (screen.left < bounds.left) {

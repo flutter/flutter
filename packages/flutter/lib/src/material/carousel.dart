@@ -550,7 +550,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
-    final element = context as SliverMultiBoxAdaptorElement;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return _RenderSliverFixedExtentCarousel(
       childManager: element,
       minExtent: minExtent,
@@ -776,7 +776,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
-    final element = context as SliverMultiBoxAdaptorElement;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return _RenderSliverWeightedCarousel(
       childManager: element,
       consumeMaxWeight: consumeMaxWeight,
@@ -914,7 +914,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     if (constraints.viewportMainAxisExtent == 0.0) {
       return 0;
     }
-    var smallerWeightCount = 0;
+    int smallerWeightCount = 0;
     for (final int weight in weights) {
       if (weight == weights.max) {
         break;
@@ -1107,7 +1107,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
         );
         return;
       }
-      final childParentData =
+      final SliverMultiBoxAdaptorParentData childParentData =
           child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
       assert(childParentData.index == index);
@@ -1116,7 +1116,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
-      final childParentData =
+      final SliverMultiBoxAdaptorParentData childParentData =
           firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
@@ -1153,7 +1153,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
         child.layout(_getChildConstraints(index));
       }
       trailingChildWithLayout = child;
-      final childParentData =
+      final SliverMultiBoxAdaptorParentData childParentData =
           child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(
@@ -1299,7 +1299,7 @@ class CarouselScrollPhysics extends ScrollPhysics {
       'the CarouselController',
     );
 
-    final metrics = position as _CarouselPosition;
+    final _CarouselPosition metrics = position as _CarouselPosition;
     if ((velocity <= 0.0 && metrics.pixels <= metrics.minScrollExtent) ||
         (velocity >= 0.0 && metrics.pixels >= metrics.maxScrollExtent)) {
       return super.createBallisticSimulation(metrics, velocity);
@@ -1452,7 +1452,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       maxItem = _itemToShowOnStartup;
     }
     if (newFlexWeights != null && !newConsumeMaxWeight) {
-      var smallerWeights = 0;
+      int smallerWeights = 0;
       for (final int weight in newFlexWeights) {
         if (weight == newFlexWeights.max) {
           break;
@@ -1669,7 +1669,7 @@ class CarouselController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    final carouselPosition = position as _CarouselPosition;
+    final _CarouselPosition carouselPosition = position as _CarouselPosition;
     carouselPosition.flexWeights = _carouselState!._flexWeights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
     carouselPosition.consumeMaxWeight = _carouselState!._consumeMaxWeight;

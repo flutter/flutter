@@ -363,7 +363,7 @@ class Message {
        messages = <LocaleInfo, String?>{},
        parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
-    final filenames = <LocaleInfo, String>{};
+    final Map<LocaleInfo, String> filenames = <LocaleInfo, String>{};
     // Collect all translations from allBundles and parse them.
     for (final AppResourceBundle bundle in allBundles.bundles) {
       filenames[bundle.locale] = bundle.file.basename;
@@ -531,7 +531,7 @@ class Message {
   // For undeclared placeholders, create a new placeholder.
   void _inferPlaceholders() {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
-    final undeclaredPlaceholders = <String, Placeholder>{};
+    final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
     for (final LocaleInfo locale in parsedMessages.keys) {
       Placeholder? getPlaceholder(String name) =>
@@ -541,7 +541,7 @@ class Message {
       if (parsedMessages[locale] == null) {
         continue;
       }
-      final traversalStack = <Node>[parsedMessages[locale]!];
+      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
         if (<ST>[
@@ -634,12 +634,12 @@ class AppResourceBundle {
       );
     }
 
-    var localeString = resources['@@locale'] as String?;
+    String? localeString = resources['@@locale'] as String?;
 
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
     final String fileName = file.fileSystem.path.basenameWithoutExtension(file.path);
 
-    for (var index = 0; index < fileName.length; index += 1) {
+    for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
       if (fileName[index] == '_') {
         // If Locale.tryParse fails, it returns null.
@@ -717,9 +717,9 @@ class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {
     // Assuming that the caller has verified that the directory is readable.
 
-    final filenameRE = RegExp(r'(\w+)\.arb$');
-    final localeToBundle = <LocaleInfo, AppResourceBundle>{};
-    final languageToLocales = <String, List<LocaleInfo>>{};
+    final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
+    final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
+    final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
     // We require the list of files to be sorted so that
     // "languageToLocales[bundle.locale.languageCode]" is not null
     // by the time we handle locales with country codes.
@@ -730,8 +730,8 @@ class AppResourceBundleCollection {
             .where((File e) => filenameRE.hasMatch(e.path))
             .toList()
           ..sort(sortFilesByPath);
-    for (final file in files) {
-      final bundle = AppResourceBundle(file);
+    for (final File file in files) {
+      final AppResourceBundle bundle = AppResourceBundle(file);
       if (localeToBundle[bundle.locale] != null) {
         throw L10nException(
           "Multiple arb files with the same '${bundle.locale}' locale detected. \n"

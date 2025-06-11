@@ -58,7 +58,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     required PlistParser plistParser,
     required ProcessManager processManager,
   }) {
-    final fileSystemUtils = FileSystemUtils(
+    final FileSystemUtils fileSystemUtils = FileSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
     );
@@ -92,14 +92,14 @@ abstract class IntelliJValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
     if (pluginsPath == null) {
       messages.add(const ValidationMessage.error('Invalid IntelliJ version number.'));
     } else {
       messages.add(ValidationMessage(_userMessages.intellijLocation(installPath)));
 
-      final plugins = IntelliJPlugins(pluginsPath!, fileSystem: _fileSystem);
+      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath!, fileSystem: _fileSystem);
       plugins.validatePackage(
         messages,
         <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -169,13 +169,13 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
     required Platform platform,
     required UserMessages userMessages,
   }) {
-    final validators = <DoctorValidator>[];
+    final List<DoctorValidator> validators = <DoctorValidator>[];
     if (fileSystemUtils.homeDirPath == null) {
       return validators;
     }
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
-      final validator = IntelliJValidatorOnWindows(
+      final IntelliJValidatorOnWindows validator = IntelliJValidatorOnWindows(
         title,
         version,
         installPath,
@@ -183,7 +183,7 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
         fileSystem: fileSystem,
         userMessages: userMessages,
       );
-      for (var index = 0; index < validators.length; index += 1) {
+      for (int index = 0; index < validators.length; index += 1) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnWindows && validator.installPath == other.installPath) {
           if (validator.version.compareTo(other.version) > 0) {
@@ -290,14 +290,14 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
     required FileSystemUtils fileSystemUtils,
     required UserMessages userMessages,
   }) {
-    final validators = <DoctorValidator>[];
+    final List<DoctorValidator> validators = <DoctorValidator>[];
     final String? homeDirPath = fileSystemUtils.homeDirPath;
     if (homeDirPath == null) {
       return validators;
     }
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
-      final validator = IntelliJValidatorOnLinux(
+      final IntelliJValidatorOnLinux validator = IntelliJValidatorOnLinux(
         title,
         version,
         installPath,
@@ -305,7 +305,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
         fileSystem: fileSystem,
         userMessages: userMessages,
       );
-      for (var index = 0; index < validators.length; index += 1) {
+      for (int index = 0; index < validators.length; index += 1) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinux && validator.installPath == other.installPath) {
           if (validator.version.compareTo(other.version) > 0) {
@@ -369,19 +369,19 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
             );
             if (installPath.contains(fileSystem.path.join('JetBrains', 'Toolbox', 'apps'))) {
               // via JetBrains ToolBox app
-              final pluginsPathInInstallDir = '$installPath.plugins';
+              final String pluginsPathInInstallDir = '$installPath.plugins';
               if (fileSystem.isDirectorySync(pluginsPathInUserHomeDir)) {
                 // after 2020.2.x
-                final pluginsPath = pluginsPathInUserHomeDir;
+                final String pluginsPath = pluginsPathInUserHomeDir;
                 addValidator(title, version, installPath, pluginsPath);
               } else if (fileSystem.isDirectorySync(pluginsPathInInstallDir)) {
                 // only 2020.1.X
-                final pluginsPath = pluginsPathInInstallDir;
+                final String pluginsPath = pluginsPathInInstallDir;
                 addValidator(title, version, installPath, pluginsPath);
               }
             } else {
               // via tar.gz
-              final pluginsPath = pluginsPathInUserHomeDir;
+              final String pluginsPath = pluginsPathInUserHomeDir;
               addValidator(title, version, installPath, pluginsPath);
             }
           }
@@ -425,9 +425,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     required PlistParser plistParser,
     required ProcessManager processManager,
   }) {
-    final validators = <DoctorValidator>[];
+    final List<DoctorValidator> validators = <DoctorValidator>[];
     final String? homeDirPath = fileSystemUtils.homeDirPath;
-    final installPaths = <String>[
+    final List<String> installPaths = <String>[
       '/Applications',
       if (homeDirPath != null) fileSystem.path.join(homeDirPath, 'Applications'),
     ];
@@ -462,7 +462,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
               )
               .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .whereType<Directory>();
-      for (final dir in installDirs) {
+      for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {
           for (final FileSystemEntity subdirectory in dir.listSync()) {
@@ -474,8 +474,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
 
       // Query Spotlight for unexpected installation locations.
-      var ceSpotlightResult = '';
-      var ultimateSpotlightResult = '';
+      String ceSpotlightResult = '';
+      String ultimateSpotlightResult = '';
       try {
         final ProcessResult ceQueryResult = processManager.runSync(<String>[
           'mdfind',

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('SuggestionSpan.toString', () {
-    const suggestionSpan = SuggestionSpan(TextRange(start: 12, end: 17), <String>[
+    const SuggestionSpan suggestionSpan = SuggestionSpan(TextRange(start: 12, end: 17), <String>[
       'weird',
     ]);
 
@@ -18,10 +18,10 @@ void main() {
   });
 
   test('SpellCheckResults.toString', () {
-    const suggestionSpan = SuggestionSpan(TextRange(start: 12, end: 17), <String>[
+    const SuggestionSpan suggestionSpan = SuggestionSpan(TextRange(start: 12, end: 17), <String>[
       'weird',
     ]);
-    const spellCheckResults = SpellCheckResults(
+    const SpellCheckResults spellCheckResults = SpellCheckResults(
       'i before e except after c is so wierd.',
       <SuggestionSpan>[suggestionSpan],
     );

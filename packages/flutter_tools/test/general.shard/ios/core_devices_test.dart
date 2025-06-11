@@ -60,7 +60,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
         version: Version(14, 0, 0),
       );
@@ -136,11 +136,11 @@ void main() {
     });
 
     group('install app', () {
-      const deviceId = 'device-id';
-      const bundlePath = '/path/to/com.example.flutterApp';
+      const String deviceId = 'device-id';
+      const String bundlePath = '/path/to/com.example.flutterApp';
 
       testWithoutContext('Successful install', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -214,7 +214,7 @@ void main() {
       });
 
       testWithoutContext('devicectl fails install', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "error" : {
     "code" : 1005,
@@ -301,7 +301,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails install because of unexpected JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -342,7 +342,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails install because of invalid JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -382,11 +382,11 @@ invalid JSON
     });
 
     group('uninstall app', () {
-      const deviceId = 'device-id';
-      const bundleId = 'com.example.flutterApp';
+      const String deviceId = 'device-id';
+      const String bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successful uninstall', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -454,7 +454,7 @@ invalid JSON
       });
 
       testWithoutContext('devicectl fails uninstall', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "error" : {
     "code" : 1005,
@@ -541,7 +541,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails uninstall because of unexpected JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -582,7 +582,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails uninstall because of invalid JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -622,11 +622,11 @@ invalid JSON
     });
 
     group('launch app', () {
-      const deviceId = 'device-id';
-      const bundleId = 'com.example.flutterApp';
+      const String deviceId = 'device-id';
+      const String bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successful launch without launch args', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -710,7 +710,7 @@ invalid JSON
       });
 
       testWithoutContext('Successful launch with launch args', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -802,7 +802,7 @@ invalid JSON
       });
 
       testWithoutContext('devicectl fails install', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "error" : {
     "code" : -10814,
@@ -876,7 +876,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
       });
 
       testWithoutContext('fails launch because of unexpected JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -914,7 +914,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
       });
 
       testWithoutContext('fails launch because of invalid JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -951,11 +951,11 @@ invalid JSON
     });
 
     group('list apps', () {
-      const deviceId = 'device-id';
-      const bundleId = 'com.example.flutterApp';
+      const String deviceId = 'device-id';
+      const String bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successfully parses apps', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1083,7 +1083,7 @@ invalid JSON
       });
 
       testWithoutContext('Successfully find installed app', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1168,7 +1168,7 @@ invalid JSON
       });
 
       testWithoutContext('Succeeds but does not find app', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1240,7 +1240,7 @@ invalid JSON
       });
 
       testWithoutContext('devicectl fails to get apps', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "error" : {
     "code" : 1000,
@@ -1314,7 +1314,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
       });
 
       testWithoutContext('fails launch because of unexpected JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -1356,7 +1356,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
       });
 
       testWithoutContext('fails launch because of invalid JSON', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -1402,7 +1402,7 @@ invalid JSON
           'core_devices.rand0',
         );
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final args = <String>[
+        final List<String> args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1436,7 +1436,7 @@ invalid JSON
           'core_devices.rand0',
         );
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final args = <String>[
+        final List<String> args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1482,7 +1482,7 @@ invalid JSON
 
       testWithoutContext('Handles file system disposal', () async {
         final LocalFileSystem localFs = LocalFileSystemFake();
-        final fs = ErrorHandlingFileSystem(
+        final ErrorHandlingFileSystem fs = ErrorHandlingFileSystem(
           delegate: localFs,
           platform: FakePlatform(),
         );
@@ -1494,7 +1494,7 @@ invalid JSON
         );
         final Directory tempDir = localFs.systemTempDirectory.childDirectory('core_devices.rand0');
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final args = <String>[
+        final List<String> args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1533,7 +1533,7 @@ invalid JSON
       });
 
       testWithoutContext('No devices', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1586,7 +1586,7 @@ invalid JSON
       });
 
       testWithoutContext('All sections parsed', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1659,7 +1659,7 @@ invalid JSON
       });
 
       testWithoutContext('All sections parsed, device missing sections', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1724,7 +1724,7 @@ invalid JSON
       });
 
       testWithoutContext('capabilities parsed', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1787,7 +1787,7 @@ invalid JSON
       });
 
       testWithoutContext('connectionProperties parsed', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1865,7 +1865,7 @@ invalid JSON
       });
 
       testWithoutContext('deviceProperties parsed', () async {
-        const deviceControlOutput = '''
+        const String deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1934,7 +1934,7 @@ invalid JSON
       });
 
       testWithoutContext('hardwareProperties parsed', () async {
-        const deviceControlOutput = r'''
+        const String deviceControlOutput = r'''
 {
   "result" : {
     "devices" : [
@@ -2036,7 +2036,7 @@ invalid JSON
 
       group('Handles errors', () {
         testWithoutContext('invalid json', () async {
-          const deviceControlOutput = '''Invalid JSON''';
+          const String deviceControlOutput = '''Invalid JSON''';
 
           final File tempFile = fileSystem.systemTempDirectory
               .childDirectory('core_devices.rand0')
@@ -2067,7 +2067,7 @@ invalid JSON
         });
 
         testWithoutContext('unexpected json', () async {
-          const deviceControlOutput = '''
+          const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -2119,7 +2119,7 @@ invalid JSON
         });
 
         testWithoutContext('When timeout is below minimum, default to minimum', () async {
-          const deviceControlOutput = '''
+          const String deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [

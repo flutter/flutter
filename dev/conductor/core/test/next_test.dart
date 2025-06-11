@@ -18,15 +18,15 @@ import 'package:platform/platform.dart';
 import './common.dart';
 
 void main() {
-  const flutterRoot = '/flutter';
-  const checkoutsParentDirectory = '$flutterRoot/dev/conductor';
-  const candidateBranch = 'flutter-1.2-candidate.3';
-  const workingBranch = 'cherrypicks-$candidateBranch';
-  const revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
-  const revision2 = 'ffffffffffffffffffffffffffffffffffffffff';
-  const releaseVersion = '1.2.0-3.0.pre';
-  const releaseChannel = 'beta';
-  const stateFile = '/state-file.json';
+  const String flutterRoot = '/flutter';
+  const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
+  const String candidateBranch = 'flutter-1.2-candidate.3';
+  const String workingBranch = 'cherrypicks-$candidateBranch';
+  const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
+  const String revision2 = 'ffffffffffffffffffffffffffffffffffffffff';
+  const String releaseVersion = '1.2.0-3.0.pre';
+  const String releaseChannel = 'beta';
+  const String stateFile = '/state-file.json';
   final String localPathSeparator = const LocalPlatform().pathSeparator;
   final String localOperatingSystem = const LocalPlatform().operatingSystem;
 
@@ -42,20 +42,20 @@ void main() {
       });
 
       CommandRunner<void> createRunner({required Checkouts checkouts}) {
-        final command = NextCommand(checkouts: checkouts);
+        final NextCommand command = NextCommand(checkouts: checkouts);
         return CommandRunner<void>('codesign-test', '')..addCommand(command);
       }
 
       test('throws if no state file found', () async {
-        final processManager = FakeProcessManager.list(<FakeCommand>[]);
-        final platform = FakePlatform(
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+        final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
           },
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory)
             ..createSync(recursive: true),
@@ -71,13 +71,13 @@ void main() {
       });
 
       group('APPLY_FRAMEWORK_CHERRYPICKS to UPDATE_ENGINE_VERSION', () {
-        const mirrorRemoteUrl = 'https://github.com/org/repo.git';
-        const upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
-        const engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
-        const frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
-        const engineCheckoutPath = '$checkoutsParentDirectory/engine';
-        const oldEngineVersion = '000000001';
-        const frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
+        const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
+        const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
+        const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
+        const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
+        const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
+        const String oldEngineVersion = '000000001';
+        const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
         late FakeProcessManager processManager;
         late FakePlatform platform;
         late pb.ConductorState state;
@@ -157,7 +157,7 @@ void main() {
             const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
           ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-          final checkouts = Checkouts(
+          final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
             parentDirectory: fileSystem.directory(checkoutsParentDirectory)
               ..createSync(recursive: true),
@@ -213,7 +213,7 @@ void main() {
             ),
           ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-          final checkouts = Checkouts(
+          final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
             parentDirectory: fileSystem.directory(checkoutsParentDirectory)
               ..createSync(recursive: true),
@@ -242,12 +242,12 @@ void main() {
         });
       });
       group('UPDATE_ENGINE_VERSION to PUBLISH_VERSION', () {
-        const mirrorRemoteUrl = 'https://github.com/org/repo.git';
-        const upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
-        const engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
-        const frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
-        const engineCheckoutPath = '$checkoutsParentDirectory/engine';
-        const oldEngineVersion = '000000001';
+        const String mirrorRemoteUrl = 'https://github.com/org/repo.git';
+        const String upstreamRemoteUrl = 'https://github.com/mirror/repo.git';
+        const String engineUpstreamRemoteUrl = 'https://github.com/mirror/engine.git';
+        const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
+        const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
+        const String oldEngineVersion = '000000001';
 
         late FakeProcessManager processManager;
         late FakePlatform platform;
@@ -329,7 +329,7 @@ void main() {
             ),
           ]);
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-          final checkouts = Checkouts(
+          final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
             parentDirectory: fileSystem.directory(checkoutsParentDirectory)
               ..createSync(recursive: true),
@@ -354,7 +354,7 @@ void main() {
       });
 
       group('PUBLISH_VERSION to VERIFY_RELEASE', () {
-        const releaseVersion = '1.2.0-3.0.pre';
+        const String releaseVersion = '1.2.0-3.0.pre';
         late pb.ConductorState state;
 
         setUp(() {
@@ -371,8 +371,8 @@ void main() {
 
         test('gives push command and updates state.currentPhase', () async {
           stdio.stdin.add('y');
-          final processManager = FakeProcessManager.empty();
-          final platform = FakePlatform(
+          final FakeProcessManager processManager = FakeProcessManager.empty();
+          final FakePlatform platform = FakePlatform(
             environment: <String, String>{
               'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
             },
@@ -380,7 +380,7 @@ void main() {
             pathSeparator: localPathSeparator,
           );
           writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-          final checkouts = Checkouts(
+          final Checkouts checkouts = Checkouts(
             fileSystem: fileSystem,
             parentDirectory: fileSystem.directory(checkoutsParentDirectory)
               ..createSync(recursive: true),
@@ -404,8 +404,8 @@ void main() {
       });
 
       test('throws exception if state.currentPhase is RELEASE_COMPLETED', () async {
-        final processManager = FakeProcessManager.empty();
-        final platform = FakePlatform(
+        final FakeProcessManager processManager = FakeProcessManager.empty();
+        final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
           },
@@ -415,7 +415,7 @@ void main() {
         final pb.ConductorState state =
             pb.ConductorState.create()..currentPhase = ReleasePhase.RELEASE_COMPLETED;
         writeStateToFile(fileSystem.file(stateFile), state, <String>[]);
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory)
             ..createSync(recursive: true),
@@ -439,14 +439,14 @@ void main() {
     test('can be overridden for different frontend implementations', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Stdio stdio = _UnimplementedStdio.instance;
-      final checkouts = Checkouts(
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory('/'),
         platform: FakePlatform(),
         processManager: FakeProcessManager.empty(),
         stdio: stdio,
       );
-      final context = _TestNextContext(
+      final _TestNextContext context = _TestNextContext(
         checkouts: checkouts,
         stateFile: fileSystem.file('/statefile.json'),
       );
@@ -457,15 +457,15 @@ void main() {
 
     test('throws if user inputs character that is not "y" or "n"', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final stdio = TestStdio(stdin: <String>['x'], verbose: true);
-      final checkouts = Checkouts(
+      final TestStdio stdio = TestStdio(stdin: <String>['x'], verbose: true);
+      final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
         parentDirectory: fileSystem.directory('/'),
         platform: FakePlatform(),
         processManager: FakeProcessManager.empty(),
         stdio: stdio,
       );
-      final context = NextContext(
+      final NextContext context = NextContext(
         autoAccept: false,
         force: false,
         checkouts: checkouts,
@@ -493,7 +493,7 @@ void main() {
     test(
       'catches GitException if the push was rejected and instead throws a helpful ConductorException',
       () async {
-        const gitPushErrorMessage = '''
+        const String gitPushErrorMessage = '''
  To github.com:user/engine.git
 
   ! [rejected]            HEAD -> cherrypicks-flutter-2.8-candidate.3 (non-fast-forward)
@@ -503,7 +503,7 @@ void main() {
  hint: 'git pull ...') before pushing again.
  hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ''';
-        final checkouts = Checkouts(
+        final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory)
             ..createSync(recursive: true),
@@ -512,7 +512,7 @@ void main() {
           stdio: stdio,
         );
         final Repository testRepository = _TestRepository.fromCheckouts(checkouts);
-        final testPbRepository = pb.Repository();
+        final pb.Repository testPbRepository = pb.Repository();
         (checkouts.processManager as FakeProcessManager).addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
@@ -537,7 +537,7 @@ void main() {
             ]),
           ),
         ]);
-        final nextContext = NextContext(
+        final NextContext nextContext = NextContext(
           autoAccept: false,
           checkouts: checkouts,
           force: false,
@@ -599,7 +599,7 @@ class _TestNextContext extends NextContext {
 void _initializeCiYamlFile(File file, {List<String>? enabledBranches}) {
   enabledBranches ??= <String>['master', 'beta', 'stable'];
   file.createSync(recursive: true);
-  final buffer = StringBuffer('enabled_branches:\n');
+  final StringBuffer buffer = StringBuffer('enabled_branches:\n');
   for (final String branch in enabledBranches) {
     buffer.writeln('  - $branch');
   }

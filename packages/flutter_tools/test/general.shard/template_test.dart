@@ -17,8 +17,8 @@ import '../src/context.dart';
 
 void main() {
   testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
-    final handler = FileExceptionHandler();
-    final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     expect(
       () => Template(
@@ -33,9 +33,9 @@ void main() {
   });
 
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
-    final handler = FileExceptionHandler();
-    final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-    final template = Template(
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Template template = Template(
       fileSystem.directory('examples')..createSync(recursive: true),
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
@@ -49,11 +49,11 @@ void main() {
   });
 
   group('template image directory', () {
-    final overrides = <Type, Generator>{
+    final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     };
-    const templatePathProvider = TemplatePathProvider();
+    const TemplatePathProvider templatePathProvider = TemplatePathProvider();
 
     testUsingContext(
       'templatePathProvider.imageDirectory returns parent template directory if passed null name',
@@ -125,13 +125,13 @@ void main() {
 
   group('renders template', () {
     late Directory destination;
-    const imageName = 'some_image.png';
+    const String imageName = 'some_image.png';
     late File sourceImage;
     late BufferLogger logger;
     late Template template;
 
     setUp(() {
-      final fileSystem = MemoryFileSystem.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory templateDir = fileSystem.directory('templates');
       final Directory imageSourceDir = fileSystem.directory('template_images');
       destination = fileSystem.directory('target');

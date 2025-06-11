@@ -47,7 +47,7 @@ void main() {
 
   test('MenuBarThemeData lerp special cases', () {
     expect(MenuBarThemeData.lerp(null, null, 0), null);
-    const data = MenuBarThemeData();
+    const MenuBarThemeData data = MenuBarThemeData();
     expect(identical(MenuBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
@@ -233,14 +233,14 @@ List<Widget> createTestMenus({
   double? menuElevation,
   OutlinedBorder? itemShape,
 }) {
-  final menuStyle = MenuStyle(
+  final MenuStyle menuStyle = MenuStyle(
     padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
     backgroundColor:
         menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
   );
-  final itemStyle = ButtonStyle(
+  final ButtonStyle itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
     shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder>(itemShape) : null,
     foregroundColor:
@@ -249,7 +249,7 @@ List<Widget> createTestMenus({
         itemBackground != null ? MaterialStatePropertyAll<Color>(itemBackground) : null,
     overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
   );
-  final result = <Widget>[
+  final List<Widget> result = <Widget>[
     SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,

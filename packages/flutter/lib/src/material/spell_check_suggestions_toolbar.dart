@@ -82,7 +82,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       return null;
     }
 
-    final buttonItems = <ContextMenuButtonItem>[];
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
     for (final String suggestion in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
@@ -100,7 +100,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     }
 
     // Build delete button.
-    final deleteButton = ContextMenuButtonItem(
+    final ContextMenuButtonItem deleteButton = ContextMenuButtonItem(
       onPressed: () {
         if (!editableTextState.mounted) {
           return;
@@ -147,7 +147,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the toolbar buttons based on the [buttonItems].
   List<Widget> _buildToolbarButtons(BuildContext context) {
     return buttonItems.map((ContextMenuButtonItem buttonItem) {
-      final button = TextSelectionToolbarTextButton(
+      final TextSelectionToolbarTextButton button = TextSelectionToolbarTextButton(
         padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
         onPressed: buttonItem.onPressed,
         alignment: Alignment.centerLeft,
@@ -185,7 +185,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final double paddingAbove =
         mediaQueryData.padding.top + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
-    final localAdjustment = Offset(
+    final Offset localAdjustment = Offset(
       CupertinoTextSelectionToolbar.kToolbarScreenPadding,
       paddingAbove,
     );

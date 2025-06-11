@@ -287,7 +287,7 @@ class _Attribute extends _Entry {
 
   factory _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
-    const attributePrefix = 'A: ';
+    const String attributePrefix = 'A: ';
     final List<String> keyVal = line
         .substring(line.indexOf(attributePrefix) + attributePrefix.length)
         .split('=');
@@ -308,7 +308,7 @@ class ApkManifestData {
     String attributeValue,
   ) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
-    for (final oneElement in allElements) {
+    for (final _Element oneElement in allElements) {
       final String? elementAttributeValue = oneElement.firstAttribute(attributeName)?.value;
       if (elementAttributeValue != null && elementAttributeValue.startsWith(attributeValue)) {
         return true;
@@ -326,8 +326,8 @@ class ApkManifestData {
     assert(lines.length > 3);
 
     final int manifestLine = lines.indexWhere((String line) => line.contains('E: manifest'));
-    final manifest = _Element.fromLine(lines[manifestLine], null);
-    var currentElement = manifest;
+    final _Element manifest = _Element.fromLine(lines[manifestLine], null);
+    _Element currentElement = manifest;
 
     for (final String line in lines.skip(manifestLine)) {
       final String trimLine = line.trimLeft();
@@ -343,7 +343,7 @@ class ApkManifestData {
           case 'A':
             currentElement.addChild(_Attribute.fromLine(line, currentElement));
           case 'E':
-            final element = _Element.fromLine(line, currentElement);
+            final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);
             currentElement = element;
         }
@@ -358,17 +358,17 @@ class ApkManifestData {
     final Iterable<_Element> activities = application.allElements('activity');
 
     _Element? launchActivity;
-    for (final activity in activities) {
+    for (final _Element activity in activities) {
       final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
-      final isEnabledByDefault = enabled == null;
+      final bool isEnabledByDefault = enabled == null;
       final bool isExplicitlyEnabled =
           enabled != null && (enabled.value?.contains('0xffffffff') ?? false);
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }
 
-      for (final element in intentFilters) {
+      for (final _Element element in intentFilters) {
         final bool isMainAction = _isAttributeWithValuePresent(
           element,
           'action',
@@ -428,7 +428,7 @@ class ApkManifestData {
       return null;
     }
 
-    final map = <String, Map<String, String>>{
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{
       if (packageName != null) 'package': <String, String>{'name': packageName},
       'version-code': <String, String>{'name': versionCode.toString()},
       if (activityName != null) 'launchable-activity': <String, String>{'name': activityName},

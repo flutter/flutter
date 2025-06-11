@@ -9,7 +9,7 @@ import 'common_matchers.dart';
 
 void main() {
   test('RoundedRectangleBorder defaults', () {
-    const border = RoundedRectangleBorder();
+    const RoundedRectangleBorder border = RoundedRectangleBorder();
     expect(border.side, BorderSide.none);
     expect(border.borderRadius, BorderRadius.zero);
   });
@@ -20,9 +20,9 @@ void main() {
       const RoundedRectangleBorder().hashCode,
       const RoundedRectangleBorder().copyWith().hashCode,
     );
-    const side = BorderSide(width: 10.0, color: Color(0xff123456));
-    const radius = BorderRadius.all(Radius.circular(16.0));
-    const directionalRadius = BorderRadiusDirectional.all(
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    const BorderRadiusDirectional directionalRadius = BorderRadiusDirectional.all(
       Radius.circular(16.0),
     );
 
@@ -38,15 +38,15 @@ void main() {
   });
 
   test('RoundedRectangleBorder', () {
-    const c10 = RoundedRectangleBorder(
+    const RoundedRectangleBorder c10 = RoundedRectangleBorder(
       side: BorderSide(width: 10.0),
       borderRadius: BorderRadius.all(Radius.circular(100.0)),
     );
-    const c15 = RoundedRectangleBorder(
+    const RoundedRectangleBorder c15 = RoundedRectangleBorder(
       side: BorderSide(width: 15.0),
       borderRadius: BorderRadius.all(Radius.circular(150.0)),
     );
-    const c20 = RoundedRectangleBorder(
+    const RoundedRectangleBorder c20 = RoundedRectangleBorder(
       side: BorderSide(width: 20.0),
       borderRadius: BorderRadius.all(Radius.circular(200.0)),
     );
@@ -57,17 +57,17 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
-    const c1 = RoundedRectangleBorder(
+    const RoundedRectangleBorder c1 = RoundedRectangleBorder(
       side: BorderSide(),
       borderRadius: BorderRadius.all(Radius.circular(1.0)),
     );
-    const c2 = RoundedRectangleBorder(
+    const RoundedRectangleBorder c2 = RoundedRectangleBorder(
       side: BorderSide(),
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     );
     expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
     expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
-    const rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
       (Canvas canvas) => c10.paint(canvas, rect),
       paints..drrect(
@@ -77,18 +77,18 @@ void main() {
       ),
     );
 
-    const directional = RoundedRectangleBorder(
+    const RoundedRectangleBorder directional = RoundedRectangleBorder(
       borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(20)),
     );
     expect(ShapeBorder.lerp(directional, c10, 1.0), ShapeBorder.lerp(c10, directional, 0.0));
   });
 
   test('RoundedRectangleBorder and CircleBorder', () {
-    const r = RoundedRectangleBorder(
+    const RoundedRectangleBorder r = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
     );
-    const c = CircleBorder();
-    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
+    const CircleBorder c = CircleBorder();
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
       includes: const <Offset>[Offset(30.0, 10.0), Offset(50.0, 10.0)],
       excludes: const <Offset>[Offset(1.0, 1.0), Offset(99.0, 19.0)],
@@ -164,41 +164,41 @@ void main() {
   });
 
   test('RoundedRectangleBorder.dimensions and CircleBorder.dimensions', () {
-    const insideRoundedRectangleBorder = RoundedRectangleBorder(
+    const RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10),
     );
     expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
-    const centerRoundedRectangleBorder = RoundedRectangleBorder(
+    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
     );
     expect(centerRoundedRectangleBorder.dimensions, const EdgeInsets.all(5));
 
-    const outsideRoundedRectangleBorder = RoundedRectangleBorder(
+    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
     expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
-    const insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
+    const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
     expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
 
-    const centerCircleBorder = CircleBorder(
+    const CircleBorder centerCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
     );
     expect(centerCircleBorder.dimensions, const EdgeInsets.all(5));
 
-    const outsideCircleBorder = CircleBorder(
+    const CircleBorder outsideCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
 
   test('RoundedRectangleBorder.lerp with different StrokeAlign', () {
-    const rInside = RoundedRectangleBorder(side: BorderSide(width: 10.0));
-    const rOutside = RoundedRectangleBorder(
+    const RoundedRectangleBorder rInside = RoundedRectangleBorder(side: BorderSide(width: 10.0));
+    const RoundedRectangleBorder rOutside = RoundedRectangleBorder(
       side: BorderSide(width: 20.0, strokeAlign: BorderSide.strokeAlignOutside),
     );
-    const rCenter = RoundedRectangleBorder(
+    const RoundedRectangleBorder rCenter = RoundedRectangleBorder(
       side: BorderSide(width: 15.0, strokeAlign: BorderSide.strokeAlignCenter),
     );
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);

@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(const example.UndoHistoryControllerExampleApp());
 
     // Equals to UndoHistoryState._kThrottleDuration.
-    const kThrottleDuration = Duration(milliseconds: 500);
+    const Duration kThrottleDuration = Duration(milliseconds: 500);
 
     expect(find.byType(TextField), findsOne);
     expect(find.widgetWithText(TextButton, 'Undo'), findsOne);

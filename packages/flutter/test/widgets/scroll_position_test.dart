@@ -24,7 +24,7 @@ class ThePositiveNumbers extends StatelessWidget {
 }
 
 Future<void> performTest(WidgetTester tester, bool maintainState) async {
-  final navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -138,7 +138,7 @@ void main() {
   testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (
     WidgetTester tester,
   ) async {
-    var count = 0;
+    int count = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: ListView.builder(
@@ -171,11 +171,11 @@ void main() {
           (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
         ).toList();
     addTearDown(() {
-      for (final node in nodes) {
+      for (final FocusNode node in nodes) {
         node.dispose();
       }
     });
-    final controller = ScrollController();
+    final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -238,8 +238,8 @@ void main() {
   });
 
   testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
-    var loadedWithDeferral = 0;
-    var buildCount = 0;
+    int loadedWithDeferral = 0;
+    int buildCount = 0;
     const double height = 500;
     await tester.pumpWidget(
       MaterialApp(

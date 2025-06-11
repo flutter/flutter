@@ -30,7 +30,7 @@ void main() {
   group('framework', () {
     final List<_CiYamlTarget> targets = _CiYamlTarget.parseAll(p.join(flutterRoot, '.ci.yaml'));
 
-    for (final target in targets) {
+    for (final _CiYamlTarget target in targets) {
       if (target.runIf == null || target.runIf!.isEmpty) {
         continue;
       }
@@ -72,7 +72,7 @@ void main() {
       p.join(flutterRoot, 'engine', 'src', 'flutter', '.ci.yaml'),
     );
 
-    for (final target in targets) {
+    for (final _CiYamlTarget target in targets) {
       if (target.runIf == null || target.runIf!.isEmpty) {
         continue;
       }
@@ -127,7 +127,7 @@ final class _CiYamlTarget {
       name: map['name'] as String,
       span: map.span,
       runIf: () {
-        final runIf = map['runIf'] as YamlList?;
+        final YamlList? runIf = map['runIf'] as YamlList?;
         if (runIf == null) {
           return null;
         }
@@ -143,8 +143,8 @@ final class _CiYamlTarget {
       sourceUrl: Uri.parse(path),
     );
 
-    final root = yamlDoc.contents as YamlMap;
-    final targets = root['targets'] as YamlList;
+    final YamlMap root = yamlDoc.contents as YamlMap;
+    final YamlList targets = root['targets'] as YamlList;
     return targets.nodes.map((YamlNode node) {
       return _CiYamlTarget.fromYamlMap(node as YamlMap);
     }).toList();

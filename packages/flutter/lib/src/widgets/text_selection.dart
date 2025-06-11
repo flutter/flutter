@@ -654,19 +654,19 @@ class TextSelectionOverlay {
     required TextPosition currentTextPosition,
   }) {
     final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
-    final positionAtEndOfLine = TextPosition(
+    final TextPosition positionAtEndOfLine = TextPosition(
       offset: lineAtOffset.extentOffset,
       affinity: TextAffinity.upstream,
     );
 
     // Default affinity is downstream.
-    final positionAtBeginningOfLine = TextPosition(offset: lineAtOffset.baseOffset);
+    final TextPosition positionAtBeginningOfLine = TextPosition(offset: lineAtOffset.baseOffset);
 
-    final localLineBoundaries = Rect.fromPoints(
+    final Rect localLineBoundaries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
-    final overlay =
+    final RenderBox? overlay =
         Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
     final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
     final Rect overlayLineBoundaries = MatrixUtils.transformRect(
@@ -764,7 +764,7 @@ class TextSelectionOverlay {
   /// line height is used, and the return value is in local coordinates as well.
   double _getHandleDy(double dragDy, double handleDy) {
     final double distanceDragged = dragDy - handleDy;
-    final dragDirection = distanceDragged < 0.0 ? -1 : 1;
+    final int dragDirection = distanceDragged < 0.0 ? -1 : 1;
     final int linesDragged =
         dragDirection * (distanceDragged.abs() / renderObject.preferredLineHeight).floor();
     return handleDy + linesDragged * renderObject.preferredLineHeight;
@@ -786,7 +786,7 @@ class TextSelectionOverlay {
     _endHandleDragPosition =
         renderObject.localToGlobal(Offset(0.0, nextEndHandleDragPositionLocal)).dy;
 
-    final handleTargetGlobal = Offset(
+    final Offset handleTargetGlobal = Offset(
       details.globalPosition.dx,
       _endHandleDragPosition + _endHandleDragTarget,
     );
@@ -808,7 +808,7 @@ class TextSelectionOverlay {
             ),
           );
 
-          final currentSelection = TextSelection.fromPosition(position);
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
@@ -836,7 +836,7 @@ class TextSelectionOverlay {
             ),
           );
 
-          final currentSelection = TextSelection.fromPosition(position);
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
@@ -918,7 +918,7 @@ class TextSelectionOverlay {
     );
     _startHandleDragPosition =
         renderObject.localToGlobal(Offset(0.0, nextStartHandleDragPositionLocal)).dy;
-    final handleTargetGlobal = Offset(
+    final Offset handleTargetGlobal = Offset(
       details.globalPosition.dx,
       _startHandleDragPosition + _startHandleDragTarget,
     );
@@ -939,7 +939,7 @@ class TextSelectionOverlay {
             ),
           );
 
-          final currentSelection = TextSelection.fromPosition(position);
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
@@ -967,7 +967,7 @@ class TextSelectionOverlay {
             ),
           );
 
-          final currentSelection = TextSelection.fromPosition(position);
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
@@ -1286,7 +1286,7 @@ class SelectionOverlay {
     // meant to be run in onStartHandleDragStart is still run.
     if (!_isDraggingStartHandle) {
       _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
-      final startDetails = DragStartDetails(
+      final DragStartDetails startDetails = DragStartDetails(
         globalPosition: details.globalPosition,
         localPosition: details.localPosition,
         sourceTimeStamp: details.sourceTimeStamp,
@@ -1407,7 +1407,7 @@ class SelectionOverlay {
     // meant to be run in onStartHandleDragStart is still run.
     if (!_isDraggingEndHandle) {
       _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
-      final startDetails = DragStartDetails(
+      final DragStartDetails startDetails = DragStartDetails(
         globalPosition: details.globalPosition,
         localPosition: details.localPosition,
         sourceTimeStamp: details.sourceTimeStamp,
@@ -1645,7 +1645,7 @@ class SelectionOverlay {
       return;
     }
 
-    final renderBox = context.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -1666,7 +1666,7 @@ class SelectionOverlay {
       return;
     }
 
-    final renderBox = context.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     _spellCheckToolbarController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -1819,9 +1819,9 @@ class SelectionOverlay {
       'If not using contextMenuBuilder, must pass selectionDelegate.',
     );
 
-    final renderBox = this.context.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
 
-    final editingRegion = Rect.fromPoints(
+    final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
@@ -1836,7 +1836,7 @@ class SelectionOverlay {
             ? editingRegion.width / 2
             : (selectionEndpoints.first.point.dx + selectionEndpoints.last.point.dx) / 2;
 
-    final midpoint = Offset(
+    final Offset midpoint = Offset(
       midX,
       // The y-coordinate won't be made use of most likely.
       selectionEndpoints.first.point.dy - lineHeightAtStart,
@@ -2053,7 +2053,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     final Rect interactiveRect = handleRect.expandToInclude(
       Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension / 2),
     );
-    final padding = RelativeRect.fromLTRB(
+    final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
@@ -2656,8 +2656,8 @@ class TextSelectionGestureDetectorBuilder {
             final TextPosition textPosition = renderEditable.getPositionForPoint(
               details.globalPosition,
             );
-            final isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
-            final wordAtCursorIndexIsMisspelled =
+            final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
+            final bool wordAtCursorIndexIsMisspelled =
                 editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
 
             if (wordAtCursorIndexIsMisspelled) {
@@ -2734,7 +2734,7 @@ class TextSelectionGestureDetectorBuilder {
             cause: SelectionChangedCause.longPress,
           );
           // Show the floating cursor.
-          final cursorPoint = RawFloatingCursorPoint(
+          final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
             state: FloatingCursorDragState.Start,
             startLocation: (
               renderEditable.globalToLocal(details.globalPosition),
@@ -2778,7 +2778,7 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
     // Adjust the drag start offset for possible viewport offset changes.
-    final editableOffset =
+    final Offset editableOffset =
         renderEditable.maxLines == 1
             ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
             : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
@@ -2807,7 +2807,7 @@ class TextSelectionGestureDetectorBuilder {
             cause: SelectionChangedCause.longPress,
           );
           // Update the floating cursor.
-          final cursorPoint = RawFloatingCursorPoint(
+          final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
             state: FloatingCursorDragState.Update,
             offset: details.offsetFromOrigin,
           );
@@ -2937,7 +2937,7 @@ class TextSelectionGestureDetectorBuilder {
         delegate.selectionEnabled &&
         editableText.textEditingValue.selection.isCollapsed) {
       // Update the floating cursor.
-      final cursorPoint = RawFloatingCursorPoint(
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
         state: FloatingCursorDragState.End,
       );
       editableText.updateFloatingCursor(cursorPoint);
@@ -2999,7 +2999,7 @@ class TextSelectionGestureDetectorBuilder {
         toPosition == fromPosition ? fromRange : _moveToTextBoundary(toPosition, boundary);
     final bool isFromBoundaryBeforeToBoundary = fromRange.start < toRange.end;
 
-    final newSelection =
+    final TextSelection newSelection =
         isFromBoundaryBeforeToBoundary
             ? TextSelection(baseOffset: fromRange.start, extentOffset: toRange.end)
             : TextSelection(baseOffset: fromRange.end, extentOffset: toRange.start);
@@ -3153,7 +3153,7 @@ class TextSelectionGestureDetectorBuilder {
 
     if (!_isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
-      final editableOffset =
+      final Offset editableOffset =
           renderEditable.maxLines == 1
               ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
               : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
@@ -3653,7 +3653,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   @override
   Widget build(BuildContext context) {
-    final gestures = <Type, GestureRecognizerFactory>{};
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
     gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
       () => TapGestureRecognizer(debugOwner: this),

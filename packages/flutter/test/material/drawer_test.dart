@@ -10,7 +10,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Material2 - Drawer control test', (WidgetTester tester) async {
-    const containerKey = Key('container');
+    const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('Material3 - Drawer control test', (WidgetTester tester) async {
-    const containerKey = Key('container');
+    const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -94,7 +94,7 @@ void main() {
   testWidgets(
     'Drawer dismiss barrier has label',
     (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer())));
 
       final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -120,7 +120,7 @@ void main() {
   );
 
   testWidgets('Drawer dismiss barrier has no label', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer())));
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -158,7 +158,7 @@ void main() {
           .child!;
     }
 
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     Widget buildFrame({Color? drawerScrimColor}) {
       return MaterialApp(
         home: Scaffold(
@@ -185,7 +185,7 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    var scrim = getScrim() as ColoredBox;
+    ColoredBox scrim = getScrim() as ColoredBox;
     expect(scrim.color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
@@ -248,7 +248,7 @@ void main() {
   });
 
   testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
-    final draggable = ThemeData(platform: TargetPlatform.android);
+    final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
     await tester.pumpWidget(MaterialApp(theme: draggable, home: const Scaffold(drawer: Drawer())));
 
     final TestGesture gesture = await tester.createGesture();
@@ -298,7 +298,7 @@ void main() {
   });
 
   testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -317,7 +317,7 @@ void main() {
   });
 
   testWidgets('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -336,7 +336,7 @@ void main() {
   });
 
   testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -367,7 +367,7 @@ void main() {
   });
 
   testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -398,7 +398,7 @@ void main() {
   });
 
   testWidgets('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'app',
@@ -459,7 +459,7 @@ void main() {
   });
 
   testWidgets('ScaffoldState close drawer', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, drawer: const Text('Drawer'), body: Container()),
@@ -480,7 +480,7 @@ void main() {
   testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (
     WidgetTester tester,
   ) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, drawer: const Text('Drawer'), body: Container()),
@@ -569,7 +569,7 @@ void main() {
   });
 
   testWidgets('ScaffoldState close end drawer', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(key: scaffoldKey, endDrawer: const Text('endDrawer'), body: Container()),
@@ -811,11 +811,11 @@ void main() {
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier.
-    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer.
     // This example taps on the ModalBarrier somewhere outside its boundaries.
-    const modalBarrierCenter = Offset(400, 300);
+    const Offset modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier.
@@ -875,11 +875,11 @@ void main() {
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier.
-    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer.
     // This example taps on the ModalBarrier somewhere outside its boundaries.
-    const modalBarrierCenter = Offset(400, 300);
+    const Offset modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier.

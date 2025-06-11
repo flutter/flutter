@@ -9,7 +9,7 @@ void main() {
   testWidgets('default search field has a border radius', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Center(child: CupertinoSearchTextField())));
 
-    final decoration =
+    final BoxDecoration decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -34,7 +34,7 @@ void main() {
       ),
     );
 
-    final decoration =
+    final BoxDecoration decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -59,7 +59,7 @@ void main() {
       ),
     );
 
-    final decoration =
+    final BoxDecoration decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -74,7 +74,7 @@ void main() {
   });
 
   testWidgets('text entries are padded by default', (WidgetTester tester) async {
-    final controller = TextEditingController(text: 'initial');
+    final TextEditingController controller = TextEditingController(text: 'initial');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
@@ -102,7 +102,7 @@ void main() {
   });
 
   testWidgets('can control text content via controller', (WidgetTester tester) async {
-    final controller = TextEditingController();
+    final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -172,7 +172,7 @@ void main() {
   });
 
   testWidgets('prefix widget is in front of the text', (WidgetTester tester) async {
-    final controller = TextEditingController(text: 'input');
+    final TextEditingController controller = TextEditingController(text: 'input');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -193,7 +193,7 @@ void main() {
   });
 
   testWidgets('suffix widget is after the text', (WidgetTester tester) async {
-    final controller = TextEditingController(text: 'Hi');
+    final TextEditingController controller = TextEditingController(text: 'Hi');
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('prefix widget visibility', (WidgetTester tester) async {
-    const prefixIcon = Key('prefix');
+    const Key prefixIcon = Key('prefix');
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -280,7 +280,7 @@ void main() {
   });
 
   testWidgets('clear button shows with right visibility mode', (WidgetTester tester) async {
-    var controller = TextEditingController();
+    TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -323,7 +323,7 @@ void main() {
   });
 
   testWidgets('clear button removes text', (WidgetTester tester) async {
-    final controller = TextEditingController();
+    final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
@@ -344,8 +344,8 @@ void main() {
   testWidgets('tapping clear button also calls onChanged when text not empty', (
     WidgetTester tester,
   ) async {
-    var value = 'text entry';
-    final controller = TextEditingController();
+    String value = 'text entry';
+    final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -406,7 +406,7 @@ void main() {
   testWidgets('custom suffix onTap overrides default clearing behavior', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(text: 'Text');
+    final TextEditingController controller = TextEditingController(text: 'Text');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -424,7 +424,7 @@ void main() {
   });
 
   testWidgets('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
-    var onTapCallCount = 0;
+    int onTapCallCount = 0;
 
     // onTap can be null.
     await tester.pumpWidget(const CupertinoApp(home: Center(child: CupertinoSearchTextField())));
@@ -477,7 +477,7 @@ void main() {
   });
 
   testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(

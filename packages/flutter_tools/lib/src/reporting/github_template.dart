@@ -82,8 +82,8 @@ class GitHubTemplateCreator {
     String doctorText,
   ) async {
     final String errorString = sanitizedCrashException(error);
-    final title = '[tool_crash] $errorString';
-    final body = '''
+    final String title = '[tool_crash] $errorString';
+    final String body = '''
 ## Command
 ```sh
 $command
@@ -128,9 +128,9 @@ ${_projectMetadataInformation()}
       if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      final metadata = FlutterProjectMetadata(project.metadataFile, _logger);
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final FlutterTemplateType? projectType = metadata.projectType;
-      final description =
+      final StringBuffer description =
           StringBuffer()
             ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
             ..writeln('**Version**: ${manifest.appVersion}')
@@ -173,7 +173,7 @@ ${_projectMetadataInformation()}
     if (plugins is! Map<String, Object?>) {
       return;
     }
-    final pluginPaths = <String>{};
+    final Set<String> pluginPaths = <String>{};
     for (final Object? pluginList in plugins.values) {
       if (pluginList is! List<Object?>) {
         continue;
@@ -182,7 +182,7 @@ ${_projectMetadataInformation()}
         if (plugin is! Map<String, Object?>) {
           continue;
         }
-        final path = plugin['path'] as String?;
+        final String? path = plugin['path'] as String?;
         if (path != null) {
           pluginPaths.add(path);
         }
@@ -191,7 +191,7 @@ ${_projectMetadataInformation()}
     if (pluginPaths.isEmpty) {
       return;
     }
-    for (final path in pluginPaths) {
+    for (final String path in pluginPaths) {
       // Write the last part of the path, which includes the plugin name and version.
       // Example: camera-0.5.7+2
       final List<String> pathParts = _fileSystem.path.split(path);

@@ -8,58 +8,58 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
-    final numValue = RestorableNum<num>(0);
+    final RestorableNum<num> numValue = RestorableNum<num>(0);
     addTearDown(numValue.dispose);
     expect(() => numValue.value, throwsAssertionError);
-    final doubleValue = RestorableDouble(1.0);
+    final RestorableDouble doubleValue = RestorableDouble(1.0);
     addTearDown(doubleValue.dispose);
     expect(() => doubleValue.value, throwsAssertionError);
-    final intValue = RestorableInt(1);
+    final RestorableInt intValue = RestorableInt(1);
     addTearDown(intValue.dispose);
     expect(() => intValue.value, throwsAssertionError);
-    final stringValue = RestorableString('hello');
+    final RestorableString stringValue = RestorableString('hello');
     addTearDown(stringValue.dispose);
     expect(() => stringValue.value, throwsAssertionError);
-    final boolValue = RestorableBool(true);
+    final RestorableBool boolValue = RestorableBool(true);
     addTearDown(boolValue.dispose);
     expect(() => boolValue.value, throwsAssertionError);
-    final nullableNumValue = RestorableNumN<num?>(0);
+    final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(0);
     addTearDown(nullableNumValue.dispose);
     expect(() => nullableNumValue.value, throwsAssertionError);
-    final nullableDoubleValue = RestorableDoubleN(1.0);
+    final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(1.0);
     addTearDown(nullableDoubleValue.dispose);
     expect(() => nullableDoubleValue.value, throwsAssertionError);
-    final nullableIntValue = RestorableIntN(1);
+    final RestorableIntN nullableIntValue = RestorableIntN(1);
     addTearDown(nullableIntValue.dispose);
     expect(() => nullableIntValue.value, throwsAssertionError);
-    final nullableStringValue = RestorableStringN('hello');
+    final RestorableStringN nullableStringValue = RestorableStringN('hello');
     addTearDown(nullableStringValue.dispose);
     expect(() => nullableStringValue.value, throwsAssertionError);
-    final nullableBoolValue = RestorableBoolN(true);
+    final RestorableBoolN nullableBoolValue = RestorableBoolN(true);
     addTearDown(nullableBoolValue.dispose);
     expect(() => nullableBoolValue.value, throwsAssertionError);
-    final controllerValue = RestorableTextEditingController();
+    final RestorableTextEditingController controllerValue = RestorableTextEditingController();
     addTearDown(controllerValue.dispose);
     expect(() => controllerValue.value, throwsAssertionError);
-    final dateTimeValue = RestorableDateTime(DateTime(2020, 4, 3));
+    final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2020, 4, 3));
     addTearDown(dateTimeValue.dispose);
     expect(() => dateTimeValue.value, throwsAssertionError);
-    final nullableDateTimeValue = RestorableDateTimeN(DateTime(2020, 4, 3));
+    final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(DateTime(2020, 4, 3));
     addTearDown(nullableDateTimeValue.dispose);
     expect(() => nullableDateTimeValue.value, throwsAssertionError);
-    final nullableEnumValue = RestorableEnumN<TestEnum>(
+    final RestorableEnumN<TestEnum> nullableEnumValue = RestorableEnumN<TestEnum>(
       TestEnum.one,
       values: TestEnum.values,
     );
     addTearDown(nullableEnumValue.dispose);
     expect(() => nullableEnumValue.value, throwsAssertionError);
-    final enumValue = RestorableEnum<TestEnum>(
+    final RestorableEnum<TestEnum> enumValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values,
     );
     addTearDown(enumValue.dispose);
     expect(() => enumValue.value, throwsAssertionError);
-    final objectValue = _TestRestorableValue();
+    final _TestRestorableValue objectValue = _TestRestorableValue();
     addTearDown(objectValue.dispose);
     expect(() => objectValue.value, throwsAssertionError);
   });
@@ -204,7 +204,7 @@ void main() {
 
     // Restores to previous values.
     await tester.restartAndRestore();
-    final oldState = state;
+    final _RestorableWidgetState oldState = state;
     state = tester.state(find.byType(_RestorableWidget));
     expect(state, isNot(same(oldState)));
 
@@ -332,7 +332,7 @@ void main() {
     expect(find.text('hello world'), findsOneWidget);
     final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
 
-    final notifyLog = <String>[];
+    final List<String> notifyLog = <String>[];
 
     state.numValue.addListener(() {
       notifyLog.add('num');
@@ -550,13 +550,13 @@ void main() {
   testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (
     WidgetTester tester,
   ) async {
-    final enumMissingValue = RestorableEnum<TestEnum>(
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(enumMissingValue.dispose);
     expect(() => enumMissingValue.value = TestEnum.four, throwsAssertionError);
-    final nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
       null,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
@@ -567,13 +567,13 @@ void main() {
   testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (
     WidgetTester tester,
   ) async {
-    final enumMissingValue = RestorableEnum<TestEnum>(
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(enumMissingValue.dispose);
     expect(() => enumMissingValue.fromPrimitives('four'), throwsAssertionError);
-    final nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
       null,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );

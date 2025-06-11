@@ -27,7 +27,7 @@ void main() {
 
     testWithoutContext('does not support non-macOS platforms', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'windows'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -40,7 +40,7 @@ void main() {
     });
 
     testWithoutContext('discovery not allowed', () async {
-      final discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -56,7 +56,7 @@ void main() {
 
     testWithoutContext('no device on x86', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -72,7 +72,7 @@ void main() {
 
     testWithoutContext('no device on when iOS development off', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -88,7 +88,7 @@ void main() {
 
     testWithoutContext('device discovery on arm', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -112,7 +112,7 @@ void main() {
   });
 
   testWithoutContext('MacOSDesignedForIPadDevice properties', () async {
-    final device = MacOSDesignedForIPadDevice(
+    final MacOSDesignedForIPadDevice device = MacOSDesignedForIPadDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),

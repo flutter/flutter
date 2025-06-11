@@ -96,7 +96,7 @@ class GalleryDemoConfiguration {
 
 /// Awaits all deferred libraries for tests.
 Future<void> pumpDeferredLibraries() {
-  final futures = <Future<void>>[
+  final List<Future<void>> futures = <Future<void>>[
     DeferredWidget.preload(cupertino_demos.loadLibrary),
     DeferredWidget.preload(material_demos.loadLibrary),
     DeferredWidget.preload(motion_demo_container.loadLibrary),

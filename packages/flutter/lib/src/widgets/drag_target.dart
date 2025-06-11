@@ -106,7 +106,7 @@ typedef DragAnchorStrategy =
 ///  * [DragAnchorStrategy], the typedef that this function implements.
 ///  * [Draggable.dragAnchorStrategy], for which this is a built-in value.
 Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
-  final renderObject = context.findRenderObject()! as RenderBox;
+  final RenderBox renderObject = context.findRenderObject()! as RenderBox;
   return renderObject.globalToLocal(position);
 }
 
@@ -508,7 +508,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     setState(() {
       _activeCount += 1;
     });
-    final avatar = _DragAvatar<T>(
+    final _DragAvatar<T> avatar = _DragAvatar<T>(
       overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay),
       data: widget.data,
       axis: widget.axis,
@@ -892,23 +892,23 @@ class _DragAvatar<T extends Object> extends Drag {
   void updateDrag(Offset globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
     if (overlayState.mounted) {
-      final box = overlayState.context.findRenderObject()! as RenderBox;
+      final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
       final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
       _overlayOffset = overlaySpaceOffset - dragStartPoint;
 
       _entry!.markNeedsBuild();
     }
 
-    final result = HitTestResult();
+    final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition + feedbackOffset, viewId);
 
     final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 
-    var listsMatch = false;
+    bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
       final Iterator<_DragTargetState<Object>> iterator = targets.iterator;
-      for (var i = 0; i < _enteredTargets.length; i += 1) {
+      for (int i = 0; i < _enteredTargets.length; i += 1) {
         iterator.moveNext();
         if (iterator.current != _enteredTargets[i]) {
           listsMatch = false;
@@ -959,14 +959,14 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   void _leaveAllEntered() {
-    for (var i = 0; i < _enteredTargets.length; i += 1) {
+    for (int i = 0; i < _enteredTargets.length; i += 1) {
       _enteredTargets[i].didLeave(this);
     }
     _enteredTargets.clear();
   }
 
   void finishDrag(_DragEndKind endKind, [Velocity? velocity]) {
-    var wasAccepted = false;
+    bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget!.didDrop(this);
       wasAccepted = true;

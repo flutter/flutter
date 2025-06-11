@@ -28,7 +28,7 @@ Future<void> run(
   FileSystem fs = const LocalFileSystem(),
   ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  final parser = ArgParser();
+  final ArgParser parser = ArgParser();
   parser.addOption(kTokenOption, help: 'Path to GitHub access token file.', mandatory: true);
   parser.addOption(
     kGithubClient,
@@ -55,9 +55,9 @@ ${parser.usage}
     rethrow;
   }
 
-  const mirrorUrl = 'https://github.com/flutter-pub-roller-bot/flutter.git';
-  final upstreamUrl = results[kUpstreamRemote]! as String;
-  final tokenPath = results[kTokenOption]! as String;
+  const String mirrorUrl = 'https://github.com/flutter-pub-roller-bot/flutter.git';
+  final String upstreamUrl = results[kUpstreamRemote]! as String;
+  final String tokenPath = results[kTokenOption]! as String;
   final File tokenFile = fs.file(tokenPath);
   if (!tokenFile.existsSync()) {
     throw ArgumentError(
@@ -71,7 +71,7 @@ ${parser.usage}
     );
   }
 
-  final framework = FrameworkRepository(
+  final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts(token),
     mirrorRemote: const Remote.mirror(mirrorUrl),
     upstreamRemote: Remote.upstream(upstreamUrl),
@@ -88,7 +88,7 @@ ${parser.usage}
 }
 
 String _parseOrgName(String remoteUrl) {
-  final pattern = RegExp(r'^https:\/\/github\.com\/(.*)\/');
+  final RegExp pattern = RegExp(r'^https:\/\/github\.com\/(.*)\/');
   final RegExpMatch? match = pattern.firstMatch(remoteUrl);
   if (match == null) {
     throw FormatException(

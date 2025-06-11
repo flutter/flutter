@@ -22,7 +22,7 @@ void main() {
   testWithoutContext('WindowsDevice defaults', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
     final File dummyFile = MemoryFileSystem.test().file('dummy');
-    final windowsApp = PrebuiltWindowsApp(
+    final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(
       executable: 'foo',
       applicationPackage: dummyFile,
     );
@@ -108,7 +108,7 @@ void main() {
 
   testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
-    final fakeApp = FakeWindowsApp();
+    final FakeWindowsApp fakeApp = FakeWindowsApp();
 
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.debug), 'debug/executable');
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.profile), 'profile/executable');
@@ -117,7 +117,7 @@ void main() {
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
-  final flutterProjectFactory = FlutterProjectFactory(
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
   );

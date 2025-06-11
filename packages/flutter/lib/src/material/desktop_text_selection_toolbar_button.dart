@@ -56,7 +56,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
-    final isDark = theme.colorScheme.brightness == Brightness.dark;
+    final bool isDark = theme.colorScheme.brightness == Brightness.dark;
     final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return SizedBox(

@@ -20,7 +20,7 @@ void main() {
   )) {
     stdout.writeln('Changes detected in the widget_preview_scaffold project templates.');
     stdout.writeln('Regenerating...');
-    final args = <String>[
+    final List<String> args = <String>[
       'widget-preview',
       'start',
       '--scaffold-output-dir=${Platform.script.resolve('widget_preview_scaffold').path}',

@@ -15,7 +15,7 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  final project = HotRestartWithPausedChildIsolateProject();
+  final HotRestartWithPausedChildIsolateProject project = HotRestartWithPausedChildIsolateProject();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -40,7 +40,7 @@ void main() {
     // child isolate that will spawn when the isolate resumes. Resume the
     // spawned child which will pause on start, and then wait for it to execute
     // the `debugger()` call.
-    final childIsolatePausedCompleter = Completer<void>();
+    final Completer<void> childIsolatePausedCompleter = Completer<void>();
     vmService.onDebugEvent.listen((Event event) async {
       if (event.kind == EventKind.kPauseStart) {
         await vmService.resume(event.isolate!.id!);

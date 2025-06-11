@@ -11,9 +11,9 @@ import './common.dart';
 
 void main() {
   test('writeStateToFile() pretty-prints JSON with 2 spaces', () {
-    final fileSystem = MemoryFileSystem.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final File stateFile = fileSystem.file('/path/to/statefile.json')..createSync(recursive: true);
-    const candidateBranch = 'flutter-2.3-candidate.0';
+    const String candidateBranch = 'flutter-2.3-candidate.0';
     final pb.ConductorState state =
         pb.ConductorState.create()
           ..releaseChannel = 'stable'
@@ -34,7 +34,7 @@ void main() {
                       ..url = 'git@github.com:flutter/flutter.git'));
     writeStateToFile(stateFile, state, <String>['[status] hello world']);
     final String serializedState = stateFile.readAsStringSync();
-    const expectedString = '''
+    const String expectedString = '''
 {
   "releaseChannel": "stable",
   "releaseVersion": "2.3.4",

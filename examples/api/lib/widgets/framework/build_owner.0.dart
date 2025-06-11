@@ -41,9 +41,9 @@ class _BuildOwnerExampleState extends State<BuildOwnerExample> {
 }
 
 Size measureWidget(Widget widget) {
-  final pipelineOwner = PipelineOwner();
+  final PipelineOwner pipelineOwner = PipelineOwner();
   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
-  final buildOwner = BuildOwner(focusManager: FocusManager());
+  final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
     container: rootView,
     debugShortDescription: '[root]',

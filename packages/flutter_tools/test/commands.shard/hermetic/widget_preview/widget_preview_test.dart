@@ -72,7 +72,7 @@ void main() {
         final List<AssetsEntry> rootAssets = root.assets;
         final List<AssetsEntry> updatedAssets = updated.assets;
         expect(updatedAssets.length, rootAssets.length);
-        for (var i = 0; i < rootAssets.length; ++i) {
+        for (int i = 0; i < rootAssets.length; ++i) {
           final AssetsEntry rootEntry = rootAssets[i];
           final AssetsEntry updatedEntry = updatedAssets[i];
           expect(updatedEntry, WidgetPreviewStartCommand.transformAssetsEntry(rootEntry));
@@ -84,12 +84,12 @@ void main() {
 
         // Verify that the updated preview scaffold pubspec includes fonts needed by
         // the previewer.
-        for (var i = 0; i < emptyPreviewFontCount; ++i) {
+        for (int i = 0; i < emptyPreviewFontCount; ++i) {
           final Font defaultPreviewerFont = emptyPreviewManifest.fonts[i];
           final Font updatedFont = updated.fonts[i];
           expect(updatedFont.familyName, defaultPreviewerFont.familyName);
           expect(updatedFont.fontAssets.length, defaultPreviewerFont.fontAssets.length);
-          for (var j = 0; j < defaultPreviewerFont.fontAssets.length; ++j) {
+          for (int j = 0; j < defaultPreviewerFont.fontAssets.length; ++j) {
             final FontAsset rootFontAsset = defaultPreviewerFont.fontAssets[j];
             final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
             expect(updatedFontAsset.descriptor, rootFontAsset.descriptor);
@@ -98,12 +98,12 @@ void main() {
 
         // Verify fonts from the root project are included in the updated preview
         // scaffold pubspec.
-        for (var i = emptyPreviewFontCount; i < expectedFontCount; ++i) {
+        for (int i = emptyPreviewFontCount; i < expectedFontCount; ++i) {
           final Font rootFont = root.fonts[i - emptyPreviewFontCount];
           final Font updatedFont = updated.fonts[i];
           expect(updatedFont.familyName, rootFont.familyName);
           expect(updatedFont.fontAssets.length, rootFont.fontAssets.length);
-          for (var j = 0; j < rootFont.fontAssets.length; ++j) {
+          for (int j = 0; j < rootFont.fontAssets.length; ++j) {
             final FontAsset rootFontAsset = rootFont.fontAssets[j];
             final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
             expect(
@@ -117,7 +117,7 @@ void main() {
 
         expect(updated.deferredComponents?.length, root.deferredComponents?.length);
         if (root.deferredComponents != null) {
-          for (var i = 0; i < root.deferredComponents!.length; ++i) {
+          for (int i = 0; i < root.deferredComponents!.length; ++i) {
             expect(
               updated.deferredComponents![i].toString(),
               WidgetPreviewStartCommand.transformDeferredComponent(
@@ -137,7 +137,7 @@ void main() {
       'can add flutter_gen to package_config.json if generate is set in the parent project',
       () async {
         command.maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
-        final packageConfig =
+        final Map<String, Object?> packageConfig =
             jsonDecode(rootProject.widgetPreviewScaffoldProject.packageConfig.readAsStringSync())
                 as Map<String, Object?>;
         expect(packageConfig.containsKey('packages'), true);

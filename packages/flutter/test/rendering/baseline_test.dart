@@ -22,7 +22,7 @@ void main() {
             child: child = RenderSizedBox(const Size(100.0, 100.0)),
           ),
     );
-    final childParentData = child.parentData! as BoxParentData;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
 
     layout(root);
     expect(childParentData.offset.dx, equals(0.0));
@@ -55,12 +55,12 @@ void main() {
   });
 
   test('RenderBaseline different baseline types', () {
-    final child =
+    final _RenderBaselineTester child =
         _RenderBaselineTester()
           ..boxSize = const Size.square(100)
           ..alphabeticBaselineOffset = 50
           ..ideographicBaselineOffset = 60;
-    final renderBaseline = RenderBaseline(
+    final RenderBaseline renderBaseline = RenderBaseline(
       baseline: 1.0,
       baselineType: TextBaseline.alphabetic,
       child: child,

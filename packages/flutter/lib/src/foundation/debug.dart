@@ -80,13 +80,13 @@ bool debugInstrumentationEnabled = false;
 ///    visualization in Chrome's tracing format. This method does not
 ///    implicitly add any timeline events.
 Future<T> debugInstrumentAction<T>(String description, Future<T> Function() action) async {
-  var instrument = false;
+  bool instrument = false;
   assert(() {
     instrument = debugInstrumentationEnabled;
     return true;
   }());
   if (instrument) {
-    final stopwatch =
+    final Stopwatch stopwatch =
         Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
     // Ignore context: The framework does not use this function internally so it will not cause flakes.
     try {

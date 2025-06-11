@@ -364,7 +364,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
       logger.printStatus('Launching the Widget Preview Scaffold...');
 
-      final debuggingOptions = DebuggingOptions.enabled(
+      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
         BuildInfo(
           BuildMode.debug,
           null,
@@ -407,7 +407,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
       );
-      final appStarted = Completer<void>();
+      final Completer<void> appStarted = Completer<void>();
       unawaited(runner.run(appStartedCompleter: appStarted));
       await appStarted.future;
     } on Exception catch (error) {
@@ -471,7 +471,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }) {
     final List<AssetsEntry> assets = rootManifest.assets.map(transformAssetsEntry).toList();
 
-    final fonts = <Font>[
+    final List<Font> fonts = <Font>[
       ...widgetPreviewManifest.fonts,
       ...rootManifest.fonts.map((Font font) {
         return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
@@ -506,7 +506,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     // Adds a path dependency on the parent project so previews can be
     // imported directly into the preview scaffold.
-    const pubAdd = 'add';
+    const String pubAdd = 'add';
     // Use `json.encode` to handle escapes correctly.
     final String pathDescriptor = json.encode(<String, Object?>{
       // `pub add` interprets relative paths relative to the current directory.
@@ -598,7 +598,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '$previewPackageConfigPath',
       );
     }
-    final packageConfigJson =
+    final Map<String, Object?> packageConfigJson =
         json.decode(packageConfig.readAsStringSync()) as Map<String, Object?>;
     (packageConfigJson['packages'] as List<dynamic>?)!.cast<Map<String, String>>().add(
       flutterGenPackageConfigEntry,

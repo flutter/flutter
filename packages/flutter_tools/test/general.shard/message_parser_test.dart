@@ -10,14 +10,14 @@ void main() {
   // Going to test that operator== is overloaded properly since the rest
   // of the test depends on it.
   testWithoutContext('node equality', () {
-    final actual = Node(
+    final Node actual = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
       children: <Node>[Node.openBrace(0), Node.string(1, 'var'), Node.closeBrace(4)],
     );
 
-    final expected = Node(
+    final Node expected = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -25,7 +25,7 @@ void main() {
     );
     expect(actual, equals(expected));
 
-    final wrongType = Node(
+    final Node wrongType = Node(
       ST.pluralExpr,
       0,
       expectedSymbolCount: 3,
@@ -33,7 +33,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongType)));
 
-    final wrongPosition = Node(
+    final Node wrongPosition = Node(
       ST.placeholderExpr,
       1,
       expectedSymbolCount: 3,
@@ -41,7 +41,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongPosition)));
 
-    final wrongChildrenCount = Node(
+    final Node wrongChildrenCount = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -49,7 +49,7 @@ void main() {
     );
     expect(actual, isNot(equals(wrongChildrenCount)));
 
-    final wrongChild = Node(
+    final Node wrongChild = Node(
       ST.placeholderExpr,
       0,
       expectedSymbolCount: 3,
@@ -296,8 +296,8 @@ void main() {
   });
 
   testWithoutContext('lexer unmatched single quote', () {
-    const message = "here''s an unmatched single quote: '";
-    const expectedError = '''
+    const String message = "here''s an unmatched single quote: '";
+    const String expectedError = '''
 [app_en.arb:escaping] ICU Lexing Error: Unmatched single quotes.
     here''s an unmatched single quote: '
                                        ^''';
@@ -314,8 +314,8 @@ void main() {
   });
 
   testWithoutContext('lexer unexpected character', () {
-    const message = '{ * }';
-    const expectedError = '''
+    const String message = '{ * }';
+    const String expectedError = '''
 [app_en.arb:lex] ICU Lexing Error: Unexpected character.
     { * }
       ^''';
@@ -377,7 +377,7 @@ void main() {
   });
 
   testWithoutContext('relaxed lexer complex', () {
-    const message =
+    const String message =
         '{ notPlaceholder } {count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}';
     final List<Node> tokens =
         Parser('string', 'app_en.arb', message, placeholders: <String>['count']).lexIntoTokens();
@@ -717,7 +717,7 @@ void main() {
 
   testWithoutContext('parser unexpected token', () {
     // unexpected token
-    const expectedError1 = '''
+    const String expectedError1 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "}" but found "=".
     { placeholder =
                   ^''';
@@ -732,7 +732,7 @@ void main() {
       ),
     );
 
-    const expectedError2 = '''
+    const String expectedError2 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "number" but found "}".
     { count, plural, = }
                        ^''';
@@ -747,7 +747,7 @@ void main() {
       ),
     );
 
-    const expectedError3 = '''
+    const String expectedError3 = '''
 [app_en.arb:unexpectedToken] ICU Syntax Error: Expected "identifier" but found ",".
     { , plural , = }
       ^''';

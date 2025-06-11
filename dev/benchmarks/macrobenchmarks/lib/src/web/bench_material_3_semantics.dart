@@ -125,7 +125,7 @@ class _ScrollTestState extends State<_ScrollTest> with SingleTickerProviderState
 
     scrollController = ScrollController();
 
-    var forward = true;
+    bool forward = true;
 
     // A one-off timer is necessary to allow the framework to measure the
     // available scroll extents before the scroll controller can be exercised

@@ -50,23 +50,23 @@ void main() {
   testWithoutContext('VM Service registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, {bool? pause, bool? force}) async {}
 
-    final mockVMService = MockVMService();
+    final MockVMService mockVMService = MockVMService();
     await setUpVmService(reloadSources: reloadSources, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kReloadSourcesServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
-    final mockDevice = FakeDevice();
+    final FakeDevice mockDevice = FakeDevice();
 
-    final mockVMService = MockVMService();
+    final MockVMService mockVMService = MockVMService();
     await setUpVmService(device: mockDevice, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
-    final mockVMService = MockVMService();
+    final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
       vmService: mockVMService,
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
-    final mockVMService = MockVMService();
+    final MockVMService mockVMService = MockVMService();
     await setUpVmService(vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
@@ -84,7 +84,7 @@ void main() {
   testUsingContext(
     'VM Service prints messages for connection failures',
     () {
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
       FakeAsync().run((FakeAsync time) {
         final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
         unawaited(connectToVmService(uri, logger: logger));
@@ -113,8 +113,8 @@ void main() {
   );
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
-    final mockVMService = MockVMService();
-    final flutterVmService = FlutterVmService(mockVMService);
+    final MockVMService mockVMService = MockVMService();
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
@@ -130,8 +130,8 @@ void main() {
   });
 
   testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
-    final mockVMService = MockVMService();
-    final flutterVmService = FlutterVmService(mockVMService);
+    final MockVMService mockVMService = MockVMService();
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(
@@ -157,8 +157,8 @@ void main() {
   });
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
-    final mockVMService = MockVMService();
-    final flutterVmService = FlutterVmService(mockVMService);
+    final MockVMService mockVMService = MockVMService();
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.flushUIThreadTasks(uiIsolateId: 'def');
 
@@ -169,7 +169,7 @@ void main() {
   });
 
   testUsingContext('runInView forwards arguments correctly', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'streamListen',
@@ -201,7 +201,7 @@ void main() {
   testWithoutContext(
     'flutterDebugDumpSemanticsTreeInTraversalOrder handles missing method',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
             method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
@@ -224,7 +224,7 @@ void main() {
   testWithoutContext(
     'flutterDebugDumpSemanticsTreeInInverseHitTestOrder handles missing method',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
             method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
@@ -245,7 +245,7 @@ void main() {
   );
 
   testWithoutContext('flutterDebugDumpLayerTree handles missing method', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpLayerTree',
@@ -260,7 +260,7 @@ void main() {
   });
 
   testWithoutContext('flutterDebugDumpRenderTree handles missing method', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpRenderTree',
@@ -275,7 +275,7 @@ void main() {
   });
 
   testWithoutContext('flutterDebugDumpApp handles missing method', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpApp',
@@ -290,7 +290,7 @@ void main() {
   });
 
   testWithoutContext('flutterDebugDumpFocusTree handles missing method', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpFocusTree',
@@ -305,7 +305,7 @@ void main() {
   });
 
   testWithoutContext('flutterDebugDumpFocusTree returns data', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'ext.flutter.debugDumpFocusTree',
@@ -325,7 +325,7 @@ void main() {
   testWithoutContext(
     'Framework service extension invocations return null if service disappears ',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
             method: kListViewsMethod,
@@ -366,7 +366,7 @@ void main() {
   );
 
   testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
           method: 'getIsolate',
@@ -385,7 +385,7 @@ void main() {
   });
 
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: kListViewsMethod,
@@ -404,7 +404,7 @@ void main() {
   });
 
   testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: kListViewsMethod,
@@ -419,7 +419,7 @@ void main() {
 
   group('findExtensionIsolate', () {
     testWithoutContext('returns an isolate with the registered extensionRPC', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -442,7 +442,7 @@ void main() {
     testWithoutContext(
       'returns the isolate with the registered extensionRPC when there are multiple FlutterViews',
       () async {
-        const otherExtensionName = 'ext.flutter.test.otherExtension';
+        const String otherExtensionName = 'ext.flutter.test.otherExtension';
 
         // Copy the other isolate and change a few fields.
         final vm_service.Isolate isolate2 =
@@ -452,9 +452,9 @@ void main() {
                 ..['extensionRPCs'] = <String>[otherExtensionName],
             )!;
 
-        final fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
+        final FlutterView fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
 
-        final fakeVmServiceHost = FakeVmServiceHost(
+        final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
             const FakeVmServiceRequest(
               method: 'streamListen',
@@ -488,14 +488,14 @@ void main() {
     testWithoutContext(
       'does not rethrow a sentinel exception if the initially queried flutter view disappears',
       () async {
-        const otherExtensionName = 'ext.flutter.test.otherExtension';
+        const String otherExtensionName = 'ext.flutter.test.otherExtension';
         final vm_service.Isolate? isolate2 = vm_service.Isolate.parse(
           isolate.toJson()
             ..['id'] = '2'
             ..['extensionRPCs'] = <String>[otherExtensionName],
         );
 
-        final fakeVmServiceHost = FakeVmServiceHost(
+        final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
             const FakeVmServiceRequest(
               method: 'streamListen',
@@ -534,7 +534,7 @@ void main() {
     testWithoutContext(
       'when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC',
       () async {
-        final fakeVmServiceHost = FakeVmServiceHost(
+        final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
             const FakeVmServiceRequest(
               method: 'streamListen',
@@ -558,7 +558,7 @@ void main() {
     );
 
     testWithoutContext('returns an isolate with a extensionRPC that is registered later', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -587,7 +587,7 @@ void main() {
     });
 
     testWithoutContext('throws when the service disappears', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -607,7 +607,7 @@ void main() {
     });
 
     testWithoutContext('throws when the service is disposed', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[],
       );
 
@@ -621,7 +621,7 @@ void main() {
   });
 
   testWithoutContext('Can process log events from the vm service', () {
-    final event = vm_service.Event(
+    final vm_service.Event event = vm_service.Event(
       bytes: base64.encode(utf8.encode('Hello There\n')),
       timestamp: 0,
       kind: vm_service.EventKind.kLogging,
@@ -631,7 +631,7 @@ void main() {
   });
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
-    final completer = Completer<String>();
+    final Completer<String> completer = Completer<String>();
     openChannelForTesting = (
       String url, {
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,

@@ -517,7 +517,7 @@ class IOSDevice extends Device {
     Status startAppStatus = _logger.startProgress('Installing and launching...');
     try {
       ProtocolDiscovery? vmServiceDiscovery;
-      var installationResult = 1;
+      int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
         vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
@@ -576,7 +576,7 @@ class IOSDevice extends Device {
         defaultTimeout = 30;
       }
 
-      final timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
+      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError(
           'The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...',
         );
@@ -632,7 +632,7 @@ class IOSDevice extends Device {
         // change the status message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
         // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
-        final mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
+        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
           startAppStatus.stop();
           startAppStatus = _logger.startProgress(
             'Waiting for approval of local network permissions...',
@@ -724,7 +724,7 @@ class IOSDevice extends Device {
     IOSApp? package,
   }) async {
     Timer? maxWaitForCI;
-    final cancelCompleter = Completer<Uri?>();
+    final Completer<Uri?> cancelCompleter = Completer<Uri?>();
 
     // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
     // Afterwards, stop the app from running and upload DerivedData Logs to debug
@@ -779,7 +779,7 @@ class IOSDevice extends Device {
       throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
-    final discoveryOptions = <Future<Uri?>>[
+    final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
@@ -918,8 +918,8 @@ class IOSDevice extends Device {
         'to run your app. If access is not allowed, you can change this through '
         'your Settings > Privacy & Security > Automation.',
       );
-      final launchTimeout = isWirelesslyConnected ? 45 : 30;
-      final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
+      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
         _logger.printError(
           'Xcode is taking longer than expected to start debugging the app. '
           'Ensure the project is opened in Xcode.',
@@ -1066,7 +1066,7 @@ class IOSDevice extends Device {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final mdnsVMServiceDiscoveryForAttach =
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
         MdnsVMServiceDiscoveryForAttach(
           device: this,
           appId: appId,
@@ -1137,13 +1137,13 @@ class IOSDevice extends Device {
 /// See: [vis(3) manpage](https://www.freebsd.org/cgi/man.cgi?query=vis&sektion=3)
 String decodeSyslog(String line) {
   // UTF-8 values for \, M, -, ^.
-  const kBackslash = 0x5c;
-  const kM = 0x4d;
-  const kDash = 0x2d;
-  const kCaret = 0x5e;
+  const int kBackslash = 0x5c;
+  const int kM = 0x4d;
+  const int kDash = 0x2d;
+  const int kCaret = 0x5e;
 
   // Mask for the UTF-8 digit range.
-  const kNum = 0x30;
+  const int kNum = 0x30;
 
   // Returns true when `byte` is within the UTF-8 7-bit digit range (0x30 to 0x39).
   bool isDigit(int byte) => (byte & 0xf0) == kNum;
@@ -1153,8 +1153,8 @@ String decodeSyslog(String line) {
 
   try {
     final List<int> bytes = utf8.encode(line);
-    final out = <int>[];
-    for (var i = 0; i < bytes.length;) {
+    final List<int> out = <int>[];
+    for (int i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);
@@ -1533,7 +1533,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
   void Function(String line) _newSyslogLineHandler() {
-    var printing = false;
+    bool printing = false;
 
     return (String line) {
       if (printing) {
@@ -1643,7 +1643,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
     Process? process;
 
-    var connected = false;
+    bool connected = false;
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort!, _id);
@@ -1665,7 +1665,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     assert(connected);
     assert(process != null);
 
-    final forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
+    final ForwardedPort forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
     _logger.printTrace('Forwarded port $forwardedPort');
     forwardedPorts.add(forwardedPort);
     return hostPort;

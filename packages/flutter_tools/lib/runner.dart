@@ -49,7 +49,7 @@ Future<int> run(
     globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
-    final runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
@@ -198,7 +198,7 @@ Future<int> _handleToolError(
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(
       () async {
-        final crashReportSender = CrashReportSender(
+        final CrashReportSender crashReportSender = CrashReportSender(
           platform: globals.platform,
           logger: globals.logger,
           operatingSystemUtils: globals.os,
@@ -219,14 +219,14 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      final logger = BufferLogger(
+      final BufferLogger logger = BufferLogger(
         terminal: globals.terminal,
         outputPreferences: globals.outputPreferences,
       );
 
-      final doctorText = DoctorText(logger);
+      final DoctorText doctorText = DoctorText(logger);
 
-      final details = CrashDetails(
+      final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace!,
@@ -258,7 +258,7 @@ String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(CrashDetails details) async {
-  final buffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
   buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');

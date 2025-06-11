@@ -647,7 +647,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final states = <MaterialState>{if (widget.selected) MaterialState.selected};
+    final Set<MaterialState> states = <MaterialState>{if (widget.selected) MaterialState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

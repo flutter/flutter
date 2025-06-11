@@ -20,14 +20,14 @@ void main() {
 
     test('Can create and set a $HashUrlStrategy', () {
       expect(() {
-        final strategy = HashUrlStrategy(location);
+        final HashUrlStrategy strategy = HashUrlStrategy(location);
         setUrlStrategy(strategy);
       }, returnsNormally);
     });
 
     test('Can create and set a $PathUrlStrategy', () {
       expect(() {
-        final strategy = PathUrlStrategy(location);
+        final PathUrlStrategy strategy = PathUrlStrategy(location);
         setUrlStrategy(strategy);
       }, returnsNormally);
     });

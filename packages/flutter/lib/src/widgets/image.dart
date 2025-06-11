@@ -123,7 +123,7 @@ Future<void> precacheImage(
   ImageErrorListener? onError,
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
-  final completer = Completer<void>();
+  final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   ImageStreamListener? listener;
   listener = ImageStreamListener(
@@ -1167,7 +1167,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
-    final provider = ScrollAwareImageProvider<Object>(
+    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<Object>(
       context: _scrollAwareContext,
       imageProvider: widget.image,
     );

@@ -29,7 +29,7 @@ void main() {
   late StdoutHandler generatorWithSchemeStdoutHandler;
   late FakeProcessManager fakeProcessManager;
 
-  const frontendServerCommand = <String>[
+  const List<String> frontendServerCommand = <String>[
     'Artifact.engineDartAotRuntime',
     'Artifact.frontendServerSnapshotForEngineDartSdk',
     '--sdk-root',
@@ -197,7 +197,7 @@ void main() {
   );
 
   testWithoutContext('incremental compile and recompile', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[...frontendServerCommand, '--verbosity=error'],
@@ -259,7 +259,7 @@ void main() {
   });
 
   testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[
@@ -340,11 +340,11 @@ void main() {
     'incremental compile and recompile non-entrypoint file with filesystem scheme',
     () async {
       final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
-      const expectedMainUri = 'scheme:///main.dart';
-      final updatedUris = <Uri>[mainUri, Uri.parse('file:///foo/bar/fizz/other.dart')];
-      const expectedUpdatedUris = <String>[expectedMainUri, 'scheme:///other.dart'];
+      const String expectedMainUri = 'scheme:///main.dart';
+      final List<Uri> updatedUris = <Uri>[mainUri, Uri.parse('file:///foo/bar/fizz/other.dart')];
+      const List<String> expectedUpdatedUris = <String>[expectedMainUri, 'scheme:///other.dart'];
 
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       fakeProcessManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -427,7 +427,7 @@ void main() {
   );
 
   testWithoutContext('incremental compile can suppress errors', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[...frontendServerCommand, '--verbosity=error'],
@@ -473,7 +473,7 @@ void main() {
   });
 
   testWithoutContext('incremental compile and recompile twice', () async {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>[...frontendServerCommand, '--verbosity=error'],
@@ -538,7 +538,7 @@ void main() {
       ),
     );
 
-    final fs = MemoryFileSystem();
+    final MemoryFileSystem fs = MemoryFileSystem();
     final File dartPluginRegistrant = fs.file('some/dir/plugin_registrant.dart')
       ..createSync(recursive: true);
     final CompilerOutput? output = await generatorWithScheme.recompile(
@@ -619,13 +619,13 @@ Future<void> _recompile(
   final CompilerOutput? output = await recompileFuture;
   expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = frontendServerStdIn.getAndClear();
-  final whitespace = RegExp(r'\s+');
+  final RegExp whitespace = RegExp(r'\s+');
   final List<String> parts = commands.split(whitespace);
 
   // Test that uuid matches at beginning and end.
   expect(parts[2], equals(parts[3 + updatedUris.length]));
   expect(parts[1], equals(expectedMainUri));
-  for (var i = 0; i < expectedUpdatedUris.length; i++) {
+  for (int i = 0; i < expectedUpdatedUris.length; i++) {
     expect(parts[3 + i], equals(expectedUpdatedUris[i]));
   }
 }
@@ -637,7 +637,7 @@ Future<void> _accept(
 ) async {
   generator.accept();
   final String commands = frontendServerStdIn.getAndClear();
-  final re = RegExp(expected);
+  final RegExp re = RegExp(expected);
   expect(commands, matches(re));
 }
 
@@ -658,6 +658,6 @@ Future<void> _reject(
   expect(output, isNull);
 
   final String commands = frontendServerStdIn.getAndClear();
-  final re = RegExp(expected);
+  final RegExp re = RegExp(expected);
   expect(commands, matches(re));
 }

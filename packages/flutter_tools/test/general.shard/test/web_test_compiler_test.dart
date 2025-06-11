@@ -16,8 +16,8 @@ import '../../src/context.dart';
 
 void main() {
   testUsingContext('web test compiler issues valid compile command', () async {
-    final logger = BufferLogger.test();
-    final fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
     fileSystem.file('build/out').createSync(recursive: true);
     fileSystem.file('build/build/out.sources').createSync(recursive: true);
@@ -26,14 +26,14 @@ void main() {
       ..writeAsStringSync('{}');
     fileSystem.file('build/build/out.map').createSync();
     fileSystem.file('build/build/out.metadata').createSync();
-    final platform = FakePlatform(environment: <String, String>{});
-    final config = Config(
+    final FakePlatform platform = FakePlatform(environment: <String, String>{});
+    final Config config = Config(
       Config.kFlutterSettings,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
     );
-    final processManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
           'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
@@ -67,7 +67,7 @@ void main() {
         stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
       ),
     ]);
-    final compiler = WebTestCompiler(
+    final WebTestCompiler compiler = WebTestCompiler(
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(environment: <String, String>{}),
@@ -76,7 +76,7 @@ void main() {
       config: config,
     );
 
-    const buildInfo = BuildInfo(
+    const BuildInfo buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: false,

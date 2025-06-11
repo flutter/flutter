@@ -82,7 +82,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
         .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
 
     if (versionLine.isNotEmpty) {
-      final regex = RegExp(r'Android emulator version\s+(.*)');
+      final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
       final Match? match = regex.firstMatch(versionLine);
       if (match != null && match.groupCount >= 1) {
         return match.group(1)?.trim();
@@ -177,7 +177,7 @@ class AndroidValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
       // No Android SDK found.
@@ -323,7 +323,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
     if (_androidSdk == null ||
@@ -469,7 +469,7 @@ class AndroidLicenseValidator extends DoctorValidator {
             ),
       );
 
-      final stderrLines = <String>[];
+      final List<String> stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {

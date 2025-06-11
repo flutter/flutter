@@ -17,7 +17,7 @@ void main() {
   });
 
   testWidgets('should handle having no title', (WidgetTester tester) async {
-    final widget = Title(color: const Color(0xFF00FF00), child: Container());
+    final Title widget = Title(color: const Color(0xFF00FF00), child: Container());
     expect(widget.toString, isNot(throwsException));
     expect(widget.title, equals(''));
     expect(widget.color, equals(const Color(0xFF00FF00)));
@@ -30,7 +30,7 @@ void main() {
   testWidgets('should not pass "null" to setApplicationSwitcherDescription', (
     WidgetTester tester,
   ) async {
-    final log = <MethodCall>[];
+    final List<MethodCall> log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,

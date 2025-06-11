@@ -46,7 +46,7 @@ final List<LeakTestCase> memoryLeakTests = <LeakTestCase>[
   LeakTestCase(
     name: 'dispose in tear down',
     body: (PumpWidgetsCallback? pumpWidgets, RunAsyncCallback<dynamic>? runAsync) async {
-      final myClass = InstrumentedDisposable();
+      final InstrumentedDisposable myClass = InstrumentedDisposable();
       addTearDown(myClass.dispose);
     },
   ),

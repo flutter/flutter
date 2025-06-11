@@ -29,14 +29,14 @@ class ValidationError implements Exception {
 ///
 /// Throws an exception upon failure.
 void validateEnglishLocalizations(File file) {
-  final errorMessages = StringBuffer();
+  final StringBuffer errorMessages = StringBuffer();
 
   if (!file.existsSync()) {
     errorMessages.writeln('English localizations do not exist: $file');
     throw ValidationError(errorMessages.toString());
   }
 
-  final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
   for (final String resourceId in bundle.keys) {
     if (resourceId.startsWith('@')) {
@@ -73,15 +73,15 @@ void validateEnglishLocalizations(File file) {
     }
 
     final bool optional = atResource.containsKey('optional');
-    final description = atResource['description'] as String?;
+    final String? description = atResource['description'] as String?;
     if (description == null && !optional) {
       errorMessages.writeln('No description specified for $atResourceId');
     }
 
-    final plural = atResource['plural'] as String?;
+    final String? plural = atResource['plural'] as String?;
     final String resourceId = atResourceId.substring(1);
     if (plural != null) {
-      final resourceIdOther = '${resourceId}Other';
+      final String resourceIdOther = '${resourceId}Other';
       if (!bundle.containsKey(resourceIdOther)) {
         errorMessages.writeln('Default plural resource $resourceIdOther undefined');
       }
@@ -111,7 +111,7 @@ void validateEnglishLocalizations(File file) {
 void removeUndefinedLocalizations(Map<LocaleInfo, Map<String, String>> localeToResources) {
   final Map<String, String> canonicalLocalizations =
       localeToResources[LocaleInfo.fromString('en')]!;
-  final canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
 
   localeToResources.forEach((LocaleInfo locale, Map<String, String> resources) {
     bool isPluralVariation(String key) {
@@ -123,7 +123,7 @@ void removeUndefinedLocalizations(Map<LocaleInfo, Map<String, String>> localeToR
       return resources.containsKey('${prefix}Other');
     }
 
-    final keys = Set<String>.from(
+    final Set<String> keys = Set<String>.from(
       resources.keys.where((String key) => !isPluralVariation(key)),
     );
 
@@ -148,9 +148,9 @@ void validateLocalizations(
 }) {
   final Map<String, String> canonicalLocalizations =
       localeToResources[LocaleInfo.fromString('en')]!;
-  final canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
-  final errorMessages = StringBuffer();
-  var explainMissingKeys = false;
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final StringBuffer errorMessages = StringBuffer();
+  bool explainMissingKeys = false;
   for (final LocaleInfo locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale]!;
 
@@ -168,7 +168,7 @@ void validateLocalizations(
       return resources.containsKey('${prefix}Other');
     }
 
-    final keys = Set<String>.from(
+    final Set<String> keys = Set<String>.from(
       resources.keys.where((String key) => !isPluralVariation(key)),
     );
 
@@ -185,7 +185,7 @@ void validateLocalizations(
     // keys, or opted out of using certain ones.
     if (locale.length == 1) {
       final Map<String, dynamic>? attributes = localeToAttributes[locale];
-      final missingKeys = <String?>[];
+      final List<String?> missingKeys = <String?>[];
       for (final String missingKey in canonicalKeys.difference(keys)) {
         final dynamic attribute = attributes?[missingKey];
         final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');

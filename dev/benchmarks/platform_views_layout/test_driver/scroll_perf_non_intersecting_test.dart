@@ -32,22 +32,22 @@ void main() {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);
 
-        for (var j = 0; j < 5; j += 1) {
+        for (int j = 0; j < 5; j += 1) {
           // Scroll down
-          for (var i = 0; i < 5; i += 1) {
+          for (int i = 0; i < 5; i += 1) {
             await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
             await Future<void>.delayed(const Duration(milliseconds: 500));
           }
 
           // Scroll up
-          for (var i = 0; i < 5; i += 1) {
+          for (int i = 0; i < 5; i += 1) {
             await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
             await Future<void>.delayed(const Duration(milliseconds: 500));
           }
         }
       });
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile(summaryName, pretty: true);
     }
 

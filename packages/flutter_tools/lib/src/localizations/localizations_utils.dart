@@ -130,7 +130,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
-  final result = <String, List<String>>{};
+  final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -168,7 +168,7 @@ void precacheLanguageAndRegionTags() {
           .skip(1)
           .map<Map<String, List<String>>>(_parseSection)
           .toList();
-  for (final section in sections) {
+  for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
@@ -214,7 +214,7 @@ String describeLocale(String tag) {
     );
   }
   final String language = _languages[languageCode]!;
-  var output = language;
+  String output = language;
   String? region;
   String? script;
   if (subtags.length == 2) {
@@ -258,7 +258,7 @@ String describeLocale(String tag) {
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  const backslash = '__BACKSLASH__';
+  const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
     'Input string cannot contain the sequence: '
@@ -314,7 +314,7 @@ String generateReturnExpr(List<String> expressions, {bool isSingleStringVar = fa
       if (expression[0] != r'$') {
         return expression + string;
       }
-      final alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
       if (alphanumeric.hasMatch(expression.substring(1)) &&
           !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
         return '$expression$string';

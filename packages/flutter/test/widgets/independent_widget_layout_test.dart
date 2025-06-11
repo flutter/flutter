@@ -161,21 +161,21 @@ void main() {
     WidgetTester tester,
   ) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final platformDispatcher =
+    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher =
         tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
     platformDispatcher.resetScheduledFrameCount();
     expect(platformDispatcher.scheduledFrameCount, isZero);
-    final tree = OffscreenWidgetTree(tester.view);
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
     tree.pumpWidget(const SizedBox.shrink());
     expect(platformDispatcher.scheduledFrameCount, isZero);
   });
 
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    final trigger1 = Trigger();
-    final counter1 = Counter();
-    final trigger2 = Trigger();
-    final counter2 = Counter();
-    final tree = OffscreenWidgetTree(tester.view);
+    final Trigger trigger1 = Trigger();
+    final Counter counter1 = Counter();
+    final Trigger trigger2 = Trigger();
+    final Counter counter2 = Counter();
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
     // Both counts should start at zero
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));
@@ -221,10 +221,10 @@ void main() {
   });
 
   testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
-    final tree = OffscreenWidgetTree(tester.view);
-    final onscreenFocus = FocusNode();
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final FocusNode onscreenFocus = FocusNode();
     addTearDown(onscreenFocus.dispose);
-    final offscreenFocus = FocusNode();
+    final FocusNode offscreenFocus = FocusNode();
     addTearDown(offscreenFocus.dispose);
 
     await tester.pumpWidget(TestFocusable(focusNode: onscreenFocus));
@@ -239,8 +239,8 @@ void main() {
   });
 
   testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
-    final tree = OffscreenWidgetTree(tester.view);
-    final states = <WidgetState>[];
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final List<WidgetState> states = <WidgetState>[];
     tree.pumpWidget(SizedBox(child: TestStates(states: states)));
     expect(states, <WidgetState>[WidgetState.initialized]);
     expect(tree.renderView.child, isNotNull);

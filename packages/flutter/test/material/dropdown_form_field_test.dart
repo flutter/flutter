@@ -111,13 +111,13 @@ class TestApp extends StatefulWidget {
 }
 
 void verifyPaintedShadow(Finder customPaint, int elevation) {
-  const originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
+  const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
-  final boxShadows = List<BoxShadow>.generate(
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(
     3,
     (int index) => kElevationToShadow[elevation]![index],
   );
-  final rrects = List<RRect>.generate(3, (int index) {
+  final List<RRect> rrects = List<RRect>.generate(3, (int index) {
     return RRect.fromRectAndRadius(
       originalRectangle.shift(boxShadows[index].offset).inflate(boxShadows[index].spreadRadius),
       const Radius.circular(2.0),
@@ -308,7 +308,7 @@ void main() {
   testWidgets('label position test - show selected item: disabled + hint + disabledHint', (
     WidgetTester tester,
   ) async {
-    const value = 1;
+    const int value = 1;
 
     await tester.pumpWidget(
       TestApp(
@@ -377,7 +377,7 @@ void main() {
 
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
-    var validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -426,7 +426,7 @@ void main() {
     final Key buttonKey = UniqueKey();
 
     // There shouldn't be overflow when expanded although list contains longer items.
-    final items = <String>[
+    final List<String> items = <String>[
       '1234567890',
       'abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890',
     ];
@@ -480,7 +480,7 @@ void main() {
     final double menuItemHeight = itemBoxesHeight.reduce(math.max);
     expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
 
-    for (final itemBox in itemBoxes) {
+    for (final RenderBox itemBox in itemBoxes) {
       expect(itemBox.attached, isTrue);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
@@ -493,8 +493,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key buttonKey = UniqueKey();
-    const value = 'two';
-    const scaleFactor = 3.0;
+    const String value = 'two';
+    const double scaleFactor = 3.0;
 
     final List<DropdownMenuItem<String>> dropdownItems =
         menuItems.map<DropdownMenuItem<String>>((String item) {
@@ -533,7 +533,7 @@ void main() {
     final TextStyle style = Theme.of(context).textTheme.titleMedium!;
     final double lineHeight = style.fontSize! * style.height!; // 16 * 1.5 = 24
     final double labelHeight = lineHeight * scaleFactor; // 24 * 3.0 = 72
-    const decorationVerticalPadding = 16.0;
+    const double decorationVerticalPadding = 16.0;
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, labelHeight + decorationVerticalPadding);
   });
@@ -543,10 +543,10 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key buttonKey = UniqueKey();
-    const value = 'two';
-    const scaleFactor = 3.0;
+    const String value = 'two';
+    const double scaleFactor = 3.0;
     const double fontSize = 22;
-    const fontHeight = 1.5;
+    const double fontHeight = 1.5;
 
     await tester.pumpWidget(
       TestApp(
@@ -581,7 +581,7 @@ void main() {
 
     const double lineHeight = fontSize * fontHeight; // 22 * 1.5 = 33
     const double labelHeight = lineHeight * scaleFactor; // 33 * 3.0 = 99
-    const decorationVerticalPadding = 16.0;
+    const double decorationVerticalPadding = 16.0;
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, labelHeight + decorationVerticalPadding);
   });
@@ -589,7 +589,7 @@ void main() {
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/46844
     final Key buttonKey = UniqueKey();
-    const value = 'two';
+    const String value = 'two';
 
     await tester.pumpWidget(
       TestApp(
@@ -619,8 +619,8 @@ void main() {
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
-    const value = 'foo';
-    final itemKey = UniqueKey();
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
 
     await tester.pumpWidget(
       TestApp(
@@ -791,7 +791,7 @@ void main() {
 
   testWidgets('DropdownButtonFormField - Custom icon size and colors', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
-    final customIcon = Icon(Icons.assessment, key: iconKey);
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
     await tester.pumpWidget(
       buildFormFrame(
@@ -933,7 +933,7 @@ void main() {
   testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (
     WidgetTester tester,
   ) async {
-    const items = <String>['One', 'Two', 'Three'];
+    const List<String> items = <String>['One', 'Two', 'Three'];
     String? selectedItem = items[0];
 
     await tester.pumpWidget(
@@ -945,7 +945,7 @@ void main() {
                 value: selectedItem,
                 onChanged: (String? string) => setState(() => selectedItem = string),
                 selectedItemBuilder: (BuildContext context) {
-                  var index = 0;
+                  int index = 0;
                   return items.map((String string) {
                     index += 1;
                     return Text('$string as an Arabic numeral: $index');
@@ -971,7 +971,7 @@ void main() {
   });
 
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
-    var dropdownButtonTapCounter = 0;
+    int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
       value = newValue;
@@ -1018,7 +1018,7 @@ void main() {
   testWidgets('DropdownButtonFormField should re-render if value param changes', (
     WidgetTester tester,
   ) async {
-    var currentValue = 'two';
+    String currentValue = 'two';
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1065,7 +1065,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    var validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1116,8 +1116,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
-    final stateKey = GlobalKey<FormFieldState<String>>();
-    final formKey = GlobalKey<FormState>();
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? value;
 
     await tester.pumpWidget(
@@ -1165,8 +1165,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/146335.
-    final stateKey = GlobalKey<FormFieldState<String>>();
-    final formKey = GlobalKey<FormState>();
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1197,7 +1197,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/106659.
   testWidgets('Error visual logic is delegated to InputDecorator', (WidgetTester tester) async {
-    final formKey = GlobalKey<FormState>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1298,9 +1298,9 @@ void main() {
   testWidgets('isValid returns false when forceErrorText is set and changes error display', (
     WidgetTester tester,
   ) async {
-    final fieldKey1 = GlobalKey<FormFieldState<String>>();
-    final fieldKey2 = GlobalKey<FormFieldState<String>>();
-    const forceErrorText = 'Forcing error.';
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String forceErrorText = 'Forcing error.';
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -1350,8 +1350,8 @@ void main() {
   testWidgets('forceErrorText overrides InputDecoration.error when both are provided', (
     WidgetTester tester,
   ) async {
-    const forceErrorText = 'Forcing error';
-    const decorationErrorText = 'Decoration';
+    const String forceErrorText = 'Forcing error';
+    const String decorationErrorText = 'Decoration';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1448,7 +1448,7 @@ void main() {
   testWidgets('DropdownButtonFormField icon is aligned with label text', (
     WidgetTester tester,
   ) async {
-    const labelText = 'Label Text';
+    const String labelText = 'Label Text';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

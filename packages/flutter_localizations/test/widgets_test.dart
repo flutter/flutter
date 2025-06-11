@@ -205,7 +205,7 @@ void main() {
   testWidgets('Localizations.localeFor in a WidgetsApp with an explicit locale', (
     WidgetTester tester,
   ) async {
-    const locale = Locale('en', 'US');
+    const Locale locale = Locale('en', 'US');
     late BuildContext pageContext;
 
     await tester.pumpWidget(
@@ -228,7 +228,7 @@ void main() {
   });
 
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
-    final delegates = <LocalizationsDelegate<dynamic>>[
+    final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
       SyncTestLocalizationsDelegate(),
       DefaultWidgetsLocalizations.delegate,
     ];
@@ -374,7 +374,7 @@ void main() {
   // stays the same BUT one of its delegate.shouldReload() methods returns true,
   // then the dependent widgets should rebuild.
   testWidgets('Localizations sync delegate shouldReload returns true', (WidgetTester tester) async {
-    final originalDelegate = SyncTestLocalizationsDelegate();
+    final SyncTestLocalizationsDelegate originalDelegate = SyncTestLocalizationsDelegate();
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
@@ -398,7 +398,7 @@ void main() {
     expect(find.text('B: en_US'), findsOneWidget);
     expect(originalDelegate.shouldReloadValues, <bool>[]);
 
-    final modifiedDelegate = SyncTestLocalizationsDelegate('---');
+    final SyncTestLocalizationsDelegate modifiedDelegate = SyncTestLocalizationsDelegate('---');
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
@@ -449,7 +449,7 @@ void main() {
     expect(find.text('A: en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
 
-    final modifiedDelegate = AsyncTestLocalizationsDelegate('---');
+    final AsyncTestLocalizationsDelegate modifiedDelegate = AsyncTestLocalizationsDelegate('---');
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[

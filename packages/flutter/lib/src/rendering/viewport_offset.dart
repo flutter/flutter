@@ -260,7 +260,7 @@ abstract class ViewportOffset extends ChangeNotifier {
 
   @override
   String toString() {
-    final description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }

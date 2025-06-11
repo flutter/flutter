@@ -57,7 +57,7 @@ void writeBytesFile(String path, List<int> content) {
 }
 
 Future<void> getPackages(String folder) async {
-  final command = <String>[
+  final List<String> command = <String>[
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'pub',
     'get',
@@ -90,7 +90,7 @@ Future<void> pollForServiceExtensionValue<T>({
   required Matcher matches,
   String valueKey = 'value',
 }) async {
-  for (var i = 0; i < 10; i++) {
+  for (int i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
     if (response.json?[valueKey] as T == continuePollingValue) {
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -160,12 +160,12 @@ class ProcessResultMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final result = item as ProcessResult;
-    var foundStdout = true;
-    var foundStderr = true;
+    final ProcessResult result = item as ProcessResult;
+    bool foundStdout = true;
+    bool foundStderr = true;
 
-    final stdout = result.stdout as String;
-    final stderr = result.stderr as String;
+    final String stdout = result.stdout as String;
+    final String stderr = result.stderr as String;
     if (stdoutPattern != null) {
       foundStdout = stdout.contains(stdoutPattern!);
       matchState['stdout'] = stdout;
@@ -191,7 +191,7 @@ class ProcessResultMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final result = item! as ProcessResult;
+    final ProcessResult result = item! as ProcessResult;
 
     if (result.exitCode != exitCode) {
       mismatchDescription.add('Actual exitCode was ${result.exitCode}\n');

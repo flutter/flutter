@@ -33,7 +33,7 @@ class FakeFlutterInformation extends FlutterInformation {
 
 void main() {
   group('Parser', () {
-    late var memoryFileSystem = MemoryFileSystem();
+    late MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     late FlutterRepoSnippetConfiguration configuration;
     late SnippetGenerator generator;
     late Directory tmpDir;
@@ -85,12 +85,12 @@ void main() {
         resourceProvider: FileSystemResourceProvider(memoryFileSystem),
       );
       expect(elements, isNotEmpty);
-      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
       sampleParser.parseFromComments(elements);
       sampleParser.parseAndAddAssumptions(elements, inputFile);
       expect(elements.length, equals(7));
-      var sampleCount = 0;
-      for (final element in elements) {
+      int sampleCount = 0;
+      for (final SourceElement element in elements) {
         expect(element.samples.length, greaterThanOrEqualTo(1));
         sampleCount += element.samples.length;
         final String code = generator.generateCode(element.samples.first);
@@ -132,11 +132,11 @@ void main() {
         resourceProvider: FileSystemResourceProvider(memoryFileSystem),
       );
       expect(elements, isNotEmpty);
-      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
       sampleParser.parseFromComments(elements);
       expect(elements.length, equals(1));
-      var sampleCount = 0;
-      for (final element in elements) {
+      int sampleCount = 0;
+      for (final SourceElement element in elements) {
         expect(element.samples.length, greaterThanOrEqualTo(1));
         sampleCount += element.samples.length;
         final String code = generator.generateCode(element.samples.first);
@@ -160,7 +160,7 @@ void main() {
     });
     test('parses assumptions', () async {
       final File inputFile = _createSnippetSourceFile(tmpDir, memoryFileSystem);
-      final sampleParser = SnippetDartdocParser(memoryFileSystem);
+      final SnippetDartdocParser sampleParser = SnippetDartdocParser(memoryFileSystem);
       final List<SourceLine> assumptions = sampleParser.parseAssumptions(inputFile);
       expect(assumptions.length, equals(1));
       expect(assumptions.first.text, equals('int integer = 3;'));
@@ -279,7 +279,7 @@ void DocumentedClassSample() {
 }
 ''');
 
-  final source =
+  final String source =
       linked
           ? '''
 /// ** See code in ${path.relative(linkedFile.path, from: flutterRoot.absolute.path)} **'''

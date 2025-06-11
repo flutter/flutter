@@ -12,7 +12,7 @@ Future<void> main() async {
   await task(() async {
     deviceOperatingSystem = DeviceOperatingSystem.ios;
     String? simulatorDeviceId;
-    var res = TaskResult.success(null);
+    TaskResult res = TaskResult.success(null);
     try {
       await testWithNewIOSSimulator('TestNativeAssetsSim', (String deviceId) async {
         simulatorDeviceId = deviceId;

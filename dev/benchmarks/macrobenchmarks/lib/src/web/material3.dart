@@ -1443,7 +1443,7 @@ class SnackBarSection extends StatelessWidget {
       tooltipMessage: 'Use ScaffoldMessenger.of(context).showSnackBar with SnackBar',
       child: TextButton(
         onPressed: () {
-          final snackBar = SnackBar(
+          final SnackBar snackBar = SnackBar(
             behavior: SnackBarBehavior.floating,
             width: 400.0,
             content: const Text('This is a snackbar'),
@@ -1472,7 +1472,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
 
   @override
   Widget build(BuildContext context) {
-    var buttonList = <Widget>[
+    List<Widget> buttonList = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.delete_outline)),
@@ -1480,7 +1480,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
       IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.favorite_border)),
     ];
-    const labelList = <Text>[
+    const List<Text> labelList = <Text>[
       Text('Share'),
       Text('Add to'),
       Text('Trash'),
@@ -1960,7 +1960,7 @@ class _MenusState extends State<Menus> {
 
   @override
   Widget build(BuildContext context) {
-    final colorEntries = <DropdownMenuEntry<ColorLabel>>[];
+    final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
     for (final ColorLabel color in ColorLabel.values) {
       colorEntries.add(
         DropdownMenuEntry<ColorLabel>(
@@ -1971,7 +1971,7 @@ class _MenusState extends State<Menus> {
       );
     }
 
-    final iconEntries = <DropdownMenuEntry<IconLabel>>[];
+    final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
     for (final IconLabel icon in IconLabel.values) {
       iconEntries.add(DropdownMenuEntry<IconLabel>(value: icon, label: icon.label));
     }

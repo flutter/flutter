@@ -17,7 +17,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/112403
     // and b/249091367
     final DragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
-    const event = PointerDownEvent(timeStamp: Duration(days: 10));
+    const PointerDownEvent event = PointerDownEvent(timeStamp: Duration(days: 10));
 
     expect(recognizer.debugLastPendingEventTimestamp, null);
 
@@ -43,18 +43,18 @@ void main() {
     (GestureTester tester) {
       // Regression test for https://github.com/flutter/flutter/issues/75061.
 
-      final v = VerticalDragGestureRecognizer()..onStart = (_) {};
+      final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()..onStart = (_) {};
       addTearDown(v.dispose);
-      final h = HorizontalDragGestureRecognizer()..onStart = (_) {};
+      final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()..onStart = (_) {};
       addTearDown(h.dispose);
 
-      const down90 = PointerDownEvent(pointer: 90, position: Offset(10.0, 10.0));
+      const PointerDownEvent down90 = PointerDownEvent(pointer: 90, position: Offset(10.0, 10.0));
 
-      const up90 = PointerUpEvent(pointer: 90, position: Offset(10.0, 10.0));
+      const PointerUpEvent up90 = PointerUpEvent(pointer: 90, position: Offset(10.0, 10.0));
 
-      const down91 = PointerDownEvent(pointer: 91, position: Offset(20.0, 20.0));
+      const PointerDownEvent down91 = PointerDownEvent(pointer: 91, position: Offset(20.0, 20.0));
 
-      const up91 = PointerUpEvent(pointer: 91, position: Offset(20.0, 20.0));
+      const PointerUpEvent up91 = PointerUpEvent(pointer: 91, position: Offset(20.0, 20.0));
 
       v.addPointer(down90);
       GestureBinding.instance.gestureArena.close(90);
@@ -71,8 +71,8 @@ void main() {
   testGesture(
     'DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is true and the threshold has not been met',
     (GestureTester tester) {
-      final verticalDrag = VerticalDragGestureRecognizer();
-      final dragCallbacks = <String>[];
+      final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+      final List<String> dragCallbacks = <String>[];
       verticalDrag
         ..onlyAcceptDragOnThreshold = true
         ..onStart = (DragStartDetails details) {
@@ -85,9 +85,9 @@ void main() {
           dragCallbacks.add('onEnd');
         };
 
-      const down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
+      const PointerDownEvent down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
 
-      const up1 = PointerUpEvent(pointer: 6, position: Offset(10.0, 10.0));
+      const PointerUpEvent up1 = PointerUpEvent(pointer: 6, position: Offset(10.0, 10.0));
 
       verticalDrag.addPointer(down1);
       tester.closeArena(down1.pointer);
@@ -102,8 +102,8 @@ void main() {
   testGesture(
     'DragGestureRecognizer should dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is false and the threshold has not been met',
     (GestureTester tester) {
-      final verticalDrag = VerticalDragGestureRecognizer();
-      final dragCallbacks = <String>[];
+      final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+      final List<String> dragCallbacks = <String>[];
       verticalDrag
         ..onlyAcceptDragOnThreshold = false
         ..onStart = (DragStartDetails details) {
@@ -116,9 +116,9 @@ void main() {
           dragCallbacks.add('onEnd');
         };
 
-      const down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
+      const PointerDownEvent down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
 
-      const up1 = PointerUpEvent(pointer: 6, position: Offset(10.0, 10.0));
+      const PointerUpEvent up1 = PointerUpEvent(pointer: 6, position: Offset(10.0, 10.0));
 
       verticalDrag.addPointer(down1);
       tester.closeArena(down1.pointer);
@@ -135,7 +135,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey tapTargetKey = GlobalKey();
-    var wasPanStartCalled = false;
+    bool wasPanStartCalled = false;
 
     // Pump a tree with panable widget inside a CustomScrollView. The CustomScrollView
     // has a more aggressive drag recognizer that will typically beat other drag
@@ -182,7 +182,7 @@ void main() {
   });
 
   group('Recognizers on different button filters:', () {
-    final recognized = <String>[];
+    final List<String> recognized = <String>[];
     late HorizontalDragGestureRecognizer primaryRecognizer;
     late HorizontalDragGestureRecognizer secondaryRecognizer;
     setUp(() {
@@ -207,7 +207,7 @@ void main() {
     });
 
     testGesture('Primary button works', (GestureTester tester) {
-      const down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
+      const PointerDownEvent down1 = PointerDownEvent(pointer: 6, position: Offset(10.0, 10.0));
 
       primaryRecognizer.addPointer(down1);
       secondaryRecognizer.addPointer(down1);
@@ -217,7 +217,7 @@ void main() {
     });
 
     testGesture('Secondary button works', (GestureTester tester) {
-      const down1 = PointerDownEvent(
+      const PointerDownEvent down1 = PointerDownEvent(
         pointer: 6,
         position: Offset(10.0, 10.0),
         buttons: kSecondaryMouseButton,

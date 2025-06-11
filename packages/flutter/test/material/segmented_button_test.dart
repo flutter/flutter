@@ -62,7 +62,7 @@ void main() {
   testWidgets('SegmentedButton releases state controllers for deleted segments', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     final Key key = UniqueKey();
 
     Widget buildApp(Widget button) {
@@ -104,7 +104,7 @@ void main() {
   testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -133,8 +133,8 @@ void main() {
   });
 
   testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
-    var callbackCount = 0;
-    var selectedSegment = 2;
+    int callbackCount = 0;
+    int selectedSegment = 2;
 
     Widget frameWithSelection(int selected) {
       return Material(
@@ -183,8 +183,8 @@ void main() {
   });
 
   testWidgets('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
-    var callbackCount = 0;
-    var selection = <int>{1};
+    int callbackCount = 0;
+    Set<int> selection = <int>{1};
 
     Widget frameWithSelection(Set<int> selected) {
       return Material(
@@ -238,7 +238,7 @@ void main() {
   });
 
   testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
-    var callbackCount = 0;
+    int callbackCount = 0;
     int? selectedSegment = 1;
 
     Widget frameWithSelection(int? selected) {
@@ -409,7 +409,7 @@ void main() {
   });
 
   testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Material(
@@ -483,7 +483,7 @@ void main() {
   });
 
   testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Material(
@@ -558,7 +558,7 @@ void main() {
   testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -607,7 +607,7 @@ void main() {
   });
 
   testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -631,7 +631,7 @@ void main() {
   });
 
   testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -659,12 +659,12 @@ void main() {
   testWidgets('SegmentedButton.styleFrom is applied to the SegmentedButton', (
     WidgetTester tester,
   ) async {
-    const foregroundColor = Color(0xfffffff0);
-    const backgroundColor = Color(0xfffffff1);
-    const selectedBackgroundColor = Color(0xfffffff2);
-    const selectedForegroundColor = Color(0xfffffff3);
-    const disabledBackgroundColor = Color(0xfffffff4);
-    const disabledForegroundColor = Color(0xfffffff5);
+    const Color foregroundColor = Color(0xfffffff0);
+    const Color backgroundColor = Color(0xfffffff1);
+    const Color selectedBackgroundColor = Color(0xfffffff2);
+    const Color selectedForegroundColor = Color(0xfffffff3);
+    const Color disabledBackgroundColor = Color(0xfffffff4);
+    const Color disabledForegroundColor = Color(0xfffffff5);
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
     const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
 
@@ -792,7 +792,7 @@ void main() {
         ),
       ),
     );
-    final states = <MaterialState>{
+    final Set<MaterialState> states = <MaterialState>{
       MaterialState.selected,
       MaterialState.disabled,
     };
@@ -811,7 +811,7 @@ void main() {
       'by default with standard density and MaterialTapTargetSize.padded', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -933,7 +933,7 @@ void main() {
   testWidgets('SegmentedButton.styleFrom overlayColor overrides default overlay color', (
     WidgetTester tester,
   ) async {
-    const overlayColor = Color(0xffff0000);
+    const Color overlayColor = Color(0xffff0000);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1111,7 +1111,7 @@ void main() {
       ),
     );
 
-    const tapTargetSize = 48.0;
+    const double tapTargetSize = 48.0;
     expect(
       find.byType(SegmentedButton<int>),
       paints..line(
@@ -1143,7 +1143,7 @@ void main() {
     );
 
     Rect? previewsChildRect;
-    for (var i = 0; i <= 3; i++) {
+    for (int i = 0; i <= 3; i++) {
       final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
       if (previewsChildRect != null) {
         expect(currentChildRect.left, previewsChildRect.left);
@@ -1183,9 +1183,9 @@ void main() {
   testWidgets('SegmentedButton.styleFrom can customize the button icon', (
     WidgetTester tester,
   ) async {
-    const iconColor = Color(0xFFF000FF);
-    const iconSize = 32.0;
-    const disabledIconColor = Color(0xFFFFF000);
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
     Widget buildButton({bool enabled = true}) {
       return MaterialApp(
         home: Material(

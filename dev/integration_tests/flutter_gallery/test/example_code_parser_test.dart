@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Flutter gallery example code parser test', () async {
-    final bundle = TestAssetBundle();
+    final TestAssetBundle bundle = TestAssetBundle();
 
     final String? codeSnippet0 = await getExampleCode('test_0', bundle);
     expect(codeSnippet0, 'test 0 0\ntest 0 1');

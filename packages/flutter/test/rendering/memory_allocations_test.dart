@@ -21,7 +21,7 @@ void main() {
   });
 
   test('Publishers dispatch events in debug mode', () async {
-    var eventCount = 0;
+    int eventCount = 0;
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
@@ -57,7 +57,7 @@ class _TestLayer extends Layer {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  var count = 0;
+  int count = 0;
 
   final RenderObject renderObject = _TestRenderObject();
   count++;

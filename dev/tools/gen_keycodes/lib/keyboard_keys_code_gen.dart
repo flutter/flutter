@@ -53,7 +53,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final lines = OutputLines<int>('Physical Key Definition');
+    final OutputLines<int> lines = OutputLines<int>('Physical Key Definition');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       final String firstComment = _wrapString(
         'Represents the location of the '
@@ -72,7 +72,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   }
 
   String get _physicalDebugNames {
-    final lines = OutputLines<int>('Physical debug names');
+    final OutputLines<int> lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
       ${toHex(entry.usbHidCode)}: '${entry.commentName}',''');
@@ -82,7 +82,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final lines = OutputLines<int>(
+    final OutputLines<int> lines = OutputLines<int>(
       'Logical debug names',
       behavior: DeduplicateBehavior.kSkip,
     );
@@ -124,7 +124,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalSynonyms {
-    final result = StringBuffer();
+    final StringBuffer result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
         final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
@@ -135,7 +135,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalReverseSynonyms {
-    final result = StringBuffer();
+    final StringBuffer result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
       final List<String> entries =
@@ -146,7 +146,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _logicalKeyLabels {
-    final lines = OutputLines<int>(
+    final OutputLines<int> lines = OutputLines<int>(
       'Logical key labels',
       behavior: DeduplicateBehavior.kSkip,
     );
@@ -159,7 +159,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
-    final lines = OutputLines<int>('Physical key map');
+    final OutputLines<int> lines = OutputLines<int>('Physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
@@ -168,7 +168,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final lines = OutputLines<int>(
+    final OutputLines<int> lines = OutputLines<int>(
       'Logical key map',
       behavior: DeduplicateBehavior.kSkip,
     );
@@ -179,7 +179,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _maskConstantVariables {
-    final lines = OutputLines<int>(
+    final OutputLines<int> lines = OutputLines<int>(
       'Mask constants',
       behavior: DeduplicateBehavior.kKeep,
     );

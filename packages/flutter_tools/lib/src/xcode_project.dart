@@ -54,7 +54,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final entity in contents) {
+    for (final FileSystemEntity entity in contents) {
       if (globals.fs.path.extension(entity.path) == extension &&
           !globals.fs.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
@@ -493,7 +493,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     required String configuration,
     required String target,
   }) async {
-    final context = XcodeProjectBuildContext(
+    final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
       target: target,
     );

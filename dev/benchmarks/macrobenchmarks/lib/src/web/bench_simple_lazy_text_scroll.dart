@@ -79,7 +79,7 @@ class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
 
     // Without the timer the animation doesn't begin.
     Timer.run(() async {
-      var forward = true;
+      bool forward = true;
       while (true) {
         await scrollController.animateTo(
           forward ? widget.initialScrollOffset + widget.scrollDistance : widget.initialScrollOffset,

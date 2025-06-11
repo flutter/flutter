@@ -532,53 +532,53 @@ mixin WidgetsBinding
   }
 
   void _debugAddStackFilters() {
-    const elementInflateWidget = PartialStackFrame(
+    const PartialStackFrame elementInflateWidget = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'inflateWidget',
     );
-    const elementUpdateChild = PartialStackFrame(
+    const PartialStackFrame elementUpdateChild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'updateChild',
     );
-    const elementRebuild = PartialStackFrame(
+    const PartialStackFrame elementRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'rebuild',
     );
-    const componentElementPerformRebuild = PartialStackFrame(
+    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: 'performRebuild',
     );
-    const componentElementFirstBuild = PartialStackFrame(
+    const PartialStackFrame componentElementFirstBuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: '_firstBuild',
     );
-    const componentElementMount = PartialStackFrame(
+    const PartialStackFrame componentElementMount = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: 'mount',
     );
-    const statefulElementFirstBuild = PartialStackFrame(
+    const PartialStackFrame statefulElementFirstBuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'StatefulElement',
       method: '_firstBuild',
     );
-    const singleChildMount = PartialStackFrame(
+    const PartialStackFrame singleChildMount = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'SingleChildRenderObjectElement',
       method: 'mount',
     );
-    const statefulElementRebuild = PartialStackFrame(
+    const PartialStackFrame statefulElementRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'StatefulElement',
       method: 'performRebuild',
     );
 
-    const replacementString = '...     Normal element mounting';
+    const String replacementString = '...     Normal element mounting';
 
     // ComponentElement variations
     FlutterError.addDefaultStackFilter(
@@ -816,8 +816,8 @@ mixin WidgetsBinding
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
-    var didCancel = false;
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    bool didCancel = false;
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
         didCancel = true;
         // Don't early return. For the case where someone is just using the
@@ -831,7 +831,7 @@ mixin WidgetsBinding
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeMetrics();
     }
   }
@@ -839,7 +839,7 @@ mixin WidgetsBinding
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeTextScaleFactor();
     }
   }
@@ -847,7 +847,7 @@ mixin WidgetsBinding
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangePlatformBrightness();
     }
   }
@@ -855,7 +855,7 @@ mixin WidgetsBinding
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -881,7 +881,7 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeLocales(locales);
     }
   }
@@ -895,7 +895,7 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -938,7 +938,7 @@ mixin WidgetsBinding
   @protected
   @visibleForTesting
   Future<bool> handlePopRoute() async {
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
         return true;
       }
@@ -952,8 +952,8 @@ mixin WidgetsBinding
 
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
-    final backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
         _backGestureObservers.add(observer);
       }
@@ -966,7 +966,7 @@ mixin WidgetsBinding
       return;
     }
 
-    final backEvent = PredictiveBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
       observer.handleUpdateBackGestureProgress(backEvent);
     }
@@ -1007,8 +1007,8 @@ mixin WidgetsBinding
   @mustCallSuper
   @visibleForTesting
   Future<bool> handlePushRoute(String route) async {
-    final routeInformation = RouteInformation(uri: Uri.parse(route));
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
         return true;
       }
@@ -1017,11 +1017,11 @@ mixin WidgetsBinding
   }
 
   Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    final routeInformation = RouteInformation(
+    final RouteInformation routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
         return true;
       }
@@ -1056,7 +1056,7 @@ mixin WidgetsBinding
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
     }
   }
@@ -1064,7 +1064,7 @@ mixin WidgetsBinding
   @override
   void handleViewFocusChanged(ViewFocusEvent event) {
     super.handleViewFocusChanged(event);
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeViewFocus(event);
     }
   }
@@ -1072,7 +1072,7 @@ mixin WidgetsBinding
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didHaveMemoryPressure();
     }
   }
@@ -1229,7 +1229,7 @@ mixin WidgetsBinding
     }());
 
     TimingsCallback? firstFrameCallback;
-    var debugFrameWasSentToEngine = false;
+    bool debugFrameWasSentToEngine = false;
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
@@ -1371,7 +1371,7 @@ mixin WidgetsBinding
   /// [RootWidget] of that version (see [WidgetTester.restartAndRestore] for an
   /// exemplary use case).
   void attachToBuildOwner(RootWidget widget) {
-    final isBootstrapFrame = rootElement == null;
+    final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
     _rootElement = widget.attach(buildOwner!, rootElement as RootElement?);
     if (isBootstrapFrame) {
@@ -1578,13 +1578,13 @@ void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
 }
 
 String _debugDumpAppString() {
-  const mode =
+  const String mode =
       kDebugMode
           ? 'DEBUG MODE'
           : kReleaseMode
           ? 'RELEASE MODE'
           : 'PROFILE MODE';
-  final buffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.rootElement != null) {
     buffer.writeln(WidgetsBinding.instance.rootElement!.toStringDeep());
@@ -1716,7 +1716,7 @@ class RootElement extends Element with RootElementMixin {
     try {
       _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
     } catch (exception, stack) {
-      final details = FlutterErrorDetails(
+      final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',

@@ -21,13 +21,13 @@ void main() {
     // - At least one top-level directory that is "engine"
     // - At least one top-level directory that is not "engine"
     // - At least one nested directory (in not "engine") that is "engine"
-    final directoriesToCreate = <String>[
+    final List<String> directoriesToCreate = <String>[
       p.join('dev', 'integration_tests', 'android_test', 'android'),
       p.join('engine', 'src', 'flutter', 'third_party', 'some_package', 'android'),
       p.join('packages', 'flutter_tools', 'test', 'fixtures', 'engine', 'android'),
     ];
 
-    for (final path in directoriesToCreate) {
+    for (final String path in directoriesToCreate) {
       localFs.directory(p.join(tmpFlutterRoot.path, path)).createSync(recursive: true);
     }
   });

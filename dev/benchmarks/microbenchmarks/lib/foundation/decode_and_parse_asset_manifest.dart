@@ -12,13 +12,13 @@ const int _kNumIterations = 1000;
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
-  final watch = Stopwatch();
-  final bundle = rootBundle as PlatformAssetBundle;
+  final Stopwatch watch = Stopwatch();
+  final PlatformAssetBundle bundle = rootBundle as PlatformAssetBundle;
 
   watch.start();
-  for (var i = 0; i < _kNumIterations; i++) {
+  for (int i = 0; i < _kNumIterations; i++) {
     await AssetManifest.loadFromAssetBundle(bundle);
     bundle.clear();
   }

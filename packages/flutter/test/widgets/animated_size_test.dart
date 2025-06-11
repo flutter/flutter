@@ -47,7 +47,7 @@ void main() {
       expect(box.size.width, equals(150.0));
       expect(box.size.height, equals(150.0));
 
-      var context = TestPaintingContext();
+      TestPaintingContext context = TestPaintingContext();
       box.paint(context, Offset.zero);
       expect(context.invocations.first.memberName, equals(#pushClipRect));
 
@@ -81,7 +81,7 @@ void main() {
     });
 
     testWidgets('calls onEnd when animation is completed', (WidgetTester tester) async {
-      var callCount = 0;
+      int callCount = 0;
       void handleEnd() {
         callCount++;
       }
@@ -285,7 +285,7 @@ void main() {
         ),
       );
 
-      for (var i = 0; i < 20; i++) {
+      for (int i = 0; i < 20; i++) {
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         expect(box.size.width, 100.0);
         expect(box.size.height, 100.0);
@@ -357,7 +357,7 @@ void main() {
       );
 
       // Each pump triggers verification of dry layout.
-      for (var total = 0; total < 200; total += 10) {
+      for (int total = 0; total < 200; total += 10) {
         await tester.pump(const Duration(milliseconds: 10));
       }
       expect(
@@ -389,7 +389,7 @@ void main() {
       const Key key1 = ValueKey<String>('key1');
       const Key key2 = ValueKey<String>('key2');
       late StateSetter setState;
-      var childSize = const Size.square(100);
+      Size childSize = const Size.square(100);
       final Widget animatedSize = Center(
         key: GlobalKey(debugLabel: 'animated size'),
         // This SizedBox creates a relayout boundary so _cleanRelayoutBoundary

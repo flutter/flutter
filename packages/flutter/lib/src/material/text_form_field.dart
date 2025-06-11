@@ -211,7 +211,7 @@ class TextFormField extends FormField<String> {
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
-           final state = field as _TextFormFieldState;
+           final _TextFormFieldState state = field as _TextFormFieldState;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
 

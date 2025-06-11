@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Dismiss dialog with tap on the scrim and escape key', (WidgetTester tester) async {
-    const dialogText = 'Tap in the scrim or press escape key to dismiss.';
+    const String dialogText = 'Tap in the scrim or press escape key to dismiss.';
 
     await tester.pumpWidget(const example.PopupRouteApp());
 

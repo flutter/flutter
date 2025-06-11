@@ -166,7 +166,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
     return null;
   }
 
-  final settings = XcodeCodeSigningSettings(
+  final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
     config: config,
     logger: logger,
     platform: platform,
@@ -199,7 +199,7 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required FileSystemUtils fileSystemUtils,
   required PlistParser plistParser,
 }) async {
-  final settings = XcodeCodeSigningSettings(
+  final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
     config: config,
     logger: logger,
     platform: platform,
@@ -315,7 +315,7 @@ class XcodeCodeSigningSettings {
       }
     }
 
-    final savedProfile =
+    final String? savedProfile =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     if (savedProfile != null) {
@@ -340,7 +340,7 @@ class XcodeCodeSigningSettings {
       };
     }
 
-    final savedCertChoice =
+    final String? savedCertChoice =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
 
     String? identity;
@@ -630,9 +630,9 @@ class XcodeCodeSigningSettings {
       return;
     }
 
-    final savedCertChoice =
+    final String? savedCertChoice =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
-    final savedProfile =
+    final String? savedProfile =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     if (savedCertChoice != null || savedProfile != null) {
@@ -742,7 +742,7 @@ class XcodeCodeSigningSettings {
       emphasis: true,
     );
     final int count = validCodeSigningIdentities.length;
-    for (var i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
       _logger.printStatus('[${i + 1}] ${validCodeSigningIdentities[i]}');
     }
     final String choice = await _terminal.promptForCharInput(
@@ -793,7 +793,7 @@ class XcodeCodeSigningSettings {
 
     final List<String> validCodeSigningIdentities = await _getSigningIdentities();
 
-    final profiles = <_ProvisioningProfile>[];
+    final List<_ProvisioningProfile> profiles = <_ProvisioningProfile>[];
     for (final FileSystemEntity entity in profileDirectory.listSync()) {
       if (entity is! File || _fileSystem.path.extension(entity.path) != '.mobileprovision') {
         continue;
@@ -829,7 +829,7 @@ class XcodeCodeSigningSettings {
       '\nValid provisioning profiles available (your choice will be saved):',
       emphasis: true,
     );
-    var count = 1;
+    int count = 1;
     for (final _ProvisioningProfile profile in validatedProfiles) {
       _logger.printStatus(
         '[$count]: ${profile.name} (${profile.teamIdentifier}) | Expires ${profile.expirationDate}',
@@ -885,12 +885,12 @@ class _ProvisioningProfile {
     Map<String, Object> data, {
     required FileSystem fileSystem,
   }) {
-    final name = data['Name']?.toString();
+    final String? name = data['Name']?.toString();
     if (name == null) {
       throw Exception('Unable to parse Name value for provisioning profile.');
     }
 
-    var identifiers = <String>[];
+    List<String> identifiers = <String>[];
     if (data case {'TeamIdentifier': final List<Object?> values}) {
       try {
         identifiers = List<String>.from(values);
@@ -902,14 +902,14 @@ class _ProvisioningProfile {
       }
     }
 
-    final uuid = data['UUID']?.toString();
+    final String? uuid = data['UUID']?.toString();
     if (uuid == null) {
       throw Exception('Unable to parse UUID value for provisioning profile.');
     }
 
-    final certificateFiles = <File>[];
+    final List<File> certificateFiles = <File>[];
     if (data case {'DeveloperCertificates': final List<Object?> values}) {
-      for (var i = 0; i < values.length; i++) {
+      for (int i = 0; i < values.length; i++) {
         final Object? obj = values[i];
         if (obj != null && obj is List<int>) {
           final File certFile = fileSystem.systemTempDirectory
@@ -925,7 +925,7 @@ class _ProvisioningProfile {
       throw Exception('Unable to parse DeveloperCertificates value for provisioning profile.');
     }
 
-    final expirationDateString = data['ExpirationDate']?.toString();
+    final String? expirationDateString = data['ExpirationDate']?.toString();
     if (expirationDateString == null) {
       throw Exception('Unable to parse ExpirationDate value for provisioning profile.');
     }

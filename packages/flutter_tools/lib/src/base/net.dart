@@ -47,8 +47,8 @@ class Net {
     File? destFile,
     @visibleForTesting Duration? durationOverride,
   }) async {
-    var attempts = 0;
-    var durationSeconds = 1;
+    int attempts = 0;
+    int durationSeconds = 1;
     while (true) {
       attempts += 1;
       _MemoryIOSink? memorySink;
@@ -174,7 +174,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
@@ -196,7 +196,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    var addSeparator = false;
+    bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);

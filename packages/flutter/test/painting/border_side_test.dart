@@ -12,24 +12,24 @@ void main() {
     expect(const BorderSide(width: -0.0), const BorderSide(width: 0.0));
   });
   test('BorderSide - merging', () {
-    const blue = BorderSide(color: Color(0xFF0000FF));
-    const blue2 = BorderSide(color: Color(0xFF0000FF), width: 2.0);
-    const green = BorderSide(color: Color(0xFF00FF00));
-    const green2 = BorderSide(color: Color(0xFF00FF00), width: 2.0);
-    const green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
-    const green5 = BorderSide(color: Color(0xFF00FF00), width: 5.0);
-    const none = BorderSide(style: BorderStyle.none);
-    const none2 = BorderSide(
+    const BorderSide blue = BorderSide(color: Color(0xFF0000FF));
+    const BorderSide blue2 = BorderSide(color: Color(0xFF0000FF), width: 2.0);
+    const BorderSide green = BorderSide(color: Color(0xFF00FF00));
+    const BorderSide green2 = BorderSide(color: Color(0xFF00FF00), width: 2.0);
+    const BorderSide green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
+    const BorderSide green5 = BorderSide(color: Color(0xFF00FF00), width: 5.0);
+    const BorderSide none = BorderSide(style: BorderStyle.none);
+    const BorderSide none2 = BorderSide(
       color: Color(0xFF0000FF),
       width: 2.0,
       style: BorderStyle.none,
     );
-    const none3 = BorderSide(style: BorderStyle.none, width: 3.0);
-    const side2 = BorderSide(width: 2.0);
-    const side3 = BorderSide(width: 3.0);
-    const side5 = BorderSide(width: 5.0);
-    const solid = BorderSide();
-    const yellowNone = BorderSide(
+    const BorderSide none3 = BorderSide(style: BorderStyle.none, width: 3.0);
+    const BorderSide side2 = BorderSide(width: 2.0);
+    const BorderSide side3 = BorderSide(width: 3.0);
+    const BorderSide side5 = BorderSide(width: 5.0);
+    const BorderSide solid = BorderSide();
+    const BorderSide yellowNone = BorderSide(
       style: BorderStyle.none,
       color: Color(0xFFFFFF00),
       width: 0.0,
@@ -74,11 +74,11 @@ void main() {
     expect(BorderSide.merge(yellowNone, yellowNone), BorderSide.none);
   });
   test('BorderSide - asserts when copied incorrectly', () {
-    const green2 = BorderSide(color: Color(0xFF00FF00), width: 2.0);
-    const blue3 = BorderSide(color: Color(0xFF0000FF), width: 3.0);
-    const blue2 = BorderSide(color: Color(0xFF0000FF), width: 2.0);
-    const green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
-    const none2 = BorderSide(
+    const BorderSide green2 = BorderSide(color: Color(0xFF00FF00), width: 2.0);
+    const BorderSide blue3 = BorderSide(color: Color(0xFF0000FF), width: 3.0);
+    const BorderSide blue2 = BorderSide(color: Color(0xFF0000FF), width: 2.0);
+    const BorderSide green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
+    const BorderSide none2 = BorderSide(
       color: Color(0xFF00FF00),
       width: 2.0,
       style: BorderStyle.none,
@@ -89,9 +89,9 @@ void main() {
     expect(green2.copyWith(style: BorderStyle.none), none2);
   });
   test('BorderSide - scale', () {
-    const side3 = BorderSide(width: 3.0, color: Color(0xFF0000FF));
-    const side6 = BorderSide(width: 6.0, color: Color(0xFF0000FF));
-    const none = BorderSide(
+    const BorderSide side3 = BorderSide(width: 3.0, color: Color(0xFF0000FF));
+    const BorderSide side6 = BorderSide(width: 6.0, color: Color(0xFF0000FF));
+    const BorderSide none = BorderSide(
       style: BorderStyle.none,
       width: 0.0,
       color: Color(0xFF0000FF),
@@ -116,13 +116,13 @@ void main() {
     expect(paint2.blendMode, BlendMode.srcOver);
   });
   test('BorderSide - lerp identical a,b', () {
-    const border = BorderSide();
+    const BorderSide border = BorderSide();
     expect(identical(BorderSide.lerp(border, border, 0.5), border), true);
   });
   test("BorderSide - won't lerp into negative widths", () {
-    const side0 = BorderSide(width: 0.0);
-    const side1 = BorderSide();
-    const side2 = BorderSide(width: 2.0);
+    const BorderSide side0 = BorderSide(width: 0.0);
+    const BorderSide side1 = BorderSide();
+    const BorderSide side2 = BorderSide(width: 2.0);
     expect(BorderSide.lerp(side2, side1, 10.0), BorderSide.none);
     expect(BorderSide.lerp(side1, side2, -10.0), BorderSide.none);
     expect(BorderSide.lerp(side0, side1, 2.0), side2);
@@ -137,8 +137,8 @@ void main() {
   });
 
   test('BorderSide - lerp with strokeAlign', () {
-    const side0 = BorderSide(width: 2.0);
-    const side1 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside);
+    const BorderSide side0 = BorderSide(width: 2.0);
+    const BorderSide side1 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside);
     expect(BorderSide.lerp(side0, side1, 0), const BorderSide(width: 2.0));
     expect(
       BorderSide.lerp(side0, side1, 0.5),
@@ -149,8 +149,8 @@ void main() {
       const BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside),
     );
 
-    const side2 = BorderSide(width: 2.0);
-    const side3 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter);
+    const BorderSide side2 = BorderSide(width: 2.0);
+    const BorderSide side3 = BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter);
     expect(BorderSide.lerp(side2, side3, 0), const BorderSide(width: 2.0));
     expect(BorderSide.lerp(side2, side3, 0.5), const BorderSide(width: 2.0, strokeAlign: -0.5));
     expect(

@@ -55,7 +55,7 @@ class PlatformViewsRegistry {
 
     // We can safely assume that a Flutter application will not require more
     // than MAX_INT32 platform views during its lifetime.
-    const MAX_INT32 = 0x7FFFFFFF;
+    const int MAX_INT32 = 0x7FFFFFFF;
     assert(_nextPlatformViewId <= MAX_INT32);
     return _nextPlatformViewId++;
   }
@@ -79,7 +79,7 @@ class PlatformViewsService {
   Future<void> _onMethodCall(MethodCall call) {
     switch (call.method) {
       case 'viewFocused':
-        final id = call.arguments as int;
+        final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
@@ -141,7 +141,7 @@ class PlatformViewsService {
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
-    final controller = TextureAndroidViewController._(
+    final TextureAndroidViewController controller = TextureAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -171,7 +171,7 @@ class PlatformViewsService {
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
-    final controller = SurfaceAndroidViewController._(
+    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -199,7 +199,7 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    final controller = ExpensiveAndroidViewController._(
+    final ExpensiveAndroidViewController controller = ExpensiveAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -227,7 +227,7 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    final controller = HybridAndroidViewController._(
+    final HybridAndroidViewController controller = HybridAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -266,7 +266,7 @@ class PlatformViewsService {
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
     // https://github.com/flutter/flutter/issues/133682
-    final args = <String, dynamic>{'id': id, 'viewType': viewType};
+    final Map<String, dynamic> args = <String, dynamic>{'id': id, 'viewType': viewType};
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
       args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
@@ -305,7 +305,7 @@ class PlatformViewsService {
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
     // https://github.com/flutter/flutter/issues/133682
-    final args = <String, dynamic>{'id': id, 'viewType': viewType};
+    final Map<String, dynamic> args = <String, dynamic>{'id': id, 'viewType': viewType};
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
       args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
@@ -571,7 +571,7 @@ class _AndroidMotionEventConverter {
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    var androidPointerId = 0;
+    int androidPointerId = 0;
     while (usedAndroidPointerIds.contains(androidPointerId)) {
       androidPointerId++;
     }
@@ -621,7 +621,7 @@ class _AndroidMotionEventConverter {
 
     // This value must match the value in engine's FlutterView.java.
     // This flag indicates whether the original Android pointer events were batched together.
-    const kPointerDataFlagBatched = 1;
+    const int kPointerDataFlagBatched = 1;
 
     // Android MotionEvent objects can batch information on multiple pointers.
     // Flutter breaks these such batched events into multiple PointerEvent objects.
@@ -1305,7 +1305,7 @@ abstract class _AndroidViewControllerInternals {
     Size? size,
     Offset? position,
   }) {
-    final args = <String, dynamic>{
+    final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
@@ -1536,7 +1536,7 @@ abstract class DarwinPlatformViewController {
   /// Calling this method releases the delayed events to the embedded UIView and makes it consume
   /// any following touch events for the pointers involved in the active gesture.
   Future<void> acceptGesture() {
-    final args = <String, dynamic>{'id': id};
+    final Map<String, dynamic> args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
@@ -1546,7 +1546,7 @@ abstract class DarwinPlatformViewController {
   /// Calling this method drops the buffered touch events and prevents any future touch events for
   /// the pointers that are part of the active touch sequence from arriving to the embedded view.
   Future<void> rejectGesture() {
-    final args = <String, dynamic>{'id': id};
+    final Map<String, dynamic> args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
   }
 

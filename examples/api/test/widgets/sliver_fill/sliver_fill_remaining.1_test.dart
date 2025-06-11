@@ -38,7 +38,7 @@ void main() {
     await tester.pumpWidget(const example.SliverFillRemainingExampleApp());
 
     final double listSpace = tester.getSize(find.byType(CustomScrollView)).height;
-    var contentHeight = 0.0;
+    double contentHeight = 0.0;
     for (final Widget widget in tester.widgetList(
       find.byWidgetPredicate(
         (Widget widget) =>

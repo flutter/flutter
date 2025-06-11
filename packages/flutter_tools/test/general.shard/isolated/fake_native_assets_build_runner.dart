@@ -42,7 +42,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     BuildResult? result = buildResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final input =
+      final BuildInputBuilder input =
           BuildInputBuilder()
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
@@ -55,7 +55,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
       for (final ProtocolExtension extension in extensions) {
         extension.setupBuildInput(input);
       }
-      final buildConfig = BuildInput(input.json);
+      final BuildInput buildConfig = BuildInput(input.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
@@ -71,7 +71,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final input =
+      final LinkInputBuilder input =
           LinkInputBuilder()
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
@@ -83,7 +83,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
       for (final ProtocolExtension extension in extensions) {
         extension.setupLinkInput(input);
       }
-      final buildConfig = LinkInput(input.json);
+      final LinkInput buildConfig = LinkInput(input.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }

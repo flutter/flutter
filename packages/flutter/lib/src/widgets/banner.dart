@@ -361,7 +361,7 @@ class CheckedModeBanner extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    var message = 'disabled';
+    String message = 'disabled';
     assert(() {
       message = '"DEBUG"';
       return true;

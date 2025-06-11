@@ -65,12 +65,12 @@ void _updateGeneratedXcodePropertiesFile({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final buffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('// This is a generated file; do not edit or check into version control.');
   xcodeBuildSettings.forEach(buffer.writeln);
 
-  final newContent = buffer.toString();
+  final String newContent = buffer.toString();
 
   final File generatedXcodePropertiesFile =
       useMacOSConfig
@@ -99,7 +99,7 @@ void _updateGeneratedEnvironmentVariablesScript({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final localsBuffer = StringBuffer();
+  final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
@@ -151,7 +151,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? buildDirOverride,
   String? configurationBuildDir,
 }) async {
-  final xcodeBuildSettings = <String>[];
+  final List<String> xcodeBuildSettings = <String>[];
 
   final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
@@ -236,7 +236,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
-    var excludedSimulatorArchs = 'i386';
+    String excludedSimulatorArchs = 'i386';
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }

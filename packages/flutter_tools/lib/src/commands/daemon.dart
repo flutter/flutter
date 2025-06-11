@@ -86,7 +86,7 @@ class DaemonCommand extends FlutterCommand {
       ).run();
       return FlutterCommandResult.success();
     }
-    final daemon = Daemon(
+    final Daemon daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
         logger: globals.logger,
@@ -147,7 +147,7 @@ class DaemonServer {
           logger.printTrace('$stackTrace');
         },
       );
-      final daemon = Daemon(
+      final Daemon daemon = Daemon(
         DaemonConnection(
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
@@ -196,7 +196,7 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon() {
-    final daemon = Daemon(
+    final Daemon daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
         logger: globals.logger,
@@ -245,7 +245,7 @@ class Daemon {
     }
 
     try {
-      final method = request.data['method']! as String;
+      final String method = request.data['method']! as String;
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -457,8 +457,8 @@ class DaemonDomain extends Domain {
   /// is correct.
   Future<Map<String, Object>> getSupportedPlatforms(Map<String, Object?> args) async {
     final String? projectRoot = _getStringArg(args, 'projectRoot', required: true);
-    final platformTypes = <String>[];
-    final platformTypesMap = <String, Object>{};
+    final List<String> platformTypes = <String>[];
+    final Map<String, Object> platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         globals.fs.directory(projectRoot),
@@ -467,7 +467,7 @@ class DaemonDomain extends Domain {
           flutterProject.getSupportedPlatforms().toSet();
 
       void handlePlatformType(PlatformType platform) {
-        final reasons = <Map<String, Object>>[];
+        final List<Map<String, Object>> reasons = <Map<String, Object>>[];
         switch (platform) {
           case PlatformType.linux:
             if (!featureFlags.isLinuxEnabled) {
@@ -768,7 +768,7 @@ class AppDomain extends Domain {
     LaunchMode launchMode,
     AppRunLogger logger,
   ) async {
-    final app = AppInstance(
+    final AppInstance app = AppInstance(
       _getNewAppId(),
       runner: runner,
       logToStdout: daemon.logToStdout,
@@ -797,7 +797,7 @@ class AppDomain extends Domain {
       // As it just writes to stdout.
       unawaited(
         connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) {
-          final params = <String, Object?>{
+          final Map<String, Object?> params = <String, Object?>{
             // The web vmservice proxy does not have an http address.
             'port': info.httpUri?.port ?? info.wsUri!.port,
             'wsUri': info.wsUri.toString(),
@@ -809,7 +809,7 @@ class AppDomain extends Domain {
         }),
       );
     }
-    final appStartedCompleter = Completer<void>();
+    final Completer<void> appStartedCompleter = Completer<void>();
 
     // This future won't complete until the application has shutdown, so we don't want to
     // await it. However, we do need to listen to the future in order to handle possible
@@ -1081,7 +1081,7 @@ class DeviceDomain extends Domain {
         discoverer.discoverDevices(timeout: timeout),
     ]);
 
-    final devices = <Device>[
+    final List<Device> devices = <Device>[
       for (final List<Device> devicesList in devicesListList) ...devicesList,
     ];
     return Future.wait(<Future<Map<String, Object?>>>[
@@ -1154,7 +1154,7 @@ class DeviceDomain extends Domain {
     );
     final ApplicationPackage? applicationPackage = await ApplicationPackageFactory.instance!
         .getPackageForPlatform(targetPlatform, applicationBinary: applicationBinary);
-    final id = 'application_package_${_id++}';
+    final String id = 'application_package_${_id++}';
     _applicationPackages[id] = applicationPackage;
     return id;
   }
@@ -1169,7 +1169,7 @@ class DeviceDomain extends Domain {
     final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
     final ApplicationPackage? applicationPackage =
         applicationPackageId != null ? _applicationPackages[applicationPackageId] : null;
-    final id = '${deviceId}_${_id++}';
+    final String id = '${deviceId}_${_id++}';
 
     final DeviceLogReader logReader = await device.getLogReader(app: applicationPackage);
     logReader.logLines.listen((String log) => sendEvent('device.logReader.logLines.$id', log));
@@ -1243,7 +1243,7 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final tempFileName = 'screenshot_${_id++}';
+    final String tempFileName = 'screenshot_${_id++}';
     final File tempFile = daemon.proxyDomain.tempDirectory.childFile(tempFileName);
     await device.takeScreenshot(tempFile);
     if (await tempFile.exists()) {
@@ -1307,7 +1307,7 @@ class DeviceDomain extends Domain {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       final List<Device> devices = await discoverer.devices(filter: DeviceDiscoveryFilter());
       Device? device;
-      for (final localDevice in devices) {
+      for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
           device = localDevice;
         }
@@ -1345,7 +1345,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    final id = '${_id++}';
+    final String id = '${_id++}';
 
     final VMServiceDiscoveryForAttach discovery = device.getVMServiceDiscoveryForAttach(
       appId: appId,
@@ -1691,7 +1691,7 @@ class ProxyDomain extends Domain {
   /// Opens a connection to a local port, and returns the connection id.
   Future<String> connect(Map<String, Object?> args) async {
     final int targetPort = _getIntArg(args, 'port', required: true)!;
-    final id = 'portForwarder_${targetPort}_${_id++}';
+    final String id = 'portForwarder_${targetPort}_${_id++}';
 
     Socket? socket;
 
@@ -1836,7 +1836,7 @@ class AppRunLogger extends DelegatingLogger {
         printStatus(message);
       }
     } else {
-      final event = <String, Object?>{
+      final Map<String, Object?> event = <String, Object?>{
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
@@ -1913,7 +1913,7 @@ class DebounceOperationQueue<T, K> {
     }
 
     // Otherwise, put one in the queue with a timer.
-    final completer = Completer<T>();
+    final Completer<T> completer = Completer<T>();
     _operationQueue[operationType] = completer.future;
     _debounceTimers[operationType] = RestartableTimer(debounceDuration, () async {
       // Remove us from the queue so we can't be reset now we've started.

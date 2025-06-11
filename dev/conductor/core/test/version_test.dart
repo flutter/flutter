@@ -10,7 +10,7 @@ import 'common.dart';
 void main() {
   group('Version.fromString()', () {
     test('parses commits past a tagged stable', () {
-      const versionString = '2.8.0-1-g2ef5ad67fe';
+      const String versionString = '2.8.0-1-g2ef5ad67fe';
       final Version version;
       try {
         version = Version.fromString(versionString);
@@ -30,9 +30,9 @@ void main() {
     'Version.increment()',
     () {
       test('throws exception on nonsensical `level`', () {
-        final levels = <String>['f', '0', 'xyz'];
-        for (final level in levels) {
-          final version = Version.fromString('1.0.0-0.0.pre');
+        final List<String> levels = <String>['f', '0', 'xyz'];
+        for (final String level in levels) {
+          final Version version = Version.fromString('1.0.0-0.0.pre');
           expect(
             () => Version.increment(version, level).toString(),
             throwsExceptionWith('Unknown increment level $level.'),
@@ -41,9 +41,9 @@ void main() {
       });
 
       test('does not support incrementing x', () {
-        const level = 'x';
+        const String level = 'x';
 
-        final version = Version.fromString('1.0.0-0.0.pre');
+        final Version version = Version.fromString('1.0.0-0.0.pre');
         expect(
           () => Version.increment(version, level).toString(),
           throwsExceptionWith('Incrementing $level is not supported by this tool'),
@@ -51,9 +51,9 @@ void main() {
       });
 
       test('successfully increments y', () {
-        const level = 'y';
+        const String level = 'y';
 
-        var version = Version.fromString('1.0.0-0.0.pre');
+        Version version = Version.fromString('1.0.0-0.0.pre');
         expect(Version.increment(version, level).toString(), '1.1.0-0.0.pre');
 
         version = Version.fromString('10.20.0-40.50.pre');
@@ -64,9 +64,9 @@ void main() {
       });
 
       test('successfully increments z', () {
-        const level = 'z';
+        const String level = 'z';
 
-        var version = Version.fromString('1.0.0');
+        Version version = Version.fromString('1.0.0');
         expect(Version.increment(version, level).toString(), '1.0.1');
 
         version = Version.fromString('10.20.0');
@@ -77,9 +77,9 @@ void main() {
       });
 
       test('does not support incrementing m', () {
-        const level = 'm';
+        const String level = 'm';
 
-        final version = Version.fromString('1.0.0-0.0.pre');
+        final Version version = Version.fromString('1.0.0-0.0.pre');
         expect(
           () => Version.increment(version, level).toString(),
           throwsAssertionWith("Do not increment 'm' via Version.increment"),
@@ -87,9 +87,9 @@ void main() {
       });
 
       test('successfully increments n', () {
-        const level = 'n';
+        const String level = 'n';
 
-        var version = Version.fromString('1.0.0-0.0.pre');
+        Version version = Version.fromString('1.0.0-0.0.pre');
         expect(Version.increment(version, level).toString(), '1.0.0-0.1.pre');
 
         version = Version.fromString('10.20.0-40.50.pre');
@@ -106,9 +106,9 @@ void main() {
 
   group('.ensureValid()', () {
     test('throws when x does not match', () {
-      const versionString = '1.2.3-4.5.pre';
-      const candidateBranch = 'flutter-3.2-candidate.4';
-      final version = Version.fromString(versionString);
+      const String versionString = '1.2.3-4.5.pre';
+      const String candidateBranch = 'flutter-3.2-candidate.4';
+      final Version version = Version.fromString(versionString);
       expect(
         () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
         throwsExceptionWith(
@@ -119,9 +119,9 @@ void main() {
     });
 
     test('throws when y does not match', () {
-      const versionString = '1.2.3';
-      const candidateBranch = 'flutter-1.15-candidate.4';
-      final version = Version.fromString(versionString);
+      const String versionString = '1.2.3';
+      const String candidateBranch = 'flutter-1.15-candidate.4';
+      final Version version = Version.fromString(versionString);
       expect(
         () => version.ensureValid(candidateBranch, ReleaseType.BETA_INITIAL),
         throwsExceptionWith(
@@ -132,9 +132,9 @@ void main() {
     });
 
     test('throws when m does not match', () {
-      const versionString = '1.2.3-4.5.pre';
-      const candidateBranch = 'flutter-1.2-candidate.0';
-      final version = Version.fromString(versionString);
+      const String versionString = '1.2.3-4.5.pre';
+      const String candidateBranch = 'flutter-1.2-candidate.0';
+      final Version version = Version.fromString(versionString);
       expect(
         () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
         throwsExceptionWith(
@@ -145,9 +145,9 @@ void main() {
     });
 
     test('does not validate m if version type is stable', () {
-      const versionString = '1.2.0';
-      const candidateBranch = 'flutter-1.2-candidate.98';
-      final version = Version.fromString(versionString);
+      const String versionString = '1.2.0';
+      const String candidateBranch = 'flutter-1.2-candidate.98';
+      final Version version = Version.fromString(versionString);
       expect(
         () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
         isNot(throwsException),
@@ -155,9 +155,9 @@ void main() {
     });
 
     test('throws on malformed candidate branch', () {
-      const versionString = '1.2.0';
-      const candidateBranch = 'stable';
-      final version = Version.fromString(versionString);
+      const String versionString = '1.2.0';
+      const String candidateBranch = 'stable';
+      final Version version = Version.fromString(versionString);
       expect(
         () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
         throwsExceptionWith('Candidate branch $candidateBranch does not match the pattern'),

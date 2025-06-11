@@ -205,7 +205,7 @@ class MenuStyle with Diagnosticable {
 
   @override
   int get hashCode {
-    final values = <Object?>[
+    final List<Object?> values = <Object?>[
       backgroundColor,
       shadowColor,
       surfaceTintColor,

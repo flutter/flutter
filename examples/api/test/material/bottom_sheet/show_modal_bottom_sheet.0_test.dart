@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('BottomSheet can be opened and closed', (WidgetTester tester) async {
-    const titleText = 'Modal BottomSheet';
-    const closeText = 'Close BottomSheet';
+    const String titleText = 'Modal BottomSheet';
+    const String closeText = 'Close BottomSheet';
 
     await tester.pumpWidget(const example.BottomSheetApp());
 

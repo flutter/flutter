@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Disposes restoration manager on reset.', () {
-    final binding = AutomatedTestWidgetsFlutterBinding();
-    var oldCounter = 0;
+    final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+    int oldCounter = 0;
     final TestRestorationManager oldRestorationManager = binding.restorationManager;
     oldRestorationManager.addListener(() => oldCounter++);
 

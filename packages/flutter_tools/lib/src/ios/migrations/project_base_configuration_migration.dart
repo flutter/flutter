@@ -34,7 +34,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     //				97C147041CF9000F007C1171 /* Release */,
     //				2436755321828D23008C7051 /* Profile */,
     //			);
-    final projectBuildConfigurationList = RegExp(
+    final RegExp projectBuildConfigurationList = RegExp(
       r'\/\* Build configuration list for PBXProject "Runner" \*\/ = {\s*isa = XCConfigurationList;\s*buildConfigurations = \(\s*(.*) \/\* Debug \*\/,\s*(.*) \/\* Release \*\/,\s*(.*) \/\* Profile \*\/,',
       multiLine: true,
     );
@@ -47,12 +47,12 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     final String profileIdentifier = match?.group(3) ?? '249021D3217E4FDB00AE95B9';
 
     // Debug
-    final debugBaseConfigurationOriginal = '''
+    final String debugBaseConfigurationOriginal = '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 ''';
-    final debugBaseConfigurationReplacement = '''
+    final String debugBaseConfigurationReplacement = '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 ''';
@@ -62,12 +62,12 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     );
 
     // Profile
-    final profileBaseConfigurationOriginal = '''
+    final String profileBaseConfigurationOriginal = '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final profileBaseConfigurationReplacement = '''
+    final String profileBaseConfigurationReplacement = '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 ''';
@@ -77,12 +77,12 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     );
 
     // Release
-    final releaseBaseConfigurationOriginal = '''
+    final String releaseBaseConfigurationOriginal = '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final releaseBaseConfigurationReplacement = '''
+    final String releaseBaseConfigurationReplacement = '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 ''';

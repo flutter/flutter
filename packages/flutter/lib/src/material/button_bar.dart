@@ -360,7 +360,7 @@ class _RenderButtonBarRow extends RenderFlex {
     if (size.width <= constraints.maxWidth) {
       return super.computeDryLayout(constraints);
     }
-    var currentHeight = 0.0;
+    double currentHeight = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
@@ -394,14 +394,14 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      var currentHeight = 0.0;
+      double currentHeight = 0.0;
       RenderBox? child = switch (verticalDirection) {
         VerticalDirection.down => firstChild,
         VerticalDirection.up => lastChild,
       };
 
       while (child != null) {
-        final childParentData = child.parentData! as FlexParentData;
+        final FlexParentData childParentData = child.parentData! as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

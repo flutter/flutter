@@ -222,7 +222,7 @@ class _RenderMenuItem extends RenderShiftedBox {
     } else {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);
-      final childParentData = child!.parentData! as BoxParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Offset.zero;
     }
     onLayout(size);
@@ -411,7 +411,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults =
         theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
-    final states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
+    final Set<MaterialState> states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
 
     TextStyle style =
         theme.useMaterial3
@@ -443,7 +443,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     );
 
     if (!widget.enabled) {
-      final isDark = theme.brightness == Brightness.dark;
+      final bool isDark = theme.brightness == Brightness.dark;
       item = IconTheme.merge(data: IconThemeData(opacity: isDark ? 0.5 : 0.38), child: item);
     }
 
@@ -612,7 +612,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults =
         theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
-    final states = <MaterialState>{if (widget.checked) MaterialState.selected};
+    final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
     final MaterialStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
     return IgnorePointer(
@@ -674,14 +674,14 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     for (final CurvedAnimation opacity in _opacities) {
       opacity.dispose();
     }
-    final newOpacities = <CurvedAnimation>[];
+    final List<CurvedAnimation> newOpacities = <CurvedAnimation>[];
     final double unit =
         1.0 /
         (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    for (var i = 0; i < widget.route.items.length; i += 1) {
+    for (int i = 0; i < widget.route.items.length; i += 1) {
       final double start = (i + 1) * unit;
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      final opacity = CurvedAnimation(
+      final CurvedAnimation opacity = CurvedAnimation(
         parent: widget.route.animation!,
         curve: Interval(start, end),
       );
@@ -703,13 +703,13 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     final double unit =
         1.0 /
         (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    final children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults =
         theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
 
-    for (var i = 0; i < widget.route.items.length; i += 1) {
+    for (int i = 0; i < widget.route.items.length; i += 1) {
       final CurvedAnimation opacity = _opacities[i];
       Widget item = widget.route.items[i];
       if (widget.route.initialValue != null &&
@@ -726,9 +726,9 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       );
     }
 
-    final opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
-    final width = CurveTween(curve: Interval(0.0, unit));
-    final height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
+    final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
+    final CurveTween width = CurveTween(curve: Interval(0.0, unit));
+    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
 
     final Widget child = ConstrainedBox(
       constraints:
@@ -847,7 +847,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
         TextDirection.ltr => position.left,
       };
     }
-    final wantedPosition = Offset(x, y);
+    final Offset wantedPosition = Offset(x, y);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(
       Offset.zero & size,
@@ -993,7 +993,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   ) {
     int? selectedItemIndex;
     if (initialValue != null) {
-      for (var index = 0; selectedItemIndex == null && index < items.length; index += 1) {
+      for (int index = 0; selectedItemIndex == null && index < items.length; index += 1) {
         if (items[index].represents(initialValue)) {
           selectedItemIndex = index;
         }
@@ -1174,7 +1174,7 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  final menuItemKeys = List<GlobalKey>.generate(
+  final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(
     items.length,
     (int index) => GlobalKey(),
   );
@@ -1570,8 +1570,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   bool _isMenuExpanded = false;
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final button = context.findRenderObject()! as RenderBox;
-    final overlay =
+    final RenderBox button = context.findRenderObject()! as RenderBox;
+    final RenderBox overlay =
         Navigator.of(
               context,
               rootNavigator: widget.useRootNavigator,
@@ -1590,7 +1590,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           offset -= Offset(0.0, widget.padding.vertical / 2);
         }
     }
-    final position = RelativeRect.fromRect(
+    final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(offset, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero) + offset, ancestor: overlay),

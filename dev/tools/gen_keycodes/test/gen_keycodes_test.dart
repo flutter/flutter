@@ -50,7 +50,7 @@ void main() {
   }
 
   test('Generate Keycodes for Android', () {
-    const platform = 'android';
+    const String platform = 'android';
     final PlatformCodeGenerator codeGenerator = AndroidCodeGenerator(physicalData, logicalData);
     final String output = codeGenerator.generate();
 
@@ -61,7 +61,7 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for macOS', () {
-    const platform = 'macos';
+    const String platform = 'macos';
     final PlatformCodeGenerator codeGenerator = MacOSCodeGenerator(
       physicalData,
       logicalData,
@@ -81,7 +81,7 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for iOS', () {
-    const platform = 'ios';
+    const String platform = 'ios';
     final PlatformCodeGenerator codeGenerator = IOSCodeGenerator(physicalData, logicalData);
     final String output = codeGenerator.generate();
 
@@ -97,7 +97,7 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Windows', () {
-    const platform = 'windows';
+    const String platform = 'windows';
     final PlatformCodeGenerator codeGenerator = WindowsCodeGenerator(
       physicalData,
       logicalData,
@@ -112,7 +112,7 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Linux', () {
-    const platform = 'gtk';
+    const String platform = 'gtk';
     final PlatformCodeGenerator codeGenerator = GtkCodeGenerator(
       physicalData,
       logicalData,
@@ -128,7 +128,7 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Web', () {
-    const platform = 'web';
+    const String platform = 'web';
     final PlatformCodeGenerator codeGenerator = WebCodeGenerator(
       physicalData,
       logicalData,

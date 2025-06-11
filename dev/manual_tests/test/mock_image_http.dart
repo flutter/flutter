@@ -11,7 +11,7 @@ import '../../../packages/flutter/test/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
 FakeHttpClient createMockImageHttpClient(SecurityContext? _) {
-  final client = FakeHttpClient();
+  final FakeHttpClient client = FakeHttpClient();
   return client;
 }
 

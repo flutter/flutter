@@ -183,7 +183,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       );
     }
 
-    final snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
     final List<int>? data = await _net.fetchUrl(snippetsUri);
     if (data == null || data.isEmpty) {
       return null;
@@ -193,7 +193,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String?> _fetchSamplesIndexFromServer() async {
-    final snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
     final List<int>? data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
     if (data == null || data.isEmpty) {
       return null;
@@ -302,18 +302,18 @@ class CreateCommand extends FlutterCommand with CreateBase {
       throwToolExit('The --empty flag is only supported for the app template.');
     }
 
-    final generateModule = template == FlutterTemplateType.module;
-    final generateMethodChannelsPlugin = template == FlutterTemplateType.plugin;
-    final generateFfiPackage = template == FlutterTemplateType.packageFfi;
-    final generateFfiPlugin = template == FlutterTemplateType.pluginFfi;
+    final bool generateModule = template == FlutterTemplateType.module;
+    final bool generateMethodChannelsPlugin = template == FlutterTemplateType.plugin;
+    final bool generateFfiPackage = template == FlutterTemplateType.packageFfi;
+    final bool generateFfiPlugin = template == FlutterTemplateType.pluginFfi;
     final bool generateFfi = generateFfiPlugin || generateFfiPackage;
-    final generatePackage = template == FlutterTemplateType.package;
+    final bool generatePackage = template == FlutterTemplateType.package;
 
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module or package.
     if (argResults!.wasParsed('platforms') &&
         (generateModule || generatePackage || generateFfiPackage)) {
-      final template = generateModule ? 'module' : 'package';
+      final String template = generateModule ? 'module' : 'package';
       throwToolExit(
         'The "--platforms" argument is not supported in $template template.',
         exitCode: 2,
@@ -451,7 +451,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     }
 
     final Directory relativeDir = globals.fs.directory(projectDirPath);
-    var generatedFileCount = 0;
+    int generatedFileCount = 0;
     final PubContext pubContext;
     switch (template) {
       case FlutterTemplateType.app:
@@ -532,7 +532,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
         // anyway, we assume this is fine.
         //
         // It won't be if they do `flutter build --no-pub`, though.
-        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+        const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           androidPlatform: includeAndroid,
@@ -549,7 +549,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     }
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
-    final application =
+    final String application =
         '${emptyArgument ? 'empty ' : ''}${sampleCode != null ? 'sample ' : ''}application';
     if (generatePackage) {
       final String relativeMainPath = globals.fs.path.normalize(
@@ -578,7 +578,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn);
       }
-      final template = generateMethodChannelsPlugin ? 'plugin' : 'plugin_ffi';
+      final String template = generateMethodChannelsPlugin ? 'plugin' : 'plugin_ffi';
       _printPluginAddPlatformMessage(relativePluginPath, template);
     } else {
       // Tell the user the next steps.
@@ -634,7 +634,7 @@ Your $application code is in $relativeAppMain.
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
-    var generatedCount = 0;
+    int generatedCount = 0;
     final String? description =
         argResults!.wasParsed('description')
             ? stringArg('description')
@@ -656,7 +656,7 @@ Your $application code is in $relativeAppMain.
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
-    var generatedCount = 0;
+    int generatedCount = 0;
     final String? description =
         argResults!.wasParsed('description')
             ? stringArg('description')
@@ -688,22 +688,22 @@ Your $application code is in $relativeAppMain.
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(directory);
-    for (final existingPlatform in existingPlatforms) {
+    for (final String existingPlatform in existingPlatforms) {
       // re-generate files for existing platforms
       templateContext[existingPlatform] = true;
     }
 
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
-    var generatedCount = 0;
+    int generatedCount = 0;
     final String? description =
         argResults!.wasParsed('description')
             ? stringArg('description')
             : 'A new Flutter plugin project.';
     templateContext['description'] = description;
 
-    final projectName = templateContext['projectName'] as String?;
-    final templates = <String>['plugin', 'plugin_shared'];
+    final String? projectName = templateContext['projectName'] as String?;
+    final List<String> templates = <String>['plugin', 'plugin_shared'];
     if ((templateContext['ios'] == true || templateContext['macos'] == true) &&
         featureFlags.isSwiftPackageManagerEnabled) {
       templates.add('plugin_swift_package_manager');
@@ -726,15 +726,15 @@ Your $application code is in $relativeAppMain.
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    final generateAndroid = templateContext['android'] == true;
+    final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
 
-    final organization =
+    final String organization =
         templateContext['organization']! as String; // Required to make the context.
-    final androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
-    final exampleProjectName = '${projectName}_example';
+    final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
+    final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(
       organization,
@@ -784,14 +784,14 @@ Your $application code is in $relativeAppMain.
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(directory);
-    for (final existingPlatform in existingPlatforms) {
+    for (final String existingPlatform in existingPlatforms) {
       // re-generate files for existing platforms
       templateContext[existingPlatform] = true;
     }
 
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
-    var generatedCount = 0;
+    int generatedCount = 0;
     final String? description =
         argResults!.wasParsed('description')
             ? stringArg('description')
@@ -806,16 +806,16 @@ Your $application code is in $relativeAppMain.
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    final generateAndroid = templateContext['android'] == true;
+    final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
 
-    final projectName = templateContext['projectName'] as String?;
-    final organization =
+    final String? projectName = templateContext['projectName'] as String?;
+    final String organization =
         templateContext['organization']! as String; // Required to make the context.
-    final androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
-    final exampleProjectName = '${projectName}_example';
+    final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
+    final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = CreateBase.createAndroidIdentifier(
       organization,
@@ -856,7 +856,7 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
     required FlutterTemplateType projectType,
   }) async {
-    var generatedCount = 0;
+    int generatedCount = 0;
     final String? description =
         argResults!.wasParsed('description')
             ? stringArg('description')
@@ -872,8 +872,8 @@ Your $application code is in $relativeAppMain.
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
 
-    final projectName = templateContext['projectName'] as String?;
-    final exampleProjectName = '${projectName}_example';
+    final String? projectName = templateContext['projectName'] as String?;
+    final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
     templateContext['description'] = 'Demonstrates how to use the $projectName package.';
     templateContext['pluginProjectName'] = projectName;
@@ -984,7 +984,7 @@ For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 
 // returns a list disabled, but requested platforms
 List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
-  final platformsToWarn = <String>[
+  final List<String> platformsToWarn = <String>[
     if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled) 'web',
     if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 'macos',
     if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled) 'windows',
@@ -995,8 +995,8 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
 }
 
 void _printWarningDisabledPlatform(List<String> platforms) {
-  final desktop = <String>[];
-  final web = <String>[];
+  final List<String> desktop = <String>[];
+  final List<String> web = <String>[];
 
   for (final String platform in platforms) {
     switch (platform) {
@@ -1008,8 +1008,8 @@ void _printWarningDisabledPlatform(List<String> platforms) {
   }
 
   if (desktop.isNotEmpty) {
-    final platforms = desktop.length > 1 ? 'platforms' : 'platform';
-    final verb = desktop.length > 1 ? 'are' : 'is';
+    final String platforms = desktop.length > 1 ? 'platforms' : 'platform';
+    final String verb = desktop.length > 1 ? 'are' : 'is';
 
     globals.printStatus('''
 The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
@@ -1084,7 +1084,7 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
     // Gradle template version incompatible with Java version.
     final gradle.JavaGradleCompat? validCompatibleGradleVersionRange = gradle
         .getValidGradleVersionRangeForJavaVersion(globals.logger, javaV: javaVersion);
-    final compatibleGradleVersionMessage =
+    final String compatibleGradleVersionMessage =
         validCompatibleGradleVersionRange == null
             ? ''
             : ' (compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
@@ -1112,11 +1112,11 @@ used.
   // AGP template version incompatible with Java version.
   final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle
       .getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
-  final compatibleAgpVersionMessage =
+  final String compatibleAgpVersionMessage =
       minimumCompatibleAgpVersion == null
           ? ''
           : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
-  final gradleBuildFilePaths =
+  final String gradleBuildFilePaths =
       '    ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
 
   globals.printWarning('''
@@ -1140,9 +1140,9 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   String templateAgpVersion,
   String projectType,
 ) {
-  final incompatibleDependency =
+  final String incompatibleDependency =
       javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' : 'Gradle';
-  final incompatibleDependencyVersion =
+  final String incompatibleDependencyVersion =
       javaGradleVersionsCompatible
           ? 'AGP version $templateAgpVersion'
           : 'Gradle version $templateGradleVersion';
@@ -1151,7 +1151,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
     agpV: templateAgpVersion,
   );
   // validJavaRange should have non-null versionMin and versionMax since it based on our template AGP and Gradle versions.
-  final validJavaRangeMessage =
+  final String validJavaRangeMessage =
       '(Java ${validJavaRange.versionMin!} <= compatible Java version < Java ${validJavaRange.versionMax!})';
 
   return '''
@@ -1170,7 +1170,7 @@ String? _getGradleWrapperPropertiesFilePath(
   FlutterTemplateType projectType,
   String projectDirPath,
 ) {
-  var gradleWrapperPropertiesFilePath = '';
+  String gradleWrapperPropertiesFilePath = '';
   switch (projectType) {
     case FlutterTemplateType.app:
       gradleWrapperPropertiesFilePath = globals.fs.path.join(
@@ -1200,7 +1200,7 @@ List<String>? _getBuildGradleConfigurationFilePaths(
   FlutterTemplateType projectType,
   String projectDirPath,
 ) {
-  final buildGradleConfigurationFilePaths = <String>[];
+  final List<String> buildGradleConfigurationFilePaths = <String>[];
   switch (projectType) {
     case FlutterTemplateType.app:
     case FlutterTemplateType.pluginFfi:
@@ -1208,9 +1208,9 @@ List<String>? _getBuildGradleConfigurationFilePaths(
         globals.fs.path.join(projectDirPath, 'android/build.gradle'),
       );
     case FlutterTemplateType.module:
-      const moduleBuildGradleFilePath = '.android/build.gradle';
-      const moduleAppBuildGradleFlePath = '.android/app/build.gradle';
-      const moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+      const String moduleBuildGradleFilePath = '.android/build.gradle';
+      const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+      const String moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
       buildGradleConfigurationFilePaths.addAll(<String>[
         globals.fs.path.join(projectDirPath, moduleBuildGradleFilePath),
         globals.fs.path.join(projectDirPath, moduleAppBuildGradleFlePath),

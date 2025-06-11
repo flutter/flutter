@@ -27,7 +27,7 @@ void main() {
 
     testWithoutContext('makeExecutable', () async {
       const Platform platform = LocalPlatform();
-      final operatingSystemUtils = OperatingSystemUtils(
+      final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,

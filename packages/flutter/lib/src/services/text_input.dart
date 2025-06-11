@@ -852,7 +852,7 @@ class TextInputConfiguration {
 
   @override
   String toString() {
-    final description = <String>[
+    final List<String> description = <String>[
       if (viewId != null) 'viewId: $viewId',
       'inputType: $inputType',
       'readOnly: $readOnly',
@@ -967,14 +967,14 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    final text = encoded['text'] as String;
-    final selection = TextSelection(
+    final String text = encoded['text'] as String;
+    final TextSelection selection = TextSelection(
       baseOffset: encoded['selectionBase'] as int? ?? -1,
       extentOffset: encoded['selectionExtent'] as int? ?? -1,
       affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
       isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
     );
-    final composing = TextRange(
+    final TextRange composing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
     );
@@ -1090,11 +1090,11 @@ class TextEditingValue {
       return originalIndex + replacedLength - removedLength;
     }
 
-    final adjustedSelection = TextSelection(
+    final TextSelection adjustedSelection = TextSelection(
       baseOffset: adjustIndex(selection.baseOffset),
       extentOffset: adjustIndex(selection.extentOffset),
     );
-    final adjustedComposing = TextRange(
+    final TextRange adjustedComposing = TextRange(
       start: adjustIndex(composing.start),
       end: adjustIndex(composing.end),
     );
@@ -1919,7 +1919,7 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    final connection = TextInputConnection._(client);
+    final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
   }
@@ -1999,7 +1999,7 @@ class TextInput {
     final String method = methodCall.method;
     switch (method) {
       case 'TextInputClient.focusElement':
-        final args = methodCall.arguments as List<dynamic>;
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
         _scribbleClients[args[0]]?.onScribbleFocus(
           Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()),
         );
@@ -2012,7 +2012,7 @@ class TextInput {
                 .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
-              final rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+              final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
               if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
                 return false;
               }
@@ -2049,16 +2049,16 @@ class TextInput {
       return;
     }
 
-    final args = methodCall.arguments as List<dynamic>;
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
     // The updateEditingStateWithTag request (autofill) can come up even to a
     // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final TextInputClient client = _currentConnection!._client;
       final AutofillScope? scope = client.currentAutofillScope;
-      final editingValue = args[1] as Map<String, dynamic>;
+      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
-        final textEditingValue = TextEditingValue.fromJSON(
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
         final AutofillClient? client = scope?.getAutofillClient(tag);
@@ -2070,11 +2070,11 @@ class TextInput {
       return;
     }
 
-    final client = args[0] as int;
+    final int client = args[0] as int;
     if (client != _currentConnection!._id) {
       // If the client IDs don't match, the incoming message was for a different
       // client.
-      var debugAllowAnyway = false;
+      bool debugAllowAnyway = false;
       assert(() {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
@@ -2091,15 +2091,15 @@ class TextInput {
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        final value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+        final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(
           _currentConnection!._client is DeltaTextInputClient,
           'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true',
         );
-        final encoded = args[1] as Map<String, dynamic>;
-        final deltas = <TextEditingDelta>[
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[
           for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>)
             TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>),
         ];
@@ -2107,7 +2107,7 @@ class TextInput {
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
       case 'TextInputClient.performAction':
         if (args[1] as String == 'TextInputAction.commitContent') {
-          final content = KeyboardInsertedContent.fromJson(
+          final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(
             args[2] as Map<String, dynamic>,
           );
           _currentConnection!._client.insertContent(content);
@@ -2118,7 +2118,7 @@ class TextInput {
         final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
         selectors.forEach(_currentConnection!._client.performSelector);
       case 'TextInputClient.performPrivateCommand':
-        final firstArg = args[1] as Map<String, dynamic>;
+        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
           firstArg['action'] as String,
           firstArg['data'] == null ? <String, dynamic>{} : firstArg['data'] as Map<String, dynamic>,

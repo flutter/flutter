@@ -14,12 +14,12 @@ void main() {
 
   test('DrawerThemeData lerp special cases', () {
     expect(DrawerThemeData.lerp(null, null, 0), null);
-    const data = DrawerThemeData();
+    const DrawerThemeData data = DrawerThemeData();
     expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -32,7 +32,7 @@ void main() {
   });
 
   testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData(
       backgroundColor: Color(0x00000099),
       scrimColor: Color(0x00000098),
@@ -65,8 +65,8 @@ void main() {
   testWidgets(
     'Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified',
     (WidgetTester tester) async {
-      final scaffoldKey = GlobalKey<ScaffoldState>();
-      final theme = ThemeData(useMaterial3: false);
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, drawer: const Drawer())),
       );
@@ -87,8 +87,8 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified',
     (WidgetTester tester) async {
-      final scaffoldKey = GlobalKey<ScaffoldState>();
-      final theme = ThemeData();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, drawer: const Drawer())),
       );
@@ -114,8 +114,8 @@ void main() {
   testWidgets(
     'Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer',
     (WidgetTester tester) async {
-      final scaffoldKey = GlobalKey<ScaffoldState>();
-      final theme = ThemeData(useMaterial3: false);
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, endDrawer: const Drawer())),
       );
@@ -136,8 +136,8 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer',
     (WidgetTester tester) async {
-      final scaffoldKey = GlobalKey<ScaffoldState>();
-      final theme = ThemeData();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(theme: theme, home: Scaffold(key: scaffoldKey, endDrawer: const Drawer())),
       );
@@ -163,18 +163,18 @@ void main() {
   testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (
     WidgetTester tester,
   ) async {
-    const backgroundColor = Color(0x00000001);
-    const scrimColor = Color(0x00000002);
-    const elevation = 7.0;
-    const shadowColor = Color(0x00000003);
-    const surfaceTintColor = Color(0x00000004);
-    const shape = RoundedRectangleBorder(
+    const Color backgroundColor = Color(0x00000001);
+    const Color scrimColor = Color(0x00000002);
+    const double elevation = 7.0;
+    const Color shadowColor = Color(0x00000003);
+    const Color surfaceTintColor = Color(0x00000004);
+    const RoundedRectangleBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     );
-    const width = 200.0;
+    const double width = 200.0;
     const Clip clipBehavior = Clip.antiAlias;
 
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -208,18 +208,18 @@ void main() {
   testWidgets(
     'Drawer values take priority over DrawerThemeData values when both properties are specified',
     (WidgetTester tester) async {
-      const backgroundColor = Color(0x00000001);
-      const scrimColor = Color(0x00000002);
-      const elevation = 7.0;
-      const shadowColor = Color(0x00000003);
-      const surfaceTintColor = Color(0x00000004);
-      const shape = RoundedRectangleBorder(
+      const Color backgroundColor = Color(0x00000001);
+      const Color scrimColor = Color(0x00000002);
+      const double elevation = 7.0;
+      const Color shadowColor = Color(0x00000003);
+      const Color surfaceTintColor = Color(0x00000004);
+      const RoundedRectangleBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16.0)),
       );
-      const width = 200.0;
+      const double width = 200.0;
       const Clip clipBehavior = Clip.antiAlias;
 
-      final scaffoldKey = GlobalKey<ScaffoldState>();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -264,18 +264,18 @@ void main() {
   testWidgets(
     'DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified',
     (WidgetTester tester) async {
-      const backgroundColor = Color(0x00000001);
-      const scrimColor = Color(0x00000002);
-      const elevation = 7.0;
-      const shadowColor = Color(0x00000003);
-      const surfaceTintColor = Color(0x00000004);
-      const shape = RoundedRectangleBorder(
+      const Color backgroundColor = Color(0x00000001);
+      const Color scrimColor = Color(0x00000002);
+      const double elevation = 7.0;
+      const Color shadowColor = Color(0x00000003);
+      const Color surfaceTintColor = Color(0x00000004);
+      const RoundedRectangleBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16.0)),
       );
-      const width = 200.0;
+      const double width = 200.0;
       const Clip clipBehavior = Clip.antiAlias;
 
-      final scaffoldKey = GlobalKey<ScaffoldState>();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(

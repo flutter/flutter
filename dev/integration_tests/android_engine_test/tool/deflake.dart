@@ -54,7 +54,7 @@ void main(List<String> args) async {
     return;
   }
 
-  final testFile = io.File(testFiles.single);
+  final io.File testFile = io.File(testFiles.single);
   if (!testFile.existsSync()) {
     io.stderr.writeln('Not a file: ${testFile.path}');
     _printUsage();
@@ -130,8 +130,8 @@ void main(List<String> args) async {
   }
 
   // Now run.
-  var totalFailed = 0;
-  for (var i = 0; i < runs; i++) {
+  int totalFailed = 0;
+  for (int i = 0; i < runs; i++) {
     io.stderr.writeln('RUN ${i + 1} of $runs');
     final bool result = await runDriverTest();
     if (!result) {
@@ -154,7 +154,7 @@ void _printUsage() {
 }
 
 Future<String> _collectStdOut(io.Process process) async {
-  final buffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   buffer.writeln('stdout:');
   buffer.writeln(await utf8.decodeStream(process.stdout));
   buffer.writeln('stderr:');

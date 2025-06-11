@@ -10,9 +10,9 @@ import '../../src/common.dart';
 typedef _InstallationMessage = String Function(Platform);
 
 void main() {
-  final macPlatform = FakePlatform(operatingSystem: 'macos');
-  final linuxPlatform = FakePlatform();
-  final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
+  final FakePlatform linuxPlatform = FakePlatform();
+  final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   void checkInstallationURL(_InstallationMessage message) {
     expect(message(macPlatform), contains('https://flutter.dev/to/macos-android-setup'));
@@ -25,7 +25,7 @@ void main() {
   }
 
   testWithoutContext('Android installation instructions', () {
-    final userMessages = UserMessages();
+    final UserMessages userMessages = UserMessages();
     checkInstallationURL(
       (Platform platform) => userMessages.androidMissingSdkInstructions(platform),
     );
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWithoutContext('Xcode installation instructions', () {
-    final userMessages = UserMessages();
+    final UserMessages userMessages = UserMessages();
     expect(userMessages.xcodeMissing, contains('iOS and macOS'));
     expect(userMessages.xcodeIncomplete, contains('iOS and macOS'));
   });

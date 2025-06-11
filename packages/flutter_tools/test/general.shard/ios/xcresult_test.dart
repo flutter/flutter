@@ -42,9 +42,9 @@ void main() {
     );
   }
 
-  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+  const FakeCommand kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
-  const kx64CheckCommand = FakeCommand(
+  const FakeCommand kx64CheckCommand = FakeCommand(
     command: <String>['sysctl', 'hw.optional.arm64'],
     exitCode: 1,
   );
@@ -56,11 +56,11 @@ void main() {
     Version? xcodeVersion = const Version.withText(16, 0, 0, '16.0'),
     bool useLegacyFlag = true,
   }) {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
     ]);
-    final xcode = Xcode.test(
+    final Xcode xcode = Xcode.test(
       processManager: fakeProcessManager,
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
@@ -77,7 +77,7 @@ void main() {
         useLegacyFlag: useLegacyFlag,
       ),
     ]);
-    final processUtils = ProcessUtils(
+    final ProcessUtils processUtils = ProcessUtils(
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
@@ -134,7 +134,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard all warnings', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
       typeMatcher: XCResultIssueType.warning,
     );
     final XCResult result = await generator.generate(
@@ -154,7 +154,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard base on subType', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
       subTypeMatcher: RegExp(r'^Warning$'),
     );
     final XCResult result = await generator.generate(
@@ -174,7 +174,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard base on message', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
       messageMatcher: RegExp(
         r"^The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.$",
       ),
@@ -196,7 +196,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard base on location', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
       locationMatcher: RegExp(r'/Users/m/Projects/test_create/ios/Runner/AppDelegate.m'),
     );
     final XCResult result = await generator.generate(
@@ -215,10 +215,10 @@ void main() {
 
   testWithoutContext('correctly parse sample result json with multiple discarders.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discardWarnings = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discardWarnings = XCResultIssueDiscarder(
       typeMatcher: XCResultIssueType.warning,
     );
-    final discardSemanticIssues = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discardSemanticIssues = XCResultIssueDiscarder(
       subTypeMatcher: RegExp(r'^Semantic Issue$'),
     );
     final XCResult result = await generator.generate(
@@ -241,7 +241,7 @@ void main() {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonWithActionIssues,
     );
-    final discarder = XCResultIssueDiscarder(
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(
       typeMatcher: XCResultIssueType.warning,
     );
     final XCResult result = await generator.generate(
@@ -273,7 +273,7 @@ void main() {
   testWithoutContext(
     'error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.',
     () async {
-      const fakeStderr = 'Fake: fail to parse result json.';
+      const String fakeStderr = 'Fake: fail to parse result json.';
       final XCResultGenerator generator = setupGenerator(
         resultJson: '',
         exitCode: 1,

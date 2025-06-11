@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
-  const errorMessage = 'Some error message';
+  const String errorMessage = 'Some error message';
 
   testWidgets('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));

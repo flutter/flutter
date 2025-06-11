@@ -33,7 +33,7 @@ Future<void> main() async {
   });
 
   test('evict clears live references', () async {
-    final binding = TestPaintingBinding();
+    final TestPaintingBinding binding = TestPaintingBinding();
     expect(binding.imageCache.clearCount, 0);
     expect(binding.imageCache.liveClearCount, 0);
 

@@ -29,7 +29,7 @@ void main() {
   testWithoutContext(
     'AndroidDevices returns empty device list and diagnostics on null adb',
     () async {
-      final androidDevices = AndroidDevices(
+      final AndroidDevices androidDevices = AndroidDevices(
         androidSdk: FakeAndroidSdk(null),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
@@ -50,9 +50,9 @@ void main() {
   testWithoutContext(
     'AndroidDevices returns empty device list and diagnostics when adb cannot be run',
     () async {
-      final fakeProcessManager = FakeProcessManager.empty();
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
       fakeProcessManager.excludedExecutables.add('adb');
-      final androidDevices = AndroidDevices(
+      final AndroidDevices androidDevices = AndroidDevices(
         androidSdk: FakeAndroidSdk(),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
@@ -74,7 +74,7 @@ void main() {
   testWithoutContext(
     'AndroidDevices returns empty device list and diagnostics on null Android SDK',
     () async {
-      final androidDevices = AndroidDevices(
+      final AndroidDevices androidDevices = AndroidDevices(
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
           androidSdk: FakeAndroidSdk(null),
@@ -99,7 +99,7 @@ void main() {
         stderr: '<stderr from adb>',
       ),
     ]);
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: androidWorkflow,
@@ -121,7 +121,7 @@ void main() {
   });
 
   testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
@@ -138,7 +138,7 @@ void main() {
   });
 
   testWithoutContext('AndroidDevices can parse output for physical attached devices', () async {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -166,7 +166,7 @@ List of devices attached
   });
 
   testWithoutContext('AndroidDevices can parse output for physical wireless devices', () async {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -194,7 +194,7 @@ List of devices attached
   });
 
   testWithoutContext('AndroidDevices can parse output for emulators and short listings', () async {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -224,7 +224,7 @@ emulator-5612          host features:shell_2
   });
 
   testWithoutContext('AndroidDevices can parse output from android n', () async {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -250,7 +250,7 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
   });
 
   testWithoutContext('AndroidDevices provides adb error message as diagnostics', () async {
-    final androidDevices = AndroidDevices(
+    final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),

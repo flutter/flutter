@@ -19,7 +19,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final project = HotReloadProject();
+    final HotReloadProject project = HotReloadProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -34,7 +34,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('Can switch from stateless to stateful', () async {
-      final completer = Completer<void>();
+      final Completer<void> completer = Completer<void>();
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
           completer.complete();
@@ -49,14 +49,14 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       await subscription.cancel();
 
       await flutter.hotReload();
-      final stdout = StringBuffer();
+      final StringBuffer stdout = StringBuffer();
       subscription = flutter.stdout.listen(stdout.writeln);
 
       // switch to stateful.
       project.toggleState();
       await flutter.hotReload();
 
-      final logs = stdout.toString();
+      final String logs = stdout.toString();
 
       expect(logs, contains('STATEFUL'));
       await subscription.cancel();

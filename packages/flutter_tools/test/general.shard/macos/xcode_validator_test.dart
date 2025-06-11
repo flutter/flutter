@@ -18,14 +18,14 @@ void main() {
   group('Xcode validation', () {
     testWithoutContext('Emits missing status when Xcode is not installed', () async {
       final ProcessManager processManager = FakeProcessManager.any();
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
           version: null,
         ),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -44,14 +44,14 @@ void main() {
           stdout: '/Library/Developer/CommandLineTools',
         ),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
           version: null,
         ),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -64,14 +64,14 @@ void main() {
 
     testWithoutContext('Emits partial status when Xcode version too low', () async {
       final ProcessManager processManager = FakeProcessManager.any();
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
           version: Version(7, 0, 1),
         ),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -84,14 +84,14 @@ void main() {
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
       final ProcessManager processManager = FakeProcessManager.any();
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
           version: Version(14, 4, null),
         ),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -120,11 +120,11 @@ void main() {
         ),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -150,11 +150,11 @@ void main() {
           exitCode: 1,
         ),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -180,11 +180,11 @@ void main() {
           command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
         ),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -211,11 +211,11 @@ void main() {
           stdout: '17.0',
         ),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: FakeIOSSimulatorUtils(),
@@ -247,16 +247,16 @@ void main() {
             stdout: '17.0',
           ),
         ]);
-        final xcode = Xcode.test(
+        final Xcode xcode = Xcode.test(
           processManager: processManager,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
-        final simulatorUtils = FakeIOSSimulatorUtils(
+        final FakeIOSSimulatorUtils simulatorUtils = FakeIOSSimulatorUtils(
           runtimes: <IOSSimulatorRuntime>[
             IOSSimulatorRuntime.fromJson(<String, String>{'version': '16.0'}),
           ],
         );
-        final validator = XcodeValidator(
+        final XcodeValidator validator = XcodeValidator(
           xcode: xcode,
           userMessages: UserMessages(),
           iosSimulatorUtils: simulatorUtils,
@@ -284,16 +284,16 @@ void main() {
           stdout: '17.0',
         ),
       ]);
-      final xcode = Xcode.test(
+      final Xcode xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
-      final simulatorUtils = FakeIOSSimulatorUtils(
+      final FakeIOSSimulatorUtils simulatorUtils = FakeIOSSimulatorUtils(
         runtimes: <IOSSimulatorRuntime>[
           IOSSimulatorRuntime.fromJson(<String, String>{'version': '17.0'}),
         ],
       );
-      final validator = XcodeValidator(
+      final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
         iosSimulatorUtils: simulatorUtils,

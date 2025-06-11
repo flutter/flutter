@@ -39,7 +39,7 @@ void main() {
   );
 
   test('buildSuggestionButtons only considers the first three suggestions', () {
-    final editableTextState = _FakeEditableTextState(
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       suggestions: <String>['hello', 'yellow', 'yell', 'yeller'],
     );
     final List<ContextMenuButtonItem>? buttonItems =
@@ -58,9 +58,9 @@ void main() {
   testWidgets(
     'buildButtonItems builds a disabled "No Replacements Found" button when no suggestions',
     (WidgetTester tester) async {
-      final controller = TextEditingController();
+      final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(CupertinoApp(home: _FakeEditableText(focusNode, controller)));
       final _FakeEditableTextState editableTextState = tester.state(find.byType(_FakeEditableText));

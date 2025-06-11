@@ -344,7 +344,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           device!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
-          final webBuilder = WebBuilder(
+          final WebBuilder webBuilder = WebBuilder(
             logger: _logger,
             processManager: globals.processManager,
             buildSystem: globals.buildSystem,
@@ -473,7 +473,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     } else {
       report = null;
       try {
-        final webBuilder = WebBuilder(
+        final WebBuilder webBuilder = WebBuilder(
           logger: _logger,
           processManager: globals.processManager,
           buildSystem: globals.buildSystem,
@@ -513,14 +513,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             vm.isolates!.first.id!,
           );
           reloadDuration = _systemClock.now().difference(reloadStart);
-          final contents = ReloadReportContents.fromReloadReport(report);
+          final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
           if (!success) {
             // Rejections happen at compile-time for the web, so in theory,
             // nothing should go wrong here. However, if DWDS or the DDC runtime
             // has some internal error, we should still surface it to make
             // debugging easier.
-            var reloadFailedMessage = 'Hot reload failed:';
+            String reloadFailedMessage = 'Hot reload failed:';
             _logger.printError(reloadFailedMessage);
             for (final ReasonForCancelling reason in contents.notices) {
               reloadFailedMessage += reason.toString();
@@ -674,7 +674,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
-      const generatedImport = 'web_plugin_registrant.dart';
+      const String generatedImport = 'web_plugin_registrant.dart';
 
       Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
@@ -779,7 +779,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
-      final webDevFS = device!.devFS! as WebDevFS;
+      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
       final bool useDebugExtension =
           device!.device is WebServerDevice && debuggingOptions.startPaused;
       _connectionResult = await webDevFS.connect(useDebugExtension);
@@ -915,7 +915,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 }
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
-  const wsPath = '/ws';
+  const String wsPath = '/ws';
   final String path = websocketUri.path;
   return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
 }

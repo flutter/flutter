@@ -177,7 +177,7 @@ class WebAssetServer implements AssetReader {
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
     if (writeRestartScripts) {
-      final srcIdsList = <Map<String, String>>[];
+      final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
       for (final String src in modules) {
         srcIdsList.add(<String, String>{'src': src, 'id': src});
       }
@@ -209,14 +209,14 @@ class WebAssetServer implements AssetReader {
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
   void performReload(List<String> modules) {
-    final moduleToLibrary = <Map<String, Object>>[];
+    final List<Map<String, Object>> moduleToLibrary = <Map<String, Object>>[];
     for (final String module in modules) {
-      final metadata = ModuleMetadata.fromJson(
+      final ModuleMetadata metadata = ModuleMetadata.fromJson(
         json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final moduleUri = baseUri != null ? '$baseUri/$module' : module;
+      final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
       moduleToLibrary.add(<String, Object>{'src': moduleUri, 'libraries': libraries});
     }
     writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
@@ -274,11 +274,11 @@ class WebAssetServer implements AssetReader {
       address = (await InternetAddress.lookup(hostname)).first;
     }
     HttpServer? httpServer;
-    const kMaxRetries = 4;
-    for (var i = 0; i <= kMaxRetries; i++) {
+    const int kMaxRetries = 4;
+    for (int i = 0; i <= kMaxRetries; i++) {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
-          final serverContext =
+          final SecurityContext serverContext =
               SecurityContext()
                 ..useCertificateChain(tlsCertPath)
                 ..usePrivateKey(tlsCertKeyPath);
@@ -304,9 +304,9 @@ class WebAssetServer implements AssetReader {
     }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
-    final modules = <String, String>{};
-    final digests = <String, String>{};
-    final server = WebAssetServer(
+    final Map<String, String> modules = <String, String>{};
+    final Map<String, String> digests = <String, String>{};
+    final WebAssetServer server = WebAssetServer(
       httpServer,
       packageConfig,
       address,
@@ -318,7 +318,7 @@ class WebAssetServer implements AssetReader {
       useLocalCanvasKit: useLocalCanvasKit,
     );
     final int selectedPort = server.selectedPort;
-    var url = '$hostname:$selectedPort';
+    String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
       url = 'localhost:$selectedPort';
     }
@@ -332,7 +332,7 @@ class WebAssetServer implements AssetReader {
 
     // In release builds (or wasm builds) deploy a simpler proxy server.
     if (buildInfo.mode != BuildMode.debug || isWasm) {
-      final releaseAssetServer = ReleaseAssetServer(
+      final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: globals.fs,
         platform: globals.platform,
@@ -442,7 +442,7 @@ class WebAssetServer implements AssetReader {
           connectedWebDeviceIds.isNotEmpty &&
           connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
-    var pipeline = const shelf.Pipeline();
+    shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
       pipeline = pipeline.addMiddleware(middleware);
       pipeline = pipeline.addMiddleware(dwds.middleware);
@@ -514,7 +514,7 @@ class WebAssetServer implements AssetReader {
       return _serveFlutterBootstrapJs();
     }
 
-    final headers = <String, String>{};
+    final Map<String, String> headers = <String, String>{};
 
     // Track etag headers for better caching of resources.
     final String? ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
@@ -529,7 +529,7 @@ class WebAssetServer implements AssetReader {
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
-      final etag = bytes.hashCode.toString();
+      final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -541,7 +541,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.sourcemaps.containsKey(requestPath)) {
       final List<int>? bytes = getSourceMap(requestPath);
-      final etag = bytes.hashCode.toString();
+      final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -554,7 +554,7 @@ class WebAssetServer implements AssetReader {
     // Attempt to lookup the file by URI.
     if (_webMemoryFS.metadataFiles.containsKey(requestPath)) {
       final List<int>? bytes = getMetadata(requestPath);
-      final etag = bytes.hashCode.toString();
+      final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
@@ -653,7 +653,7 @@ class WebAssetServer implements AssetReader {
   final bool useLocalCanvasKit;
 
   String get _buildConfigString {
-    final buildConfig = <String, dynamic>{
+    final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
         <String, dynamic>{
@@ -923,11 +923,11 @@ class WebDevFS implements DevFS {
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,
   }) {
-    final firstConnection = Completer<ConnectionResult>();
+    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
     // [firstConnection] completing; thus test the boolean to determine if
     // the current connection is the first.
-    var foundFirstConnection = false;
+    bool foundFirstConnection = false;
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
         try {
@@ -1028,7 +1028,7 @@ class WebDevFS implements DevFS {
       return;
     }
 
-    final template = WebTemplate(await file.readAsString());
+    final WebTemplate template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
       globals.logger.printWarning(
         'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}',
@@ -1093,7 +1093,7 @@ class WebDevFS implements DevFS {
               generateLoadingIndicator: enableDwds,
             ),
       );
-      const onLoadEndBootstrap = 'on_load_end_bootstrap.js';
+      const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
       if (ddcModuleSystem) {
         webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
       }
@@ -1130,7 +1130,7 @@ class WebDevFS implements DevFS {
     }
     await _validateTemplateFile('index.html');
     await _validateTemplateFile('flutter_bootstrap.js');
-    final candidateCompileTime = DateTime.now();
+    final DateTime candidateCompileTime = DateTime.now();
     if (resetCompiler) {
       generator.reset();
     }
@@ -1354,7 +1354,7 @@ class ReleaseAssetServer {
 
 @visibleForTesting
 void log(logging.LogRecord event) {
-  final error = event.error == null ? '' : 'Error: ${event.error}';
+  final String error = event.error == null ? '' : 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {

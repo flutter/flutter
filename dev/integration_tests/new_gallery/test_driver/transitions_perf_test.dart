@@ -194,7 +194,7 @@ Future<void> runDemos(
 
     // We launch each demo twice to be able to measure and compare first and
     // subsequent builds.
-    for (var i = 0; i < 2; i += 1) {
+    for (int i = 0; i < 2; i += 1) {
       stdout.writeln('tapping demo');
       await driver.tap(demoItem); // Launch the demo
 
@@ -276,7 +276,7 @@ void main([List<String> args = const <String>[]]) {
         );
       }, streams: const <TimelineStream>[TimelineStream.dart, TimelineStream.embedder]);
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-crane', pretty: true);
     }, timeout: Timeout.none);
 
@@ -316,7 +316,7 @@ void main([List<String> args = const <String>[]]) {
         );
       }, streams: const <TimelineStream>[TimelineStream.dart, TimelineStream.embedder]);
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-reply', pretty: true);
     }, timeout: Timeout.none);
 
@@ -334,11 +334,11 @@ void main([List<String> args = const <String>[]]) {
         retainPriorEvents: true,
       );
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions', pretty: true);
 
       // Execute the remaining tests.
-      final unprofiledDemos = Set<String>.from(_allDemos)..removeAll(_profiledDemos);
+      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(_profiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
     }, timeout: Timeout.none);
   });

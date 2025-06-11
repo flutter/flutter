@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 int countSemanticsChildren(RenderObject object) {
-  var count = 0;
+  int count = 0;
   object.visitChildrenForSemantics((RenderObject child) {
     count += 1;
   });
@@ -20,7 +20,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderOpacity and children and semantics', () {
-    final box = RenderOpacity(
+    final RenderOpacity box = RenderOpacity(
       child: RenderParagraph(const TextSpan(), textDirection: TextDirection.ltr),
     );
     expect(countSemanticsChildren(box), 1);
@@ -39,8 +39,8 @@ void main() {
   });
 
   test('RenderOpacity and children and semantics', () {
-    final controller = AnimationController(vsync: const TestVSync());
-    final box = RenderAnimatedOpacity(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final RenderAnimatedOpacity box = RenderAnimatedOpacity(
       opacity: controller,
       child: RenderParagraph(const TextSpan(), textDirection: TextDirection.ltr),
     );

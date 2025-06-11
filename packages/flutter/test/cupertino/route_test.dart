@@ -79,8 +79,8 @@ void main() {
 
     final List<Element> titles =
         tester.elementList(find.text('An iPod')).toList()..sort((Element a, Element b) {
-          final aParagraph = a.renderObject! as RenderParagraph;
-          final bParagraph = b.renderObject! as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
@@ -201,7 +201,7 @@ void main() {
   testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Placeholder()));
 
-    final route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       title: 'An iPod',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -211,7 +211,7 @@ void main() {
       },
     );
 
-    final route3 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route3 = CupertinoPageRoute<void>(
       title: 'A Phone',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -1223,7 +1223,7 @@ void main() {
   testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Text('1')));
 
-    final route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(child: Text('2'));
       },
@@ -1279,7 +1279,7 @@ void main() {
   testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Text('1')));
 
-    final route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(child: Text('2'));
       },
@@ -1346,7 +1346,7 @@ void main() {
   testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Text('1')));
 
-    final route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(child: Text('2'));
       },
@@ -1390,7 +1390,7 @@ void main() {
       ),
     );
 
-    final route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(child: Text('2'));
       },
@@ -1440,7 +1440,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final pageNumber = settings.name == '/' ? '1' : '2';
+              final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -1479,7 +1479,7 @@ void main() {
           return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              final pageNumber = settings.name == '/' ? '1' : '2';
+              final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
             },
           );
@@ -1557,7 +1557,7 @@ void main() {
           if (methodName != #drawRect) {
             return true;
           }
-          final rect = arguments[0] as Rect;
+          final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
           // _CupertinoEdgeShadowDecoration draws the shadows with a series of
           // differently colored 1px-wide rects. Skip rects that aren't being
@@ -1645,7 +1645,7 @@ void main() {
             if (methodName != #drawRect) {
               return true;
             }
-            final rect = arguments[0] as Rect;
+            final Rect rect = arguments[0] as Rect;
             // _CupertinoEdgeShadowDecoration draws the shadows with a series of
             // differently colored 1px rects. Skip all rects not drawn by a
             // _CupertinoEdgeShadowDecoration.
@@ -1753,8 +1753,8 @@ void main() {
 
     final GlobalKey homeScaffoldKey = GlobalKey();
     final GlobalKey pageScaffoldKey = GlobalKey();
-    var homeTapCount = 0;
-    var pageTapCount = 0;
+    int homeTapCount = 0;
+    int pageTapCount = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1817,8 +1817,8 @@ void main() {
   testWidgets('showCupertinoModalPopup uses root navigator by default', (
     WidgetTester tester,
   ) async {
-    final rootObserver = PopupObserver();
-    final nestedObserver = PopupObserver();
+    final PopupObserver rootObserver = PopupObserver();
+    final PopupObserver nestedObserver = PopupObserver();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1854,8 +1854,8 @@ void main() {
   testWidgets('back swipe to screen edges does not dismiss the hero animation', (
     WidgetTester tester,
   ) async {
-    final navigator = GlobalKey<NavigatorState>();
-    final container = UniqueKey();
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final UniqueKey container = UniqueKey();
     await tester.pumpWidget(
       CupertinoApp(
         navigatorKey: navigator,
@@ -1889,7 +1889,7 @@ void main() {
       ),
     );
 
-    var box = tester.renderObject(find.byKey(container)) as RenderBox;
+    RenderBox box = tester.renderObject(find.byKey(container)) as RenderBox;
     final double initialPosition = box.localToGlobal(Offset.zero).dx;
 
     navigator.currentState!.pushNamed('/page2');
@@ -1928,8 +1928,8 @@ void main() {
   testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (
     WidgetTester tester,
   ) async {
-    final rootObserver = PopupObserver();
-    final nestedObserver = PopupObserver();
+    final PopupObserver rootObserver = PopupObserver();
+    final PopupObserver nestedObserver = PopupObserver();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -1964,8 +1964,8 @@ void main() {
   });
 
   testWidgets('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
-    final rootObserver = DialogObserver();
-    final nestedObserver = DialogObserver();
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2001,8 +2001,8 @@ void main() {
   testWidgets('showCupertinoDialog uses nested navigator if useRootNavigator is false', (
     WidgetTester tester,
   ) async {
-    final rootObserver = DialogObserver();
-    final nestedObserver = DialogObserver();
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2040,7 +2040,7 @@ void main() {
     WidgetTester tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: Navigator(
@@ -2084,7 +2084,7 @@ void main() {
     WidgetTester tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: Navigator(
@@ -2126,7 +2126,7 @@ void main() {
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (
     WidgetTester tester,
   ) async {
-    final routeSettingsObserver = RouteSettingsObserver();
+    final RouteSettingsObserver routeSettingsObserver = RouteSettingsObserver();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2225,7 +2225,7 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
-    const customColor = Color(0x11223344);
+    const Color customColor = Color(0x11223344);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2323,8 +2323,8 @@ void main() {
 
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
-    final detector = TransitionDetector();
-    var myPages = <Page<void>>[
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
       CupertinoPage<void>(
         key: pageKey,
         title: 'title one',
@@ -2385,8 +2385,8 @@ void main() {
   testWidgets('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
-    final detector = TransitionDetector();
-    var myPages = <Page<void>>[
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
       CupertinoPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
       CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
@@ -2453,7 +2453,7 @@ void main() {
   testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
 
-    final r = CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const Scaffold(body: Center(child: Text('child')));
       },
@@ -2914,9 +2914,9 @@ void main() {
     'Setting CupertinoDialogRoute.requestFocus to false does not request focus on the dialog',
     (WidgetTester tester) async {
       late BuildContext savedContext;
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      const dialogText = 'Dialog Text';
+      const String dialogText = 'Dialog Text';
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
@@ -2988,9 +2988,9 @@ void main() {
     'Setting CupertinoModalPopupRoute.requestFocus to false does not request focus on the popup',
     (WidgetTester tester) async {
       late BuildContext savedContext;
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      const dialogText = 'Popup Text';
+      const String dialogText = 'Popup Text';
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
@@ -3058,7 +3058,7 @@ void main() {
     'Setting CupertinoPageRoute.requestFocus to false does not request focus on the page',
     (WidgetTester tester) async {
       late BuildContext savedContext;
-      const pageTwoText = 'Page Two';
+      const String pageTwoText = 'Page Two';
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
@@ -3118,8 +3118,8 @@ void main() {
   testWidgets('requestFocus works correctly in showCupertinoModalPopup.', (
     WidgetTester tester,
   ) async {
-    final navigatorKey = GlobalKey<NavigatorState>();
-    final focusNode = FocusNode();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(navigatorKey: navigatorKey, home: CupertinoTextField(focusNode: focusNode)),
@@ -3152,8 +3152,8 @@ void main() {
   });
 
   testWidgets('requestFocus works correctly in showCupertinoDialog.', (WidgetTester tester) async {
-    final navigatorKey = GlobalKey<NavigatorState>();
-    final focusNode = FocusNode();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(navigatorKey: navigatorKey, home: CupertinoTextField(focusNode: focusNode)),

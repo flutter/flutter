@@ -98,7 +98,7 @@ class SymbolizeCommand extends FlutterCommand {
   }
 
   Map<int, File> _unitDebugInfoPathMap() {
-    final map = <int, File>{};
+    final Map<int, File> map = <int, File>{};
     final String? rootInfo = stringArg('debug-info');
     if (rootInfo != null) {
       map[rootLoadingUnitId] = _handleDSYM(rootInfo);
@@ -174,7 +174,7 @@ class SymbolizeCommand extends FlutterCommand {
       }
       output = outputFile.openWrite();
     } else {
-      final outputController = StreamController<List<int>>();
+      final StreamController<List<int>> outputController = StreamController<List<int>>();
       outputController.stream.transform(utf8.decoder).listen(_stdio.stdoutWrite);
       output = IOSink(outputController);
     }
@@ -185,7 +185,7 @@ class SymbolizeCommand extends FlutterCommand {
             ? _fileSystem.file(stringArg('input')).openRead()
             : _stdio.stdin;
 
-    final unitSymbols = <int, Uint8List>{
+    final Map<int, Uint8List> unitSymbols = <int, Uint8List>{
       for (final MapEntry<int, File> entry in _unitDebugInfoPathMap().entries)
         entry.key: entry.value.readAsBytesSync(),
     };
@@ -208,7 +208,7 @@ StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
 }
 
 StreamTransformer<String, String> _defaultUnitsTransformer(Map<int, Uint8List> unitSymbols) {
-  final map = <int, Dwarf>{};
+  final Map<int, Dwarf> map = <int, Dwarf>{};
   for (final int unitId in unitSymbols.keys) {
     final Uint8List symbols = unitSymbols[unitId]!;
     final Dwarf? dwarf = Dwarf.fromBytes(symbols);
@@ -297,7 +297,7 @@ class DwarfSymbolizationService {
         _transformer != null
             ? ((Map<int, Uint8List> m) => _transformer(m[rootLoadingUnitId]!))
             : _unitsTransformer;
-    final onDone = Completer<void>();
+    final Completer<void> onDone = Completer<void>();
     StreamSubscription<void>? subscription;
     subscription = input
         .cast<List<int>>()

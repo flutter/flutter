@@ -9,9 +9,9 @@ import '../rendering/src/solid_color_box.dart';
 
 // Solid color, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, {int flex = 0}) {
-  final child = RenderSolidColorBox(backgroundColor);
+  final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  final childParentData = child.parentData! as FlexParentData;
+  final FlexParentData childParentData = child.parentData! as FlexParentData;
   childParentData.flex = flex;
 }
 
@@ -83,10 +83,10 @@ void rotate(Duration timeStamp) {
 
 void main() {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  final proxy = RenderProxyBox();
+  final RenderProxyBox proxy = RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
-  final flexRoot = RenderFlex(direction: Axis.vertical);
+  final RenderFlex flexRoot = RenderFlex(direction: Axis.vertical);
   addFlexChildSolidColor(flexRoot, const Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
@@ -96,15 +96,15 @@ void main() {
     transform: Matrix4.identity(),
     alignment: Alignment.center,
   );
-  final root = RenderPadding(
+  final RenderPadding root = RenderPadding(
     padding: const EdgeInsets.all(80.0),
     child: transformBox,
   );
 
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(binding.platformDispatcher.implicitView != null);
-  final view = RenderView(view: binding.platformDispatcher.implicitView!, child: root);
-  final pipelineOwner = PipelineOwner()..rootNode = view;
+  final RenderView view = RenderView(view: binding.platformDispatcher.implicitView!, child: root);
+  final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = view;
   binding.rootPipelineOwner.adoptChild(pipelineOwner);
   binding.addRenderView(view);
   view.prepareInitialFrame();

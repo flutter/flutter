@@ -34,8 +34,8 @@ void main() {
 
   group(NoAndroidStudioValidator, () {
     testWithoutContext('shows Android Studio as "not available" when not available.', () async {
-      final config = Config.test();
-      final validator = NoAndroidStudioValidator(
+      final Config config = Config.test();
+      final NoAndroidStudioValidator validator = NoAndroidStudioValidator(
         config: config,
         platform: linuxPlatform,
         userMessages: UserMessages(),
@@ -55,9 +55,9 @@ void main() {
             exception: ProcessException('java', <String>['-version']),
           ),
         );
-        const installPath = '/opt/android-studio-with-cheese-5.0';
-        const studioHome = '$home/.AndroidStudioWithCheese5.0';
-        const homeFile = '$studioHome/system/.home';
+        const String installPath = '/opt/android-studio-with-cheese-5.0';
+        const String studioHome = '$home/.AndroidStudioWithCheese5.0';
+        const String homeFile = '$studioHome/system/.home';
         globals.fs.directory(installPath).createSync(recursive: true);
         globals.fs.file(homeFile).createSync(recursive: true);
         globals.fs.file(homeFile).writeAsStringSync(installPath);
@@ -91,7 +91,7 @@ void main() {
 
     testWithoutContext('warns if version of Android Studio could not be determined', () async {
       final AndroidStudio studio = _FakeAndroidStudio();
-      final validator = AndroidStudioValidator(
+      final AndroidStudioValidator validator = AndroidStudioValidator(
         studio,
         fileSystem: fileSystem,
         userMessages: UserMessages(),

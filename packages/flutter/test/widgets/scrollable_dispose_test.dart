@@ -33,7 +33,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/27707.
 
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       final Key outerContainer = GlobalKey();
 

@@ -18,8 +18,8 @@ void main() {
   });
 
   group('parse service', () {
-    const badOutput = 'No uri here';
-    const sampleOutput =
+    const String badOutput = 'No uri here';
+    const String sampleOutput =
         'A Dart VM Service on '
         'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
 

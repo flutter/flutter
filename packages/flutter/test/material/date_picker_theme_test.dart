@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const datePickerTheme = DatePickerThemeData(
+  const DatePickerThemeData datePickerTheme = DatePickerThemeData(
     backgroundColor: Color(0xfffffff0),
     elevation: 6,
     shadowColor: Color(0xfffffff1),
@@ -90,8 +90,8 @@ void main() {
     return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
   }
 
-  const wideWindowSize = Size(1920.0, 1080.0);
-  const narrowWindowSize = Size(1070.0, 1770.0);
+  const Size wideWindowSize = Size(1920.0, 1080.0);
+  const Size narrowWindowSize = Size(1070.0, 1770.0);
 
   test('DatePickerThemeData copyWith, ==, hashCode basics', () {
     expect(const DatePickerThemeData(), const DatePickerThemeData().copyWith());
@@ -99,12 +99,12 @@ void main() {
   });
 
   test('DatePickerThemeData lerp special cases', () {
-    const data = DatePickerThemeData();
+    const DatePickerThemeData data = DatePickerThemeData();
     expect(identical(DatePickerThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('DatePickerThemeData defaults', () {
-    const theme = DatePickerThemeData();
+    const DatePickerThemeData theme = DatePickerThemeData();
     expect(theme.backgroundColor, null);
     expect(theme.elevation, null);
     expect(theme.shadowColor, null);
@@ -468,7 +468,7 @@ void main() {
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -481,7 +481,7 @@ void main() {
   });
 
   testWidgets('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     datePickerTheme.debugFillProperties(builder);
 
@@ -591,7 +591,7 @@ void main() {
 
     final Text day24 = tester.widget<Text>(find.text('24')); // DatePickerDialog.currentDate
     final ShapeDecoration day24Decoration = findDayDecoration(tester, '24')!;
-    final day24Shape = day24Decoration.shape as OutlinedBorder;
+    final OutlinedBorder day24Shape = day24Decoration.shape as OutlinedBorder;
     expect(day24.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
     expect(day24.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
     expect(day24Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
@@ -650,7 +650,7 @@ void main() {
       year2023Decoration.color,
       datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}),
     );
-    final roundedRectangleBorder =
+    final RoundedRectangleBorder roundedRectangleBorder =
         year2023Decoration.shape as RoundedRectangleBorder;
     expect(roundedRectangleBorder.side.width, datePickerTheme.todayBorder?.width);
     expect(
@@ -1051,7 +1051,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Focus day selection.
-    for (var i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
     }
@@ -1133,7 +1133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Focus year selection.
-    for (var i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
     }
@@ -1234,7 +1234,7 @@ void main() {
   testWidgets('YearPicker maintains default year shape at textScaleFactor 1, 1.5, 2', (
     WidgetTester tester,
   ) async {
-    var textScaleFactor = 1.0;
+    double textScaleFactor = 1.0;
     Widget buildFrame() {
       return MaterialApp(
         home: Builder(
@@ -1339,8 +1339,8 @@ void main() {
   testWidgets('Toggle button uses DatePickerTheme.toggleButtonTextStyle.color when it is defined', (
     WidgetTester tester,
   ) async {
-    const toggleButtonTextColor = Color(0xff00ff00);
-    const subHeaderForegroundColor = Color(0xffff0000);
+    const Color toggleButtonTextColor = Color(0xff00ff00);
+    const Color subHeaderForegroundColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1366,7 +1366,7 @@ void main() {
   testWidgets(
     'Toggle button uses DatePickerTheme.subHeaderForegroundColor when DatePickerTheme.toggleButtonTextStyle.color is not defined',
     (WidgetTester tester) async {
-      const subHeaderForegroundColor = Color(0xffff0000);
+      const Color subHeaderForegroundColor = Color(0xffff0000);
 
       await tester.pumpWidget(
         MaterialApp(

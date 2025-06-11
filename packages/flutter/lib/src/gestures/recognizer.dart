@@ -335,7 +335,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           final String? report = debugReport != null ? debugReport() : null;
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
-          final prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
+          final String prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
           debugPrint(
             '$prefix$this calling $name callback.${(report?.isNotEmpty ?? false) ? " $report" : ""}',
           );
@@ -446,9 +446,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    final localEntries = List<GestureArenaEntry>.of(_entries.values);
+    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
-    for (final entry in localEntries) {
+    for (final GestureArenaEntry entry in localEntries) {
       entry.resolve(disposition);
     }
   }

@@ -17,11 +17,11 @@ void main() {
     final Finder yellowFinder = containerFinder.last;
 
     final Container greenContainer = tester.firstWidget<Container>(greenFinder);
-    final greenDecoration = greenContainer.decoration as BoxDecoration?;
+    final BoxDecoration? greenDecoration = greenContainer.decoration as BoxDecoration?;
     expect(greenDecoration?.border, expectGreenHasBorder ? isNot(null) : null);
 
     final Container yellowContainer = tester.firstWidget<Container>(yellowFinder);
-    final yellowDecoration = yellowContainer.decoration as BoxDecoration?;
+    final BoxDecoration? yellowDecoration = yellowContainer.decoration as BoxDecoration?;
     expect(yellowDecoration?.border, expectYellowHasBorder ? isNot(null) : null);
   }
 

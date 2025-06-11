@@ -37,7 +37,7 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
   // │    ▓▓│
   // └──────┘
   // At different levels of quality these pixels are blurred differently.
-  final test3x3Image = Uint8List.fromList(<int>[
+  final Uint8List test3x3Image = Uint8List.fromList(<int>[
     0x89,
     0x50,
     0x4e,
@@ -132,9 +132,9 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
   addTearDown(image.dispose);
   expect(image.width, 3);
   expect(image.height, 3);
-  final streamCompleter = _TestImageStreamCompleter();
+  final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
   streamCompleter.setData(imageInfo: ImageInfo(image: image));
-  final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+  final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
 
   await tester.pumpWidget(
     quality == null
@@ -171,7 +171,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       if (imageInfo != null) {
         listener.onImage(imageInfo.clone(), false);
       }
@@ -183,7 +183,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
 
   void setError({required Object exception, StackTrace? stackTrace}) {
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       listener.onError?.call(exception, stackTrace);
     }
   }

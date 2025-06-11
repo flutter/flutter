@@ -118,8 +118,8 @@ void main() {
     });
 
     testUsingContext('success, error and warning', () async {
-      final loggerTest = BufferLogger.test();
-      final command = AnalyzeCommand(
+      final BufferLogger loggerTest = BufferLogger.test();
+      final AnalyzeCommand command = AnalyzeCommand(
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: loggerTest,
@@ -136,7 +136,7 @@ void main() {
 
       await runner.run(<String>['analyze', '--suggestions', './']);
 
-      const expected =
+      const String expected =
           '\n'
           '┌──────────────────────────────────────────┐\n'
           '│ First Dummy                              │\n'
@@ -152,8 +152,8 @@ void main() {
     });
 
     testUsingContext('crash', () async {
-      final loggerTest = BufferLogger.test();
-      final command = AnalyzeCommand(
+      final BufferLogger loggerTest = BufferLogger.test();
+      final AnalyzeCommand command = AnalyzeCommand(
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: loggerTest,
@@ -167,14 +167,14 @@ void main() {
 
       await runner.run(<String>['analyze', '--suggestions', './']);
 
-      const expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
+      const String expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
 
       expect(loggerTest.statusText, contains(expected));
     });
 
     testUsingContext('--watch and --suggestions not compatible together', () async {
-      final loggerTest = BufferLogger.test();
-      final command = AnalyzeCommand(
+      final BufferLogger loggerTest = BufferLogger.test();
+      final AnalyzeCommand command = AnalyzeCommand(
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: loggerTest,

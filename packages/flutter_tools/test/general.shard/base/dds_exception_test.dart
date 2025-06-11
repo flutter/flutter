@@ -9,13 +9,13 @@ import '../../src/common.dart';
 void main() {
   group('DartDevelopmentServiceException.fromJSON', () {
     test('parses existing DDS instance error', () {
-      final actual =
+      final DartDevelopmentServiceException actual =
           DartDevelopmentServiceException.fromJson(<String, Object>{
             'error_code': DartDevelopmentServiceException.existingDdsInstanceError,
             'message': 'Foo',
             'uri': 'http://localhost',
           });
-      final expected =
+      final DartDevelopmentServiceException expected =
           DartDevelopmentServiceException.existingDdsInstance(
             'Foo',
             ddsUri: Uri.parse('http://localhost'),
@@ -30,22 +30,22 @@ void main() {
     });
 
     test('parses connection issue error', () {
-      final actual = DartDevelopmentServiceException.fromJson(
+      final DartDevelopmentServiceException actual = DartDevelopmentServiceException.fromJson(
         <String, Object>{
           'error_code': DartDevelopmentServiceException.connectionError,
           'message': 'Foo',
         },
       );
-      final expected =
+      final DartDevelopmentServiceException expected =
           DartDevelopmentServiceException.connectionIssue('Foo');
       expect(actual.errorCode, expected.errorCode);
       expect(actual.message, expected.message);
     });
 
     test('parses failed to start error', () {
-      final expected =
+      final DartDevelopmentServiceException expected =
           DartDevelopmentServiceException.failedToStart();
-      final actual = DartDevelopmentServiceException.fromJson(
+      final DartDevelopmentServiceException actual = DartDevelopmentServiceException.fromJson(
         <String, Object>{
           'error_code': DartDevelopmentServiceException.failedToStartError,
           'message': expected.message,

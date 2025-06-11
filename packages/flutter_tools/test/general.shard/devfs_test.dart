@@ -56,7 +56,7 @@ FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
 
 void main() {
   testWithoutContext('DevFSByteContent', () {
-    final content = DevFSByteContent(<int>[4, 5, 6]);
+    final DevFSByteContent content = DevFSByteContent(<int>[4, 5, 6]);
 
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
     expect(content.isModified, isTrue);
@@ -64,7 +64,7 @@ void main() {
   });
 
   testWithoutContext('DevFSStringContent', () {
-    final content = DevFSStringContent('some string');
+    final DevFSStringContent content = DevFSStringContent('some string');
 
     expect(content.string, 'some string');
     expect(content.bytes, orderedEquals(utf8.encode('some string')));
@@ -75,7 +75,7 @@ void main() {
   testWithoutContext('DevFSFileContent', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo.txt');
-    final content = DevFSFileContent(file);
+    final DevFSFileContent content = DevFSFileContent(file);
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
 
@@ -102,7 +102,7 @@ void main() {
   });
 
   testWithoutContext('DevFSStringCompressingBytesContent', () {
-    final content = DevFSStringCompressingBytesContent(
+    final DevFSStringCompressingBytesContent content = DevFSStringCompressingBytesContent(
       'uncompressed string',
     );
 
@@ -117,12 +117,12 @@ void main() {
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[failingCreateDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
 
-      final devFS = DevFS(
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -141,12 +141,12 @@ void main() {
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest, failingDeleteDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -165,14 +165,14 @@ void main() {
 
   testWithoutContext('DevFS retries uploads when connection reset by peer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final osUtils = OperatingSystemUtils(
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: FakePlatform(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
     );
-    final residentCompiler = FakeResidentCompiler();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
@@ -187,7 +187,7 @@ void main() {
     final List<List<int>> expectedEncoded =
         await osUtils.gzipLevel1Stream(Stream<List<int>>.value(<int>[1, 2, 3, 4, 5])).toList();
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -251,12 +251,12 @@ void main() {
 
   testWithoutContext('DevFS reports unsuccessful compile when errors are returned', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -272,7 +272,7 @@ void main() {
     await devFS.create();
     final DateTime? previousCompile = devFS.lastCompiled;
 
-    final residentCompiler = FakeResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       return const CompilerOutput('lib/foo.dill', 2, <Uri>[]);
     };
@@ -296,12 +296,12 @@ void main() {
     'DevFS correctly updates last compiled time when compilation does not fail',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
 
-      final devFS = DevFS(
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -317,7 +317,7 @@ void main() {
       await devFS.create();
       final DateTime? previousCompile = devFS.lastCompiled;
 
-      final residentCompiler = FakeResidentCompiler();
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
       residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
         fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
         return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -341,13 +341,13 @@ void main() {
 
   testWithoutContext('DevFS can reset compilation time', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
     );
-    final localDevFSWriter = LocalDevFSWriter(fileSystem: fileSystem);
+    final LocalDevFSWriter localDevFSWriter = LocalDevFSWriter(fileSystem: fileSystem);
     fileSystem.directory('test').createSync();
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -363,7 +363,7 @@ void main() {
     await devFS.create();
     final DateTime? previousCompile = devFS.lastCompiled;
 
-    final residentCompiler = FakeResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -394,12 +394,12 @@ void main() {
 
   testWithoutContext('DevFS uses provided DevFSWriter instead of default HTTP writer', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final writer = FakeDevFSWriter();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeDevFSWriter writer = FakeDevFSWriter();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
     );
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -414,7 +414,7 @@ void main() {
 
     await devFS.create();
 
-    final residentCompiler = FakeResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('example').createSync();
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -441,7 +441,7 @@ void main() {
   testWithoutContext('Local DevFSWriter can copy and write files', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo_bar')..writeAsStringSync('goodbye');
-    final writer = LocalDevFSWriter(fileSystem: fileSystem);
+    final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
 
     await writer.write(<Uri, DevFSContent>{
       Uri.parse('hello'): DevFSStringContent('hello'),
@@ -455,9 +455,9 @@ void main() {
   });
 
   testWithoutContext('Local DevFSWriter turns FileSystemException into DevFSException', () async {
-    final handler = FileExceptionHandler();
+    final FileExceptionHandler handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-    final writer = LocalDevFSWriter(fileSystem: fileSystem);
+    final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
     final File file = fileSystem.file('foo');
     handler.addError(file, FileSystemOp.read, const FileSystemException('foo'));
 
@@ -472,12 +472,12 @@ void main() {
   testWithoutContext('DevFS correctly records the elapsed time', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     // final FakeDevFSWriter writer = FakeDevFSWriter();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -498,7 +498,7 @@ void main() {
 
     await devFS.create();
 
-    final residentCompiler = FakeResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
@@ -522,14 +522,14 @@ void main() {
 
   testUsingContext('DevFS actually starts compile before processing bundle', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final fakeVmServiceHost = FakeVmServiceHost(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
 
-    final logger = LoggingLogger();
+    final LoggingLogger logger = LoggingLogger();
 
-    final devFS = DevFS(
+    final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
@@ -544,9 +544,9 @@ void main() {
 
     await devFS.create();
 
-    final frontendServerStdIn = MemoryIOSink();
+    final MemoryIOSink frontendServerStdIn = MemoryIOSink();
     Stream<List<int>> frontendServerStdOut() async* {
-      var processed = 0;
+      int processed = 0;
       while (true) {
         while (frontendServerStdIn.writes.length == processed) {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
@@ -576,17 +576,17 @@ void main() {
       // Output nothing on stderr.
     }
 
-    final fakeProcessManager = AnsweringFakeProcessManager(
+    final AnsweringFakeProcessManager fakeProcessManager = AnsweringFakeProcessManager(
       frontendServerStdOut(),
       frontendServerStdErr(),
       frontendServerStdIn,
     );
-    final generatorStdoutHandler = StdoutHandler(
+    final StdoutHandler generatorStdoutHandler = StdoutHandler(
       logger: testLogger,
       fileSystem: fileSystem,
     );
 
-    final residentCompiler = DefaultResidentCompiler(
+    final DefaultResidentCompiler residentCompiler = DefaultResidentCompiler(
       'sdkroot',
       buildMode: BuildMode.debug,
       logger: logger,
@@ -639,13 +639,13 @@ void main() {
 
   group('Shader compilation', () {
     testWithoutContext('DevFS recompiles shaders', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
-      final logger = BufferLogger.test();
-      final devFS = DevFS(
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -661,7 +661,7 @@ void main() {
 
       await devFS.create();
 
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()
             ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
               fileSystem.file('lib/foo.dill')
@@ -669,7 +669,7 @@ void main() {
                 ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
               return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
             };
-      final bundle =
+      final FakeBundle bundle =
           FakeBundle()
             ..entries['foo.frag'] = AssetBundleEntry(
               DevFSByteContent(<int>[1, 2, 3, 4]),
@@ -700,13 +700,13 @@ void main() {
     });
 
     testWithoutContext('DevFS tracks when FontManifest is updated', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
-      final logger = BufferLogger.test();
-      final devFS = DevFS(
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -724,7 +724,7 @@ void main() {
 
       expect(devFS.didUpdateFontManifest, false);
 
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()
             ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
               fileSystem.file('lib/foo.dill')
@@ -732,7 +732,7 @@ void main() {
                 ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
               return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
             };
-      final bundle =
+      final FakeBundle bundle =
           FakeBundle()
             ..entries['FontManifest.json'] = AssetBundleEntry(
               DevFSByteContent(<int>[1, 2, 3, 4]),
@@ -761,10 +761,10 @@ void main() {
 
   group('Asset transformation', () {
     testWithoutContext('DevFS re-transforms assets with transformers during update', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = Artifacts.test();
-      final devFSWriter = FakeDevFSWriter();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Artifacts artifacts = Artifacts.test();
+      final FakeDevFSWriter devFSWriter = FakeDevFSWriter();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <Pattern>[
             artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -792,12 +792,12 @@ void main() {
         ),
       ]);
 
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
-      final logger = BufferLogger.test();
-      final devFS = DevFS(
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -813,7 +813,7 @@ void main() {
 
       await devFS.create();
 
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()
             ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
               fileSystem.file('lib/foo.dill')
@@ -822,7 +822,7 @@ void main() {
               return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
             };
 
-      final bundle =
+      final FakeBundle bundle =
           FakeBundle()
             ..entries['asset.txt'] = AssetBundleEntry(
               DevFSByteContent(<int>[1, 2, 3, 4]),
@@ -848,7 +848,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
       expect(report.success, true);
       expect(devFSWriter.entries, isNotNull);
-      final assetUri = Uri(path: 'build/flutter_assets/asset.txt');
+      final Uri assetUri = Uri(path: 'build/flutter_assets/asset.txt');
       expect(devFSWriter.entries, contains(assetUri));
       expect(
         await devFSWriter.entries![assetUri]!.contentsAsBytes(),
@@ -857,10 +857,10 @@ void main() {
     });
 
     testWithoutContext('DevFS reports failure when asset transformation fails', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = Artifacts.test();
-      final devFSWriter = FakeDevFSWriter();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Artifacts artifacts = Artifacts.test();
+      final FakeDevFSWriter devFSWriter = FakeDevFSWriter();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <Pattern>[
             artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -873,12 +873,12 @@ void main() {
         ),
       ]);
 
-      final fakeVmServiceHost = FakeVmServiceHost(
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
       );
-      final logger = BufferLogger.test();
-      final devFS = DevFS(
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
@@ -894,7 +894,7 @@ void main() {
 
       await devFS.create();
 
-      final residentCompiler =
+      final FakeResidentCompiler residentCompiler =
           FakeResidentCompiler()
             ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
               fileSystem.file('lib/foo.dill')
@@ -903,7 +903,7 @@ void main() {
               return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
             };
 
-      final bundle =
+      final FakeBundle bundle =
           FakeBundle()
             ..entries['asset.txt'] = AssetBundleEntry(
               DevFSByteContent(<int>[1, 2, 3, 4]),

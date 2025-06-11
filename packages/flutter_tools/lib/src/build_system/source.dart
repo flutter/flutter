@@ -110,7 +110,7 @@ class SourceVisitor implements ResolvedFiles {
     if (hasWildcard) {
       wildcardFile = rawParts.removeLast();
     }
-    final segments = <String>[
+    final List<String> segments = <String>[
       ...environment.fileSystem.path.split(switch (rawParts.first) {
         // flutter root will not contain a symbolic link.
         Environment.kFlutterRootDirectory => environment.flutterRootDir.absolute.path,

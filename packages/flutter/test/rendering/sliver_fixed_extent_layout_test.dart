@@ -11,15 +11,15 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderSliverFixedExtentList layout test - rounding error', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 0,
@@ -44,9 +44,9 @@ void main() {
   group('getMaxChildIndexForScrollOffset', () {
     // Regression test for https://github.com/flutter/flutter/issues/68182
 
-    const genericItemExtent = 600.0;
-    const extraValueToNotHaveRoundingIssues = 1e-10;
-    const extraValueToHaveRoundingIssues = 1e-11;
+    const double genericItemExtent = 600.0;
+    const double extraValueToNotHaveRoundingIssues = 1e-10;
+    const double extraValueToHaveRoundingIssues = 1e-11;
 
     test('should be 0 when item extent is 0', () {
       const double offsetValueWhichDoesNotCare = 1234;
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('should be 5 when offset is 6 times greater than item extent', () {
-      const anotherGenericItemExtent = 414.0;
+      const double anotherGenericItemExtent = 414.0;
       final int actual = testGetMaxChildIndexForScrollOffset(
         anotherGenericItemExtent * 6,
         anotherGenericItemExtent,
@@ -100,7 +100,7 @@ void main() {
     test(
       'should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals',
       () {
-        const itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
+        const double itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
         final int actual = testGetMaxChildIndexForScrollOffset(
           itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
           itemExtentSpecificForAProblematicScreenSize,
@@ -119,15 +119,15 @@ void main() {
   });
 
   test('Implements paintsChild correctly', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 0,
@@ -136,7 +136,7 @@ void main() {
     layout(root);
     expect(children.first.parent, isA<RenderSliverMultiBoxAdaptor>());
 
-    final parent =
+    final RenderSliverMultiBoxAdaptor parent =
         children.first.parent! as RenderSliverMultiBoxAdaptor;
     expect(parent.paintsChild(children[0]), true);
     expect(parent.paintsChild(children[1]), false);
@@ -156,16 +156,16 @@ void main() {
   });
 
   test('RenderSliverFillViewport correctly references itemExtent, non-zero offset', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderSliverFillViewport sliver = childManager.createRenderSliverFillViewport();
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.fixed(1200.0),
       cacheExtent: 100,
@@ -202,16 +202,16 @@ void main() {
   });
 
   test('RenderSliverFillViewport correctly references itemExtent, zero offset', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderSliverFillViewport sliver = childManager.createRenderSliverFillViewport();
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 100,
@@ -248,16 +248,16 @@ void main() {
   });
 
   test('RenderSliverFixedExtentList correctly references itemExtent, non-zero offset', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(30.0);
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.fixed(45.0),
       cacheExtent: 100,
@@ -295,16 +295,16 @@ void main() {
   });
 
   test('RenderSliverFixedExtentList correctly references itemExtent, zero offset', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(30.0);
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 100,
@@ -342,16 +342,16 @@ void main() {
   });
 
   test('RenderSliverMultiBoxAdaptor has calculate leading and trailing garbage', () {
-    final children = <RenderBox>[
+    final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
     ];
-    final childManager = TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(30.0);
-    final root = RenderViewport(
+    final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 100,
@@ -366,7 +366,7 @@ void main() {
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-  final renderSliver = TestRenderSliverFixedExtentBoxAdaptor(
+  final TestRenderSliverFixedExtentBoxAdaptor renderSliver = TestRenderSliverFixedExtentBoxAdaptor(
     itemExtent: itemExtent,
   );
   return renderSliver.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
@@ -430,7 +430,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final childParentData =
+    final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }

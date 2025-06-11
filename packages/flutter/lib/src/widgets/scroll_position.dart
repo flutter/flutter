@@ -534,7 +534,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
+      final double? value =
           PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         correctPixels(value);
@@ -759,7 +759,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       AxisDirection.right => (SemanticsAction.scrollLeft, SemanticsAction.scrollRight),
     };
 
-    final actions = <SemanticsAction>{
+    final Set<SemanticsAction> actions = <SemanticsAction>{
       if (pixels > minScrollExtent) backward,
       if (pixels < maxScrollExtent) forward,
     };

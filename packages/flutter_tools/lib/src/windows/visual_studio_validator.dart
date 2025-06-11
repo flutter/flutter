@@ -20,7 +20,7 @@ class VisualStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType status = ValidationType.missing;
     String? versionInfo;
 

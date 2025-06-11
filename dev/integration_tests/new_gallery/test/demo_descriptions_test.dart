@@ -8,7 +8,7 @@ import 'package:gallery/data/demos.dart';
 import 'package:gallery/gallery_localizations_en.dart';
 
 bool _isUnique(List<String> list) {
-  final covered = <String>{};
+  final Set<String> covered = <String>{};
   for (final String element in list) {
     if (covered.contains(element)) {
       return false;
@@ -40,7 +40,7 @@ void main() {
   test('Special demo descriptions are correct', () {
     final List<String> allDemos = Demos.allDescriptions();
 
-    final specialDemos = <String>[
+    final List<String> specialDemos = <String>[
       'shrine@study',
       'rally@study',
       'crane@study',
@@ -58,7 +58,7 @@ void main() {
       'colors@other',
     ];
 
-    for (final specialDemo in specialDemos) {
+    for (final String specialDemo in specialDemos) {
       expect(allDemos.contains(specialDemo), true);
     }
   });

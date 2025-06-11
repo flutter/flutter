@@ -40,9 +40,9 @@ void main() {
   _binding = TestGestureFlutterBinding();
 
   test('Pointer events are locked during reassemble', () async {
-    final events = <PointerEvent>[];
+    final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
-    var tested = false;
+    bool tested = false;
     await _binding.test(() {
       expect(events.length, 0);
       tested = true;

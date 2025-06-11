@@ -22,7 +22,7 @@ import 'test_support.dart';
 void main() {
   late Directory tempDir;
   late DapTestSession dap;
-  final relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
+  final String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
@@ -40,7 +40,7 @@ void main() {
 
   group('launch', () {
     testWithoutContext('can run and terminate a Flutter app in debug mode', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Once the "topLevelFunction" output arrives, we can terminate the app.
@@ -71,7 +71,7 @@ void main() {
     });
 
     testWithoutContext('logs stdout to client when sendLogsToClient=true', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -110,7 +110,7 @@ void main() {
     });
 
     testWithoutContext('logs stderr to client when sendLogsToClient=true', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Capture all log events.
@@ -145,7 +145,7 @@ void main() {
     });
 
     testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Once the "topLevelFunction" output arrives, we can terminate the app.
@@ -183,11 +183,11 @@ void main() {
     });
 
     testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
-      final server = dap.server as OutOfProcessDapTestServer;
-      final project = CompileErrorProject();
+      final OutOfProcessDapTestServer server = dap.server as OutOfProcessDapTestServer;
+      final CompileErrorProject project = CompileErrorProject();
       await project.setUpIn(tempDir);
 
-      final stderrOutput = StringBuffer();
+      final StringBuffer stderrOutput = StringBuffer();
       dap.server.onStderrOutput = stderrOutput.write;
 
       // Write invalid headers and await the error.
@@ -195,7 +195,7 @@ void main() {
       await server.exitCode;
 
       // Verify the user-friendly message was included in the output.
-      final error = stderrOutput.toString();
+      final String error = stderrOutput.toString();
       expect(error, contains('Input could not be parsed as a Debug Adapter Protocol message'));
       expect(error, contains('The "flutter debug-adapter" command is intended for use by tooling'));
       // This test only runs with out-of-process DAP as it's testing _actual_
@@ -204,7 +204,7 @@ void main() {
     }, skip: useInProcessDap); // [intended] See above.
 
     testWithoutContext('correctly outputs launch errors and terminates', () async {
-      final project = CompileErrorProject();
+      final CompileErrorProject project = CompileErrorProject();
       await project.setUpIn(tempDir);
 
       final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
@@ -257,7 +257,7 @@ void main() {
       }
 
       testWithoutContext('correctly outputs exceptions in debug mode', () async {
-        final project = BasicProjectThatThrows();
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
         final String output = await getExceptionOutput(project, noDebug: false, ansiColors: false);
 
         expect(
@@ -275,7 +275,7 @@ The relevant error-causing widget was:
       testWithoutContext(
         'correctly outputs colored exceptions when supported',
         () async {
-          final project = BasicProjectThatThrows();
+          final BasicProjectThatThrows project = BasicProjectThatThrows();
           final String output = await getExceptionOutput(project, noDebug: false, ansiColors: true);
 
           // Frames in the stack trace that are the users own code will be unformatted, but
@@ -307,7 +307,7 @@ When the exception was thrown, this was the stack:
       );
 
       testWithoutContext('correctly outputs exceptions in noDebug mode', () async {
-        final project = BasicProjectThatThrows();
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
         final String output = await getExceptionOutput(project, noDebug: true, ansiColors: false);
 
         // When running in noDebug mode, we don't get the Flutter.Error event so
@@ -327,7 +327,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('can hot reload', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -380,7 +380,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('sends progress notifications during hot reload', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -410,8 +410,8 @@ The relevant error-causing widget was:
 
       final List<Map<String, Object?>> eventBodies =
           progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
-      final start = ProgressStartEventBody.fromMap(eventBodies[0]);
-      final end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
       expect(start.title, 'Flutter');
       expect(start.message, 'Hot reloading…');
@@ -420,7 +420,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('can hot restart', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -458,7 +458,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('sends progress notifications during hot restart', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to print "topLevelFunction".
@@ -488,8 +488,8 @@ The relevant error-causing widget was:
 
       final List<Map<String, Object?>> eventBodies =
           progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
-      final start = ProgressStartEventBody.fromMap(eventBodies[0]);
-      final end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
       expect(start.title, 'Flutter');
       expect(start.message, 'Hot restarting…');
@@ -498,7 +498,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
-      final project = BasicProjectThatThrows();
+      final BasicProjectThatThrows project = BasicProjectThatThrows();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to stop at an exception.
@@ -540,9 +540,9 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('sends events for extension state updates', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
-      const debugPaintRpc = 'ext.flutter.debugPaint';
+      const String debugPaintRpc = 'ext.flutter.debugPaint';
 
       // Create a future to capture the isolate ID when the debug paint service
       // extension loads, as we'll need that to call it later.
@@ -584,7 +584,7 @@ The relevant error-causing widget was:
     });
 
     testWithoutContext('provides appStarted events to the client', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to send a 'flutter.appStart' event.
@@ -603,13 +603,13 @@ The relevant error-causing widget was:
       await dap.client.terminate();
 
       final Event appStart = await appStartFuture;
-      final params = appStart.body! as Map<String, Object?>;
+      final Map<String, Object?> params = appStart.body! as Map<String, Object?>;
       expect(params['deviceId'], 'flutter-tester');
       expect(params['mode'], 'debug');
     });
 
     testWithoutContext('provides appStarted events to the client', () async {
-      final project = BasicProject();
+      final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
       // Launch the app and wait for it to send a 'flutter.appStarted' event.
@@ -629,7 +629,7 @@ The relevant error-causing widget was:
 
     group('can step', () {
       test('into SDK sources mapped to local files when debugSdkLibraries=true', () async {
-        final project = BasicProject();
+        final BasicProject project = BasicProject();
         await project.setUpIn(tempDir);
 
         final String breakpointFilePath = globals.fs.path.join(
@@ -834,7 +834,7 @@ String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
       })
       .where((String output) {
         // Skip the item if it's the same as the previous one.
-        final isDupe = output == lastItem;
+        final bool isDupe = output == lastItem;
         lastItem = output;
         return !isDupe;
       })

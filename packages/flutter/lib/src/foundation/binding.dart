@@ -931,7 +931,7 @@ abstract class BindingBase {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
-    final methodName = 'ext.flutter.$name';
+    final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {

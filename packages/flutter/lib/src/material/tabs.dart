@@ -258,7 +258,7 @@ class _TabStyle extends AnimatedWidget {
   MaterialStateColor _resolveWithLabelColor(BuildContext context, {IconThemeData? iconTheme}) {
     final ThemeData themeData = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
-    final animation = listenable as Animation<double>;
+    final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
     // as it'll be a breaking change without a possible migration plan. for
@@ -301,9 +301,9 @@ class _TabStyle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
-    final animation = listenable as Animation<double>;
+    final Animation<double> animation = listenable as Animation<double>;
 
-    final states =
+    final Set<MaterialState> states =
         isSelected ? const <MaterialState>{MaterialState.selected} : const <MaterialState>{};
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
@@ -367,9 +367,9 @@ class _TabLabelBarRenderer extends RenderFlex {
     // the each subsequent tab as each subsequent value, and of the trailing
     // edge of the last tab as the last value.
     RenderBox? child = firstChild;
-    final xOffsets = <double>[];
+    final List<double> xOffsets = <double>[];
     while (child != null) {
-      final childParentData = child.parentData! as FlexParentData;
+      final FlexParentData childParentData = child.parentData! as FlexParentData;
       xOffsets.add(childParentData.offset.dx);
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
@@ -446,7 +446,7 @@ class _DividerPainter extends CustomPainter {
       return;
     }
 
-    final paint =
+    final Paint paint =
         Paint()
           ..color = dividerColor
           ..strokeWidth = dividerHeight;
@@ -556,7 +556,7 @@ class _IndicatorPainter extends CustomPainter {
     }
 
     final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
-    final rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
+    final Rect rect = Rect.fromLTWH(tabLeft, 0.0, tabRight - tabLeft, tabBarSize.height);
 
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
@@ -581,18 +581,18 @@ class _IndicatorPainter extends CustomPainter {
 
     assert(_currentRect != null);
 
-    final configuration = ImageConfiguration(
+    final ImageConfiguration configuration = ImageConfiguration(
       size: _currentRect!.size,
       textDirection: _currentTextDirection,
       devicePixelRatio: devicePixelRatio,
     );
     if (showDivider && dividerHeight! > 0) {
-      final dividerPaint =
+      final Paint dividerPaint =
           Paint()
             ..color = dividerColor!
             ..strokeWidth = dividerHeight!;
-      final dividerP1 = Offset(0, size.height - (dividerPaint.strokeWidth / 2));
-      final dividerP2 = Offset(size.width, size.height - (dividerPaint.strokeWidth / 2));
+      final Offset dividerP1 = Offset(0, size.height - (dividerPaint.strokeWidth / 2));
+      final Offset dividerP2 = Offset(size.width, size.height - (dividerPaint.strokeWidth / 2));
       canvas.drawLine(dividerP1, dividerP2, dividerPaint);
     }
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
@@ -797,7 +797,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    var result = true;
+    bool result = true;
     if (!_viewportDimensionWasNonZero) {
       _viewportDimensionWasNonZero = viewportDimension != 0.0;
     }
@@ -1843,7 +1843,7 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    final wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
+    final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
       EdgeInsetsGeometry padding =
           widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
@@ -1928,8 +1928,8 @@ class _TabBarState extends State<TabBar> {
     // then give all of the tabs equal flexibility so that they each occupy
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
-    for (var index = 0; index < tabCount; index += 1) {
-      final selectedState = <MaterialState>{
+    for (int index = 0; index < tabCount; index += 1) {
+      final Set<MaterialState> selectedState = <MaterialState>{
         if (index == _currentIndex) MaterialState.selected,
       };
 
@@ -1940,7 +1940,7 @@ class _TabBarState extends State<TabBar> {
 
       final MaterialStateProperty<Color?> defaultOverlay =
           MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-            final effectiveStates = selectedState..addAll(states);
+            final Set<MaterialState> effectiveStates = selectedState..addAll(states);
             return _defaults.overlayColor?.resolve(effectiveStates);
           });
       wrappedTabs[index] = InkWell(
@@ -2265,7 +2265,7 @@ class _TabBarViewState extends State<TabBarView> {
       return;
     }
 
-    final adjacentDestination = (_currentIndex! - _controller!.previousIndex).abs() == 1;
+    final bool adjacentDestination = (_currentIndex! - _controller!.previousIndex).abs() == 1;
     if (adjacentDestination) {
       _warpToAdjacentTab(_controller!.animationDuration);
     } else {
@@ -2596,8 +2596,8 @@ class _TabPageSelectorState extends State<TabPageSelector> {
   Widget build(BuildContext context) {
     final Color fixColor = widget.color ?? Colors.transparent;
     final Color fixSelectedColor = widget.selectedColor ?? Theme.of(context).colorScheme.secondary;
-    final selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
-    final previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
+    final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
+    final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return AnimatedBuilder(
       animation: _animation!,

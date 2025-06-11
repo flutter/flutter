@@ -8,7 +8,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('Configuration', () {
-    final memoryFileSystem = MemoryFileSystem();
+    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     late SnippetConfiguration config;
 
     setUp(() {

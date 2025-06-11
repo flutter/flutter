@@ -481,8 +481,8 @@ void main() {
         flutterTestDirectory,
         extraArguments: const <String>['--start-paused'],
       );
-      final completer = Completer<Uri>();
-      final devToolsUriRegExp = RegExp(
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp devToolsUriRegExp = RegExp(
         r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)',
       );
       sub = process.stdout.transform(utf8.decoder).listen((String e) {
@@ -491,7 +491,7 @@ void main() {
         }
       });
       final Uri devToolsUri = await completer.future;
-      final client = HttpClient();
+      final HttpClient client = HttpClient();
       final HttpClientRequest request = await client.getUrl(devToolsUri);
       final HttpClientResponse response = await request.close();
       final String content = await response.transform(utf8.decoder).join();
@@ -552,10 +552,10 @@ Future<void> _testFile(
   output.add('<<stderr>>');
   output.addAll((exec.stderr as String).split('\n'));
   final List<String> expectations = fileSystem.file(fullTestExpectation).readAsLinesSync();
-  var allowSkip = false;
-  var expectationLineNumber = 0;
-  var outputLineNumber = 0;
-  var haveSeenStdErrMarker = false;
+  bool allowSkip = false;
+  int expectationLineNumber = 0;
+  int outputLineNumber = 0;
+  bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
     expect(
       output,
@@ -585,7 +585,7 @@ Future<void> _testFile(
       // that it is possible to write expectations that still hold even if a
       // line is wrapped slightly differently due to for example a file name
       // being longer on one platform than another.
-      final mergedLines = '$outputLine\n${output[outputLineNumber + 1]}';
+      final String mergedLines = '$outputLine\n${output[outputLineNumber + 1]}';
       if (RegExp(expectationLine).hasMatch(mergedLines)) {
         outputLineNumber += 1;
         outputLine = mergedLines;
@@ -657,7 +657,7 @@ Future<ProcessResult> _runFlutterTest(
     }
   }
 
-  final args = <String>[
+  final List<String> args = <String>[
     'test',
     '--no-color',
     '--no-version-check',
@@ -700,7 +700,7 @@ Future<Process> _runFlutterTestConcurrent(
     }
   }
 
-  final args = <String>[
+  final List<String> args = <String>[
     'test',
     '--no-color',
     '--no-version-check',

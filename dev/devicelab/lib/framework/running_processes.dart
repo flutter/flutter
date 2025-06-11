@@ -66,7 +66,7 @@ Future<Set<RunningProcessInfo>> windowsRunningProcesses(
 ) async {
   // PowerShell script to get the command line arguments and create time of a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
-  final script =
+  final String script =
       processName != null
           ? '"Get-CimInstance Win32_Process -Filter \\"name=\'$processName\'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
           : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
@@ -94,7 +94,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
   const int creationDateHeaderStart = processIdHeaderSize + 1;
   late int creationDateHeaderEnd;
   late int commandLineHeaderStart;
-  var inTableBody = false;
+  bool inTableBody = false;
   for (final String line in output.split('\n')) {
     if (line.startsWith('ProcessId')) {
       commandLineHeaderStart = line.indexOf('CommandLine');
@@ -168,7 +168,7 @@ Future<Set<RunningProcessInfo>> posixRunningProcesses(
 /// Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
 @visibleForTesting
 Iterable<RunningProcessInfo> processPsOutput(String output, String? processName) sync* {
-  var inTableBody = false;
+  bool inTableBody = false;
   for (String line in output.split('\n')) {
     if (line.trim().startsWith('STARTED')) {
       inTableBody = true;
@@ -187,7 +187,7 @@ Iterable<RunningProcessInfo> processPsOutput(String output, String? processName)
 
     // 'Sat Feb 16 02:29:55 2019'
     // 'Sat Mar  9 20:12:47 2019'
-    const months = <String, String>{
+    const Map<String, String> months = <String, String>{
       'Jan': '01',
       'Feb': '02',
       'Mar': '03',

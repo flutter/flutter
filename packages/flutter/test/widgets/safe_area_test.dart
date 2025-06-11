@@ -66,8 +66,8 @@ void main() {
     });
 
     testWidgets('SafeArea - properties', (WidgetTester tester) async {
-      final child = SafeArea(right: false, bottom: false, child: Container());
-      final properties = DiagnosticPropertiesBuilder();
+      final SafeArea child = SafeArea(right: false, bottom: false, child: Container());
+      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
 
       expect(
@@ -370,14 +370,14 @@ void main() {
   });
 
   testWidgets('SliverSafeArea - properties', (WidgetTester tester) async {
-    const child = SliverSafeArea(
+    const SliverSafeArea child = SliverSafeArea(
       right: false,
       bottom: false,
       sliver: SliverToBoxAdapter(
         child: SizedBox(width: 800.0, height: 100.0, child: Text('padded')),
       ),
     );
-    final properties = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     child.debugFillProperties(properties);
 
     expect(

@@ -77,7 +77,7 @@ void main() {
 
   testWidgets('GlobalKey children of two nodes - C', (WidgetTester tester) async {
     late StateSetter nestedSetState;
-    var flag = false;
+    bool flag = false;
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,

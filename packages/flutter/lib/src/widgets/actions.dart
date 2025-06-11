@@ -396,8 +396,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
     // Make a local copy so that a listener can unregister while the list is
     // being iterated over.
-    final localListeners = List<ActionListenerCallback>.of(_listeners);
-    for (final listener in localListeners) {
+    final List<ActionListenerCallback> localListeners = List<ActionListenerCallback>.of(_listeners);
+    for (final ActionListenerCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
         collector =
@@ -872,7 +872,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final actions = element.widget as _ActionsScope;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
@@ -904,7 +904,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final actions = element.widget as _ActionsScope;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         action = result;
@@ -957,7 +957,7 @@ class Actions extends StatefulWidget {
     Object? returnValue;
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
-      final actions = element.widget as _ActionsScope;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result._isEnabled(intent, context)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
@@ -1002,7 +1002,7 @@ class Actions extends StatefulWidget {
   static Object? maybeInvoke<T extends Intent>(BuildContext context, T intent) {
     Object? returnValue;
     _visitActionsAncestors(context, (InheritedElement element) {
-      final actions = element.widget as _ActionsScope;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result._isEnabled(intent, context)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
@@ -1050,10 +1050,10 @@ class _ActionsState extends State<Actions> {
     final Set<Action<Intent>> removedActions = listenedActions!.difference(widgetActions);
     final Set<Action<Intent>> addedActions = widgetActions.difference(listenedActions!);
 
-    for (final action in removedActions) {
+    for (final Action<Intent> action in removedActions) {
       action.removeActionListener(_handleActionChanged);
     }
-    for (final action in addedActions) {
+    for (final Action<Intent> action in addedActions) {
       action.addActionListener(_handleActionChanged);
     }
     listenedActions = widgetActions;

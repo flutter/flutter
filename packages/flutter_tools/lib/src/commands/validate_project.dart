@@ -35,10 +35,10 @@ class ValidateProject {
         userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project = FlutterProject.fromDirectory(workingDirectory);
-    final results =
+    final Map<ProjectValidator, Future<List<ProjectValidatorResult>>> results =
         <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
 
-    var hasCrash = false;
+    bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
       if (validator.machineOutput != machine) {
         continue;
@@ -56,14 +56,14 @@ class ValidateProject {
       }
     }
 
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (machine) {
       // Print properties
       buffer.write('{\n');
       for (final Future<List<ProjectValidatorResult>> resultListFuture in results.values) {
         final List<ProjectValidatorResult> resultList = await resultListFuture;
-        var count = 0;
-        for (final result in resultList) {
+        int count = 0;
+        for (final ProjectValidatorResult result in resultList) {
           count++;
           buffer.write(
             '  "${result.name}": ${result.value}${count < resultList.length ? ',' : ''}\n',
@@ -73,7 +73,7 @@ class ValidateProject {
       buffer.write('}');
       logger.printStatus(buffer.toString());
     } else {
-      final resultsString = <String>[];
+      final List<String> resultsString = <String>[];
       for (final ProjectValidator validator in results.keys) {
         if (results[validator] != null) {
           resultsString.add(validator.title);

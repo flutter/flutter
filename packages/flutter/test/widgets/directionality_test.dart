@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Directionality', (WidgetTester tester) async {
-    final log = <TextDirection>[];
+    final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
       builder: (BuildContext context) {
         log.add(Directionality.of(context));
@@ -27,7 +27,7 @@ void main() {
   });
 
   testWidgets('Directionality default', (WidgetTester tester) async {
-    var good = false;
+    bool good = false;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {

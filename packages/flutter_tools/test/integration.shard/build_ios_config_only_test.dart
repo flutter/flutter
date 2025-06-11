@@ -25,7 +25,7 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-      final buildCommand = <String>[
+      final List<String> buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -70,7 +70,7 @@ void main() {
         buildCommand,
         workingDirectory: workingDirectory,
       );
-      final secondRunStdout = secondRunResult.stdout.toString();
+      final String secondRunStdout = secondRunResult.stdout.toString();
 
       expect(secondRunResult, const ProcessResultMatcher());
       // Do not run "pod install" when nothing changes.

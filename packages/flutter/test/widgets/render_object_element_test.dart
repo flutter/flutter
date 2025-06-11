@@ -205,18 +205,18 @@ class RenderSwapper extends RenderBox {
     assert(constraints.hasTightHeight);
     size = constraints.biggest;
     const Offset topOffset = Offset.zero;
-    final bottomOffset = Offset(0, size.height / 2);
+    final Offset bottomOffset = Offset(0, size.height / 2);
     final BoxConstraints childConstraints = constraints.copyWith(
       minHeight: constraints.minHeight / 2,
       maxHeight: constraints.maxHeight / 2,
     );
     if (stable != null) {
-      final stableParentData = stable!.parentData! as BoxParentData;
+      final BoxParentData stableParentData = stable!.parentData! as BoxParentData;
       stable!.layout(childConstraints);
       stableParentData.offset = _swapperIsOnTop! ? bottomOffset : topOffset;
     }
     if (swapper != null) {
-      final swapperParentData = swapper!.parentData! as BoxParentData;
+      final BoxParentData swapperParentData = swapper!.parentData! as BoxParentData;
       swapper!.layout(childConstraints);
       swapperParentData.offset = _swapperIsOnTop! ? topOffset : bottomOffset;
     }
@@ -225,7 +225,7 @@ class RenderSwapper extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject child) {
-      final childParentData = child.parentData! as BoxParentData;
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
       context.paintChild(child, offset + childParentData.offset);
     });
   }

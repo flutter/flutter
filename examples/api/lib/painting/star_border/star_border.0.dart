@@ -379,7 +379,7 @@ class OptionModel extends ChangeNotifier {
   }
 
   void reset() {
-    final defaultModel = OptionModel();
+    final OptionModel defaultModel = OptionModel();
     _pointRounding = defaultModel.pointRounding;
     _valleyRounding = defaultModel.valleyRounding;
     _rotation = defaultModel.rotation;

@@ -276,8 +276,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _markChildWidgetCacheAsDirty();
     }
 
-    final hasNewChild = widget.child != null;
-    final hasOldChild = _currentEntry != null;
+    final bool hasNewChild = widget.child != null;
+    final bool hasOldChild = _currentEntry != null;
     if (hasNewChild != hasOldChild ||
         hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
@@ -309,12 +309,12 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     if (widget.child == null) {
       return;
     }
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
     );
-    final animation = CurvedAnimation(
+    final CurvedAnimation animation = CurvedAnimation(
       parent: controller,
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
@@ -339,7 +339,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     required AnimationController controller,
     required CurvedAnimation animation,
   }) {
-    final entry = _ChildEntry(
+    final _ChildEntry entry = _ChildEntry(
       widgetChild: child,
       transition: KeyedSubtree.wrap(builder(child, animation), _childNumber),
       animation: animation,

@@ -28,9 +28,9 @@ class _NoNotificationContextScrollableState extends ScrollableState {
 void main() {
   group('ScrollableDetails', () {
     test('copyWith / == / hashCode', () {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
-      final details = ScrollableDetails(
+      final ScrollableDetails details = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -57,14 +57,14 @@ void main() {
     });
 
     test('toString', () {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
-      const bareDetails = ScrollableDetails(direction: AxisDirection.right);
+      const ScrollableDetails bareDetails = ScrollableDetails(direction: AxisDirection.right);
       expect(
         bareDetails.toString(),
         equalsIgnoringHashCodes('ScrollableDetails#00000(axisDirection: AxisDirection.right)'),
       );
-      final fullDetails = ScrollableDetails(
+      final ScrollableDetails fullDetails = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -83,14 +83,14 @@ void main() {
     });
 
     test('deprecated clipBehavior is backwards compatible', () {
-      const deprecatedClip = ScrollableDetails(
+      const ScrollableDetails deprecatedClip = ScrollableDetails(
         direction: AxisDirection.right,
         clipBehavior: Clip.hardEdge,
       );
       expect(deprecatedClip.clipBehavior, Clip.hardEdge);
       expect(deprecatedClip.decorationClipBehavior, Clip.hardEdge);
 
-      const newClip = ScrollableDetails(
+      const ScrollableDetails newClip = ScrollableDetails(
         direction: AxisDirection.right,
         decorationClipBehavior: Clip.hardEdge,
       );
@@ -102,7 +102,7 @@ void main() {
   testWidgets(
     "Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics",
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -167,7 +167,7 @@ void main() {
   testWidgets(
     'Vertical scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -237,7 +237,7 @@ void main() {
   testWidgets(
     'Horizontal scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -296,7 +296,7 @@ void main() {
   testWidgets(
     'Horizontal scrollables are scrolled the correct direction in RTL locales.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -358,9 +358,9 @@ void main() {
   testWidgets(
     'Reversed vertical scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
-      final focusNode = FocusNode(debugLabel: 'SizedBox');
+      final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -432,9 +432,9 @@ void main() {
   testWidgets(
     'Reversed horizontal scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
-      final focusNode = FocusNode(debugLabel: 'SizedBox');
+      final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -491,9 +491,9 @@ void main() {
   testWidgets(
     'Custom scrollables with a center sliver are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
-      final items = List<String>.generate(20, (int index) => 'Item $index');
+      final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -525,7 +525,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
         equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
       );
-      for (var i = 0; i < 10; ++i) {
+      for (int i = 0; i < 10; ++i) {
         // We exclude the modifier keys here for web testing since default web shortcuts
         // do not use a modifier key with arrow keys for ScrollActions.
         if (!kIsWeb) {
@@ -543,7 +543,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
         equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)),
       );
-      for (var i = 0; i < 10; ++i) {
+      for (int i = 0; i < 10; ++i) {
         if (!kIsWeb) {
           await tester.sendKeyDownEvent(modifierKey);
         }
@@ -602,16 +602,16 @@ void main() {
   testWidgets(
     'Invoking a ScrollAction when notificationContext is null does not cause an exception.',
     (WidgetTester tester) async {
-      const keysWithModifier = <LogicalKeyboardKey>[
+      const List<LogicalKeyboardKey> keysWithModifier = <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowDown,
         LogicalKeyboardKey.arrowUp,
       ];
-      const keys = <LogicalKeyboardKey>[
+      const List<LogicalKeyboardKey> keys = <LogicalKeyboardKey>[
         ...keysWithModifier,
         LogicalKeyboardKey.pageDown,
         LogicalKeyboardKey.pageUp,
       ];
-      final controller = ScrollController();
+      final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -646,7 +646,7 @@ void main() {
         equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
       );
 
-      for (final key in keys) {
+      for (final LogicalKeyboardKey key in keys) {
         // The default web shortcuts do not use a modifier key for ScrollActions.
         if (!kIsWeb && keysWithModifier.contains(key)) {
           await tester.sendKeyDownEvent(modifierKey);

@@ -36,8 +36,8 @@ void main() {
   Future<StringBuffer> runApp() async {
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
-    final l10nEnd = Completer<void>();
-    final stdout = StringBuffer();
+    final Completer<void> l10nEnd = Completer<void>();
+    final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       if (line.contains('#l10n')) {
         stdout.writeln(line.substring(line.indexOf('#l10n')));

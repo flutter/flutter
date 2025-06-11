@@ -13,10 +13,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize scale gestures', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
-    final tap = TapGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
@@ -38,17 +38,17 @@ void main() {
       updatedPointerCount = details.pointerCount;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    var didTap = false;
+    bool didTap = false;
     tap.onTap = () {
       didTap = true;
     };
 
-    final pointer1 = TestPointer();
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -88,7 +88,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Two-finger scaling
-    final pointer2 = TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
@@ -151,7 +151,7 @@ void main() {
     updatedPointerCount = null;
 
     // Three-finger scaling
-    final pointer3 = TestPointer(3);
+    final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
@@ -276,11 +276,11 @@ void main() {
   });
 
   testGesture('Rejects scale gestures from unallowed device kinds', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer(
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
     );
 
-    var didStartScale = false;
+    bool didStartScale = false;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
     };
@@ -290,7 +290,7 @@ void main() {
       updatedScale = details.scale;
     };
 
-    final mousePointer = TestPointer(1, PointerDeviceKind.mouse);
+    final TestPointer mousePointer = TestPointer(1, PointerDeviceKind.mouse);
 
     final PointerDownEvent down = mousePointer.down(Offset.zero);
     scale.addPointer(down);
@@ -312,11 +312,11 @@ void main() {
   testGesture(
     'Scale gestures starting from allowed device kinds cannot be ended from unallowed devices',
     (GestureTester tester) {
-      final scale = ScaleGestureRecognizer(
+      final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
         supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
       );
 
-      var didStartScale = false;
+      bool didStartScale = false;
       Offset? updatedFocalPoint;
       scale.onStart = (ScaleStartDetails details) {
         didStartScale = true;
@@ -329,12 +329,12 @@ void main() {
         updatedFocalPoint = details.focalPoint;
       };
 
-      var didEndScale = false;
+      bool didEndScale = false;
       scale.onEnd = (ScaleEndDetails details) {
         didEndScale = true;
       };
 
-      final touchPointer = TestPointer();
+      final TestPointer touchPointer = TestPointer();
 
       final PointerDownEvent down = touchPointer.down(Offset.zero);
       scale.addPointer(down);
@@ -357,7 +357,7 @@ void main() {
       expect(didEndScale, isFalse);
 
       // Two-finger scaling
-      final mousePointer = TestPointer(2, PointerDeviceKind.mouse);
+      final TestPointer mousePointer = TestPointer(2, PointerDeviceKind.mouse);
       final PointerDownEvent down2 = mousePointer.down(const Offset(10.0, 20.0));
       scale.addPointer(down2);
       tester.closeArena(2);
@@ -378,10 +378,10 @@ void main() {
   );
 
   testGesture('Scale gesture competes with drag', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
-    final drag = HorizontalDragGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
-    final log = <String>[];
+    final List<String> log = <String>[];
 
     scale.onStart = (ScaleStartDetails details) {
       log.add('scale-start');
@@ -400,7 +400,7 @@ void main() {
       log.add('drag-end');
     };
 
-    final pointer1 = TestPointer();
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
@@ -419,7 +419,7 @@ void main() {
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
-    final pointer2 = TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     drag.addPointer(down2);
@@ -448,7 +448,7 @@ void main() {
     // TODO(ianh): https://github.com/flutter/flutter/issues/11384
     // In this case, we move fast, so that the scale wins. If we moved slowly,
     // the horizontal drag would win, since it was added first.
-    final pointer3 = TestPointer(3);
+    final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(30.0, 30.0));
     scale.addPointer(down3);
     drag.addPointer(down3);
@@ -470,10 +470,10 @@ void main() {
   });
 
   testGesture('Should recognize rotation gestures', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
-    final tap = TapGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
@@ -491,17 +491,17 @@ void main() {
       updatedPointerCount = details.pointerCount;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    var didTap = false;
+    bool didTap = false;
     tap.onTap = () {
       didTap = true;
     };
 
-    final pointer1 = TestPointer();
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -532,7 +532,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Two-finger scaling
-    final pointer2 = TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(30.0, 40.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
@@ -576,7 +576,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Three-finger scaling
-    final pointer3 = TestPointer(3);
+    final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
@@ -692,7 +692,7 @@ void main() {
 
   // Regressing test for https://github.com/flutter/flutter/issues/78941
   testGesture('First rotation test', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     addTearDown(scale.dispose);
 
     double? updatedRotation;
@@ -700,13 +700,13 @@ void main() {
       updatedRotation = details.rotation;
     };
 
-    final pointer1 = TestPointer();
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
     tester.route(down);
 
-    final pointer2 = TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
     scale.addPointer(down2);
     tester.closeArena(2);
@@ -720,18 +720,18 @@ void main() {
   });
 
   testGesture('Scale gestures pointer count test', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
-    var pointerCountOfStart = 0;
+    int pointerCountOfStart = 0;
     scale.onStart = (ScaleStartDetails details) => pointerCountOfStart = details.pointerCount;
 
-    var pointerCountOfUpdate = 0;
+    int pointerCountOfUpdate = 0;
     scale.onUpdate = (ScaleUpdateDetails details) => pointerCountOfUpdate = details.pointerCount;
 
-    var pointerCountOfEnd = 0;
+    int pointerCountOfEnd = 0;
     scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
-    final pointer1 = TestPointer();
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
@@ -744,7 +744,7 @@ void main() {
     expect(pointerCountOfUpdate, 1);
 
     // Two-finger scaling
-    final pointer2 = TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     tester.closeArena(2);
@@ -774,12 +774,12 @@ void main() {
   testGesture('Should recognize scale gestures from pointer pan/zoom events', (
     GestureTester tester,
   ) {
-    final scale = ScaleGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     addTearDown(scale.dispose);
-    final drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     addTearDown(drag.dispose);
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
@@ -801,12 +801,12 @@ void main() {
       updatedPointerCount = details.pointerCount;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    final pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);
@@ -888,12 +888,12 @@ void main() {
   });
 
   testGesture('Pointer pan/zooms should work alongside touches', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     addTearDown(scale.dispose);
-    final drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     addTearDown(drag.dispose);
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
@@ -917,14 +917,14 @@ void main() {
       updatedPointerCount = details.pointerCount;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    final touchPointer1 = TestPointer(2);
-    final touchPointer2 = TestPointer(3);
-    final panZoomPointer = TestPointer(4, PointerDeviceKind.trackpad);
+    final TestPointer touchPointer1 = TestPointer(2);
+    final TestPointer touchPointer2 = TestPointer(3);
+    final TestPointer panZoomPointer = TestPointer(4, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent panZoomStart = panZoomPointer.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(panZoomStart);
@@ -1090,10 +1090,10 @@ void main() {
   });
 
   testGesture('Scale gesture competes with drag for trackpad gesture', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer();
-    final drag = HorizontalDragGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
-    final log = <String>[];
+    final List<String> log = <String>[];
 
     scale.onStart = (ScaleStartDetails details) {
       log.add('scale-start');
@@ -1112,7 +1112,7 @@ void main() {
       log.add('drag-end');
     };
 
-    final pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent down = pointer1.panZoomStart(const Offset(10.0, 10.0));
     scale.addPointerPanZoom(down);
@@ -1133,7 +1133,7 @@ void main() {
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
-    final pointer2 = TestPointer(3, PointerDeviceKind.trackpad);
+    final TestPointer pointer2 = TestPointer(3, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down2 = pointer2.panZoomStart(const Offset(10.0, 20.0));
     scale.addPointerPanZoom(down2);
     drag.addPointerPanZoom(down2);
@@ -1162,7 +1162,7 @@ void main() {
     // TODO(ianh): https://github.com/flutter/flutter/issues/11384
     // In this case, we move fast, so that the scale wins. If we moved slowly,
     // the horizontal drag would win, since it was added first.
-    final pointer3 = TestPointer(4, PointerDeviceKind.trackpad);
+    final TestPointer pointer3 = TestPointer(4, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down3 = pointer3.panZoomStart(const Offset(30.0, 30.0));
     scale.addPointerPanZoom(down3);
     drag.addPointerPanZoom(down3);
@@ -1186,14 +1186,14 @@ void main() {
   testGesture('Scale gesture from pan/zoom events properly handles DragStartBehavior.start', (
     GestureTester tester,
   ) {
-    final scale = ScaleGestureRecognizer(
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       dragStartBehavior: DragStartBehavior.start,
     );
     addTearDown(scale.dispose);
-    final drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
     addTearDown(drag.dispose);
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
@@ -1214,12 +1214,12 @@ void main() {
       updatedDelta = details.focalPointDelta;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    final pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);
@@ -1293,12 +1293,12 @@ void main() {
   });
 
   testGesture('scale trackpadScrollCausesScale', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer(
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       dragStartBehavior: DragStartBehavior.start,
       trackpadScrollCausesScale: true,
     );
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     int? updatedPointerCount;
     scale.onStart = (ScaleStartDetails details) {
@@ -1316,12 +1316,12 @@ void main() {
       updatedPointerCount = details.pointerCount;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 
-    final pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);
@@ -1447,26 +1447,26 @@ void main() {
   });
 
   testGesture('scale ending velocity', (GestureTester tester) {
-    final scale = ScaleGestureRecognizer(
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       dragStartBehavior: DragStartBehavior.start,
       trackpadScrollCausesScale: true,
     );
 
-    var didStartScale = false;
+    bool didStartScale = false;
     Offset? updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
-    var didEndScale = false;
+    bool didEndScale = false;
     double? scaleEndVelocity;
     scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
       scaleEndVelocity = details.scaleVelocity;
     };
 
-    final pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);
@@ -1484,7 +1484,7 @@ void main() {
     expect(didEndScale, isFalse);
 
     // Zoom in by scrolling up.
-    for (var i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
       tester.route(
         pointer1.panZoomUpdate(
           Offset.zero,
@@ -1508,10 +1508,10 @@ void main() {
   testGesture(
     'ScaleStartDetails and ScaleUpdateDetails callbacks should contain their event.timestamp',
     (GestureTester tester) {
-      final scale = ScaleGestureRecognizer();
-      final tap = TapGestureRecognizer();
+      final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+      final TapGestureRecognizer tap = TapGestureRecognizer();
 
-      var didStartScale = false;
+      bool didStartScale = false;
       Offset? updatedFocalPoint;
       Duration? initialSourceTimestamp;
       scale.onStart = (ScaleStartDetails details) {
@@ -1534,17 +1534,17 @@ void main() {
         updatedSourceTimestamp = details.sourceTimeStamp;
       };
 
-      var didEndScale = false;
+      bool didEndScale = false;
       scale.onEnd = (ScaleEndDetails details) {
         didEndScale = true;
       };
 
-      var didTap = false;
+      bool didTap = false;
       tap.onTap = () {
         didTap = true;
       };
 
-      final pointer1 = TestPointer();
+      final TestPointer pointer1 = TestPointer();
 
       final PointerDownEvent down = pointer1.down(
         Offset.zero,
@@ -1593,7 +1593,7 @@ void main() {
       expect(scale.pointerCount, 1);
 
       // Two-finger scaling.
-      final pointer2 = TestPointer(2);
+      final TestPointer pointer2 = TestPointer(2);
       final PointerDownEvent down2 = pointer2.down(
         const Offset(10.0, 20.0),
         timeStamp: const Duration(milliseconds: 30),
@@ -1674,7 +1674,7 @@ void main() {
       updatedSourceTimestamp = null;
 
       // Three-finger scaling.
-      final pointer3 = TestPointer(3);
+      final TestPointer pointer3 = TestPointer(3);
       final PointerDownEvent down3 = pointer3.down(
         const Offset(25.0, 35.0),
         timeStamp: const Duration(milliseconds: 80),
@@ -1834,9 +1834,9 @@ void main() {
   testGesture('ScaleStartDetails should contain the correct PointerDeviceKind', (
     GestureTester tester,
   ) {
-    final scale = ScaleGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
-    var didStartScale = false;
+    bool didStartScale = false;
     PointerDeviceKind? updatedKind;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
@@ -1848,7 +1848,7 @@ void main() {
 
     // The default kind is touch.
     // ignore: avoid_redundant_argument_values
-    final pointer1 = TestPointer(1, PointerDeviceKind.touch);
+    final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
@@ -1860,7 +1860,7 @@ void main() {
     tester.route(pointer1.up());
     expect(didStartScale, isFalse);
 
-    final pointer2 = TestPointer(2, PointerDeviceKind.mouse);
+    final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.mouse);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     tester.closeArena(2);
@@ -1871,7 +1871,7 @@ void main() {
     tester.route(pointer2.up());
     expect(didStartScale, isFalse);
 
-    final pointer3 = TestPointer(3, PointerDeviceKind.stylus);
+    final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.stylus);
     final PointerDownEvent down3 = pointer3.down(const Offset(10.0, 20.0));
     scale.addPointer(down3);
     tester.closeArena(3);
@@ -1882,7 +1882,7 @@ void main() {
     tester.route(pointer3.up());
     expect(didStartScale, isFalse);
 
-    final pointer4 = TestPointer(4, PointerDeviceKind.invertedStylus);
+    final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.invertedStylus);
     final PointerDownEvent down4 = pointer4.down(const Offset(10.0, 20.0));
     scale.addPointer(down4);
     tester.closeArena(4);
@@ -1893,7 +1893,7 @@ void main() {
     tester.route(pointer4.up());
     expect(didStartScale, isFalse);
 
-    final pointer5 = TestPointer(5, PointerDeviceKind.unknown);
+    final TestPointer pointer5 = TestPointer(5, PointerDeviceKind.unknown);
     final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 20.0));
     scale.addPointer(down5);
     tester.closeArena(5);
@@ -1904,7 +1904,7 @@ void main() {
     tester.route(pointer5.up());
     expect(didStartScale, isFalse);
 
-    final pointer6 = TestPointer(6, PointerDeviceKind.trackpad);
+    final TestPointer pointer6 = TestPointer(6, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down6 = pointer6.panZoomStart(const Offset(10.0, 20.0));
     scale.addPointerPanZoom(down6);
     tester.closeArena(6);

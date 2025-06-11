@@ -326,7 +326,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const defaultData = CupertinoThemeData();
+    const CupertinoThemeData defaultData = CupertinoThemeData();
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(
       createCupertinoColorProperty(

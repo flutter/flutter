@@ -139,7 +139,7 @@ class _AlbumTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final randomNumberGenerator = Random();
+    final Random randomNumberGenerator = Random();
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Column(

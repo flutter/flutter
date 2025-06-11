@@ -74,7 +74,7 @@ void main() {
     );
 
     testUsingContext('alias aab', () async {
-      final command = BuildAppBundleCommand(logger: BufferLogger.test());
+      final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));
     });
 
@@ -367,7 +367,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   List<String>? arguments,
 }) async {
-  final command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',

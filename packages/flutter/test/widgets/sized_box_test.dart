@@ -8,31 +8,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SizedBox constructors', (WidgetTester tester) async {
-    const a = SizedBox();
+    const SizedBox a = SizedBox();
     expect(a.width, isNull);
     expect(a.height, isNull);
 
-    const b = SizedBox(width: 10.0);
+    const SizedBox b = SizedBox(width: 10.0);
     expect(b.width, 10.0);
     expect(b.height, isNull);
 
-    const c = SizedBox(width: 10.0, height: 20.0);
+    const SizedBox c = SizedBox(width: 10.0, height: 20.0);
     expect(c.width, 10.0);
     expect(c.height, 20.0);
 
-    final d = SizedBox.fromSize();
+    final SizedBox d = SizedBox.fromSize();
     expect(d.width, isNull);
     expect(d.height, isNull);
 
-    final e = SizedBox.fromSize(size: const Size(1.0, 2.0));
+    final SizedBox e = SizedBox.fromSize(size: const Size(1.0, 2.0));
     expect(e.width, 1.0);
     expect(e.height, 2.0);
 
-    const f = SizedBox.expand();
+    const SizedBox f = SizedBox.expand();
     expect(f.width, double.infinity);
     expect(f.height, double.infinity);
 
-    const g = SizedBox.shrink();
+    const SizedBox g = SizedBox.shrink();
     expect(g.width, 0.0);
     expect(g.height, 0.0);
   });

@@ -439,7 +439,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   }
 
   static Iterable<FocusNode> _getDescendantsWithoutExpandingScope(FocusNode node) {
-    final result = <FocusNode>[];
+    final List<FocusNode> result = <FocusNode>[];
     for (final FocusNode child in node.children) {
       result.add(child);
       if (child is! FocusScopeNode) {
@@ -456,7 +456,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ) {
     final FocusTraversalPolicy defaultPolicy =
         scopeGroupNode?.policy ?? ReadingOrderTraversalPolicy();
-    final groups =
+    final Map<FocusNode?, _FocusTraversalGroupInfo> groups =
         <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in _getDescendantsWithoutExpandingScope(scope)) {
       final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(node);
@@ -520,7 +520,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
 
     // Traverse the group tree, adding the children of members in the order they
     // appear in the member lists.
-    final sortedDescendants = <FocusNode>[];
+    final List<FocusNode> sortedDescendants = <FocusNode>[];
     void visitGroups(_FocusTraversalGroupInfo info) {
       for (final FocusNode node in info.members) {
         if (groups.containsKey(node)) {
@@ -670,7 +670,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
 
     final Iterable<FocusNode> maybeFlipped = forward ? sortedNodes : sortedNodes.reversed;
     FocusNode? previousNode;
-    for (final node in maybeFlipped) {
+    for (final FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
         return _requestTabTraversalFocus(
           node,
@@ -840,7 +840,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           eligibleNodes = eligibleNodes.toList().reversed;
         }
         // Find any nodes that intersect the band of the focused child.
-        final band = Rect.fromLTRB(
+        final Rect band = Rect.fromLTRB(
           focusedChild.rect.left,
           -double.infinity,
           focusedChild.rect.right,
@@ -891,7 +891,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           eligibleNodes = eligibleNodes.toList().reversed;
         }
         // Find any nodes that intersect the band of the focused child.
-        final band = Rect.fromLTRB(
+        final Rect band = Rect.fromLTRB(
           -double.infinity,
           focusedChild.rect.top,
           double.infinity,
@@ -1193,7 +1193,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusNode focusedChild,
   ) {
     final _DirectionalPolicyData? policyData = _policyData[nearestScope];
-    final newEntry = _DirectionalPolicyDataEntry(
+    final _DirectionalPolicyDataEntry newEntry = _DirectionalPolicyDataEntry(
       node: focusedChild,
       direction: direction,
     );
@@ -1412,7 +1412,7 @@ class _ReadingOrderSortData with Diagnosticable {
       (_ReadingOrderSortData member) => member.directionalAncestors.toSet(),
     );
     Set<Directionality>? common;
-    for (final ancestorSet in allAncestors) {
+    for (final Set<Directionality> ancestorSet in allAncestors) {
       common ??= ancestorSet;
       common = common.intersection(ancestorSet);
     }
@@ -1447,7 +1447,7 @@ class _ReadingOrderSortData with Diagnosticable {
   /// furthest.
   Iterable<Directionality> get directionalAncestors {
     List<Directionality> getDirectionalityAncestors(BuildContext context) {
-      final result = <Directionality>[];
+      final List<Directionality> result = <Directionality>[];
       InheritedElement? directionalityElement =
           context.getElementForInheritedWidgetOfExactType<Directionality>();
       while (directionalityElement != null) {
@@ -1576,12 +1576,12 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
       return nodes;
     }
 
-    final data = <_ReadingOrderSortData>[
+    final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[
       for (final FocusNode node in nodes) _ReadingOrderSortData(node),
     ];
 
-    final sortedList = <FocusNode>[];
-    final unplaced = data;
+    final List<FocusNode> sortedList = <FocusNode>[];
+    final List<_ReadingOrderSortData> unplaced = data;
 
     // Pick the initial widget as the one that is at the beginning of the band
     // of the topmost, or the topmost, if there are no others in its band.
@@ -1608,8 +1608,8 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
     Iterable<_ReadingOrderSortData> candidates,
   ) {
     TextDirection? currentDirection = candidates.first.directionality;
-    var currentGroup = <_ReadingOrderSortData>[];
-    final result = <_ReadingOrderDirectionalGroupData>[];
+    List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
+    final List<_ReadingOrderDirectionalGroupData> result = <_ReadingOrderDirectionalGroupData>[];
     // Split candidates into runs of the same directionality.
     for (final _ReadingOrderSortData candidate in candidates) {
       if (candidate.directionality == currentDirection) {
@@ -1624,7 +1624,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
       result.add(_ReadingOrderDirectionalGroupData(currentGroup));
     }
     // Sort each group separately. Each group has the same directionality.
-    for (final bandGroup in result) {
+    for (final _ReadingOrderDirectionalGroupData bandGroup in result) {
       if (bandGroup.members.length == 1) {
         continue; // No need to sort one node.
       }
@@ -1647,7 +1647,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
       _ReadingOrderSortData current,
       Iterable<_ReadingOrderSortData> candidates,
     ) {
-      final band = Rect.fromLTRB(
+      final Rect band = Rect.fromLTRB(
         double.negativeInfinity,
         current.rect.top,
         double.infinity,
@@ -1906,9 +1906,9 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy
       descendants,
       currentNode,
     );
-    final unordered = <FocusNode>[];
-    final ordered = <_OrderedFocusInfo>[];
-    for (final node in sortedDescendants) {
+    final List<FocusNode> unordered = <FocusNode>[];
+    final List<_OrderedFocusInfo> ordered = <_OrderedFocusInfo>[];
+    for (final FocusNode node in sortedDescendants) {
       final FocusOrder? order = FocusTraversalOrder.maybeOf(node.context!);
       if (order != null) {
         ordered.add(_OrderedFocusInfo(node: node, order: order));

@@ -17,7 +17,7 @@ void testNoStopwatches(Stopwatch stopwatch) {
   // OK for now, but we probably want to catch public APIs that take a Stopwatch?
   stopwatch.runtimeType;
   // Bad: introducing Stopwatch from dart:core.
-  final localVariable = Stopwatch(); // ERROR: Stopwatch()
+  final Stopwatch localVariable = Stopwatch(); // ERROR: Stopwatch()
   // Bad: introducing Stopwatch from dart:core.
   Stopwatch().runtimeType; // ERROR: Stopwatch()
 

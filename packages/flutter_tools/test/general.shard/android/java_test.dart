@@ -81,7 +81,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         'finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found',
         () {
           final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
-          const javaHome = '/java/home';
+          const String javaHome = '/java/home';
           final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
           const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
@@ -144,7 +144,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
       });
 
       testWithoutContext('finds and prefers JDK found at config item "jdk-dir" if it is set', () {
-        const configuredJdkPath = '/jdk';
+        const String configuredJdkPath = '/jdk';
         config.setValue('jdk-dir', configuredJdkPath);
         JavaSource expectedJavaHomeSource = JavaSource.flutterConfig;
 
@@ -152,8 +152,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
         );
 
-        final androidStudio = _FakeAndroidStudioWithJdk();
-        final platformWithJavaHome = FakePlatform(
+        final _FakeAndroidStudioWithJdk androidStudio = _FakeAndroidStudioWithJdk();
+        final FakePlatform platformWithJavaHome = FakePlatform(
           environment: <String, String>{'JAVA_HOME': '/old/jdk'},
         );
         Java? java = Java.find(

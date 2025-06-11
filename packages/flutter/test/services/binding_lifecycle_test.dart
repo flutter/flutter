@@ -31,10 +31,10 @@ class _TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 }
 
 void main() {
-  final binding = _TestBinding();
+  final _TestBinding binding = _TestBinding();
 
   test('can send message on completion of binding initialization', () async {
-    var called = false;
+    bool called = false;
     binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall method,
     ) async {

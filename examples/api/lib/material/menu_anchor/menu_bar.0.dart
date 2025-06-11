@@ -44,7 +44,7 @@ class MenuEntry {
   }
 
   static Map<MenuSerializableShortcut, Intent> shortcuts(List<MenuEntry> selections) {
-    final result = <MenuSerializableShortcut, Intent>{};
+    final Map<MenuSerializableShortcut, Intent> result = <MenuSerializableShortcut, Intent>{};
     for (final MenuEntry selection in selections) {
       if (selection.menuChildren != null) {
         result.addAll(MenuEntry.shortcuts(selection.menuChildren!));
@@ -129,7 +129,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
   }
 
   List<MenuEntry> _getMenus() {
-    final result = <MenuEntry>[
+    final List<MenuEntry> result = <MenuEntry>[
       MenuEntry(
         label: 'Menu Demo',
         menuChildren: <MenuEntry>[

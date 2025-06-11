@@ -52,7 +52,7 @@ void main() {
   });
 
   Future<BuildBundleCommand> runCommandIn(String projectPath, {List<String>? arguments}) async {
-    final command = BuildBundleCommand(
+    final BuildBundleCommand command = BuildBundleCommand(
       logger: BufferLogger.test(),
       bundleBuilder: fakeBundleBuilder,
     );

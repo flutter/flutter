@@ -39,19 +39,19 @@ List<Paragraph> generateLaidOutParagraphs({
   required double widthConstraint,
   required Color color,
 }) {
-  final strings = <Paragraph>[];
-  var wordPointer = 0; // points to the next word in lipsum to extract
-  for (var i = 0; i < paragraphCount; i++) {
+  final List<Paragraph> strings = <Paragraph>[];
+  int wordPointer = 0; // points to the next word in lipsum to extract
+  for (int i = 0; i < paragraphCount; i++) {
     final int wordCount =
         minWordCountPerParagraph +
         _random.nextInt(maxWordCountPerParagraph - minWordCountPerParagraph + 1);
-    final string = <String>[];
-    for (var j = 0; j < wordCount; j++) {
+    final List<String> string = <String>[];
+    for (int j = 0; j < wordCount; j++) {
       string.add(lipsum[wordPointer]);
       wordPointer = (wordPointer + 1) % lipsum.length;
     }
 
-    final builder =
+    final ParagraphBuilder builder =
         ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
           ..pushStyle(TextStyle(color: color, fontSize: 18.0))
           ..addText(string.join(' '))

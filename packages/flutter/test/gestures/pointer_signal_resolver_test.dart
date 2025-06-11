@@ -23,7 +23,7 @@ class PointerSignalTester {
   PointerSignalEvent event = const PointerScrollEvent();
 
   TestPointerSignalListener addListener() {
-    final listener = TestPointerSignalListener(event);
+    final TestPointerSignalListener listener = TestPointerSignalListener(event);
     resolver.register(event, listener.callback);
     return listener;
   }
@@ -38,13 +38,13 @@ class PointerSignalTester {
 
 void main() {
   test('Resolving with no entries should be a no-op', () {
-    final tester = PointerSignalTester();
+    final PointerSignalTester tester = PointerSignalTester();
     tester.resolver.resolve(tester.event);
   });
 
   test('Resolving with no entries should notify engine of no-op', () {
-    var allowedPlatformDefault = false;
-    final tester = PointerSignalTester();
+    bool allowedPlatformDefault = false;
+    final PointerSignalTester tester = PointerSignalTester();
     tester.event = PointerScrollEvent(
       onRespond: ({required bool allowPlatformDefault}) {
         allowedPlatformDefault = allowPlatformDefault;
@@ -59,7 +59,7 @@ void main() {
   });
 
   test('First entry should always win', () {
-    final tester = PointerSignalTester();
+    final PointerSignalTester tester = PointerSignalTester();
     final TestPointerSignalListener first = tester.addListener();
     final TestPointerSignalListener second = tester.addListener();
     tester.resolve();
@@ -68,7 +68,7 @@ void main() {
   });
 
   test('Re-use after resolve should work', () {
-    final tester = PointerSignalTester();
+    final PointerSignalTester tester = PointerSignalTester();
     final TestPointerSignalListener first = tester.addListener();
     final TestPointerSignalListener second = tester.addListener();
     tester.resolve();
@@ -84,8 +84,8 @@ void main() {
   });
 
   test('works with transformed events', () {
-    final resolver = PointerSignalResolver();
-    const originalEvent = PointerScrollEvent();
+    final PointerSignalResolver resolver = PointerSignalResolver();
+    const PointerScrollEvent originalEvent = PointerScrollEvent();
     final PointerSignalEvent transformedEvent = originalEvent.transformed(
       Matrix4.translationValues(10.0, 20.0, 0.0),
     );
@@ -99,7 +99,7 @@ void main() {
     expect(originalEvent, isNot(same(anotherTransformedEvent)));
     expect(anotherTransformedEvent.original, same(originalEvent));
 
-    final events = <PointerSignalEvent>[];
+    final List<PointerSignalEvent> events = <PointerSignalEvent>[];
     resolver.register(transformedEvent, (PointerSignalEvent event) {
       events.add(event);
     });

@@ -916,7 +916,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
 
     _SwitchConfig switchConfig;
     SwitchThemeData defaults;
-    var applyCupertinoTheme = false;
+    bool applyCupertinoTheme = false;
     double disabledOpacity = 1;
     switch (widget.switchType) {
       case _SwitchType.material:
@@ -1026,7 +1026,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         switchTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final activePressedStates = activeStates..add(MaterialState.pressed);
+    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedThumbColor =
         widget.thumbColor?.resolve(activePressedStates) ??
         _widgetThumbColor.resolve(activePressedStates) ??
@@ -1038,7 +1038,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         activeThumbColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedThumbColor =
         widget.thumbColor?.resolve(inactivePressedStates) ??
         _widgetThumbColor.resolve(inactivePressedStates) ??
@@ -1556,14 +1556,14 @@ class _SwitchPainter extends ToggleablePainter {
         _pressedInactiveThumbRadius = inactiveThumbRadius;
       }
     }
-    final inactiveThumbSize =
+    final Size inactiveThumbSize =
         isCupertino
             ? Size(
               _pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!,
               _pressedInactiveThumbRadius! * 2,
             )
             : Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
-    final activeThumbSize =
+    final Size activeThumbSize =
         isCupertino
             ? Size(
               _pressedActiveThumbRadius! * 2 + _pressedThumbExtension!,
@@ -1677,7 +1677,7 @@ class _SwitchPainter extends ToggleablePainter {
     final ImageErrorListener? thumbErrorListener =
         currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
 
-    final paint = Paint()..color = trackColor;
+    final Paint paint = Paint()..color = trackColor;
 
     final Offset trackPaintOffset = _computeTrackPaintOffset(size, trackWidth, trackHeight);
     final Offset thumbPaintOffset = _computeThumbPaintOffset(
@@ -1685,7 +1685,7 @@ class _SwitchPainter extends ToggleablePainter {
       thumbSize,
       visualPosition,
     );
-    final radialReactionOrigin = Offset(
+    final Offset radialReactionOrigin = Offset(
       thumbPaintOffset.dx + thumbSize.height / 2,
       size.height / 2,
     );
@@ -1738,31 +1738,31 @@ class _SwitchPainter extends ToggleablePainter {
     Color? trackOutlineColor,
     double? trackOutlineWidth,
   ) {
-    final trackRect = Rect.fromLTWH(
+    final Rect trackRect = Rect.fromLTWH(
       trackPaintOffset.dx,
       trackPaintOffset.dy,
       trackWidth,
       trackHeight,
     );
     final double trackRadius = trackHeight / 2;
-    final trackRRect = RRect.fromRectAndRadius(trackRect, Radius.circular(trackRadius));
+    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, Radius.circular(trackRadius));
 
     canvas.drawRRect(trackRRect, paint);
 
     // paint track outline
     if (trackOutlineColor != null) {
-      final outlineTrackRect = Rect.fromLTWH(
+      final Rect outlineTrackRect = Rect.fromLTWH(
         trackPaintOffset.dx + 1,
         trackPaintOffset.dy + 1,
         trackWidth - 2,
         trackHeight - 2,
       );
-      final outlineTrackRRect = RRect.fromRectAndRadius(
+      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
         outlineTrackRect,
         Radius.circular(trackRadius),
       );
 
-      final outlinePaint =
+      final Paint outlinePaint =
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = trackOutlineWidth ?? 2.0
@@ -1774,7 +1774,7 @@ class _SwitchPainter extends ToggleablePainter {
     if (isCupertino) {
       if (isFocused) {
         final RRect focusedOutline = trackRRect.inflate(1.75);
-        final focusedPaint =
+        final Paint focusedPaint =
             Paint()
               ..style = PaintingStyle.stroke
               ..color = focusColor
@@ -1830,7 +1830,7 @@ class _SwitchPainter extends ToggleablePainter {
         final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
         final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
 
-        final textSpan = TextSpan(
+        final TextSpan textSpan = TextSpan(
           text: String.fromCharCode(iconData.codePoint),
           style: TextStyle(
             fontVariations: <FontVariation>[
@@ -1864,7 +1864,7 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
-    final thumbBounds = RRect.fromLTRBR(
+    final RRect thumbBounds = RRect.fromLTRBR(
       thumbPaintOffset.dx,
       thumbPaintOffset.dy,
       thumbPaintOffset.dx + thumbSize.width,
@@ -2107,7 +2107,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   MaterialStateProperty<Color> get thumbColor {
-    final isDark = _theme.brightness == Brightness.dark;
+    final bool isDark = _theme.brightness == Brightness.dark;
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -2122,8 +2122,8 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   MaterialStateProperty<Color> get trackColor {
-    final isDark = _theme.brightness == Brightness.dark;
-    const black32 = Color(0x52000000); // Black with 32% opacity
+    final bool isDark = _theme.brightness == Brightness.dark;
+    const Color black32 = Color(0x52000000); // Black with 32% opacity
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {

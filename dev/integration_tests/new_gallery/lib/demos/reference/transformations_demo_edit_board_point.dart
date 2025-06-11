@@ -19,7 +19,7 @@ class EditBoardPoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boardPointColors = <Color>{
+    final Set<Color> boardPointColors = <Color>{
       Colors.white,
       GalleryThemeData.darkColorScheme.primary,
       GalleryThemeData.darkColorScheme.primaryContainer,

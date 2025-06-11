@@ -51,7 +51,7 @@ class AndroidStudio {
       return null;
     }
 
-    final versionString =
+    final String? versionString =
         plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
 
     Version? version;
@@ -196,7 +196,7 @@ class AndroidStudio {
       }
     } else {
       // JetBrains Toolbox write plugins here
-      final toolboxPluginsPath = '$directory.plugins';
+      final String toolboxPluginsPath = '$directory.plugins';
 
       if (globals.fs.directory(toolboxPluginsPath).existsSync()) {
         return toolboxPluginsPath;
@@ -274,7 +274,7 @@ class AndroidStudio {
       globals.platform.isMacOS ? _allMacOS() : _allLinuxOrWindows();
 
   static List<AndroidStudio> _allMacOS() {
-    final candidatePaths = <FileSystemEntity>[];
+    final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
     void checkForStudio(String path) {
       if (!globals.fs.isDirectorySync(path)) {
@@ -283,7 +283,7 @@ class AndroidStudio {
       try {
         final Iterable<Directory> directories =
             globals.fs.directory(path).listSync(followLinks: false).whereType<Directory>();
-        for (final directory in directories) {
+        for (final Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
           if (name.startsWith('Android Studio') && name.endsWith('.app')) {
@@ -316,7 +316,7 @@ class AndroidStudio {
     }
 
     // Query Spotlight for unexpected installation locations.
-    var spotlightQueryResult = '';
+    String spotlightQueryResult = '';
     try {
       final ProcessResult spotlightResult = globals.processManager.runSync(<String>[
         'mdfind',
@@ -351,7 +351,7 @@ class AndroidStudio {
   }
 
   static List<AndroidStudio> _allLinuxOrWindows() {
-    final studios = <AndroidStudio>[];
+    final List<AndroidStudio> studios = <AndroidStudio>[];
 
     bool alreadyFoundStudioAt(String path, {Version? newerThan}) {
       return studios.any((AndroidStudio studio) {
@@ -377,14 +377,14 @@ class AndroidStudio {
     if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
       // >=4.1 has new install location at $HOME/.cache/Google
       final String cacheDirPath = globals.fs.path.join(homeDirPath, '.cache', 'Google');
-      final directoriesToSearch = <Directory>[
+      final List<Directory> directoriesToSearch = <Directory>[
         globals.fs.directory(homeDirPath),
         if (globals.fs.isDirectorySync(cacheDirPath)) globals.fs.directory(cacheDirPath),
       ];
 
-      final entities = <Directory>[];
+      final List<Directory> entities = <Directory>[];
 
-      for (final baseDir in directoriesToSearch) {
+      for (final Directory baseDir in directoriesToSearch) {
         final Iterable<Directory> directories =
             baseDir.listSync(followLinks: false).whereType<Directory>();
         entities.addAll(
@@ -394,7 +394,7 @@ class AndroidStudio {
         );
       }
 
-      for (final entity in entities) {
+      for (final Directory entity in entities) {
         final AndroidStudio? studio = AndroidStudio.fromHomeDot(entity);
         if (studio != null && !alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
@@ -425,7 +425,7 @@ class AndroidStudio {
               // ignored
             }
             if (installPath != null && globals.fs.isDirectorySync(installPath)) {
-              final studio = AndroidStudio(
+              final AndroidStudio studio = AndroidStudio(
                 installPath,
                 version: Version.parse(version),
                 studioAppName: title,
@@ -442,7 +442,7 @@ class AndroidStudio {
       }
     }
 
-    final configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
+    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null) {
       final AndroidStudio? matchingAlreadyFoundInstall =
           studios
@@ -481,7 +481,7 @@ class AndroidStudio {
   /// The returned [Directory], if not null, is guaranteed to have existed during
   /// this function's execution.
   static Directory? _configuredDir() {
-    final configuredPath = globals.config.getValue('android-studio-dir') as String?;
+    final String? configuredPath = globals.config.getValue('android-studio-dir') as String?;
     if (configuredPath == null) {
       return null;
     }
@@ -569,7 +569,7 @@ the configured path by running this command: flutter config --android-studio-dir
     // Example match: EAP AI-242.21829.142.2422.12358220
     // We try to capture "2422" here, which can be translated to a
     // more human-friendly "24.2.2".
-    final eapVersionPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
+    final RegExp eapVersionPattern = RegExp(r'EAP\s+[A-Z]{2}-\d+\.\d+\.\d+\.(\d+)\.\d+');
     final Match? eapVersionMatch = eapVersionPattern.firstMatch(text);
 
     if (eapVersionMatch == null) {

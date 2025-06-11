@@ -145,12 +145,12 @@ Iterable<String> debugWordWrap(String message, int width, {String wrapIndent = '
   if (message.length < width || message.trimLeft()[0] == '#') {
     return <String>[message];
   }
-  final wrapped = <String>[];
+  final List<String> wrapped = <String>[];
   final Match prefixMatch = _indentPattern.matchAsPrefix(message)!;
   final String prefix = wrapIndent + ' ' * prefixMatch.group(0)!.length;
-  var start = 0;
-  var startForLengthCalculations = 0;
-  var addPrefix = false;
+  int start = 0;
+  int startForLengthCalculations = 0;
+  bool addPrefix = false;
   int index = prefix.length;
   _WordWrapParseMode mode = _WordWrapParseMode.inSpace;
   late int lastWordStart;

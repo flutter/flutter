@@ -22,7 +22,7 @@ void main() {
   testWidgets('Increments and decrements value', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ActionsExampleApp());
 
-    var value = 0;
+    int value = 0;
 
     while (value < 10) {
       expect(find.text('Value: $value'), findsOneWidget);
@@ -72,7 +72,7 @@ void main() {
   });
 
   testWidgets('SaveButton tap resets dirty status and adds log', (WidgetTester tester) async {
-    final log = <String?>[];
+    final List<String?> log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
     debugPrint = (String? message, {int? wrapWidth}) {

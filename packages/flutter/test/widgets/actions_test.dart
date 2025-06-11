@@ -13,8 +13,8 @@ void main() {
   group(ActionDispatcher, () {
     testWidgets('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
-      var invoked = false;
-      const dispatcher = ActionDispatcher();
+      bool invoked = false;
+      const ActionDispatcher dispatcher = ActionDispatcher();
       final Object? result = dispatcher.invokeAction(
         TestAction(
           onInvoke: (Intent intent) {
@@ -52,7 +52,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
+      bool invoked = false;
 
       await tester.pumpWidget(
         Actions(
@@ -78,7 +78,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
+      bool invoked = false;
 
       await tester.pumpWidget(
         Actions(
@@ -102,7 +102,7 @@ void main() {
 
     testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
+      bool invoked = false;
 
       await tester.pumpWidget(
         Actions(
@@ -129,7 +129,7 @@ void main() {
 
     testWidgets('invoke throws when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
+      bool invoked = false;
 
       await tester.pumpWidget(
         Actions(
@@ -158,8 +158,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
-      const intent = TestIntent();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
@@ -184,8 +184,8 @@ void main() {
 
     testWidgets('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
-      const intent = TestIntent();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
@@ -218,8 +218,8 @@ void main() {
       "Actions can invoke actions in ancestor dispatcher if a lower one isn't specified",
       (WidgetTester tester) async {
         final GlobalKey containerKey = GlobalKey();
-        var invoked = false;
-        const intent = TestIntent();
+        bool invoked = false;
+        const TestIntent intent = TestIntent();
         final Action<Intent> testAction = TestAction(
           onInvoke: (Intent intent) {
             invoked = true;
@@ -268,8 +268,8 @@ void main() {
     testWidgets('Action can be found with find', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
-      var invoked = false;
-      final testAction = TestAction(
+      bool invoked = false;
+      final TestAction testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
           return invoked;
@@ -319,17 +319,17 @@ void main() {
     ) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
+      bool invoked = false;
       const Intent intent = TestIntent();
-      final focusNode = FocusNode(debugLabel: 'Test Node');
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
           return invoked;
         },
       );
-      var hovering = false;
-      var focusing = false;
+      bool hovering = false;
+      bool focusing = false;
 
       addTearDown(focusNode.dispose);
 
@@ -432,9 +432,9 @@ void main() {
 
     testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      final sentinel = Object();
-      var invoked = false;
-      const intent = TestIntent();
+      final Object sentinel = Object();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
@@ -458,8 +458,8 @@ void main() {
 
     testWidgets('ContextAction can return null', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      const intent = TestIntent();
-      final testAction = TestContextAction();
+      const TestIntent intent = TestIntent();
+      final TestContextAction testAction = TestContextAction();
 
       await tester.pumpWidget(
         Actions(
@@ -480,16 +480,16 @@ void main() {
 
     testWidgets('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked = false;
-      const intent = TestIntent();
-      final enabledTestAction = TestAction(
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
+      final TestAction enabledTestAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
           return invoked;
         },
       );
       enabledTestAction.enabled = true;
-      final disabledTestAction = TestAction(
+      final TestAction disabledTestAction = TestAction(
         onInvoke: (Intent intent) {
           invoked = true;
           return invoked;
@@ -522,42 +522,42 @@ void main() {
   group('Listening', () {
     testWidgets('can listen to enabled state of Actions', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
-      var invoked1 = false;
-      var invoked2 = false;
-      var invoked3 = false;
-      final action1 = TestAction(
+      bool invoked1 = false;
+      bool invoked2 = false;
+      bool invoked3 = false;
+      final TestAction action1 = TestAction(
         onInvoke: (Intent intent) {
           invoked1 = true;
           return invoked1;
         },
       );
-      final action2 = TestAction(
+      final TestAction action2 = TestAction(
         onInvoke: (Intent intent) {
           invoked2 = true;
           return invoked2;
         },
       );
-      final action3 = TestAction(
+      final TestAction action3 = TestAction(
         onInvoke: (Intent intent) {
           invoked3 = true;
           return invoked3;
         },
       );
-      var enabled1 = true;
+      bool enabled1 = true;
       action1.addActionListener(
         (Action<Intent> action) => enabled1 = action.isEnabled(const TestIntent()),
       );
       action1.enabled = false;
       expect(enabled1, isFalse);
 
-      var enabled2 = true;
+      bool enabled2 = true;
       action2.addActionListener(
         (Action<Intent> action) => enabled2 = action.isEnabled(const SecondTestIntent()),
       );
       action2.enabled = false;
       expect(enabled2, isFalse);
 
-      var enabled3 = true;
+      bool enabled3 = true;
       action3.addActionListener(
         (Action<Intent> action) => enabled3 = action.isEnabled(const ThirdTestIntent()),
       );
@@ -833,7 +833,7 @@ void main() {
     testWidgets('FocusableActionDetector can prevent its descendants from being focusable', (
       WidgetTester tester,
     ) async {
-      final buttonNode = FocusNode(debugLabel: 'Test');
+      final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
       addTearDown(buttonNode.dispose);
 
@@ -878,9 +878,9 @@ void main() {
     testWidgets('FocusableActionDetector can prevent its descendants from being traversable', (
       WidgetTester tester,
     ) async {
-      final buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
-      final buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
-      final skipTraversalNode = FocusNode(skipTraversal: true);
+      final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
+      final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
+      final FocusNode skipTraversalNode = FocusNode(skipTraversal: true);
 
       addTearDown(() {
         buttonNode1.dispose();
@@ -1053,25 +1053,25 @@ void main() {
   group('Action subclasses', () {
     testWidgets('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
       late Intent passedIntent;
-      final action = TestAction(
+      final TestAction action = TestAction(
         onInvoke: (Intent intent) {
           passedIntent = intent;
           return true;
         },
       );
-      const intent = TestIntent();
+      const TestIntent intent = TestIntent();
       action._testInvoke(intent);
       expect(passedIntent, equals(intent));
     });
 
     testWidgets('VoidCallbackAction', (WidgetTester tester) async {
-      var called = false;
+      bool called = false;
       void testCallback() {
         called = true;
       }
 
-      final action = VoidCallbackAction();
-      final intent = VoidCallbackIntent(testCallback);
+      final VoidCallbackAction action = VoidCallbackAction();
+      final VoidCallbackIntent intent = VoidCallbackIntent(testCallback);
       action.invoke(intent);
       expect(called, isTrue);
     });
@@ -1095,7 +1095,7 @@ void main() {
 
   group('Diagnostics', () {
     testWidgets('default Intent debugFillProperties', (WidgetTester tester) async {
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       // ignore: invalid_use_of_protected_member
       const TestIntent().debugFillProperties(builder);
@@ -1112,7 +1112,7 @@ void main() {
     });
 
     testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
         actions: const <Type, Action<Intent>>{},
@@ -1136,7 +1136,7 @@ void main() {
     });
 
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
         key: const ValueKey<String>('foo'),
@@ -1165,7 +1165,7 @@ void main() {
   });
 
   group('Action overriding', () {
-    final invocations = <String>[];
+    final List<String> invocations = <String>[];
     BuildContext? invokingContext;
 
     tearDown(() {
@@ -1298,7 +1298,7 @@ void main() {
       );
 
       // Invoke a bunch of times and verify it still produces the same result.
-      final randomContexts = <BuildContext>[
+      final List<BuildContext> randomContexts = <BuildContext>[
         invokingContext!,
         invokingContext2,
         invokingContext!,
@@ -1308,7 +1308,7 @@ void main() {
         invokingContext2,
       ];
 
-      for (final randomContext in randomContexts) {
+      for (final BuildContext randomContext in randomContexts) {
         Actions.invoke(randomContext, LogIntent(log: invocations));
       }
 
@@ -1765,7 +1765,7 @@ void main() {
     });
 
     testWidgets('Overriding Actions can change the intent', (WidgetTester tester) async {
-      final newLogChannel = <String>[];
+      final List<String> newLogChannel = <String>[];
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {

@@ -45,7 +45,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 
   try {
     // Replace whatever the current backend is with the specified backend.
-    final impellerBackendMetadata = RegExp(_impellerBackendMetadata(value: '.*'));
+    final RegExp impellerBackendMetadata = RegExp(_impellerBackendMetadata(value: '.*'));
     androidManifestXml.writeAsStringSync(
       androidManifestContents.replaceFirst(
         impellerBackendMetadata,
@@ -98,7 +98,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       // }
     }
 
-    for (final file in mains) {
+    for (final FileSystemEntity file in mains) {
       if (file.path.contains('hcpp')) {
         continue;
       }
@@ -113,7 +113,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           kSurfaceControlMetadataEnabled,
         ),
       );
-      for (final file in mains) {
+      for (final FileSystemEntity file in mains) {
         if (!file.path.contains('hcpp')) {
           continue;
         }

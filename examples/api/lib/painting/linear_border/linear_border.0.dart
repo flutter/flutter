@@ -80,12 +80,12 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final primarySide0 = BorderSide(
+    final BorderSide primarySide0 = BorderSide(
       width: 0,
       color: colorScheme.inversePrimary,
     ); // hairline
-    final primarySide2 = BorderSide(width: 2, color: colorScheme.onPrimaryContainer);
-    final primarySide3 = BorderSide(width: 3, color: colorScheme.inversePrimary);
+    final BorderSide primarySide2 = BorderSide(width: 2, color: colorScheme.onPrimaryContainer);
+    final BorderSide primarySide3 = BorderSide(width: 3, color: colorScheme.inversePrimary);
 
     return Scaffold(
       body: SingleChildScrollView(

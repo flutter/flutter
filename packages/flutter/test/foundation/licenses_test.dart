@@ -78,7 +78,7 @@ S
 \u0020\u0020\u0020\u0020\u0020\u0020
       Y''').paragraphs.toList();
 
-    var index = 0;
+    int index = 0;
     expect(paragraphs[index].text, 'A A A');
     expect(paragraphs[index].indent, 0);
     index += 1;

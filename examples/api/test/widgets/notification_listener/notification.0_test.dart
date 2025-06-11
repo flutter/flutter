@@ -35,13 +35,13 @@ void main() {
 
   testWidgets('Scrolling the scroll view triggers the notification', (WidgetTester tester) async {
     final DebugPrintCallback originalDebugPrint = debugPrint;
-    final logs = <String>[];
+    final List<String> logs = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       logs.add(message!);
     };
     await tester.pumpWidget(const example.NotificationExampleApp());
 
-    final testPointer = TestPointer(1, PointerDeviceKind.mouse);
+    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(tester.getCenter(find.byType(NestedScrollView)));
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 10)));
     expect(
@@ -58,13 +58,13 @@ void main() {
 
   testWidgets('Changing tabs triggers the notification', (WidgetTester tester) async {
     final DebugPrintCallback originalDebugPrint = debugPrint;
-    final logs = <String>[];
+    final List<String> logs = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       logs.add(message!);
     };
     await tester.pumpWidget(const example.NotificationExampleApp());
 
-    final testPointer = TestPointer(1, PointerDeviceKind.mouse);
+    final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
     testPointer.hover(tester.getCenter(find.byType(NestedScrollView)));
     await tester.sendEventToBinding(testPointer.scroll(const Offset(500, 0)));
     expect(

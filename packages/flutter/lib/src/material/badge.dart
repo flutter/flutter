@@ -182,7 +182,7 @@ class Badge extends StatelessWidget {
     );
     final double effectiveWidthOffset;
     final Widget badge;
-    final hasLabel = label != null;
+    final bool hasLabel = label != null;
     if (hasLabel) {
       final double minSize =
           effectiveWidthOffset = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
@@ -219,7 +219,7 @@ class Badge extends StatelessWidget {
     final AlignmentGeometry effectiveAlignment =
         alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final defaultOffset =
+    final Offset defaultOffset =
         textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
     // Adds a offset const Offset(0, 8) to avoiding breaking customers after
     // the offset calculation changes.
@@ -342,7 +342,7 @@ class _RenderBadge extends RenderAligningShiftedBox {
     child!.layout(const BoxConstraints(), parentUsesSize: true);
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final childParentData = child!.parentData! as BoxParentData;
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
     Offset badgeLocation =
         offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
     if (hasLabel) {

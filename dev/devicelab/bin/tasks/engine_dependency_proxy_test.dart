@@ -52,7 +52,7 @@ tasks.register("printEngineMavenUrl") {
         section('Checking default maven URL');
 
         String gradleOutput = await eval(gradlewExecutable, <String>['printEngineMavenUrl', '-q']);
-        const splitter = LineSplitter();
+        const LineSplitter splitter = LineSplitter();
         List<String> outputLines = splitter.convert(gradleOutput);
         String mavenUrl = outputLines.last;
         print('Returned maven url: $mavenUrl');

@@ -15,7 +15,7 @@ import '../painting/fake_image_provider.dart';
 
 Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
-  final fakeImageProvider = FakeImageProvider(fakeCodec);
+  final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
   testWidgets('Obscured image does not animate', (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();

@@ -12,8 +12,8 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
-  const userBranch = 'abc123';
-  const clientIde = 'VSCode';
+  const String userBranch = 'abc123';
+  const String clientIde = 'VSCode';
 
   late MemoryFileSystem fs;
   late Config config;

@@ -32,7 +32,7 @@ CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
 Future<String> createProject(Directory temp, {List<String>? arguments}) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = globals.fs.path.join(temp.path, 'flutter_project');
-  final command = CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
@@ -42,7 +42,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = globals.logger;
-    final contextOverrides = <Type, dynamic>{
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(

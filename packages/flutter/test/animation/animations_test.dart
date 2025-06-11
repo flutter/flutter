@@ -28,14 +28,14 @@ void main() {
     expect(kAlwaysCompleteAnimation, hasOneLineDescription);
     expect(kAlwaysDismissedAnimation, hasOneLineDescription);
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
-    var curvedAnimation = CurvedAnimation(
+    CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
       curve: Curves.ease,
     );
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: const TestVSync(),
     );
@@ -52,7 +52,7 @@ void main() {
   });
 
   test('ProxyAnimation.toString control test', () {
-    final animation = ProxyAnimation();
+    final ProxyAnimation animation = ProxyAnimation();
     expect(animation.value, 0.0);
     expect(animation.status, AnimationStatus.dismissed);
     expect(animation, hasOneLineDescription);
@@ -61,10 +61,10 @@ void main() {
   });
 
   test('ProxyAnimation set parent generates value changed', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     controller.value = 0.5;
-    var didReceiveCallback = false;
-    final animation =
+    bool didReceiveCallback = false;
+    final ProxyAnimation animation =
         ProxyAnimation()..addListener(() {
           didReceiveCallback = true;
         });
@@ -78,14 +78,14 @@ void main() {
   });
 
   test('ReverseAnimation calls listeners', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     controller.value = 0.5;
-    var didReceiveCallback = false;
+    bool didReceiveCallback = false;
     void listener() {
       didReceiveCallback = true;
     }
 
-    final animation = ReverseAnimation(controller)..addListener(listener);
+    final ReverseAnimation animation = ReverseAnimation(controller)..addListener(listener);
     expect(didReceiveCallback, isFalse);
     controller.value = 0.6;
     expect(didReceiveCallback, isTrue);
@@ -98,12 +98,12 @@ void main() {
   });
 
   test('TrainHoppingAnimation', () {
-    final currentTrain = AnimationController(vsync: const TestVSync());
-    final nextTrain = AnimationController(vsync: const TestVSync());
+    final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
+    final AnimationController nextTrain = AnimationController(vsync: const TestVSync());
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
-    var didSwitchTrains = false;
-    final animation = TrainHoppingAnimation(
+    bool didSwitchTrains = false;
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(
       currentTrain,
       nextTrain,
       onSwitchedTrain: () {
@@ -135,15 +135,15 @@ void main() {
   });
 
   test('AnimationMean control test', () {
-    final left = AnimationController(value: 0.5, vsync: const TestVSync());
-    final right = AnimationController(vsync: const TestVSync());
+    final AnimationController left = AnimationController(value: 0.5, vsync: const TestVSync());
+    final AnimationController right = AnimationController(vsync: const TestVSync());
 
-    final mean = AnimationMean(left: left, right: right);
+    final AnimationMean mean = AnimationMean(left: left, right: right);
 
     expect(mean, hasOneLineDescription);
     expect(mean.value, equals(0.25));
 
-    final log = <double>[];
+    final List<double> log = <double>[];
     void logValue() {
       log.add(mean.value);
     }
@@ -165,15 +165,15 @@ void main() {
   });
 
   test('AnimationMax control test', () {
-    final first = AnimationController(value: 0.5, vsync: const TestVSync());
-    final second = AnimationController(vsync: const TestVSync());
+    final AnimationController first = AnimationController(value: 0.5, vsync: const TestVSync());
+    final AnimationController second = AnimationController(vsync: const TestVSync());
 
-    final max = AnimationMax<double>(first, second);
+    final AnimationMax<double> max = AnimationMax<double>(first, second);
 
     expect(max, hasOneLineDescription);
     expect(max.value, equals(0.5));
 
-    final log = <double>[];
+    final List<double> log = <double>[];
     void logValue() {
       log.add(max.value);
     }
@@ -195,15 +195,15 @@ void main() {
   });
 
   test('AnimationMin control test', () {
-    final first = AnimationController(value: 0.5, vsync: const TestVSync());
-    final second = AnimationController(vsync: const TestVSync());
+    final AnimationController first = AnimationController(value: 0.5, vsync: const TestVSync());
+    final AnimationController second = AnimationController(vsync: const TestVSync());
 
-    final min = AnimationMin<double>(first, second);
+    final AnimationMin<double> min = AnimationMin<double>(first, second);
 
     expect(min, hasOneLineDescription);
     expect(min.value, equals(0.0));
 
-    final log = <double>[];
+    final List<double> log = <double>[];
     void logValue() {
       log.add(min.value);
     }
@@ -225,8 +225,8 @@ void main() {
   });
 
   test('CurvedAnimation with bogus curve', () {
-    final controller = AnimationController(vsync: const TestVSync());
-    final curved = CurvedAnimation(parent: controller, curve: const BogusCurve());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: const BogusCurve());
     FlutterError? error;
     try {
       curved.value;
@@ -251,12 +251,12 @@ FlutterError
   });
 
   test('CurvedAnimation running with different forward and reverse durations.', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
+    final CurvedAnimation curved = CurvedAnimation(
       parent: controller,
       curve: Curves.linear,
       reverseCurve: Curves.linear,
@@ -300,15 +300,15 @@ FlutterError
   });
 
   test('CurvedAnimation stops listening to parent when disposed.', () async {
-    const forwardCurve = Interval(0.0, 0.5);
-    const reverseCurve = Interval(0.5, 1.0);
+    const Interval forwardCurve = Interval(0.0, 0.5);
+    const Interval reverseCurve = Interval(0.5, 1.0);
 
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
+    final CurvedAnimation curved = CurvedAnimation(
       parent: controller,
       curve: forwardCurve,
       reverseCurve: reverseCurve,
@@ -341,12 +341,12 @@ FlutterError
   });
 
   test('ReverseAnimation running with different forward and reverse durations.', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final reversed = ReverseAnimation(
+    final ReverseAnimation reversed = ReverseAnimation(
       CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear),
     );
 
@@ -388,7 +388,7 @@ FlutterError
   });
 
   test('TweenSequence', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
 
     final Animation<double> animation = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(tween: Tween<double>(begin: 5.0, end: 10.0), weight: 4.0),
@@ -415,7 +415,7 @@ FlutterError
   });
 
   test('TweenSequence with curves', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
 
     final Animation<double> animation = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
@@ -459,7 +459,7 @@ FlutterError
   });
 
   test('TweenSequence, one tween', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
 
     final Animation<double> animation = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(tween: Tween<double>(begin: 5.0, end: 10.0), weight: 1.0),

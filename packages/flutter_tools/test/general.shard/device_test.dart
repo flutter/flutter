@@ -21,10 +21,10 @@ import '../src/fake_devices.dart';
 void main() {
   group('DeviceManager', () {
     testWithoutContext('getDevices', () async {
-      final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
-      final devices = <Device>[device1, device2, device3];
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
@@ -32,11 +32,11 @@ void main() {
     });
 
     testWithoutContext('getDeviceById exact matcher', () async {
-      final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
-      final devices = <Device>[device1, device2, device3];
-      final logger = BufferLogger.test();
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final BufferLogger logger = BufferLogger.test();
 
       // Include different device discoveries:
       // 1. One that never completes to prove the first exact match is
@@ -66,11 +66,11 @@ void main() {
     });
 
     testWithoutContext('getDeviceById exact matcher with well known ID', () async {
-      final device1 = FakeDevice('Windows', 'windows');
-      final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
-      final devices = <Device>[device1, device2, device3];
-      final logger = BufferLogger.test();
+      final FakeDevice device1 = FakeDevice('Windows', 'windows');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final BufferLogger logger = BufferLogger.test();
 
       // Because the well known ID will match, no other device discovery will run.
       final DeviceManager deviceManager = TestDeviceManager(
@@ -93,11 +93,11 @@ void main() {
     });
 
     testWithoutContext('getDeviceById prefix matcher', () async {
-      final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
-      final devices = <Device>[device1, device2, device3];
-      final logger = BufferLogger.test();
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final BufferLogger logger = BufferLogger.test();
 
       // Include different device discoveries:
       // 1. One that throws, to prove matches can return when some succeed
@@ -122,10 +122,10 @@ void main() {
     });
 
     testWithoutContext('getDeviceById two exact matches, matches on first', () async {
-      final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final device2 = FakeDevice('Nexus 5', '01abfc49119c410e');
-      final devices = <Device>[device1, device2];
-      final logger = BufferLogger.test();
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5', '01abfc49119c410e');
+      final List<Device> devices = <Device>[device1, device2];
+      final BufferLogger logger = BufferLogger.test();
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: logger);
 
@@ -137,13 +137,13 @@ void main() {
     });
 
     testWithoutContext('getAllDevices caches', () async {
-      final notSupportedDiscoverer = FakePollingDeviceDiscovery();
-      final supportedDiscoverer = FakePollingDeviceDiscovery(
+      final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(
         requiresExtendedWirelessDeviceDiscovery: true,
       );
 
-      final attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final wirelessDevice = FakeDevice(
+      final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice wirelessDevice = FakeDevice(
         'Wireless device',
         'wireless-device',
         connectionInterface: DeviceConnectionInterface.wireless,
@@ -152,17 +152,17 @@ void main() {
       notSupportedDiscoverer.addDevice(attachedDevice);
       supportedDiscoverer.addDevice(wirelessDevice);
 
-      final deviceManager = TestDeviceManager(
+      final TestDeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         logger: BufferLogger.test(),
         deviceDiscoveryOverrides: <DeviceDiscovery>[notSupportedDiscoverer, supportedDiscoverer],
       );
       expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
 
-      final newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
       notSupportedDiscoverer.addDevice(newAttachedDevice);
 
-      final newWirelessDevice = FakeDevice(
+      final FakeDevice newWirelessDevice = FakeDevice(
         'New wireless device',
         'new-wireless-device',
         connectionInterface: DeviceConnectionInterface.wireless,
@@ -173,13 +173,13 @@ void main() {
     });
 
     testWithoutContext('refreshAllDevices does not cache', () async {
-      final notSupportedDiscoverer = FakePollingDeviceDiscovery();
-      final supportedDiscoverer = FakePollingDeviceDiscovery(
+      final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(
         requiresExtendedWirelessDeviceDiscovery: true,
       );
 
-      final attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final wirelessDevice = FakeDevice(
+      final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice wirelessDevice = FakeDevice(
         'Wireless device',
         'wireless-device',
         connectionInterface: DeviceConnectionInterface.wireless,
@@ -188,17 +188,17 @@ void main() {
       notSupportedDiscoverer.addDevice(attachedDevice);
       supportedDiscoverer.addDevice(wirelessDevice);
 
-      final deviceManager = TestDeviceManager(
+      final TestDeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         logger: BufferLogger.test(),
         deviceDiscoveryOverrides: <DeviceDiscovery>[notSupportedDiscoverer, supportedDiscoverer],
       );
       expect(await deviceManager.refreshAllDevices(), <Device>[attachedDevice, wirelessDevice]);
 
-      final newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
       notSupportedDiscoverer.addDevice(newAttachedDevice);
 
-      final newWirelessDevice = FakeDevice(
+      final FakeDevice newWirelessDevice = FakeDevice(
         'New wireless device',
         'new-wireless-device',
         connectionInterface: DeviceConnectionInterface.wireless,
@@ -216,13 +216,13 @@ void main() {
     testWithoutContext(
       'refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time',
       () async {
-        final normalDiscoverer = FakePollingDeviceDiscovery();
-        final extendedDiscoverer = FakePollingDeviceDiscovery(
+        final FakePollingDeviceDiscovery normalDiscoverer = FakePollingDeviceDiscovery();
+        final FakePollingDeviceDiscovery extendedDiscoverer = FakePollingDeviceDiscovery(
           requiresExtendedWirelessDeviceDiscovery: true,
         );
 
-        final attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
-        final wirelessDevice = FakeDevice(
+        final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+        final FakeDevice wirelessDevice = FakeDevice(
           'Wireless device',
           'wireless-device',
           connectionInterface: DeviceConnectionInterface.wireless,
@@ -231,7 +231,7 @@ void main() {
         normalDiscoverer.addDevice(attachedDevice);
         extendedDiscoverer.addDevice(wirelessDevice);
 
-        final deviceManager = TestDeviceManager(
+        final TestDeviceManager deviceManager = TestDeviceManager(
           <Device>[],
           logger: BufferLogger.test(),
           deviceDiscoveryOverrides: <DeviceDiscovery>[normalDiscoverer, extendedDiscoverer],
@@ -239,10 +239,10 @@ void main() {
         await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
         expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
 
-        final newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+        final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
         normalDiscoverer.addDevice(newAttachedDevice);
 
-        final newWirelessDevice = FakeDevice(
+        final FakeDevice newWirelessDevice = FakeDevice(
           'New wireless device',
           'new-wireless-device',
           connectionInterface: DeviceConnectionInterface.wireless,
@@ -261,7 +261,7 @@ void main() {
 
   testWithoutContext('PollingDeviceDiscovery startPolling', () {
     FakeAsync().run((FakeAsync time) {
-      final pollingDeviceDiscovery = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
       pollingDeviceDiscovery.startPolling();
 
       // First check should use the default polling timeout
@@ -277,41 +277,41 @@ void main() {
   });
 
   group('Filter devices', () {
-    final ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
-    final ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
-    final nonEphemeralOne = FakeDevice(
+    final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
+    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
+    final FakeDevice nonEphemeralOne = FakeDevice(
       'nonEphemeralOne',
       'nonEphemeralOne',
       ephemeral: false,
     );
-    final nonEphemeralTwo = FakeDevice(
+    final FakeDevice nonEphemeralTwo = FakeDevice(
       'nonEphemeralTwo',
       'nonEphemeralTwo',
       ephemeral: false,
     );
-    final unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
-    final unsupportedForProject = FakeDevice(
+    final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
+    final FakeDevice unsupportedForProject = FakeDevice(
       'unsupportedForProject',
       'unsupportedForProject',
       isSupportedForProject: false,
     );
-    final webDevice = FakeDevice('webby', 'webby')
+    final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-    final fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
+    final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
-    final unconnectedDevice = FakeDevice(
+    final FakeDevice unconnectedDevice = FakeDevice(
       'ephemeralTwo',
       'ephemeralTwo',
       isConnected: false,
     );
-    final wirelessDevice = FakeDevice(
+    final FakeDevice wirelessDevice = FakeDevice(
       'ephemeralTwo',
       'ephemeralTwo',
       connectionInterface: DeviceConnectionInterface.wireless,
     );
 
     testUsingContext('chooses ephemeral device', () async {
-      final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
+      final List<Device> devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
@@ -323,7 +323,7 @@ void main() {
     testUsingContext(
       'returns null when multiple non ephemeral devices are found',
       () async {
-        final devices = <Device>[
+        final List<Device> devices = <Device>[
           ephemeralOne,
           ephemeralTwo,
           nonEphemeralOne,
@@ -342,7 +342,7 @@ void main() {
     testUsingContext(
       'return null when hasSpecifiedDeviceId is true',
       () async {
-        final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
+        final List<Device> devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
         final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
         deviceManager.specifiedDeviceId = 'device';
@@ -357,7 +357,7 @@ void main() {
     testUsingContext(
       'returns null when no ephemeral devices are found',
       () async {
-        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+        final List<Device> devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
 
         final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
@@ -369,7 +369,7 @@ void main() {
     );
 
     testWithoutContext('Unsupported devices listed in all devices', () async {
-      final devices = <Device>[unsupported, unsupportedForProject];
+      final List<Device> devices = <Device>[unsupported, unsupportedForProject];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final List<Device> filtered = await deviceManager.getDevices();
@@ -378,7 +378,7 @@ void main() {
     });
 
     testUsingContext('Removes unsupported devices', () async {
-      final devices = <Device>[unsupported, unsupportedForProject];
+      final List<Device> devices = <Device>[unsupported, unsupportedForProject];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final List<Device> filtered = await deviceManager.getDevices(
         filter: DeviceDiscoveryFilter(supportFilter: deviceManager.deviceSupportFilter()),
@@ -390,7 +390,7 @@ void main() {
     testUsingContext(
       'Retains devices unsupported by the project if includeDevicesUnsupportedByProject is true',
       () async {
-        final devices = <Device>[unsupported, unsupportedForProject];
+        final List<Device> devices = <Device>[unsupported, unsupportedForProject];
 
         final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
         final List<Device> filtered = await deviceManager.getDevices(
@@ -406,7 +406,7 @@ void main() {
     );
 
     testUsingContext('Removes web and fuchsia from --all', () async {
-      final devices = <Device>[webDevice, fuchsiaDevice];
+      final List<Device> devices = <Device>[webDevice, fuchsiaDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = 'all';
 
@@ -418,7 +418,7 @@ void main() {
     });
 
     testUsingContext('Removes devices unsupported by the project from --all', () async {
-      final devices = <Device>[
+      final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
@@ -435,7 +435,7 @@ void main() {
     });
 
     testUsingContext('Returns device with the specified id', () async {
-      final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+      final List<Device> devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = nonEphemeralOne.id;
 
@@ -449,7 +449,7 @@ void main() {
     testUsingContext(
       'Returns multiple devices when multiple devices matches the specified id',
       () async {
-        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+        final List<Device> devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
         final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
         deviceManager.specifiedDeviceId = 'nonEphemeral'; // This prefix matches both devices
 
@@ -462,7 +462,7 @@ void main() {
     );
 
     testUsingContext('Returns empty when device of specified id is not found', () async {
-      final devices = <Device>[nonEphemeralOne];
+      final List<Device> devices = <Device>[nonEphemeralOne];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       deviceManager.specifiedDeviceId = nonEphemeralTwo.id;
 
@@ -476,17 +476,17 @@ void main() {
     testWithoutContext(
       'uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject',
       () async {
-        final devices = <Device>[unsupported, unsupportedForProject];
-        final deviceManager = TestDeviceManager(
+        final List<Device> devices = <Device>[unsupported, unsupportedForProject];
+        final TestDeviceManager deviceManager = TestDeviceManager(
           devices,
           logger: BufferLogger.test(),
         );
-        final supportFilter =
+        final TestDeviceDiscoverySupportFilter supportFilter =
             TestDeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
               flutterProject: FakeFlutterProject(),
             );
         supportFilter.isAlwaysSupportedForProjectOverride = true;
-        final filter = DeviceDiscoveryFilter(supportFilter: supportFilter);
+        final DeviceDiscoveryFilter filter = DeviceDiscoveryFilter(supportFilter: supportFilter);
 
         final List<Device> filtered = await deviceManager.getDevices(filter: filter);
 
@@ -495,7 +495,7 @@ void main() {
     );
 
     testUsingContext('Unconnected devices filtered out by default', () async {
-      final devices = <Device>[unconnectedDevice];
+      final List<Device> devices = <Device>[unconnectedDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
       final List<Device> filtered = await deviceManager.getDevices();
@@ -504,9 +504,9 @@ void main() {
     });
 
     testUsingContext('Return unconnected devices when filter allows', () async {
-      final devices = <Device>[unconnectedDevice];
+      final List<Device> devices = <Device>[unconnectedDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-      final filter = DeviceDiscoveryFilter(excludeDisconnected: false);
+      final DeviceDiscoveryFilter filter = DeviceDiscoveryFilter(excludeDisconnected: false);
 
       final List<Device> filtered = await deviceManager.getDevices(filter: filter);
 
@@ -514,9 +514,9 @@ void main() {
     });
 
     testUsingContext('Filter to only include wireless devices', () async {
-      final devices = <Device>[ephemeralOne, wirelessDevice];
+      final List<Device> devices = <Device>[ephemeralOne, wirelessDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-      final filter = DeviceDiscoveryFilter(
+      final DeviceDiscoveryFilter filter = DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.wireless,
       );
 
@@ -526,9 +526,9 @@ void main() {
     });
 
     testUsingContext('Filter to only include attached devices', () async {
-      final devices = <Device>[ephemeralOne, wirelessDevice];
+      final List<Device> devices = <Device>[ephemeralOne, wirelessDevice];
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-      final filter = DeviceDiscoveryFilter(
+      final DeviceDiscoveryFilter filter = DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.attached,
       );
 
@@ -543,15 +543,15 @@ void main() {
       'Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing last',
       () async {
         FakeAsync().run((FakeAsync time) {
-          final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-          final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+          final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+          final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
-          const timeToGetInitialDevices = Duration(seconds: 1);
-          const timeToRefreshDevices = Duration(seconds: 5);
-          final initialDevices = <Device>[device2];
-          final refreshDevices = <Device>[device1];
+          const Duration timeToGetInitialDevices = Duration(seconds: 1);
+          const Duration timeToRefreshDevices = Duration(seconds: 5);
+          final List<Device> initialDevices = <Device>[device2];
+          final List<Device> refreshDevices = <Device>[device1];
 
-          final deviceManager = TestDeviceManager(
+          final TestDeviceManager deviceManager = TestDeviceManager(
             <Device>[],
             logger: BufferLogger.test(),
             fakeDiscoverer: FakePollingDeviceDiscoveryWithTimeout(<List<Device>>[
@@ -591,15 +591,15 @@ void main() {
       'Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first',
       () async {
         fakeAsync((FakeAsync async) {
-          final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-          final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+          final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+          final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
-          const timeToGetInitialDevices = Duration(seconds: 5);
-          const timeToRefreshDevices = Duration(seconds: 1);
-          final initialDevices = <Device>[device2];
-          final refreshDevices = <Device>[device1];
+          const Duration timeToGetInitialDevices = Duration(seconds: 5);
+          const Duration timeToRefreshDevices = Duration(seconds: 1);
+          final List<Device> initialDevices = <Device>[device2];
+          final List<Device> refreshDevices = <Device>[device1];
 
-          final deviceManager = TestDeviceManager(
+          final TestDeviceManager deviceManager = TestDeviceManager(
             <Device>[],
             logger: BufferLogger.test(),
             fakeDiscoverer: FakePollingDeviceDiscoveryWithTimeout(<List<Device>>[
@@ -637,15 +637,15 @@ void main() {
 
     testWithoutContext('refreshAllDevices twice', () async {
       fakeAsync((FakeAsync async) {
-        final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-        final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+        final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+        final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
-        const timeToFirstRefresh = Duration(seconds: 1);
-        const timeToSecondRefresh = Duration(seconds: 5);
-        final firstRefreshDevices = <Device>[device2];
-        final secondRefreshDevices = <Device>[device1];
+        const Duration timeToFirstRefresh = Duration(seconds: 1);
+        const Duration timeToSecondRefresh = Duration(seconds: 5);
+        final List<Device> firstRefreshDevices = <Device>[device2];
+        final List<Device> secondRefreshDevices = <Device>[device1];
 
-        final deviceManager = TestDeviceManager(
+        final TestDeviceManager deviceManager = TestDeviceManager(
           <Device>[],
           logger: BufferLogger.test(),
           fakeDiscoverer: FakePollingDeviceDiscoveryWithTimeout(<List<Device>>[
@@ -694,7 +694,7 @@ void main() {
 
   group('JSON encode DebuggingOptions', () {
     testWithoutContext('can preserve the original options', () {
-      final original = DebuggingOptions.enabled(
+      final DebuggingOptions original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
@@ -725,7 +725,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for physical device with debugging enabled with all launch arguments',
       () {
-        final original = DebuggingOptions.enabled(
+        final DebuggingOptions original = DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
           disableServiceAuthCodes: true,
@@ -786,7 +786,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for physical device with debugging enabled with no launch arguments',
       () {
-        final original = DebuggingOptions.enabled(BuildInfo.debug);
+        final DebuggingOptions original = DebuggingOptions.enabled(BuildInfo.debug);
 
         final List<String> launchArguments = original.getIOSLaunchArguments(
           EnvironmentType.physical,
@@ -808,7 +808,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for physical CoreDevice with debugging enabled with no launch arguments',
       () {
-        final original = DebuggingOptions.enabled(BuildInfo.debug);
+        final DebuggingOptions original = DebuggingOptions.enabled(BuildInfo.debug);
 
         final List<String> launchArguments = original.getIOSLaunchArguments(
           EnvironmentType.physical,
@@ -822,7 +822,7 @@ void main() {
     );
 
     testWithoutContext('Get launch arguments for physical device with iPv4 network connection', () {
-      final original = DebuggingOptions.enabled(BuildInfo.debug);
+      final DebuggingOptions original = DebuggingOptions.enabled(BuildInfo.debug);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
         EnvironmentType.physical,
@@ -843,7 +843,7 @@ void main() {
     });
 
     testWithoutContext('Get launch arguments for physical device with iPv6 network connection', () {
-      final original = DebuggingOptions.enabled(BuildInfo.debug, ipv6: true);
+      final DebuggingOptions original = DebuggingOptions.enabled(BuildInfo.debug, ipv6: true);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
         EnvironmentType.physical,
@@ -866,7 +866,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for physical device with debugging disabled with available launch arguments',
       () {
-        final original = DebuggingOptions.disabled(
+        final DebuggingOptions original = DebuggingOptions.disabled(
           BuildInfo.debug,
           traceAllowlist: 'foo',
           enableImpeller: ImpellerStatus.disabled,
@@ -894,7 +894,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for simulator device with debugging enabled with all launch arguments',
       () {
-        final original = DebuggingOptions.enabled(
+        final DebuggingOptions original = DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
           disableServiceAuthCodes: true,
@@ -955,7 +955,7 @@ void main() {
     testWithoutContext(
       'Get launch arguments for simulator device with debugging enabled with no launch arguments',
       () {
-        final original = DebuggingOptions.enabled(BuildInfo.debug);
+        final DebuggingOptions original = DebuggingOptions.enabled(BuildInfo.debug);
 
         final List<String> launchArguments = original.getIOSLaunchArguments(
           EnvironmentType.simulator,
@@ -975,7 +975,7 @@ void main() {
     );
 
     testWithoutContext('No --enable-dart-profiling flag when option is false', () {
-      final original = DebuggingOptions.enabled(
+      final DebuggingOptions original = DebuggingOptions.enabled(
         BuildInfo.debug,
         enableDartProfiling: false,
       );
@@ -994,16 +994,16 @@ void main() {
   });
 
   group('PollingDeviceDiscovery', () {
-    final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+    final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
 
     testWithoutContext('initial call to devices returns the correct list', () async {
-      final deviceList = <Device>[device1];
-      final testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
+      final List<Device> deviceList = <Device>[device1];
+      final TestPollingDeviceDiscovery testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
 
       // Call `onAdded` to make sure that calling `onAdded` does not affect the
       // result of `devices()`.
-      final addedDevice = <Device>[];
-      final removedDevice = <Device>[];
+      final List<Device> addedDevice = <Device>[];
+      final List<Device> removedDevice = <Device>[];
       testDeviceDiscovery.onAdded.listen(addedDevice.add);
       testDeviceDiscovery.onRemoved.listen(removedDevice.add);
 
@@ -1013,13 +1013,13 @@ void main() {
     });
 
     testWithoutContext('call to devices triggers onAdded', () async {
-      final deviceList = <Device>[device1];
-      final testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
+      final List<Device> deviceList = <Device>[device1];
+      final TestPollingDeviceDiscovery testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
 
       // Call `onAdded` to make sure that calling `onAdded` does not affect the
       // result of `devices()`.
-      final addedDevice = <Device>[];
-      final removedDevice = <Device>[];
+      final List<Device> addedDevice = <Device>[];
+      final List<Device> removedDevice = <Device>[];
       testDeviceDiscovery.onAdded.listen(addedDevice.add);
       testDeviceDiscovery.onRemoved.listen(removedDevice.add);
 

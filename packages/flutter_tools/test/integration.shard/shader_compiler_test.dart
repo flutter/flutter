@@ -21,7 +21,7 @@ void main() {
   Future<void> testCompileShader(String source) async {
     final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync('shader_compiler_test.');
     final File file = tmpDir.childFile('test_shader.frag')..writeAsStringSync(source);
-    final shaderCompiler = ShaderCompiler(
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
       processManager: globals.processManager,
       logger: logger,
       fileSystem: globals.fs,
@@ -53,7 +53,7 @@ void main() {
     final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync('shader_compiler_test.');
     final String inkSparkleOutputPath = globals.fs.path.join(tmpDir.path, 'ink_sparkle.frag');
 
-    final shaderCompiler = ShaderCompiler(
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
       processManager: globals.processManager,
       logger: logger,
       fileSystem: globals.fs,
@@ -74,7 +74,7 @@ void main() {
   });
 
   testUsingContext('Compilation error with in storage', () async {
-    const kShaderWithInput = '''
+    const String kShaderWithInput = '''
 in float foo;
 
 out vec4 fragColor;
@@ -97,7 +97,7 @@ void main() {
   });
 
   testUsingContext('Compilation error with UBO', () async {
-    const kShaderWithInput = '''
+    const String kShaderWithInput = '''
 uniform Data {
   vec4 foo;
 } data;
@@ -124,7 +124,7 @@ void main() {
   testUsingContext(
     'Compilation error with texture arguments besides position or sampler',
     () async {
-      const kShaderWithInput = '''
+      const String kShaderWithInput = '''
 uniform sampler2D tex;
 
 out vec4 fragColor;
@@ -148,7 +148,7 @@ void main() {
   );
 
   testUsingContext('Compilation error with uint8 uniforms', () async {
-    const kShaderWithInput = '''
+    const String kShaderWithInput = '''
 #version 310 es
 
 layout(location = 0) uniform uint foo;

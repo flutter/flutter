@@ -30,20 +30,20 @@ class _CupertinoTextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const halfStrokeWidth = 1.0;
-    final paint = Paint()..color = color;
-    final circle = Rect.fromCircle(
+    const double halfStrokeWidth = 1.0;
+    final Paint paint = Paint()..color = color;
+    final Rect circle = Rect.fromCircle(
       center: const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
       radius: _kSelectionHandleRadius,
     );
-    final line = Rect.fromPoints(
+    final Rect line = Rect.fromPoints(
       const Offset(
         _kSelectionHandleRadius - halfStrokeWidth,
         2 * _kSelectionHandleRadius - _kSelectionHandleOverlap,
       ),
       Offset(_kSelectionHandleRadius + halfStrokeWidth, size.height),
     );
-    final path =
+    final Path path =
         Path()
           ..addOval(circle)
           // Draw line so it slightly overlaps the circle.
@@ -278,13 +278,13 @@ class _CupertinoTextSelectionControlsToolbarState
     // selectionMidpoint.dy, since the caller
     // (TextSelectionOverlay._buildToolbar) does not know whether the toolbar is
     // going to be facing up or down.
-    final anchorAbove = Offset(anchorX, anchorTop);
-    final anchorBelow = Offset(
+    final Offset anchorAbove = Offset(anchorX, anchorTop);
+    final Offset anchorBelow = Offset(
       anchorX,
       widget.endpoints.last.point.dy + widget.globalEditableRegion.top,
     );
 
-    final items = <Widget>[];
+    final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final Widget onePhysicalPixelVerticalDivider = SizedBox(
       width: 1.0 / MediaQuery.devicePixelRatioOf(context),

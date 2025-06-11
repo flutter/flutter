@@ -16,8 +16,8 @@ Future<void> execute() async {
           ' printer took a galley of type and scrambled it to make a'
           ' type specimen book'
       .split(' ');
-  final data = <InlineSpanSemanticsInformation>[];
-  for (var i = 0; i < words.length; i++) {
+  final List<InlineSpanSemanticsInformation> data = <InlineSpanSemanticsInformation>[];
+  for (int i = 0; i < words.length; i++) {
     if (i.isEven) {
       data.add(InlineSpanSemanticsInformation(words[i]));
     } else if (i.isEven) {
@@ -27,21 +27,21 @@ Future<void> execute() async {
   print(words);
 
   // Warm up lap
-  for (var i = 0; i < _kNumWarmUp; i += 1) {
+  for (int i = 0; i < _kNumWarmUp; i += 1) {
     combineSemanticsInfoSyncStar(data);
     combineSemanticsInfoList(data);
   }
 
-  final watch = Stopwatch();
+  final Stopwatch watch = Stopwatch();
   watch.start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     consumeSpan(combineSemanticsInfoSyncStar(data));
   }
   final int combineSemanticsInfoSyncStarTime = watch.elapsedMicroseconds;
   watch
     ..reset()
     ..start();
-  for (var i = 0; i < _kNumIterations; i += 1) {
+  for (int i = 0; i < _kNumIterations; i += 1) {
     consumeSpan(combineSemanticsInfoList(data));
   }
   final int combineSemanticsInfoListTime = watch.elapsedMicroseconds;
@@ -49,7 +49,7 @@ Future<void> execute() async {
     ..reset()
     ..start();
 
-  final printer = BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   const double scale = 1000.0 / _kNumIterations;
   printer.addResult(
     description: 'combineSemanticsInfoSyncStar',
@@ -67,7 +67,7 @@ Future<void> execute() async {
 }
 
 String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
-  var result = '';
+  String result = '';
   for (final InlineSpanSemanticsInformation span in items) {
     result += span.text;
   }
@@ -77,7 +77,7 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(
   List<InlineSpanSemanticsInformation> inputs,
 ) sync* {
-  var workingText = '';
+  String workingText = '';
   String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
@@ -101,9 +101,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(
   List<InlineSpanSemanticsInformation> inputs,
 ) {
-  var workingText = '';
+  String workingText = '';
   String? workingLabel;
-  final result = <InlineSpanSemanticsInformation>[];
+  final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       result.add(

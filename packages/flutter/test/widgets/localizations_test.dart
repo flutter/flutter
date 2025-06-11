@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final binding = TestAutomatedTestWidgetsFlutterBinding();
+  final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
 
   testWidgets('English translations exist for all WidgetsLocalizations properties', (
     WidgetTester tester,
@@ -33,7 +33,7 @@ void main() {
   testWidgets('Locale is available when Localizations widget stops deferring frames', (
     WidgetTester tester,
   ) async {
-    final delegate = FakeLocalizationsDelegate();
+    final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('fo'),

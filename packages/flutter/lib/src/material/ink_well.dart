@@ -790,7 +790,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final gestures = <String>[
+    final List<String> gestures = <String>[
       if (onTap != null) 'tap',
       if (onDoubleTap != null) 'double tap',
       if (onLongPress != null) 'long press',
@@ -1019,7 +1019,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               _HighlightType.focus => widget.focusColor ?? Theme.of(context).focusColor,
               _HighlightType.hover => widget.hoverColor ?? Theme.of(context).hoverColor,
             };
-        final referenceBox = context.findRenderObject()! as RenderBox;
+        final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
@@ -1069,7 +1069,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   InteractiveInkFeature _createSplash(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
-    final referenceBox = context.findRenderObject()! as RenderBox;
+    final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color =
         widget.overlayColor?.resolve(statesController.value) ??
@@ -1173,7 +1173,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
     final Offset globalPosition;
     if (context != null) {
-      final referenceBox = context.findRenderObject()! as RenderBox;
+      final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
       assert(
         referenceBox.hasSize,
         'InkResponse must be done with layout before starting a splash.',
@@ -1248,7 +1248,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
-      for (final splash in splashes) {
+      for (final InteractiveInkFeature splash in splashes) {
         splash.dispose();
       }
       _currentSplash = null;
@@ -1313,7 +1313,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final ThemeData theme = Theme.of(context);
-    const highlightableStates = <MaterialState>{
+    const Set<MaterialState> highlightableStates = <MaterialState>{
       MaterialState.focused,
       MaterialState.hovered,
       MaterialState.pressed,
@@ -1323,15 +1323,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     );
     // Each highlightable state will be resolved separately to get the corresponding color.
     // For this resolution to be correct, the non-highlightable states should be preserved.
-    final pressed = <MaterialState>{
+    final Set<MaterialState> pressed = <MaterialState>{
       ...nonHighlightableStates,
       MaterialState.pressed,
     };
-    final focused = <MaterialState>{
+    final Set<MaterialState> focused = <MaterialState>{
       ...nonHighlightableStates,
       MaterialState.focused,
     };
-    final hovered = <MaterialState>{
+    final Set<MaterialState> hovered = <MaterialState>{
       ...nonHighlightableStates,
       MaterialState.hovered,
     };

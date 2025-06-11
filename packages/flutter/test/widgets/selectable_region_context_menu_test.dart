@@ -51,7 +51,7 @@ void main() {
       ),
     );
 
-    final element =
+    final web.HTMLElement element =
         fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
 
     expect(element, isNotNull);
@@ -94,9 +94,9 @@ void main() {
   testWidgets('right click can trigger select word', (WidgetTester tester) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final spy = UniqueKey();
+    final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
@@ -107,7 +107,7 @@ void main() {
       ),
     );
 
-    final element =
+    final web.HTMLElement element =
         fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
     expect(element, isNotNull);
 
@@ -148,12 +148,12 @@ void main() {
       ),
     );
 
-    final element =
+    final web.HTMLElement element =
         fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
     expect(element, isNotNull);
 
-    for (var i = 0; i <= 4; i++) {
-      final event = web.MouseEvent(
+    for (int i = 0; i <= 4; i++) {
+      final web.MouseEvent event = web.MouseEvent(
         'mousedown',
         web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
       );
@@ -165,7 +165,7 @@ void main() {
 
 void removeAllStyleElements() {
   final List<web.Element?> styles = web.document.head!.children.iterable.toList();
-  for (final element in styles) {
+  for (final web.Element? element in styles) {
     if (element!.tagName == 'STYLE') {
       element.remove();
     }
@@ -175,7 +175,7 @@ void removeAllStyleElements() {
 int getNumberOfStyleElements() {
   expect(web.document.head!.children.iterable, isNotEmpty);
 
-  var count = 0;
+  int count = 0;
   for (final web.Element? element in web.document.head!.children.iterable) {
     expect(element, isNotNull);
     if (element!.tagName != 'STYLE') {

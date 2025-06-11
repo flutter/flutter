@@ -171,7 +171,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
 }
 
 String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode? mode]) {
-  final exe = hostPlatform.isWindows ? '.exe' : '';
+  final String exe = hostPlatform.isWindows ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
@@ -227,8 +227,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
     case Artifact.fuchsiaFlutterRunner:
-      final jitOrAot = mode!.isJit ? '_jit' : '_aot';
-      final productOrNo = mode.isRelease ? '_product' : '';
+      final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
+      final String productOrNo = mode.isRelease ? '_product' : '';
       return 'flutter$jitOrAot${productOrNo}_runner-0.far';
     case Artifact.fontSubset:
       return 'font-subset$exe';
@@ -240,8 +240,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
 }
 
 String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
-  final exe = platform.isWindows ? '.exe' : '';
-  var dll = '.so';
+  final String exe = platform.isWindows ? '.exe' : '';
+  String dll = '.so';
   if (platform.isWindows) {
     dll = '.dll';
   } else if (platform.isMacOS) {
@@ -691,16 +691,16 @@ class CachedArtifacts implements Artifacts {
       platform.fuchsiaArchForTargetPlatform,
       mode.isRelease ? 'release' : mode.toString(),
     );
-    final runtime = mode.isJit ? 'jit' : 'aot';
+    final String runtime = mode.isJit ? 'jit' : 'aot';
     switch (artifact) {
       case Artifact.genSnapshot:
-        final genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
+        final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
         return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
       case Artifact.genSnapshotArm64:
       case Artifact.genSnapshotX64:
         throw ArgumentError('$artifact is not available on this platform');
       case Artifact.flutterPatchedSdkPath:
-        const artifactFileName = 'flutter_runner_patched_sdk';
+        const String artifactFileName = 'flutter_runner_patched_sdk';
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.platformKernelDill:
         final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
@@ -885,7 +885,7 @@ class CachedArtifacts implements Artifacts {
         if (mode == BuildMode.debug || mode == null) {
           return _fileSystem.path.join(engineDir, platformName);
         }
-        final suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -899,7 +899,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        final suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
@@ -1188,7 +1188,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }) {
     platform ??= _currentHostPlatform(_platform, _operatingSystemUtils);
     platform = _mapTargetPlatform(platform);
-    final isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
+    final bool isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
     final String? artifactFileName =
         isDirectoryArtifact ? null : _artifactToFileName(artifact, _platform, mode);
     switch (artifact) {
@@ -1254,8 +1254,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        final modeName = mode!.isRelease ? 'release' : mode.toString();
-        final dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
+        final String modeName = mode!.isRelease ? 'release' : mode.toString();
+        final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
         return _fileSystem.path.join(
           localEngineInfo.targetOutPath,
           'host_bundle',
@@ -1263,8 +1263,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
           'kernel_compiler.dart.snapshot',
         );
       case Artifact.fuchsiaFlutterRunner:
-        final jitOrAot = mode!.isJit ? '_jit' : '_aot';
-        final productOrNo = mode.isRelease ? '_product' : '';
+        final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
+        final String productOrNo = mode.isRelease ? '_product' : '';
         return _fileSystem.path.join(
           localEngineInfo.targetOutPath,
           'flutter$jitOrAot${productOrNo}_runner-0.far',
@@ -1362,7 +1362,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }
 
   String _genSnapshotPath(Artifact artifact) {
-    const clangDirs = <String>[
+    const List<String> clangDirs = <String>[
       '.',
       'universal',
       'clang_x64',
@@ -1371,7 +1371,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       'clang_arm64',
     ];
     final String genSnapshotName = _artifactToFileName(artifact, _platform)!;
-    for (final clangDir in clangDirs) {
+    for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(
         localEngineInfo.targetOutPath,
         clangDir,
@@ -1686,7 +1686,7 @@ class _TestArtifacts implements Artifacts {
       return _getFileGeneratorsPath();
     }
 
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     buffer.write(artifact);
     if (platform != null) {
       buffer.write('.$platform');

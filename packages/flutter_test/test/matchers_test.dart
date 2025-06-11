@@ -51,7 +51,7 @@ const SemanticsFlags allFlags = SemanticsFlags(
 class _MockToStringDeep {
   _MockToStringDeep(String str) : _lines = <String>[] {
     final List<String> lines = str.split('\n');
-    for (var i = 0; i < lines.length - 1; ++i) {
+    for (int i = 0; i < lines.length - 1; ++i) {
       _lines.add('${lines[i]}\n');
     }
 
@@ -70,12 +70,12 @@ class _MockToStringDeep {
   final List<String> _lines;
 
   String toStringDeep({String prefixLineOne = '', String prefixOtherLines = ''}) {
-    final sb = StringBuffer();
+    final StringBuffer sb = StringBuffer();
     if (_lines.isNotEmpty) {
       sb.write('$prefixLineOne${_lines.first}');
     }
 
-    for (var i = 1; i < _lines.length; ++i) {
+    for (int i = 1; i < _lines.length; ++i) {
       sb.write('$prefixOtherLines${_lines[i]}');
     }
 
@@ -431,7 +431,7 @@ void main() {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
     tester.platformDispatcher.textScaleFactorTestValue = 123;
 
-    final mediaQueryData = MediaQueryData.fromView(tester.view);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
     final TextScaler systemScaler = mediaQueryData.textScaler;
     expect(systemScaler, isSystemTextScaler());
     expect(systemScaler, isSystemTextScaler(withScaleFactor: 123));
@@ -447,7 +447,7 @@ void main() {
     });
 
     test('mismatch', () {
-      final rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
         Path(),
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -455,7 +455,7 @@ void main() {
     });
 
     test('mismatch out of examined area', () {
-      final rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       rectPath.addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
         Path(),
@@ -464,8 +464,8 @@ void main() {
     });
 
     test('differently constructed rects match', () {
-      final rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final linePath =
+      final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath =
           Path()
             ..moveTo(5.0, 5.0)
             ..lineTo(5.0, 6.0)
@@ -479,8 +479,8 @@ void main() {
     });
 
     test('partially overlapping paths', () {
-      final rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final linePath =
+      final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath =
           Path()
             ..moveTo(5.0, 5.0)
             ..lineTo(5.0, 6.0)
@@ -625,7 +625,7 @@ void main() {
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const key = Key('semantics');
+      const Key key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -728,13 +728,13 @@ void main() {
     });
 
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
-      var actions = 0;
-      const action = CustomSemanticsAction(label: 'test');
+      int actions = 0;
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       for (final SemanticsAction action in SemanticsAction.values) {
         actions |= action.index;
       }
 
-      final data = SemanticsData(
+      final SemanticsData data = SemanticsData(
         flagsCollection: allFlags,
         actions: actions,
         identifier: 'i',
@@ -763,7 +763,7 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final node = _FakeSemanticsNode(data);
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(
         node,
@@ -837,7 +837,7 @@ void main() {
 
     testWidgets('Can match child semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const key = Key('a');
+      const Key key = Key('a');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -864,7 +864,7 @@ void main() {
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
-      const key = Key('semantics');
+      const Key key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -926,7 +926,7 @@ void main() {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
-      const key = Key('semantics');
+      const Key key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -1028,13 +1028,13 @@ void main() {
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
-      var actions = 0;
-      const action = CustomSemanticsAction(label: 'test');
+      int actions = 0;
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       for (final SemanticsAction action in SemanticsAction.values) {
         actions |= action.index;
       }
 
-      final data = SemanticsData(
+      final SemanticsData data = SemanticsData(
         flagsCollection: allFlags,
         actions: actions,
         identifier: 'i',
@@ -1063,7 +1063,7 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final node = _FakeSemanticsNode(data);
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(
         node,
@@ -1134,7 +1134,7 @@ void main() {
     });
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
-      final data = SemanticsData(
+      final SemanticsData data = SemanticsData(
         flagsCollection: SemanticsFlags.kNone,
         actions: 0,
         identifier: 'i',
@@ -1162,7 +1162,7 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final node = _FakeSemanticsNode(data);
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(
         node,
@@ -1232,13 +1232,13 @@ void main() {
     });
 
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
-      var allActions = 0;
+      int allActions = 0;
 
       for (final SemanticsAction action in SemanticsAction.values) {
         allActions |= action.index;
       }
 
-      final emptyData = SemanticsData(
+      final SemanticsData emptyData = SemanticsData(
         flagsCollection: SemanticsFlags.kNone,
         actions: 0,
         identifier: 'i',
@@ -1266,10 +1266,10 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final emptyNode = _FakeSemanticsNode(emptyData);
+      final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
-      const action = CustomSemanticsAction(label: 'test');
-      final fullData = SemanticsData(
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      final SemanticsData fullData = SemanticsData(
         flagsCollection: allFlags,
         actions: allActions,
         identifier: 'i',
@@ -1298,7 +1298,7 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final fullNode = _FakeSemanticsNode(fullData);
+      final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
       expect(
         emptyNode,
@@ -1330,7 +1330,7 @@ void main() {
 
     testWidgets('can match child semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const key = Key('a');
+      const Key key = Key('a');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -1356,8 +1356,8 @@ void main() {
     });
 
     testWidgets('can match only custom actions', (WidgetTester tester) async {
-      const action = CustomSemanticsAction(label: 'test');
-      final data = SemanticsData(
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      final SemanticsData data = SemanticsData(
         flagsCollection: SemanticsFlags.kNone,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
@@ -1386,7 +1386,7 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
       );
-      final node = _FakeSemanticsNode(data);
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
     });
@@ -1394,7 +1394,7 @@ void main() {
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
-      const key = Key('semantics');
+      const Key key = Key('semantics');
       await tester.pumpWidget(
         Semantics(
           key: key,

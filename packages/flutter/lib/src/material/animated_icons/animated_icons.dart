@@ -99,7 +99,7 @@ class AnimatedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final iconData = icon as _AnimatedIconData;
+    final _AnimatedIconData iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
     assert(iconTheme.isConcrete);
     final double iconSize = size ?? iconTheme.size!;
@@ -195,7 +195,7 @@ class _PathFrames {
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
     final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
-    final paint =
+    final ui.Paint paint =
         ui.Paint()
           ..style = PaintingStyle.fill
           ..color = color.withOpacity(color.opacity * opacity);

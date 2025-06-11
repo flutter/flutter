@@ -37,12 +37,12 @@ void main() {
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(
+      final FakeDevice device = FakeDevice(
         targetPlatform: TargetPlatform.darwin,
         sdkNameAndVersion: 'Macos',
       );
-      final residentCompiler = FakeResidentCompiler();
-      final flutterDevice =
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+      final FakeFlutterDevice flutterDevice =
           FakeFlutterDevice()
             ..testUri = testUri
             ..vmServiceHost = (() => fakeVmServiceHost)
@@ -53,7 +53,7 @@ void main() {
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      final residentRunner = HotRunner(
+      final HotRunner residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(

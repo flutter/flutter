@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Theme.wrap()', (WidgetTester tester) async {
-    const primaryColor = Color(0xFF00FF00);
+    const Color primaryColor = Color(0xFF00FF00);
     final Key primaryContainerKey = UniqueKey();
 
     // Effectively the same as a StatelessWidget subclass.
@@ -94,7 +94,7 @@ void main() {
 
   testWidgets('Material2 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
-    const menuTextColor = Color(0xFF0000FF);
+    const Color menuTextColor = Color(0xFF0000FF);
 
     Widget buildFrame() {
       return MaterialApp(
@@ -148,7 +148,7 @@ void main() {
   });
 
   testWidgets('Material3 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
-    const textStyle = TextStyle(fontSize: 24.0, color: Color(0xFF0000FF));
+    const TextStyle textStyle = TextStyle(fontSize: 24.0, color: Color(0xFF0000FF));
 
     Widget buildFrame() {
       return MaterialApp(
@@ -201,9 +201,9 @@ void main() {
   });
 
   testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {
-    const bannerBackgroundColor = Color(0xFF0000FF);
+    const Color bannerBackgroundColor = Color(0xFF0000FF);
     const double bannerFontSize = 48;
-    const bannerTextColor = Color(0xFF00FF00);
+    const Color bannerTextColor = Color(0xFF00FF00);
 
     final Widget banner = MaterialBanner(
       content: const Text('hello'),
@@ -296,7 +296,7 @@ void main() {
   });
 
   testWidgets('DividerTheme.wrap()', (WidgetTester tester) async {
-    const dividerColor = Color(0xFF0000FF);
+    const Color dividerColor = Color(0xFF0000FF);
     const double dividerSpace = 13;
     const double dividerThickness = 7;
     const Widget divider = Center(child: Divider());
@@ -354,7 +354,7 @@ void main() {
     }
 
     BorderSide dividerBorder() {
-      final decoration =
+      final BoxDecoration decoration =
           tester
                   .widget<Container>(
                     find
@@ -386,9 +386,9 @@ void main() {
   });
 
   testWidgets('ListTileTheme.wrap()', (WidgetTester tester) async {
-    const tileSelectedColor = Color(0xFF00FF00);
-    const tileIconColor = Color(0xFF0000FF);
-    const tileTextColor = Color(0xFFFF0000);
+    const Color tileSelectedColor = Color(0xFF00FF00);
+    const Color tileIconColor = Color(0xFF0000FF);
+    const Color tileTextColor = Color(0xFFFF0000);
 
     final Key selectedIconKey = UniqueKey();
     final Key unselectedIconKey = UniqueKey();
@@ -498,9 +498,9 @@ void main() {
   });
 
   testWidgets('SliderTheme.wrap()', (WidgetTester tester) async {
-    const activeTrackColor = Color(0xFF00FF00);
-    const inactiveTrackColor = Color(0xFF0000FF);
-    const thumbColor = Color(0xFFFF0000);
+    const Color activeTrackColor = Color(0xFF00FF00);
+    const Color inactiveTrackColor = Color(0xFF0000FF);
+    const Color thumbColor = Color(0xFFFF0000);
 
     final Widget slider = Scaffold(
       body: Center(child: Slider(value: 0.5, onChanged: (double value) {})),
@@ -590,8 +590,8 @@ void main() {
   });
 
   testWidgets('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
-    const buttonColor = Color(0xFF00FF00);
-    const selectedButtonColor = Color(0xFFFF0000);
+    const Color buttonColor = Color(0xFF00FF00);
+    const Color selectedButtonColor = Color(0xFFFF0000);
 
     final Widget toggleButtons = Scaffold(
       body: Center(

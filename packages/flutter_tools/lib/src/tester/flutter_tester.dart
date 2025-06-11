@@ -153,7 +153,7 @@ class FlutterTesterDevice extends Device {
       assetDirPath: assetDirectory.path,
     );
 
-    final command = <String>[
+    final List<String> command = <String>[
       _artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',

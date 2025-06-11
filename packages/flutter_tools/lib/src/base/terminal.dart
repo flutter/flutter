@@ -258,7 +258,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
       // they're redundant. This prevents previously embedded resets from
@@ -266,7 +266,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(_boldControls, '');
       buffer.writeln('$bold$line$resetBold');
     }
-    final result = buffer.toString();
+    final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -278,7 +278,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     final String colorCodes = _colorMap[color]!;
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
@@ -287,7 +287,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(resetColor, '$resetColor$colorCodes');
       buffer.writeln('$colorCodes$line$resetColor');
     }
-    final result = buffer.toString();
+    final String result = buffer.toString();
     // avoid introducing a new newline to the colored text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -315,7 +315,7 @@ class AnsiTerminal implements Terminal {
     if (!_stdio.stdinHasTerminal) {
       return false;
     }
-    final stdin = _stdio.stdin as io.Stdin;
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
     return !stdin.lineMode && !stdin.echoMode;
   }
 
@@ -324,7 +324,7 @@ class AnsiTerminal implements Terminal {
     if (!_stdio.stdinHasTerminal) {
       return;
     }
-    final stdin = _stdio.stdin as io.Stdin;
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
 
     try {
       // The order of setting lineMode and echoMode is important on Windows.

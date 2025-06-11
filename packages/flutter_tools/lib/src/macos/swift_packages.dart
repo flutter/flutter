@@ -227,12 +227,12 @@ class SwiftPackageProduct {
     //     .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"]),
     //     .library(name: "FlutterDependenciesPackage", type: .dynamic, targets: ["FlutterDependenciesPackage"]),
     // ],
-    var targetsString = '';
+    String targetsString = '';
     if (targets.isNotEmpty) {
       final List<String> quotedTargets = targets.map((String target) => '"$target"').toList();
       targetsString = ', targets: [${quotedTargets.join(', ')}]';
     }
-    var libraryTypeString = '';
+    String libraryTypeString = '';
     if (libraryType != null) {
       libraryTypeString = ', type: ${libraryType!.name}';
     }
@@ -306,15 +306,15 @@ class SwiftPackageTarget {
     //     ),
     // ]
     const String targetIndent = _doubleIndent;
-    const targetDetailsIndent = '$_doubleIndent$_singleIndent';
+    const String targetDetailsIndent = '$_doubleIndent$_singleIndent';
 
-    final targetDetails = <String>[];
+    final List<String> targetDetails = <String>[];
 
-    final nameString = 'name: "$name"';
+    final String nameString = 'name: "$name"';
     targetDetails.add(nameString);
 
     if (path != null) {
-      final pathString = 'path: "$path"';
+      final String pathString = 'path: "$path"';
       targetDetails.add(pathString);
     }
 
@@ -323,7 +323,7 @@ class SwiftPackageTarget {
           dependencies!
               .map((SwiftPackageTargetDependency dependency) => dependency.format())
               .toList();
-      final dependenciesString = '''
+      final String dependenciesString = '''
 dependencies: [
 ${targetDependencies.join(",\n")}
 $targetDetailsIndent]''';

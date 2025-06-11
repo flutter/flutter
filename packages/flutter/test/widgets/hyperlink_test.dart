@@ -8,23 +8,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can tap a hyperlink', (WidgetTester tester) async {
-    var didTapLeft = false;
-    final tapLeft =
+    bool didTapLeft = false;
+    final TapGestureRecognizer tapLeft =
         TapGestureRecognizer()
           ..onTap = () {
             didTapLeft = true;
           };
     addTearDown(tapLeft.dispose);
 
-    var didTapRight = false;
-    final tapRight =
+    bool didTapRight = false;
+    final TapGestureRecognizer tapRight =
         TapGestureRecognizer()
           ..onTap = () {
             didTapRight = true;
           };
     addTearDown(tapRight.dispose);
 
-    const textKey = Key('text');
+    const Key textKey = Key('text');
 
     await tester.pumpWidget(
       Center(

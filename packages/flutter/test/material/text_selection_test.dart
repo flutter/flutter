@@ -18,7 +18,7 @@ import '../widgets/editable_text_utils.dart'
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final mockClipboard = MockClipboard();
+  final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -39,10 +39,10 @@ void main() {
 
   group('canSelectAll', () {
     Widget createEditableText({required Key key, String? text, TextSelection? selection}) {
-      final controller = TextEditingController(text: text)
+      final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
       addTearDown(controller.dispose);
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       return MaterialApp(
@@ -104,7 +104,7 @@ void main() {
     testWidgets(
       'All menu items show when they fit.',
       (WidgetTester tester) async {
-        final controller = TextEditingController(text: 'abc def ghi');
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -169,7 +169,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final controller = TextEditingController(text: 'abc def ghi');
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -242,7 +242,7 @@ void main() {
         tester.view.physicalSize = const Size(800, 800);
         addTearDown(tester.view.reset);
 
-        final controller = TextEditingController(text: 'abc def ghi');
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -306,7 +306,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final controller = TextEditingController(text: 'abc def ghi');
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -381,7 +381,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final controller = TextEditingController(text: 'abc def ghi');
+        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -491,7 +491,7 @@ void main() {
     testWidgets(
       'When renders below a block of text, menu appears below bottom endpoint',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
+        final TextEditingController controller = TextEditingController(
           text: 'abc\ndef\nghi\njkl\nmno\npqr',
         );
         addTearDown(controller.dispose);
@@ -566,7 +566,7 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
+        final TextEditingController controller = TextEditingController(
           text: 'abc\ndef\nghi\njkl\nmno\npqr',
         );
         addTearDown(controller.dispose);
@@ -720,7 +720,7 @@ void main() {
   testWidgets(
     'Paste only appears when clipboard has contents',
     (WidgetTester tester) async {
-      final controller = TextEditingController(
+      final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       addTearDown(controller.dispose);
@@ -734,7 +734,7 @@ void main() {
       await Clipboard.setData(const ClipboardData(text: ''));
 
       // Double tap to select the first word.
-      const index = 4;
+      const int index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));

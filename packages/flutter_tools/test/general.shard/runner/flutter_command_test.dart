@@ -76,7 +76,7 @@ void main() {
     });
 
     testUsingContext('help text contains global options', () {
-      final fake = FakeDeprecatedCommand();
+      final FakeDeprecatedCommand fake = FakeDeprecatedCommand();
       createTestCommandRunner(fake);
       expect(fake.usage, contains('Global options:\n'));
     });
@@ -84,7 +84,7 @@ void main() {
     testUsingContext(
       'honors shouldUpdateCache false',
       () async {
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         await flutterCommand.run();
 
         expect(cache.artifacts, isEmpty);
@@ -101,7 +101,7 @@ void main() {
     testUsingContext(
       'honors shouldUpdateCache true',
       () async {
-        final flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
         await flutterCommand.run();
         // First call for universal, second for the rest
         expect(cache.artifacts, <Set<DevelopmentArtifact>>[
@@ -119,7 +119,7 @@ void main() {
     testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
       () async {
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         await expectToolExitLater(
           flutterCommand.run(),
           contains('Flutter SDK installation appears corrupted'),
@@ -136,7 +136,7 @@ void main() {
     testUsingContext(
       'deprecated command should warn',
       () async {
-        final flutterCommand = FakeDeprecatedCommand();
+        final FakeDeprecatedCommand flutterCommand = FakeDeprecatedCommand();
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['deprecated']);
 
@@ -166,7 +166,7 @@ void main() {
     testUsingContext(
       'uses the error handling file system',
       () async {
-        final flutterCommand = DummyFlutterCommand(
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
           commandFunction: () async {
             expect(globals.fs, isA<ErrorHandlingFileSystem>());
             return const FlutterCommandResult(ExitStatus.success);
@@ -184,7 +184,7 @@ void main() {
       'finds the target file with default values',
       () async {
         globals.fs.file('lib/main.dart').createSync(recursive: true);
-        final fakeTargetCommand = FakeTargetCommand();
+        final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
         final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
         await runner.run(<String>['test']);
 
@@ -200,7 +200,7 @@ void main() {
       'finds the target file with specified value',
       () async {
         globals.fs.file('lib/foo.dart').createSync(recursive: true);
-        final fakeTargetCommand = FakeTargetCommand();
+        final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
         final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
         await runner.run(<String>['test', '-t', 'lib/foo.dart']);
 
@@ -215,7 +215,7 @@ void main() {
     testUsingContext(
       'throws tool exit if specified file does not exist',
       () async {
-        final fakeTargetCommand = FakeTargetCommand();
+        final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
         final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
 
         expect(() async => runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
@@ -245,7 +245,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           return const FlutterCommandResult(ExitStatus.success);
         },
@@ -269,7 +269,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           return const FlutterCommandResult(ExitStatus.warning);
         },
@@ -293,7 +293,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
         },
@@ -323,7 +323,7 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final command =
+        final DummyFlutterCommand command =
             DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
@@ -341,7 +341,7 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final command =
+        final DummyFlutterCommand command =
             DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
@@ -388,16 +388,16 @@ void main() {
           // Crash if called a third time which is unexpected.
           clock.times = <int>[1000, 2000];
 
-          final completer = Completer<void>();
+          final Completer<void> completer = Completer<void>();
           setExitFunctionForTests((int exitCode) {
             expect(exitCode, 0);
             restoreExitFunction();
             completer.complete();
           });
 
-          final flutterCommand = DummyFlutterCommand(
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
             commandFunction: () async {
-              final c = Completer<void>();
+              final Completer<void> c = Completer<void>();
               await c.future;
               throw UnsupportedError('Unreachable');
             },
@@ -437,18 +437,18 @@ void main() {
         'command release lock on kill signal',
         () async {
           clock.times = <int>[1000, 2000];
-          final completer = Completer<void>();
+          final Completer<void> completer = Completer<void>();
           setExitFunctionForTests((int exitCode) {
             expect(exitCode, 0);
             restoreExitFunction();
             completer.complete();
           });
-          final checkLockCompleter = Completer<void>();
-          final flutterCommand = DummyFlutterCommand(
+          final Completer<void> checkLockCompleter = Completer<void>();
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
             commandFunction: () async {
               await globals.cache.lock();
               checkLockCompleter.complete();
-              final c = Completer<void>();
+              final Completer<void> c = Completer<void>();
               await c.future;
               throw UnsupportedError('Unreachable');
             },
@@ -479,7 +479,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand();
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
       expect(
@@ -499,10 +499,10 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand(noUsagePath: true);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
 
-      var timingEventCounts = 0;
+      int timingEventCounts = 0;
       for (final Event e in fakeAnalytics.sentEvents) {
         if (e.eventName == DashEvent.timing) {
           timingEventCounts += 1;
@@ -521,14 +521,14 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final commandResult = FlutterCommandResult(
+      final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
         timingLabelParts: <String?>['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
-      final flutterCommand = DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async => commandResult,
       );
       await flutterCommand.run();
@@ -550,7 +550,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final flutterCommand = DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
         },
@@ -573,7 +573,7 @@ void main() {
     testUsingContext(
       'use packagesPath to generate BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
@@ -588,7 +588,7 @@ void main() {
     testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
@@ -603,7 +603,7 @@ void main() {
     testUsingContext(
       'use fileSystemRoots to generate BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand(
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
           fileSystemRoots: <String>['foo', 'bar'],
         );
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -620,7 +620,7 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final flutterCommand =
+        final DummyFlutterCommand flutterCommand =
             DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
@@ -638,7 +638,7 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final flutterCommand =
+        final DummyFlutterCommand flutterCommand =
             DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
@@ -656,7 +656,7 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final flutterCommand =
+        final DummyFlutterCommand flutterCommand =
             DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
@@ -674,7 +674,7 @@ void main() {
     testUsingContext(
       'sets useLocalCanvasKit in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         fileSystem.directory('engine/src/out/wasm_release').createSync(recursive: true);
         await runner.run(<String>[
@@ -696,7 +696,7 @@ void main() {
     testUsingContext(
       'dds options',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--dds-port=1']);
         expect(ddsCommand.enableDds, isTrue);
@@ -711,7 +711,7 @@ void main() {
     testUsingContext(
       'dds options --dds',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--dds']);
         expect(ddsCommand.enableDds, isTrue);
@@ -725,7 +725,7 @@ void main() {
     testUsingContext(
       'dds options --no-dds',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--no-dds']);
         expect(ddsCommand.enableDds, isFalse);
@@ -739,7 +739,7 @@ void main() {
     testUsingContext(
       'dds options --disable-dds',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--disable-dds']);
         expect(ddsCommand.enableDds, isFalse);
@@ -753,7 +753,7 @@ void main() {
     testUsingContext(
       'dds options --no-disable-dds',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--no-disable-dds']);
         expect(ddsCommand.enableDds, isTrue);
@@ -767,7 +767,7 @@ void main() {
     testUsingContext(
       'dds options --dds --disable-dds',
       () async {
-        final ddsCommand = FakeDdsCommand();
+        final FakeDdsCommand ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--dds', '--disable-dds']);
         expect(() => ddsCommand.enableDds, throwsToolExit());
@@ -779,18 +779,18 @@ void main() {
     );
 
     group('findTargetDevice', () {
-      final device1 = FakeDevice('device1', 'device1');
-      final device2 = FakeDevice('device2', 'device2');
+      final FakeDevice device1 = FakeDevice('device1', 'device1');
+      final FakeDevice device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -799,7 +799,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -1227,7 +1227,7 @@ flutter:
   default-flavor: foo
         ''');
 
-          final flutterCommand = DummyFlutterCommand();
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1250,7 +1250,7 @@ flutter:
   default-flavor: foo
         ''');
 
-          final flutterCommand = DummyFlutterCommand(
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
             commandFunction: () async {
               return FlutterCommandResult.success();
             },
@@ -1287,7 +1287,7 @@ flutter:
         DeviceManager:
             () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
-          final fileSystem = MemoryFileSystem.test();
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
           fileSystem.file('pubspec.yaml').createSync();
           return fileSystem;
@@ -1319,7 +1319,7 @@ flutter:
         DeviceManager:
             () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
-          final fileSystem = MemoryFileSystem.test();
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
           fileSystem.file('pubspec.yaml').createSync();
           return fileSystem;
@@ -1350,7 +1350,7 @@ flutter:
         DeviceManager:
             () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
-          final fileSystem = MemoryFileSystem.test();
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.file('config.json')
@@ -1405,7 +1405,7 @@ flutter:
             Platform: () => FakePlatform(),
             Cache: () => Cache.test(processManager: FakeProcessManager.any()),
             FileSystem: () {
-              final fileSystem = MemoryFileSystem.test();
+              final MemoryFileSystem fileSystem = MemoryFileSystem.test();
               fileSystem.file('lib/main.dart').createSync(recursive: true);
               fileSystem.file('pubspec.yaml').createSync();
               fileSystem.file('.packages').createSync();
@@ -1441,7 +1441,7 @@ flutter:
                     },
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           FileSystem: () {
-            final fileSystem = MemoryFileSystem.test();
+            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
             fileSystem.file('lib/main.dart').createSync(recursive: true);
             fileSystem.file('pubspec.yaml').createSync();
             fileSystem.file('.packages').createSync();
@@ -1455,7 +1455,7 @@ flutter:
       testUsingContext(
         'FLUTTER_VERSION is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1470,7 +1470,7 @@ flutter:
       testUsingContext(
         'FLUTTER_CHANNEL is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1486,7 +1486,7 @@ flutter:
       testUsingContext(
         'FLUTTER_GIT_URL is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1505,7 +1505,7 @@ flutter:
       testUsingContext(
         'FLUTTER_FRAMEWORK_REVISION is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1521,7 +1521,7 @@ flutter:
       testUsingContext(
         'FLUTTER_ENGINE_REVISION is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1537,7 +1537,7 @@ flutter:
       testUsingContext(
         'FLUTTER_DART_VERSION is set in dartDefines',
         () async {
-          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );

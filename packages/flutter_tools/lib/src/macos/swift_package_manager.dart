@@ -87,18 +87,18 @@ class SwiftPackageManager {
 
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
-    final generatedProduct = SwiftPackageProduct(
+    final SwiftPackageProduct generatedProduct = SwiftPackageProduct(
       name: kFlutterGeneratedPluginSwiftPackageName,
       targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
       libraryType: SwiftPackageLibraryType.static,
     );
 
-    final generatedTarget = SwiftPackageTarget.defaultTarget(
+    final SwiftPackageTarget generatedTarget = SwiftPackageTarget.defaultTarget(
       name: kFlutterGeneratedPluginSwiftPackageName,
       dependencies: targetDependencies,
     );
 
-    final pluginsPackage = SwiftPackage(
+    final SwiftPackage pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
       name: kFlutterGeneratedPluginSwiftPackageName,
       platforms: <SwiftPackageSupportedPlatform>[swiftSupportedPlatform],
@@ -117,9 +117,9 @@ class SwiftPackageManager {
     required Directory symlinkDirectory,
     required String pathRelativeTo,
   }) {
-    final packageDependencies =
+    final List<SwiftPackagePackageDependency> packageDependencies =
         <SwiftPackagePackageDependency>[];
-    final targetDependencies = <SwiftPackageTargetDependency>[];
+    final List<SwiftPackageTargetDependency> targetDependencies = <SwiftPackageTargetDependency>[];
 
     for (final Plugin plugin in plugins) {
       final String? pluginSwiftPackageManifestPath = plugin.pluginSwiftPackageManifestPath(

@@ -677,13 +677,13 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
 
     final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? CupertinoColors.black;
 
-    final activePressedStates = activeStates..add(WidgetState.pressed);
+    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedThumbColor =
         _resolveThumbColor(widget.thumbColor, activePressedStates) ??
         _widgetThumbColor.resolve(activePressedStates) ??
         CupertinoColors.white;
 
-    final inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
     final Color effectiveInactivePressedThumbColor =
         _resolveThumbColor(widget.thumbColor, inactivePressedStates) ??
         _widgetThumbColor.resolve(inactivePressedStates) ??
@@ -1058,7 +1058,7 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     _pressedThumbExtension = reaction.value * _kThumbExtensionFactor;
-    final thumbSize = Size(_kThumbRadius * 2 + _pressedThumbExtension!, _kThumbRadius * 2);
+    final Size thumbSize = Size(_kThumbRadius * 2 + _pressedThumbExtension!, _kThumbRadius * 2);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
@@ -1095,7 +1095,7 @@ class _SwitchPainter extends ToggleablePainter {
     final ImageErrorListener? thumbErrorListener =
         currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
 
-    final paint = Paint()..color = trackColor;
+    final Paint paint = Paint()..color = trackColor;
 
     final Offset trackPaintOffset = _computeTrackPaintOffset(size);
     final Offset thumbPaintOffset = _computeThumbPaintOffset(
@@ -1104,7 +1104,7 @@ class _SwitchPainter extends ToggleablePainter {
       visualPosition,
     );
 
-    final trackRect = Rect.fromLTWH(
+    final Rect trackRect = Rect.fromLTWH(
       trackPaintOffset.dx,
       trackPaintOffset.dy,
       _kTrackWidth,
@@ -1143,19 +1143,19 @@ class _SwitchPainter extends ToggleablePainter {
       };
 
       // Draws '|' label.
-      final onLabelRect = Rect.fromCenter(
+      final Rect onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
-      final onLabelPaint =
+      final Paint onLabelPaint =
           Paint()
             ..color = onLabelColor.withOpacity(onLabelOpacity)
             ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       // Draws 'O' label.
-      final offLabelPaint =
+      final Paint offLabelPaint =
           Paint()
             ..color = offLabelColor.withOpacity(offLabelOpacity)
             ..style = PaintingStyle.stroke
@@ -1209,24 +1209,24 @@ class _SwitchPainter extends ToggleablePainter {
     Rect trackRect,
   ) {
     const double trackRadius = _kTrackHeight / 2;
-    final trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(trackRadius));
+    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(trackRadius));
 
     canvas.drawRRect(trackRRect, paint);
 
     // Paint the track outline.
     if (trackOutlineColor != null) {
-      final outlineTrackRect = Rect.fromLTWH(
+      final Rect outlineTrackRect = Rect.fromLTWH(
         trackPaintOffset.dx + 1,
         trackPaintOffset.dy + 1,
         _kTrackWidth - 2,
         _kTrackHeight - 2,
       );
-      final outlineTrackRRect = RRect.fromRectAndRadius(
+      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
         outlineTrackRect,
         const Radius.circular(trackRadius),
       );
 
-      final outlinePaint =
+      final Paint outlinePaint =
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = trackOutlineWidth ?? 2.0
@@ -1237,7 +1237,7 @@ class _SwitchPainter extends ToggleablePainter {
 
     if (isFocused) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
-      final focusedPaint =
+      final Paint focusedPaint =
           Paint()
             ..style = PaintingStyle.stroke
             ..color = focusColor
@@ -1289,7 +1289,7 @@ class _SwitchPainter extends ToggleablePainter {
         final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
         final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
 
-        final textSpan = TextSpan(
+        final TextSpan textSpan = TextSpan(
           text: String.fromCharCode(iconData.codePoint),
           style: TextStyle(
             fontVariations: <FontVariation>[
@@ -1323,7 +1323,7 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
-    final thumbBounds = RRect.fromLTRBR(
+    final RRect thumbBounds = RRect.fromLTRBR(
       thumbPaintOffset.dx,
       thumbPaintOffset.dy,
       thumbPaintOffset.dx + thumbSize.width,

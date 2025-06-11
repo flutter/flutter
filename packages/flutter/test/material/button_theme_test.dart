@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ButtonThemeData defaults', () {
-    const theme = ButtonThemeData();
+    const ButtonThemeData theme = ButtonThemeData();
     expect(theme.textTheme, ButtonTextTheme.normal);
     expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
     expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
@@ -20,7 +20,7 @@ void main() {
   });
 
   test('ButtonThemeData default overrides', () {
-    const theme = ButtonThemeData(
+    const ButtonThemeData theme = ButtonThemeData(
       textTheme: ButtonTextTheme.primary,
       minWidth: 100.0,
       height: 200.0,

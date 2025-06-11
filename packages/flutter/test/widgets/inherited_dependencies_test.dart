@@ -23,7 +23,7 @@ void main() {
         ),
       ),
     );
-    final element = key.currentContext! as InheritedElement;
+    final InheritedElement element = key.currentContext! as InheritedElement;
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(

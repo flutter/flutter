@@ -241,7 +241,7 @@ void main() {
     testUsingContext(
       'updates packages - only runs pub get',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -259,7 +259,7 @@ void main() {
     testUsingContext(
       '--force-upgrade updates packages',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -280,7 +280,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:2.0.9']);
@@ -304,7 +304,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package with caret',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9']);
@@ -328,7 +328,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package muliple',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9,meta:1.0.5']);
@@ -356,7 +356,7 @@ void main() {
     testUsingContext(
       '--force-upgrade',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
       },
       overrides: <Type, Generator>{
@@ -423,7 +423,7 @@ class _FakePub extends Fake implements Pub {
     final List<String> split = arguments.first.split(':');
     final String packageName = split[0];
     final String packageVersion = split[1];
-    final pubspec = Pubspec.parse(project.pubspecFile.readAsStringSync());
+    final Pubspec pubspec = Pubspec.parse(project.pubspecFile.readAsStringSync());
     pubspec.dependencies[packageName] = HostedDependency(
       version: VersionConstraint.parse(packageVersion),
     );

@@ -49,7 +49,7 @@ class PreviewManifest {
     logger.printStatus('Creating the Widget Preview Scaffold manifest at ${_manifest.path}');
     assert(!_manifest.existsSync());
     _manifest.createSync(recursive: true);
-    final manifestContents = <String, Object?>{
+    final PreviewManifestContents manifestContents = <String, Object?>{
       kManifestVersion: previewManifestVersion.toString(),
       kSdkVersion: cache.dartSdkVersion,
       kPubspecHash: _calculatePubspecHash(),
@@ -96,7 +96,7 @@ class PreviewManifest {
     // If the SDK version of the widget preview scaffold doesn't match the current SDK version
     // the widget preview scaffold should also be regenerated to pick up any new functionality and
     // avoid possible binary compatibility issues.
-    final sdkVersionMismatch = manifest[kSdkVersion] != cache.dartSdkVersion;
+    final bool sdkVersionMismatch = manifest[kSdkVersion] != cache.dartSdkVersion;
     if (sdkVersionMismatch) {
       logger.printStatus(
         'The existing Widget Preview Scaffold was generated with Dart SDK '

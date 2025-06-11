@@ -84,9 +84,9 @@ void main() {
     final Finder draggable = find.byType(Draggable<int>);
     final Finder target = find.byType(DragTarget<int>);
 
-    var counter = 0;
+    int counter = 0;
 
-    for (var i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(draggable));
       await gesture.moveTo(tester.getCenter(target));
       await gesture.up();

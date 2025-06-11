@@ -25,7 +25,7 @@ void main() {
     testWidgets('updates counter when Ctrl-C combination pressed', (WidgetTester tester) async {
       await tester.pumpWidget(const example.SingleActivatorExampleApp());
 
-      for (var counter = 0; counter < 10; counter++) {
+      for (int counter = 0; counter < 10; counter++) {
         expect(find.text('count: $counter'), findsOneWidget);
 
         await pressControlC(tester);

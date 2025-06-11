@@ -95,7 +95,7 @@ void main() {
     expect(insetsState.insets, const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 12.0));
 
     // Drag each slider to its maximum value.
-    for (var index = 0; index < 3; index++) {
+    for (int index = 0; index < 3; index++) {
       await tester.drag(find.byType(Slider).at(index), const Offset(500.0, 0.0));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);

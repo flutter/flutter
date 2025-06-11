@@ -16,7 +16,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final project = BasicProjectWithUnaryMain();
+  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {

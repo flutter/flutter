@@ -29,7 +29,7 @@ void main() {
   }
 
   group('successful fetch', () {
-    const responseString = 'response string';
+    const String responseString = 'response string';
     late List<int> responseData;
 
     setUp(() {
@@ -59,7 +59,7 @@ void main() {
           ),
         ]),
       );
-      final fileSystem = MemoryFileSystem.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File destFile = fileSystem.file('dest_file')..createSync();
       final List<int>? data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),
@@ -204,7 +204,7 @@ void main() {
 
   testWithoutContext('check for bad override on ArgumentError', () async {
     final Uri invalid = Uri.parse('example.invalid/');
-    final net = Net(
+    final Net net = Net(
       httpClientFactory: () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(invalid, responseError: ArgumentError()),

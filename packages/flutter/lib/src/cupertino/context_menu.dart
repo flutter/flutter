@@ -71,7 +71,7 @@ typedef CupertinoContextMenuBuilder =
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
+  final RenderBox renderBoxContainer = globalKey.currentContext!.findRenderObject()! as RenderBox;
   return Rect.fromPoints(
     renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft),
     renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.bottomRight),
@@ -658,8 +658,8 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   void initState() {
     super.initState();
 
-    const beginPause = 1.0;
-    const openAnimationLength = 5.0;
+    const double beginPause = 1.0;
+    const double openAnimationLength = 5.0;
     const double totalOpenAnimationLength = beginPause + openAnimationLength;
     final double endPause =
         ((totalOpenAnimationLength * _animationDuration) /
@@ -818,7 +818,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static Rect _getScaledRect(GlobalKey globalKey, double scale) {
     final Rect childRect = _getRect(globalKey);
     final Size sizeScaled = childRect.size * scale;
-    final offsetScaled = Offset(
+    final Offset offsetScaled = Offset(
       childRect.left + (childRect.size.width - sizeScaled.width) / 2,
       childRect.top + (childRect.size.height - sizeScaled.height) / 2,
     );
@@ -881,7 +881,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // When opening, the transition happens from the end of the child's bounce
     // animation to the final state. When closing, it goes from the final state
     // to the original position before the bounce.
-    final childRectOriginal = Rect.fromCenter(
+    final Rect childRectOriginal = Rect.fromCenter(
       center: _previousChildRect.center,
       width: _previousChildRect.width / _scaleFactor,
       height: _previousChildRect.height / _scaleFactor,
@@ -976,7 +976,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // While the animation is running, render everything in a Stack so that
         // they're movable.
         if (!animation.isCompleted) {
-          final reverse = animation.status == AnimationStatus.reverse;
+          final bool reverse = animation.status == AnimationStatus.reverse;
           final Rect rect =
               reverse
                   ? _rectAnimatableReverse.evaluate(animation)!
@@ -1201,7 +1201,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
   // both the orientation of the screen as well as the position on the screen of
   // the original child.
   List<Widget> _getChildren(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    final child = Expanded(
+    final Expanded child = Expanded(
       child: Align(
         alignment: _getChildAlignment(widget.orientation, widget.contextMenuLocation),
         child: AnimatedBuilder(
@@ -1211,8 +1211,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
         ),
       ),
     );
-    const spacer = SizedBox(width: _kPadding, height: _kPadding);
-    final sheet = Expanded(
+    const SizedBox spacer = SizedBox(width: _kPadding, height: _kPadding);
+    final Expanded sheet = Expanded(
       child: AnimatedBuilder(
         animation: _sheetController,
         builder: _buildSheetAnimation,

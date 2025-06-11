@@ -227,7 +227,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       ),
     );
 
-    final material = Material(
+    final Material material = Material(
       key: materialKey,
       type: MaterialType.transparency,
       child: SafeArea(child: child),
@@ -267,7 +267,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     if (bottomNavigationBarTop != null) {
       return bottomNavigationBarTop;
     }
-    final box = materialKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
     return box?.localToGlobal(Offset.zero).dy ?? 0;
   }
 

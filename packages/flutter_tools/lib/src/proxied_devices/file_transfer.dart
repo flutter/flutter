@@ -57,11 +57,11 @@ class BlockHashes {
 /// Converts a stream of bytes, into a stream of bytes of fixed chunk size.
 @visibleForTesting
 Stream<Uint8List> convertToChunks(Stream<Uint8List> source, int chunkSize) {
-  final bytesBuilder = BytesBuilder(copy: false);
-  final controller = StreamController<Uint8List>();
+  final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
+  final StreamController<Uint8List> controller = StreamController<Uint8List>();
   final StreamSubscription<Uint8List> subscription = source.listen(
     (Uint8List chunk) {
-      var start = 0;
+      int start = 0;
       while (start < chunk.length) {
         final int sizeToTake = min(chunkSize - bytesBuilder.length, chunk.length - start);
         assert(sizeToTake > 0);
@@ -107,20 +107,20 @@ const int _adler32Prime = 65521;
 @visibleForTesting
 int adler32Hash(Uint8List binary) {
   // The maximum integer that can be stored in the `int` data type.
-  const maxInt = 0x1fffffffffffff;
+  const int maxInt = 0x1fffffffffffff;
   // maxChunkSize is the maximum number of bytes we can sum without
   // performing the modulus operation, without overflow.
   // n * (n + 1) / 2 * 255 < maxInt
   // n < sqrt(maxInt / 255) - 1
   final int maxChunkSize = sqrt(maxInt / 255).floor() - 1;
 
-  var a = 1;
-  var b = 0;
+  int a = 1;
+  int b = 0;
 
   final int length = binary.length;
-  for (var i = 0; i < length; i += maxChunkSize) {
+  for (int i = 0; i < length; i += maxChunkSize) {
     final int end = i + maxChunkSize < length ? i + maxChunkSize : length;
-    for (var j = i; j < end; j++) {
+    for (int j = i; j < end; j++) {
       a += binary[j];
       b += a;
     }
@@ -183,7 +183,7 @@ class RollingAdler32 {
     } else if (_cur == 0) {
       return _buffer;
     } else {
-      final builder =
+      final BytesBuilder builder =
           BytesBuilder(copy: false)
             ..add(Uint8List.sublistView(_buffer, _cur))
             ..add(Uint8List.sublistView(_buffer, 0, _cur));
@@ -233,8 +233,8 @@ class FileTransfer {
       (List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk),
     );
 
-    final adler32Results = <int>[];
-    final md5Results = <String>[];
+    final List<int> adler32Results = <int>[];
+    final List<String> md5Results = <String>[];
 
     await convertToChunks(fileContentStream, blockSize).forEach((Uint8List chunk) {
       adler32Results.add(adler32Hash(chunk));
@@ -268,23 +268,23 @@ class FileTransfer {
     final int blockSize = hashes.blockSize;
 
     // Generate a lookup for adler32 hash to block index.
-    final adler32ToBlockIndex = <int, List<int>>{};
-    for (var i = 0; i < hashes.adler32.length; i++) {
+    final Map<int, List<int>> adler32ToBlockIndex = <int, List<int>>{};
+    for (int i = 0; i < hashes.adler32.length; i++) {
       (adler32ToBlockIndex[hashes.adler32[i]] ??= <int>[]).add(i);
     }
 
-    final adler32 = RollingAdler32(blockSize);
+    final RollingAdler32 adler32 = RollingAdler32(blockSize);
 
     // Number of bytes read.
-    var size = 0;
+    int size = 0;
 
     // Offset of the beginning of the current block.
-    var start = 0;
+    int start = 0;
 
-    final blocks = <FileDeltaBlock>[];
+    final List<FileDeltaBlock> blocks = <FileDeltaBlock>[];
 
     await fileContentStream.forEach((List<int> chunk) {
-      for (var i = 0; i < chunk.length; i++) {
+      for (int i = 0; i < chunk.length; i++) {
         final int c = chunk[i];
         final int hash = adler32.push(c);
         size++;
@@ -304,7 +304,7 @@ class FileTransfer {
         final String md5Hash = base64.encode(md5.convert(adler32.currentBlock()).bytes);
 
         // Verify if any of our findings actually matches the destination block by comparing its MD5.
-        for (final blockIndex in blockIndices) {
+        for (final int blockIndex in blockIndices) {
           if (hashes.md5[blockIndex] != md5Hash) {
             // Adler-32 hash collision. This is not an actual match.
             continue;
@@ -358,9 +358,9 @@ class FileTransfer {
     final int totalSize = toTransfer
         .map((FileDeltaBlock i) => i.size)
         .reduce((int a, int b) => a + b);
-    final buffer = Uint8List(totalSize);
-    var start = 0;
-    for (final current in toTransfer) {
+    final Uint8List buffer = Uint8List(totalSize);
+    int start = 0;
+    for (final FileDeltaBlock current in toTransfer) {
       await binaryView.setPosition(current.start);
       await binaryView.readInto(buffer, start, start + current.size);
       start += current.size;
@@ -377,12 +377,12 @@ class FileTransfer {
     final RandomAccessFile fileView = await file.open();
 
     // Buffer used to hold the file content in memory.
-    final buffer = BytesBuilder(copy: false);
+    final BytesBuilder buffer = BytesBuilder(copy: false);
 
-    final iterator = StreamIterator<List<int>>(binary);
-    var currentIteratorStart = -1;
+    final StreamIterator<List<int>> iterator = StreamIterator<List<int>>(binary);
+    int currentIteratorStart = -1;
 
-    var iteratorMoveNextReturnValue = true;
+    bool iteratorMoveNextReturnValue = true;
 
     for (final FileDeltaBlock current in delta) {
       if (current.copyFromDestination) {
@@ -418,7 +418,7 @@ class FileTransfer {
   }
 
   Future<String> _md5OfFile(File file) async {
-    final fileMd5Hash = Md5Hash();
+    final Md5Hash fileMd5Hash = Md5Hash();
     await file.openRead().forEach(
       (List<int> chunk) =>
           fileMd5Hash.addChunk(chunk is Uint8List ? chunk : Uint8List.fromList(chunk)),

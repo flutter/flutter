@@ -86,26 +86,26 @@ class ThemedCard extends SingleChildRenderObjectWidget {
 
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
-    final log = <TestInherited>[];
+    final List<TestInherited> log = <TestInherited>[];
 
-    final builder = Builder(
+    final Builder builder = Builder(
       builder: (BuildContext context) {
         log.add(context.dependOnInheritedWidgetOfExactType<TestInherited>()!);
         return Container();
       },
     );
 
-    final first = TestInherited(child: builder);
+    final TestInherited first = TestInherited(child: builder);
     await tester.pumpWidget(first);
 
     expect(log, equals(<TestInherited>[first]));
 
-    final second = TestInherited(shouldNotify: false, child: builder);
+    final TestInherited second = TestInherited(shouldNotify: false, child: builder);
     await tester.pumpWidget(second);
 
     expect(log, equals(<TestInherited>[first]));
 
-    final third = TestInherited(child: builder);
+    final TestInherited third = TestInherited(child: builder);
     await tester.pumpWidget(third);
 
     expect(log, equals(<TestInherited>[first, third]));
@@ -113,7 +113,7 @@ void main() {
 
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) async {
     final GlobalKey globalKey = GlobalKey();
-    final log = <TestInherited>[];
+    final List<TestInherited> log = <TestInherited>[];
 
     TestInherited build() {
       return TestInherited(
@@ -142,7 +142,7 @@ void main() {
   });
 
   testWidgets('Update inherited when removing node', (WidgetTester tester) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(
       ValueInherited(
@@ -201,7 +201,7 @@ void main() {
   testWidgets('Update inherited when removing node and child has global key', (
     WidgetTester tester,
   ) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
 
     final Key key = GlobalKey();
 
@@ -268,7 +268,7 @@ void main() {
   testWidgets('Update inherited when removing node and child has global key with constant child', (
     WidgetTester tester,
   ) async {
-    final log = <int>[];
+    final List<int> log = <int>[];
 
     final Key key = GlobalKey();
 
@@ -317,7 +317,7 @@ void main() {
   testWidgets(
     'Update inherited when removing node and child has global key with constant child, minimised',
     (WidgetTester tester) async {
-      final log = <int>[];
+      final List<int> log = <int>[];
 
       final Widget child = Builder(
         key: GlobalKey(),
@@ -386,7 +386,7 @@ void main() {
   testWidgets(
     "Inherited widget doesn't notify descendants when descendant did not previously fail to find a match and had no dependencies",
     (WidgetTester tester) async {
-      var buildCount = 0;
+      int buildCount = 0;
 
       final Widget inner = Container(
         key: GlobalKey(),
@@ -409,7 +409,7 @@ void main() {
   testWidgets(
     'Inherited widget does notify descendants when descendant did not previously fail to find a match but did have other dependencies',
     (WidgetTester tester) async {
-      var buildCount = 0;
+      int buildCount = 0;
 
       final Widget inner = Container(
         key: GlobalKey(),
@@ -436,9 +436,9 @@ void main() {
   testWidgets("BuildContext.getInheritedWidgetOfExactType doesn't create a dependency", (
     WidgetTester tester,
   ) async {
-    var buildCount = 0;
+    int buildCount = 0;
     final GlobalKey<void> inheritedKey = GlobalKey();
-    final notifier = ChangeNotifier();
+    final ChangeNotifier notifier = ChangeNotifier();
     addTearDown(notifier.dispose);
 
     final Widget builder = Builder(
@@ -467,9 +467,9 @@ void main() {
 
   testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5491
-    var exceptionCaught = false;
+    bool exceptionCaught = false;
 
-    final parent = TestInherited(
+    final TestInherited parent = TestInherited(
       child: ExpectFail(() {
         exceptionCaught = true;
       }),
@@ -480,8 +480,8 @@ void main() {
   });
 
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
-    var buildCount = 0;
-    final notifier = ChangeNotifier();
+    int buildCount = 0;
+    final ChangeNotifier notifier = ChangeNotifier();
     addTearDown(notifier.dispose);
 
     final Widget builder = Builder(
@@ -514,7 +514,7 @@ void main() {
   });
 
   testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
-    var cardThemeData = const CardThemeData(color: Colors.white);
+    CardThemeData cardThemeData = const CardThemeData(color: Colors.white);
     late StateSetter setState;
 
     // Verifies that the "themed card" is rendered

@@ -36,12 +36,12 @@ void main() {
   });
 
   test('Can set value during status callback', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    var didComplete = false;
-    var didDismiss = false;
+    bool didComplete = false;
+    bool didDismiss = false;
     controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         didComplete = true;
@@ -69,12 +69,12 @@ void main() {
   });
 
   test('Receives status callbacks for forward and reverse', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final valueLog = <double>[];
-    final log = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> log = <AnimationStatus>[];
     controller
       ..addStatusListener(log.add)
       ..addListener(() {
@@ -131,12 +131,12 @@ void main() {
   });
 
   test('Forward and reverse from values', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final valueLog = <double>[];
-    final statusLog = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
       ..addStatusListener(statusLog.add)
       ..addListener(() {
@@ -161,7 +161,7 @@ void main() {
   });
 
   test('Forward and reverse with different durations', () {
-    var controller = AnimationController(
+    AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
@@ -227,7 +227,7 @@ void main() {
   });
 
   test('toggle() with different durations', () {
-    var controller = AnimationController(
+    AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
@@ -293,7 +293,7 @@ void main() {
   });
 
   test('toggle() acts correctly based on the animation state', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -319,12 +319,12 @@ void main() {
   });
 
   test('Forward only from value', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final valueLog = <double>[];
-    final statusLog = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
       ..addStatusListener(statusLog.add)
       ..addListener(() {
@@ -339,7 +339,7 @@ void main() {
   });
 
   test('Can fling to upper and lower bounds', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -350,7 +350,7 @@ void main() {
     expect(controller.value, 1.0);
     controller.stop();
 
-    final largeRangeController = AnimationController(
+    final AnimationController largeRangeController = AnimationController(
       duration: const Duration(milliseconds: 100),
       lowerBound: -30.0,
       upperBound: 45.0,
@@ -371,8 +371,8 @@ void main() {
   });
 
   test('Custom springDescription can be applied', () {
-    final controller = AnimationController(vsync: const TestVSync());
-    final customSpringController = AnimationController(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final AnimationController customSpringController = AnimationController(
       vsync: const TestVSync(),
     );
 
@@ -394,7 +394,7 @@ void main() {
   });
 
   test('lastElapsedDuration control test', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -408,7 +408,7 @@ void main() {
   });
 
   test('toString control test', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -428,7 +428,7 @@ void main() {
   });
 
   test('velocity test - linear', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: const TestVSync(),
     );
@@ -472,7 +472,7 @@ void main() {
   });
 
   test('Disposed AnimationController toString works', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -481,7 +481,7 @@ void main() {
   });
 
   test('AnimationController error handling', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
 
     expect(controller.forward, throwsFlutterError);
     expect(controller.reverse, throwsFlutterError);
@@ -509,7 +509,7 @@ void main() {
         '     AnimationController#00000(⏮ 0.000; paused; DISPOSED)\n',
       ),
     );
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     result.debugFillProperties(builder);
     final DiagnosticsNode controllerProperty = builder.properties.last;
     expect(
@@ -520,7 +520,7 @@ void main() {
   });
 
   test('AnimationController repeat() throws if period is not specified', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     expect(() {
       controller.repeat();
     }, throwsFlutterError);
@@ -531,9 +531,9 @@ void main() {
   });
 
   test('Do not animate if already at target', () {
-    final statusLog = <AnimationStatus>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
 
-    final controller = AnimationController(value: 0.5, vsync: const TestVSync())
+    final AnimationController controller = AnimationController(value: 0.5, vsync: const TestVSync())
       ..addStatusListener(statusLog.add);
 
     expect(controller.value, equals(0.5));
@@ -544,9 +544,9 @@ void main() {
   });
 
   test('Do not animate to upperBound if already at upperBound', () {
-    final statusLog = <AnimationStatus>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
 
-    final controller = AnimationController(value: 1.0, vsync: const TestVSync())
+    final AnimationController controller = AnimationController(value: 1.0, vsync: const TestVSync())
       ..addStatusListener(statusLog.add);
 
     expect(controller.value, equals(1.0));
@@ -557,9 +557,9 @@ void main() {
   });
 
   test('Do not animate to lowerBound if already at lowerBound', () {
-    final statusLog = <AnimationStatus>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
 
-    final controller = AnimationController(value: 0.0, vsync: const TestVSync())
+    final AnimationController controller = AnimationController(value: 0.0, vsync: const TestVSync())
       ..addStatusListener(statusLog.add);
 
     expect(controller.value, equals(0.0));
@@ -570,8 +570,8 @@ void main() {
   });
 
   test('Do not animate if already at target mid-flight (forward)', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       value: 0.0,
       duration: const Duration(milliseconds: 1000),
       vsync: const TestVSync(),
@@ -596,8 +596,8 @@ void main() {
   });
 
   test('Do not animate if already at target mid-flight (reverse)', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       value: 1.0,
       duration: const Duration(milliseconds: 1000),
       vsync: const TestVSync(),
@@ -622,7 +622,7 @@ void main() {
   });
 
   test('animateTo can deal with duration == Duration.zero', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -640,8 +640,8 @@ void main() {
   });
 
   test('resetting animation works at all phases', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
       vsync: const TestVSync(),
@@ -705,7 +705,7 @@ void main() {
   });
 
   test('setting value directly sets correct status', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       value: 0.0,
       vsync: const TestVSync(),
     );
@@ -732,8 +732,8 @@ void main() {
   });
 
   test('animateTo sets correct status', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
       vsync: const TestVSync(),
@@ -789,8 +789,8 @@ void main() {
   });
 
   test('after a reverse call animateTo sets correct status', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 1.0,
       vsync: const TestVSync(),
@@ -822,8 +822,8 @@ void main() {
   });
 
   test('after a forward call animateTo sets correct status', () {
-    final statusLog = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
       vsync: const TestVSync(),
@@ -856,7 +856,7 @@ void main() {
 
   test('calling repeat with reverse set to true makes the animation alternate '
       'between lowerBound and upperBound values on each repeat', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
       vsync: const TestVSync(),
@@ -903,7 +903,7 @@ void main() {
 
   test('calling repeat with specified min and max values between 0 and 1 makes '
       'the animation alternate between min and max values on each repeat', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
       vsync: const TestVSync(),
@@ -950,7 +950,7 @@ void main() {
 
   test('calling repeat with negative min value and positive max value makes the '
       'animation alternate between min and max values on each repeat', () {
-    final controller = AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 1.0,
       lowerBound: -1,
@@ -979,10 +979,10 @@ void main() {
 
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
-      final controller = AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       expect(controller.animationBehavior, AnimationBehavior.normal);
 
-      final repeating = AnimationController.unbounded(vsync: const TestVSync());
+      final AnimationController repeating = AnimationController.unbounded(vsync: const TestVSync());
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
       controller.dispose();
       repeating.dispose();
@@ -990,7 +990,7 @@ void main() {
 
     test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
-      final controller = AnimationController(
+      final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
         animationBehavior: AnimationBehavior.preserve,
       );
@@ -1016,7 +1016,7 @@ void main() {
 
     test('AnimationBehavior.normal runs at 20x speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
-      final controller = AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
 
       expect(controller.value, 0.0);
       expect(controller.status, AnimationStatus.dismissed);
@@ -1039,8 +1039,8 @@ void main() {
 
     test('AnimationBehavior.normal runs "faster" than AnimationBehavior.preserve', () {
       debugSemanticsDisableAnimations = true;
-      final controller = AnimationController(vsync: const TestVSync());
-      final fastController = AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final AnimationController fastController = AnimationController(vsync: const TestVSync());
 
       controller.fling(animationBehavior: AnimationBehavior.preserve);
       fastController.fling(animationBehavior: AnimationBehavior.normal);
@@ -1056,7 +1056,7 @@ void main() {
   });
 
   test('AnimationController methods assert _ticker is not null', () {
-    final controller = AnimationController(vsync: const TestVSync());
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
 
     controller.dispose();
 
@@ -1069,8 +1069,8 @@ void main() {
   });
 
   test('Simulations run forward', () {
-    final statuses = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
@@ -1085,8 +1085,8 @@ void main() {
   });
 
   test('Simulations run forward even after a reverse run', () {
-    final statuses = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
@@ -1110,8 +1110,8 @@ void main() {
   });
 
   test('Repeating animation with reverse: true report as forward and reverse', () {
-    final statuses = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
@@ -1129,8 +1129,8 @@ void main() {
   });
 
   test('AnimateBack can runs successfully with just "reverseDuration" property set', () {
-    final statuses = <AnimationStatus>[];
-    final controller = AnimationController(
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
       reverseDuration: const Duration(seconds: 2),
       vsync: const TestVSync(),
     )..addStatusListener((AnimationStatus status) {
@@ -1150,7 +1150,7 @@ void main() {
 
   group('AnimationController "duration" error test', () {
     test('AnimationController forward() will throw an error if there is no default duration', () {
-      final controller = AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
 
       late FlutterError error;
       try {
@@ -1173,7 +1173,7 @@ void main() {
 
     test('AnimationController animateTo() will throw an error if there is no explicit duration '
         'and default duration', () {
-      final controller = AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
 
       late FlutterError error;
       try {
@@ -1200,7 +1200,7 @@ void main() {
     test(
       'AnimationController reverse() will throw an error if there is no default duration or reverseDuration',
       () {
-        final controller = AnimationController(vsync: const TestVSync());
+        final AnimationController controller = AnimationController(vsync: const TestVSync());
 
         late FlutterError error;
         try {
@@ -1228,7 +1228,7 @@ void main() {
       'AnimationController animateBack() will throw an error if there is no explicit duration and '
       'no default duration or reverseDuration',
       () {
-        final controller = AnimationController(vsync: const TestVSync());
+        final AnimationController controller = AnimationController(vsync: const TestVSync());
 
         late FlutterError error;
         try {
@@ -1256,7 +1256,7 @@ void main() {
 
   group('count tests for repeated animation', () {
     test('calling repeat by setting count as zero shall throw Assertion', () {
-      final controller = AnimationController(
+      final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
         vsync: const TestVSync(),
@@ -1267,7 +1267,7 @@ void main() {
     });
 
     test('calling repeat by setting count as negative shall throw Assertion', () {
-      final controller = AnimationController(
+      final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
         vsync: const TestVSync(),
@@ -1280,7 +1280,7 @@ void main() {
     test(
       'calling repeat by setting count as valid with reverse as false, shall run animation accordingly',
       () {
-        final controller = AnimationController(
+        final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           value: 0.0,
           vsync: const TestVSync(),
@@ -1318,7 +1318,7 @@ void main() {
     test(
       'calling repeat by setting count as valid with reverse as true, shall run animation accordingly',
       () {
-        final controller = AnimationController(
+        final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           value: 0.0,
           vsync: const TestVSync(),

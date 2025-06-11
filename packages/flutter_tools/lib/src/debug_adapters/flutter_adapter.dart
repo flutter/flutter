@@ -122,7 +122,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
-    final args = this.args as FlutterAttachRequestArguments;
+    final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
     String? vmServiceUri = args.vmServiceUri;
     final String? vmServiceInfoFile = args.vmServiceInfoFile;
 
@@ -144,7 +144,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       vmServiceUri = uriFromFile.toString();
     }
 
-    final toolArgs = <String>[
+    final List<String> toolArgs = <String>[
       'attach',
       '--machine',
       if (!enableFlutterDds) '--no-dds',
@@ -187,7 +187,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       case 'hotReload':
       // This convention is for the internal IDE client.
       case r'$/hotReload':
-        final isFullRestart = request.command == 'hotRestart';
+        final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
         sendResponse(null);
 
@@ -235,11 +235,11 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final args = this.args as FlutterLaunchRequestArguments;
+    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
     launchProgress = startProgressNotification('launch', 'Flutter', message: 'Launching…');
 
-    final toolArgs = <String>[
+    final List<String> toolArgs = <String>[
       'run',
       '--machine',
       if (!enableFlutterDds) '--no-dds',
@@ -283,7 +283,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
     }
 
-    final processArgs = <String>[
+    final List<String> processArgs = <String>[
       ...toolArgs,
       ...?userToolArgs,
       if (targetProgram != null) ...<String>['--target', targetProgram],
@@ -314,7 +314,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// common during the application being stopped, where async messages may be
   /// processed).
   Future<Object?> sendFlutterRequest(String method, Map<String, Object?>? params) async {
-    final completer = Completer<Object?>();
+    final Completer<Object?> completer = Completer<Object?>();
     final int id = _flutterRequestId++;
     _flutterRequestCompleters[id] = completer;
 
@@ -334,7 +334,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     final String messageString = jsonEncode(message);
     // Flutter requests are always wrapped in brackets as an array.
-    final payload = '[$messageString]\n';
+    final String payload = '[$messageString]\n';
     _logTraffic('==> [Flutter] $payload');
     await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: payload);
   }
@@ -350,7 +350,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // It's possible the Flutter process will terminate before we process the
     // response, so accept either a response or the process exiting.
     if (_appId != null) {
-      final method = isAttach ? 'app.detach' : 'app.stop';
+      final String method = isAttach ? 'app.detach' : 'app.stop';
       await Future.any<void>(<Future<void>>[
         sendFlutterRequest(method, <String, Object?>{'appId': _appId}),
         process?.exitCode ?? Future<void>.value(),
@@ -448,7 +448,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // On Windows, the pid from the process we spawn is the shell running
     // flutter.bat and terminating it may not be reliable, so we also take the
     // pid provided from the VM running flutter_tools.
-    final pid = params['pid'] as int?;
+    final int? pid = params['pid'] as int?;
     if (pid != null) {
       pidsToTerminate.add(pid);
     }
@@ -457,7 +457,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
   Future<void> _handleDebugPort(Map<String, Object?> params) async {
     // Capture the VM Service URL which we'll connect to when we get app.started.
-    final wsUri = params['wsUri'] as String?;
+    final String? wsUri = params['wsUri'] as String?;
     if (wsUri != null) {
       final Uri vmServiceUri = Uri.parse(wsUri);
       // Also wait for app.started before we connect, to ensure Flutter's
@@ -470,7 +470,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
   @override
   void handleExitCode(int code) {
-    final codeSuffix = code == 0 ? '' : ' ($code)';
+    final String codeSuffix = code == 0 ? '' : ' ($code)';
     _logTraffic('<== [Flutter] Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
@@ -517,7 +517,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     }
 
     // Set up a completer to forward the response back to `flutter` when it arrives.
-    final completer = Completer<Object?>();
+    final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
     completer.future.then(
       (Object? value) => sendResponseToFlutter(id, value),
@@ -594,7 +594,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // started, then stdout (users output). This is so info like
     // "Launching lib/main.dart on Device foo" is formatted differently to
     // general output printed by the user.
-    final outputCategory = _receivedAppStarted ? 'stdout' : 'console';
+    final String outputCategory = _receivedAppStarted ? 'stdout' : 'console';
 
     // Output in stdout can include both user output (eg. print) and Flutter
     // daemon output. Since it's not uncommon for users to print JSON while
@@ -672,8 +672,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       return;
     }
 
-    final progressId = fullRestart ? 'hotRestart' : 'hotReload';
-    final progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
+    final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
+    final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
     final DapProgressReporter progress = startProgressNotification(
       progressId,
       'Flutter',
@@ -689,7 +689,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         'debounce': true,
       });
     } on DebugAdapterException catch (error) {
-      final action = fullRestart ? 'Hot Restart' : 'Hot Reload';
+      final String action = fullRestart ? 'Hot Restart' : 'Hot Reload';
       sendOutput('console', 'Failed to $action: $error');
     } finally {
       progress.end();

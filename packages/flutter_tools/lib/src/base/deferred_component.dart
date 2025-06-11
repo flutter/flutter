@@ -92,7 +92,7 @@ class DeferredComponent {
   /// configuration.
   @override
   String toString() {
-    final out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
+    final StringBuffer out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n    - $lib');
     }
@@ -138,7 +138,7 @@ class LoadingUnit {
   /// the [path] field. The [path] is not included as it is not relevant when the
   @override
   String toString() {
-    final out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
+    final StringBuffer out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n  - $lib');
     }
@@ -161,13 +161,13 @@ class LoadingUnit {
     Logger logger, {
     List<String>? abis,
   }) {
-    final loadingUnits = <LoadingUnit>[];
+    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
-    for (final fileEntity in files) {
+    for (final FileSystemEntity fileEntity in files) {
       if (fileEntity is File) {
         final File file = fileEntity;
         // Determine if the abi is one we build.
-        var matchingAbi = abis == null;
+        bool matchingAbi = abis == null;
         if (abis != null) {
           for (final String abi in abis) {
             if (file.parent.path.endsWith(abi)) {

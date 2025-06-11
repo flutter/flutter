@@ -11,10 +11,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Semantic announcement', () async {
-    final log = <Map<dynamic, dynamic>>[];
+    final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
     Future<dynamic> handleMessage(dynamic mockMessage) async {
-      final message = mockMessage as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
       log.add(message);
     }
 

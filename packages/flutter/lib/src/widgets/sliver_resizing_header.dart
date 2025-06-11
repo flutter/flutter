@@ -162,7 +162,7 @@ class _RenderSliverResizingHeader extends RenderSliver
     SliverConstraints constraints,
     SliverGeometry geometry,
   ) {
-    final childParentData = child.parentData! as SliverPhysicalParentData;
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     final AxisDirection direction = applyGrowthDirectionToAxisDirection(
       constraints.axisDirection,
       constraints.growthDirection,
@@ -231,14 +231,14 @@ class _RenderSliverResizingHeader extends RenderSliver
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final childParentData = child.parentData! as SliverPhysicalParentData;
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      final childParentData =
+      final SliverPhysicalParentData childParentData =
           child!.parentData! as SliverPhysicalParentData;
       context.paintChild(child!, offset + childParentData.paintOffset);
     }

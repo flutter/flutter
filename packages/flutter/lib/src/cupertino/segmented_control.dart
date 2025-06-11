@@ -219,7 +219,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
   bool _updateColors() {
     assert(mounted, 'This should only be called after didUpdateDependencies');
-    var changed = false;
+    bool changed = false;
     final Color disabledTextColor = widget.disabledTextColor ?? _kDisableTextColor;
     if (_disabledTextColor != disabledTextColor) {
       changed = true;
@@ -300,7 +300,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
     }
 
     if (oldWidget.groupValue != widget.groupValue) {
-      var index = 0;
+      int index = 0;
       for (final T key in widget.children.keys) {
         if (widget.groupValue == key) {
           _childTweens[index] = _forwardBackgroundColorTween;
@@ -379,9 +379,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
   @override
   Widget build(BuildContext context) {
-    final gestureChildren = <Widget>[];
-    final backgroundColors = <Color>[];
-    var index = 0;
+    final List<Widget> gestureChildren = <Widget>[];
+    final List<Color> backgroundColors = <Color>[];
+    int index = 0;
     int? selectedIndex;
     int? pressedIndex;
     for (final T currentKey in widget.children.keys) {
@@ -391,7 +391,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       final TextStyle textStyle = DefaultTextStyle.of(
         context,
       ).style.copyWith(color: getTextColor(index, currentKey));
-      final iconTheme = IconThemeData(color: getTextColor(index, currentKey));
+      final IconThemeData iconTheme = IconThemeData(color: getTextColor(index, currentKey));
 
       Widget child = Center(child: widget.children[currentKey]);
 
@@ -556,9 +556,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    var minWidth = 0.0;
+    double minWidth = 0.0;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       minWidth = math.max(minWidth, childWidth);
@@ -570,9 +570,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    var maxWidth = 0.0;
+    double maxWidth = 0.0;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxWidth = math.max(maxWidth, childWidth);
@@ -584,9 +584,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMinIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    var minHeight = 0.0;
+    double minHeight = 0.0;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       minHeight = math.max(minHeight, childHeight);
@@ -598,9 +598,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    var maxHeight = 0.0;
+    double maxHeight = 0.0;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxHeight = math.max(maxHeight, childHeight);
@@ -623,13 +623,13 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _layoutRects(_NextChild nextChild, RenderBox? leftChild, RenderBox? rightChild) {
     RenderBox? child = leftChild;
-    var start = 0.0;
+    double start = 0.0;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
-      final childOffset = Offset(start, 0.0);
+      final Offset childOffset = Offset(start, 0.0);
       childParentData.offset = childOffset;
-      final childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       final RSuperellipse rChildRect;
       if (child == leftChild) {
         rChildRect = RSuperellipse.fromRectAndCorners(
@@ -677,7 +677,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final Size childSize = _calculateChildSize(constraints);
-    final childConstraints = BoxConstraints.tight(childSize);
+    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
@@ -699,7 +699,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     final BoxConstraints constraints = this.constraints;
     final Size childSize = _calculateChildSize(constraints);
 
-    final childConstraints = BoxConstraints.tightFor(
+    final BoxConstraints childConstraints = BoxConstraints.tightFor(
       width: childSize.width,
       height: childSize.height,
     );
@@ -723,7 +723,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     RenderBox? child = firstChild;
-    var index = 0;
+    int index = 0;
     while (child != null) {
       _paintChild(context, offset, child, index);
       child = childAfter(child);
@@ -732,7 +732,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child, int childIndex) {
-    final childParentData =
+    final _SegmentedControlContainerBoxParentData childParentData =
         child.parentData! as _SegmentedControlContainerBoxParentData;
 
     context.canvas.drawRSuperellipse(
@@ -756,7 +756,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
-      final childParentData =
+      final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
       if (childParentData.surroundingRect!.outerRect.contains(position)) {
         return result.addWithPaintOffset(

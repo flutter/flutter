@@ -34,7 +34,7 @@ class SizeChangerState extends State<SizeChanger> {
 
 void main() {
   testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
-    var frame = 1;
+    int frame = 1;
     await tester.pumpWidget(
       SizeChanger(
         // when this is triggered, the child LayoutBuilder will build again

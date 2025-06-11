@@ -417,7 +417,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final child in List<_RawMenuAnchorBaseMixin>.from(
+    for (final _RawMenuAnchorBaseMixin child in List<_RawMenuAnchorBaseMixin>.from(
       _anchorChildren,
     )) {
       child.close(inDispose: inDispose);
@@ -573,17 +573,17 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   Widget _buildOverlay(BuildContext context) {
     final BuildContext anchorContext = _anchorKey.currentContext!;
-    final overlay =
+    final RenderBox overlay =
         Overlay.of(anchorContext, rootOverlay: useRootOverlay).context.findRenderObject()!
             as RenderBox;
-    final anchorBox = anchorContext.findRenderObject()! as RenderBox;
+    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
     final ui.Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
     final ui.Offset bottomRight = anchorBox.localToGlobal(
       anchorBox.size.bottomRight(Offset.zero),
       ancestor: overlay,
     );
 
-    final info = RawMenuOverlayInfo(
+    final RawMenuOverlayInfo info = RawMenuOverlayInfo(
       anchorRect: Rect.fromPoints(upperLeft, bottomRight),
       overlaySize: overlay.size,
       position: _menuPosition,

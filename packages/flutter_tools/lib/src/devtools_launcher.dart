@@ -65,7 +65,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       ]);
       _processStartCompleter.complete();
 
-      final devToolsCompleter = Completer<Uri>();
+      final Completer<Uri> devToolsCompleter = Completer<Uri>();
       _devToolsProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         String line,
       ) {

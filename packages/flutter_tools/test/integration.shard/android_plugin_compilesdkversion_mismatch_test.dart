@@ -40,7 +40,7 @@ void main() {
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
     // Bump up plugin compileSdk version to 31
-    final androidCompileSdkVersionRegExp = RegExp(
+    final RegExp androidCompileSdkVersionRegExp = RegExp(
       r'compileSdk = ([0-9]+|flutter.compileSdkVersion)',
     );
     final String newPluginGradleFile = pluginBuildGradle.replaceAll(

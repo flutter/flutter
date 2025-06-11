@@ -16,9 +16,9 @@ void main() {
   late FakeMenuChannel fakeMenuChannel;
   late PlatformMenuDelegate originalDelegate;
   late DefaultPlatformMenuDelegate delegate;
-  final selected = <String>[];
-  final opened = <String>[];
-  final closed = <String>[];
+  final List<String> selected = <String>[];
+  final List<String> opened = <String>[];
+  final List<String> closed = <String>[];
 
   void onSelected(String item) {
     selected.add(item);
@@ -118,11 +118,11 @@ void main() {
       },
     );
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const item = PlatformMenuItem(
+      const PlatformMenuItem item = PlatformMenuItem(
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
-      const menuBar = PlatformMenuBar(
+      const PlatformMenuBar menuBar = PlatformMenuBar(
         menus: <PlatformMenuItem>[item],
         child: SizedBox(),
       );
@@ -144,10 +144,10 @@ void main() {
   });
   group('MenuBarItem', () {
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const childItem = PlatformMenuItem(label: 'label');
-      const item = PlatformMenu(label: 'label', menus: <PlatformMenuItem>[childItem]);
+      const PlatformMenuItem childItem = PlatformMenuItem(label: 'label');
+      const PlatformMenu item = PlatformMenu(label: 'label', menus: <PlatformMenuItem>[childItem]);
 
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       item.debugFillProperties(builder);
 
       final List<String> description =
@@ -162,12 +162,12 @@ void main() {
 
   group('ShortcutSerialization', () {
     testWidgets('character constructor', (WidgetTester tester) async {
-      final serialization = ShortcutSerialization.character('?');
+      final ShortcutSerialization serialization = ShortcutSerialization.character('?');
       expect(
         serialization.toChannelRepresentation(),
         equals(<String, Object?>{'shortcutCharacter': '?', 'shortcutModifiers': 0}),
       );
-      final serializationWithModifiers = ShortcutSerialization.character(
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.character(
         '?',
         alt: true,
         control: true,
@@ -180,7 +180,7 @@ void main() {
     });
 
     testWidgets('modifier constructor', (WidgetTester tester) async {
-      final serialization = ShortcutSerialization.modifier(
+      final ShortcutSerialization serialization = ShortcutSerialization.modifier(
         LogicalKeyboardKey.home,
       );
       expect(
@@ -190,7 +190,7 @@ void main() {
           'shortcutModifiers': 0,
         }),
       );
-      final serializationWithModifiers = ShortcutSerialization.modifier(
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.modifier(
         LogicalKeyboardKey.home,
         alt: true,
         control: true,
@@ -231,7 +231,7 @@ List<PlatformMenuItem> createTestMenus({
   Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
-  final result = <PlatformMenuItem>[
+  final List<PlatformMenuItem> result = <PlatformMenuItem>[
     PlatformMenu(
       label: mainMenu[0],
       onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
@@ -433,7 +433,7 @@ class FakeMenuChannel implements MethodChannel {
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
-    final call = MethodCall(method, arguments);
+    final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
     return await outgoing(call) as T;
   }

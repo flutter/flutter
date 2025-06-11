@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
-    final controller = TrackingScrollController();
+    final TrackingScrollController controller = TrackingScrollController();
     addTearDown(controller.dispose);
-    const listItemHeight = 100.0;
+    const double listItemHeight = 100.0;
 
     await tester.pumpWidget(
       Directionality(
@@ -59,9 +59,9 @@ void main() {
   });
 
   testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
-    var attach = 0;
-    var detach = 0;
-    final controller = TrackingScrollController(
+    int attach = 0;
+    int detach = 0;
+    final TrackingScrollController controller = TrackingScrollController(
       onAttach: (_) {
         attach++;
       },
@@ -70,7 +70,7 @@ void main() {
       },
     );
     addTearDown(controller.dispose);
-    const listItemHeight = 100.0;
+    const double listItemHeight = 100.0;
 
     await tester.pumpWidget(
       Directionality(

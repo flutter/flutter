@@ -140,7 +140,7 @@ class _ErrorMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final description = matchState[mismatchDescriptionKey] as String?;
+    final String? description = matchState[mismatchDescriptionKey] as String?;
     return description != null
         ? mismatchDescription.add(description)
         : mismatchDescription.add('$matchState');
@@ -159,12 +159,12 @@ class _ErrorsInFileMatcher extends Matcher {
   }
 
   List<(int, String)> _expectedErrorMessagesFromFile(Map<dynamic, dynamic> matchState) {
-    final returnValue = <(int, String)>[];
+    final List<(int, String)> returnValue = <(int, String)>[];
     for (final (int index, String line) in file.readAsLinesSync().indexed) {
       final List<String> expectations =
           expectationMatcher.firstMatch(line)?.namedGroup('expectations')?.split(' // ERROR: ') ??
           <String>[];
-      for (final expectation in expectations) {
+      for (final String expectation in expectations) {
         returnValue.add((index + 1, expectation));
       }
     }
@@ -173,7 +173,7 @@ class _ErrorsInFileMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final actualErrors = item as List<String>;
+    final List<String> actualErrors = item as List<String>;
     final List<(int, String)> expectedErrors = _expectedErrorMessagesFromFile(matchState);
     if (expectedErrors.length != actualErrors.length) {
       return mismatch(
@@ -183,7 +183,7 @@ class _ErrorsInFileMatcher extends Matcher {
         matchState,
       );
     }
-    for (var i = 0; i < actualErrors.length; ++i) {
+    for (int i = 0; i < actualErrors.length; ++i) {
       final String actualError = actualErrors[i];
       final (int lineNumber, String expectedError) = expectedErrors[i];
       switch (actualError.split(':')) {

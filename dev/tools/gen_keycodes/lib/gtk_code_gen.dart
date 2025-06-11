@@ -24,7 +24,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get _xkbScanCodeMap {
-    final lines = OutputLines<int>('GTK scancode map');
+    final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.xKbScanCode != null) {
         lines.add(
@@ -38,7 +38,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of GTK keyval codes to Flutter logical keys.
   String get _gtkKeyvalCodeMap {
-    final lines = OutputLines<int>('GTK keyval map');
+    final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
         lines.add(value, '    {${toHex(value)}, ${toHex(entry.value, digits: 11)}},  // $name');
@@ -53,7 +53,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     LogicalKeyData logicalData,
     String debugFunctionName,
   ) {
-    final result = StringBuffer();
+    final StringBuffer result = StringBuffer();
     source.forEach((String modifierBitName, List<String> keyNames) {
       assert(keyNames.length == 2 || keyNames.length == 3);
       final String primaryPhysicalName = keyNames[0];
@@ -69,7 +69,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
         );
         return;
       }
-      final pad = secondaryLogical == null ? '' : '  ';
+      final String pad = secondaryLogical == null ? '' : '  ';
       result.writeln(
         '''
 
@@ -108,11 +108,11 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   final Map<String, bool> _layoutGoals;
   String get _layoutGoalsString {
-    final lines = OutputLines<int>('GTK layout goals');
+    final OutputLines<int> lines = OutputLines<int>('GTK layout goals');
     _layoutGoals.forEach((String name, bool mandatory) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
-      final line =
+      final String line =
           'LayoutGoal{'
           '${toHex(physicalEntry.xKbScanCode, digits: 2)}, '
           '${toHex(logicalEntry.value, digits: 2)}, '
@@ -129,9 +129,9 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
-    final buffer = StringBuffer();
-    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kGtkPlane];
-    for (final constant in maskConstants) {
+    final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kGtkPlane];
+    for (final MaskConstant constant in maskConstants) {
       buffer.writeln(
         'const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};',
       );

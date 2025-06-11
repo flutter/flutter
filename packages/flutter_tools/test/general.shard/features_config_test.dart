@@ -27,12 +27,12 @@ void main() {
     Map<String, Object> globalConfig = const <String, Object>{},
     String? projectManifest,
   }) {
-    final globalConfigReader = Config.test();
+    final Config globalConfigReader = Config.test();
     for (final MapEntry<String, Object>(:String key, :Object value) in globalConfig.entries) {
       globalConfigReader.setValue(key, value);
     }
 
-    final logger = BufferLogger.test();
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest =
         projectManifest != null
             ? FlutterManifest.createFromString(projectManifest, logger: logger)
@@ -41,7 +41,7 @@ void main() {
       fail(logger.errorText);
     }
 
-    final featuresConfig = FlutterFeaturesConfig(
+    final FlutterFeaturesConfig featuresConfig = FlutterFeaturesConfig(
       globalConfig: globalConfigReader,
       platform: FakePlatform(environment: <String, String>{...environment}),
       projectManifest: flutterManifest,

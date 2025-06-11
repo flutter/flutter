@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(
@@ -106,7 +106,7 @@ void main() {
       ),
     );
 
-    var changeCount = 0;
+    int changeCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       changeCount += 1;
     });

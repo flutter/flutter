@@ -70,7 +70,7 @@ void main() {
         final dynamic exception = tester.takeException();
         expect(exception, isNotNull);
         expect(exception, isFlutterError);
-        final error = exception as FlutterError;
+        final FlutterError error = exception as FlutterError;
         expect(error.diagnostics.length, 3);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
@@ -102,7 +102,7 @@ void main() {
     );
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
-      final key = GlobalKey<_SingleTickerTestState>();
+      final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
@@ -145,7 +145,7 @@ void main() {
     });
 
     testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
-      final key = GlobalKey<_SingleTickerTestState>();
+      final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
@@ -190,7 +190,7 @@ void main() {
     testWidgets('TickerProviderStateMixin dispose while any ticker is active', (
       WidgetTester tester,
     ) async {
-      final key = GlobalKey<_MultipleTickerTestState>();
+      final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
       final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
       FlutterError? error;
@@ -302,7 +302,7 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
   @override
   void initState() {
     super.initState();
-    const duration = Duration(seconds: 100);
+    const Duration duration = Duration(seconds: 100);
     controllers.add(AnimationController(vsync: this, duration: duration));
     controllers.add(AnimationController(vsync: this, duration: duration));
   }

@@ -151,7 +151,7 @@ class ColdRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
+      for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
     }

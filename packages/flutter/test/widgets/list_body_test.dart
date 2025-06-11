@@ -15,9 +15,9 @@ const List<Widget> children = <Widget>[
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
   final Finder finder = find.byType(SizedBox);
-  final actual = <Rect>[];
+  final List<Rect> actual = <Rect>[];
   finder.runCached(() {
-    for (var i = 0; i < expected.length; ++i) {
+    for (int i = 0; i < expected.length; ++i) {
       final Finder current = finder.at(i);
       expect(current, findsOneWidget);
       actual.add(tester.getRect(finder.at(i)));
@@ -103,7 +103,7 @@ void main() {
 
   testWidgets('Limited space along main axis error', (WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
-    final errors = <FlutterErrorDetails>[];
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
@@ -136,7 +136,7 @@ void main() {
 
   testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
-    final errors = <FlutterErrorDetails>[];
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(

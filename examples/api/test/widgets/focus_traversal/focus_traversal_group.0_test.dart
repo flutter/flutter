@@ -24,7 +24,7 @@ void main() {
 
     expect(hasFocus(tester, 'num: 0'), isTrue);
 
-    const focusOrder = <String>[
+    const List<String> focusOrder = <String>[
       'num: 1',
       'num: 2',
       'String: A',
@@ -36,7 +36,7 @@ void main() {
       'num: 0',
     ];
 
-    for (final text in focusOrder) {
+    for (final String text in focusOrder) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
 

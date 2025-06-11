@@ -118,9 +118,9 @@ abstract class DeviceManager {
 
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
-    final prefixMatches = <Device>[];
-    final exactMatchCompleter = Completer<Device>();
-    final futureDevices = <Future<List<Device>?>>[
+    final List<Device> prefixMatches = <Device>[];
+    final Completer<Device> exactMatchCompleter = Completer<Device>();
+    final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
           discoverer
@@ -811,12 +811,12 @@ abstract class Device {
     }
 
     // Extract device information
-    final table = <List<String>>[];
+    final List<List<String>> table = <List<String>>[];
     for (final Device device in devices) {
-      var supportIndicator = device.isSupported() ? '' : ' (unsupported)';
+      String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -828,9 +828,9 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
+    for (final List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -1369,7 +1369,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    final buf = StringBuffer('started=$started');
+    final StringBuffer buf = StringBuffer('started=$started');
     if (vmServiceUri != null) {
       buf.write(', vmService=$vmServiceUri');
     }

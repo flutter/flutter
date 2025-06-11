@@ -157,7 +157,7 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
 class CubicWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final path = Path();
+    final Path path = Path();
     // Closer to 1 moves the wave lower, closer to 0 moves it higher.
     final double waveHeight = size.height * 0.65;
 
@@ -189,7 +189,7 @@ class CubicWaveClipper extends CustomClipper<Path> {
 class TriangleClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final path = Path();
+    final Path path = Path();
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0);
@@ -214,7 +214,7 @@ class OverlappingRectClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     // Note: Path coordinates are relative to the widget being clipped.
-    final path = Path();
+    final Path path = Path();
 
     // Define the two rectangles relative to the widget's size
     final double rectWidth = size.width * 0.4;
@@ -224,8 +224,8 @@ class OverlappingRectClipper extends CustomClipper<Path> {
     final double offsetX2 = size.width * 0.25;
     final double offsetY2 = size.height * 0.25;
 
-    final rect1 = Rect.fromLTWH(offsetX1, offsetY1, rectWidth, rectHeight);
-    final rect2 = Rect.fromLTWH(offsetX2, offsetY2, rectWidth, rectHeight); // Overlaps rect1
+    final Rect rect1 = Rect.fromLTWH(offsetX1, offsetY1, rectWidth, rectHeight);
+    final Rect rect2 = Rect.fromLTWH(offsetX2, offsetY2, rectWidth, rectHeight); // Overlaps rect1
 
     // Add the rectangles to the path
     path.addRect(rect1);

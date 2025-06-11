@@ -40,11 +40,11 @@ final class DartBuildResult {
       dependencies = const <Uri>[];
 
   factory DartBuildResult.fromJson(Map<String, Object?> json) {
-    final dependencies = <Uri>[
+    final List<Uri> dependencies = <Uri>[
       for (final Object? encodedUri in json['dependencies']! as List<Object?>)
         Uri.parse(encodedUri! as String),
     ];
-    final codeAssets = <FlutterCodeAsset>[
+    final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
       for (final Object? json in json['code_assets']! as List<Object?>)
         FlutterCodeAsset(
           codeAsset: CodeAsset.fromEncoded(
@@ -109,7 +109,7 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Directory buildDir = fileSystem.directory(buildUri);
 
-  final flutterTester = targetPlatform == TargetPlatform.tester;
+  final bool flutterTester = targetPlatform == TargetPlatform.tester;
 
   if (!await buildDir.exists()) {
     // Ensure the folder exists so the native build system can copy it even
@@ -151,7 +151,7 @@ Future<void> installCodeAssets({
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
-  final flutterTester = targetPlatform == TargetPlatform.tester;
+  final bool flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
@@ -343,16 +343,16 @@ Future<Uri> _writeNativeAssetsJson(
 }
 
 String _toNativeAssetsJsonFile(List<KernelAsset> kernelAssets) {
-  final assetsPerTarget = <Target, List<KernelAsset>>{};
+  final Map<Target, List<KernelAsset>> assetsPerTarget = <Target, List<KernelAsset>>{};
   for (final KernelAsset asset in kernelAssets) {
     assetsPerTarget.putIfAbsent(asset.target, () => <KernelAsset>[]).add(asset);
   }
 
-  const formatVersionKey = 'format-version';
-  const nativeAssetsKey = 'native-assets';
+  const String formatVersionKey = 'format-version';
+  const String nativeAssetsKey = 'native-assets';
 
   // See assets/native_assets.cc in the engine for the expected format.
-  final jsonContents = <String, Object>{
+  final Map<String, Object> jsonContents = <String, Object>{
     formatVersionKey: const <int>[1, 0, 0],
     nativeAssetsKey: <String, Map<String, List<String>>>{
       for (final MapEntry<Target, List<KernelAsset>> entry in assetsPerTarget.entries)
@@ -576,14 +576,14 @@ Future<DartBuildResult> _runDartBuild({
   required OS? targetOS,
   required bool linkingEnabled,
 }) async {
-  final architectureString =
+  final String architectureString =
       architectures.length == 1
           ? architectures.single.toString()
           : architectures.toList().toString();
 
   globals.logger.printTrace('Building native assets for $targetOS $architectureString.');
-  final codeAssets = <FlutterCodeAsset>[];
-  final dependencies = <Uri>{};
+  final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[];
+  final Set<Uri> dependencies = <Uri>{};
 
   final EnvironmentType? environmentType;
   if (targetOS == OS.iOS) {
@@ -615,7 +615,7 @@ Future<DartBuildResult> _runDartBuild({
   final MacOSCodeConfig? macOSConfig =
       targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
   for (final Architecture architecture in architectures) {
-    final target = Target.fromArchitectureAndOS(architecture, targetOS!);
+    final Target target = Target.fromArchitectureAndOS(architecture, targetOS!);
     final BuildResult? buildResult = await buildRunner.build(
       extensions: <ProtocolExtension>[
         CodeAssetExtension(

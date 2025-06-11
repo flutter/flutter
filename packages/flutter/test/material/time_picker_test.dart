@@ -19,9 +19,9 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  const okString = 'OK';
-  const amString = 'AM';
-  const pmString = 'PM';
+  const String okString = 'OK';
+  const String amString = 'AM';
+  const String pmString = 'PM';
 
   Material getMaterialFromDialog(WidgetTester tester) {
     return tester.widget<Material>(
@@ -39,10 +39,10 @@ void main() {
   testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
-    const timePickerPortraitSize = Size(310, 468);
-    const timePickerLandscapeSize = Size(524, 342);
-    const timePickerLandscapeSizeM2 = Size(508, 300);
-    const padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
+    const Size timePickerPortraitSize = Size(310, 468);
+    const Size timePickerLandscapeSize = Size(524, 342);
+    const Size timePickerLandscapeSizeM2 = Size(508, 300);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
     double width;
     double height;
 
@@ -74,9 +74,9 @@ void main() {
 
   testWidgets('Material2 - Dialog size - input mode', (WidgetTester tester) async {
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
-    const timePickerInputSize = Size(312, 252);
-    const dayPeriodPortraitSize = Size(52, 80);
-    const padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
+    const Size timePickerInputSize = Size(312, 252);
+    const Size dayPeriodPortraitSize = Size(52, 80);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
     final double height = timePickerInputSize.height + padding.vertical;
     double width;
 
@@ -111,18 +111,18 @@ void main() {
       materialType: MaterialType.material2,
     );
 
-    final labels00To22 = List<String>.generate(12, (int index) {
+    final List<String> labels00To22 = List<String>.generate(12, (int index) {
       return (index * 2).toString().padLeft(2, '0');
     });
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
     // ignore: avoid_dynamic_calls
-    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
       selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
@@ -133,9 +133,9 @@ void main() {
   testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
-    const timePickerPortraitSize = Size(310, 468);
-    const timePickerLandscapeSize = Size(524, 342);
-    const padding = EdgeInsets.all(24.0);
+    const Size timePickerPortraitSize = Size(310, 468);
+    const Size timePickerLandscapeSize = Size(524, 342);
+    const EdgeInsets padding = EdgeInsets.all(24.0);
     double width;
     double height;
 
@@ -166,12 +166,12 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog size - input mode', (WidgetTester tester) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
-    const textScaleFactor = 1.0;
-    const timePickerMinInputSize = Size(312, 252);
-    const dayPeriodPortraitSize = Size(52, 80);
-    const padding = EdgeInsets.all(24.0);
+    const double textScaleFactor = 1.0;
+    const Size timePickerMinInputSize = Size(312, 252);
+    const Size dayPeriodPortraitSize = Size(52, 80);
+    const EdgeInsets padding = EdgeInsets.all(24.0);
     final double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
     double width;
 
@@ -207,22 +207,22 @@ void main() {
       materialType: MaterialType.material3,
     );
 
-    final labels00To23 = List<String>.generate(24, (int index) {
+    final List<String> labels00To23 = List<String>.generate(24, (int index) {
       return index == 0 ? '00' : index.toString();
     });
-    final inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
     // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
 
     // ignore: avoid_dynamic_calls
-    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
       selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
@@ -242,7 +242,7 @@ void main() {
       materialType: MaterialType.material3,
     );
 
-    final labels00To23 = <String>[
+    final List<String> labels00To23 = <String>[
       '۰',
       '۱',
       '۲',
@@ -268,19 +268,19 @@ void main() {
       '۲۲',
       '۲۳',
     ];
-    final inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
-    final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
     // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
 
     // ignore: avoid_dynamic_calls
-    final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
       selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
@@ -293,7 +293,7 @@ void main() {
   testWidgets('Material3 - Dial background uses correct default color', (
     WidgetTester tester,
   ) async {
-    var theme = ThemeData();
+    ThemeData theme = ThemeData();
     Widget buildTimePicker(ThemeData themeData) {
       return MaterialApp(
         theme: themeData,
@@ -400,10 +400,10 @@ void main() {
             (await startPicker(tester, (TimeOfDay? time) {
               result = time!;
             }, materialType: materialType))!;
-        final hour0 = Offset(center.dx, center.dy - 50); // 12:00 AM
-        final hour3 = Offset(center.dx + 50, center.dy);
-        final hour6 = Offset(center.dx, center.dy + 50);
-        final hour9 = Offset(center.dx - 50, center.dy);
+        final Offset hour0 = Offset(center.dx, center.dy - 50); // 12:00 AM
+        final Offset hour3 = Offset(center.dx + 50, center.dy);
+        final Offset hour6 = Offset(center.dx, center.dy + 50);
+        final Offset hour9 = Offset(center.dx - 50, center.dy);
 
         TestGesture gesture;
 
@@ -457,8 +457,8 @@ void main() {
             (await startPicker(tester, (TimeOfDay? time) {
               result = time!;
             }, materialType: materialType))!;
-        final hour6 = Offset(center.dx, center.dy + 50); // 6:00
-        final min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
+        final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
+        final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
         await tester.tapAt(hour6);
         await tester.pump(const Duration(milliseconds: 50));
@@ -474,9 +474,9 @@ void main() {
             (await startPicker(tester, (TimeOfDay? time) {
               result = time!;
             }, materialType: materialType))!;
-        final hour3 = Offset(center.dx + 50, center.dy);
-        final hour6 = Offset(center.dx, center.dy + 50);
-        final hour9 = Offset(center.dx - 50, center.dy);
+        final Offset hour3 = Offset(center.dx + 50, center.dy);
+        final Offset hour6 = Offset(center.dx, center.dy + 50);
+        final Offset hour9 = Offset(center.dx - 50, center.dy);
 
         TestGesture gesture = await tester.startGesture(hour6);
         await gesture.moveBy(hour9 - hour6);
@@ -498,8 +498,8 @@ void main() {
             (await startPicker(tester, (TimeOfDay? time) {
               result = time!;
             }, materialType: materialType))!;
-        final hour6 = Offset(center.dx, center.dy + 50); // 6:00
-        final min46 = Offset(center.dx - 50, center.dy - 5); // 46 mins
+        final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
+        final Offset min46 = Offset(center.dx - 50, center.dy - 5); // 46 mins
 
         await tester.tapAt(hour6);
         await tester.pump(const Duration(milliseconds: 50));
@@ -517,8 +517,8 @@ void main() {
             (await startPicker(tester, (TimeOfDay? time) {
               result = time!;
             }, materialType: materialType))!;
-        final hour6 = Offset(center.dx, center.dy + 50); // 6:00
-        final min48 = Offset(center.dx - 50, center.dy - 15); // 48 mins
+        final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
+        final Offset min48 = Offset(center.dx - 50, center.dy - 15); // 48 mins
 
         await tester.tapAt(hour6);
         await tester.pump(const Duration(milliseconds: 50));
@@ -529,8 +529,8 @@ void main() {
     });
 
     group('Dial Haptic Feedback (${materialType.name})', () {
-      const kFastFeedbackInterval = Duration(milliseconds: 10);
-      const kSlowFeedbackInterval = Duration(milliseconds: 200);
+      const Duration kFastFeedbackInterval = Duration(milliseconds: 10);
+      const Duration kSlowFeedbackInterval = Duration(milliseconds: 200);
       late FeedbackTester feedback;
 
       setUp(() {
@@ -574,8 +574,8 @@ void main() {
       testWidgets('drag-select vibrates once', (WidgetTester tester) async {
         final Offset center =
             (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
-        final hour0 = Offset(center.dx, center.dy - 50);
-        final hour3 = Offset(center.dx + 50, center.dy);
+        final Offset hour0 = Offset(center.dx, center.dy - 50);
+        final Offset hour3 = Offset(center.dx + 50, center.dy);
 
         final TestGesture gesture = await tester.startGesture(hour3);
         await gesture.moveBy(hour0 - hour3);
@@ -587,8 +587,8 @@ void main() {
       testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
         final Offset center =
             (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
-        final hour0 = Offset(center.dx, center.dy - 50);
-        final hour3 = Offset(center.dx + 50, center.dy);
+        final Offset hour0 = Offset(center.dx, center.dy - 50);
+        final Offset hour3 = Offset(center.dx + 50, center.dy);
 
         final TestGesture gesture = await tester.startGesture(hour3);
         await gesture.moveBy(hour0 - hour3);
@@ -604,8 +604,8 @@ void main() {
       testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
         final Offset center =
             (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
-        final hour0 = Offset(center.dx, center.dy - 50);
-        final hour3 = Offset(center.dx + 50, center.dy);
+        final Offset hour0 = Offset(center.dx, center.dy - 50);
+        final Offset hour3 = Offset(center.dx + 50, center.dy);
 
         final TestGesture gesture = await tester.startGesture(hour3);
         await gesture.moveBy(hour0 - hour3);
@@ -684,7 +684,7 @@ void main() {
         WidgetTester tester,
       ) async {
         await mediaQueryBoilerplate(tester, materialType: materialType);
-        const labels12To11 = <String>[
+        const List<String> labels12To11 = <String>[
           '12',
           '1',
           '2',
@@ -702,7 +702,7 @@ void main() {
         final CustomPaint dialPaint = tester.widget(findDialPaint);
         final dynamic dialPainter = dialPaint.painter;
         // ignore: avoid_dynamic_calls
-        final primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+        final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
         expect(
           // ignore: avoid_dynamic_calls
           primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
@@ -710,7 +710,7 @@ void main() {
         );
 
         // ignore: avoid_dynamic_calls
-        final selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+        final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
         expect(
           // ignore: avoid_dynamic_calls
           selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
@@ -979,8 +979,8 @@ void main() {
       });
 
       testWidgets('uses root navigator by default', (WidgetTester tester) async {
-        final rootObserver = PickerObserver();
-        final nestedObserver = PickerObserver();
+        final PickerObserver rootObserver = PickerObserver();
+        final PickerObserver nestedObserver = PickerObserver();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1016,8 +1016,8 @@ void main() {
       testWidgets('uses nested navigator if useRootNavigator is false', (
         WidgetTester tester,
       ) async {
-        final rootObserver = PickerObserver();
-        final nestedObserver = PickerObserver();
+        final PickerObserver rootObserver = PickerObserver();
+        final PickerObserver nestedObserver = PickerObserver();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1052,9 +1052,9 @@ void main() {
       });
 
       testWidgets('optional text parameters are utilized', (WidgetTester tester) async {
-        const cancelText = 'Custom Cancel';
-        const confirmText = 'Custom OK';
-        const helperText = 'Custom Help';
+        const String cancelText = 'Custom Cancel';
+        const String confirmText = 'Custom OK';
+        const String helperText = 'Custom Help';
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -1090,8 +1090,8 @@ void main() {
       });
 
       testWidgets('Material2 - OK Cancel button and helpText layout', (WidgetTester tester) async {
-        const selectTimeString = 'SELECT TIME';
-        const cancelString = 'CANCEL';
+        const String selectTimeString = 'SELECT TIME';
+        const String cancelString = 'CANCEL';
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -1149,8 +1149,8 @@ void main() {
       });
 
       testWidgets('Material3 - OK Cancel button and helpText layout', (WidgetTester tester) async {
-        const selectTimeString = 'Select time';
-        const cancelString = 'Cancel';
+        const String selectTimeString = 'Select time';
+        const String cancelString = 'Cancel';
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
             home: Material(
@@ -1356,7 +1356,7 @@ void main() {
       });
 
       group('Works for various view sizes', () {
-        for (final size in const <Size>[Size(100, 100), Size(300, 300), Size(800, 600)]) {
+        for (final Size size in const <Size>[Size(100, 100), Size(300, 300), Size(800, 600)]) {
           testWidgets('Draws dial without overflows at $size', (WidgetTester tester) async {
             tester.view.physicalSize = size;
             addTearDown(tester.view.reset);
@@ -1386,7 +1386,7 @@ void main() {
       testWidgets('provides semantics information for AM/PM indicator', (
         WidgetTester tester,
       ) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(tester, materialType: materialType);
 
         expect(
@@ -1423,7 +1423,7 @@ void main() {
       testWidgets('Material2 - provides semantics information for header and footer', (
         WidgetTester tester,
       ) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1454,7 +1454,7 @@ void main() {
       testWidgets('Material3 - provides semantics information for header and footer', (
         WidgetTester tester,
       ) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1483,7 +1483,7 @@ void main() {
       });
 
       testWidgets('provides semantics information for text fields', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1525,7 +1525,7 @@ void main() {
       });
 
       testWidgets('can increment and decrement hours', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
 
         Future<void> actAndExpect({
           required String initialValue,
@@ -1580,7 +1580,7 @@ void main() {
       });
 
       testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
 
         Future<void> actAndExpect({
           required String initialValue,
@@ -1675,7 +1675,7 @@ void main() {
       });
 
       testWidgets('Help text is used - Input', (WidgetTester tester) async {
-        const helpText = 'help';
+        const String helpText = 'help';
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1687,7 +1687,7 @@ void main() {
       });
 
       testWidgets('Help text is used in Material3 - Input', (WidgetTester tester) async {
-        const helpText = 'help';
+        const String helpText = 'help';
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1699,7 +1699,7 @@ void main() {
       });
 
       testWidgets('Hour label text is used - Input', (WidgetTester tester) async {
-        const hourLabelText = 'Custom hour label';
+        const String hourLabelText = 'Custom hour label';
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1711,7 +1711,7 @@ void main() {
       });
 
       testWidgets('Minute label text is used - Input', (WidgetTester tester) async {
-        const minuteLabelText = 'Custom minute label';
+        const String minuteLabelText = 'Custom minute label';
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1723,7 +1723,7 @@ void main() {
       });
 
       testWidgets('Invalid error text is used - Input', (WidgetTester tester) async {
-        const errorInvalidText = 'Custom validation error';
+        const String errorInvalidText = 'Custom validation error';
         await mediaQueryBoilerplate(
           tester,
           alwaysUse24HourFormat: true,
@@ -1757,8 +1757,8 @@ void main() {
       });
 
       testWidgets('Can override TimePicker entry icons', (WidgetTester tester) async {
-        const customInputIcon = Icon(Icons.text_fields);
-        const customTimerIcon = Icon(Icons.watch);
+        const Icon customInputIcon = Icon(Icons.text_fields);
+        const Icon customTimerIcon = Icon(Icons.watch);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1829,7 +1829,7 @@ void main() {
       testWidgets('Switching to dial entry mode triggers entry callback', (
         WidgetTester tester,
       ) async {
-        var triggeredCallback = false;
+        bool triggeredCallback = false;
 
         await mediaQueryBoilerplate(
           tester,
@@ -1851,7 +1851,7 @@ void main() {
       testWidgets('Switching to input entry mode triggers entry callback', (
         WidgetTester tester,
       ) async {
-        var triggeredCallback = false;
+        bool triggeredCallback = false;
 
         await mediaQueryBoilerplate(
           tester,
@@ -2130,8 +2130,8 @@ void main() {
               restorationId: 'restorable_time_picker',
               materialType: materialType,
             ))!;
-        final hour6 = Offset(center.dx, center.dy + 50); // 6:00
-        final min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
+        final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
+        final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
         await tester.tapAt(hour6);
         await tester.pump(const Duration(milliseconds: 50));
@@ -2216,8 +2216,8 @@ void main() {
 
         // Restoring from dial mode.
         await tester.restoreFrom(restorationData);
-        final hour6 = Offset(center.dx, center.dy + 50); // 6:00
-        final min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
+        final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
+        final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
         await tester.tapAt(hour6);
         await tester.pump(const Duration(milliseconds: 50));
@@ -2233,7 +2233,7 @@ void main() {
   testWidgets('Material3 - Time selector separator default text style', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     await startPicker(tester, (TimeOfDay? value) {}, theme: theme);
 
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
@@ -2244,7 +2244,7 @@ void main() {
   testWidgets('Material2 - Time selector separator default text style', (
     WidgetTester tester,
   ) async {
-    final theme = ThemeData(useMaterial3: false);
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await startPicker(tester, (TimeOfDay? value) {}, theme: theme);
 
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
@@ -2255,7 +2255,7 @@ void main() {
   testWidgets('provides semantics information for hour/minute mode announcement', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(
@@ -2299,8 +2299,8 @@ void main() {
   testWidgets('provides semantics information for the header (selected time)', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
-    const initialTime = TimeOfDay(hour: 7, minute: 15);
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TimeOfDay initialTime = TimeOfDay(hour: 7, minute: 15);
 
     await mediaQueryBoilerplate(
       tester,
@@ -2563,12 +2563,12 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
 
   @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(BuildContext context, Object? arguments) {
-    final args = arguments! as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
     final TimePickerEntryMode entryMode = TimePickerEntryMode.values.firstWhere(
       (TimePickerEntryMode element) => element.name == args['entry_mode'],
     );
-    final cancelText = args['cancel_text'] as String?;
-    final confirmText = args['confirm_text'] as String?;
+    final String? cancelText = args['cancel_text'] as String?;
+    final String? confirmText = args['confirm_text'] as String?;
     return DialogRoute<TimeOfDay>(
       context: context,
       builder: (BuildContext context) {

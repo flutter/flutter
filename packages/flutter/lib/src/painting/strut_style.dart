@@ -600,7 +600,7 @@ class StrutStyle with Diagnosticable {
     if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
     }
-    final styles = <DiagnosticsNode>[
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
       IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
       DoubleProperty('${prefix}size', fontSize, defaultValue: null),

@@ -124,7 +124,7 @@ void main() {
     );
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).first);
-    final boxDecoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color, backgroundColor);
   });
 

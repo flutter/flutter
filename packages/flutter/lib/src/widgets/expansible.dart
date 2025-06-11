@@ -305,7 +305,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     } else {
       widget.controller.collapse();
     }
-    final heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
+    final Tween<double> heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
     _heightFactor = CurvedAnimation(
       parent: _animationController.drive(heightFactorTween),
       curve: widget.curve,

@@ -496,7 +496,7 @@ abstract class ScrollView extends StatelessWidget {
     final ScrollController? scrollController =
         effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
 
-    final scrollable = Scrollable(
+    final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,

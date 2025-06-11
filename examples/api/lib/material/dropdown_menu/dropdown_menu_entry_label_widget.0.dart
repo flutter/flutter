@@ -44,7 +44,7 @@ class _DropdownMenuEntryLabelWidgetExampleState extends State<DropdownMenuEntryL
   @override
   Widget build(BuildContext context) {
     // Created by Google Bard from 'create a lyrical phrase of about 25 words that begins with "is a color"'.
-    const longText =
+    const String longText =
         'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
 
     return Scaffold(
@@ -59,7 +59,7 @@ class _DropdownMenuEntryLabelWidgetExampleState extends State<DropdownMenuEntryL
           },
           dropdownMenuEntries:
               ColorItem.values.map<DropdownMenuEntry<ColorItem>>((ColorItem item) {
-                final labelText = '${item.label} $longText\n';
+                final String labelText = '${item.label} $longText\n';
                 return DropdownMenuEntry<ColorItem>(
                   value: item,
                   label: labelText,

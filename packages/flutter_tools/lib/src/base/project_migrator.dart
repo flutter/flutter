@@ -39,10 +39,10 @@ abstract class ProjectMigrator {
   void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
-    final newProjectContents = StringBuffer();
+    final StringBuffer newProjectContents = StringBuffer();
     final String basename = file.basename;
 
-    for (final line in lines) {
+    for (final String line in lines) {
       final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
@@ -60,7 +60,7 @@ abstract class ProjectMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
-    final projectContentsWithMigratedLines = newProjectContents.toString();
+    final String projectContentsWithMigratedLines = newProjectContents.toString();
     final String projectContentsWithMigratedContents = migrateFileContents(
       projectContentsWithMigratedLines,
     );

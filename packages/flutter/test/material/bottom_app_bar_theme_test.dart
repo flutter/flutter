@@ -28,12 +28,12 @@ void main() {
   });
 
   test('BottomAppBarThemeData lerp special cases', () {
-    const theme = BottomAppBarThemeData();
+    const BottomAppBarThemeData theme = BottomAppBarThemeData();
     expect(identical(BottomAppBarThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
   testWidgets('Default BottomAppBarThemeData debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomAppBarThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -46,7 +46,7 @@ void main() {
   });
 
   testWidgets('BottomAppBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomAppBarThemeData(
       color: Color(0xffff0000),
       elevation: 1.0,
@@ -76,13 +76,13 @@ void main() {
 
   testWidgets('Local BottomAppBarTheme overrides defaults', (WidgetTester tester) async {
     const Color color = Colors.blueAccent;
-    const elevation = 1.0;
+    const double elevation = 1.0;
     const Color shadowColor = Colors.black87;
-    const height = 100.0;
+    const double height = 100.0;
     const Color surfaceTintColor = Colors.transparent;
     const NotchedShape shape = CircularNotchedRectangle();
     const EdgeInsetsGeometry padding = EdgeInsets.all(8);
-    const themeData = BottomAppBarThemeData(
+    const BottomAppBarThemeData themeData = BottomAppBarThemeData(
       color: color,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -108,7 +108,7 @@ void main() {
       expect(widget.clipper.toString(), '_BottomAppBarClipper');
     } else {
       expect(widget.clipper, isA<ShapeBorderClipper>());
-      final clipper = widget.clipper as ShapeBorderClipper;
+      final ShapeBorderClipper clipper = widget.clipper as ShapeBorderClipper;
       expect(clipper.shape, isA<RoundedRectangleBorder>());
     }
 
@@ -131,7 +131,7 @@ void main() {
   group('Material 2 tests', () {
     testWidgets('Material2 - BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
-      const theme = BottomAppBarThemeData(color: themedColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: themedColor);
 
       await tester.pumpWidget(_withTheme(babTheme: theme, useMaterial3: false));
 
@@ -142,7 +142,7 @@ void main() {
     testWidgets('Material2 - BAB color - Widget', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
-      const theme = BottomAppBarThemeData(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -157,7 +157,7 @@ void main() {
 
     testWidgets('Material2 - BAB color - BabTheme', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
-      const theme = BottomAppBarThemeData(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -201,7 +201,7 @@ void main() {
     });
 
     testWidgets('Material2 - BAB theme customizes shape', (WidgetTester tester) async {
-      const theme = BottomAppBarThemeData(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         color: Colors.white30,
         shape: CircularNotchedRectangle(),
         elevation: 1.0,
@@ -233,7 +233,7 @@ void main() {
   group('Material 3 tests', () {
     testWidgets('Material3 - BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
-      const theme = BottomAppBarThemeData(color: themedColor, elevation: 0);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: themedColor, elevation: 0);
       await tester.pumpWidget(_withTheme(babTheme: theme));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
@@ -243,7 +243,7 @@ void main() {
     testWidgets('Material3 - BAB color - Widget', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
-      const theme = BottomAppBarThemeData(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -260,7 +260,7 @@ void main() {
 
     testWidgets('Material3 - BAB color - BabTheme', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
-      const theme = BottomAppBarThemeData(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -274,7 +274,7 @@ void main() {
     });
 
     testWidgets('Material3 - BAB theme does not affect defaults', (WidgetTester tester) async {
-      final theme = ThemeData();
+      final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
@@ -291,7 +291,7 @@ void main() {
     testWidgets('Material3 - BAB theme overrides surfaceTintColor', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
-      const theme = BottomAppBarThemeData(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         color: color,
         surfaceTintColor: babThemeSurfaceTintColor,
         elevation: 0,
@@ -304,7 +304,7 @@ void main() {
 
     testWidgets('Material3 - BAB theme overrides shadowColor', (WidgetTester tester) async {
       const Color babThemeShadowColor = Colors.yellow;
-      const theme = BottomAppBarThemeData(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         shadowColor: babThemeShadowColor,
         elevation: 0,
       );
@@ -318,7 +318,7 @@ void main() {
       const Color color = Colors.white10; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
       const Color babSurfaceTintColor = Colors.pink;
-      const theme = BottomAppBarThemeData(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         surfaceTintColor: babThemeSurfaceTintColor,
       );
       await tester.pumpWidget(
@@ -337,7 +337,7 @@ void main() {
     testWidgets('Material3 - BAB surfaceTintColor - BabTheme', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeColor = Colors.black87;
-      const theme = BottomAppBarThemeData(surfaceTintColor: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(surfaceTintColor: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(

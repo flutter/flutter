@@ -146,7 +146,7 @@ class KeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = ThemeData(
+    final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
       platform: Theme.of(context).platform,

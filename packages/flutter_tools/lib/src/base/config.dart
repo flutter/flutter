@@ -188,7 +188,7 @@ class Config {
   //
   // This is different from [FileSystemUtils.homeDirPath].
   static String _userHomePath(Platform platform) {
-    final envKey = platform.isWindows ? 'APPDATA' : 'HOME';
+    final String envKey = platform.isWindows ? 'APPDATA' : 'HOME';
     return platform.environment[envKey] ?? '.';
   }
 

@@ -52,12 +52,12 @@ Future<void> buildLinux(
     );
   }
 
-  final migrators = <ProjectMigrator>[
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(linuxProject, logger),
     CmakeNativeAssetsMigration(linuxProject, 'linux', logger),
   ];
 
-  final migration = ProjectMigration(migrators);
+  final ProjectMigration migration = ProjectMigration(migrators);
   await migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
@@ -152,7 +152,7 @@ Future<void> _runCmake(
   TargetPlatform targetPlatform,
   String targetSysroot,
 ) async {
-  final sw = Stopwatch()..start();
+  final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
 
@@ -195,7 +195,7 @@ Future<void> _runCmake(
 }
 
 Future<void> _runBuild(Directory buildDir) async {
-  final sw = Stopwatch()..start();
+  final Stopwatch sw = Stopwatch()..start();
 
   int result;
   try {

@@ -115,7 +115,7 @@ class BuildAarCommand extends BuildSubCommand {
     if (_androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final androidBuildInfo = <AndroidBuildInfo>{};
+    final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
 
     final Iterable<AndroidArch> targetArchitectures = stringsArg(
       'target-platform',
@@ -130,7 +130,7 @@ class BuildAarCommand extends BuildSubCommand {
             : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
-    for (final buildMode in const <String>['debug', 'profile', 'release']) {
+    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
@@ -160,7 +160,7 @@ class BuildAarCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final buildLabel =
+    final String buildLabel =
         impellerEnabled ? 'manifest-aar-impeller-enabled' : 'manifest-aar-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 

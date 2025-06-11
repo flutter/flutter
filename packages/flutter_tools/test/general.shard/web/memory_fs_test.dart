@@ -12,7 +12,7 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('correctly parses source, source map, metadata, manifest files', () {
-    final fileSystem = MemoryFileSystem();
+    final MemoryFileSystem fileSystem = MemoryFileSystem();
     final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = fileSystem.file('metadata')..writeAsStringSync('{}');
@@ -25,7 +25,7 @@ void main() {
         },
       }),
     );
-    final webMemoryFS = WebMemoryFS();
+    final WebMemoryFS webMemoryFS = WebMemoryFS();
     webMemoryFS.write(source, manifest, sourcemap, metadata);
 
     expect(utf8.decode(webMemoryFS.files['foo.js']!), 'main() {}');

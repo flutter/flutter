@@ -36,7 +36,7 @@ void main() {
   Process? process;
   Logger? logger;
   DtdLauncher? dtdLauncher;
-  final project = BasicProject();
+  final BasicProject project = BasicProject();
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
@@ -55,7 +55,7 @@ void main() {
 
   Future<void> runWidgetPreview({required List<String> expectedMessages, Uri? dtdUri}) async {
     expect(expectedMessages, isNotEmpty);
-    var i = 0;
+    int i = 0;
     process = await processManager.start(<String>[
       flutterBin,
       'widget-preview',
@@ -65,7 +65,7 @@ void main() {
       if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
     ], workingDirectory: tempDir.path);
 
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
       printOnFailure('STDOUT: $msg');
       if (completer.isCompleted) {
@@ -124,8 +124,8 @@ void main() {
       // The preview scaffold will send a 'Connected' event on this stream once it has initialized
       // and is ready.
       final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
-      const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
-      final completer = Completer<void>();
+      const String kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
+      final Completer<void> completer = Completer<void>();
       dtdConnection.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
         expect(event.stream, kWidgetPreviewScaffoldStream);
         expect(event.kind, 'Connected');

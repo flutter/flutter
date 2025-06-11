@@ -284,7 +284,7 @@ abstract class BoxBorder extends ShapeBorder {
     BorderRadius borderRadius,
   ) {
     assert(side.style != BorderStyle.none);
-    final paint = Paint()..color = side.color;
+    final Paint paint = Paint()..color = side.color;
     final double width = side.width;
     if (width == 0.0) {
       paint
@@ -332,7 +332,7 @@ abstract class BoxBorder extends ShapeBorder {
           Radius.circular(rect.width),
         );
     }
-    final paint = Paint()..color = color;
+    final Paint paint = Paint()..color = color;
     final RRect inner = _deflateRRect(
       borderRect,
       EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset),
@@ -509,7 +509,7 @@ class Border extends BoxBorder {
     BorderStyle style = BorderStyle.solid,
     double strokeAlign = BorderSide.strokeAlignInside,
   }) {
-    final side = BorderSide(
+    final BorderSide side = BorderSide(
       color: color,
       width: width,
       style: style,
@@ -809,7 +809,7 @@ class Border extends BoxBorder {
     if (isUniform) {
       return '${objectRuntimeType(this, 'Border')}.all($top)';
     }
-    final arguments = <String>[
+    final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
       if (bottom != BorderSide.none) 'bottom: $bottom',
@@ -1173,7 +1173,7 @@ class BorderDirectional extends BoxBorder {
 
   @override
   String toString() {
-    final arguments = <String>[
+    final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (start != BorderSide.none) 'start: $start',
       if (end != BorderSide.none) 'end: $end',

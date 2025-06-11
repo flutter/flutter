@@ -26,7 +26,7 @@ void main() {
   });
 
   testUsingContext('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
-    final environment = Environment.test(
+    final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       buildDir: fileSystem.directory('build')..createSync(),
@@ -38,12 +38,12 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
       androidAotBundle,
     );
-    final validatorTarget =
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
         DeferredComponentsGenSnapshotValidatorTarget(
           deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
           nonDeferredComponentsDependencies: <Target>[],
@@ -63,7 +63,7 @@ void main() {
   });
 
   testUsingContext('checkAgainstLoadingUnitsCache checks runs', () async {
-    final environment = Environment.test(
+    final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       buildDir: fileSystem.directory('build')..createSync(),
@@ -75,12 +75,12 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
       androidAotBundle,
     );
-    final validatorTarget =
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
         DeferredComponentsGenSnapshotValidatorTarget(
           deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
           nonDeferredComponentsDependencies: <Target>[],
@@ -99,7 +99,7 @@ void main() {
   });
 
   testUsingContext('writeLoadingUnitsCache task runs', () async {
-    final environment = Environment.test(
+    final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       buildDir: fileSystem.directory('build')..createSync(),
@@ -111,12 +111,12 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const androidAotBundle = AndroidAotBundle(androidAot);
-    final androidDefBundle = AndroidAotDeferredComponentsBundle(
+    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
       androidAotBundle,
     );
-    final validatorTarget =
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget =
         DeferredComponentsGenSnapshotValidatorTarget(
           deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
           nonDeferredComponentsDependencies: <Target>[],

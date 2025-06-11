@@ -76,7 +76,7 @@ class Java {
     required Platform platform,
     required ProcessManager processManager,
   }) {
-    final os = OperatingSystemUtils(
+    final OperatingSystemUtils os = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
@@ -184,11 +184,11 @@ class Java {
         final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
         // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
-        final jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
+        final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
         final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
         if (matches.isEmpty) {
           // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
-          final secondJdkVersionRegex = RegExp(
+          final RegExp secondJdkVersionRegex = RegExp(
             r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d',
           );
           final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);

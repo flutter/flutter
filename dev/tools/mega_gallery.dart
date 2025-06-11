@@ -18,7 +18,7 @@ void main(List<String> args) {
     Directory.current = Directory.current.parent.parent;
   }
 
-  final argParser = ArgParser();
+  final ArgParser argParser = ArgParser();
   argParser.addOption('out', mandatory: true);
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
@@ -33,9 +33,9 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
-  final outParent = Directory(_normalize(results['out'] as String));
-  final out = Directory(path.join(outParent.path, 'packages'));
+  final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
+  final Directory outParent = Directory(_normalize(results['out'] as String));
+  final Directory out = Directory(path.join(outParent.path, 'packages'));
 
   if (results['delete'] as bool) {
     if (outParent.existsSync()) {
@@ -77,7 +77,7 @@ void main(List<String> args) {
   _copy(source, out);
 
   // Make n - 1 copies.
-  for (var i = 1; i < copies; i++) {
+  for (int i = 1; i < copies; i++) {
     _copyGallery(out, i);
   }
 
@@ -87,7 +87,7 @@ void main(List<String> args) {
   // Update the pubspec.
   final String pubspec = _file(Directory(''), 'pubspec.yaml').readAsStringSync();
 
-  final yamlEditor = YamlEditor(pubspec);
+  final YamlEditor yamlEditor = YamlEditor(pubspec);
   yamlEditor.update(<String>['workspace'], <String>['packages']);
   File(path.join(outParent.path, 'pubspec.yaml')).writeAsStringSync(yamlEditor.toString());
 
@@ -108,14 +108,14 @@ analyzer:
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
 void _createEntry(File mainFile, int copies) {
-  final imports = StringBuffer();
+  final StringBuffer imports = StringBuffer();
 
-  for (var i = 1; i < copies; i++) {
+  for (int i = 1; i < copies; i++) {
     imports.writeln('// ignore: unused_import');
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
   }
 
-  final contents = '''
+  final String contents = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -157,7 +157,7 @@ void _copy(Directory source, Directory target) {
         _copy(entity, Directory(path.join(target.path, name)));
 
       case File() when name != '.packages' && name != 'pubspec.lock':
-        final dest = File(path.join(target.path, name));
+        final File dest = File(path.join(target.path, name));
         dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
@@ -202,7 +202,7 @@ int _lineCount(File file) {
 }
 
 String _comma(int count) {
-  final str = count.toString();
+  final String str = count.toString();
   if (str.length > 3) {
     return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
   }

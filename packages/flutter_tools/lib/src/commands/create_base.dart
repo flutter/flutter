@@ -129,7 +129,7 @@ mixin CreateBase on FlutterCommand {
     }
 
     if (rest.length > 1) {
-      var message = 'Multiple output directories specified.';
+      String message = 'Multiple output directories specified.';
       for (final String arg in rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
@@ -160,7 +160,7 @@ mixin CreateBase on FlutterCommand {
     final File metadataFile = globals.fs.file(
       globals.fs.path.join(projectDir.absolute.path, '.metadata'),
     );
-    final projectMetadata = FlutterProjectMetadata(
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(
       metadataFile,
       globals.logger,
     );
@@ -233,7 +233,7 @@ mixin CreateBase on FlutterCommand {
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
     if (globals.fs.isFileSync(projectDirPath)) {
-      final message =
+      final String message =
           "Invalid project name: '$projectDirPath' - refers to an existing file.";
       throwToolExit(
         overwrite ? '$message Refusing to overwrite a file with a directory.' : message,
@@ -336,7 +336,7 @@ mixin CreateBase on FlutterCommand {
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
-    final pluginClass =
+    final String pluginClass =
         pluginDartClass.endsWith('Plugin') ? pluginDartClass : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
@@ -347,7 +347,7 @@ mixin CreateBase on FlutterCommand {
     final String windowsIdentifier = createWindowsIdentifier(organization, projectName);
     // Linux uses the same scheme as the Android identifier.
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
-    final linuxIdentifier = androidIdentifier;
+    final String linuxIdentifier = androidIdentifier;
 
     return <String, Object?>{
       'organization': organization,
@@ -471,7 +471,7 @@ mixin CreateBase on FlutterCommand {
     bool generateMetadata = true,
     FlutterTemplateType? projectType,
   }) async {
-    var generatedCount = 0;
+    int generatedCount = 0;
     generatedCount += await renderMerged(
       <String>[...templateNames],
       directory,
@@ -491,7 +491,7 @@ mixin CreateBase on FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    final platformsForMigrateConfig = <SupportedPlatform>[
+    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[
       SupportedPlatform.root,
     ];
     if (androidPlatform) {
@@ -520,7 +520,7 @@ mixin CreateBase on FlutterCommand {
       final File metadataFile = globals.fs.file(
         globals.fs.path.join(projectDir.absolute.path, '.metadata'),
       );
-      final metadata = FlutterProjectMetadata.explicit(
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: globals.flutterVersion.frameworkRevision,
         versionChannel: globals.flutterVersion.getBranchName(), // may contain PII
@@ -548,8 +548,8 @@ mixin CreateBase on FlutterCommand {
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
   static String createAndroidIdentifier(String organization, String name) {
-    var tmpIdentifier = '$organization.$name';
-    final disallowed = RegExp(r'[^\w\.]');
+    String tmpIdentifier = '$organization.$name';
+    final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
@@ -560,7 +560,7 @@ mixin CreateBase on FlutterCommand {
     }
 
     // Each segment must start with a letter.
-    final segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
+    final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
     final List<String> prefixedSegments =
         segments.map((String segment) {
           if (!segmentPatternRegex.hasMatch(segment)) {
@@ -586,8 +586,8 @@ mixin CreateBase on FlutterCommand {
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   static String createUTIIdentifier(String organization, String name) {
     name = camelCase(name);
-    var tmpIdentifier = '$organization.$name';
-    final disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
+    String tmpIdentifier = '$organization.$name';
+    final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
@@ -622,7 +622,7 @@ mixin CreateBase on FlutterCommand {
         'Exception details: $e',
       );
     }
-    final manifest = json.decode(manifestFileContents) as Map<String, Object?>;
+    final Map<String, Object?> manifest = json.decode(manifestFileContents) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
         (String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path)),
@@ -631,7 +631,7 @@ mixin CreateBase on FlutterCommand {
   }
 
   int _injectGradleWrapper(FlutterProject project) {
-    var filesCreated = 0;
+    int filesCreated = 0;
     copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,

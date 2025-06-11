@@ -10,15 +10,15 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics can merge sibling group', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
-    const first = SemanticsTag('1');
-    const second = SemanticsTag('2');
-    const third = SemanticsTag('3');
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const SemanticsTag first = SemanticsTag('1');
+    const SemanticsTag second = SemanticsTag('2');
+    const SemanticsTag third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
       expect(configs.length, 3);
-      final builder =
+      final ChildSemanticsConfigurationsResultBuilder builder =
           ChildSemanticsConfigurationsResultBuilder();
-      final sibling = <SemanticsConfiguration>[];
+      final List<SemanticsConfiguration> sibling = <SemanticsConfiguration>[];
       // Merge first and third
       for (final SemanticsConfiguration config in configs) {
         if (config.tagsChildrenWith(first) || config.tagsChildrenWith(third)) {
@@ -81,12 +81,12 @@ void main() {
   });
 
   testWidgets('Semantics can drop semantics config', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
-    const first = SemanticsTag('1');
-    const second = SemanticsTag('2');
-    const third = SemanticsTag('3');
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const SemanticsTag first = SemanticsTag('1');
+    const SemanticsTag second = SemanticsTag('2');
+    const SemanticsTag third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
+      final ChildSemanticsConfigurationsResultBuilder builder =
           ChildSemanticsConfigurationsResultBuilder();
       // Merge first and third
       for (final SemanticsConfiguration config in configs) {
@@ -145,11 +145,11 @@ void main() {
   testWidgets('Semantics throws when mark the same config twice case 1', (
     WidgetTester tester,
   ) async {
-    const first = SemanticsTag('1');
-    const second = SemanticsTag('2');
-    const third = SemanticsTag('3');
+    const SemanticsTag first = SemanticsTag('1');
+    const SemanticsTag second = SemanticsTag('2');
+    const SemanticsTag third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
+      final ChildSemanticsConfigurationsResultBuilder builder =
           ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
@@ -195,11 +195,11 @@ void main() {
   testWidgets('Semantics throws when mark the same config twice case 2', (
     WidgetTester tester,
   ) async {
-    const first = SemanticsTag('1');
-    const second = SemanticsTag('2');
-    const third = SemanticsTag('3');
+    const SemanticsTag first = SemanticsTag('1');
+    const SemanticsTag second = SemanticsTag('2');
+    const SemanticsTag third = SemanticsTag('3');
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
+      final ChildSemanticsConfigurationsResultBuilder builder =
           ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
@@ -245,11 +245,11 @@ void main() {
   testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (
     WidgetTester tester,
   ) async {
-    final inner = UniqueKey();
-    final boundaryParent = UniqueKey();
-    final grandBoundaryParent = UniqueKey();
+    final UniqueKey inner = UniqueKey();
+    final UniqueKey boundaryParent = UniqueKey();
+    final UniqueKey grandBoundaryParent = UniqueKey();
     ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
-      final builder =
+      final ChildSemanticsConfigurationsResultBuilder builder =
           ChildSemanticsConfigurationsResultBuilder();
       configs.forEach(builder.markAsMergeUp);
       return builder.build();

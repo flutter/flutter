@@ -122,7 +122,7 @@ abstract class DesktopDevice extends Device {
     }
 
     Process process;
-    final command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
+    final List<String> command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
     try {
       process = await _processManager.start(
         command,
@@ -139,7 +139,7 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final vmServiceDiscovery = ProtocolDiscovery.vmService(
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
       _deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
@@ -150,7 +150,7 @@ abstract class DesktopDevice extends Device {
       Timer? timer;
       if (this is MacOSDevice) {
         if (await globals.isRunningOnBot) {
-          const defaultTimeout = 5;
+          const int defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
             // a dialog will prompt the user to allow the app to run. This will
@@ -200,10 +200,10 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
-    var succeeded = true;
+    bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
-    for (final process in Set<Process>.of(_runningProcesses)) {
+    for (final Process process in Set<Process>.of(_runningProcesses)) {
       succeeded &= _processManager.killPid(process.pid);
     }
     return succeeded;
@@ -241,8 +241,8 @@ abstract class DesktopDevice extends Device {
     bool traceStartup,
     String? route,
   ) {
-    var flags = 0;
-    final environment = <String, String>{};
+    int flags = 0;
+    final Map<String, String> environment = <String, String>{};
 
     void addFlag(String value) {
       flags += 1;

@@ -25,9 +25,9 @@ void main() {
   testUsingContext('Android analyze command should run pub', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Platform platform = FakePlatform();
-    final logger = BufferLogger.test();
-    final processManager = FakeProcessManager.empty();
-    final terminal = Terminal.test();
+    final BufferLogger logger = BufferLogger.test();
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final Terminal terminal = Terminal.test();
     final AnalyzeCommand command = FakeAndroidAnalyzeCommand(
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
@@ -78,9 +78,9 @@ void main() {
       tempDir.childDirectory('android').createSync();
 
       // Setup repo roots
-      const homePath = '/home/user/flutter';
+      const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
+      for (final String dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
       builder = FakeAndroidBuilder();
@@ -113,7 +113,7 @@ void main() {
     });
 
     testUsingContext('can output app link settings', () async {
-      const buildVariant = 'release';
+      const String buildVariant = 'release';
       await runner.run(<String>[
         'analyze',
         '--android',

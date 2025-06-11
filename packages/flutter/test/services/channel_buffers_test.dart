@@ -21,18 +21,18 @@ void main() {
   }
 
   test('does drain channel buffers', () async {
-    const channel = 'foo';
-    final binding = TestChannelBuffersFlutterBinding();
+    const String channel = 'foo';
+    final TestChannelBuffersFlutterBinding binding = TestChannelBuffersFlutterBinding();
     expect(binding.defaultBinaryMessenger, isNotNull);
-    var didCallCallback = false;
+    bool didCallCallback = false;
     void callback(ByteData? responseData) {
       didCallCallback = true;
     }
 
-    const payload = 'bar';
+    const String payload = 'bar';
     final ByteData data = makeByteData(payload);
     ui.channelBuffers.push(channel, data, callback);
-    var didDrainData = false;
+    bool didDrainData = false;
     binding.defaultBinaryMessenger.setMessageHandler(channel, (ByteData? message) async {
       expect(getString(message!), payload);
       didDrainData = true;

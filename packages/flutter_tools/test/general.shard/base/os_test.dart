@@ -70,7 +70,7 @@ void main() {
     testWithoutContext('throws tool exit if where.exe cannot be run', () async {
       fakeProcessManager.excludedExecutables.add('where');
 
-      final utils = OperatingSystemUtils(
+      final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -248,7 +248,7 @@ void main() {
     });
 
     testWithoutContext('Linux name', () async {
-      const fakeOsRelease = '''
+      const String fakeOsRelease = '''
       NAME="Name"
       ID=id
       ID_LIKE=id_like
@@ -265,7 +265,7 @@ void main() {
       fileSystem.directory('/etc').createSync();
       fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
 
-      final utils = OperatingSystemUtils(
+      final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
@@ -279,7 +279,7 @@ void main() {
     testWithoutContext(
       'Linux name reads from "/usr/lib/os-release" if "/etc/os-release" is missing',
       () async {
-        const fakeOsRelease = '''
+        const String fakeOsRelease = '''
       NAME="Name"
       ID=id
       ID_LIKE=id_like
@@ -298,7 +298,7 @@ void main() {
 
         expect(fileSystem.file('/etc/os-release').existsSync(), false);
 
-        final utils = OperatingSystemUtils(
+        final OperatingSystemUtils utils = OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           platform: FakePlatform(
@@ -311,7 +311,7 @@ void main() {
     );
 
     testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
-      final handler = FileExceptionHandler();
+      final FileExceptionHandler handler = FileExceptionHandler();
       final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
       fileSystem.directory('/etc').createSync();
@@ -319,7 +319,7 @@ void main() {
 
       handler.addError(osRelease, FileSystemOp.read, const FileSystemException());
 
-      final utils = OperatingSystemUtils(
+      final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
@@ -331,7 +331,7 @@ void main() {
     });
 
     testWithoutContext('Linux name omits kernel release if undefined', () async {
-      const fakeOsRelease = '''
+      const String fakeOsRelease = '''
       NAME="Name"
       ID=id
       ID_LIKE=id_like
@@ -348,7 +348,7 @@ void main() {
       fileSystem.directory('/etc').createSync();
       fileSystem.file('/etc/os-release').writeAsStringSync(fakeOsRelease);
 
-      final utils = OperatingSystemUtils(
+      final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystemVersion: 'undefinedOperatingSystemVersion'),
@@ -362,11 +362,11 @@ void main() {
       // on POSIX systems we use the `unzip` binary, which will fail to extract
       // files with paths outside the target directory
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final File fakeZipFile = fs.file('archive.zip');
       final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
-      const content = 'hello, world!';
-      final archive =
+      const String content = 'hello, world!';
+      final Archive archive =
           Archive()..addFile(
             // This file would be extracted outside of the target extraction dir
             ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
@@ -387,8 +387,8 @@ void main() {
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
-    const exceptionMessage = 'Something really bad happened.';
-    final handler = FileExceptionHandler();
+    const String exceptionMessage = 'Something really bad happened.';
+    final FileExceptionHandler handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     fakeProcessManager.addCommand(
@@ -403,7 +403,7 @@ void main() {
     final File bar = fileSystem.file('bar.zip')..createSync();
     handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
 
-    final osUtils = OperatingSystemUtils(
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
@@ -418,8 +418,8 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('rsync');
 
-      final logger = BufferLogger.test();
-      final macOSUtils = OperatingSystemUtils(
+      final BufferLogger logger = BufferLogger.test();
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -439,7 +439,7 @@ void main() {
     testWithoutContext('unzip and rsyncs', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
 
-      final macOSUtils = OperatingSystemUtils(
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -492,7 +492,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
-      final linuxOsUtils = OperatingSystemUtils(
+      final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
@@ -513,7 +513,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
-      final macOSUtils = OperatingSystemUtils(
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -534,7 +534,7 @@ void main() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fakeProcessManager.excludedExecutables.add('unzip');
 
-      final unknownOsUtils = OperatingSystemUtils(
+      final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -554,7 +554,7 @@ void main() {
 
   testWithoutContext('directory size', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final osUtils = OperatingSystemUtils(
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'fuchsia'),

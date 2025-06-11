@@ -14,14 +14,14 @@ import 'dart:io';
 /// line with `╡ ••• Done ••• ╞` to signal the end of collection.
 Future<Map<String, double>> readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
-  const jsonStart = '================ RESULTS ================';
-  const jsonEnd = '================ FORMATTED ==============';
-  const jsonPrefix = ':::JSON:::';
-  const testComplete = '╡ ••• Done ••• ╞';
+  const String jsonStart = '================ RESULTS ================';
+  const String jsonEnd = '================ FORMATTED ==============';
+  const String jsonPrefix = ':::JSON:::';
+  const String testComplete = '╡ ••• Done ••• ╞';
 
-  var jsonStarted = false;
-  final jsonBuf = StringBuffer();
-  final completer = Completer<Map<String, double>>();
+  bool jsonStarted = false;
+  final StringBuffer jsonBuf = StringBuffer();
+  final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
       .transform<String>(const Utf8Decoder())
@@ -30,9 +30,9 @@ Future<Map<String, double>> readJsonResults(Process process) {
         stderr.writeln('[STDERR] $line');
       });
 
-  final collectedJson = <String>[];
+  final List<String> collectedJson = <String>[];
 
-  var processWasKilledIntentionally = false;
+  bool processWasKilledIntentionally = false;
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
@@ -59,7 +59,7 @@ Future<Map<String, double>> readJsonResults(Process process) {
           // Also send a kill signal in case the `q` above didn't work.
           process.kill(ProcessSignal.sigint);
           try {
-            final results = Map<String, double>.from(<String, dynamic>{
+            final Map<String, double> results = Map<String, double>.from(<String, dynamic>{
               for (final String data in collectedJson) ...json.decode(data) as Map<String, dynamic>,
             });
             completer.complete(results);

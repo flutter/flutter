@@ -165,14 +165,14 @@ class Md5Hash {
   void addChunk(Uint8List data, [int? stop]) {
     assert(_remainingLength == 0);
     stop ??= data.length;
-    var i = 0;
+    int i = 0;
     for (; i <= stop - _kChunkSize; i += _kChunkSize) {
-      final view = Uint32List.view(data.buffer, i, 16);
+      final Uint32List view = Uint32List.view(data.buffer, i, 16);
       _writeChunk(view);
     }
     if (i != stop) {
       // The data must be copied so that the provided buffer can be reused.
-      var j = 0;
+      int j = 0;
       for (; i < stop; i += 1) {
         _scratchSpace[j] = data[i];
         j += 1;
@@ -195,13 +195,13 @@ class Md5Hash {
     int c = _digest[2];
     int b = _digest[1];
     int a = _digest[0];
-    var e = 0;
-    var f = 0;
-    var i = 0;
+    int e = 0;
+    int f = 0;
+    int i = 0;
     for (; i < 16; i += 1) {
       e = (b & c) | ((~b & _mask32) & d);
       f = i;
-      final temp = d;
+      final int temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -210,7 +210,7 @@ class Md5Hash {
     for (; i < 32; i += 1) {
       e = (d & b) | ((~d & _mask32) & c);
       f = ((5 * i) + 1) % 16;
-      final temp = d;
+      final int temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -219,7 +219,7 @@ class Md5Hash {
     for (; i < 48; i += 1) {
       e = b ^ c ^ d;
       f = ((3 * i) + 5) % 16;
-      final temp = d;
+      final int temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));
@@ -228,7 +228,7 @@ class Md5Hash {
     for (; i < 64; i += 1) {
       e = c ^ (b | (~d & _mask32));
       f = (7 * i) % 16;
-      final temp = d;
+      final int temp = d;
       d = c;
       c = b;
       b = _add32(b, _rotl32(_add32(_add32(a, e), _add32(_noise[i], chunk[f])), _shiftAmounts[i]));

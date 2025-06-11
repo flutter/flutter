@@ -42,10 +42,10 @@ void main() {
 
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
-      var i = 1;
+      int i = 1;
       int? cleanup;
 
-      final shutdownHooks = ShutdownHooks();
+      final ShutdownHooks shutdownHooks = ShutdownHooks();
 
       shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
@@ -69,7 +69,7 @@ void main() {
     });
 
     testWithoutContext('Command output is not wrapped.', () async {
-      final testString = <String>['0123456789' * 10];
+      final List<String> testString = <String>['0123456789' * 10];
       processManager.addCommand(
         FakeCommand(
           command: const <String>['command'],
@@ -185,7 +185,7 @@ void main() {
     });
 
     testWithoutContext('throws on failure with throwOnError', () async {
-      const stderr = 'Something went wrong.';
+      const String stderr = 'Something went wrong.';
       fakeProcessManager.addCommand(
         const FakeCommand(command: <String>['kaboom'], exitCode: 1, stderr: stderr),
       );
@@ -204,7 +204,7 @@ void main() {
     testWithoutContext(
       'throws with stderr in exception on failure with verboseExceptions',
       () async {
-        const stderr = 'Something went wrong.';
+        const String stderr = 'Something went wrong.';
         fakeProcessManager.addCommand(
           const FakeCommand(command: <String>['verybad'], exitCode: 1, stderr: stderr),
         );
@@ -376,7 +376,7 @@ void main() {
 
   group('writeToStdinGuarded', () {
     testWithoutContext('handles any error thrown by stdin.flush', () async {
-      final stdin = _ThrowsOnFlushIOSink();
+      final _ThrowsOnFlushIOSink stdin = _ThrowsOnFlushIOSink();
       Object? errorPassedToCallback;
 
       await ProcessUtils.writeToStdinGuarded(
@@ -405,7 +405,7 @@ void main() {
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
-      final fakeFlutterVersion = FakeFlutterVersion();
+      final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
       analytics = Analytics.fake(
         tool: DashTool.flutterTool,
         homeDirectory: fileSystem.currentDirectory,
@@ -420,7 +420,7 @@ void main() {
       'prints analytics welcome message',
       () async {
         io.setExitFunctionForTests((int exitCode) {});
-        final shutdownHooks = ShutdownHooks();
+        final ShutdownHooks shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, contains(analytics.getConsentMessage));
       },
@@ -434,7 +434,7 @@ void main() {
 
         analytics.clientShowedMessage();
 
-        final shutdownHooks = ShutdownHooks();
+        final ShutdownHooks shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
       },

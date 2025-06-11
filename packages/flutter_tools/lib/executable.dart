@@ -133,7 +133,7 @@ Future<void> main(List<String> args) async {
           ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
-        final loggerFactory = LoggerFactory(
+        final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,

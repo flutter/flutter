@@ -75,7 +75,7 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final command = PackagesCommand();
+      final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -122,18 +122,18 @@ void main() {
       );
     }
 
-    final pubOutput = <String>[
+    final List<String> pubOutput = <String>[
       globals.fs.path.join('.dart_tool', 'package_config.json'),
       'pubspec.lock',
     ];
 
-    const pluginRegistrants = <String>[
+    const List<String> pluginRegistrants = <String>[
       'ios/Runner/GeneratedPluginRegistrant.h',
       'ios/Runner/GeneratedPluginRegistrant.m',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const modulePluginRegistrants = <String>[
+    const List<String> modulePluginRegistrants = <String>[
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.h',
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -155,14 +155,14 @@ void main() {
       ];
     }
 
-    const pluginContentWitnesses = <String, String>{
+    const Map<String, String> pluginContentWitnesses = <String, String>{
       'ios/Flutter/Debug.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       'ios/Flutter/Release.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
-    const modulePluginContentWitnesses = <String, String>{
+    const Map<String, String> modulePluginContentWitnesses = <String, String>{
       '.ios/Config/Debug.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       '.ios/Config/Release.xcconfig':
@@ -170,13 +170,13 @@ void main() {
     };
 
     void expectDependenciesResolved(String projectPath) {
-      for (final output in pubOutput) {
+      for (final String output in pubOutput) {
         expectExists(projectPath, output);
       }
     }
 
     void expectZeroPluginsInjected(String projectPath) {
-      for (final registrant in modulePluginRegistrants) {
+      for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses(includeLegacyPluginsList: true)) {
@@ -191,7 +191,7 @@ void main() {
     }
 
     void expectPluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
-      for (final registrant in pluginRegistrants) {
+      for (final String registrant in pluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses(
@@ -208,7 +208,7 @@ void main() {
     }
 
     void expectModulePluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
-      for (final registrant in modulePluginRegistrants) {
+      for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in modulePluginWitnesses(
@@ -227,7 +227,7 @@ void main() {
         modulePluginRegistrants,
         pluginWitnesses(includeLegacyPluginsList: true),
       ].expand<String>((List<String> list) => list);
-      for (final path in allFiles) {
+      for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
         ErrorHandlingFileSystem.deleteIfExists(file);
       }
@@ -325,8 +325,8 @@ workspace:
           arguments: <String>['--no-pub', '--template=module'],
         );
         final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
-        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-        final pubspec = <String, Object?>{
+        final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+        final Map<String, Object?> pubspec = <String, Object?>{
           ...pubspecYaml.value.cast<String, Object?>(),
           'resolution': 'workspace',
           'environment': <String, Object?>{
@@ -436,7 +436,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -473,7 +473,7 @@ flutter:
         final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
 
         final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
@@ -504,7 +504,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -537,7 +537,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -567,7 +567,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -805,7 +805,7 @@ flutter:
       () async {
         Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
-        final stdin = IOSink(StreamController<List<int>>().sink);
+        final IOSink stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -847,7 +847,7 @@ flutter:
       () async {
         Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
-        final stdin = IOSink(StreamController<List<int>>().sink);
+        final IOSink stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
             command: const <String>[

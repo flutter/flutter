@@ -56,7 +56,7 @@ Future<void> processPodsIfNeeded(
     }
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
-    final swiftPackageManager = SwiftPackageManager(
+    final SwiftPackageManager swiftPackageManager = SwiftPackageManager(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
@@ -68,7 +68,7 @@ Future<void> processPodsIfNeeded(
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
-  final fingerprinter = Fingerprinter(
+  final Fingerprinter fingerprinter = Fingerprinter(
     fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,

@@ -75,7 +75,7 @@ class HotEvent extends UsageEvent {
 
   @override
   void send() {
-    final parameters = CustomDimensions(
+    final CustomDimensions parameters = CustomDimensions(
       hotEventTargetPlatform: targetPlatform,
       hotEventSdkName: sdkName,
       hotEventEmulator: emulator,
@@ -118,13 +118,13 @@ class DoctorResultEvent extends UsageEvent {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    final group = validator as GroupedValidator;
+    final GroupedValidator group = validator as GroupedValidator;
     // The validator crashed.
     if (group.subResults.isEmpty) {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    for (var i = 0; i < group.subValidators.length; i++) {
+    for (int i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
       DoctorResultEvent(validator: v, result: r, flutterUsage: flutterUsage).send();
@@ -165,7 +165,7 @@ class BuildEvent extends UsageEvent {
 
   @override
   void send() {
-    final parameters = CustomDimensions(
+    final CustomDimensions parameters = CustomDimensions(
       buildEventCommand: _command,
       buildEventSettings: _settings,
       buildEventError: _eventError,

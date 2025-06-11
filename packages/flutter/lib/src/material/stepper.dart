@@ -392,7 +392,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.initState();
     _keys = List<GlobalKey>.generate(widget.steps.length, (int i) => GlobalKey());
 
-    for (var i = 0; i < widget.steps.length; i += 1) {
+    for (int i = 0; i < widget.steps.length; i += 1) {
       _oldStates[i] = widget.steps[i].state;
     }
   }
@@ -402,7 +402,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     assert(widget.steps.length == oldWidget.steps.length);
 
-    for (var i = 0; i < oldWidget.steps.length; i += 1) {
+    for (int i = 0; i < oldWidget.steps.length; i += 1) {
       _oldStates[i] = oldWidget.steps[i].state;
     }
   }
@@ -448,7 +448,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Color _connectorColor(bool isActive) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final states = <MaterialState>{
+    final Set<MaterialState> states = <MaterialState>{
       if (isActive) MaterialState.selected else MaterialState.disabled,
     };
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
@@ -484,7 +484,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Color _circleColor(int index) {
     final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final states = <MaterialState>{
+    final Set<MaterialState> states = <MaterialState>{
       if (isActive) MaterialState.selected else MaterialState.disabled,
     };
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
@@ -605,7 +605,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     const OutlinedBorder buttonShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(2)),
     );
-    const buttonPadding = EdgeInsets.symmetric(horizontal: 16.0);
+    const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
@@ -864,7 +864,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
-    final children = <Widget>[
+    final List<Widget> children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap:
@@ -916,8 +916,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       ],
     ];
 
-    final stepPanels = <Widget>[];
-    for (var i = 0; i < widget.steps.length; i += 1) {
+    final List<Widget> stepPanels = <Widget>[];
+    for (int i = 0; i < widget.steps.length; i += 1) {
       stepPanels.add(
         Visibility(
           maintainState: true,
@@ -1000,7 +1000,7 @@ class _TrianglePainter extends CustomPainter {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;
-    final points = <Offset>[
+    final List<Offset> points = <Offset>[
       Offset(0.0, height),
       Offset(base, height),
       Offset(halfBase, 0.0),
@@ -1164,7 +1164,7 @@ class StepStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final theme = ThemeData.fallback();
+    final ThemeData theme = ThemeData.fallback();
     final TextTheme defaultTextTheme = theme.textTheme;
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: null));

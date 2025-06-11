@@ -45,7 +45,7 @@ class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
     }
 
     final List<FileSystemEntity> files = _podRunnerTargetSupportFiles.listSync();
-    for (final file in files) {
+    for (final FileSystemEntity file in files) {
       if (file.basename.endsWith('xcconfig') && file is File) {
         processFileLines(file);
       }
@@ -57,8 +57,8 @@ class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
     final String trimmedString = line.trim();
     if (trimmedString.startsWith('LD_RUNPATH_SEARCH_PATHS') ||
         trimmedString.startsWith('LIBRARY_SEARCH_PATHS')) {
-      const originalReadLinkLine = r'{DT_TOOLCHAIN_DIR}';
-      const replacementReadLinkLine = r'{TOOLCHAIN_DIR}';
+      const String originalReadLinkLine = r'{DT_TOOLCHAIN_DIR}';
+      const String replacementReadLinkLine = r'{TOOLCHAIN_DIR}';
 
       return line.replaceAll(originalReadLinkLine, replacementReadLinkLine);
     }

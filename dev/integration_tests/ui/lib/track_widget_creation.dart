@@ -6,7 +6,7 @@ import 'dart:developer';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  final widgets = <Widget>{};
+  final Set<Widget> widgets = <Widget>{};
   widgets.add(const Text('same'));
   widgets.add(const Text('same'));
 

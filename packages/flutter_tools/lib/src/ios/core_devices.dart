@@ -67,7 +67,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'list',
@@ -80,7 +80,7 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
-      var isToolPossiblyShutdown = false;
+      bool isToolPossiblyShutdown = false;
       if (_fileSystem is ErrorHandlingFileSystem) {
         final FileSystem delegate = _fileSystem.fileSystem;
         if (delegate is LocalFileSystem) {
@@ -155,7 +155,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('core_device_app_list.json');
     output.createSync();
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -230,7 +230,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('install_results.json');
     output.createSync();
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -279,7 +279,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('uninstall_results.json');
     output.createSync();
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -330,7 +330,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('launch_results.json');
     output.createSync();
 
-    final command = <String>[
+    final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -395,7 +395,7 @@ class IOSCoreDevice {
   ///   "visibilityClass" : "default"
   /// }
   factory IOSCoreDevice.fromBetaJson(Map<String, Object?> data, {required Logger logger}) {
-    final capabilitiesList = <_IOSCoreDeviceCapability>[
+    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[
       if (data case {'capabilities': final List<Object?> capabilitiesData})
         for (final Object? capabilityData in capabilitiesData)
           if (capabilityData != null && capabilityData is Map<String, Object?>)

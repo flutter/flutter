@@ -10,7 +10,7 @@ void main() {
   testWidgets('Rebuild widget using InheritedModel', (WidgetTester tester) async {
     await tester.pumpWidget(const example.InheritedModelApp());
 
-    var decoration =
+    BoxDecoration? decoration =
         tester.widget<AnimatedContainer>(find.byType(AnimatedContainer).first).decoration
             as BoxDecoration?;
     expect(decoration!.color, Colors.blue);

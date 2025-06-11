@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Rotated box control test', (WidgetTester tester) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
     final Key rotatedBoxKey = UniqueKey();
 
     await tester.pumpWidget(

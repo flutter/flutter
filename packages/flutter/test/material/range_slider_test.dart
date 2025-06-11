@@ -14,8 +14,8 @@ import '../widgets/semantics_tester.dart';
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
   testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
-    var values = const RangeValues(0.1, 0.5);
-    var dragStarted = false;
+    RangeValues values = const RangeValues(0.1, 0.5);
+    bool dragStarted = false;
     final Key sliderKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -72,7 +72,7 @@ void main() {
     drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
     await tester.pump(kPressTimeout);
 
-    var sliderEnd = false;
+    bool sliderEnd = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -124,7 +124,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -178,7 +178,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -232,7 +232,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
-    var values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -290,7 +290,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
-    var values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -350,7 +350,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -396,7 +396,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -442,7 +442,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -490,7 +490,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -538,7 +538,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.3, 0.7);
+      RangeValues values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -591,7 +591,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.3, 0.7);
+      RangeValues values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -644,7 +644,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -699,7 +699,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -754,7 +754,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.3, 0.7);
+      RangeValues values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -807,7 +807,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.3, 0.7);
+      RangeValues values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -860,7 +860,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -915,7 +915,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -970,7 +970,7 @@ void main() {
   testWidgets(
     'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
       RangeValues? startValues;
       RangeValues? endValues;
 
@@ -1027,7 +1027,7 @@ void main() {
   testWidgets(
     'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag',
     (WidgetTester tester) async {
-      var values = const RangeValues(30, 70);
+      RangeValues values = const RangeValues(30, 70);
       late RangeValues startValues;
       late RangeValues endValues;
 
@@ -1116,7 +1116,7 @@ void main() {
     int? divisions,
     bool enabled = true,
   }) {
-    var values = const RangeValues(0.5, 0.75);
+    RangeValues values = const RangeValues(0.5, 0.75);
     final ValueChanged<RangeValues>? onChanged =
         !enabled
             ? null
@@ -1180,7 +1180,7 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes when setting the active color',
     (WidgetTester tester) async {
-      const activeColor = Color(0xcafefeed);
+      const Color activeColor = Color(0xcafefeed);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1211,7 +1211,7 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes when setting the inactive color',
     (WidgetTester tester) async {
-      const inactiveColor = Color(0xdeadbeef);
+      const Color inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1241,8 +1241,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes with active and inactive colors',
     (WidgetTester tester) async {
-      const activeColor = Color(0xcafefeed);
-      const inactiveColor = Color(0xdeadbeef);
+      const Color activeColor = Color(0xcafefeed);
+      const Color inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1308,8 +1308,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors',
     (WidgetTester tester) async {
-      const activeColor = Color(0xcafefeed);
-      const inactiveColor = Color(0xdeadbeef);
+      const Color activeColor = Color(0xcafefeed);
+      const Color inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1376,8 +1376,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors',
     (WidgetTester tester) async {
-      const activeColor = Color(0xcafefeed);
-      const inactiveColor = Color(0xdeadbeef);
+      const Color activeColor = Color(0xcafefeed);
+      const Color inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1410,7 +1410,7 @@ void main() {
     (WidgetTester tester) async {
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
-      var values = const RangeValues(0.5, 0.75);
+      RangeValues values = const RangeValues(0.5, 0.75);
 
       Widget buildApp({
         Color? activeColor,
@@ -1475,8 +1475,8 @@ void main() {
   testWidgets(
     'Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.5, 0.75);
-      const fillColor = Color(0xf55f5f5f);
+      RangeValues values = const RangeValues(0.5, 0.75);
+      const Color fillColor = Color(0xf55f5f5f);
 
       Widget buildApp({
         Color? activeColor,
@@ -1583,9 +1583,9 @@ void main() {
   );
 
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -1652,9 +1652,9 @@ void main() {
   testWidgets('Range Slider top value indicator gets stroked when overlapping', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -1731,9 +1731,9 @@ void main() {
   testWidgets(
     'Range Slider top value indicator gets stroked when overlapping with large text scale',
     (WidgetTester tester) async {
-      var values = const RangeValues(0.3, 0.7);
+      RangeValues values = const RangeValues(0.3, 0.7);
 
-      final theme = ThemeData(
+      final ThemeData theme = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
         sliderTheme: const SliderThemeData(
@@ -1812,9 +1812,9 @@ void main() {
   );
 
   testWidgets('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
-    var values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.7);
 
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -2016,7 +2016,7 @@ void main() {
     // the semantics node rects by avoiding floating point errors.
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
-    final rects = <Rect>[];
+    final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
         // Round rect values to avoid floating point errors.
@@ -2098,7 +2098,7 @@ void main() {
     // the semantics node rects by avoiding floating point errors.
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
-    final rects = <Rect>[];
+    final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
         // Round rect values to avoid floating point errors.
@@ -2122,7 +2122,7 @@ void main() {
   });
 
   testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
       activeColor: Colors.blue,
@@ -2297,7 +2297,7 @@ void main() {
         }),
     );
 
-    const padding = 4.0;
+    const double padding = 4.0;
     // The 1st thumb should at one-third(5 / 15) of the Slider.
     // The 2nd thumb should at (8 / 15) of the Slider.
     // The left of the active track shape is the position of the 1st thumb.
@@ -2319,7 +2319,7 @@ void main() {
   });
 
   testWidgets('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {
-    const values = RangeValues(50, 70);
+    const RangeValues values = RangeValues(50, 70);
 
     // Test default cursor.
     await tester.pumpWidget(
@@ -2383,7 +2383,7 @@ void main() {
   testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (
     WidgetTester tester,
   ) async {
-    var values = const RangeValues(50, 70);
+    RangeValues values = const RangeValues(50, 70);
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
@@ -2467,8 +2467,8 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    var values = const RangeValues(50, 70);
-    final theme = ThemeData();
+    RangeValues values = const RangeValues(50, 70);
+    final ThemeData theme = ThemeData();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2533,8 +2533,8 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    var values = const RangeValues(50, 70);
-    final theme = ThemeData();
+    RangeValues values = const RangeValues(50, 70);
+    final ThemeData theme = ThemeData();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2592,9 +2592,9 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    var values = const RangeValues(50, 70);
-    const hoverColor = Color(0xffff0000);
-    const draggedColor = Color(0xff0000ff);
+    RangeValues values = const RangeValues(50, 70);
+    const Color hoverColor = Color(0xffff0000);
+    const Color draggedColor = Color(0xff0000ff);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2712,8 +2712,8 @@ void main() {
   testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
-    var startFired = 0;
-    var endFired = 0;
+    int startFired = 0;
+    int endFired = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2781,7 +2781,7 @@ void main() {
   testWidgets('Semantic nodes do not throw an error after clearSemantics', (
     WidgetTester tester,
   ) async {
-    var semantics = SemanticsTester(tester);
+    SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -2815,9 +2815,9 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    var values = const RangeValues(50, 70);
-    const hoverColor = Color(0xffff0000);
-    const dragColor = Color(0xff0000ff);
+    RangeValues values = const RangeValues(50, 70);
+    const Color hoverColor = Color(0xffff0000);
+    const Color dragColor = Color(0xff0000ff);
 
     Widget buildApp() {
       return MaterialApp(
@@ -3099,8 +3099,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // The default track left and right padding.
-    const sliderPadding = 24.0;
-    final theme = ThemeData(
+    const double sliderPadding = 24.0;
+    final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         // Thumb padding is applied based on the track height.
         trackHeight: 100,
@@ -3138,7 +3138,7 @@ void main() {
   });
 
   testWidgets('Default RangeSlider when year2023 is false', (WidgetTester tester) async {
-    final theme = ThemeData();
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     final Color activeTrackColor = colorScheme.primary;
     final Color inactiveTrackColor = colorScheme.secondaryContainer;
@@ -3151,7 +3151,7 @@ void main() {
     final Color thumbColor = colorScheme.primary;
     final Color disabledThumbColor = colorScheme.onSurface.withOpacity(0.38);
     final Color valueIndicatorColor = colorScheme.inverseSurface;
-    var values = const RangeValues(25.0, 75.0);
+    RangeValues values = const RangeValues(25.0, 75.0);
     Widget buildApp({int? divisions, bool enabled = true}) {
       final ValueChanged<RangeValues>? onChanged =
           !enabled
@@ -3183,8 +3183,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
 
     // Test default track shape.
-    const trackOuterCornerRadius = Radius.circular(8.0);
-    const trackInnerCornerRadius = Radius.circular(2.0);
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3330,11 +3330,11 @@ void main() {
   testWidgets('RangeSlider value indicator text when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const values = RangeValues(25.0, 75.0);
-    final log = <InlineSpan>[];
-    final loggingValueIndicatorShape =
+    const RangeValues values = RangeValues(25.0, 75.0);
+    final List<InlineSpan> log = <InlineSpan>[];
+    final LoggingRangeSliderValueIndicatorShape loggingValueIndicatorShape =
         LoggingRangeSliderValueIndicatorShape(log);
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       sliderTheme: SliderThemeData(rangeValueIndicatorShape: loggingValueIndicatorShape),
     );
 
@@ -3370,9 +3370,9 @@ void main() {
   testWidgets('RangeSlider supports DropRangeSliderValueIndicatorShape', (
     WidgetTester tester,
   ) async {
-    const values = RangeValues(25.0, 75.0);
-    const valueIndicatorColor = Color(0XFFFF0000);
-    final theme = ThemeData(
+    const RangeValues values = RangeValues(25.0, 75.0);
+    const Color valueIndicatorColor = Color(0XFFFF0000);
+    final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         rangeValueIndicatorShape: DropRangeSliderValueIndicatorShape(),
         valueIndicatorColor: valueIndicatorColor,

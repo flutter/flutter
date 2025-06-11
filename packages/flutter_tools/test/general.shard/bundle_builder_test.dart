@@ -67,14 +67,14 @@ void main() {
   testWithoutContext(
     'writeBundle applies transformations to any assets that have them defined',
     () async {
-      final fileSystem = MemoryFileSystem.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File asset =
           fileSystem.file('my-asset.txt')
             ..createSync()
             ..writeAsBytesSync(<int>[1, 2, 3]);
-      final artifacts = Artifacts.test();
+      final Artifacts artifacts = Artifacts.test();
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <Pattern>[
             artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -102,7 +102,7 @@ void main() {
         ),
       ]);
 
-      final bundle =
+      final FakeAssetBundle bundle =
           FakeAssetBundle()
             ..entries['my-asset.txt'] = AssetBundleEntry(
               DevFSFileContent(asset),
@@ -162,8 +162,8 @@ void main() {
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
       final String mainPath = globals.fs.path.join('lib', 'main.dart');
-      const assetDirPath = 'example';
-      const depfilePath = 'example.d';
+      const String assetDirPath = 'example';
+      const String depfilePath = 'example.d';
       Environment? env;
       final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -220,7 +220,7 @@ void main() {
 
   testWithoutContext('--enable-experiment is removed from getDefaultCachedKernelPath hash', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final config = Config.test();
+    final Config config = Config.test();
 
     expect(
       getDefaultCachedKernelPath(
@@ -270,7 +270,7 @@ void main() {
   testUsingContext(
     'Release bundle includes native assets',
     () async {
-      final dependencies = <String>[];
+      final List<String> dependencies = <String>[];
       final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,

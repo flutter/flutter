@@ -16,7 +16,7 @@ void main() {
   });
 
   test('MaterialBannerThemeData null fields by default', () {
-    const bannerTheme = MaterialBannerThemeData();
+    const MaterialBannerThemeData bannerTheme = MaterialBannerThemeData();
     expect(bannerTheme.backgroundColor, null);
     expect(bannerTheme.surfaceTintColor, null);
     expect(bannerTheme.shadowColor, null);
@@ -28,7 +28,7 @@ void main() {
   });
 
   testWidgets('Default MaterialBannerThemeData debugFillProperties', (WidgetTester tester) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -43,7 +43,7 @@ void main() {
   testWidgets('MaterialBannerThemeData implements debugFillProperties', (
     WidgetTester tester,
   ) async {
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData(
       backgroundColor: Color(0xfffffff0),
       surfaceTintColor: Color(0xfffffff1),
@@ -76,8 +76,8 @@ void main() {
   testWidgets('Material3 - Passing no MaterialBannerThemeData returns defaults', (
     WidgetTester tester,
   ) async {
-    const contentText = 'Content';
-    final theme = ThemeData();
+    const String contentText = 'Content';
+    final ThemeData theme = ThemeData();
     late final ThemeData localizedTheme;
 
     await tester.pumpWidget(
@@ -121,9 +121,9 @@ void main() {
   testWidgets(
     'Material3 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger',
     (WidgetTester tester) async {
-      const contentText = 'Content';
-      const tapTarget = Key('tap-target');
-      final theme = ThemeData();
+      const String contentText = 'Content';
+      const Key tapTarget = Key('tap-target');
+      final ThemeData theme = ThemeData();
       late final ThemeData localizedTheme;
 
       await tester.pumpWidget(
@@ -183,7 +183,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
-    const contentText = 'Content';
+    const String contentText = 'Content';
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(bannerTheme: bannerTheme),
@@ -221,8 +221,8 @@ void main() {
     'MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger',
     (WidgetTester tester) async {
       final MaterialBannerThemeData bannerTheme = _bannerTheme();
-      const contentText = 'Content';
-      const tapTarget = Key('tap-target');
+      const String contentText = 'Content';
+      const Key tapTarget = Key('tap-target');
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(bannerTheme: bannerTheme),
@@ -280,9 +280,9 @@ void main() {
     const Color backgroundColor = Colors.purple;
     const Color surfaceTintColor = Colors.red;
     const Color shadowColor = Colors.orange;
-    const textStyle = TextStyle(color: Colors.green);
+    const TextStyle textStyle = TextStyle(color: Colors.green);
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
-    const contentText = 'Content';
+    const String contentText = 'Content';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -328,11 +328,11 @@ void main() {
     'MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger',
     (WidgetTester tester) async {
       const Color backgroundColor = Colors.purple;
-      const elevation = 6.0;
-      const textStyle = TextStyle(color: Colors.green);
+      const double elevation = 6.0;
+      const TextStyle textStyle = TextStyle(color: Colors.green);
       final MaterialBannerThemeData bannerTheme = _bannerTheme();
-      const contentText = 'Content';
-      const tapTarget = Key('tap-target');
+      const String contentText = 'Content';
+      const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(
         MaterialApp(
@@ -390,7 +390,7 @@ void main() {
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
-    const contentText = 'Content';
+    const String contentText = 'Content';
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(colorScheme: colorScheme),
@@ -411,8 +411,8 @@ void main() {
     'MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger',
     (WidgetTester tester) async {
       final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
-      const contentText = 'Content';
-      const tapTarget = Key('tap-target');
+      const String contentText = 'Content';
+      const Key tapTarget = Key('tap-target');
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(colorScheme: colorScheme),
@@ -455,7 +455,7 @@ void main() {
     testWidgets('Material2 - Passing no MaterialBannerThemeData returns defaults', (
       WidgetTester tester,
     ) async {
-      const contentText = 'Content';
+      const String contentText = 'Content';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -500,8 +500,8 @@ void main() {
     testWidgets(
       'Material2 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger',
       (WidgetTester tester) async {
-        const contentText = 'Content';
-        const tapTarget = Key('tap-target');
+        const String contentText = 'Content';
+        const Key tapTarget = Key('tap-target');
 
         await tester.pumpWidget(
           MaterialApp(

@@ -15,9 +15,9 @@ import '../widgets/semantics_tester.dart';
 void main() {
   late MenuController controller;
   String? focusedMenu;
-  final selected = <TestMenu>[];
-  final opened = <TestMenu>[];
-  final closed = <TestMenu>[];
+  final List<TestMenu> selected = <TestMenu>[];
+  final List<TestMenu> opened = <TestMenu>[];
+  final List<TestMenu> closed = <TestMenu>[];
   final GlobalKey menuItemKey = GlobalKey();
 
   void onPressed(TestMenu item) {
@@ -62,7 +62,7 @@ void main() {
   }
 
   List<RenderObject> ancestorRenderTheaters(RenderObject child) {
-    final results = <RenderObject>[];
+    final List<RenderObject> results = <RenderObject>[];
     RenderObject? node = child;
     while (node != null) {
       if (node.runtimeType.toString() == '_RenderTheater') {
@@ -99,7 +99,7 @@ void main() {
     void Function(TestMenu)? onOpen,
     void Function(TestMenu)? onClose,
   }) {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     return MaterialApp(
       theme: ThemeData(useMaterial3: false),
@@ -325,7 +325,7 @@ void main() {
   });
 
   testWidgets('Menu defaults', (WidgetTester tester) async {
-    final themeData = ThemeData();
+    final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -411,7 +411,7 @@ void main() {
   });
 
   testWidgets('Menu defaults - disabled', (WidgetTester tester) async {
-    final themeData = ThemeData();
+    final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -500,7 +500,7 @@ void main() {
   });
 
   testWidgets('Menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
-    const scrollbarTheme = ScrollbarThemeData(
+    const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
       thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
       thumbVisibility: MaterialStatePropertyAll<bool?>(true),
     );
@@ -577,7 +577,7 @@ void main() {
   testWidgets('Focus is returned to previous focus before invoking onPressed', (
     WidgetTester tester,
   ) async {
-    final buttonFocus = FocusNode(debugLabel: 'Button Focus');
+    final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
     addTearDown(buttonFocus.dispose);
     FocusNode? focusInOnPressed;
 
@@ -1328,11 +1328,11 @@ void main() {
     });
 
     testWidgets('diagnostics', (WidgetTester tester) async {
-      const item = MenuItemButton(
+      const MenuItemButton item = MenuItemButton(
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
         child: Text('label2'),
       );
-      final menuBar = MenuBar(
+      final MenuBar menuBar = MenuBar(
         controller: controller,
         style: const MenuStyle(
           backgroundColor: MaterialStatePropertyAll<Color>(Colors.red),
@@ -1344,7 +1344,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: Material(child: menuBar)));
       await tester.pump();
 
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       menuBar.debugFillProperties(builder);
 
       final List<String> description =
@@ -1692,7 +1692,7 @@ void main() {
 
     testWidgets('MenuAnchor tab traversal works', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/144381
-      final buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
       addTearDown(buttonFocusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -1782,7 +1782,7 @@ void main() {
     });
 
     testWidgets('MenuAnchor LTR directional traversal works', (WidgetTester tester) async {
-      final buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
       addTearDown(buttonFocusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -1881,7 +1881,7 @@ void main() {
 
     testWidgets('MenuAnchor RTL directional traversal works', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119532
-      final buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      final FocusNode buttonFocusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
       addTearDown(buttonFocusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -2118,7 +2118,7 @@ void main() {
 
       // Traverse with the keyboard to test that the menu scrolls without hover
       // focus affecting the focused menu.
-      for (var i = 2; i < 20; i++) {
+      for (int i = 2; i < 20; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
         await tester.pump();
         expect(focusedMenu, equals('MenuItemButton(Text("Item $i"))'));
@@ -2126,7 +2126,7 @@ void main() {
     });
 
     testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {
-      final scrollController = ScrollController();
+      final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -2162,9 +2162,9 @@ void main() {
 
     testWidgets('menus do not close on root menu internal scroll', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/122168.
-      final scrollController = ScrollController();
+      final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      var rootOpened = false;
+      bool rootOpened = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2219,7 +2219,7 @@ void main() {
       expect(rootOpened, true);
 
       // Hover the first item.
-      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
       await tester.sendEventToBinding(
         pointer.hover(tester.getCenter(find.text(TestMenu.mainMenu0.label))),
       );
@@ -2240,9 +2240,9 @@ void main() {
     });
 
     testWidgets('menus close on view size change', (WidgetTester tester) async {
-      final scrollController = ScrollController();
+      final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      final mediaQueryData = MediaQueryData.fromView(tester.view);
+      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
       Widget build(Size size) {
         return MaterialApp(
@@ -2278,7 +2278,7 @@ void main() {
       expect(closed, isEmpty);
       opened.clear();
 
-      const smallSize = Size(200, 200);
+      const Size smallSize = Size(200, 200);
       await changeSurfaceSize(tester, smallSize);
 
       await tester.pumpWidget(build(smallSize));
@@ -2302,7 +2302,7 @@ void main() {
       // This test verifies that `MenuAnchor`'s shortcuts continues to work even
       // when `WidgetsApp.shortcuts` contains nothing.
 
-      final childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
+      final FocusNode childNode = FocusNode(debugLabel: 'Dropdown Inkwell');
       addTearDown(childNode.dispose);
 
       await tester.pumpWidget(
@@ -2350,11 +2350,11 @@ void main() {
   });
 
   group('Accelerators', () {
-    const apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS};
+    const Set<TargetPlatform> apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS};
     final Set<TargetPlatform> nonApple = TargetPlatform.values.toSet().difference(apple);
 
     test('Accelerator markers are stripped properly', () {
-      const expected = <String, String>{
+      const Map<String, String> expected = <String, String>{
         'Plain String': 'Plain String',
         '&Simple Accelerator': 'Simple Accelerator',
         '&Multiple &Accelerators': 'Multiple Accelerators',
@@ -2364,8 +2364,8 @@ void main() {
         '&&Multiple Ampersands &&& &&&A &&&&B &&&&': '&Multiple Ampersands & &A &&B &&',
         'Bohrium 𨨏 Code point U+28A0F': 'Bohrium 𨨏 Code point U+28A0F',
       };
-      const expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
-      const expectedHasAccelerator = <bool>[
+      const List<int> expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
+      const List<bool> expectedHasAccelerator = <bool>[
         false,
         true,
         true,
@@ -2375,8 +2375,8 @@ void main() {
         true,
         false,
       ];
-      var acceleratorIndex = -1;
-      var count = 0;
+      int acceleratorIndex = -1;
+      int count = 0;
       for (final String key in expected.keys) {
         expect(
           MenuAcceleratorLabel.stripAcceleratorMarkers(
@@ -2942,7 +2942,7 @@ void main() {
     });
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
-      final submenuController = MenuController();
+      final MenuController submenuController = MenuController();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -2991,12 +2991,12 @@ void main() {
     });
 
     testWidgets('diagnostics', (WidgetTester tester) async {
-      final style = ButtonStyle(
+      final ButtonStyle style = ButtonStyle(
         shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
         elevation: MaterialStateProperty.all<double?>(10.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
       );
-      final menuStyle = MenuStyle(
+      final MenuStyle menuStyle = MenuStyle(
         shape: MaterialStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
         elevation: MaterialStateProperty.all<double?>(20.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.green),
@@ -3025,7 +3025,7 @@ void main() {
       await tester.pump();
 
       final SubmenuButton submenu = tester.widget(find.byType(SubmenuButton));
-      final builder = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       submenu.debugFillProperties(builder);
 
       final List<String> description =
@@ -3046,7 +3046,7 @@ void main() {
     });
 
     testWidgets('MenuItemButton respects closeOnActivate property', (WidgetTester tester) async {
-      final controller = MenuController();
+      final MenuController controller = MenuController();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -3175,14 +3175,14 @@ void main() {
       );
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
       // This should throw an error.
-      final exception = tester.takeException() as AssertionError;
+      final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     });
 
     testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (
       WidgetTester tester,
     ) async {
-      const overlayColor = Color(0xffff0000);
+      const Color overlayColor = Color(0xffff0000);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -3227,10 +3227,10 @@ void main() {
 
   group('Layout', () {
     List<Rect> collectMenuItemRects() {
-      final menuRects = <Rect>[];
+      final List<Rect> menuRects = <Rect>[];
       final List<Element> candidates = find.byType(SubmenuButton).evaluate().toList();
-      for (final candidate in candidates) {
-        final box = candidate.renderObject! as RenderBox;
+      for (final Element candidate in candidates) {
+        final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
         final Offset bottomRight = box.localToGlobal(box.size.bottomRight(Offset.zero));
         menuRects.add(Rect.fromPoints(topLeft, bottomRight));
@@ -3239,10 +3239,10 @@ void main() {
     }
 
     List<Rect> collectSubmenuRects() {
-      final menuRects = <Rect>[];
+      final List<Rect> menuRects = <Rect>[];
       final List<Element> candidates = findMenuPanels().evaluate().toList();
-      for (final candidate in candidates) {
-        final box = candidate.renderObject! as RenderBox;
+      for (final Element candidate in candidates) {
+        final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
         final Offset bottomRight = box.localToGlobal(box.size.bottomRight(Offset.zero));
         menuRects.add(Rect.fromPoints(topLeft, bottomRight));
@@ -3852,8 +3852,8 @@ void main() {
     testWidgets('Menu follows content position when a LayerLink is provided', (
       WidgetTester tester,
     ) async {
-      final controller = MenuController();
-      final contentKey = UniqueKey();
+      final MenuController controller = MenuController();
+      final UniqueKey contentKey = UniqueKey();
 
       Widget boilerplate(double bottomInsets) {
         return MaterialApp(
@@ -3896,10 +3896,10 @@ void main() {
     testWidgets(
       'Menu is correctly offset when a LayerLink is provided and alignmentOffset is set',
       (WidgetTester tester) async {
-        final controller = MenuController();
-        final contentKey = UniqueKey();
-        const horizontalOffset = 16.0;
-        const verticalOffset = 20.0;
+        final MenuController controller = MenuController();
+        final UniqueKey contentKey = UniqueKey();
+        const double horizontalOffset = 16.0;
+        const double verticalOffset = 20.0;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3961,7 +3961,7 @@ void main() {
             expectedSeparator = ' ';
         }
 
-        const allModifiers = SingleActivator(
+        const SingleActivator allModifiers = SingleActivator(
           LogicalKeyboardKey.keyA,
           control: true,
           meta: true,
@@ -3991,8 +3991,8 @@ void main() {
               'A',
             ].join(expectedSeparator);
         }
-        const charShortcuts = CharacterActivator('ñ');
-        const charExpected = 'ñ';
+        const CharacterActivator charShortcuts = CharacterActivator('ñ');
+        const String charExpected = 'ñ';
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -4147,7 +4147,7 @@ void main() {
 
     group('Semantics', () {
       testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -4189,7 +4189,7 @@ void main() {
       });
 
       testWidgets('MenuItemButton semantics respects label', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
@@ -4209,7 +4209,7 @@ void main() {
       }, variant: TargetPlatformVariant.desktop());
 
       testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -4250,7 +4250,7 @@ void main() {
       });
 
       testWidgets('SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
-        final semantics = SemanticsTester(tester);
+        final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
@@ -4401,13 +4401,13 @@ void main() {
 
     // This is a regression test for https://github.com/flutter/flutter/issues/131676.
     testWidgets('Material3 - Menu uses correct text styles', (WidgetTester tester) async {
-      const menuTextStyle = TextStyle(
+      const TextStyle menuTextStyle = TextStyle(
         fontSize: 18.5,
         fontStyle: FontStyle.italic,
         wordSpacing: 1.2,
         decoration: TextDecoration.lineThrough,
       );
-      final themeData = ThemeData(textTheme: const TextTheme(labelLarge: menuTextStyle));
+      final ThemeData themeData = ThemeData(textTheme: const TextTheme(labelLarge: menuTextStyle));
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -4449,9 +4449,9 @@ void main() {
     });
 
     testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      var onFocusChangeCalled = 0;
+      int onFocusChangeCalled = 0;
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -4509,7 +4509,7 @@ void main() {
     testWidgets('SubmenuButton.styleFrom overlayColor overrides default overlay color', (
       WidgetTester tester,
     ) async {
-      const overlayColor = Color(0xffff00ff);
+      const Color overlayColor = Color(0xffff00ff);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -4562,7 +4562,7 @@ void main() {
         controller.open();
         await tester.pump();
 
-        final state = WeakReference<State>(
+        final WeakReference<State> state = WeakReference<State>(
           tester.firstState<State<SubmenuButton>>(find.byType(SubmenuButton)),
         );
         expect(state.target, isNotNull);
@@ -4592,9 +4592,9 @@ void main() {
     testWidgets('MenuItemButton.styleFrom can customize the button icon', (
       WidgetTester tester,
     ) async {
-      const iconColor = Color(0xFFF000FF);
-      const iconSize = 32.0;
-      const disabledIconColor = Color(0xFFFFF000);
+      const Color iconColor = Color(0xFFF000FF);
+      const double iconSize = 32.0;
+      const Color disabledIconColor = Color(0xFFFFF000);
       Widget buildButton({bool enabled = true}) {
         return MaterialApp(
           home: Material(
@@ -4628,9 +4628,9 @@ void main() {
     testWidgets('SubmenuButton.styleFrom can customize the button icon', (
       WidgetTester tester,
     ) async {
-      const iconColor = Color(0xFFF000FF);
-      const iconSize = 32.0;
-      const disabledIconColor = Color(0xFFFFF000);
+      const Color iconColor = Color(0xFFF000FF);
+      const double iconSize = 32.0;
+      const Color disabledIconColor = Color(0xFFFFF000);
       Widget buildButton({bool enabled = true}) {
         return MaterialApp(
           home: Material(
@@ -4664,9 +4664,9 @@ void main() {
     testWidgets('Content is shown in the root overlay when useRootOverlay is true', (
       WidgetTester tester,
     ) async {
-      final controller = MenuController();
-      final overlayKey = UniqueKey();
-      final menuItemKey = UniqueKey();
+      final MenuController controller = MenuController();
+      final UniqueKey overlayKey = UniqueKey();
+      final UniqueKey menuItemKey = UniqueKey();
 
       late final OverlayEntry overlayEntry;
       addTearDown(() {
@@ -4732,9 +4732,9 @@ void main() {
     testWidgets('Content is shown in the nearest ancestor overlay when useRootOverlay is false', (
       WidgetTester tester,
     ) async {
-      final controller = MenuController();
-      final overlayKey = UniqueKey();
-      final menuItemKey = UniqueKey();
+      final MenuController controller = MenuController();
+      final UniqueKey overlayKey = UniqueKey();
+      final UniqueKey menuItemKey = UniqueKey();
 
       late final OverlayEntry overlayEntry;
       addTearDown(() {
@@ -4796,7 +4796,7 @@ void main() {
     testWidgets('Unattached MenuController does not throw when calling close', (
       WidgetTester tester,
     ) async {
-      final controller = MenuController();
+      final MenuController controller = MenuController();
       controller.close();
       await tester.pump();
       expect(tester.takeException(), isNull);
@@ -4805,15 +4805,15 @@ void main() {
     testWidgets('Unattached MenuController returns false when calling isOpen', (
       WidgetTester tester,
     ) async {
-      final controller = MenuController();
+      final MenuController controller = MenuController();
       expect(controller.isOpen, false);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/157606.
     testWidgets('MenuAnchor updates isOpen state correctly', (WidgetTester tester) async {
-      var isOpen = false;
-      var openCount = 0;
-      var closeCount = 0;
+      bool isOpen = false;
+      int openCount = 0;
+      int closeCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -4983,7 +4983,7 @@ List<Widget> createTestMenus({
     );
   }
 
-  final result = <Widget>[
+  final List<Widget> result = <Widget>[
     submenuButton(
       TestMenu.mainMenu0,
       menuChildren: <Widget>[

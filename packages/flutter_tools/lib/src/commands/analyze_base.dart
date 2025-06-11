@@ -80,8 +80,8 @@ abstract class AnalyzeBase {
   }
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount) {
-    const benchmarkOut = 'analysis_benchmark.json';
-    final data = <String, dynamic>{
+    const String benchmarkOut = 'analysis_benchmark.json';
+    final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
     };
@@ -91,7 +91,7 @@ abstract class AnalyzeBase {
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
-    final dartSdk = argResults['dart-sdk'] as String?;
+    final String? dartSdk = argResults['dart-sdk'] as String?;
     return dartSdk ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   }
 
@@ -105,7 +105,7 @@ abstract class AnalyzeBase {
     int? files,
     required String seconds,
   }) {
-    final errorsMessage = StringBuffer(
+    final StringBuffer errorsMessage = StringBuffer(
       issueCount > 0 ? '$issueCount ${pluralize('issue', issueCount)} found.' : 'No issues found!',
     );
 
@@ -147,7 +147,7 @@ class PackageDependency {
     final String? flutterRoot = Cache.flutterRoot;
     assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
-      for (final source in targetSources) {
+      for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
         if (globals.fs.path.isWithin(flutterRoot!, source)) {
           return true;
@@ -161,12 +161,12 @@ class PackageDependency {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
-    for (final target in targets) {
+    for (final String target in targets) {
       final List<String> targetList = values[target]!;
       final int count = targetList.length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
-      var canonical = false;
-      for (final source in targetList) {
+      bool canonical = false;
+      for (final String source in targetList) {
         result.writeln('    $source');
         if (source == canonicalSource) {
           canonical = true;
@@ -231,7 +231,7 @@ class PackageDependencyTracker {
     }
 
     if (dependencies.hasConflicts) {
-      final message = StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
@@ -263,7 +263,7 @@ class PackageDependencyTracker {
 
   String generateConflictReport() {
     assert(hasConflicts);
-    final result = StringBuffer();
+    final StringBuffer result = StringBuffer();
     packages.forEach((String package, PackageDependency dependency) {
       if (dependency.hasConflict) {
         result.writeln('Package "$package" has conflicts:');
@@ -274,7 +274,7 @@ class PackageDependencyTracker {
   }
 
   Map<String, String> asPackageMap() {
-    final result = <String, String>{};
+    final Map<String, String> result = <String, String>{};
     packages.forEach((String package, PackageDependency dependency) {
       result[package] = dependency.target;
     });
@@ -284,11 +284,11 @@ class PackageDependencyTracker {
 
 /// Find directories or files from argResults.rest.
 Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
-  final items = Set<String>.of(
+  final Set<String> items = Set<String>.of(
     argResults.rest.map<String>((String path) => fileSystem.path.canonicalize(path)),
   );
   if (items.isNotEmpty) {
-    for (final item in items) {
+    for (final String item in items) {
       final FileSystemEntityType type = fileSystem.typeSync(item);
 
       if (type == FileSystemEntityType.notFound) {

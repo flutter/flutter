@@ -85,7 +85,7 @@ class GalleryDemo {
 }
 
 List<GalleryDemo> _buildGalleryDemos() {
-  final galleryDemos = <GalleryDemo>[
+  final List<GalleryDemo> galleryDemos = <GalleryDemo>[
     // Demos
     GalleryDemo(
       title: 'Shrine',

@@ -36,14 +36,14 @@ void main() {
 }
 
 void runTest(FileSystemStyle style) {
-  final sep = style == FileSystemStyle.windows ? r'\' : '/';
-  final root = style == FileSystemStyle.windows ? r'C:\' : '/';
-  final rootUri = style == FileSystemStyle.windows ? 'C:/' : '';
+  final String sep = style == FileSystemStyle.windows ? r'\' : '/';
+  final String root = style == FileSystemStyle.windows ? r'C:\' : '/';
+  final String rootUri = style == FileSystemStyle.windows ? 'C:/' : '';
 
   late MultiRootFileSystem fs;
 
   setUp(() {
-    final memory = MemoryFileSystem(style: style);
+    final MemoryFileSystem memory = MemoryFileSystem(style: style);
     setupFileSystem(
       fs: memory,
       directories: <String>[

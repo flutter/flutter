@@ -808,7 +808,7 @@ void main() {
   });
 
   testWidgets('Hit test children in wrap', (WidgetTester tester) async {
-    final log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(
       Wrap(

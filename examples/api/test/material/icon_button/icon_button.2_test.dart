@@ -11,10 +11,10 @@ void main() {
     await tester.pumpWidget(const example.IconButtonApp());
     expect(find.widgetWithIcon(IconButton, Icons.filter_drama), findsNWidgets(8));
     final Finder iconButtons = find.widgetWithIcon(IconButton, Icons.filter_drama);
-    for (var i = 0; i <= 3; i++) {
+    for (int i = 0; i <= 3; i++) {
       expect(tester.widget<IconButton>(iconButtons.at(i)).onPressed is VoidCallback, isTrue);
     }
-    for (var i = 4; i <= 7; i++) {
+    for (int i = 4; i <= 7; i++) {
       expect(tester.widget<IconButton>(iconButtons.at(i)).onPressed, isNull);
     }
   });

@@ -17,11 +17,11 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  final material3Theme = ThemeData();
-  final material2Theme = ThemeData(useMaterial3: false);
+  final ThemeData material3Theme = ThemeData();
+  final ThemeData material2Theme = ThemeData(useMaterial3: false);
 
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
-    var didPressButton = false;
+    bool didPressButton = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -292,7 +292,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -580,7 +580,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button semantics (enabled)', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -621,7 +621,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button semantics (disabled)', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -656,7 +656,7 @@ void main() {
   });
 
   testWidgets('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -888,7 +888,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -929,7 +929,7 @@ void main() {
   });
 
   testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
-    const foregroundColor = Color(0xcafefeed);
+    const Color foregroundColor = Color(0xcafefeed);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -948,7 +948,7 @@ void main() {
   });
 
   testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
-    const splashColor = Color(0xcafefeed);
+    const Color splashColor = Color(0xcafefeed);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -970,8 +970,8 @@ void main() {
   testWidgets('extended FAB does not show label when isExtended is false', (
     WidgetTester tester,
   ) async {
-    const iconKey = Key('icon');
-    const labelKey = Key('label');
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
 
     await tester.pumpWidget(
       Directionality(
@@ -1019,10 +1019,10 @@ void main() {
   });
 
   testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
-    const iconKey = Key('icon');
-    const labelKey = Key('label');
-    const spacing = 33.0;
-    const padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const double spacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1057,8 +1057,8 @@ void main() {
   testWidgets('FloatingActionButton.extended can customize text style', (
     WidgetTester tester,
   ) async {
-    const labelKey = Key('label');
-    const style = TextStyle(letterSpacing: 2.0);
+    const Key labelKey = Key('label');
+    const TextStyle style = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1161,7 +1161,7 @@ void main() {
     });
 
     testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
-      final focusNode = FocusNode();
+      final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1356,7 +1356,7 @@ void main() {
     });
 
     testWidgets('FloatingActionButton with enabled feedback', (WidgetTester tester) async {
-      const enableFeedback = true;
+      const bool enableFeedback = true;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1375,7 +1375,7 @@ void main() {
     });
 
     testWidgets('FloatingActionButton with disabled feedback', (WidgetTester tester) async {
-      const enableFeedback = false;
+      const bool enableFeedback = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1411,8 +1411,8 @@ void main() {
     testWidgets('FloatingActionButton with disabled feedback using FloatingActionButtonTheme', (
       WidgetTester tester,
     ) async {
-      const enableFeedbackTheme = false;
-      final theme = ThemeData(
+      const bool enableFeedbackTheme = false;
+      final ThemeData theme = ThemeData(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           enableFeedback: enableFeedbackTheme,
         ),
@@ -1436,9 +1436,9 @@ void main() {
     testWidgets(
       'FloatingActionButton.enableFeedback is overridden by FloatingActionButtonThemeData.enableFeedback',
       (WidgetTester tester) async {
-        const enableFeedbackTheme = false;
-        const enableFeedback = true;
-        final theme = ThemeData(
+        const bool enableFeedbackTheme = false;
+        const bool enableFeedback = true;
+        final ThemeData theme = ThemeData(
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
             enableFeedback: enableFeedbackTheme,
           ),

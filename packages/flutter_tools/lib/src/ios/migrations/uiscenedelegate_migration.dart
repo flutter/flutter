@@ -55,7 +55,7 @@ class UISceneDelegateMigration extends ProjectMigrator {
 
   @visibleForTesting
   static Map<String, XmlElement> extractPlistDict(XmlElement dict) {
-    final keyValues = <String, XmlElement>{};
+    final Map<String, XmlElement> keyValues = <String, XmlElement>{};
     String? key;
     for (final XmlElement child in dict.childElements) {
       if (key != null) {
@@ -71,7 +71,7 @@ class UISceneDelegateMigration extends ProjectMigrator {
   @override
   String migrateFileContents(String fileContents) {
     try {
-      final read = XmlDocument.parse(fileContents);
+      final XmlDocument read = XmlDocument.parse(fileContents);
       final XmlElement readPlist = read.childElements.first;
       final XmlElement readDict = readPlist.childElements.first;
       final Map<String, XmlElement> keyValues = extractPlistDict(readDict);
@@ -80,7 +80,7 @@ class UISceneDelegateMigration extends ProjectMigrator {
         if (keyValues.containsKey(_storyboardKey)) {
           final String storyboard = keyValues[_storyboardKey]!.innerText;
           final String xmlAddition = _addition(storyboard);
-          final fragment = XmlDocumentFragment.parse(xmlAddition);
+          final XmlDocumentFragment fragment = XmlDocumentFragment.parse(xmlAddition);
           for (final XmlNode node in fragment.children) {
             readDict.children.add(node.copy());
           }

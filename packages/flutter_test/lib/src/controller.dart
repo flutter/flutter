@@ -271,7 +271,7 @@ class SemanticsController {
       (RenderView r) => r.flutterView == actualView,
     );
 
-    final traversal = <SemanticsNode>[];
+    final List<SemanticsNode> traversal = <SemanticsNode>[];
     _accessibilityTraversal(renderView.owner!.semanticsOwner!.rootSemanticsNode!, traversal);
 
     // Setting the range
@@ -332,7 +332,7 @@ class SemanticsController {
     final List<SemanticsNode> children = node.debugListChildrenInOrder(
       DebugSemanticsDumpOrder.traversalOrder,
     );
-    for (final child in children) {
+    for (final SemanticsNode child in children) {
       _accessibilityTraversal(child, traversal);
     }
   }
@@ -357,12 +357,12 @@ class SemanticsController {
       return false;
     }
 
-    final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+    final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
     if (hasNonScrollingAction) {
       return true;
     }
 
-    final hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
+    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
     if (hasImportantFlag) {
       return true;
     }
@@ -822,7 +822,7 @@ abstract class WidgetController {
   Iterable<T> widgetList<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final result = element.widget as T;
+      final T result = element.widget as T;
       return result;
     });
   }
@@ -834,7 +834,7 @@ abstract class WidgetController {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderObject object = element.renderObject!;
-    var current = object;
+    RenderObject current = object;
     while (current.debugLayer == null) {
       current = current.parent!;
     }
@@ -984,7 +984,7 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final result = element.renderObject! as T;
+      final T result = element.renderObject! as T;
       return result;
     });
   }
@@ -1283,17 +1283,17 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final testPointer = TestPointer(
+      final TestPointer testPointer = TestPointer(
         pointer ?? _getNextPointer(),
         deviceKind,
         null,
         buttons,
       );
-      const kMoveCount =
+      const int kMoveCount =
           50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      var timeStamp = 0.0;
-      var lastTimeStamp = timeStamp;
+      double timeStamp = 0.0;
+      double lastTimeStamp = timeStamp;
       await sendEventToBinding(
         testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())),
       );
@@ -1307,7 +1307,7 @@ abstract class WidgetController {
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (var i = 0; i <= kMoveCount; i += 1) {
+      for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location =
             startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(
@@ -1379,17 +1379,17 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final testPointer = TestPointer(
+      final TestPointer testPointer = TestPointer(
         pointer ?? _getNextPointer(),
         PointerDeviceKind.trackpad,
         null,
         buttons,
       );
-      const kMoveCount =
+      const int kMoveCount =
           50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      var timeStamp = 0.0;
-      var lastTimeStamp = timeStamp;
+      double timeStamp = 0.0;
+      double lastTimeStamp = timeStamp;
       await sendEventToBinding(
         testPointer.panZoomStart(
           startLocation,
@@ -1407,7 +1407,7 @@ abstract class WidgetController {
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (var i = 0; i <= kMoveCount; i += 1) {
+      for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset pan = initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(
           testPointer.panZoomUpdate(
@@ -1702,14 +1702,14 @@ abstract class WidgetController {
     final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
     assert(intervals > 1);
     pointer ??= _getNextPointer();
-    final timeStamps = <Duration>[
+    final List<Duration> timeStamps = <Duration>[
       for (int t = 0; t <= intervals; t += 1) duration * t ~/ intervals,
     ];
-    final offsets = <Offset>[
+    final List<Offset> offsets = <Offset>[
       startLocation,
       for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
-    final records = <PointerEventRecord>[
+    final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
         PointerAddedEvent(position: startLocation),
         PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
@@ -1816,7 +1816,7 @@ abstract class WidgetController {
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
     viewId ??= view.viewId;
-    final result = HitTestResult();
+    final HitTestResult result = HitTestResult();
     binding.hitTestInView(result, location, viewId);
     return result;
   }
@@ -1979,8 +1979,8 @@ abstract class WidgetController {
               // Try hit-testing the center of each TextBox.
               .map((TextBox textBox) => textBox.toRect().center);
 
-          for (final localOffset in testOffsets) {
-            final result = HitTestResult();
+          for (final Offset localOffset in testOffsets) {
+            final HitTestResult result = HitTestResult();
             final Offset globalOffset = localOffset + renderParagraphPaintOffset;
             binding.hitTestInView(result, globalOffset, textRangeContext.view.view.viewId);
             if (result.path.any((HitTestEntry entry) => entry.target == target)) {
@@ -2029,11 +2029,11 @@ abstract class WidgetController {
         'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.',
       );
     }
-    final box = element.renderObject! as RenderBox;
+    final RenderBox box = element.renderObject! as RenderBox;
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
       final FlutterView view = _viewOf(finder);
-      final result = HitTestResult();
+      final HitTestResult result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
       final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
       if (!found) {
@@ -2088,7 +2088,7 @@ abstract class WidgetController {
   Size getSize(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final box = element.renderObject! as RenderBox;
+    final RenderBox box = element.renderObject! as RenderBox;
     return box.size;
   }
 
@@ -2417,7 +2417,7 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([Duration duration = const Duration(milliseconds: 100)]) {
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
-      var count = 0;
+      int count = 0;
       do {
         await pump(duration);
         count += 1;
@@ -2430,7 +2430,7 @@ class LiveWidgetController extends WidgetController {
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      final handleTimeStampDiff = <Duration>[];
+      final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
       for (final PointerEventRecord record in records) {
         final DateTime now = clock.now();

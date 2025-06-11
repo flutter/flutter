@@ -20,9 +20,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   late MenuController controller;
   String? focusedMenu;
-  final selected = <Tag>[];
-  final opened = <Tag>[];
-  final closed = <Tag>[];
+  final List<Tag> selected = <Tag>[];
+  final List<Tag> opened = <Tag>[];
+  final List<Tag> closed = <Tag>[];
 
   void onPressed(Tag item) {
     selected.add(item);
@@ -67,7 +67,7 @@ void main() {
   }
 
   List<RenderObject> findAncestorRenderTheaters(RenderObject child) {
-    final results = <RenderObject>[];
+    final List<RenderObject> results = <RenderObject>[];
     RenderObject? node = child;
     while (node != null) {
       if (node.runtimeType.toString() == '_RenderTheater') {
@@ -108,7 +108,7 @@ void main() {
   testWidgets('[Default] MenuController.open() and .close() toggle overlay visibility', (
     WidgetTester tester,
   ) async {
-    final nestedController = MenuController();
+    final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         Menu(
@@ -186,7 +186,7 @@ void main() {
   testWidgets('[Default] MenuController.closeChildren closes submenu children', (
     WidgetTester tester,
   ) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -360,7 +360,7 @@ void main() {
   });
 
   testWidgets('[Group] MenuController.open does nothing', (WidgetTester tester) async {
-    final nestedController = MenuController();
+    final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchorGroup(
@@ -395,7 +395,7 @@ void main() {
   });
 
   testWidgets('[Group] MenuController.close closes children', (WidgetTester tester) async {
-    final nestedController = MenuController();
+    final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchorGroup(
@@ -433,7 +433,7 @@ void main() {
   });
 
   testWidgets('[Group] MenuController.closeChildren closes children', (WidgetTester tester) async {
-    final nestedController = MenuController();
+    final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchorGroup(
@@ -514,15 +514,15 @@ void main() {
   testWidgets('MenuController.maybeIsOpenOf notifies dependents when isOpen changes', (
     WidgetTester tester,
   ) async {
-    final groupController = MenuController();
-    final controller = MenuController();
-    final nestedController = MenuController();
+    final MenuController groupController = MenuController();
+    final MenuController controller = MenuController();
+    final MenuController nestedController = MenuController();
     bool? panelIsOpen;
     bool? overlayIsOpen;
     bool? anchorIsOpen;
-    var panelBuilds = 0;
-    var anchorBuilds = 0;
-    var overlayBuilds = 0;
+    int panelBuilds = 0;
+    int anchorBuilds = 0;
+    int overlayBuilds = 0;
 
     await tester.pumpWidget(
       App(
@@ -616,15 +616,15 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey anchorKey = GlobalKey();
-    final demoControllerOne = MenuController();
-    final demoControllerTwo = MenuController();
+    final MenuController demoControllerOne = MenuController();
+    final MenuController demoControllerTwo = MenuController();
 
     MenuController? panelController;
     MenuController? overlayController;
     MenuController? anchorController;
-    var panelBuilds = 0;
-    var anchorBuilds = 0;
-    var overlayBuilds = 0;
+    int panelBuilds = 0;
+    int anchorBuilds = 0;
+    int overlayBuilds = 0;
 
     Widget buildAnchor({required MenuController panel, required MenuController overlay}) {
       return App(
@@ -703,7 +703,7 @@ void main() {
   testWidgets('Unattached MenuController does not throw when calling close', (
     WidgetTester tester,
   ) async {
-    final controller = MenuController();
+    final MenuController controller = MenuController();
     controller.close();
     await tester.pump();
     expect(tester.takeException(), isNull);
@@ -712,7 +712,7 @@ void main() {
   testWidgets('Unattached MenuController returns false when calling isOpen', (
     WidgetTester tester,
   ) async {
-    final controller = MenuController();
+    final MenuController controller = MenuController();
     expect(controller.isOpen, false);
   });
 
@@ -734,7 +734,7 @@ void main() {
       const App(Menu(menuPanel: SizedBox.shrink(), child: SizedBox.shrink())),
     );
 
-    var serializedException = '';
+    String serializedException = '';
     runZonedGuarded(controller.closeChildren, (Object exception, StackTrace stackTrace) {
       serializedException = exception.toString();
     });
@@ -754,7 +754,7 @@ void main() {
       App(RawMenuAnchorGroup(controller: MenuController(), child: const SizedBox.shrink())),
     );
 
-    var serializedException = '';
+    String serializedException = '';
     runZonedGuarded(controller.closeChildren, (Object exception, StackTrace stackTrace) {
       serializedException = exception.toString();
     });
@@ -772,7 +772,7 @@ void main() {
 
     await tester.pumpWidget(const App(SizedBox()));
 
-    var serializedException = '';
+    String serializedException = '';
     runZonedGuarded(controller.closeChildren, (Object exception, StackTrace stackTrace) {
       serializedException = exception.toString();
     });
@@ -790,7 +790,7 @@ void main() {
 
     await tester.pumpWidget(const App(SizedBox()));
 
-    var serializedException = '';
+    String serializedException = '';
     runZonedGuarded(controller.closeChildren, (Object exception, StackTrace stackTrace) {
       serializedException = exception.toString();
     });
@@ -829,9 +829,9 @@ void main() {
   });
 
   testWidgets('Escape key closes menus', (WidgetTester tester) async {
-    final aFocusNode = FocusNode();
-    final baaFocusNode = FocusNode();
-    final menuController = MenuController();
+    final FocusNode aFocusNode = FocusNode();
+    final FocusNode baaFocusNode = FocusNode();
+    final MenuController menuController = MenuController();
     addTearDown(aFocusNode.dispose);
     addTearDown(baaFocusNode.dispose);
 
@@ -895,8 +895,8 @@ void main() {
 
   // Credit to Closure library for the test idea.
   testWidgets('Intents are not blocked by closed anchor', (WidgetTester tester) async {
-    final invokedIntents = <Intent>[];
-    final aFocusNode = FocusNode();
+    final List<Intent> invokedIntents = <Intent>[];
+    final FocusNode aFocusNode = FocusNode();
     addTearDown(aFocusNode.dispose);
 
     await tester.pumpWidget(
@@ -965,12 +965,12 @@ void main() {
   testWidgets('[Default] Focus traversal shortcuts are not bound to actions', (
     WidgetTester tester,
   ) async {
-    final anchorFocusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
-    final bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
+    final FocusNode anchorFocusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
+    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
     addTearDown(anchorFocusNode.dispose);
     addTearDown(bFocusNode.dispose);
 
-    final traversalShortcuts = <ShortcutActivator, Intent>{
+    final Map<ShortcutActivator, Intent> traversalShortcuts = <ShortcutActivator, Intent>{
       LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(
@@ -978,7 +978,7 @@ void main() {
       ),
     };
 
-    final invokedIntents = <Intent>[];
+    final List<Intent> invokedIntents = <Intent>[];
     await tester.pumpWidget(
       App(
         Column(
@@ -1090,12 +1090,12 @@ void main() {
   testWidgets('Actions that wrap Menu are invoked by both anchor and overlay', (
     WidgetTester tester,
   ) async {
-    final anchorFocusNode = FocusNode();
-    final aFocusNode = FocusNode();
+    final FocusNode anchorFocusNode = FocusNode();
+    final FocusNode aFocusNode = FocusNode();
     addTearDown(anchorFocusNode.dispose);
     addTearDown(aFocusNode.dispose);
-    var invokedAnchor = false;
-    var invokedOverlay = false;
+    bool invokedAnchor = false;
+    bool invokedOverlay = false;
 
     await tester.pumpWidget(
       App(
@@ -1141,7 +1141,7 @@ void main() {
   });
 
   testWidgets('DismissMenuAction closes menus', (WidgetTester tester) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       App(
@@ -1482,7 +1482,7 @@ void main() {
   });
 
   testWidgets('onOpen is called when the menu is opened', (WidgetTester tester) async {
-    var opened = false;
+    bool opened = false;
     await tester.pumpWidget(
       App(
         Menu(
@@ -1514,7 +1514,7 @@ void main() {
   });
 
   testWidgets('onClose is called when the menu is closed', (WidgetTester tester) async {
-    var closed = true;
+    bool closed = true;
     await tester.pumpWidget(
       App(
         Menu(
@@ -1553,7 +1553,7 @@ void main() {
   });
 
   testWidgets('[Default] diagnostics', (WidgetTester tester) async {
-    final focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final Widget menuAnchor = RawMenuAnchor(
       controller: controller,
@@ -1567,7 +1567,7 @@ void main() {
     controller.open();
     await tester.pump();
 
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
     final List<String> properties =
         builder.properties
@@ -1587,7 +1587,7 @@ void main() {
     await tester.pumpWidget(App(menuNode));
     await tester.pump();
 
-    final builder = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuNode.debugFillProperties(builder);
     final Iterable<String> properties = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -1630,11 +1630,11 @@ void main() {
   // menu or traverses its items. By default, we let the user choose whether
   // to close the menu or traverse its items.
   testWidgets('Tab traversal is not handled.', (WidgetTester tester) async {
-    final bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
-    final bbFocusNode = FocusNode(debugLabel: Tag.b.b.focusNode);
+    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
+    final FocusNode bbFocusNode = FocusNode(debugLabel: Tag.b.b.focusNode);
     addTearDown(bFocusNode.dispose);
     addTearDown(bbFocusNode.dispose);
-    final invokedIntents = <Intent>[];
+    final List<Intent> invokedIntents = <Intent>[];
 
     await tester.pumpWidget(
       App(
@@ -1730,12 +1730,12 @@ void main() {
   });
 
   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
-    final scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    final mediaQueryData = MediaQueryData.fromView(tester.view);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
-    var opened = false;
-    var closed = false;
+    bool opened = false;
+    bool closed = false;
 
     Widget build(Size size) {
       return MediaQuery(
@@ -1772,7 +1772,7 @@ void main() {
     expect(opened, isTrue);
     expect(closed, isFalse);
 
-    const smallSize = Size(200, 200);
+    const Size smallSize = Size(200, 200);
     await changeSurfaceSize(tester, smallSize);
     await tester.pumpWidget(build(smallSize));
 
@@ -1781,7 +1781,7 @@ void main() {
   });
 
   testWidgets('Menu closes on ancestor scroll', (WidgetTester tester) async {
-    final scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -1825,10 +1825,10 @@ void main() {
 
   testWidgets('Menus do not close on root menu internal scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/122168.
-    final scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    var rootOpened = false;
-    const largeButtonConstraints = BoxConstraints.tightFor(width: 200, height: 300);
+    bool rootOpened = false;
+    const BoxConstraints largeButtonConstraints = BoxConstraints.tightFor(width: 200, height: 300);
 
     await tester.pumpWidget(
       App(
@@ -1875,7 +1875,7 @@ void main() {
     expect(rootOpened, true);
 
     // Hover the first submenu anchor.
-    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     await tester.tap(find.text(Tag.a.text));
     await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.text(Tag.a.text))));
     await tester.pump();
@@ -1898,9 +1898,9 @@ void main() {
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.
   testWidgets('Menu builder rebuilds when isOpen state changes', (WidgetTester tester) async {
-    var isOpen = false;
-    var openCount = 0;
-    var closeCount = 0;
+    bool isOpen = false;
+    int openCount = 0;
+    int closeCount = 0;
 
     await tester.pumpWidget(
       App(
@@ -1953,8 +1953,8 @@ void main() {
   testWidgets('Content is shown in the root overlay when useRootOverlay is true', (
     WidgetTester tester,
   ) async {
-    final controller = MenuController();
-    final overlayKey = UniqueKey();
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
     final Finder a = find.text(Tag.a.text);
     final Finder aa = find.text(Tag.a.a.text);
 
@@ -2023,8 +2023,8 @@ void main() {
   testWidgets('Content is shown in the nearest ancestor overlay when useRootOverlay is false', (
     WidgetTester tester,
   ) async {
-    final controller = MenuController();
-    final overlayKey = UniqueKey();
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
     final Finder a = find.text(Tag.a.text);
     final Finder aa = find.text(Tag.a.a.text);
 
@@ -2092,7 +2092,7 @@ void main() {
   testWidgets('Parent updates are not triggered during builds', (WidgetTester tester) async {
     // This test ensures that _MenuAnchor._childChangedOpenState does not
     // rebuild a child's parent if that parent is currently building.
-    final mediaQueryData = MediaQueryData.fromView(tester.view);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
     Widget build(Size size) {
       return App(
@@ -2114,7 +2114,7 @@ void main() {
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    const smallSize = Size(200, 200);
+    const Size smallSize = Size(200, 200);
     await changeSurfaceSize(tester, smallSize);
 
     await tester.pumpWidget(build(smallSize));

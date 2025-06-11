@@ -20,7 +20,7 @@ void main() {
   group('logs', () {
     late Platform platform;
     late FakeDeviceManager deviceManager;
-    const deviceId = 'abc123';
+    const String deviceId = 'abc123';
 
     setUp(() {
       Cache.disableLocking();
@@ -33,7 +33,7 @@ void main() {
     });
 
     testUsingContext('fail with a bad device id', () async {
-      final command = LogsCommand(
+      final LogsCommand command = LogsCommand(
         sigterm: FakeProcessSignal(),
         sigint: FakeProcessSignal(),
       );
@@ -48,11 +48,11 @@ void main() {
     testUsingContext(
       'does not try to complete exitCompleter multiple times',
       () async {
-        final fakeDevice = FakeDevice('phone', deviceId);
+        final FakeDevice fakeDevice = FakeDevice('phone', deviceId);
         deviceManager.attachedDevices.add(fakeDevice);
-        final termSignal = FakeProcessSignal();
-        final intSignal = FakeProcessSignal();
-        final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+        final FakeProcessSignal termSignal = FakeProcessSignal();
+        final FakeProcessSignal intSignal = FakeProcessSignal();
+        final LogsCommand command = LogsCommand(sigterm: termSignal, sigint: intSignal);
         final Future<void> commandFuture = createTestCommandRunner(
           command,
         ).run(<String>['-d', deviceId, 'logs']);

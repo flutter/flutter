@@ -9,19 +9,19 @@ import 'common.dart';
 void main() {
   group('TaskResult fromJson', () {
     test('succeeded', () {
-      final expectedJson = <String, dynamic>{
+      final Map<String, dynamic> expectedJson = <String, dynamic>{
         'success': true,
         'data': <String, dynamic>{'i': 5, 'j': 10, 'not_a_metric': 'something'},
         'benchmarkScoreKeys': <String>['i', 'j'],
         'detailFiles': <String>[],
       };
-      final result = TaskResult.fromJson(expectedJson);
+      final TaskResult result = TaskResult.fromJson(expectedJson);
       expect(result.toJson(), expectedJson);
     });
 
     test('succeeded with empty data', () {
-      final result = TaskResult.fromJson(<String, dynamic>{'success': true});
-      final expectedJson = <String, dynamic>{
+      final TaskResult result = TaskResult.fromJson(<String, dynamic>{'success': true});
+      final Map<String, dynamic> expectedJson = <String, dynamic>{
         'success': true,
         'data': null,
         'benchmarkScoreKeys': <String>[],
@@ -31,11 +31,11 @@ void main() {
     });
 
     test('failed', () {
-      final expectedJson = <String, dynamic>{
+      final Map<String, dynamic> expectedJson = <String, dynamic>{
         'success': false,
         'reason': 'failure message',
       };
-      final result = TaskResult.fromJson(expectedJson);
+      final TaskResult result = TaskResult.fromJson(expectedJson);
       expect(result.toJson(), expectedJson);
     });
   });

@@ -363,7 +363,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (exception is FlutterError) {
           final String summary = exception.diagnostics.first.toDescription();
           if (summary == 'setState() or markNeedsBuild() called during build.') {
-            final information = <DiagnosticsNode>[
+            final List<DiagnosticsNode> information = <DiagnosticsNode>[
               ErrorSummary('The showSnackBar() method cannot be called during build.'),
               ErrorDescription(
                 'The showSnackBar() method was called during build, which is '
@@ -973,7 +973,7 @@ class _BodyBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final bodyConstraints = constraints as _BodyBoxConstraints;
+        final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
         final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom =
@@ -1035,7 +1035,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    final looseConstraints = BoxConstraints.loose(size);
+    final BoxConstraints looseConstraints = BoxConstraints.loose(size);
 
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
@@ -1044,9 +1044,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
     final double bottom = size.height;
-    var contentTop = 0.0;
-    var bottomWidgetsHeight = 0.0;
-    var appBarHeight = 0.0;
+    double contentTop = 0.0;
+    double bottomWidgetsHeight = 0.0;
+    double appBarHeight = 0.0;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
       appBarHeight = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
@@ -1064,7 +1064,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
-      final footerConstraints = BoxConstraints(
+      final BoxConstraints footerConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, bottom - bottomWidgetsHeight - contentTop),
       );
@@ -1135,7 +1135,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
     if (hasChild(_ScaffoldSlot.bodyScrim)) {
-      final bottomSheetScrimConstraints = BoxConstraints(
+      final BoxConstraints bottomSheetScrimConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: contentBottom,
       );
@@ -1150,7 +1150,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      final bottomSheetConstraints = BoxConstraints(
+      final BoxConstraints bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, contentBottom - contentTop),
       );
@@ -1167,7 +1167,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       // To account for the FAB position being changed, we'll animate between
       // the old and new positions.
-      final currentGeometry = ScaffoldPrelayoutGeometry(
+      final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
 
@@ -1397,8 +1397,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // Get the right scale and rotation animations to use for this widget.
       _updateAnimations();
     }
-    final oldChildIsNull = oldWidget.child == null;
-    final newChildIsNull = widget.child == null;
+    final bool oldChildIsNull = oldWidget.child == null;
+    final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
     }
@@ -2385,11 +2385,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // otherwise may cause duplicate GlobalKey assertion if the sheet sub-tree contains
       // GlobalKey widgets.
       if (_dismissedBottomSheets.isNotEmpty) {
-        final sheets = List<_StandardBottomSheet>.of(
+        final List<_StandardBottomSheet> sheets = List<_StandardBottomSheet>.of(
           _dismissedBottomSheets,
           growable: false,
         );
-        for (final sheet in sheets) {
+        for (final _StandardBottomSheet sheet in sheets) {
           sheet.animationController.reset();
         }
         assert(_dismissedBottomSheets.isEmpty);
@@ -2475,13 +2475,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       return true;
     }());
 
-    final completer = Completer<void>();
-    final bottomSheetKey =
+    final Completer<void> completer = Completer<void>();
+    final GlobalKey<_StandardBottomSheetState> bottomSheetKey =
         GlobalKey<_StandardBottomSheetState>();
     late _StandardBottomSheet bottomSheet;
 
-    var removedEntry = false;
-    var doingDispose = false;
+    bool removedEntry = false;
+    bool doingDispose = false;
 
     void removePersistentSheetHistoryEntryIfNeeded() {
       assert(isPersistent);
@@ -2719,7 +2719,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // Moves the Floating Action Button to the new Floating Action Button Location.
   void _moveFloatingActionButton(final FloatingActionButtonLocation newLocation) {
     FloatingActionButtonLocation? previousLocation = _floatingActionButtonLocation;
-    var restartAnimationFrom = 0.0;
+    double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (_floatingActionButtonMoveController.isAnimating) {
       previousLocation = _TransitionSnapshotFabLocation(
@@ -2974,7 +2974,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
-    final children = <LayoutId>[];
+    final List<LayoutId> children = <LayoutId>[];
     _addIfNonNull(
       children,
       widget.body == null
@@ -3026,7 +3026,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
-    var isSnackBarFloating = false;
+    bool isSnackBarFloating = false;
     double? snackBarWidth;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
@@ -3070,7 +3070,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
-    var extendBodyBehindMaterialBanner = false;
+    bool extendBodyBehindMaterialBanner = false;
     // MaterialBanner set by ScaffoldMessenger
     if (_messengerMaterialBanner != null) {
       final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);

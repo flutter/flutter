@@ -166,7 +166,7 @@ bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (var i = 0; i < a.length; i++) {
+  for (int i = 0; i < a.length; i++) {
     if (!_deepEquals(a[i], b[i])) {
       return false;
     }

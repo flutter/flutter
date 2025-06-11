@@ -56,8 +56,8 @@ void main() {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     testWithoutContext('test directory copy', () async {
-      final sourceMemoryFs = MemoryFileSystem.test();
-      const sourcePath = '/some/origin';
+      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem.test();
+      const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs
           .directory(sourcePath)
           .create(recursive: true);
@@ -68,8 +68,8 @@ void main() {
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
-      final targetMemoryFs = MemoryFileSystem.test();
-      const targetPath = '/some/non-existent/target';
+      final MemoryFileSystem targetMemoryFs = MemoryFileSystem.test();
+      const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
 
       copyDirectory(sourceDirectory, targetDirectory);
@@ -87,13 +87,13 @@ void main() {
     });
 
     testWithoutContext('test directory copy with followLinks: true', () async {
-      final signals = Signals.test();
-      final fileSystem = LocalFileSystem.test(signals: signals);
+      final Signals signals = Signals.test();
+      final LocalFileSystem fileSystem = LocalFileSystem.test(signals: signals);
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_copy_directory.',
       );
       try {
-        final sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
+        final String sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)
           ..createSync(recursive: true);
         final File sourceFile1 = sourceDirectory.childFile('some_file.txt')
@@ -104,11 +104,11 @@ void main() {
           .childDirectory('dir1')
           .childDirectory('dir2')..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
-        final subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
+        final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
         sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        final targetPath =
+        final String targetPath =
             io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
@@ -164,13 +164,13 @@ void main() {
     });
 
     testWithoutContext('test directory copy with followLinks: false', () async {
-      final signals = Signals.test();
-      final fileSystem = LocalFileSystem.test(signals: signals);
+      final Signals signals = Signals.test();
+      final LocalFileSystem fileSystem = LocalFileSystem.test(signals: signals);
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_copy_directory.',
       );
       try {
-        final sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
+        final String sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)
           ..createSync(recursive: true);
         final File sourceFile1 = sourceDirectory.childFile('some_file.txt')
@@ -181,11 +181,11 @@ void main() {
           .childDirectory('dir1')
           .childDirectory('dir2')..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
-        final subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
+        final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
         sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        final targetPath =
+        final String targetPath =
             io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
@@ -249,7 +249,7 @@ void main() {
     });
 
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
-      final fileSystem = MemoryFileSystem.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
       fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
@@ -279,7 +279,7 @@ void main() {
     });
 
     testWithoutContext('Skip directories if shouldCopyDirectory returns false', () {
-      final fileSystem = MemoryFileSystem.test();
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
       fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
@@ -308,8 +308,8 @@ void main() {
 
   group('escapePath', () {
     testWithoutContext('on Windows', () {
-      final fileSystem = MemoryFileSystem.test();
-      final fsUtils = FileSystemUtils(
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
       );
@@ -322,8 +322,8 @@ void main() {
     });
 
     testWithoutContext('on Linux', () {
-      final fileSystem = MemoryFileSystem.test();
-      final fsUtils = FileSystemUtils(
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
         platform: FakePlatform(),
       );
@@ -343,22 +343,22 @@ void main() {
     });
 
     testWithoutContext('runs shutdown hooks', () async {
-      final signals = Signals.test();
-      final localFileSystem = LocalFileSystem.test(signals: signals);
+      final Signals signals = Signals.test();
+      final LocalFileSystem localFileSystem = LocalFileSystem.test(signals: signals);
       final Directory temp = localFileSystem.systemTempDirectory;
 
       expect(temp.existsSync(), isTrue);
       expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
-      final logger = BufferLogger.test();
+      final BufferLogger logger = BufferLogger.test();
       await localFileSystem.shutdownHooks.runShutdownHooks(logger);
       expect(temp.existsSync(), isFalse);
       expect(logger.traceText, contains('Running 1 shutdown hook'));
     });
 
     testWithoutContext('deletes system temp entry on a fatal signal', () async {
-      final completer = Completer<void>();
-      final signals = Signals.test();
-      final localFileSystem = LocalFileSystem.test(
+      final Completer<void> completer = Completer<void>();
+      final Signals signals = Signals.test();
+      final LocalFileSystem localFileSystem = LocalFileSystem.test(
         signals: signals,
         fatalSignals: <ProcessSignal>[signalUnderTest],
       );
@@ -377,8 +377,8 @@ void main() {
     });
 
     testWithoutContext('throwToolExit when temp not found', () async {
-      final signals = Signals.test();
-      final localFileSystem = LocalFileSystemFake.test(signals: signals);
+      final Signals signals = Signals.test();
+      final LocalFileSystemFake localFileSystem = LocalFileSystemFake.test(signals: signals);
 
       try {
         localFileSystem.systemTempDirectory;

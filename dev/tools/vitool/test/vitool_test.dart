@@ -192,7 +192,7 @@ void main() {
 
   group('create PathAnimation', () {
     test('single path', () {
-      const frameData = <FrameData>[
+      const List<FrameData> frameData = <FrameData>[
         FrameData(Point<double>(10.0, 10.0), <SvgPath>[
           SvgPath('path_1', <SvgPathCommand>[
             SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
@@ -219,7 +219,7 @@ void main() {
     });
 
     test('multiple paths', () {
-      const frameData = <FrameData>[
+      const List<FrameData> frameData = <FrameData>[
         FrameData(Point<double>(10.0, 10.0), <SvgPath>[
           SvgPath('path_1', <SvgPathCommand>[
             SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
@@ -259,7 +259,7 @@ void main() {
     });
 
     test('multiple frames', () {
-      const frameData = <FrameData>[
+      const List<FrameData> frameData = <FrameData>[
         FrameData(Point<double>(10.0, 10.0), <SvgPath>[
           SvgPath('path_1', <SvgPathCommand>[
             SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
@@ -289,7 +289,7 @@ void main() {
 
   group('create Animation', () {
     test('multiple paths', () {
-      const frameData = <FrameData>[
+      const List<FrameData> frameData = <FrameData>[
         FrameData(Point<double>(10.0, 10.0), <SvgPath>[
           SvgPath('path_1', <SvgPathCommand>[
             SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
@@ -299,7 +299,7 @@ void main() {
           ]),
         ]),
       ];
-      final animation = Animation.fromFrameData(frameData);
+      final Animation animation = Animation.fromFrameData(frameData);
       expect(
         animation.paths[0],
         const PathAnimationMatcher(
@@ -334,7 +334,7 @@ void main() {
 
   group('toDart', () {
     test('_PathMoveTo', () {
-      const command = PathCommandAnimation('M', <List<Point<double>>>[
+      const PathCommandAnimation command = PathCommandAnimation('M', <List<Point<double>>>[
         <Point<double>>[Point<double>(1.0, 2.0), Point<double>(3.0, 4.0)],
       ]);
 
@@ -350,7 +350,7 @@ void main() {
     });
 
     test('_PathLineTo', () {
-      const command = PathCommandAnimation('L', <List<Point<double>>>[
+      const PathCommandAnimation command = PathCommandAnimation('L', <List<Point<double>>>[
         <Point<double>>[Point<double>(1.0, 2.0), Point<double>(3.0, 4.0)],
       ]);
 
@@ -366,7 +366,7 @@ void main() {
     });
 
     test('_PathCubicTo', () {
-      const command = PathCommandAnimation('C', <List<Point<double>>>[
+      const PathCommandAnimation command = PathCommandAnimation('C', <List<Point<double>>>[
         <Point<double>>[Point<double>(16.0, 24.0), Point<double>(16.0, 10.0)],
         <Point<double>>[Point<double>(16.0, 25.0), Point<double>(16.0, 11.0)],
         <Point<double>>[Point<double>(40.0, 40.0), Point<double>(40.0, 40.0)],
@@ -392,7 +392,7 @@ void main() {
     });
 
     test('_PathClose', () {
-      const command = PathCommandAnimation('Z', <List<Point<double>>>[]);
+      const PathCommandAnimation command = PathCommandAnimation('Z', <List<Point<double>>>[]);
 
       expect(
         command.toDart(),
@@ -402,7 +402,7 @@ void main() {
     });
 
     test('Unsupported path command', () {
-      const command = PathCommandAnimation('h', <List<Point<double>>>[]);
+      const PathCommandAnimation command = PathCommandAnimation('h', <List<Point<double>>>[]);
 
       expect(() {
         command.toDart();
@@ -410,7 +410,7 @@ void main() {
     });
 
     test('_PathFrames', () {
-      const pathAnimation = PathAnimation(
+      const PathAnimation pathAnimation = PathAnimation(
         <PathCommandAnimation>[
           PathCommandAnimation('M', <List<Point<double>>>[
             <Point<double>>[Point<double>(0.0, 0.0), Point<double>(10.0, 10.0)],
@@ -448,7 +448,7 @@ void main() {
     });
 
     test('Animation', () {
-      const animation = Animation(Point<double>(48.0, 48.0), <PathAnimation>[
+      const Animation animation = Animation(Point<double>(48.0, 48.0), <PathAnimation>[
         PathAnimation(
           <PathCommandAnimation>[
             PathCommandAnimation('M', <List<Point<double>>>[
@@ -537,7 +537,7 @@ class PathMatcher extends Matcher {
       return false;
     }
 
-    final other = item as SvgPath;
+    final SvgPath other = item as SvgPath;
     if (other.id != actual.id || other.opacity != actual.opacity) {
       return false;
     }
@@ -546,7 +546,7 @@ class PathMatcher extends Matcher {
       return false;
     }
 
-    for (var i = 0; i < other.commands.length; i += 1) {
+    for (int i = 0; i < other.commands.length; i += 1) {
       if (!commandsMatch(actual.commands[i], other.commands[i])) {
         return false;
       }
@@ -559,7 +559,7 @@ class PathMatcher extends Matcher {
       return false;
     }
 
-    for (var i = 0; i < other.points.length; i += 1) {
+    for (int i = 0; i < other.points.length; i += 1) {
       if ((other.points[i].x - actual.points[i].x).abs() > margin) {
         return false;
       }
@@ -589,7 +589,7 @@ class PathAnimationMatcher extends Matcher {
       return false;
     }
 
-    final other = item as PathAnimation;
+    final PathAnimation other = item as PathAnimation;
 
     if (!const ListEquality<double>().equals(other.opacities, expected.opacities)) {
       return false;
@@ -599,7 +599,7 @@ class PathAnimationMatcher extends Matcher {
       return false;
     }
 
-    for (var i = 0; i < other.commands.length; i += 1) {
+    for (int i = 0; i < other.commands.length; i += 1) {
       if (!commandsMatch(expected.commands[i], other.commands[i])) {
         return false;
       }
@@ -612,7 +612,7 @@ class PathAnimationMatcher extends Matcher {
       return false;
     }
 
-    for (var i = 0; i < other.points.length; i += 1) {
+    for (int i = 0; i < other.points.length; i += 1) {
       if (!const ListEquality<Point<double>>().equals(other.points[i], expected.points[i])) {
         return false;
       }

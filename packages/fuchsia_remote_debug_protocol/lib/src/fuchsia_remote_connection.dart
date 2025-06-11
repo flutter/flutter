@@ -134,7 +134,7 @@ class FuchsiaRemoteConnection {
   static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
     SshCommandRunner commandRunner,
   ) async {
-    final connection = FuchsiaRemoteConnection._(
+    final FuchsiaRemoteConnection connection = FuchsiaRemoteConnection._(
       isIpV6Address(commandRunner.address),
       commandRunner,
     );
@@ -203,7 +203,7 @@ class FuchsiaRemoteConnection {
         r'No address supplied, and $FUCHSIA_DEVICE_URL not found.',
       );
     }
-    const interfaceDelimiter = '%';
+    const String interfaceDelimiter = '%';
     if (address.contains(interfaceDelimiter)) {
       final List<String> addressAndInterface = address.split(interfaceDelimiter);
       address = addressAndInterface[0];
@@ -254,7 +254,7 @@ class FuchsiaRemoteConnection {
     Duration timeout = _kIsolateFindTimeout,
     Duration vmConnectionTimeout = _kDartVmConnectionTimeout,
   ]) async {
-    final completer = Completer<List<IsolateRef>>();
+    final Completer<List<IsolateRef>> completer = Completer<List<IsolateRef>>();
     _onDartVmEvent.listen(
       (DartVmEvent event) async {
         if (event.eventType == DartVmEventType.started) {
@@ -308,7 +308,7 @@ class FuchsiaRemoteConnection {
     }
     // Accumulate a list of eventual IsolateRef lists so that they can be loaded
     // simultaneously via Future.wait.
-    final isolates = <Future<List<IsolateRef>>>[];
+    final List<Future<List<IsolateRef>>> isolates = <Future<List<IsolateRef>>>[];
     for (final PortForwarder fp in _dartVmPortMap.values) {
       final DartVm? vmService = await _getDartVm(_getDartVmUri(fp), timeout: vmConnectionTimeout);
       if (vmService == null) {
@@ -319,7 +319,7 @@ class FuchsiaRemoteConnection {
     final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(
       isolates,
     ).timeout(timeout).then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
-      final mutableListOfLists = List<List<IsolateRef>>.from(listOfLists)
+      final List<List<IsolateRef>> mutableListOfLists = List<List<IsolateRef>>.from(listOfLists)
         ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
       // Folds the list of lists into one flat list.
       return mutableListOfLists.fold<List<IsolateRef>>(<IsolateRef>[], (
@@ -378,7 +378,7 @@ class FuchsiaRemoteConnection {
     Future<E> Function(DartVm vmService) vmFunction, [
     bool queueEvents = true,
   ]) async {
-    final result = <E>[];
+    final List<E> result = <E>[];
 
     // Helper function loop.
     Future<void> shutDownPortForwarder(PortForwarder pf) async {
@@ -414,7 +414,7 @@ class FuchsiaRemoteConnection {
     } else {
       addr = isIpV6Address(pf.openPortAddress!) ? '[${pf.openPortAddress}]' : pf.openPortAddress;
     }
-    final uri = Uri.http('$addr:${pf.port}', '/');
+    final Uri uri = Uri.http('$addr:${pf.port}', '/');
     return uri;
   }
 
@@ -448,7 +448,7 @@ class FuchsiaRemoteConnection {
   Future<void> _pollVms() async {
     await _checkPorts();
     final List<int> servicePorts = await getDeviceServicePorts();
-    for (final servicePort in servicePorts) {
+    for (final int servicePort in servicePorts) {
       if (!_stalePorts.contains(servicePort) && !_dartVmPortMap.containsKey(servicePort)) {
         _dartVmPortMap[servicePort] = await fuchsiaPortForwardingFunction(
           _sshCommandRunner.address,
@@ -496,7 +496,7 @@ class FuchsiaRemoteConnection {
       }),
     );
 
-    for (final pf in forwardedVmServicePorts) {
+    for (final PortForwarder? pf in forwardedVmServicePorts) {
       // TODO(awdavies): Handle duplicates.
       _dartVmPortMap[pf!.remotePort] = pf;
     }
@@ -510,23 +510,23 @@ class FuchsiaRemoteConnection {
   /// Helper for getDeviceServicePorts() to extract the vm_service_port from
   /// json response.
   List<int> getVmServicePortFromInspectSnapshot(dynamic inspectSnapshot) {
-    final snapshot = List<Map<String, dynamic>>.from(
+    final List<Map<String, dynamic>> snapshot = List<Map<String, dynamic>>.from(
       inspectSnapshot as List<dynamic>,
     );
-    final ports = <int>[];
+    final List<int> ports = <int>[];
 
-    for (final item in snapshot) {
+    for (final Map<String, dynamic> item in snapshot) {
       if (!item.containsKey('payload') || item['payload'] == null) {
         continue;
       }
-      final payload = Map<String, dynamic>.from(
+      final Map<String, dynamic> payload = Map<String, dynamic>.from(
         item['payload'] as Map<String, dynamic>,
       );
 
       if (!payload.containsKey('root') || payload['root'] == null) {
         continue;
       }
-      final root = Map<String, dynamic>.from(
+      final Map<String, dynamic> root = Map<String, dynamic>.from(
         payload['root'] as Map<String, dynamic>,
       );
 
@@ -636,10 +636,10 @@ class _SshPortForwarder implements PortForwarder {
     // loopback (::1). Therefore, while the IPv4 loopback can be used for
     // forwarding to the destination IPv6 interface, when connecting to the
     // websocket, the IPV6 loopback should be used.
-    final formattedForwardingUrl = '${localSocket.port}:$_ipv4Loopback:$remotePort';
+    final String formattedForwardingUrl = '${localSocket.port}:$_ipv4Loopback:$remotePort';
     final String targetAddress = isIpV6 && interface!.isNotEmpty ? '$address%$interface' : address;
-    const dummyRemoteCommand = 'true';
-    final command = <String>[
+    const String dummyRemoteCommand = 'true';
+    final List<String> command = <String>[
       'ssh',
       if (isIpV6) '-6',
       if (sshConfigPath != null) ...<String>['-F', sshConfigPath],
@@ -662,7 +662,7 @@ class _SshPortForwarder implements PortForwarder {
     if (processResult.exitCode != 0) {
       throw StateError('Unable to start port forwarding');
     }
-    final result = _SshPortForwarder._(
+    final _SshPortForwarder result = _SshPortForwarder._(
       address,
       remotePort,
       localSocket,
@@ -683,11 +683,11 @@ class _SshPortForwarder implements PortForwarder {
   Future<void> stop() async {
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
-    final formattedForwardingUrl = '${_localSocket.port}:$_ipv4Loopback:$_remotePort';
+    final String formattedForwardingUrl = '${_localSocket.port}:$_ipv4Loopback:$_remotePort';
     final String targetAddress =
         _ipV6 && _interface!.isNotEmpty ? '$_remoteAddress%$_interface' : _remoteAddress;
     final String? sshConfigPath = _sshConfigPath;
-    final command = <String>[
+    final List<String> command = <String>[
       'ssh',
       if (sshConfigPath != null) ...<String>['-F', sshConfigPath],
       '-O',

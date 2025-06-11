@@ -378,7 +378,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       _buttonHeldDown = false;
       _animate();
     }
-    final renderObject = context.findRenderObject()! as RenderBox;
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
     if (renderObject.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
       _handleTap();
@@ -396,7 +396,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapMove(TapMoveDetails event) {
-    final renderObject = context.findRenderObject()! as RenderBox;
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
     final bool buttonShouldHeldDown = renderObject.paintBounds
         .inflate(CupertinoButton.tapMoveSlop())
@@ -501,7 +501,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
-    final states = <WidgetState>{
+    final Set<WidgetState> states = <WidgetState>{
       if (!enabled) WidgetState.disabled,
       if (_tapInProgress) WidgetState.pressed,
       if (isFocused) WidgetState.focused,
@@ -510,7 +510,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
 
-    final shapeDecoration = ShapeDecoration(
+    final ShapeDecoration shapeDecoration = ShapeDecoration(
       shape: RoundedSuperellipseBorder(
         side:
             enabled && isFocused

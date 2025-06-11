@@ -89,7 +89,7 @@ class IntelliJPlugins {
   }
 
   ArchiveFile? _findPluginXml(String packageName) {
-    final mainJarFileList = <File>[];
+    final List<File> mainJarFileList = <File>[];
     if (packageName.endsWith('.jar')) {
       // package exists (checked in _hasPackage)
       mainJarFileList.add(_fileSystem.file(_fileSystem.path.join(pluginsPath, packageName)));
@@ -129,7 +129,7 @@ class IntelliJPlugins {
       mainJarFileList.addAll(pluginJarFiles);
     }
 
-    for (final file in mainJarFileList) {
+    for (final File file in mainJarFileList) {
       final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
       final ArchiveFile? archiveFile = archive.findFile('META-INF/plugin.xml');
       if (archiveFile != null) {
@@ -146,7 +146,7 @@ class IntelliJPlugins {
         return null;
       }
       final String content = utf8.decode(archiveFile.content as List<int>);
-      const versionStartTag = '<version>';
+      const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);

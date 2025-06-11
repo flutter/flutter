@@ -779,7 +779,7 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    const fontSizeToScale = 14.0;
+    const double fontSizeToScale = 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
     final double paddingScaleFactor = _scalePadding(effectiveTextScale);
@@ -791,9 +791,9 @@ class AlertDialog extends StatelessWidget {
     Widget? actionsWidget;
 
     if (icon != null) {
-      final belowIsTitle = title != null;
+      final bool belowIsTitle = title != null;
       final bool belowIsContent = !belowIsTitle && content != null;
-      final defaultIconPadding = EdgeInsets.only(
+      final EdgeInsets defaultIconPadding = EdgeInsets.only(
         left: 24.0,
         top: 24.0,
         right: 24.0,
@@ -821,7 +821,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (title != null) {
-      final defaultTitlePadding = EdgeInsets.only(
+      final EdgeInsets defaultTitlePadding = EdgeInsets.only(
         left: 24.0,
         top: icon == null ? 24.0 : 0.0,
         right: 24.0,
@@ -854,7 +854,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final defaultContentPadding = EdgeInsets.only(
+      final EdgeInsets defaultContentPadding = EdgeInsets.only(
         left: 24.0,
         top: theme.useMaterial3 ? 16.0 : 20.0,
         right: 24.0,

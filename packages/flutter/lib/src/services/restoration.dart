@@ -687,7 +687,7 @@ class RestorationBucket {
   P? remove<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
     final bool needsUpdate = _rawValues.containsKey(restorationId);
-    final result = _rawValues.remove(restorationId) as P?;
+    final P? result = _rawValues.remove(restorationId) as P?;
     if (_rawValues.isEmpty) {
       _rawData.remove(_valuesMapKey);
     }
@@ -758,7 +758,7 @@ class RestorationBucket {
 
     // Case 1+2: Adopt and return an empty bucket.
     if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
-      final child = RestorationBucket.empty(
+      final RestorationBucket child = RestorationBucket.empty(
         debugOwner: debugOwner,
         restorationId: restorationId,
       );
@@ -768,7 +768,7 @@ class RestorationBucket {
 
     // Case 3: Return bucket wrapping the existing data.
     assert(_rawChildren[restorationId] != null);
-    final child = RestorationBucket.child(
+    final RestorationBucket child = RestorationBucket.child(
       restorationId: restorationId,
       parent: this,
       debugOwner: debugOwner,
@@ -857,7 +857,7 @@ class RestorationBucket {
       if (_childrenToAdd.isEmpty) {
         return true;
       }
-      final error = <DiagnosticsNode>[
+      final List<DiagnosticsNode> error = <DiagnosticsNode>[
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
         ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
@@ -1004,7 +1004,7 @@ class RestorationBucket {
 /// Should only be called from within asserts. Always returns false outside
 /// of debug builds.
 bool debugIsSerializableForRestoration(Object? object) {
-  var result = false;
+  bool result = false;
 
   assert(() {
     try {

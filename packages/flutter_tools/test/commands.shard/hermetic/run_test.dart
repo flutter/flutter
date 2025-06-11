@@ -57,7 +57,7 @@ void main() {
     testUsingContext(
       'fails when target not found',
       () async {
-        final command = RunCommand();
+        final RunCommand command = RunCommand();
         expect(
           () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
           throwsA(
@@ -83,7 +83,7 @@ void main() {
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
 
-        final command = RunCommand();
+        final RunCommand command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
             'run',
@@ -123,12 +123,12 @@ void main() {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
 
-        final command = RunCommand();
+        final RunCommand command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(),
         );
-        final bufferLogger = globals.logger as BufferLogger;
+        final BufferLogger bufferLogger = globals.logger as BufferLogger;
         expect(
           bufferLogger.statusText,
           containsIgnoringWhitespace('Changing current working directory to:'),
@@ -147,7 +147,7 @@ void main() {
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
         fileSystem.file('lib/main.dart').createSync(recursive: true);
 
-        final command = RunCommand();
+        final RunCommand command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(message: 'No pubspec.yaml file found'),
@@ -191,7 +191,7 @@ void main() {
       testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           testDeviceManager.devices = <Device>[];
 
           await expectLater(
@@ -215,8 +215,8 @@ void main() {
       testUsingContext(
         'exits and lists available devices when specified device not found',
         () async {
-          final command = RunCommand();
-          final device = FakeDevice(isLocalEmulator: true);
+          final RunCommand command = RunCommand();
+          final FakeDevice device = FakeDevice(isLocalEmulator: true);
           testDeviceManager
             ..devices = <Device>[device]
             ..specifiedDeviceId = 'invalid-device-id';
@@ -248,11 +248,11 @@ void main() {
       testUsingContext(
         'fails when targeted device is not Android with --device-user',
         () async {
-          final device = FakeDevice(isLocalEmulator: true);
+          final FakeDevice device = FakeDevice(isLocalEmulator: true);
 
           testDeviceManager.devices = <Device>[device];
 
-          final command = TestRunCommandThatOnlyValidates();
+          final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
           await expectLater(
             createTestCommandRunner(
               command,
@@ -275,14 +275,14 @@ void main() {
       testUsingContext(
         'succeeds when targeted device is an Android device with --device-user',
         () async {
-          final device = FakeDevice(
+          final FakeDevice device = FakeDevice(
             isLocalEmulator: true,
             platformType: PlatformType.android,
           );
 
           testDeviceManager.devices = <Device>[device];
 
-          final command = TestRunCommandThatOnlyValidates();
+          final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--device-user', '10']);
@@ -300,8 +300,8 @@ void main() {
       testUsingContext(
         'shows unsupported devices when no supported devices are found',
         () async {
-          final command = RunCommand();
-          final mockDevice = FakeDevice(
+          final RunCommand command = RunCommand();
+          final FakeDevice mockDevice = FakeDevice(
             targetPlatform: TargetPlatform.android_arm,
             isLocalEmulator: true,
             sdkNameAndVersion: 'api-14',
@@ -344,7 +344,7 @@ void main() {
       testUsingContext(
         'prints warning when --flavor is used with an unsupported target platform',
         () async {
-          const runCommand = <String>[
+          const List<String> runCommand = <String>[
             'run',
             '--no-pub',
             '--no-hot',
@@ -354,8 +354,8 @@ void main() {
           ];
           // Useful for test readability.
           // ignore: avoid_redundant_argument_values
-          final deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
-          final deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
+          final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
+          final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
           testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
 
           await createTestCommandRunner(TestRunCommandThatOnlyValidates()).run(runCommand);
@@ -381,8 +381,8 @@ void main() {
       testUsingContext(
         'forwards --uninstall-only to DebuggingOptions',
         () async {
-          final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+          final RunCommand command = RunCommand();
+          final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
             ..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -415,8 +415,8 @@ void main() {
       testUsingContext(
         'passes device target platform to analytics',
         () async {
-          final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+          final RunCommand command = RunCommand();
+          final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
             ..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -473,8 +473,8 @@ void main() {
               .childDirectory('ios')
               .childFile('AppDelegate.swift')
               .createSync(recursive: true);
-          final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+          final RunCommand command = RunCommand();
+          final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
             ..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -520,8 +520,8 @@ void main() {
         testUsingContext(
           'can pass --device-user',
           () async {
-            final command = DaemonCapturingRunCommand();
-            final device = FakeDevice(platformType: PlatformType.android);
+            final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+            final FakeDevice device = FakeDevice(platformType: PlatformType.android);
             testDeviceManager.devices = <Device>[device];
 
             await expectLater(
@@ -552,8 +552,8 @@ void main() {
         testUsingContext(
           'can disable devtools with --no-devtools',
           () async {
-            final command = DaemonCapturingRunCommand();
-            final device = FakeDevice();
+            final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+            final FakeDevice device = FakeDevice();
             testDeviceManager.devices = <Device>[device];
 
             await expectLater(
@@ -723,13 +723,13 @@ void main() {
       testUsingContext(
         'with only non-iOS usb device',
         () async {
-          final devices = <Device>[
+          final List<Device> devices = <Device>[
             FakeDevice(
               targetPlatform: TargetPlatform.android_arm,
               platformType: PlatformType.android,
             ),
           ];
-          final command = TestRunCommandForUsageValues(
+          final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(
             devices: devices,
           );
           final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -779,8 +779,8 @@ void main() {
       testUsingContext(
         'with only iOS usb device',
         () async {
-          final devices = <Device>[FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2')];
-          final command = TestRunCommandForUsageValues(
+          final List<Device> devices = <Device>[FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2')];
+          final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(
             devices: devices,
           );
           final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -831,13 +831,13 @@ void main() {
       testUsingContext(
         'with only iOS wireless device',
         () async {
-          final devices = <Device>[
+          final List<Device> devices = <Device>[
             FakeIOSDevice(
               connectionInterface: DeviceConnectionInterface.wireless,
               sdkNameAndVersion: 'iOS 16.2',
             ),
           ];
-          final command = TestRunCommandForUsageValues(
+          final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(
             devices: devices,
           );
           final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -888,14 +888,14 @@ void main() {
       testUsingContext(
         'with both iOS usb and wireless devices',
         () async {
-          final devices = <Device>[
+          final List<Device> devices = <Device>[
             FakeIOSDevice(
               connectionInterface: DeviceConnectionInterface.wireless,
               sdkNameAndVersion: 'iOS 16.2',
             ),
             FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
           ];
-          final command = TestRunCommandForUsageValues(
+          final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(
             devices: devices,
           );
           final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -956,7 +956,7 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
+        final FakeDevice device = FakeDevice(
           isLocalEmulator: true,
           platformType: PlatformType.android,
         );
@@ -966,7 +966,7 @@ void main() {
       testUsingContext(
         'can accept simple, valid values',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -988,7 +988,7 @@ void main() {
       testUsingContext(
         'throws a ToolExit when no value is provided',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1013,7 +1013,7 @@ void main() {
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
 
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1041,7 +1041,7 @@ void main() {
       testUsingContext(
         'throws a ToolExit when using --wasm on a non-web platform',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(command).run(<String>['run', '--no-pub', '--wasm']),
             throwsToolExit(message: '--wasm is only supported on the web platform'),
@@ -1058,7 +1058,7 @@ void main() {
       testUsingContext(
         'throws a ToolExit when using the skwasm renderer without --wasm',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1077,7 +1077,7 @@ void main() {
       testUsingContext(
         'accepts headers with commas in them',
         () async {
-          final command = RunCommand();
+          final RunCommand command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1112,8 +1112,8 @@ void main() {
     testUsingContext(
       'Flutter run sets terminal singleCharMode to false on exit',
       () async {
-        final residentRunner = FakeResidentRunner();
-        final command = TestRunCommandWithFakeResidentRunner();
+        final FakeResidentRunner residentRunner = FakeResidentRunner();
+        final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
         command.fakeResidentRunner = residentRunner;
 
         await createTestCommandRunner(command).run(<String>['run', '--no-pub']);
@@ -1135,8 +1135,8 @@ void main() {
       'Flutter run catches StdinException while setting terminal singleCharMode to false',
       () async {
         fakeTerminal.hasStdin = false;
-        final residentRunner = FakeResidentRunner();
-        final command = TestRunCommandWithFakeResidentRunner();
+        final FakeResidentRunner residentRunner = FakeResidentRunner();
+        final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
         command.fakeResidentRunner = residentRunner;
 
         try {
@@ -1158,13 +1158,13 @@ void main() {
   testUsingContext(
     'Flutter run catches catches errors due to vm service disconnection by text and throws a tool exit',
     () async {
-      final residentRunner = FakeResidentRunner();
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
       residentRunner.rpcError = RPCError(
         'flutter._listViews',
         RPCErrorKind.kServiceDisappeared.code,
         '',
       );
-      final command = TestRunCommandWithFakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
       command.fakeResidentRunner = residentRunner;
 
       await expectToolExitLater(
@@ -1193,13 +1193,13 @@ void main() {
   testUsingContext(
     'Flutter run catches catches errors due to vm service disconnection by code and throws a tool exit',
     () async {
-      final residentRunner = FakeResidentRunner();
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
       residentRunner.rpcError = RPCError(
         'flutter._listViews',
         RPCErrorKind.kServiceDisappeared.code,
         '',
       );
-      final command = TestRunCommandWithFakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
       command.fakeResidentRunner = residentRunner;
 
       await expectToolExitLater(
@@ -1228,13 +1228,13 @@ void main() {
   testUsingContext(
     'Flutter run does not catch other RPC errors',
     () async {
-      final residentRunner = FakeResidentRunner();
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
       residentRunner.rpcError = RPCError(
         'flutter._listViews',
         RPCErrorKind.kInvalidParams.code,
         '',
       );
-      final command = TestRunCommandWithFakeResidentRunner();
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
       command.fakeResidentRunner = residentRunner;
 
       await expectLater(
@@ -1252,7 +1252,7 @@ void main() {
   testUsingContext(
     'Configures web connection options to use web sockets by default',
     () async {
-      final command = RunCommand();
+      final RunCommand command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
         throwsToolExit(),
@@ -1274,7 +1274,7 @@ void main() {
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final command = RunCommand();
+      final RunCommand command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>[
           'run',
@@ -1326,7 +1326,7 @@ void main() {
   testUsingContext(
     'usingCISystem can also be set by environment LUCI_CI',
     () async {
-      final command = RunCommand();
+      final RunCommand command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run']),
         throwsToolExit(),
@@ -1347,7 +1347,7 @@ void main() {
   testUsingContext(
     'wasm mode selects skwasm renderer by default',
     () async {
-      final command = RunCommand();
+      final RunCommand command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
         throwsToolExit(),
@@ -1368,7 +1368,7 @@ void main() {
   testUsingContext(
     'fails when "--web-launch-url" is not supported',
     () async {
-      final command = RunCommand();
+      final RunCommand command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(
           command,
@@ -1385,7 +1385,7 @@ void main() {
       final DebuggingOptions options = await command.createDebuggingOptions(true);
       expect(options.webLaunchUrl, 'http://flutter.dev');
 
-      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
       expect(pattern.hasMatch(options.webLaunchUrl!), true);
     },
     overrides: <Type, Generator>{
@@ -1401,7 +1401,7 @@ class TestDeviceManager extends DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
-    final discoverer = FakePollingDeviceDiscovery();
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }

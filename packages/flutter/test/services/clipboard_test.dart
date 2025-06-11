@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 
 void main() {
-  final mockClipboard = MockClipboard();
+  final MockClipboard mockClipboard = MockClipboard();
   TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
     SystemChannels.platform,
     mockClipboard.handleMethodCall,

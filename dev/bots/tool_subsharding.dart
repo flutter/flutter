@@ -38,9 +38,9 @@ class TestFileReporterResults {
       throw Exception('${metrics.path} does not exist');
     }
 
-    final testSpecs = <int, TestSpecs>{};
-    var hasFailedTests = true;
-    final errors = <String>[];
+    final Map<int, TestSpecs> testSpecs = <int, TestSpecs>{};
+    bool hasFailedTests = true;
+    final List<String> errors = <String>[];
 
     for (final String metric in metrics.readAsLinesSync()) {
       /// Using print within a test adds the printed content to the json file report
@@ -50,16 +50,16 @@ class TestFileReporterResults {
       /// first opening curly bracket.
       // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
       final String sanitizedMetric = metric.replaceAll(RegExp(r'$.*{'), '{');
-      final entry = json.decode(sanitizedMetric) as Map<String, Object?>;
+      final Map<String, Object?> entry = json.decode(sanitizedMetric) as Map<String, Object?>;
       if (entry.containsKey('suite')) {
-        final suite = entry['suite']! as Map<String, Object?>;
+        final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
         addTestSpec(suite, entry['time']! as int, testSpecs);
       } else if (isMetricDone(entry, testSpecs)) {
-        final group = entry['group']! as Map<String, Object?>;
-        final suiteID = group['suiteID']! as int;
+        final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
+        final int suiteID = group['suiteID']! as int;
         addMetricDone(suiteID, entry['time']! as int, testSpecs);
       } else if (entry.containsKey('error')) {
-        final stackTrace =
+        final String stackTrace =
             entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
         errors.add('${entry['error']}\n $stackTrace');
       } else if (entry.containsKey('success') && entry['success'] == true) {
@@ -89,7 +89,7 @@ class TestFileReporterResults {
 
   static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) {
     if (entry.containsKey('group') && entry['type']! as String == 'group') {
-      final group = entry['group']! as Map<String, Object?>;
+      final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
       return allTestSpecs.containsKey(group['suiteID']! as int);
     }
     return false;

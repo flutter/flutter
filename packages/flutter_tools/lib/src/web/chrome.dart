@@ -64,7 +64,7 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   }
   if (platform.isWindows) {
     /// The possible locations where the chrome executable can be located on windows.
-    final kWindowsPrefixes = <String>[
+    final List<String> kWindowsPrefixes = <String>[
       if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
       if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
@@ -88,7 +88,7 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
   }
   if (platform.isWindows) {
     /// The possible locations where the Edge executable can be located on windows.
-    final kWindowsPrefixes = <String>[
+    final List<String> kWindowsPrefixes = <String>[
       if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
       if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
@@ -199,7 +199,7 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
-    final args = <String>[
+    final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
@@ -278,8 +278,8 @@ class ChromiumLauncher {
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool reached the maximum retry count, in which case we throw ToolExit.
-    const kMaxRetries = 3;
-    var retry = 0;
+    const int kMaxRetries = 3;
+    int retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
 
@@ -289,9 +289,9 @@ class ChromiumLauncher {
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
-      var hitGlibcBug = false;
-      var shouldRetry = false;
-      final errors = <String>[];
+      bool hitGlibcBug = false;
+      bool shouldRetry = false;
+      final List<String> errors = <String>[];
       await process.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -504,10 +504,10 @@ class Chromium {
   // (We should just keep waiting forever, and print a warning when it's
   // taking too long.)
   Future<void> _validateChromeConnection() async {
-    const retryFor = Duration(seconds: 2);
-    const attempts = 5;
+    const Duration retryFor = Duration(seconds: 2);
+    const int attempts = 5;
 
-    for (var i = 1; i <= attempts; i++) {
+    for (int i = 1; i <= attempts; i++) {
       try {
         final List<ChromeTab> tabs = await chromeConnection.getTabs(retryFor: retryFor);
 

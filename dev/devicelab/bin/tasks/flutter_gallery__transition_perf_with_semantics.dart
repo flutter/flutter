@@ -17,7 +17,7 @@ Future<void> main() async {
     final bool withoutSemanticsDataMissing =
         withoutSemantics.benchmarkScoreKeys == null || withoutSemantics.benchmarkScoreKeys!.isEmpty;
     if (withSemanticsDataMissing || withoutSemanticsDataMissing) {
-      var message = 'Lack of data';
+      String message = 'Lack of data';
       if (withSemanticsDataMissing) {
         message += ' for test with semantics';
         if (withoutSemanticsDataMissing) {
@@ -29,10 +29,10 @@ Future<void> main() async {
       return TaskResult.failure(message);
     }
 
-    final benchmarkScoreKeys = <String>[];
-    final data = <String, dynamic>{};
+    final List<String> benchmarkScoreKeys = <String>[];
+    final Map<String, dynamic> data = <String, dynamic>{};
     for (final String key in withSemantics.benchmarkScoreKeys!) {
-      final deltaKey = 'delta_$key';
+      final String deltaKey = 'delta_$key';
       data[deltaKey] = (withSemantics.data![key] as num) - (withoutSemantics.data![key] as num);
       data['semantics_$key'] = withSemantics.data![key];
       data[key] = withoutSemantics.data![key];

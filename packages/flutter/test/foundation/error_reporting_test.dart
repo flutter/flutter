@@ -40,7 +40,7 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final console = <String?>[];
+  final List<String?> console = <String?>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
@@ -243,7 +243,7 @@ Future<void> main() async {
   });
 
   test('Stack traces are not truncated', () async {
-    const stackString = '''
+    const String stackString = '''
 #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)

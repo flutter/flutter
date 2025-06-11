@@ -214,7 +214,7 @@ class VisualStudio {
       return null;
     }
 
-    final arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : 'x64';
+    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : 'x64';
 
     return _fileSystem.path.joinAll(<String>[
       details.installationPath!,
@@ -237,7 +237,7 @@ class VisualStudio {
       return null;
     }
 
-    final arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : '64';
+    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : '64';
 
     return _fileSystem.path.joinAll(<String>[
       details.installationPath!,
@@ -258,7 +258,7 @@ class VisualStudio {
   /// not user-controllable, unlike the install location of Visual Studio
   /// itself.
   String get _vswherePath {
-    const programFilesEnv = 'PROGRAMFILES(X86)';
+    const String programFilesEnv = 'PROGRAMFILES(X86)';
     if (!_platform.environment.containsKey(programFilesEnv)) {
       throwToolExit('%$programFilesEnv% environment variable not found.');
     }
@@ -339,7 +339,7 @@ class VisualStudio {
     List<String>? additionalArguments,
     String? requiredWorkload,
   }) {
-    final requirementArguments =
+    final List<String> requirementArguments =
         validateRequirements
             ? <String>[
               if (requiredWorkload != null) ...<String>['-requires', requiredWorkload],
@@ -347,7 +347,7 @@ class VisualStudio {
             ]
             : <String>[];
     try {
-      final defaultArguments = <String>[
+      final List<String> defaultArguments = <String>[
         '-format',
         'json',
         '-products',
@@ -380,7 +380,7 @@ class VisualStudio {
   }
 
   String? _findMsvcVersion(List<Map<String, dynamic>> installations) {
-    final installationPath = installations[0]['installationPath'] as String?;
+    final String? installationPath = installations[0]['installationPath'] as String?;
     String? msvcVersion;
     if (installationPath != null) {
       final Directory installationDir = _fileSystem.directory(installationPath);
@@ -443,11 +443,11 @@ class VisualStudio {
     // First, attempt to find the latest version of Visual Studio that satisfies
     // both the minimum supported version and the required workloads.
     // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT.
-    final minimumVersionArguments = <String>[
+    final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
     ];
-    for (final checkForPrerelease in <bool>[false, true]) {
+    for (final bool checkForPrerelease in <bool>[false, true]) {
       for (final String requiredWorkload in _requiredWorkloads) {
         final VswhereDetails? result = _visualStudioDetails(
           validateRequirements: true,
@@ -481,7 +481,7 @@ class VisualStudio {
         _windows10SdkRegistryKey,
       ]);
       if (result.exitCode == 0) {
-        final pattern = RegExp(r'InstallationFolder\s+REG_SZ\s+(.+)');
+        final RegExp pattern = RegExp(r'InstallationFolder\s+REG_SZ\s+(.+)');
         final RegExpMatch? match = pattern.firstMatch(result.stdout);
         if (match != null) {
           return match.group(1)!.trim();
@@ -544,7 +544,7 @@ class VswhereDetails {
     Map<String, dynamic> details,
     String? msvcVersion,
   ) {
-    final catalog = details['catalog'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
     return VswhereDetails(
       meetsRequirements: meetsRequirements,

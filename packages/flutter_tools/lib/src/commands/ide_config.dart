@@ -104,7 +104,7 @@ class IdeConfigCommand extends FlutterCommand {
     // Test byte by byte. We're assuming that these are small files.
     final List<int> srcBytes = src.readAsBytesSync();
     final List<int> destBytes = dest.readAsBytesSync();
-    for (var i = 0; i < srcBytes.length; ++i) {
+    for (int i = 0; i < srcBytes.length; ++i) {
       if (srcBytes[i] != destBytes[i]) {
         return false;
       }
@@ -118,9 +118,9 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final manifest = <String>{};
+    final Set<String> manifest = <String>{};
     final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
-    for (final srcFile in flutterFiles) {
+    for (final File srcFile in flutterFiles) {
       final String relativePath = globals.fs.path.relative(
         srcFile.path,
         from: _flutterRoot.absolute.path,
@@ -134,7 +134,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final trackedIdeaFileRegExp = RegExp(r'(\.name|modules.xml|vcs.xml)$');
+      final RegExp trackedIdeaFileRegExp = RegExp(r'(\.name|modules.xml|vcs.xml)$');
       final bool isATrackedIdeaFile =
           _hasDirectoryInPath(srcFile, '.idea') &&
           (trackedIdeaFileRegExp.hasMatch(relativePath) ||
@@ -189,7 +189,7 @@ class IdeConfigCommand extends FlutterCommand {
     // them.
     final Iterable<File> templateFiles =
         _templateDirectory.listSync(recursive: true).whereType<File>();
-    for (final templateFile in templateFiles) {
+    for (final File templateFile in templateFiles) {
       final String relativePath = globals.fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
@@ -241,7 +241,7 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
-    var generatedCount = 0;
+    int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
@@ -258,7 +258,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
-    final template = Template(
+    final Template template = Template(
       _templateDirectory,
       null,
       fileSystem: globals.fs,

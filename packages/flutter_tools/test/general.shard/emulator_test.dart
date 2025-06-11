@@ -60,7 +60,7 @@ void main() {
     // iOS discovery uses context.
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -88,7 +88,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -102,7 +102,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('getEmulatorsById', () async {
-      final testEmulatorManager = TestEmulatorManager(
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(
         emulators,
         java: FakeJava(),
         logger: BufferLogger.test(),
@@ -128,7 +128,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -146,7 +146,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -180,7 +180,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('create emulator with a unique name does not throw', () async {
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -214,7 +214,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('create emulator with an existing name errors', () async {
-      final emulatorManager = EmulatorManager(
+      final EmulatorManager emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -256,7 +256,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testUsingContext(
       'create emulator without a name but when default exists adds a suffix',
       () async {
-        final emulatorManager = EmulatorManager(
+        final EmulatorManager emulatorManager = EmulatorManager(
           java: FakeJava(),
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),

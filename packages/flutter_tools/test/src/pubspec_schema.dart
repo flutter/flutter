@@ -25,10 +25,10 @@ void validatePubspecForPlugin({
         fileSystem: globals.fs,
         logger: globals.logger,
       )!;
-  final platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
+  final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final String platform in expectedPlatforms) {
     expect(platformMaps[platform], isNotNull);
-    final platformMap = platformMaps[platform]! as YamlMap;
+    final YamlMap platformMap = platformMaps[platform]! as YamlMap;
     if (pluginClass != null) {
       expect(platformMap['pluginClass'], pluginClass);
     }

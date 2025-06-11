@@ -71,7 +71,7 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
-      var hasPlatformViewCreated = false;
+      bool hasPlatformViewCreated = false;
       void onPlatformViewCreatedCallBack(int id) {
         hasPlatformViewCreated = true;
       }
@@ -143,7 +143,7 @@ void main() {
         ),
       );
 
-      final resizeCompleter = Completer<void>();
+      final Completer<void> resizeCompleter = Completer<void>();
 
       await tester.pumpWidget(
         const Center(
@@ -297,7 +297,7 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
 
       // The HTML element should be a div.
-      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('div'));
     });
 
@@ -323,12 +323,12 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
       // The HTML element should be a script.
-      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('script'));
     });
 
     testWidgets('onElementCreated', (WidgetTester tester) async {
-      final createdElements = <Object>[];
+      final List<Object> createdElements = <Object>[];
       void onElementCreated(Object element) {
         createdElements.add(element);
       }
@@ -359,7 +359,7 @@ void main() {
     group('hitTestBehavior', () {
       testWidgets('opaque by default', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        var taps = 0;
+        int taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(
@@ -388,7 +388,7 @@ void main() {
 
       testWidgets('can be set to transparent', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        var taps = 0;
+        int taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(

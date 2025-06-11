@@ -140,8 +140,8 @@ void main() {
   });
 
   test('OffsetLayer.findAllAnnotations respects offset', () {
-    const insidePosition = Offset(-5, 5);
-    const outsidePosition = Offset(5, 5);
+    const Offset insidePosition = Offset(-5, 5);
+    const Offset outsidePosition = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -166,8 +166,8 @@ void main() {
   });
 
   test('ClipRectLayer.findAllAnnotations respects clipRect', () {
-    const insidePosition = Offset(11, 11);
-    const outsidePosition = Offset(19, 19);
+    const Offset insidePosition = Offset(11, 11);
+    const Offset outsidePosition = Offset(19, 19);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -202,12 +202,12 @@ void main() {
     // For a curve of radius 4 centered at (4, 4),
     // location (1, 1) is outside, while (2, 2) is inside.
     // Here we shift this RRect by (10, 10).
-    final rrect = RRect.fromRectAndRadius(
+    final RRect rrect = RRect.fromRectAndRadius(
       const Offset(10, 10) & const Size(10, 10),
       const Radius.circular(4),
     );
-    const insidePosition = Offset(12, 12);
-    const outsidePosition = Offset(11, 11);
+    const Offset insidePosition = Offset(12, 12);
+    const Offset outsidePosition = Offset(11, 11);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -245,14 +245,14 @@ void main() {
     //    |  /
     //    | /
     // 2  |/
-    final originalPath = Path();
+    final Path originalPath = Path();
     originalPath.lineTo(2, 0);
     originalPath.lineTo(0, 2);
     originalPath.close();
     // Shift this clip path by (10, 10).
     final Path path = originalPath.shift(const Offset(10, 10));
-    const insidePosition = Offset(11, 11);
-    const outsidePosition = Offset(12, 12);
+    const Offset insidePosition = Offset(11, 11);
+    const Offset outsidePosition = Offset(12, 12);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -286,11 +286,11 @@ void main() {
   test('TransformLayer.findAllAnnotations respects transform', () {
     // Matrix `transform` enlarges the target by (2x, 4x), then shift it by
     // (10, 20).
-    final transform = Matrix4.diagonal3Values(2, 4, 1)..setTranslation(Vector3(10, 20, 0));
+    final Matrix4 transform = Matrix4.diagonal3Values(2, 4, 1)..setTranslation(Vector3(10, 20, 0));
     // The original region is Offset(10, 10) & Size(10, 10)
     // The transformed region is Offset(30, 60) & Size(20, 40)
-    const insidePosition = Offset(40, 80);
-    const outsidePosition = Offset(20, 40);
+    const Offset insidePosition = Offset(40, 80);
+    const Offset outsidePosition = Offset(20, 40);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -323,7 +323,7 @@ void main() {
 
   test('TransformLayer.findAllAnnotations correctly transforms with perspective', () {
     // Test the 4 corners of a transformed annotated region.
-    final transform =
+    final Matrix4 transform =
         Matrix4.identity()
           ..setEntry(3, 2, 0.005)
           ..rotateX(-0.2)
@@ -403,7 +403,7 @@ void main() {
   });
 
   test('TransformLayer.findAllAnnotations skips when transform is irreversible', () {
-    final transform = Matrix4.diagonal3Values(1, 0, 1);
+    final Matrix4 transform = Matrix4.diagonal3Values(1, 0, 1);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -422,8 +422,8 @@ void main() {
   });
 
   test('LeaderLayer.findAllAnnotations respects offset', () {
-    const insidePosition = Offset(-5, 5);
-    const outsidePosition = Offset(5, 5);
+    const Offset insidePosition = Offset(-5, 5);
+    const Offset outsidePosition = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -449,7 +449,7 @@ void main() {
 
   test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
       'and return the given opacity (false) during a successful hit', () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -471,7 +471,7 @@ void main() {
 
   test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
       'and return the given opacity (true) during a successful hit', () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -491,7 +491,7 @@ void main() {
   });
 
   test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -513,7 +513,7 @@ void main() {
 
   test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
       "children's opacity (false) during a failed hit", () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -534,7 +534,7 @@ void main() {
 
   test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
       "children's opacity (true) during a failed hit", () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -554,7 +554,7 @@ void main() {
 
   test("AnnotatedRegionLayer.findAllAnnotations should not add to children's opacity "
       'during a successful hit if it is not opaque', () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -576,7 +576,7 @@ void main() {
 
   test("AnnotatedRegionLayer.findAllAnnotations should add to children's opacity "
       'during a successful hit if it is opaque', () {
-    const position = Offset(5, 5);
+    const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -598,7 +598,7 @@ void main() {
   test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
       'using size and offset (positive)', () {
     // The target position would have fallen outside if not for the offset.
-    const position = Offset(100, 100);
+    const Offset position = Offset(100, 100);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -630,7 +630,7 @@ void main() {
   test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
       'using size and offset (negative)', () {
     // The target position would have fallen inside if not for the offset.
-    const position = Offset(10, 10);
+    const Offset position = Offset(10, 10);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
@@ -741,7 +741,7 @@ class _TestAnnotatedLayer extends Layer {
       return false;
     }
     final Object untypedValue = value;
-    final typedValue = untypedValue as S;
+    final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));
     return opaque;
   }

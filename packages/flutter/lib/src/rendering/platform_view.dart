@@ -293,7 +293,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     if (_viewController == value) {
       return;
     }
-    final needsSemanticsUpdate = _viewController.id != value.id;
+    final bool needsSemanticsUpdate = _viewController.id != value.id;
     _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -675,7 +675,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     if (_controller == controller) {
       return;
     }
-    final needsSemanticsUpdate = _controller.viewId != controller.viewId;
+    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
     _controller = controller;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
