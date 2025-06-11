@@ -1,0 +1,12 @@
+name: checks_tool
+
+environment:
+  sdk: ^3.7.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+
+dev_dependencies:
+  test: any
