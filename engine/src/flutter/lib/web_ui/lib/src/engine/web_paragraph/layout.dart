@@ -44,6 +44,7 @@ class TextLayout {
   }
 
   bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
+
   bool get isDefaultRtl => paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
 
   void performLayout(double width) {
@@ -107,7 +108,6 @@ class TextLayout {
   }
 
   ui.Rect getAdvance(DomTextMetrics textMetrics, TextRange textRange) {
-    WebParagraphDebug.log('getAdvance($textRange) ${textMetrics.getTextClusters().length}');
     final List<DomRectReadOnly> rects = textMetrics.getSelectionRects(
       textRange.start,
       textRange.end,
@@ -120,7 +120,6 @@ class TextLayout {
         rects.first.width,
         rects.first.height,
       );
-      WebParagraphDebug.log('getAdvance($textRange)');
       for (final rect in rects) {
         WebParagraphDebug.log('[${rect.left}:${rect.right})');
         final r = ui.Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height);
@@ -439,10 +438,9 @@ class TextLayout {
           styledTextBlock.textMetrics,
           styleTextRange.translate(-styledTextBlock.textRange.start),
         );
-        final ExtendedTextCluster firstVisualClusterInBlock =
-            bidiRun.bidiLevel.isEven
-                ? textClusters[styleClusterRange.start]
-                : textClusters[styleClusterRange.end - 1];
+        final ExtendedTextCluster firstVisualClusterInBlock = bidiRun.bidiLevel.isEven
+            ? textClusters[styleClusterRange.start]
+            : textClusters[styleClusterRange.end - 1];
 
         line.visualBlocks.add(
           LineBlock(
@@ -485,7 +483,8 @@ class TextLayout {
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
-      shiftInsideLine, // At the end this shift is equal to the entire line width
+      shiftInsideLine,
+      // At the end this shift is equal to the entire line width
       line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
     );
     lines.add(line);
@@ -536,6 +535,7 @@ class TextLayout {
   }
 
   static double EPSILON = 0.001;
+
   List<ui.TextBox> getBoxesForRange(
     int start,
     int end,
@@ -659,6 +659,8 @@ class TextLayout {
   }
 
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
+    WebParagraphDebug.log('getPositionForOffset($offset)');
+
     int lineNum = 0;
     for (final line in lines) {
       lineNum++;
@@ -666,11 +668,12 @@ class TextLayout {
         // We didn't find a line that contains the offset. All previous lines are placed above it and this one - below.
         // Actually, it's only possible for the first line (no lines before) because lines cover all vertical space.
         assert(lineNum == 1);
-        return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+        return ui.TextPosition(offset: line.textRange.start, affinity: ui.TextAffinity.downstream);
       } else if (line.advance.bottom < offset.dy) {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
+      WebParagraphDebug.log('Found line: ${line.textRange} ${line.advance} ');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       int blockNum = 0;
@@ -686,17 +689,23 @@ class TextLayout {
           continue;
         }
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
-        final int start =
-            block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
-        final int end =
-            block.bidiLevel.isEven ? block.clusterRange.end : block.clusterRange.start - 1;
+        final int start = block.bidiLevel.isEven
+            ? block.clusterRange.start
+            : block.clusterRange.end - 1;
+        final int end = block.bidiLevel.isEven
+            ? block.clusterRange.end
+            : block.clusterRange.start - 1;
         final int step = block.bidiLevel.isEven ? 1 : -1;
+        WebParagraphDebug.log('Found block: ${block.clusterRange}');
         for (int i = start; i != end; i += step) {
           final cluster = textClusters[i];
-          final rect = cluster.advance.translate(
-            line.advance.left + line.formattingShift + block.clusterShiftInLine,
-            line.advance.top + line.fontBoundingBoxAscent,
-          );
+          final ui.Rect rect = cluster.advance
+              .translate(
+                line.advance.left + line.formattingShift + block.clusterShiftInLine,
+                line.advance.top + line.fontBoundingBoxAscent,
+              )
+              .inflate(EPSILON);
+          WebParagraphDebug.log('Check cluster: $rect $offset');
           if (rect.contains(offset)) {
             // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
             if (offset.dx - rect.left <= rect.right - offset.dx) {
@@ -724,7 +733,7 @@ class TextLayout {
     // We didn't find the line containing our offset and
     // we didn't find the line that is down from the offset
     // So all the line are above the offset
-    return ui.TextPosition(offset: paragraph.text!.length, affinity: ui.TextAffinity.downstream);
+    return ui.TextPosition(offset: paragraph.text!.length - 1, affinity: ui.TextAffinity.upstream);
   }
 }
 
@@ -784,12 +793,14 @@ class ExtendedTextCluster {
 
 class BidiRun {
   BidiRun(this.clusterRange, this.bidiLevel);
+
   final int bidiLevel;
   final ClusterRange clusterRange;
 }
 
 class StyledTextBlock extends StyledTextRange {
   StyledTextBlock(super.start, super.end, super.textStyle, this.textMetrics);
+
   final DomTextMetrics textMetrics;
 }
 
@@ -797,6 +808,7 @@ class StyledTextBlock extends StyledTextRange {
 // (with shiftInsideLine pointing to the position when this piece starts on the line)
 class LineRun extends BidiRun {
   LineRun(super.clusterRange, super.bidiLevel, this.textRange, this.width, this.shiftInsideLine);
+
   final TextRange textRange;
   final double width;
   final double shiftInsideLine;

@@ -50,7 +50,7 @@ Future<void> testMain() async {
     expect(paragraph.longestLine, paragraph.width);
   });
 
-  test('Paragraph getBoxesForRange 1 Non-Infinity line', () {
+  test('Paragraph getBoxesForRange multiple lines', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
 
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
