@@ -1754,15 +1754,15 @@ class CompileTest {
     });
   }
 
-  Future<List<double>> getMetricsFromXCResults() async {
+  Future<List<double>> getMetricsFromXCResults(String xcResultsBundleName) async {
     return inDirectory<List<double>>(testDirectory, () async {
       List<dynamic> resultsJson = <dynamic>[];
-      const String resultsBundleName = 'benchmarkResults.xcresult';
-      // Get ID from Info.plist
+
+      // First, grab the id from the info.plist.
       final ProcessResult plistIDResult = await Process.run(
         workingDirectory: testDirectory,
         'plutil',
-        <String>['-extract', 'rootId.hash', 'raw', '-o', '-', '$resultsBundleName/Info.plist'],
+        <String>['-extract', 'rootId.hash', 'raw', '-o', '-', '$xcResultsBundleName/Info.plist'],
       );
 
       final String plistID = plistIDResult.stdout.toString().trim();
@@ -1773,7 +1773,7 @@ class CompileTest {
         'xcresulttool',
         'get',
         '--path',
-        resultsBundleName,
+        xcResultsBundleName,
         '--id',
         plistID,
         '--format',
@@ -1781,6 +1781,7 @@ class CompileTest {
         '--legacy',
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
+        print(result.stdout.toString());
 
         testRefID =
         // ignore: avoid_dynamic_calls
@@ -1788,13 +1789,13 @@ class CompileTest {
                 .toString();
       });
 
-      // Next, grab the ActionTestSummary using our testRefID
+      // Next, grab the ActionTestSummary using our testRefID.
       String actionTestSummaryID = '';
       await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
         'xcresulttool',
         'get',
         '--path',
-        resultsBundleName,
+        xcResultsBundleName,
         '--id',
         testRefID,
         '--format',
@@ -1816,7 +1817,7 @@ class CompileTest {
         'xcresulttool',
         'get',
         '--path',
-        resultsBundleName,
+        xcResultsBundleName,
         '--id',
         actionTestSummaryID,
         '--format',
@@ -1891,14 +1892,15 @@ class CompileTest {
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
       /* Time to First Frame */
+      const String resultBundleName = 'benchmarkResults.xcresult';
       await Process.run(workingDirectory: testDirectory, 'rm', <String>[
         '-rf',
-        '$testDirectory/benchmarkResults.xcresult',
+        '$testDirectory/$resultBundleName',
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
 
-      // Run the benchmarking tests and output the result
+      // Run the benchmarking tests, and create the xcResults file.
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
         'test',
         '-project',
@@ -1909,14 +1911,14 @@ class CompileTest {
         'platform=iOS',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
-        '$testDirectory/benchmarkResults.xcresult',
+        '$testDirectory/$resultBundleName',
         '-verbose',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]);
 
-      final List<double> extractedLaunchTimes = await getMetricsFromXCResults();
+      final List<double> extractedLaunchTimes = await getMetricsFromXCResults(resultBundleName);
 
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
