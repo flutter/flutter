@@ -501,6 +501,44 @@ enum SemanticsRole {
   /// * The connection to the server was lost so local changes will not be
   ///   saved.
   alert,
+
+  /// A supporting section that relates to the main content.
+  ///
+  /// The compelementary role is one of landmark roles. This role can be used to
+  /// describe sidebars, or call-out boxes.
+  ///
+  /// For more information, see: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/complementary_role
+  complementary,
+
+  /// A section for a footer, containing identifying information such as
+  /// copyright information, navigation links and privacy statements.
+  ///
+  /// The contentInfo role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/contentinfo_role
+  contentInfo,
+
+  /// The primary content of a document.
+  ///
+  /// The section consists of content that is directly related to or expands on
+  /// the central topic of a document, or the main function of an application.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/main_role
+  main,
+
+  /// A region of a web page that contains navigation links.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/navigation_role
+  navigation,
+
+  /// A section of content sufficiently important but cannot be descrived by one
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
+  /// navigation.
+  ///
+  /// For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role
+  region,
 }
 
 /// Describe the type of data for an input field.
@@ -1027,10 +1065,10 @@ class SemanticsFlag {
 ///
 /// For example, These flags can indicate if an element is
 /// checkable, currently checked, selectable, or functions as a button.
-class SemanticsFlags {
+class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// Creates a set of semantics flags that describe various states of a widget.
   /// All flags default to `false` unless specified.
-  const SemanticsFlags({
+  SemanticsFlags({
     this.hasCheckedState = false,
     this.isChecked = false,
     this.isSelected = false,
@@ -1062,10 +1100,116 @@ class SemanticsFlags {
     this.hasSelectedState = false,
     this.hasRequiredState = false,
     this.isRequired = false,
-  });
+  }) {
+    _initSemanticsFlags(
+      this,
+      hasCheckedState,
+      isChecked,
+      isSelected,
+      isButton,
+      isTextField,
+      isFocused,
+      hasEnabledState,
+      isEnabled,
+      isInMutuallyExclusiveGroup,
+      isHeader,
+      isObscured,
+      scopesRoute,
+      namesRoute,
+      isHidden,
+      isImage,
+      isLiveRegion,
+      hasToggledState,
+      isToggled,
+      hasImplicitScrolling,
+      isMultiline,
+      isReadOnly,
+      isFocusable,
+      isLink,
+      isSlider,
+      isKeyboardKey,
+      isCheckStateMixed,
+      hasExpandedState,
+      isExpanded,
+      hasSelectedState,
+      hasRequiredState,
+      isRequired,
+    );
+  }
+
+  @Native<
+    Void Function(
+      Handle,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+    )
+  >(symbol: 'NativeSemanticsFlags::initSemanticsFlags')
+  external static void _initSemanticsFlags(
+    SemanticsFlags instance,
+    bool hasCheckedState,
+    bool isChecked,
+    bool isSelected,
+    bool isButton,
+    bool isTextField,
+    bool isFocused,
+    bool hasEnabledState,
+    bool isEnabled,
+    bool isInMutuallyExclusiveGroup,
+    bool isHeader,
+    bool isObscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool isHidden,
+    bool isImage,
+    bool isLiveRegion,
+    bool hasToggledState,
+    bool isToggled,
+    bool hasImplicitScrolling,
+    bool isMultiline,
+    bool isReadOnly,
+    bool isFocusable,
+    bool isLink,
+    bool isSlider,
+    bool isKeyboardKey,
+    bool isCheckStateMixed,
+    bool hasExpandedState,
+    bool isExpanded,
+    bool hasSelectedState,
+    bool hasRequiredState,
+    bool isRequired,
+  );
 
   /// The set of semantics flags with every flag set to false.
-  static const SemanticsFlags kNone = SemanticsFlags();
+  static SemanticsFlags none = SemanticsFlags();
 
   /// {@macro dart.ui.semantics.hasCheckedState}
   final bool hasCheckedState;
@@ -1633,14 +1777,6 @@ abstract class SemanticsUpdateBuilder {
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   ///
-  /// The `elevation` describes the distance in z-direction between this node
-  /// and the `elevation` of the parent.
-  ///
-  /// The `thickness` describes how much space this node occupies in the
-  /// z-direction starting at `elevation`. Basically, in the z-direction the
-  /// node starts at `elevation` above the parent and ends at `elevation` +
-  /// `thickness` above the parent.
-  ///
   /// The `headingLevel` describes that this node is a heading and the hierarchy
   /// level this node represents as a heading. A value of 0 indicates that this
   /// node is not a heading. A value of 1 or greater indicates that this node is
@@ -1668,7 +1804,7 @@ abstract class SemanticsUpdateBuilder {
   ///    `validationResult` argument.
   void updateNode({
     required int id,
-    required int flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1680,8 +1816,6 @@ abstract class SemanticsUpdateBuilder {
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1747,7 +1881,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   @override
   void updateNode({
     required int id,
-    required int flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1759,8 +1893,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1809,8 +1941,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       rect.top,
       rect.right,
       rect.bottom,
-      elevation,
-      thickness,
       identifier,
       label,
       labelAttributes,
@@ -1841,6 +1971,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     Void Function(
       Pointer<Void>,
       Int32,
+      Handle,
       Int32,
       Int32,
       Int32,
@@ -1849,9 +1980,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Int32,
       Int32,
-      Int32,
-      Double,
-      Double,
       Double,
       Double,
       Double,
@@ -1886,7 +2014,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
     int id,
-    int flags,
+    SemanticsFlags flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -1902,8 +2030,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     String? identifier,
     String label,
     List<StringAttribute> labelAttributes,

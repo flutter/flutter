@@ -425,7 +425,7 @@ void main() {
     // didChangeAccessibilityFeatures
     tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(routeBuildCount, equals(1));
     expect(dependentBuildCount, equals(5));

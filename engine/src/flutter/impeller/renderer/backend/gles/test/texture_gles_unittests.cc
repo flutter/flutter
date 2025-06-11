@@ -7,6 +7,7 @@
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -91,6 +92,28 @@ TEST_P(TextureGLESTest, Binds2DTexture) {
     EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
               TextureGLES::Type::kRenderBufferMultisampled);
   }
+}
+
+TEST_P(TextureGLESTest, Leak) {
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2D;
+  desc.sample_count = SampleCount::kCount1;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  ASSERT_TRUE(texture);
+
+  std::optional<GLuint> handle = TextureGLES::Cast(*texture).GetGLHandle();
+  EXPECT_TRUE(handle.has_value());
+
+  TextureGLES::Cast(*texture).Leak();
+
+  ScopedValidationDisable disable_validation;
+  handle = TextureGLES::Cast(*texture).GetGLHandle();
+  EXPECT_FALSE(handle.has_value());
 }
 
 }  // namespace impeller::testing

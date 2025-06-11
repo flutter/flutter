@@ -94,7 +94,7 @@ constexpr flutter::DlColor ToDisplayListType(Color color) {
   );
 }
 
-constexpr SkMatrix ToSkMatrix(const Matrix& matrix) {
+inline SkMatrix ToSkMatrix(const Matrix& matrix) {
   return SkM44::ColMajor(matrix.m).asM33();
 }
 
