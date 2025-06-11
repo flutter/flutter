@@ -7,16 +7,19 @@ package io.flutter.plugin.platform;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel3;
 import io.flutter.view.AccessibilityBridge;
 
-public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate {
+public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate, PlatformViewsChannel3.PlatformViewsHandler {
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
 
   public PlatformViewsControllerDelegator(
-      PlatformViewsController platformViewsController,
-      PlatformViewsController2 platformViewsController2) {
+          PlatformViewsController platformViewsController,
+          PlatformViewsController2 platformViewsController2) {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
   }
@@ -25,15 +28,15 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   @Override
   public View getPlatformViewById(int viewId) {
     return platformViewsController2.getPlatformViewById(viewId) != null
-        ? platformViewsController2.getPlatformViewById(viewId)
-        : platformViewsController.getPlatformViewById(viewId);
+            ? platformViewsController2.getPlatformViewById(viewId)
+            : platformViewsController.getPlatformViewById(viewId);
   }
 
   @Override
   public boolean usesVirtualDisplay(int id) {
     return platformViewsController2.getPlatformViewById(id) != null
-        ? platformViewsController2.usesVirtualDisplay(id)
-        : platformViewsController.usesVirtualDisplay(id);
+            ? platformViewsController2.usesVirtualDisplay(id)
+            : platformViewsController.usesVirtualDisplay(id);
   }
 
   @Override
@@ -47,4 +50,42 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
     platformViewsController.detachAccessibilityBridge();
     platformViewsController2.detachAccessibilityBridge();
   }
+
+  @Override
+  public void createPlatformView(@NonNull PlatformViewsChannel3.PlatformViewCreationRequest request) {
+
+  }
+
+  @Override
+  public void dispose(int viewId) {
+
+  }
+
+  @Override
+  public void onTouch(@NonNull PlatformViewsChannel3.PlatformViewTouch touch) {
+
+  }
+
+  @Override
+  public void setDirection(int viewId, int direction) {
+
+  }
+
+  @Override
+  public void clearFocus(int viewId) {
+
+  }
+
+  @Override
+  public boolean isSurfaceControlEnabled() {
+    return false;
+  }
+
+
+  // TODO(gmackall) Can we define a common interface, allowing us to do something like this?
+//  private PlatformViewsController delegateToController(int viewId) {
+//    return platformViewsController2.getPlatformViewById(viewId) != null
+//            ? platformViewsController2
+//            : platformViewsController;
+//  }
 }
