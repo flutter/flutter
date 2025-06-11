@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 void main(List<String> args) {
-  print('Hello World');
+  io.stdout.writeln('Hello World');
 }
