@@ -2571,7 +2571,7 @@ String _getFlutterLicense() {
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 ''';
-  return '$rawLicense\n\n';
+  return '$rawLicense\n\n\n';
 }
 
 String _removeLicenseIfPresent(String fileContents, String license) {
