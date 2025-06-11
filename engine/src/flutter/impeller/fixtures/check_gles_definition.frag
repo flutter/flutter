@@ -6,7 +6,7 @@ out vec4 out_color;
 
 void main() {
 #ifdef IMPELLER_TARGET_OPENGLES
-    fail
+  fail
 #else
   out_color = vec4(1, 0, 0, 0);
 #endif
