@@ -10,5 +10,5 @@ questions or concerns, see [#170491](https://github.com/flutter/flutter/issues/1
 ## Usage
 
 ```sh
-
+./dev/checks
 ```
