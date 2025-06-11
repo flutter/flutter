@@ -2513,18 +2513,22 @@ void _tests() {
             SliverSemantics(
               key: key,
               container: true,
-              explicitChildNodes: true, // This is needed to pass the test in this scenario why?
-              child: SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  // The widgets in this list merge into one node in this test scenario but not the pure sliver one above why?
-                  Semantics(
-                    blockUserActions: true,
-                    label: 'label1',
-                    onTap: () {},
-                    child: const SizedBox(height: 10),
-                  ),
-                  Semantics(label: 'label2', onTap: () {}, child: const SizedBox(height: 10)),
-                ]),
+              child: SliverToBoxAdapter(
+                child: Column(
+                  children: <Widget>[
+                    Semantics(
+                      blockUserActions: true,
+                      label: 'label1',
+                      onTap: () {},
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                    Semantics(
+                      label: 'label2',
+                      onTap: () {},
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
