@@ -315,6 +315,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// callback can be used to add a delay or a closing animation before the menu
   /// is hidden.
   ///
+  /// If the menu is not closed, this callback will also be called when the root
+  /// menu anchor is scrolled and when the screen is resized.
+  ///
   /// After a close request is intercepted and closing behaviors have completed,
   /// the `hideOverlay` callback should be called. This callback sets
   /// [MenuController.isOpen] to false and hides the menu overlay widget. If the
@@ -624,7 +627,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void handleOutsideTap(PointerDownEvent pointerDownEvent) {
     assert(_debugMenuInfo('Tapped Outside $menuController'));
-    closeChildren();
+    if (isOpen) {
+      closeChildren();
+    }
   }
 
   // Used to build the anchor widget in subclasses.

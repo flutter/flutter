@@ -1554,12 +1554,12 @@ void main() {
     await tester.tap(find.text(Tag.outside.text));
     await tester.pump();
 
+    // When the menu is open, outside taps are consumed. As a result, tapping
+    // outside the menu will close it and not select the outside button.
+    expect(selected, isEmpty);
     expect(opened, isEmpty);
     expect(closed, equals(<NestedTag>[Tag.a, Tag.anchor]));
-    expect(selected, isEmpty);
 
-    // When the menu is open, don't expect the outside button to be selected.
-    expect(selected, isEmpty);
     selected.clear();
     opened.clear();
     closed.clear();
@@ -2763,10 +2763,11 @@ void main() {
       expect(find.text(Tag.a.text), findsNothing);
     });
 
-    testWidgets('View size change triggers onCloseRequested', (WidgetTester tester) async {
+    testWidgets('View size change triggers onCloseRequested on open menu', (
+      WidgetTester tester,
+    ) async {
       final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
-      int onOpenRequestedCalled = 0;
       int onCloseRequestedCalled = 0;
 
       Widget build(Size size) {
@@ -2774,10 +2775,6 @@ void main() {
           data: mediaQueryData.copyWith(size: size),
           child: App(
             Menu(
-              onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
-                onOpenRequestedCalled += 1;
-                showOverlay();
-              },
               onCloseRequested: (VoidCallback hideOverlay) {
                 onCloseRequestedCalled += 1;
                 hideOverlay();
@@ -2791,64 +2788,88 @@ void main() {
       }
 
       await tester.pumpWidget(build(mediaQueryData.size));
+      await tester.pump();
+
+      // Test menu resize before first open.
+      await tester.pumpWidget(build(const Size(250, 250)));
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      expect(onOpenRequestedCalled, equals(1));
       expect(onCloseRequestedCalled, equals(0));
+      expect(find.text(Tag.a.text), findsOneWidget);
 
-      const Size smallSize = Size(200, 200);
-      await changeSurfaceSize(tester, smallSize);
-      await tester.pumpWidget(build(smallSize));
+      await tester.pumpWidget(build(const Size(200, 200)));
 
-      expect(onOpenRequestedCalled, equals(1));
+      expect(onCloseRequestedCalled, equals(1));
+
+      await tester.pump();
+
+      expect(controller.isOpen, isFalse);
+
+      // Test menu resize after close.
+      await tester.pumpWidget(build(const Size(300, 300)));
+
       expect(onCloseRequestedCalled, equals(1));
     });
 
-    testWidgets('Ancestor scroll triggers onCloseRequested', (WidgetTester tester) async {
+    testWidgets('Ancestor scroll triggers onCloseRequested on open menu', (
+      WidgetTester tester,
+    ) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
-      int onOpenRequestedCalled = 0;
       int onCloseRequestedCalled = 0;
 
       await tester.pumpWidget(
         App(
           SingleChildScrollView(
             controller: scrollController,
-            child: Menu(
-              onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
-                onOpenRequestedCalled += 1;
-                showOverlay();
-              },
-              onCloseRequested: (VoidCallback hideOverlay) {
-                onCloseRequestedCalled += 1;
-                hideOverlay();
-              },
-              menuPanel: Panel(
-                children: <Widget>[
-                  Button.tag(Tag.a),
-                  Button.tag(Tag.b),
-                  Button.tag(Tag.c),
-                  Button.tag(Tag.d),
-                ],
+            child: SizedBox(
+              height: 1000,
+              child: Menu(
+                onCloseRequested: (VoidCallback hideOverlay) {
+                  onCloseRequestedCalled += 1;
+                  hideOverlay();
+                },
+                menuPanel: Panel(
+                  children: <Widget>[
+                    Button.tag(Tag.a),
+                    Button.tag(Tag.b),
+                    Button.tag(Tag.c),
+                    Button.tag(Tag.d),
+                  ],
+                ),
+                child: const AnchorButton(Tag.anchor),
               ),
-              child: const AnchorButton(Tag.anchor),
             ),
           ),
         ),
       );
 
+      scrollController.jumpTo(10);
+      await tester.pump();
+
+      // The menu is not open, so onCloseRequested should not be called.
+      expect(onCloseRequestedCalled, equals(0));
+
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      expect(onOpenRequestedCalled, equals(1));
+      expect(find.text(Tag.a.text), findsOneWidget);
       expect(onCloseRequestedCalled, equals(0));
 
-      scrollController.jumpTo(1000);
+      scrollController.jumpTo(500);
       await tester.pump();
 
-      expect(onOpenRequestedCalled, equals(1));
+      // Make sure we didn't just scroll the menu off-screen.
+      expect(find.text(Tag.anchor.text), findsOneWidget);
+      expect(onCloseRequestedCalled, equals(1));
+      expect(find.text(Tag.a.text), findsNothing);
+
+      scrollController.jumpTo(5);
+      await tester.pump();
+
+      expect(find.text(Tag.anchor.text), findsOneWidget);
       expect(onCloseRequestedCalled, equals(1));
     });
   });
@@ -3027,6 +3048,8 @@ class _ButtonState extends State<Button> {
   @override
   void dispose() {
     _internalFocusNode?.dispose();
+    _states.dispose();
+    _internalFocusNode = null;
     super.dispose();
   }
 
