@@ -4213,7 +4213,7 @@ class SliverSemantics extends SemanticsBase {
   /// {@macro flutter.widgets.SemanticsBase.constructor}
   SliverSemantics({
     super.key,
-    super.child,
+    required Widget sliver,
     super.container = false,
     super.explicitChildNodes = false,
     super.excludeSemantics = false,
@@ -4288,7 +4288,7 @@ class SliverSemantics extends SemanticsBase {
     super.validationResult = SemanticsValidationResult.none,
     super.inputType,
     super.localeForSubtree,
-  });
+  }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
   const SliverSemantics.fromProperties({
