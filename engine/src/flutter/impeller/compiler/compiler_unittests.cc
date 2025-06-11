@@ -15,6 +15,25 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
+TEST(CompilerTest, Defines) {
+  std::shared_ptr<const fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("sample.vert");
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  Reflector::Options reflector_options;
+  Compiler compiler = Compiler(fixture, options, reflector_options);
+
+  // Should fail as the shader has a compilation error in it.
+  EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+
+  // Should succeed as the compilation error is ifdef'd out.
+  options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+  Compiler compiler_2 = Compiler(fixture, options, reflector_options);
+  EXPECT_NE(compiler.GetSPIRVAssembly(), nullptr);
+}
+
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);
