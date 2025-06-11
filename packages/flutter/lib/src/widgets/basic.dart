@@ -4175,10 +4175,16 @@ sealed class SemanticsBase extends SingleChildRenderObjectWidget {
     }
 
     final bool containsText =
-        properties.attributedLabel != null ||
         properties.label != null ||
+        properties.attributedLabel != null ||
         properties.value != null ||
+        properties.attributedValue != null ||
+        properties.increasedValue != null ||
+        properties.attributedIncreasedValue != null ||
+        properties.decreasedValue != null ||
+        properties.attributedDecreasedValue != null ||
         properties.hint != null ||
+        properties.attributedHint != null ||
         properties.tooltip != null;
 
     if (!containsText) {
