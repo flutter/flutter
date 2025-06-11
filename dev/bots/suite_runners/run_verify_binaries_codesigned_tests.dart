@@ -61,13 +61,7 @@ List<String> binariesWithEntitlements(String flutterRoot) {
     'artifacts/engine/ios/gen_snapshot_arm64',
     'artifacts/libimobiledevice/idevicescreenshot',
     'artifacts/libimobiledevice/idevicesyslog',
-    'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
-    'artifacts/libimobiledeviceglue/libimobiledevice-glue-1.0.0.dylib',
-    'artifacts/libplist/libplist-2.0.4.dylib',
-    'artifacts/openssl/libcrypto.3.dylib',
-    'artifacts/openssl/libssl.3.dylib',
     'artifacts/libusbmuxd/iproxy',
-    'artifacts/libusbmuxd/libusbmuxd-2.0.7.dylib',
     'dart-sdk/bin/dart',
     'dart-sdk/bin/dartaotruntime',
     'dart-sdk/bin/utils/gen_snapshot',
@@ -101,6 +95,12 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/ios-deploy/ios-deploy',
+    'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
+    'artifacts/libimobiledeviceglue/libimobiledevice-glue-1.0.0.dylib',
+    'artifacts/libplist/libplist-2.0.4.dylib',
+    'artifacts/openssl/libcrypto.3.dylib',
+    'artifacts/openssl/libssl.3.dylib',
+    'artifacts/libusbmuxd/libusbmuxd-2.0.7.dylib',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }
 
