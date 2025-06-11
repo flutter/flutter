@@ -3097,9 +3097,7 @@ void main() {
                   child: Center(
                     child: CupertinoButton(
                       child: const Text('Press me!'),
-                      onPressed: () {
-                        count++;
-                      },
+                      onPressed: () => count++,
                     ),
                   ),
                 ),
@@ -3111,14 +3109,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Verify the button is present
+      // Verify the button is present.
       expect(find.widgetWithText(CupertinoButton, 'Press me!'), findsOneWidget);
 
-      // Tap the button
+      // Tap the button.
       await tester.tap(find.widgetWithText(CupertinoButton, 'Press me!'));
-      await tester.pump(); // Process the tap
+      await tester.pump();
 
-      // Check if the counter has increased
+      // Check if the counter has increased.
       expect(count, 1);
 
       // Scroll a little over the halfway point.
@@ -3127,14 +3125,15 @@ void main() {
       );
       await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
       await scrollGesture.up();
-      // This should not time out or throw an error.
+
+      // The crux of this test: this should NOT time out or throw an error.
       await tester.pumpAndSettle();
 
-      // Tap the button
+      // Tap the button.
       await tester.tap(find.widgetWithText(CupertinoButton, 'Press me!'));
-      await tester.pump(); // Process the tap
+      await tester.pump();
 
-      // Check if the counter has increased
+      // Check if the counter has increased.
       expect(count, 2);
     },
   );
