@@ -1781,7 +1781,7 @@ class CompileTest {
         '--legacy',
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
-        print(result.stdout.toString());
+        print(result.stdout);
 
         testRefID =
         // ignore: avoid_dynamic_calls
