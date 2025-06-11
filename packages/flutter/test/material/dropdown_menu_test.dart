@@ -4181,7 +4181,6 @@ void main() {
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isReadOnly,
-                            // SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[SemanticsAction.focus],
                           textDirection: TextDirection.ltr,
