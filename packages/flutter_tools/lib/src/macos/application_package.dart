@@ -5,7 +5,6 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
@@ -188,8 +187,7 @@ class BuildableMacOSApp extends MacOSApp {
   }
 
   String bundleDirectory(BuildInfo buildInfo) {
-    return sentenceCase(buildInfo.mode.cliName) +
-        (buildInfo.flavor != null ? '-${buildInfo.flavor!}' : '');
+    return buildInfo.mode.uppercaseName + (buildInfo.flavor != null ? '-${buildInfo.flavor!}' : '');
   }
 
   @override
