@@ -864,7 +864,7 @@ abstract class Device {
     return <String, Object>{
       'name': name,
       'id': id,
-      'isSupported': isSupported(),
+      'isSupported': await isSupported(),
       'targetPlatform': getNameForTargetPlatform(await targetPlatform),
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
