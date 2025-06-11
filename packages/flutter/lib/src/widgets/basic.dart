@@ -3845,8 +3845,8 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that annotates the widget tree with a description of the meaning of
-/// the widgets.
+/// An abstract class for building widgets that annotate their widget tree with a
+/// description of the meaning of the widgets.
 ///
 /// {@template flutter.widgets.SemanticsBase}
 /// Used by assistive technologies, search engines, and other semantic analysis
@@ -3869,18 +3869,21 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///    be enabled using [WidgetsApp.showSemanticsDebugger],
 ///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
 /// {@endtemplate}
+@immutable
 sealed class SemanticsBase extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
   ///
   /// To create a `const` instance of [SemanticsBase], use the
   /// [SemanticsBase.fromProperties] constructor.
   ///
+  /// {@template flutter.widgets.SemanticsBase.constructor}
   /// See also:
   ///
   ///  * [SemanticsProperties], which contains a complete documentation for each
   ///    of the constructor parameters that belongs to semantics properties.
   ///  * [SemanticsSortKey] for a class that determines accessibility traversal
   ///    order.
+  /// {@endtemplate}
   // Properties added to this constructor should be marked required
   // to enforce its subclasses add it to their constructors.
   SemanticsBase({
@@ -4200,18 +4203,14 @@ sealed class SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+@immutable
 class SliverSemantics extends SemanticsBase {
   /// Creates a semantic annotation.
   ///
   /// To create a `const` instance of [SliverSemantics], use the
   /// [SliverSemantics.fromProperties] constructor.
   ///
-  /// See also:
-  ///
-  ///  * [SemanticsProperties], which contains a complete documentation for each
-  ///    of the constructor parameters that belongs to semantics properties.
-  ///  * [SemanticsSortKey] for a class that determines accessibility traversal
-  ///    order.
+  /// {@macro flutter.widgets.SemanticsBase.constructor}
   SliverSemantics({
     super.key,
     super.child,
@@ -7784,12 +7783,7 @@ class Semantics extends SemanticsBase {
   /// To create a `const` instance of [Semantics], use the
   /// [Semantics.fromProperties] constructor.
   ///
-  /// See also:
-  ///
-  ///  * [SemanticsProperties], which contains a complete documentation for each
-  ///    of the constructor parameters that belongs to semantics properties.
-  ///  * [SemanticsSortKey] for a class that determines accessibility traversal
-  ///    order.
+  /// {@macro flutter.widgets.SemanticsBase}
   Semantics({
     super.key,
     super.child,
