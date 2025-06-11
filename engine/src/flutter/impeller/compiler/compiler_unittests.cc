@@ -17,12 +17,16 @@ namespace testing {
 
 TEST(CompilerTest, Defines) {
   std::shared_ptr<const fml::Mapping> fixture =
-      flutter::testing::OpenFixtureAsMapping("sample.vert");
+      flutter::testing::OpenFixtureAsMapping("check_gles_definition.frag");
 
   SourceOptions options;
   options.source_language = SourceLanguage::kGLSL;
   options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.entry_point_name = "main";
+  options.type = SourceType::kFragmentShader;
+
   Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
   Compiler compiler = Compiler(fixture, options, reflector_options);
 
   // Should fail as the shader has a compilation error in it.
@@ -30,8 +34,9 @@ TEST(CompilerTest, Defines) {
 
   // Should succeed as the compilation error is ifdef'd out.
   options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageVulkan;
   Compiler compiler_2 = Compiler(fixture, options, reflector_options);
-  EXPECT_NE(compiler.GetSPIRVAssembly(), nullptr);
+  EXPECT_NE(compiler_2.GetSPIRVAssembly(), nullptr);
 }
 
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
