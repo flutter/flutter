@@ -678,7 +678,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${sentenceCase(options.buildInfo.friendlyModeName)} '
+        '${options.buildInfo.mode.uppercaseFriendlyName} '
         'mode is not supported for ${device.displayName}.',
       );
     }
@@ -726,7 +726,6 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
-        logger: globals.logger,
       );
     } else {
       runner = ColdRunner(

@@ -32,7 +32,6 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
-import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
@@ -406,7 +405,7 @@ class FlutterDevice {
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device!.displayName} in $modeName mode...',
@@ -482,7 +481,7 @@ class FlutterDevice {
 
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.mode.friendlyName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
@@ -987,7 +986,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
     CommandHelp? commandHelp,
-    this.dartBuilder,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1058,32 +1056,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   BuildResult? _lastBuild;
-
-  late final Environment _environment = Environment(
-    artifacts: globals.artifacts!,
-    logger: globals.logger,
-    cacheDir: globals.cache.getRoot(),
-    engineVersion: globals.flutterVersion.engineRevision,
-    fileSystem: globals.fs,
-    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-    outputDir: globals.fs.directory(getBuildDirectory()),
-    processManager: globals.processManager,
-    platform: globals.platform,
-    analytics: globals.analytics,
-    projectDir: globals.fs.currentDirectory,
-    packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-    generateDartPluginRegistry: generateDartPluginRegistry,
-    defines: <String, String>{
-      // Needed for Dart plugin registry generation.
-      kTargetFile: mainPath,
-      kBuildMode: debuggingOptions.buildInfo.mode.cliName,
-    },
-  );
-
-  Environment get environment => _environment;
-
-  /// Can dispatch [FlutterHookRunner.runHooks] to get new assets from the hooks.
-  final FlutterHookRunner? dartBuilder;
+  Environment? _environment;
 
   @override
   bool hotMode;
@@ -1181,6 +1154,26 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
+    _environment ??= Environment(
+      artifacts: globals.artifacts!,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      platform: globals.platform,
+      analytics: globals.analytics,
+      projectDir: globals.fs.currentDirectory,
+      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+      defines: <String, String>{
+        // Needed for Dart plugin registry generation.
+        kTargetFile: mainPath,
+      },
+    );
+
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
@@ -1188,7 +1181,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     _lastBuild = await globals.buildSystem.buildIncremental(
       compositeTarget,
-      _environment,
+      _environment!,
       _lastBuild,
     );
     if (!_lastBuild!.success) {

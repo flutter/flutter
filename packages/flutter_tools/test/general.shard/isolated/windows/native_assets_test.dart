@@ -13,11 +13,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
-    show cCompilerConfigWindows;
+import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -31,6 +30,7 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
+  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -47,6 +47,7 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
+    runPackageName = environment.projectDir.basename;
   });
 
   for (final bool flutterTester in <bool>[false, true]) {
@@ -99,7 +100,7 @@ void main() {
           };
           final TargetPlatform targetPlatform =
               flutterTester ? TargetPlatform.tester : TargetPlatform.windows_x64;
-          final DartHookResult dartHookResult = await runFlutterSpecificHooks(
+          final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
@@ -115,7 +116,7 @@ void main() {
                   )
                   : nonFlutterTesterAssetUri;
           await installCodeAssets(
-            dartHookResult: dartHookResult,
+            dartBuildResult: dartBuildResult,
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
@@ -127,8 +128,8 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for ${expectedOS}_$expectedArch.',
-              'Building native assets for ${expectedOS}_$expectedArch done.',
+              'Building native assets for $expectedOS $expectedArch.',
+              'Building native assets for $expectedOS $expectedArch done.',
             ]),
           );
           expect(
@@ -243,7 +244,28 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final CCompilerConfig result = (await cCompilerConfigWindows())!;
+      final File packageConfigFile = writePackageConfigFiles(
+        directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
+      );
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: environment.logger,
+      );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
+      final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
+        packageConfigFile.path,
+        packageConfig,
+        fileSystem,
+        logger,
+        runPackageName,
+        includeDevDependencies: false,
+        pubspecFile.path,
+      );
+      final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
       expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
       expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
