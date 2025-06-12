@@ -13,7 +13,7 @@ void main() {
 
     // Verify the app bar is present
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.text('ReorderableListView Sample'), findsOneWidget);
+    expect(find.text('ReorderableListView.separated Sample'), findsOneWidget);
 
     // Verify the reorderable list view is present
     expect(find.byType(ReorderableListView), findsOneWidget);
