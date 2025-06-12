@@ -248,7 +248,7 @@ mixin RenderInlineChildrenContainerDefaults
     if (offset == null) {
       transform.setZero();
     } else {
-      transform.translate(offset.dx, offset.dy);
+      transform.translateByDouble(offset.dx, offset.dy, 0, 1);
     }
   }
 
