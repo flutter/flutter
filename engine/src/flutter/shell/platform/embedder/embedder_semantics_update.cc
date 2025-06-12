@@ -5,17 +5,50 @@
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 namespace {
+
+// TODO(hangyujin): Update these two functions once the SemanticsFlags in
+// dart:ui are updated to use tristate/quad-state flags for properties like
+// isChecked and isSelected.
+FlutterCheckState ToFlutterCheckState(bool isNotNone,
+                                      bool isTrue,
+                                      bool isMixed) {
+  if (!isNotNone) {
+    return kFlutterCheckStateNone;
+  }
+  if (isTrue) {
+    return kFlutterCheckStateTrue;
+  }
+  if (isMixed) {
+    return kFlutterCheckStateMixed;
+  }
+  return kFlutterCheckStateFalse;
+}
+FlutterTristate ToFlutterTristate(bool isNotNone, bool isTrue) {
+  if (!isNotNone) {
+    return kFlutterTristateNone;
+  }
+  if (isTrue) {
+    return kFlutterTristateTrue;
+  }
+  return kFlutterTristateFalse;
+}
+
 std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
     const flutter::SemanticsFlags& source) {
   return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
-      .has_checked_state = source.hasCheckedState,
-      .is_checked = source.isChecked,
-      .is_selected = source.isSelected,
+      .is_checked = ToFlutterCheckState(
+          source.hasCheckedState, source.isChecked, source.isCheckStateMixed),
+      .is_selected =
+          ToFlutterTristate(source.hasSelectedState, source.isSelected),
+      .is_enabled = ToFlutterTristate(source.hasEnabledState, source.isEnabled),
+      .is_toggled = ToFlutterTristate(source.hasToggledState, source.isToggled),
+      .is_expanded =
+          ToFlutterTristate(source.hasExpandedState, source.isExpanded),
+      .is_required =
+          ToFlutterTristate(source.hasRequiredState, source.isRequired),
+      .is_focused = ToFlutterTristate(source.isFocusable, source.isFocused),
       .is_button = source.isButton,
       .is_text_field = source.isTextField,
-      .is_focused = source.isFocused,
-      .has_enabled_state = source.hasEnabledState,
-      .is_enabled = source.isEnabled,
       .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
       .is_header = source.isHeader,
       .is_obscured = source.isObscured,
@@ -24,21 +57,12 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_hidden = source.isHidden,
       .is_image = source.isImage,
       .is_live_region = source.isLiveRegion,
-      .has_toggled_state = source.hasToggledState,
-      .is_toggled = source.isToggled,
       .has_implicit_scrolling = source.hasImplicitScrolling,
       .is_multiline = source.isMultiline,
       .is_read_only = source.isReadOnly,
-      .is_focusable = source.isFocusable,
       .is_link = source.isLink,
       .is_slider = source.isSlider,
       .is_keyboard_key = source.isKeyboardKey,
-      .is_check_state_mixed = source.isCheckStateMixed,
-      .has_expanded_state = source.hasExpandedState,
-      .is_expanded = source.isExpanded,
-      .has_selected_state = source.hasSelectedState,
-      .has_required_state = source.hasRequiredState,
-      .is_required = source.isRequired,
   });
 }
 }  // namespace
