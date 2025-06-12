@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "flutter/third_party/abseil-cpp/absl/container/btree_map.h"
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
@@ -100,7 +100,8 @@ class LicensesWriter {
  public:
   explicit LicensesWriter(std::ostream& licenses) : licenses_(licenses) {}
 
-  void Write(std::string_view package, std::string_view license) {
+  void Write(const absl::flat_hash_set<std::string>& packages,
+             std::string_view license) {
     if (!first_write_) {
       for (int i = 0; i < 80; ++i) {
         licenses_.put('-');
@@ -108,7 +109,10 @@ class LicensesWriter {
       licenses_.put('\n');
     }
     first_write_ = false;
-    licenses_ << package << "\n\n" << license << "\n";
+    for (const std::string& package : packages) {
+      licenses_ << package << "\n";
+    }
+    licenses_ << "\n" << license << "\n";
   }
 
  private:
@@ -143,7 +147,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       return errors;
     }
     LicensesWriter writer(licenses);
-    absl::flat_hash_map<std::string, absl::flat_hash_set<std::string>>
+    absl::btree_map<std::string, absl::flat_hash_set<std::string>>
         license_map;
     std::string package = "engine";
     for (const std::string& git_file : git_files.value()) {
@@ -166,10 +170,6 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           return errors;
         }
       }
-      auto package_emplace_result =
-          license_map.try_emplace(package, absl::flat_hash_set<std::string>());
-      absl::flat_hash_set<std::string>& package_set =
-          package_emplace_result.first->second;
       IterateComments(file->GetData(), file->GetSize(),
                       [&](std::string_view comment) {
                         VLOG(2) << comment;
@@ -178,18 +178,24 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                           did_find_copyright = true;
                           VLOG(1) << comment;
 
-                          if (package_set.find(comment) != package_set.end()) {
+                          auto package_emplace_result = license_map.try_emplace(
+                              comment, absl::flat_hash_set<std::string>());
+                          absl::flat_hash_set<std::string>& comment_set =
+                              package_emplace_result.first->second;
+                          if (comment_set.find(package) != comment_set.end()) {
                             // License is already seen.
                             return;
                           }
-                          package_set.emplace(std::string(comment));
-                          writer.Write(package, comment);
+                          comment_set.emplace(std::string(package));
                         }
                       });
       if (!did_find_copyright) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
+    }
+    for (const auto& comment_entry : license_map) {
+      writer.Write(comment_entry.second, comment_entry.first);
     }
   }
   if (IsStdoutTerminal()) {
