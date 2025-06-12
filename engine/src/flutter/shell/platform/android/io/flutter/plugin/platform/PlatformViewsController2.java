@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouchNew;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
@@ -139,7 +140,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   @VisibleForTesting
-  public MotionEvent toMotionEvent(float density, PlatformViewsChannel2.PlatformViewTouch touch) {
+  public MotionEvent toMotionEvent(float density, PlatformViewTouchNew touch) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
@@ -668,7 +669,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         }
 
         @Override
-        public void onTouch(@NonNull PlatformViewsChannel2.PlatformViewTouch touch) {
+        public void onTouch(@NonNull PlatformViewTouchNew touch) {
           final int viewId = touch.viewId;
           final float density = context.getResources().getDisplayMetrics().density;
 

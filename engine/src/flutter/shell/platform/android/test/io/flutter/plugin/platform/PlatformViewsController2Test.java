@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.platform;
 
-import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -31,8 +30,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouchNew;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -184,8 +183,8 @@ public class PlatformViewsController2Test {
 
     MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
 
-    PlatformViewTouch frameWorkTouch =
-        new PlatformViewTouch(
+    PlatformViewTouchNew frameWorkTouch =
+        new PlatformViewTouchNew(
             0, // viewId
             original.getDownTime(),
             original.getEventTime(),
@@ -236,8 +235,8 @@ public class PlatformViewsController2Test {
                 (double) original.getX(),
                 (double) original.getY()));
     // Make a platform view touch from the motion event.
-    PlatformViewTouch frameWorkTouchNonVd =
-        new PlatformViewTouch(
+    PlatformViewTouchNew frameWorkTouchNonVd =
+        new PlatformViewTouchNew(
             0, // viewId
             original.getDownTime(),
             original.getEventTime(),

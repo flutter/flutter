@@ -295,6 +295,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/MouseCursorChannel.java",
   "io/flutter/embedding/engine/systemchannels/NavigationChannel.java",
   "io/flutter/embedding/engine/systemchannels/PlatformChannel.java",
+  "io/flutter/embedding/engine/systemchannels/PlatformViewTouchNew.java",
   "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java",
   "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel2.java",
   "io/flutter/embedding/engine/systemchannels/ProcessTextChannel.java",

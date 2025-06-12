@@ -125,8 +125,8 @@ public class PlatformViewsChannel2 {
 
         private void touch(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           List<Object> args = call.arguments();
-          PlatformViewTouch touch =
-              new PlatformViewTouch(
+          PlatformViewTouchNew touch =
+              new PlatformViewTouchNew(
                   (int) args.get(0),
                   (Number) args.get(1),
                   (Number) args.get(2),
@@ -211,7 +211,7 @@ public class PlatformViewsChannel2 {
      *
      * <p>Touch data is reported in {@code touch}.
      */
-    void onTouch(@NonNull PlatformViewTouch touch);
+    void onTouch(@NonNull PlatformViewTouchNew touch);
 
     /**
      * The Flutter application would like to change the layout direction of an existing Android
@@ -259,78 +259,6 @@ public class PlatformViewsChannel2 {
       this.logicalHeight = logicalHeight;
       this.direction = direction;
       this.params = params;
-    }
-  }
-
-  /** The state of a touch event in Flutter within a platform view. */
-  public static class PlatformViewTouch {
-    /** The ID of the platform view as seen by the Flutter side. */
-    public final int viewId;
-
-    /** The amount of time that the touch has been pressed. */
-    @NonNull public final Number downTime;
-
-    @NonNull public final Number eventTime;
-
-    public final int action;
-    /** The number of pointers (e.g, fingers) involved in the touch event. */
-    public final int pointerCount;
-    /**
-     * Properties for each pointer, encoded in a raw format. Expected to be formatted as a
-     * List[List[Integer]], where each inner list has two items: - An id, at index 0, corresponding
-     * to {@link android.view.MotionEvent.PointerProperties#id} - A tool type, at index 1,
-     * corresponding to {@link android.view.MotionEvent.PointerProperties#toolType}.
-     */
-    @NonNull public final Object rawPointerPropertiesList;
-    /** Coordinates for each pointer, encoded in a raw format. */
-    @NonNull public final Object rawPointerCoords;
-
-    public final int metaState;
-    public final int buttonState;
-    /** Coordinate precision along the x-axis. */
-    public final float xPrecision;
-    /** Coordinate precision along the y-axis. */
-    public final float yPrecision;
-
-    public final int deviceId;
-    public final int edgeFlags;
-    public final int source;
-    public final int flags;
-    public final long motionEventId;
-
-    public PlatformViewTouch(
-        int viewId,
-        @NonNull Number downTime,
-        @NonNull Number eventTime,
-        int action,
-        int pointerCount,
-        @NonNull Object rawPointerPropertiesList,
-        @NonNull Object rawPointerCoords,
-        int metaState,
-        int buttonState,
-        float xPrecision,
-        float yPrecision,
-        int deviceId,
-        int edgeFlags,
-        int source,
-        int flags,
-        long motionEventId) {
-      this.viewId = viewId;
-      this.downTime = downTime;
-      this.eventTime = eventTime;
-      this.action = action;
-      this.pointerCount = pointerCount;
-      this.rawPointerPropertiesList = rawPointerPropertiesList;
-      this.rawPointerCoords = rawPointerCoords;
-      this.metaState = metaState;
-      this.buttonState = buttonState;
-      this.xPrecision = xPrecision;
-      this.yPrecision = yPrecision;
-      this.deviceId = deviceId;
-      this.edgeFlags = edgeFlags;
-      this.source = source;
-      this.flags = flags;
-      this.motionEventId = motionEventId;
     }
   }
 }

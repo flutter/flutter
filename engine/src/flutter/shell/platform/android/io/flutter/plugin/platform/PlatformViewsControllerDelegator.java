@@ -9,6 +9,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouchNew;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
@@ -84,28 +85,9 @@ public class PlatformViewsControllerDelegator
   }
 
   @Override
-  public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
+  public void onTouch(@NonNull PlatformViewTouchNew touch) {
     if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
-      // TODO Let's not reconstruct, and instead unify the types used by the channels. Same below.
-      final PlatformViewsChannel2.PlatformViewTouch reconstructedTouch =
-          new PlatformViewsChannel2.PlatformViewTouch(
-              touch.viewId,
-              touch.downTime,
-              touch.eventTime,
-              touch.action,
-              touch.pointerCount,
-              touch.rawPointerPropertiesList,
-              touch.rawPointerCoords,
-              touch.metaState,
-              touch.buttonState,
-              touch.xPrecision,
-              touch.yPrecision,
-              touch.deviceId,
-              touch.edgeFlags,
-              touch.source,
-              touch.flags,
-              touch.motionEventId);
-      platformViewsController2.channelHandler.onTouch(reconstructedTouch);
+      platformViewsController2.channelHandler.onTouch(touch);
     } else {
       platformViewsController.channelHandler.onTouch(touch);
     }

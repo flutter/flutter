@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
-import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -42,8 +41,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouchNew;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -290,8 +289,8 @@ public class PlatformViewsControllerTest {
     // track an event that will later get passed to us from framework
     MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
 
-    PlatformViewTouch frameWorkTouch =
-        new PlatformViewTouch(
+    PlatformViewTouchNew frameWorkTouch =
+        new PlatformViewTouchNew(
             0, // viewId
             original.getDownTime(),
             original.getEventTime(),
@@ -337,8 +336,8 @@ public class PlatformViewsControllerTest {
 
     MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
 
-    PlatformViewTouch frameWorkTouch =
-        new PlatformViewTouch(
+    PlatformViewTouchNew frameWorkTouch =
+        new PlatformViewTouchNew(
             0, // viewId
             original.getDownTime(),
             original.getEventTime(),
@@ -391,8 +390,8 @@ public class PlatformViewsControllerTest {
                 (double) original.getX(),
                 (double) original.getY()));
     // Make a platform view touch from the motion event.
-    PlatformViewTouch frameWorkTouchNonVd =
-        new PlatformViewTouch(
+    PlatformViewTouchNew frameWorkTouchNonVd =
+        new PlatformViewTouchNew(
             0, // viewId
             original.getDownTime(),
             original.getEventTime(),
