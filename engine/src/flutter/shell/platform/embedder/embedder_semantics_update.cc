@@ -66,6 +66,7 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_keyboard_key = source.isKeyboardKey,
   });
 }
+
 }  // namespace
 
 namespace flutter {
