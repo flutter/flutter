@@ -22,6 +22,7 @@ import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;

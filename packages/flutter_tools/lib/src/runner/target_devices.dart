@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';

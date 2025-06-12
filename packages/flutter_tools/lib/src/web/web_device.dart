@@ -14,6 +14,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';

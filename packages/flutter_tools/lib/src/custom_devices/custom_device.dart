@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
 import '../convert.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';

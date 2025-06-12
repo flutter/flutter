@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

@@ -18,8 +18,8 @@ import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
+import 'debugging_options.dart';
 import 'devfs.dart';
-import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 

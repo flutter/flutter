@@ -30,6 +30,7 @@ import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../debugging_options.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;

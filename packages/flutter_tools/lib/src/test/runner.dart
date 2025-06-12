@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';

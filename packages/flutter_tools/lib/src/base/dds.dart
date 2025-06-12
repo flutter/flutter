@@ -9,7 +9,7 @@ import 'package:dds/dds_launcher.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';

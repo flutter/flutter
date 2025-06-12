@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;

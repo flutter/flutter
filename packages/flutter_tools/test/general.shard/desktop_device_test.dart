@@ -11,13 +11,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/debugging_options.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
-
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -268,7 +268,7 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
-        dartEntrypointArgs: <String>['arg1', 'arg2'],
+        dartEntrypointArgs: const <String>['arg1', 'arg2'],
       ),
     );
 
@@ -302,7 +302,7 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
-        dartEntrypointArgs: <String>['arg1', 'arg2'],
+        dartEntrypointArgs: const <String>['arg1', 'arg2'],
       ),
     );
   });
@@ -330,7 +330,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         enableImpeller: ImpellerStatus.enabled,
-        dartEntrypointArgs: <String>[],
       ),
     );
   });
@@ -358,7 +357,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         enableImpeller: ImpellerStatus.disabled,
-        dartEntrypointArgs: <String>[],
       ),
     );
   });
@@ -383,7 +381,6 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
             enableImpeller: ImpellerStatus.disabled,
-            dartEntrypointArgs: <String>[],
             usingCISystem: true,
           ),
         );

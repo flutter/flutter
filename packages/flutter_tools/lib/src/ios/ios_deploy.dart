@@ -15,7 +15,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import 'code_signing.dart';
 
 // Error message patterns from ios-deploy output

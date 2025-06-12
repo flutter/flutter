@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../application_package.dart';
 import '../base/dds.dart';
 import '../build_info.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';

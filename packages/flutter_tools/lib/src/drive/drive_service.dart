@@ -17,6 +17,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
