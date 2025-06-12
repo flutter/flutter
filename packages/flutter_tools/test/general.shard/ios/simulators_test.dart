@@ -378,9 +378,9 @@ void main() {
 
     testUsingContext(
       'iPhone X is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone X',
             simControl: simControl,
