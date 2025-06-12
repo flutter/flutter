@@ -285,8 +285,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _populatePreviewPubspec(rootProject: rootProject);
     }
 
-    final PreviewMapping initialPreviews = await _previewDetector.initialize();
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
+    final PreviewDependencyGraph graph = await _previewDetector.initialize();
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
     if (boolArg(kLaunchPreviewer)) {
       shutdownHooks.addShutdownHook(() async {
@@ -306,7 +306,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     return FlutterCommandResult.success();
   }
 
-  void onChangeDetected(PreviewMapping previews) {
+  void onChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
     _widgetPreviewApp?.restart();
