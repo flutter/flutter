@@ -95,6 +95,27 @@ void PrintProgress(size_t idx, size_t count) {
 bool IsStdoutTerminal() {
   return isatty(STDOUT_FILENO);
 }
+
+class LicensesWriter {
+ public:
+  explicit LicensesWriter(std::ostream& licenses) : licenses_(licenses) {}
+
+  void Write(std::string_view package, std::string_view license) {
+    if (!first_write_) {
+      for (int i = 0; i < 80; ++i) {
+        licenses_.put('-');
+      }
+      licenses_.put('\n');
+    }
+    first_write_ = false;
+    licenses_ << package << "\n\n" << license << "\n";
+  }
+
+ private:
+  std::ostream& licenses_;
+  bool first_write_ = true;
+};
+
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
@@ -121,7 +142,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       errors.push_back(git_files.status());
       return errors;
     }
-    bool is_first_write = true;
+    LicensesWriter writer(licenses);
     absl::flat_hash_map<std::string, absl::flat_hash_set<std::string>>
         license_map;
     std::string package = "engine";
@@ -164,14 +185,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                 }
               }
               package_set.emplace(std::string(comment));
-              if (!is_first_write) {
-                for (int i = 0; i < 80; ++i) {
-                  licenses.put('-');
-                }
-                licenses.put('\n');
-              }
-              is_first_write = false;
-              licenses << package << "\n\n" << comment << "\n";
+              writer.Write(package, comment);
             }
           });
       if (!did_find_copyright) {
