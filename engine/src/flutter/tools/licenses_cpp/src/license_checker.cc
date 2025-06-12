@@ -166,28 +166,26 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           return errors;
         }
       }
-      IterateComments(
-          file->GetData(), file->GetSize(), [&](std::string_view comment) {
-            VLOG(2) << comment;
-            re2::StringPiece match;
-            if (RE2::PartialMatch(comment, pattern, &match)) {
-              did_find_copyright = true;
-              VLOG(1) << comment;
+      auto package_emplace_result =
+          license_map.try_emplace(package, absl::flat_hash_set<std::string>());
+      absl::flat_hash_set<std::string>& package_set =
+          package_emplace_result.first->second;
+      IterateComments(file->GetData(), file->GetSize(),
+                      [&](std::string_view comment) {
+                        VLOG(2) << comment;
+                        re2::StringPiece match;
+                        if (RE2::PartialMatch(comment, pattern, &match)) {
+                          did_find_copyright = true;
+                          VLOG(1) << comment;
 
-              auto package_emplace_result = license_map.try_emplace(
-                  package, absl::flat_hash_set<std::string>());
-              absl::flat_hash_set<std::string>& package_set =
-                  package_emplace_result.first->second;
-              if (!package_emplace_result.second) {
-                if (package_set.find(comment) != package_set.end()) {
-                  // License is already seen.
-                  return;
-                }
-              }
-              package_set.emplace(std::string(comment));
-              writer.Write(package, comment);
-            }
-          });
+                          if (package_set.find(comment) != package_set.end()) {
+                            // License is already seen.
+                            return;
+                          }
+                          package_set.emplace(std::string(comment));
+                          writer.Write(package, comment);
+                        }
+                      });
       if (!did_find_copyright) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
