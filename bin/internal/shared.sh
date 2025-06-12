@@ -197,6 +197,10 @@ function upgrade_flutter () (
       rm -f "$SNAPSHOT_PATH_OLD"
     fi
   fi
+
+  # Even if pub did nothing, ensure the lockfile appears updated.
+  touch "$FLUTTER_TOOLS_DIR/pubspec.lock"
+
   # The exit here is extraneous since the function is run in a subshell, but
   # this serves as documentation that running the function in a subshell is
   # required to make sure any lock directory created by mkdir is cleaned up.
