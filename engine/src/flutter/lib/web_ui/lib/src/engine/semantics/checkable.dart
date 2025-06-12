@@ -33,7 +33,7 @@ enum _CheckableKind {
 _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) {
   if (semanticsObject.flags.isInMutuallyExclusiveGroup) {
     return _CheckableKind.radio;
-  } else if (semanticsObject.flags.hasToggledState) {
+  } else if (semanticsObject.flags.isToggled != Tristate.none) {
     return _CheckableKind.toggle;
   } else {
     return _CheckableKind.checkbox;

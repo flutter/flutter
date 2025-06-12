@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'dart:ui'
+    show CheckedState;
 
 import 'basic.dart';
 import 'binding.dart';
@@ -226,8 +228,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final List<String> annotations = <String>[];
 
     bool wantsTap = false;
-    if (data.flagsCollection.hasCheckedState) {
-      annotations.add(data.flagsCollection.isChecked ? 'checked' : 'unchecked');
+    if (data.flagsCollection.isChecked != CheckedState.none ) {
+      annotations.add(data.flagsCollection.isChecked ==  CheckedState.isTrue ? 'checked' : 'unchecked');
       wantsTap = true;
     }
     if (data.flagsCollection.isTextField) {
