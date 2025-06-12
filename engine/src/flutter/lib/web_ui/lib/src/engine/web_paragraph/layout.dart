@@ -397,6 +397,7 @@ class TextLayout {
     double shiftInsideLine = 0.0;
     for (final BidiIndex visual in visuals) {
       final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
+      // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange runClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
         lineClusterRange,
@@ -432,15 +433,17 @@ class TextLayout {
         WebParagraphDebug.log(
           'Style: ${styledTextBlock.textRange} & $runTextRange = $styleTextRange ',
         );
+
         final ClusterRange styleClusterRange = convertTextToClusterRange(styleTextRange);
         final String styleText = getTextFromMonodirectionalClusterRange(styleClusterRange);
         final ui.Rect advance = getAdvance(
           styledTextBlock.textMetrics,
           styleTextRange.translate(-styledTextBlock.textRange.start),
         );
-        final ExtendedTextCluster firstVisualClusterInBlock = bidiRun.bidiLevel.isEven
-            ? textClusters[styleClusterRange.start]
-            : textClusters[styleClusterRange.end - 1];
+        final ExtendedTextCluster firstVisualClusterInBlock =
+            bidiRun.bidiLevel.isEven
+                ? textClusters[styleClusterRange.start]
+                : textClusters[styleClusterRange.end - 1];
 
         line.visualBlocks.add(
           LineBlock(
@@ -454,6 +457,22 @@ class TextLayout {
             styledTextBlock.textRange.start,
           ),
         );
+
+        WebParagraphDebug.log(
+          'Multiply: ${line.visualBlocks.last.multiplier} ${line.visualBlocks.last.rawFontBoundingBoxAscent} ${line.visualBlocks.last.multipliedFontBoundingBoxAscent} '
+          '${styledTextBlock.textStyle.height!} ${styledTextBlock.textStyle.fontSize!} ',
+        );
+
+        // Line always counts multipled metrics (no need for the others)
+        line.fontBoundingBoxAscent = math.max(
+          line.fontBoundingBoxAscent,
+          line.visualBlocks.last.multipliedFontBoundingBoxAscent,
+        );
+        line.fontBoundingBoxDescent = math.max(
+          line.fontBoundingBoxDescent,
+          line.visualBlocks.last.multipliedFontBoundingBoxDescent,
+        );
+
         WebParagraphDebug.log(
           'Style: "$styleText" clusterRange: $styleClusterRange '
           'width:${advance.width} shift:${line.visualBlocks.last.clusterShiftInLine}=$shiftInsideLine-${firstVisualClusterInBlock.advance.left} ',
@@ -462,30 +481,12 @@ class TextLayout {
       }
     }
 
-    // At this point we are agnostic of any fonts participating in text shaping
-    // so we have to assume each cluster has a (different) font
-    // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
-    // TODO(jlavrova): count ascent/descent by blocks, not by clusters
-    line.fontBoundingBoxAscent = 0.0;
-    line.fontBoundingBoxDescent = 0.0;
-    for (int i = line.textRange.start; i < line.textRange.end; i += 1) {
-      final ExtendedTextCluster cluster = textClusters[i];
-      line.fontBoundingBoxAscent = math.max(
-        line.fontBoundingBoxAscent,
-        cluster.fontBoundingBoxAscent,
-      );
-      line.fontBoundingBoxDescent = math.max(
-        line.fontBoundingBoxDescent,
-        cluster.fontBoundingBoxDescent,
-      );
-    }
-
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
       shiftInsideLine,
       // At the end this shift is equal to the entire line width
-      line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
+      line.height,
     );
     lines.add(line);
     WebParagraphDebug.log(
@@ -572,7 +573,7 @@ class TextLayout {
           rects.first.top,
           rects.first.width,
           rects.first.height,
-        ).translate(-block.advance.left, block.fontBoundingBoxAscent);
+        ).translate(-block.advance.left, block.rawFontBoundingBoxAscent); // block.advance.top == 0
         WebParagraphDebug.log(
           'getSelectionRects(${intersect.start},${intersect.end}): '
           '${firstRect.left}:${firstRect.right} x ${firstRect.top}:${firstRect.bottom}',
@@ -585,25 +586,34 @@ class TextLayout {
                 firstRect.top +
                 line.advance.top +
                 line.fontBoundingBoxAscent -
-                block.fontBoundingBoxAscent;
-            bottom = top + block.fontBoundingBoxAscent + block.fontBoundingBoxDescent;
+                block.rawFontBoundingBoxAscent;
+            bottom = top + block.rawHeight;
             assert((block.advance.height - (bottom - top).abs() < EPSILON));
           case ui.BoxHeightStyle.max:
             top = firstRect.top + line.advance.top;
-            bottom = top + line.fontBoundingBoxAscent + line.fontBoundingBoxDescent;
+            bottom = firstRect.top + line.advance.bottom;
             assert((line.advance.height - (bottom - top).abs() < EPSILON));
           case ui.BoxHeightStyle.strut:
             // TODO(jlavrova): implement
             throw UnimplementedError('BoxHeightStyle.strut not implemented');
           case ui.BoxHeightStyle.includeLineSpacingMiddle:
-            // TODO(jlavrova): implement
-            throw UnimplementedError('BoxHeightStyle.includeLineSpacingMiddle not implemented');
+            top =
+                line.advance.top +
+                (line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent) / 2;
+            bottom =
+                line.advance.top +
+                line.fontBoundingBoxAscent +
+                (line.fontBoundingBoxDescent + block.rawFontBoundingBoxDescent) / 2;
           case ui.BoxHeightStyle.includeLineSpacingTop:
-            // TODO(jlavrova): implement
-            throw UnimplementedError('BoxHeightStyle.includeLineSpacingTop not implemented');
+            top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
+            bottom =
+                line.advance.top +
+                line.fontBoundingBoxAscent +
+                line.fontBoundingBoxDescent;
           case ui.BoxHeightStyle.includeLineSpacingBottom:
-            // TODO(jlavrova): implement
-            throw UnimplementedError('BoxHeightStyle.includeLineSpacingBottom not implemented');
+            top = line.advance.top;
+            bottom =
+                line.advance.top + line.fontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
         }
         left = firstRect.left - (line.advance.left + line.formattingShift);
         right = left + firstRect.width;
@@ -689,12 +699,10 @@ class TextLayout {
           continue;
         }
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
-        final int start = block.bidiLevel.isEven
-            ? block.clusterRange.start
-            : block.clusterRange.end - 1;
-        final int end = block.bidiLevel.isEven
-            ? block.clusterRange.end
-            : block.clusterRange.start - 1;
+        final int start =
+            block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
+        final int end =
+            block.bidiLevel.isEven ? block.clusterRange.end : block.clusterRange.start - 1;
         final int step = block.bidiLevel.isEven ? 1 : -1;
         WebParagraphDebug.log('Found block: ${block.clusterRange}');
         for (int i = start; i != end; i += step) {
@@ -825,8 +833,15 @@ class LineBlock {
     this.advance,
     this.clusterShiftInLine,
     this.textMetricsZero,
-  ) : fontBoundingBoxAscent = textMetrics!.fontBoundingBoxAscent,
-      fontBoundingBoxDescent = textMetrics.fontBoundingBoxDescent;
+  );
+
+  double get multiplier => textStyle.height == null ? 1.0 : textStyle.height!;
+  double get rawHeight => textMetrics!.fontBoundingBoxAscent + textMetrics!.fontBoundingBoxDescent;
+  double get rawFontBoundingBoxAscent => textMetrics!.fontBoundingBoxAscent;
+  double get rawFontBoundingBoxDescent => textMetrics!.fontBoundingBoxDescent;
+  double get multipliedHeight => rawHeight * multiplier;
+  double get multipliedFontBoundingBoxAscent => rawFontBoundingBoxAscent * multiplier;
+  double get multipliedFontBoundingBoxDescent => rawFontBoundingBoxDescent * multiplier;
 
   // TODO(jlavrova): we probably do not need that reference
   final DomTextMetrics? textMetrics; // This is just a reference to a parent styled text block
@@ -837,13 +852,12 @@ class LineBlock {
   final ui.Rect advance;
   final double clusterShiftInLine;
   final int textMetricsZero; // from the beginning of the line to this block start
-
-  double fontBoundingBoxAscent = 0.0;
-  double fontBoundingBoxDescent = 0.0;
 }
 
 class TextLine {
   TextLine(this.textRange, this.whitespacesRange, this.hardLineBreak);
+
+  double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
 
   final ClusterRange textRange;
   final ClusterRange whitespacesRange;

@@ -120,4 +120,41 @@ Future<void> testMain() async {
       );
     }
   });
+
+  test('Paragraph getBoxesForRange includeLineSpacing multiple lines', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Arial', fontSize: 20, height: 2.0);
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(heightStyle);
+    builder.addText(
+      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+    }
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+    }
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+    }
+  });
 }

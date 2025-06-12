@@ -75,3 +75,4 @@ Future<void> testMain() async {
     expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
   });
 }
+// SkParagraph_PositionInsideEmoji

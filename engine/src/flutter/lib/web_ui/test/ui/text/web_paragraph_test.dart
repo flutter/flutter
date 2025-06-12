@@ -680,9 +680,15 @@ Future<void> testMain() async {
           ..color = const Color(0xFF0000FF)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1;
-
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    final Paint greenPaint =
+        Paint()
+          ..color = const Color(0xFF00FF00)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
+    final WebParagraphStyle robotoStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, height: 2.0);
+    final WebParagraphBuilder builder = WebParagraphBuilder(robotoStyle);
+    builder.pushStyle(heightStyle);
     builder.addText(
       'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
     );
@@ -690,19 +696,43 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
 
-    final rects = paragraph.getBoxesForRange(
-      0,
-      paragraph.text!.length,
-      boxHeightStyle: BoxHeightStyle.max,
-      boxWidthStyle: BoxWidthStyle.max,
-    );
-
-    bool flip = true;
-    for (final rect in rects) {
-      print('${rect.left}:${rect.right}x${rect.top}:${rect.bottom} ');
-      canvas.drawRect(rect.toRect(), flip ? redPaint : bluePaint);
-      flip = !flip;
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: BoxHeightStyle.includeLineSpacingTop,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+      for (final rect in rects) {
+        print('$rect');
+        canvas.drawRect(rect.toRect(), bluePaint);
+      }
     }
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: BoxHeightStyle.includeLineSpacingBottom,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+      for (final rect in rects) {
+        print('$rect');
+        canvas.drawRect(rect.toRect(), redPaint);
+      }
+    }
+    {
+      final rects = paragraph.getBoxesForRange(
+        0,
+        paragraph.text!.length,
+        boxHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
+        //boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+      for (final rect in rects) {
+        print('$rect');
+        canvas.drawRect(rect.toRect(), greenPaint);
+      }
+    }
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_query_boxes_ltr_1.png', region: region);
   });

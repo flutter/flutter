@@ -55,7 +55,7 @@ class TextPaint {
         block,
         ui.Offset(
           line.advance.left + line.formattingShift + block.clusterShiftInLine,
-          line.advance.top + line.fontBoundingBoxAscent - block.textMetrics!.fontBoundingBoxAscent,
+          line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
         ),
         ui.Offset(x, y),
       );
@@ -85,6 +85,9 @@ class TextPaint {
       if (!block.textStyle.hasElement(styleElement)) {
         continue;
       }
+      WebParagraphDebug.log(
+        'paintByClusters: ${line.fontBoundingBoxAscent} - ${block.rawFontBoundingBoxAscent}',
+      );
       final int start =
           block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
       final int end =
@@ -98,9 +101,7 @@ class TextPaint {
           clusterText,
           ui.Offset(
             line.advance.left + line.formattingShift + block.clusterShiftInLine,
-            line.advance.top +
-                line.fontBoundingBoxAscent -
-                block.textMetrics!.fontBoundingBoxAscent,
+            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
         );
@@ -153,8 +154,7 @@ class TextPaint {
 
     final String text = paragraph.getText(webTextCluster.textRange);
     WebParagraphDebug.log(
-      'calculateBlock "$text" ${block.textRange}-${block.textMetricsZero} ${block.clusterRange} '
-      'source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right}',
+      'calculateBlock "$text" ${block.textRange}-${block.textMetricsZero} ${block.clusterRange} source: $sourceRect => target: $targetRect',
     );
 
     return (sourceRect, targetRect);

@@ -121,6 +121,7 @@ class WebTextStyle implements ui.TextStyle {
     double? decorationThickness,
     double? letterSpacing,
     double? wordSpacing,
+    double? height,
   }) {
     return WebTextStyle._(
       originalFontFamily: fontFamily ?? 'Arial',
@@ -136,6 +137,7 @@ class WebTextStyle implements ui.TextStyle {
       decorationThickness: decorationThickness,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
+      height: height,
     );
   }
 
@@ -153,6 +155,7 @@ class WebTextStyle implements ui.TextStyle {
     required this.decorationThickness,
     required this.letterSpacing,
     required this.wordSpacing,
+    required this.height,
   });
 
   final String? originalFontFamily;
@@ -168,6 +171,7 @@ class WebTextStyle implements ui.TextStyle {
   final double? decorationThickness;
   final double? letterSpacing;
   final double? wordSpacing;
+  final double? height;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -188,6 +192,7 @@ class WebTextStyle implements ui.TextStyle {
       decorationThickness: other.decorationThickness ?? decorationThickness,
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
+      height: other.height ?? height,
     );
   }
 
@@ -209,7 +214,8 @@ class WebTextStyle implements ui.TextStyle {
         other.decorationStyle == decorationStyle &&
         other.decorationThickness == decorationThickness &&
         other.letterSpacing == letterSpacing &&
-        other.wordSpacing == wordSpacing;
+        other.wordSpacing == wordSpacing &&
+        other.height == height;
   }
 
   @override
@@ -228,6 +234,7 @@ class WebTextStyle implements ui.TextStyle {
       decorationThickness,
       letterSpacing,
       wordSpacing,
+      height,
     );
   }
 
@@ -263,6 +270,9 @@ class WebTextStyle implements ui.TextStyle {
       }
       if (wordSpacing != null) {
         result += 'wordSpacing: $wordSpacing ';
+      }
+      if (height != null) {
+        result += 'height: $height ';
       }
       return true;
     }());
