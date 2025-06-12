@@ -12,7 +12,8 @@ import 'package:pub_semver/pub_semver.dart';
 
 import '../base/file_system.dart';
 import '../project.dart';
-import 'preview_detector.dart';
+import 'dependency_graph.dart';
+import 'preview_details.dart';
 
 typedef _PreviewMappingEntry = MapEntry<PreviewPath, PreviewDependencyNode>;
 
