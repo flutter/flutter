@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <fstream>
+
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
@@ -39,7 +41,7 @@ int main(int argc, char** argv) {
     std::ofstream licenses;
     licenses.open(licenses_path.value());
     if (licenses.bad()) {
-      std::cerr << "Unable to write to '" << licenses_path << "'.";
+      std::cerr << "Unable to write to '" << licenses_path.value() << "'.";
       return 1;
     }
     return LicenseChecker::Run(working_dir.value(), licenses, data_dir.value());
