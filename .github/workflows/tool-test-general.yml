@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Note: we must check out the tree for the composite action to be available
       - uses: actions/checkout@v4
       - uses: ./.github/actions/composite-flutter-setup
 
