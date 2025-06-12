@@ -150,6 +150,29 @@ class FlutterPlugin : Plugin<Project> {
                 isUniversalApk = false
             }
         } else {
+            // When splits-per-abi is NOT enabled, configure abiFilters to control which
+            // native libraries are included in the APK.
+            //
+            // This is crucial: If a project includes third-party dependencies with x86 native libraries,
+            // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
+            // When users with x86 devices install the app, it would crash at runtime because Flutter's
+            // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
+            // correctly excludes x86 devices from the compatible device list.
+            //
+            // NOTE: This code does NOT affect "add-to-app" scenarios because:
+            // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
+            //    are not packaged into AAR artifacts - they are only added as dependencies
+            //    in pom files.
+            // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
+            //    Gradle Plugin is not applied to the main app subproject, so this apply()
+            //    method is never called.
+            //
+            // abiFilters cannot be added to templates because it would break builds when
+            // --splits-per-abi is used due to conflicting configuration. This approach
+            // adds them programmatically only when splits are not configured.
+            //
+            // If the user has specified abiFilters in their build.gradle file, those
+            // settings will take precedence over these defaults.
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
                 buildType.ndk.abiFilters.clear()
                 FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
