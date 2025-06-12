@@ -8,21 +8,21 @@ import android.content.Context;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
-public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate, PlatformViewsChannel.PlatformViewsHandler {
+public class PlatformViewsControllerDelegator
+    implements PlatformViewsAccessibilityDelegate, PlatformViewsChannel.PlatformViewsHandler {
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
 
   public PlatformViewsControllerDelegator(
-          PlatformViewsController platformViewsController,
-          PlatformViewsController2 platformViewsController2) {
+      PlatformViewsController platformViewsController,
+      PlatformViewsController2 platformViewsController2) {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
   }
@@ -31,15 +31,15 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   @Override
   public View getPlatformViewById(int viewId) {
     return platformViewsController2.getPlatformViewById(viewId) != null
-            ? platformViewsController2.getPlatformViewById(viewId)
-            : platformViewsController.getPlatformViewById(viewId);
+        ? platformViewsController2.getPlatformViewById(viewId)
+        : platformViewsController.getPlatformViewById(viewId);
   }
 
   @Override
   public boolean usesVirtualDisplay(int id) {
     return platformViewsController2.getPlatformViewById(id) != null
-            ? platformViewsController2.usesVirtualDisplay(id)
-            : platformViewsController.usesVirtualDisplay(id);
+        ? platformViewsController2.usesVirtualDisplay(id)
+        : platformViewsController.usesVirtualDisplay(id);
   }
 
   @Override
@@ -64,7 +64,9 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   }
 
   @Override
-  public void resize(@NonNull PlatformViewsChannel.PlatformViewResizeRequest request, @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
+  public void resize(
+      @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
+      @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
     if (platformViewsController2.getPlatformViewById(request.viewId) != null) {
       // this is a no op
     } else {
@@ -85,7 +87,7 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
     if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
       // TODO no op until the two touch types are unified, I don't feel like reconstructing here
-      //platformViewsController2.channelHandler.onTouch(touch);
+      // platformViewsController2.channelHandler.onTouch(touch);
     } else {
       platformViewsController.channelHandler.onTouch(touch);
     }
@@ -102,11 +104,11 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
 
   @Override
   public void clearFocus(int viewId) {
-      if (platformViewsController2.getPlatformViewById(viewId) != null) {
-          platformViewsController2.channelHandler.clearFocus(viewId);
-      } else {
-          platformViewsController.channelHandler.clearFocus(viewId);
-      }
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.channelHandler.clearFocus(viewId);
+    } else {
+      platformViewsController.channelHandler.clearFocus(viewId);
+    }
   }
 
   @Override
@@ -121,13 +123,15 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
 
   // hc only
   @Override
-  public void createForPlatformViewLayer(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+  public void createForPlatformViewLayer(
+      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     platformViewsController.channelHandler.createForPlatformViewLayer(request);
   }
 
   // tlhc w/ fallbacks
   @Override
-  public long createForTextureLayer(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+  public long createForTextureLayer(
+      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     return platformViewsController.channelHandler.createForTextureLayer(request);
   }
 
@@ -138,17 +142,17 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   }
 
   public void attach(
-          @Nullable Context context,
-          @NonNull TextureRegistry textureRegistry,
-          @NonNull DartExecutor dartExecutor) {
+      @Nullable Context context,
+      @NonNull TextureRegistry textureRegistry,
+      @NonNull DartExecutor dartExecutor) {
 
     platformViewsController.getPlatformViewsChannel().setPlatformViewsHandler(this);
   }
 
   // TODO(gmackall) Can we define a common interface, allowing us to do something like this?
-//  private PlatformViewsController delegateToController(int viewId) {
-//    return platformViewsController2.getPlatformViewById(viewId) != null
-//            ? platformViewsController2
-//            : platformViewsController;
-//  }
+  //  private PlatformViewsController delegateToController(int viewId) {
+  //    return platformViewsController2.getPlatformViewById(viewId) != null
+  //            ? platformViewsController2
+  //            : platformViewsController;
+  //  }
 }

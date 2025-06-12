@@ -411,7 +411,8 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
 
-    this.platformViewsControllerDelegator = new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+    this.platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
 
     this.pluginRegistry =
         new FlutterEngineConnectionRegistry(
@@ -697,7 +698,9 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   }
 
   @NonNull
-  public PlatformViewsControllerDelegator getPlatformViewsControllerDelegator() { return platformViewsControllerDelegator; }
+  public PlatformViewsControllerDelegator getPlatformViewsControllerDelegator() {
+    return platformViewsControllerDelegator;
+  }
 
   @NonNull
   public ActivityControlSurface getActivityControlSurface() {
