@@ -14,14 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 SemanticsFlags allFlags = SemanticsFlags(
-  hasCheckedState: true,
-  isChecked: true,
-  isSelected: true,
+  isChecked: ui.CheckedState.isTrue,
+  isSelected: ui.Tristate.isTrue,
+  isEnabled: ui.Tristate.isTrue,
+  isToggled: ui.Tristate.isTrue,
+  isExpanded: ui.Tristate.isTrue,
+  isRequired: ui.Tristate.isTrue,
+  isFocused: ui.Tristate.isTrue,
   isButton: true,
   isTextField: true,
-  isFocused: true,
-  hasEnabledState: true,
-  isEnabled: true,
   isInMutuallyExclusiveGroup: true,
   isHeader: true,
   isObscured: true,
@@ -30,21 +31,12 @@ SemanticsFlags allFlags = SemanticsFlags(
   isHidden: true,
   isImage: true,
   isLiveRegion: true,
-  hasToggledState: true,
-  isToggled: true,
   hasImplicitScrolling: true,
   isMultiline: true,
   isReadOnly: true,
-  isFocusable: true,
   isLink: true,
   isSlider: true,
   isKeyboardKey: true,
-  isCheckStateMixed: true,
-  hasExpandedState: true,
-  isExpanded: true,
-  hasSelectedState: true,
-  hasRequiredState: true,
-  isRequired: true,
 );
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -777,7 +769,6 @@ void main() {
           /* Flags */
           hasCheckedState: true,
           isChecked: true,
-          isCheckStateMixed: true,
           hasSelectedState: true,
           isSelected: true,
           isButton: true,
