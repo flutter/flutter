@@ -1217,7 +1217,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
 
   // Test unchecked too.
   auto updated_flags = FlutterSemanticsFlags{
-      is_checked = FlutterCheckState::kFlutterCheckStateFalse,
+      .is_checked = FlutterCheckState::kFlutterCheckStateFalse,
   };
   root.flags2 = &updated_flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
