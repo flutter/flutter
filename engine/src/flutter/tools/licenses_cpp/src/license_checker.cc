@@ -5,10 +5,12 @@
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
 #include <unistd.h>
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 #include <vector>
 
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
@@ -120,6 +122,9 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       return errors;
     }
     bool is_first_write = true;
+    absl::flat_hash_map<std::string, absl::flat_hash_set<std::string>>
+        license_map;
+    std::string package = "engine";
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
@@ -140,23 +145,35 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           return errors;
         }
       }
-      IterateComments(file->GetData(), file->GetSize(),
-                      [&](std::string_view comment) {
-                        VLOG(2) << comment;
-                        re2::StringPiece match;
-                        if (RE2::PartialMatch(comment, pattern, &match)) {
-                          did_find_copyright = true;
-                          VLOG(1) << comment;
-                          if (!is_first_write) {
-                            for (int i = 0; i < 80; ++i) {
-                              licenses.put('-');
-                            }
-                            licenses.put('\n');
-                          }
-                          is_first_write = false;
-                          licenses << "engine\n\n" << comment << "\n";
-                        }
-                      });
+      IterateComments(
+          file->GetData(), file->GetSize(), [&](std::string_view comment) {
+            VLOG(2) << comment;
+            re2::StringPiece match;
+            if (RE2::PartialMatch(comment, pattern, &match)) {
+              did_find_copyright = true;
+              VLOG(1) << comment;
+
+              auto package_emplace_result = license_map.try_emplace(
+                  package, absl::flat_hash_set<std::string>());
+              absl::flat_hash_set<std::string>& package_set =
+                  package_emplace_result.first->second;
+              if (!package_emplace_result.second) {
+                if (package_set.find(comment) != package_set.end()) {
+                  // License is already seen.
+                  return;
+                }
+              }
+              package_set.emplace(std::string(comment));
+              if (!is_first_write) {
+                for (int i = 0; i < 80; ++i) {
+                  licenses.put('-');
+                }
+                licenses.put('\n');
+              }
+              is_first_write = false;
+              licenses << package << "\n\n" << comment << "\n";
+            }
+          });
       if (!did_find_copyright) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
