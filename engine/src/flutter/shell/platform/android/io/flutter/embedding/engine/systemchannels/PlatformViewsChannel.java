@@ -81,7 +81,6 @@ public class PlatformViewsChannel {
         }
 
         private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          // if hcpp go take the other path
 
           final Map<String, Object> createArgs = call.arguments();
           // TODO(egarciad): Remove the "hybrid" case.
@@ -91,6 +90,24 @@ public class PlatformViewsChannel {
               createArgs.containsKey("params")
                   ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                   : null;
+
+          // if hcpp go take the other path
+          if (handler.isHcppEnabled()) {
+            final PlatformViewCreationRequest request =
+                new PlatformViewCreationRequest(
+                    (int) createArgs.get("id"),
+                    (String) createArgs.get("viewType"),
+                    0,
+                    0,
+                    0,
+                    0,
+                    (int) createArgs.get("direction"),
+                    PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
+                    additionalParams);
+            handler.createPlatformViewHcpp(request);
+
+            return;
+          }
           try {
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
@@ -307,6 +324,10 @@ public class PlatformViewsChannel {
      * @param request The metadata sent from the framework.
      */
     void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request);
+
+    public boolean isHcppEnabled();
+
+    void createPlatformViewHcpp(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request);
 
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform

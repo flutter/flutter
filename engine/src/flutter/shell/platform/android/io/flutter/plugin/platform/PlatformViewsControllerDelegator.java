@@ -116,7 +116,7 @@ public class PlatformViewsControllerDelegator
     platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
   }
 
-  //  @Override
+  @Override
   public boolean isHcppEnabled() {
     return platformViewsController2.isHcppEnabled();
   }
@@ -136,9 +136,14 @@ public class PlatformViewsControllerDelegator
   }
 
   // hcpp
-  void createPlatformView(@NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+  @Override
+  public void createPlatformViewHcpp(
+      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     // todo, unify the creation class
-    platformViewsController2.channelHandler.createPlatformView(request);
+    final PlatformViewsChannel2.PlatformViewCreationRequest reconstructedRequest =
+        new PlatformViewsChannel2.PlatformViewCreationRequest(
+            request.viewId, request.viewType, 0, 0, request.direction, request.params);
+    platformViewsController2.channelHandler.createPlatformView(reconstructedRequest);
   }
 
   public void attach(

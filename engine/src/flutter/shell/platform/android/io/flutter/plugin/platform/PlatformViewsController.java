@@ -176,6 +176,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // not applicable to fallback from TLHC to HC.
         }
 
+        @Override
+        public boolean isHcppEnabled() {
+          return false;
+          // no op
+        }
+
+        @Override
+        public void createPlatformViewHcpp(
+            @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+          // no op
+        }
+
         @SuppressLint("NewApi")
         @Override
         public long createForTextureLayer(
