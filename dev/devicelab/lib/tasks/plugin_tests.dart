@@ -77,12 +77,14 @@ class PluginTest {
         await plugin.runFlutterTest();
         if (!dartOnlyPlugin) {
           await plugin.example.runNativeTests(buildTarget);
-          bool runResult = false;
-          await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
-            runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
-          });
-          if (!runResult) {
-            return TaskResult.failure('flutter run either failed or had an engine error.');
+          if (buildTarget == 'ios') {
+            bool runResult = false;
+            await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
+              runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
+            });
+            if (!runResult) {
+              return TaskResult.failure('flutter run either failed or had an engine error.');
+            }
           }
         }
       }
