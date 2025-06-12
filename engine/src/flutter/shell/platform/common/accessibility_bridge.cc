@@ -311,42 +311,43 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
 
 void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
                                                    const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
-  FML_DCHECK(flags) << "SemanticsNode::flags must not be null";
-  if (flags->is_button) {
+  FlutterSemanticsFlag flags = node.flags;
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsButton) {
     node_data.role = ax::mojom::Role::kButton;
     return;
   }
-  if (flags->is_text_field && !flags->is_read_only) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
+      !(flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly)) {
     node_data.role = ax::mojom::Role::kTextField;
     return;
   }
-  if (flags->is_header) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsHeader) {
     node_data.role = ax::mojom::Role::kHeader;
     return;
   }
-  if (flags->is_image) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsImage) {
     node_data.role = ax::mojom::Role::kImage;
     return;
   }
-  if (flags->is_link) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsLink) {
     node_data.role = ax::mojom::Role::kLink;
     return;
   }
 
-  if (flags->is_in_mutually_exclusive_group && flags->has_checked_state) {
+  if (flags & kFlutterSemanticsFlagIsInMutuallyExclusiveGroup &&
+      flags & kFlutterSemanticsFlagHasCheckedState) {
     node_data.role = ax::mojom::Role::kRadioButton;
     return;
   }
-  if (flags->has_checked_state) {
+  if (flags & kFlutterSemanticsFlagHasCheckedState) {
     node_data.role = ax::mojom::Role::kCheckBox;
     return;
   }
-  if (flags->has_toggled_state) {
+  if (flags & kFlutterSemanticsFlagHasToggledState) {
     node_data.role = ax::mojom::Role::kSwitch;
     return;
   }
-  if (flags->is_slider) {
+  if (flags & kFlutterSemanticsFlagIsSlider) {
     node_data.role = ax::mojom::Role::kSlider;
     return;
   }
@@ -361,14 +362,17 @@ void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
 
 void AccessibilityBridge::SetStateFromFlutterUpdate(ui::AXNodeData& node_data,
                                                     const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
+  FlutterSemanticsFlag flags = node.flags;
   FlutterSemanticsAction actions = node.actions;
-  if (flags->has_expanded_state && flags->is_expanded) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState &&
+      flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsExpanded) {
     node_data.AddState(ax::mojom::State::kExpanded);
-  } else if (flags->has_expanded_state) {
+  } else if (flags &
+             FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState) {
     node_data.AddState(ax::mojom::State::kCollapsed);
   }
-  if (flags->is_text_field && !flags->is_read_only) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
+      (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0) {
     node_data.AddState(ax::mojom::State::kEditable);
   }
   if (node_data.role == ax::mojom::Role::kStaticText &&
@@ -431,7 +435,7 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
     ui::AXNodeData& node_data,
     const SemanticsNode& node) {
   FlutterSemanticsAction actions = node.actions;
-  const FlutterSemanticsFlags* flags = node.flags;
+  FlutterSemanticsFlag flags = node.flags;
   node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kScrollable,
                              actions & kHasScrollingAction);
   node_data.AddBoolAttribute(
@@ -440,10 +444,13 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
   // TODO(chunhtai): figure out if there is a node that does not clip overflow.
   node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kClipsChildren,
                              !node.children_in_traversal_order.empty());
-  node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kSelected,
-                             flags->is_selected);
-  node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kEditableRoot,
-                             flags->is_text_field && !flags->is_read_only);
+  node_data.AddBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected,
+      flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsSelected);
+  node_data.AddBoolAttribute(
+      ax::mojom::BoolAttribute::kEditableRoot,
+      flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
+          (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0);
   // Mark nodes as line breaking so that screen readers don't
   // merge all consecutive objects into one.
   // TODO(schectman): When should a node have this attribute set?
@@ -455,13 +462,15 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
 void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
     ui::AXNodeData& node_data,
     const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
+  FlutterSemanticsFlag flags = node.flags;
   node_data.AddIntAttribute(ax::mojom::IntAttribute::kTextDirection,
                             node.text_direction);
 
   int sel_start = node.text_selection_base;
   int sel_end = node.text_selection_extent;
-  if (flags->is_text_field && !flags->is_read_only && !node.value.empty()) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
+      (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0 &&
+      !node.value.empty()) {
     // By default the text field selection should be at the end.
     sel_start = sel_start == -1 ? node.value.length() : sel_start;
     sel_end = sel_end == -1 ? node.value.length() : sel_end;
@@ -474,15 +483,18 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
         static_cast<int32_t>(
-            flags->is_check_state_mixed ? ax::mojom::CheckedState::kMixed
-            : flags->is_checked         ? ax::mojom::CheckedState::kTrue
-                                        : ax::mojom::CheckedState::kFalse));
+            flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsCheckStateMixed
+                ? ax::mojom::CheckedState::kMixed
+            : flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked
+                ? ax::mojom::CheckedState::kTrue
+                : ax::mojom::CheckedState::kFalse));
   } else if (node_data.role == ax::mojom::Role::kSwitch) {
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
-        static_cast<int32_t>(flags->is_toggled
-                                 ? ax::mojom::CheckedState::kTrue
-                                 : ax::mojom::CheckedState::kFalse));
+        static_cast<int32_t>(
+            flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsToggled
+                ? ax::mojom::CheckedState::kTrue
+                : ax::mojom::CheckedState::kFalse));
   }
 }
 
@@ -536,12 +548,13 @@ void AccessibilityBridge::SetTooltipFromFlutterUpdate(
 
 void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
                                       ui::AXTreeUpdate& tree_update) {
-  const FlutterSemanticsFlags* flags = node.flags;
-  //  Set selection of the focused node if:
-  //  1. this text field has a valid selection
-  //  2. this text field doesn't have a valid selection but had selection stored
-  //     in the tree.
-  if (flags->is_text_field && flags->is_focused) {
+  FlutterSemanticsFlag flags = node.flags;
+  // Set selection of the focused node if:
+  // 1. this text field has a valid selection
+  // 2. this text field doesn't have a valid selection but had selection stored
+  //    in the tree.
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
+      flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused) {
     if (node.text_selection_base != -1) {
       tree_update.tree_data.sel_anchor_object_id = node.id;
       tree_update.tree_data.sel_anchor_offset = node.text_selection_base;
@@ -557,10 +570,13 @@ void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
     }
   }
 
-  if (flags->is_focused && tree_update.tree_data.focus_id != node.id) {
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused &&
+      tree_update.tree_data.focus_id != node.id) {
     tree_update.tree_data.focus_id = node.id;
     tree_update.has_tree_data = true;
-  } else if (!flags->is_focused && tree_update.tree_data.focus_id == node.id) {
+  } else if ((flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused) ==
+                 0 &&
+             tree_update.tree_data.focus_id == node.id) {
     tree_update.tree_data.focus_id = ui::AXNode::kInvalidAXID;
     tree_update.has_tree_data = true;
   }
@@ -571,10 +587,7 @@ AccessibilityBridge::FromFlutterSemanticsNode(
     const FlutterSemanticsNode2& flutter_node) {
   SemanticsNode result;
   result.id = flutter_node.id;
-  FML_DCHECK(flutter_node.flags2)
-      << "FlutterSemanticsNode2::flags2 must not be null";
-
-  result.flags = flutter_node.flags2;
+  result.flags = flutter_node.flags;
   result.actions = flutter_node.actions;
   result.text_selection_base = flutter_node.text_selection_base;
   result.text_selection_extent = flutter_node.text_selection_extent;
