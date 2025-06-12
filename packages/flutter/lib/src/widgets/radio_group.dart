@@ -177,6 +177,7 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       role: SemanticsRole.radioGroup,
       child: Shortcuts(
         shortcuts: _radioGroupShortcuts,
