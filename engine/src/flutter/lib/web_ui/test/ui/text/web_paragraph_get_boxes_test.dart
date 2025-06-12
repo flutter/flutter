@@ -122,39 +122,49 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getBoxesForRange includeLineSpacing multiple lines', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Arial', fontSize: 20, height: 2.0);
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, height: 2.0);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(heightStyle);
     builder.addText(
       'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
     );
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    paragraph.layout(const ui.ParagraphConstraints(width: 500));
 
-    {
-      final rects = paragraph.getBoxesForRange(
-        0,
-        paragraph.text!.length,
-        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-        //boxWidthStyle: ui.BoxWidthStyle.tight,
-      );
-    }
-    {
-      final rects = paragraph.getBoxesForRange(
-        0,
-        paragraph.text!.length,
-        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
-        //boxWidthStyle: ui.BoxWidthStyle.tight,
-      );
-    }
-    {
-      final rects = paragraph.getBoxesForRange(
-        0,
-        paragraph.text!.length,
-        boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-        //boxWidthStyle: ui.BoxWidthStyle.tight,
-      );
-    }
+    const double EPSILON = 0.001;
+
+    final rectsTop = paragraph.getBoxesForRange(
+      0,
+      paragraph.text!.length,
+      boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+      //boxWidthStyle: ui.BoxWidthStyle.tight,
+    );
+
+    final rectsBottom = paragraph.getBoxesForRange(
+      0,
+      paragraph.text!.length,
+      boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+      //boxWidthStyle: ui.BoxWidthStyle.tight,
+    );
+
+    final rectsMiddle = paragraph.getBoxesForRange(
+      0,
+      paragraph.text!.length,
+      boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+      //boxWidthStyle: ui.BoxWidthStyle.tight,
+    );
+
+    expect(rectsTop.length, 3);
+    expect(rectsBottom.length, 3);
+    expect(rectsMiddle.length, 3);
+
+    final top0 = rectsTop[0];
+    final top1 = rectsTop[1];
+    final bottom1 = rectsBottom[1];
+    final middle1 = rectsMiddle[1];
+    expect((top0.bottom - bottom1.top).abs() < EPSILON, true);
+    expect(middle1.top > bottom1.top, true);
+    expect(middle1.top < top1.top, true);
   });
 }

@@ -459,8 +459,7 @@ class TextLayout {
         );
 
         WebParagraphDebug.log(
-          'Multiply: ${line.visualBlocks.last.multiplier} ${line.visualBlocks.last.rawFontBoundingBoxAscent} ${line.visualBlocks.last.multipliedFontBoundingBoxAscent} '
-          '${styledTextBlock.textStyle.height!} ${styledTextBlock.textStyle.fontSize!} ',
+          'Multiply: ${line.visualBlocks.last.multiplier} ${line.visualBlocks.last.rawFontBoundingBoxAscent} ${line.visualBlocks.last.multipliedFontBoundingBoxAscent} ',
         );
 
         // Line always counts multipled metrics (no need for the others)
@@ -606,10 +605,7 @@ class TextLayout {
                 (line.fontBoundingBoxDescent + block.rawFontBoundingBoxDescent) / 2;
           case ui.BoxHeightStyle.includeLineSpacingTop:
             top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
-            bottom =
-                line.advance.top +
-                line.fontBoundingBoxAscent +
-                line.fontBoundingBoxDescent;
+            bottom = line.advance.top + line.fontBoundingBoxAscent + line.fontBoundingBoxDescent;
           case ui.BoxHeightStyle.includeLineSpacingBottom:
             top = line.advance.top;
             bottom =
