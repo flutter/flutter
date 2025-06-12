@@ -129,6 +129,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         'mousedown',
         (web.Event event) {
           final web.MouseEvent mouseEvent = event as web.MouseEvent;
+          mouseEvent.preventDefault();
           if (mouseEvent.button != _kRightClickButton) {
             return;
           }

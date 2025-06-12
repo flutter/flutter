@@ -153,6 +153,8 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 
         .se_a = a,
         .se_n = 0,
+
+        .circle_start = {a, a},
     };
   }
 
@@ -468,6 +470,16 @@ class RoundSuperellipseBuilder {
 
 }  // namespace
 
+RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
+    const Rect& bounds,
+    Scalar radius) {
+  return RoundSuperellipseParam{
+      .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                   {radius, radius}, {-1, 1}),
+      .all_corners_same = true,
+  };
+}
+
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds,
     const RoundingRadii& radii) {
@@ -507,7 +519,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
   };
 }
 
-void RoundSuperellipseParam::AddToPath(PathReceiver& path_receiver) const {
+void RoundSuperellipseParam::Dispatch(PathReceiver& path_receiver) const {
   RoundSuperellipseBuilder builder(path_receiver);
 
   Point start = top_right.offset +

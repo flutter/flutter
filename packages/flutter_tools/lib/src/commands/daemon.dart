@@ -678,7 +678,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${sentenceCase(options.buildInfo.friendlyModeName)} '
+        '${options.buildInfo.mode.uppercaseFriendlyName} '
         'mode is not supported for ${device.displayName}.',
       );
     }
@@ -1215,8 +1215,6 @@ class DeviceDomain extends Domain {
     return <String, Object?>{
       'started': result.started,
       'vmServiceUri': result.vmServiceUri?.toString(),
-      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
-      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 

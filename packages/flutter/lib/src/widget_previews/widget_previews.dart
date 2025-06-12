@@ -16,6 +16,9 @@ typedef PreviewTheme = PreviewThemeData Function();
 /// Signature for callbacks that wrap a [Widget] with another [Widget] when creating a [Preview].
 typedef WidgetWrapper = Widget Function(Widget);
 
+/// Signature for callbacks that build localization data used when creating a [Preview].
+typedef PreviewLocalizations = PreviewLocalizationsData Function();
+
 /// Annotation used to mark functions that return a widget preview.
 ///
 /// NOTE: this interface is not stable and **will change**.
@@ -68,6 +71,7 @@ base class Preview {
     this.wrapper,
     this.theme,
     this.brightness,
+    this.localizations,
   });
 
   /// A description to be displayed alongside the preview.
@@ -114,6 +118,79 @@ base class Preview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  /// A callback to return a localization configuration to be applied to the
+  /// previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewLocalizations? localizations;
+}
+
+/// A collection of localization objects and callbacks for use in widget previews.
+base class PreviewLocalizationsData {
+  /// Creates a collection of localization objects and callbacks for use in
+  /// widget previews.
+  const PreviewLocalizationsData({
+    this.locale,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+  });
+
+  /// {@macro flutter.widgets.widgetsApp.locale}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this preview.
+  final Locale? locale;
+
+  /// {@macro flutter.widgets.widgetsApp.supportedLocales}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final List<Locale> supportedLocales;
+
+  /// The delegates for this preview's [Localizations] widget.
+  ///
+  /// The delegates collectively define all of the localized resources
+  /// for this preview's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers the entire list of preferred locales.
+  ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers only the default locale, which is the first locale
+  /// in the preferred locales list. It is preferred to set [localeListResolutionCallback]
+  /// over [localeResolutionCallback] as it provides the full preferred locales list.
+  ///
+  /// This algorithm should be able to handle a null locale, which indicates
+  /// Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleResolutionCallback? localeResolutionCallback;
 }
 
 /// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
