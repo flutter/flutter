@@ -137,7 +137,6 @@ std::string GetPackageName(const fs::path& full_path) {
   }
 
   return result.has_value() ? result.value() : "engine";
-
 }
 }  // namespace
 
@@ -166,8 +165,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       return errors;
     }
     LicensesWriter writer(licenses);
-    absl::btree_map<std::string, absl::flat_hash_set<std::string>>
-        license_map;
+    absl::btree_map<std::string, absl::flat_hash_set<std::string>> license_map;
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
