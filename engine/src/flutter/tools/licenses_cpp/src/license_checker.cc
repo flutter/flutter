@@ -102,6 +102,10 @@ class LicensesWriter {
 
   void Write(const absl::flat_hash_set<std::string>& packages,
              std::string_view license) {
+    std::vector<std::string_view> sorted;
+    sorted.reserve(packages.size());
+    sorted.insert(sorted.end(), packages.begin(), packages.end());
+    std::sort(sorted.begin(), sorted.end());
     if (!first_write_) {
       for (int i = 0; i < 80; ++i) {
         licenses_.put('-');
@@ -109,7 +113,7 @@ class LicensesWriter {
       licenses_.put('\n');
     }
     first_write_ = false;
-    for (const std::string& package : packages) {
+    for (std::string_view package : sorted) {
       licenses_ << package << "\n";
     }
     licenses_ << "\n" << license << "\n";
@@ -120,6 +124,21 @@ class LicensesWriter {
   bool first_write_ = true;
 };
 
+std::string GetPackageName(const fs::path& full_path) {
+  std::optional<std::string> result;
+  bool after_third_party = false;
+  for (const fs::path& component : full_path) {
+    if (after_third_party) {
+      result = component;
+      after_third_party = false;
+    } else if (component.string() == "third_party") {
+      after_third_party = true;
+    }
+  }
+
+  return result.has_value() ? result.value() : "engine";
+
+}
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
@@ -149,7 +168,6 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
     LicensesWriter writer(licenses);
     absl::btree_map<std::string, absl::flat_hash_set<std::string>>
         license_map;
-    std::string package = "engine";
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
@@ -158,6 +176,9 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         // Ignore file.
         continue;
       }
+
+      std::string package = GetPackageName(full_path);
+
       VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
