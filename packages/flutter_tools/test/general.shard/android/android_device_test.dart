@@ -78,7 +78,6 @@ void main() {
     // The format is [ABI, ABI list]: expected target platform.
     final Map<List<String>, TargetPlatform> values = <List<String>, TargetPlatform>{
       <String>['x86_64', 'unknown']: TargetPlatform.android_x64,
-      // The default ABI is arm32
       <String>['armeabi-v7a', 'unknown']: TargetPlatform.android_arm,
       <String>['arm64-v8a', 'arm64-v8a,']: TargetPlatform.android_arm64,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
@@ -106,8 +105,7 @@ void main() {
     // The format is [ABI, ABI list]: expected release mode support.
     final Map<List<String>, bool> values = <List<String>, bool>{
       <String>['x86_64', 'unknown']: true,
-      // The default ABI is arm32
-      <String>['???', 'unknown']: true,
+      <String>['armeabi-v7a', 'unknown']: true,
       <String>['arm64-v8a', 'arm64-v8a,']: true,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
       <String>['arm64-v8a', 'arm']: true,
