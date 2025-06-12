@@ -9,6 +9,9 @@ import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 
+/// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).
+///
+/// This includes details like binary names, artifact locations, and deployment versions.
 enum FlutterDarwinPlatform {
   ios(
     name: 'ios',
@@ -42,13 +45,28 @@ enum FlutterDarwinPlatform {
     required this.sdks,
   }) : _artifactName = artifactName;
 
+  /// The name of the platform in all lowercase. Matches the corresponding [TargetPlatform].
   final String name;
+
+  /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
+
+  /// The corresponding [TargetPlatform] for the [FlutterDarwinPlatform].
   final TargetPlatform targetPlatform;
+
+  /// The corresponding [SwiftPackagePlatform] for the [FlutterDarwinPlatform].
   final SwiftPackagePlatform swiftPackagePlatform;
+
+  /// The name of the directory for the artifacts for the platform in the cache.
   final String _artifactName;
+
+  /// The name of the zip file the xcframework artifacts are located in.
   final String artifactZip;
+
+  /// The [Artifact] for the xcframework for the platform.
   final Artifact xcframeworkArtifact;
+
+  /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
 
   /// Minimum supported version for the platform.

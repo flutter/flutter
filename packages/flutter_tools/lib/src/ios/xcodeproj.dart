@@ -396,7 +396,7 @@ enum XcodeSdk {
     platformName: 'iphonesimulator',
     sdkType: EnvironmentType.simulator,
   ),
-  MacOSX(displayName: 'macOS', platformName: 'macosx'),
+  MacOSX(displayName: 'macOS', platformName: 'macosx', sdkType: EnvironmentType.physical),
   WatchOS(displayName: 'watchOS', platformName: 'watchos', sdkType: EnvironmentType.physical),
   WatchSimulator(
     displayName: 'watchOS Simulator',
@@ -404,7 +404,7 @@ enum XcodeSdk {
     sdkType: EnvironmentType.simulator,
   );
 
-  const XcodeSdk({required this.displayName, required this.platformName, this.sdkType});
+  const XcodeSdk({required this.displayName, required this.platformName, required this.sdkType});
 
   /// Corresponds to Xcode value PLATFORM_DISPLAY_NAME.
   final String displayName;
@@ -412,7 +412,8 @@ enum XcodeSdk {
   /// Corresponds to Xcode value PLATFORM_NAME.
   final String platformName;
 
-  final EnvironmentType? sdkType;
+  /// The [EnvironmentType] for the sdk (simulator, physical).
+  final EnvironmentType sdkType;
 
   String get genericPlatform => 'generic/platform=$displayName';
 }
