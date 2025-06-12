@@ -9,9 +9,9 @@ namespace {
 // TODO(hangyujin): Update these two functions once the SemanticsFlags in
 // dart:ui are updated to use tristate/quad-state flags for properties like
 // isChecked and isSelected.
-FlutterCheckState ToFlutterCheckState(bool isNotNone,
-                                      bool isTrue,
-                                      bool isMixed) {
+FlutterCheckState ToFlutterCheckState(bool is_not_none,
+                                      bool is_true,
+                                      bool is_mixed) {
   if (!isNotNone) {
     return kFlutterCheckStateNone;
   }
