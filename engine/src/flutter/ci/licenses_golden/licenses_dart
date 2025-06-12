@@ -1,4 +1,4 @@
-Signature: 276ddee1f44ce201cf15f63a931f773b
+Signature: 7422171d92753ef86473d82b226fea85
 
 ====================================================================================================
 LIBRARY: dart
@@ -4230,6 +4230,8 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dar
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2wasm.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc + ../../../flutter/third_party/dart/LICENSE
@@ -4256,6 +4258,8 @@ FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2
 FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2wasm.dart
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
 FILE: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc
@@ -4892,7 +4896,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/f8e88f6ce02a775961863dc4f84e4bcd448ce840
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/9f741ef8a6890492450e94217e0472ca7e529018
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
