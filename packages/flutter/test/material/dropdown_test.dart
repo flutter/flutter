@@ -588,6 +588,49 @@ void main() {
     expect(value, equals('three'));
   });
 
+  testWidgets('Dropdown form field only uses value as initial', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: Form(
+                key: formKey,
+                child: DropdownButtonFormField<String>(
+                  value: 'one',
+                  hint: const Text('Select Value'),
+                  items:
+                      menuItems.map((String val) {
+                        return DropdownMenuItem<String>(value: val, child: Text(val));
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      // Do nothing, just to trigger a rebuild.
+                    });
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('one'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+    expect(find.text('three'), findsOneWidget);
+
+    final FormState form = formKey.currentState!;
+    form.reset();
+    await tester.pumpAndSettle();
+
+    expect(find.text('one'), findsOneWidget);
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
