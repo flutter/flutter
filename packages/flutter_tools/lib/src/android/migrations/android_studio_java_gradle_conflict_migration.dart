@@ -76,7 +76,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
     required AndroidProject project,
     AndroidStudio? androidStudio,
     required Java? java,
-  }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot),
+  }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot.parent),
        _androidStudio = androidStudio,
        _java = java;
 
