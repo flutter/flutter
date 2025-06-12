@@ -618,21 +618,21 @@ void main() {
     );
     expect(fieldKey.currentState!.value, 'one');
 
-    // Open the dropdown menu
+    // Open the dropdown menu.
     await tester.tap(find.text('one'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
 
-    // The value should update to selected, not the initial value
+    // The value should update to selected, not the initial value.
     expect(find.text('three'), findsOneWidget);
     expect(fieldKey.currentState!.value, 'three');
 
     fieldKey.currentState!.reset();
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    // After reset, the value is initial value 'one'
+    // Reset to the initial value.
     expect(find.text('one'), findsOneWidget);
     expect(fieldKey.currentState!.value, 'one');
   });
