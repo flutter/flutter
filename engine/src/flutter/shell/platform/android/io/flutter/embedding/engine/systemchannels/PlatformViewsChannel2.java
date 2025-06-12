@@ -125,8 +125,8 @@ public class PlatformViewsChannel2 {
 
         private void touch(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           List<Object> args = call.arguments();
-          PlatformViewTouchNew touch =
-              new PlatformViewTouchNew(
+          PlatformViewTouch touch =
+              new PlatformViewTouch(
                   (int) args.get(0),
                   (Number) args.get(1),
                   (Number) args.get(2),
@@ -211,7 +211,7 @@ public class PlatformViewsChannel2 {
      *
      * <p>Touch data is reported in {@code touch}.
      */
-    void onTouch(@NonNull PlatformViewTouchNew touch);
+    void onTouch(@NonNull PlatformViewTouch touch);
 
     /**
      * The Flutter application would like to change the layout direction of an existing Android

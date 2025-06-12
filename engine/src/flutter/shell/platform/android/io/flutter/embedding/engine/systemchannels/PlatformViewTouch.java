@@ -2,7 +2,7 @@ package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
 
-public class PlatformViewTouchNew {
+public class PlatformViewTouch {
   /** The ID of the platform view as seen by the Flutter side. */
   public final int viewId;
 
@@ -37,7 +37,7 @@ public class PlatformViewTouchNew {
   public final int flags;
   public final long motionEventId;
 
-  public PlatformViewTouchNew(
+  public PlatformViewTouch(
       int viewId,
       @NonNull Number downTime,
       @NonNull Number eventTime,

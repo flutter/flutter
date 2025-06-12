@@ -9,7 +9,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.systemchannels.PlatformViewTouchNew;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
@@ -85,7 +85,7 @@ public class PlatformViewsControllerDelegator
   }
 
   @Override
-  public void onTouch(@NonNull PlatformViewTouchNew touch) {
+  public void onTouch(@NonNull PlatformViewTouch touch) {
     if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
       platformViewsController2.channelHandler.onTouch(touch);
     } else {
