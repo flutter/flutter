@@ -3769,6 +3769,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.debugdata/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/meta.json
