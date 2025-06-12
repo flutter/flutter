@@ -23,6 +23,7 @@ FlutterCheckState ToFlutterCheckState(bool isNotNone,
   }
   return kFlutterCheckStateFalse;
 }
+
 FlutterTristate ToFlutterTristate(bool isNotNone, bool isTrue) {
   if (!isNotNone) {
     return kFlutterTristateNone;
