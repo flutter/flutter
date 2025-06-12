@@ -87,7 +87,8 @@ public class PlatformViewsControllerDelegator
   public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
     if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
       // TODO Let's not reconstruct, and instead unify the types used by the channels. Same below.
-      final PlatformViewsChannel2.PlatformViewTouch reconstructedTouch = new PlatformViewsChannel2.PlatformViewTouch(
+      final PlatformViewsChannel2.PlatformViewTouch reconstructedTouch =
+          new PlatformViewsChannel2.PlatformViewTouch(
               touch.viewId,
               touch.downTime,
               touch.eventTime,
@@ -103,9 +104,8 @@ public class PlatformViewsControllerDelegator
               touch.edgeFlags,
               touch.source,
               touch.flags,
-              touch.motionEventId
-      );
-       platformViewsController2.channelHandler.onTouch(reconstructedTouch);
+              touch.motionEventId);
+      platformViewsController2.channelHandler.onTouch(reconstructedTouch);
     } else {
       platformViewsController.channelHandler.onTouch(touch);
     }

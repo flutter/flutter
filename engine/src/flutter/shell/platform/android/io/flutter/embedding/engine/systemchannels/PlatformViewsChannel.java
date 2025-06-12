@@ -96,16 +96,16 @@ public class PlatformViewsChannel {
             if (handler.isHcppEnabled()) {
               Log.e("HI GRAY", "USING HCPP");
               final PlatformViewCreationRequest request =
-                      new PlatformViewCreationRequest(
-                              (int) createArgs.get("id"),
-                              (String) createArgs.get("viewType"),
-                              0,
-                              0,
-                              0,
-                              0,
-                              (int) createArgs.get("direction"),
-                              PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
-                              additionalParams);
+                  new PlatformViewCreationRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      0,
+                      0,
+                      0,
+                      0,
+                      (int) createArgs.get("direction"),
+                      PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
+                      additionalParams);
               handler.createPlatformViewHcpp(request);
               result.success(null);
               return;
