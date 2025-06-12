@@ -778,7 +778,7 @@ class WebTestsSuite {
         // TODO(ianh): this is the only remaining consumer of startCommand other than runCommand
         // and it doesn't use most of startCommand's features; we could simplify this a lot by
         // inlining the relevant parts of startCommand here.
-        '/Users/jacksongardner/Downloads/chromedriver-mac-arm64/chromedriver',
+        'chromedriver',
         <String>['--port=4444', '--log-level=INFO', '--enable-chrome-logs'],
       );
       while (!await _isChromeDriverRunning()) {
