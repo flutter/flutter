@@ -133,7 +133,7 @@ dependencies:
   meta: 1.16.0
   metrics_center: 1.0.13
   mime: 2.0.0
-  native_toolchain_c: 0.16.2
+  native_toolchain_c: 0.16.3
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 1ho2t
+# PUBSPEC CHECKSUM: vsmjan
