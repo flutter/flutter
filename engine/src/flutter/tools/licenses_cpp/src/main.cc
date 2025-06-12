@@ -34,7 +34,8 @@ int main(int argc, char** argv) {
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_working_dir);
   std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
-  if (working_dir.has_value() && data_dir.has_value() && licenses_path.has_value()) {
+  if (working_dir.has_value() && data_dir.has_value() &&
+      licenses_path.has_value()) {
     std::ofstream licenses;
     licenses.open(licenses_path.value());
     if (licenses.bad()) {
