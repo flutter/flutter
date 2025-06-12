@@ -650,14 +650,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
-  protobuf:
-    dependency: "direct main"
-    description:
-      name: protobuf
-      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   provider:
     dependency: "direct main"
     description:
