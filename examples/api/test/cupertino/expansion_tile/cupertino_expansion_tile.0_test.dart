@@ -9,38 +9,38 @@ void main() {
   testWidgets('CupertinoExpansionTile transition modes test', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoExpansionTileApp());
 
-    // Check initial labels
+    // Check initial labels.
     expect(find.text('Fade Transition - Tap to expand'), findsOneWidget);
     expect(find.text('Scroll Transition - Tap to expand'), findsOneWidget);
 
-    // Tap Fade Transition tile
+    // Tap to expand the Fade Transition tile.
     await tester.tap(find.text('Fade Transition - Tap to expand'));
     await tester.pumpAndSettle();
 
-    // Check Fade is expanded
+    // Check Fade is expanded.
     expect(find.text('Fade Transition - Collapse me'), findsOneWidget);
     expect(find.textContaining('expanded content of the fade transition'), findsOneWidget);
 
-    // Collapse Fade Transition tile
+    // Tap to collapse the Fade Transition tile.
     await tester.tap(find.text('Fade Transition - Collapse me'));
     await tester.pumpAndSettle();
 
-    // Ensure Fade collapsed
+    // Ensure Fade is collapsed.
     expect(find.textContaining('expanded content of the fade transition'), findsNothing);
 
-    // Tap Scroll Transition tile
+    // Tap to expand Scroll Transition tile.
     await tester.tap(find.text('Scroll Transition - Tap to expand'));
     await tester.pumpAndSettle();
 
-    // Check Scroll is expanded
+    // Check Scroll is expanded.
     expect(find.text('Scroll Transition - Collapse me'), findsOneWidget);
     expect(find.textContaining('expanded content of the scroll transition'), findsOneWidget);
 
-    // Collapse Scroll Transition tile
+    // Tap to collapse the Scroll Transition tile.
     await tester.tap(find.text('Scroll Transition - Collapse me'));
     await tester.pumpAndSettle();
 
-    // Ensure Scroll collapsed
+    // Ensure Scroll is collapsed.
     expect(find.textContaining('expanded content of the scroll transition'), findsNothing);
   });
 }

@@ -35,7 +35,6 @@ class ExpansionTileExamples extends StatelessWidget {
           title: 'Fade Transition',
           transitionMode: ExpansionTileTransitionMode.fade,
         ),
-
         TransitionTileSection(
           title: 'Scroll Transition',
           transitionMode: ExpansionTileTransitionMode.scroll,
