@@ -541,10 +541,10 @@ void AccessibilityBridge::SetTooltipFromFlutterUpdate(
 void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
                                       ui::AXTreeUpdate& tree_update) {
   const FlutterSemanticsFlags* flags = node.flags;
-  //  Set selection of the focused node if:
-  //  1. this text field has a valid selection
-  //  2. this text field doesn't have a valid selection but had selection stored
-  //     in the tree.
+  // Set selection of the focused node if:
+  // 1. this text field has a valid selection
+  // 2. this text field doesn't have a valid selection but had selection stored
+  //    in the tree.
   if (flags->is_text_field &&
       flags->is_focused == FlutterTristate::kFlutterTristateTrue) {
     if (node.text_selection_base != -1) {

@@ -12,23 +12,23 @@ namespace {
 FlutterCheckState ToFlutterCheckState(bool is_not_none,
                                       bool is_true,
                                       bool is_mixed) {
-  if (!isNotNone) {
+  if (!is_not_none) {
     return kFlutterCheckStateNone;
   }
-  if (isTrue) {
+  if (is_true) {
     return kFlutterCheckStateTrue;
   }
-  if (isMixed) {
+  if (is_mixed) {
     return kFlutterCheckStateMixed;
   }
   return kFlutterCheckStateFalse;
 }
 
-FlutterTristate ToFlutterTristate(bool isNotNone, bool isTrue) {
-  if (!isNotNone) {
+FlutterTristate ToFlutterTristate(bool is_not_none, bool is_true) {
+  if (!is_not_none) {
     return kFlutterTristateNone;
   }
-  if (isTrue) {
+  if (is_true) {
     return kFlutterTristateTrue;
   }
   return kFlutterTristateFalse;
