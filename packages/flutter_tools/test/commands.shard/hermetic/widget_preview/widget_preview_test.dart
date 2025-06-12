@@ -3,58 +3,49 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
+import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
 import 'package:test/test.dart';
 import 'package:test_api/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
     late MemoryFileSystem fileSystem;
     late ProcessManager processManager;
-    late WidgetPreviewStartCommand command;
+    late PreviewPubspecBuilder pubspecBuilder;
     late FlutterProject rootProject;
     late Logger logger;
-    final Platform platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.any();
       logger = BufferLogger.test();
-      command = WidgetPreviewStartCommand(
-        fs: fileSystem,
-        projectFactory: FakeFlutterProjectFactory(),
-        logger: logger,
-        cache: Cache.test(processManager: processManager, platform: platform),
-        platform: platform,
-        shutdownHooks: ShutdownHooks(),
-        os: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
-        processManager: FakeProcessManager.any(),
-        artifacts: Artifacts.test(fileSystem: fileSystem),
-      );
       rootProject = FakeFlutterProject(
         projectRoot: 'some_project',
         fileSystem: fileSystem,
         logger: logger,
+      );
+      pubspecBuilder = PreviewPubspecBuilder(
+        logger: logger,
+        verbose: false,
+        offline: false,
+        rootProject: rootProject,
+        previewManifest: PreviewManifest(
+          logger: logger,
+          rootProject: rootProject,
+          fs: fileSystem,
+          cache: Cache.test(processManager: processManager),
+        ),
       );
     });
 
@@ -64,7 +55,7 @@ void main() {
         final FlutterManifest root = rootProject.manifest;
         final FlutterManifest emptyPreviewManifest =
             rootProject.widgetPreviewScaffoldProject.manifest;
-        final FlutterManifest updated = command.buildPubspec(
+        final FlutterManifest updated = pubspecBuilder.buildPubspec(
           rootManifest: rootProject.manifest,
           widgetPreviewManifest: rootProject.widgetPreviewScaffoldProject.manifest,
         );
@@ -75,7 +66,7 @@ void main() {
         for (int i = 0; i < rootAssets.length; ++i) {
           final AssetsEntry rootEntry = rootAssets[i];
           final AssetsEntry updatedEntry = updatedAssets[i];
-          expect(updatedEntry, WidgetPreviewStartCommand.transformAssetsEntry(rootEntry));
+          expect(updatedEntry, PreviewPubspecBuilder.transformAssetsEntry(rootEntry));
         }
 
         final int emptyPreviewFontCount = emptyPreviewManifest.fonts.length;
@@ -108,19 +99,19 @@ void main() {
             final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
             expect(
               updatedFontAsset.descriptor,
-              WidgetPreviewStartCommand.transformFontAsset(rootFontAsset).descriptor,
+              PreviewPubspecBuilder.transformFontAsset(rootFontAsset).descriptor,
             );
           }
         }
 
-        expect(updated.shaders, root.shaders.map(WidgetPreviewStartCommand.transformAssetUri));
+        expect(updated.shaders, root.shaders.map(PreviewPubspecBuilder.transformAssetUri));
 
         expect(updated.deferredComponents?.length, root.deferredComponents?.length);
         if (root.deferredComponents != null) {
           for (int i = 0; i < root.deferredComponents!.length; ++i) {
             expect(
               updated.deferredComponents![i].toString(),
-              WidgetPreviewStartCommand.transformDeferredComponent(
+              PreviewPubspecBuilder.transformDeferredComponent(
                 root.deferredComponents![i],
               ).toString(),
             );
@@ -136,7 +127,7 @@ void main() {
     testUsingContext(
       'can add flutter_gen to package_config.json if generate is set in the parent project',
       () async {
-        command.maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
+        pubspecBuilder.maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
         final Map<String, Object?> packageConfig =
             jsonDecode(rootProject.widgetPreviewScaffoldProject.packageConfig.readAsStringSync())
                 as Map<String, Object?>;
@@ -144,7 +135,7 @@ void main() {
         final List<Map<String, Object?>> packages =
             (packageConfig['packages']! as List<dynamic>).cast<Map<String, Object?>>();
         expect(packages.length, 2);
-        expect(packages.last, WidgetPreviewStartCommand.flutterGenPackageConfigEntry);
+        expect(packages.last, PreviewPubspecBuilder.flutterGenPackageConfigEntry);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,

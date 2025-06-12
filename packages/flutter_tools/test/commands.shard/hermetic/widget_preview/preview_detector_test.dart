@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
+import 'package:flutter_tools/src/widget_preview/preview_details.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 

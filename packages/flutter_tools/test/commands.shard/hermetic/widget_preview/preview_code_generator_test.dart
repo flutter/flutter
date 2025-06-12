@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
