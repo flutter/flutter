@@ -304,7 +304,11 @@ class WebTestsSuite {
     tests.shuffle(math.Random(0));
 
     await _ensureChromeDriverIsRunning();
-    await runShardRunnerIndexOfTotalSubshard(tests);
+    //await _runGalleryE2eWebTest('debug');
+    await _runGalleryE2eWebTest('profile');
+    await _runGalleryE2eWebTest('release');
+
+    // await runShardRunnerIndexOfTotalSubshard(tests);
     await _stopChromeDriver();
   }
 
@@ -373,6 +377,7 @@ class WebTestsSuite {
           '--dart-define=FLUTTER_WEB_USE_SKIA=true',
           '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
         ],
+        '--no-web-resources-cdn',
       ],
       expectNonZeroExit: expectFailure,
       workingDirectory: testAppDirectory,
@@ -491,6 +496,7 @@ class WebTestsSuite {
         'web-server',
         if (buildMode == 'debug') '--no-web-experimental-hot-reload',
         '--$buildMode',
+        '--no-web-resources-cdn',
       ],
       workingDirectory: testAppDirectory,
       environment: <String, String>{'FLUTTER_WEB': 'true'},
@@ -772,7 +778,7 @@ class WebTestsSuite {
         // TODO(ianh): this is the only remaining consumer of startCommand other than runCommand
         // and it doesn't use most of startCommand's features; we could simplify this a lot by
         // inlining the relevant parts of startCommand here.
-        'chromedriver',
+        '/Users/jacksongardner/Downloads/chromedriver-mac-arm64/chromedriver',
         <String>['--port=4444', '--log-level=INFO', '--enable-chrome-logs'],
       );
       while (!await _isChromeDriverRunning()) {
