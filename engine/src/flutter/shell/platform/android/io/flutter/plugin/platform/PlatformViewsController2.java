@@ -611,9 +611,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
+  public boolean isHcppEnabled() {
+    if (flutterJNI == null) {
+      return false;
+    }
+    return flutterJNI.IsSurfaceControlEnabled();
+  }
+
   //// Message Handler ///////
 
-  private final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
+  final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel2.PlatformViewsHandler() {
 
         @Override
@@ -711,10 +718,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
         @Override
         public boolean isSurfaceControlEnabled() {
-          if (flutterJNI == null) {
-            return false;
-          }
-          return flutterJNI.IsSurfaceControlEnabled();
+          return isHcppEnabled();
         }
       };
 }

@@ -4,15 +4,18 @@
 
 package io.flutter.plugin.platform;
 
+import android.content.Context;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel3;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.TextureRegistry;
 
-public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate, PlatformViewsChannel3.PlatformViewsHandler {
+public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate, PlatformViewsChannel.PlatformViewsHandler {
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
@@ -52,35 +55,95 @@ public class PlatformViewsControllerDelegator implements PlatformViewsAccessibil
   }
 
   @Override
-  public void createPlatformView(@NonNull PlatformViewsChannel3.PlatformViewCreationRequest request) {
-
-  }
-
-  @Override
   public void dispose(int viewId) {
-
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.channelHandler.dispose(viewId);
+    } else {
+      platformViewsController.channelHandler.dispose(viewId);
+    }
   }
 
   @Override
-  public void onTouch(@NonNull PlatformViewsChannel3.PlatformViewTouch touch) {
+  public void resize(@NonNull PlatformViewsChannel.PlatformViewResizeRequest request, @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
+    if (platformViewsController2.getPlatformViewById(request.viewId) != null) {
+      // this is a no op
+    } else {
+      platformViewsController.channelHandler.resize(request, onComplete);
+    }
+  }
 
+  @Override
+  public void offset(int viewId, double top, double left) {
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      // this is a no op
+    } else {
+      platformViewsController.channelHandler.offset(viewId, top, left);
+    }
+  }
+
+  @Override
+  public void onTouch(@NonNull PlatformViewsChannel.PlatformViewTouch touch) {
+    if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
+      // TODO no op until the two touch types are unified, I don't feel like reconstructing here
+      //platformViewsController2.channelHandler.onTouch(touch);
+    } else {
+      platformViewsController.channelHandler.onTouch(touch);
+    }
   }
 
   @Override
   public void setDirection(int viewId, int direction) {
-
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.channelHandler.setDirection(viewId, direction);
+    } else {
+      platformViewsController.channelHandler.setDirection(viewId, direction);
+    }
   }
 
   @Override
   public void clearFocus(int viewId) {
-
+      if (platformViewsController2.getPlatformViewById(viewId) != null) {
+          platformViewsController2.channelHandler.clearFocus(viewId);
+      } else {
+          platformViewsController.channelHandler.clearFocus(viewId);
+      }
   }
 
   @Override
-  public boolean isSurfaceControlEnabled() {
-    return false;
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
   }
 
+  //  @Override
+  public boolean isHcppEnabled() {
+    return platformViewsController2.isHcppEnabled();
+  }
+
+  // hc only
+  @Override
+  public void createForPlatformViewLayer(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+    platformViewsController.channelHandler.createForPlatformViewLayer(request);
+  }
+
+  // tlhc w/ fallbacks
+  @Override
+  public long createForTextureLayer(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+    return platformViewsController.channelHandler.createForTextureLayer(request);
+  }
+
+  // hcpp
+  void createPlatformView(@NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+    // todo, unify the creation class
+    platformViewsController2.channelHandler.createPlatformView(request);
+  }
+
+  public void attach(
+          @Nullable Context context,
+          @NonNull TextureRegistry textureRegistry,
+          @NonNull DartExecutor dartExecutor) {
+
+    platformViewsController.getPlatformViewsChannel().setPlatformViewsHandler(this);
+  }
 
   // TODO(gmackall) Can we define a common interface, allowing us to do something like this?
 //  private PlatformViewsController delegateToController(int viewId) {

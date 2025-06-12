@@ -81,6 +81,8 @@ public class PlatformViewsChannel {
         }
 
         private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          // if hcpp go take the other path
+
           final Map<String, Object> createArgs = call.arguments();
           // TODO(egarciad): Remove the "hybrid" case.
           final boolean usesPlatformViewLayer =

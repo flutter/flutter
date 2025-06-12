@@ -156,7 +156,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static boolean enableSurfaceProducerRenderTarget = true;
 
-  private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
+  final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
         @Override
@@ -504,6 +504,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               + request.viewId
               + ")");
     }
+  }
+
+  public PlatformViewsChannel getPlatformViewsChannel() {
+    return platformViewsChannel;
   }
 
   // Creates a platform view based on `request`, performs configuration that's common to

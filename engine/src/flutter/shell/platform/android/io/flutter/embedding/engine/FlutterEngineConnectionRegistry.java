@@ -343,6 +343,10 @@ import java.util.Set;
         .attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
     flutterEngine.getPlatformViewsController2().attach(activity, flutterEngine.getDartExecutor());
 
+    // TODO(gmackall): this really isn't the right place to do this going forward, just for testing.
+    //                 this is overriding the above config instead of doing it right in the first place.
+    flutterEngine.getPlatformViewsControllerDelegator().attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
+
     // Notify all ActivityAware plugins that they are now attached to a new Activity.
     for (ActivityAware activityAware : activityAwarePlugins.values()) {
       if (isWaitingForActivityReattachment) {

@@ -1151,9 +1151,7 @@ public class FlutterView extends FrameLayout
             flutterEngine.getAccessibilityChannel(),
             (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
             getContext().getContentResolver(),
-            new PlatformViewsControllerDelegator(
-                this.flutterEngine.getPlatformViewsController(),
-                this.flutterEngine.getPlatformViewsController2()));
+            flutterEngine.getPlatformViewsControllerDelegator());
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),
