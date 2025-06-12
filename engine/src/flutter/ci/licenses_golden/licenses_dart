@@ -1,4 +1,4 @@
-Signature: 7422171d92753ef86473d82b226fea85
+Signature: 39b60747d96700d6b2ed3207f7577126
 
 ====================================================================================================
 LIBRARY: dart
@@ -2069,7 +2069,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: dart
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_io_api_impl.cc + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/observatory_assets_empty.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/include/bin/dart_io_api.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/developer.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/timeline.cc + ../../../flutter/third_party/dart/LICENSE
@@ -2143,11 +2142,9 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/developer/timeline.dart + ../.
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/io/io_resource_info.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/io/security_context.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js/_js_annotations.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/asset.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/vmservice.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_io_api_impl.cc
-FILE: ../../../flutter/third_party/dart/runtime/bin/observatory_assets_empty.cc
 FILE: ../../../flutter/third_party/dart/runtime/include/bin/dart_io_api.h
 FILE: ../../../flutter/third_party/dart/runtime/lib/developer.cc
 FILE: ../../../flutter/third_party/dart/runtime/lib/timeline.cc
@@ -2221,7 +2218,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/developer/timeline.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/io/io_resource_info.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/io/security_context.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/js/_js_annotations.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/asset.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/vmservice.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
@@ -4896,7 +4892,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/9f741ef8a6890492450e94217e0472ca7e529018
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/ac589dba5282b7a8740a1eb52c2fc5b6a201d929
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
