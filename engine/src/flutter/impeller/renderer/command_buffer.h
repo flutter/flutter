@@ -107,6 +107,13 @@ class CommandBuffer {
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() = 0;
 
+  /// @brief Submit the command buffer to the GPU for execution.
+  ///
+  /// If [block_on_schedule] is true, this function will not return until
+  /// the command buffer has been scheduled. This only impacts the Metal
+  /// backend.
+  ///
+  /// @returns Whether the command buffer was enqueued successfully.
   [[nodiscard]] virtual bool OnSubmitCommands(bool block_on_schedule,
                                               CompletionCallback callback) = 0;
 
