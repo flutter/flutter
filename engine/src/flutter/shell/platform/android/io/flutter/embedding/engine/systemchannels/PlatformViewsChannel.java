@@ -91,24 +91,26 @@ public class PlatformViewsChannel {
                   ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                   : null;
 
-          // if hcpp go take the other path
-          if (handler.isHcppEnabled()) {
-            final PlatformViewCreationRequest request =
-                new PlatformViewCreationRequest(
-                    (int) createArgs.get("id"),
-                    (String) createArgs.get("viewType"),
-                    0,
-                    0,
-                    0,
-                    0,
-                    (int) createArgs.get("direction"),
-                    PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
-                    additionalParams);
-            handler.createPlatformViewHcpp(request);
-
-            return;
-          }
           try {
+            // if hcpp go take the other path
+            if (handler.isHcppEnabled()) {
+              Log.e("HI GRAY", "USING HCPP");
+              final PlatformViewCreationRequest request =
+                      new PlatformViewCreationRequest(
+                              (int) createArgs.get("id"),
+                              (String) createArgs.get("viewType"),
+                              0,
+                              0,
+                              0,
+                              0,
+                              (int) createArgs.get("direction"),
+                              PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
+                              additionalParams);
+              handler.createPlatformViewHcpp(request);
+              result.success(null);
+              return;
+            }
+            Log.e("HI GRAY", "USING USING LEGACY");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
                   new PlatformViewCreationRequest(
