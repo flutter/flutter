@@ -339,14 +339,6 @@ import java.util.Set;
     // to use it, otherwise an error stack trace will appear that says there is no
     // flutter/platform_views channel.
     flutterEngine
-        .getPlatformViewsController()
-        .attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
-    flutterEngine.getPlatformViewsController2().attach(activity, flutterEngine.getDartExecutor());
-
-    // TODO(gmackall): this really isn't the right place to do this going forward, just for testing.
-    //                 this is overriding the above config instead of doing it right in the first
-    // place.
-    flutterEngine
         .getPlatformViewsControllerDelegator()
         .attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
 

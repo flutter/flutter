@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
@@ -95,7 +96,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   public PlatformView createFlutterPlatformView(
-      @NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+      @NonNull PlatformViewCreationRequest request) {
     final PlatformViewFactory viewFactory = registry.getFactory(request.viewType);
     if (viewFactory == null) {
       throw new IllegalStateException(
@@ -198,6 +199,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
               + "attach was called while the PlatformViewsController was already attached.");
     }
     this.context = context;
+    // TODO(gmackall): We should remove this channel once
     platformViewsChannel = new PlatformViewsChannel2(dartExecutor);
     platformViewsChannel.setPlatformViewsHandler(channelHandler);
   }
@@ -626,7 +628,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
         @Override
         public void createPlatformView(
-            @NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+            @NonNull PlatformViewCreationRequest request) {
           createFlutterPlatformView(request);
         }
 

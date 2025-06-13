@@ -9,6 +9,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
@@ -124,33 +125,30 @@ public class PlatformViewsControllerDelegator
   // hc only
   @Override
   public void createForPlatformViewLayer(
-      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+      @NonNull PlatformViewCreationRequest request) {
     platformViewsController.channelHandler.createForPlatformViewLayer(request);
   }
 
   // tlhc w/ fallbacks
   @Override
   public long createForTextureLayer(
-      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+      @NonNull PlatformViewCreationRequest request) {
     return platformViewsController.channelHandler.createForTextureLayer(request);
   }
 
   // hcpp
   @Override
   public void createPlatformViewHcpp(
-      @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
-    // todo, unify the creation class
-    final PlatformViewsChannel2.PlatformViewCreationRequest reconstructedRequest =
-        new PlatformViewsChannel2.PlatformViewCreationRequest(
-            request.viewId, request.viewType, 0, 0, request.direction, request.params);
-    platformViewsController2.channelHandler.createPlatformView(reconstructedRequest);
+      @NonNull PlatformViewCreationRequest request) {
+    platformViewsController2.channelHandler.createPlatformView(request);
   }
 
   public void attach(
       @Nullable Context context,
       @NonNull TextureRegistry textureRegistry,
       @NonNull DartExecutor dartExecutor) {
-
+    platformViewsController.attach(context, textureRegistry, dartExecutor);
+    platformViewsController2.attach(context, dartExecutor);
     platformViewsController.getPlatformViewsChannel().setPlatformViewsHandler(this);
   }
 

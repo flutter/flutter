@@ -41,8 +41,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -126,8 +126,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -167,8 +167,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,

@@ -94,15 +94,13 @@ public class PlatformViewsChannel2 {
                   ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                   : null;
           try {
-
             final PlatformViewCreationRequest request =
-                new PlatformViewCreationRequest(
-                    (int) createArgs.get("id"),
-                    (String) createArgs.get("viewType"),
-                    0,
-                    0,
-                    (int) createArgs.get("direction"),
-                    additionalParams);
+                    PlatformViewCreationRequest.createHCPPRequest(
+                            (int) createArgs.get("id"),
+                            (String) createArgs.get("viewType"),
+                            (int) createArgs.get("direction"),
+                            additionalParams
+                    );
             handler.createPlatformView(request);
             result.success(null);
 
@@ -224,41 +222,5 @@ public class PlatformViewsChannel2 {
 
     /** Whether the SurfaceControl swapchain is enabled. */
     boolean isSurfaceControlEnabled();
-  }
-
-  /** Request sent from Flutter to create a new platform view. */
-  public static class PlatformViewCreationRequest {
-    /** The ID of the platform view as seen by the Flutter side. */
-    public final int viewId;
-
-    @NonNull public final String viewType;
-    public final double logicalWidth;
-    public final double logicalHeight;
-
-    /**
-     * The layout direction of the new platform view.
-     *
-     * <p>See {@link android.view.View#LAYOUT_DIRECTION_LTR} and {@link
-     * android.view.View#LAYOUT_DIRECTION_RTL}
-     */
-    public final int direction;
-
-    /** Custom parameters that are unique to the desired platform view. */
-    @Nullable public final ByteBuffer params;
-
-    public PlatformViewCreationRequest(
-        int viewId,
-        @NonNull String viewType,
-        double logicalWidth,
-        double logicalHeight,
-        int direction,
-        @Nullable ByteBuffer params) {
-      this.viewId = viewId;
-      this.viewType = viewType;
-      this.logicalWidth = logicalWidth;
-      this.logicalHeight = logicalHeight;
-      this.direction = direction;
-      this.params = params;
-    }
   }
 }

@@ -96,16 +96,12 @@ public class PlatformViewsChannel {
             if (handler.isHcppEnabled()) {
               Log.e("HI GRAY", "USING HCPP");
               final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
-                      (int) createArgs.get("id"),
-                      (String) createArgs.get("viewType"),
-                      0,
-                      0,
-                      0,
-                      0,
-                      (int) createArgs.get("direction"),
-                      PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
-                      additionalParams);
+                      PlatformViewCreationRequest.createHCPPRequest(
+                              (int) createArgs.get("id"),
+                              (String) createArgs.get("viewType"),
+                              (int) createArgs.get("direction"),
+                              additionalParams
+                      );
               handler.createPlatformViewHcpp(request);
               result.success(null);
               return;
@@ -113,16 +109,12 @@ public class PlatformViewsChannel {
             Log.e("HI GRAY", "USING USING LEGACY");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
-                      (int) createArgs.get("id"),
-                      (String) createArgs.get("viewType"),
-                      0,
-                      0,
-                      0,
-                      0,
-                      (int) createArgs.get("direction"),
-                      PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY,
-                      additionalParams);
+                      PlatformViewCreationRequest.createHybridCompositionRequest(
+                              (int) createArgs.get("id"),
+                              (String) createArgs.get("viewType"),
+                              (int) createArgs.get("direction"),
+                              additionalParams
+                      );
               handler.createForPlatformViewLayer(request);
               result.success(null);
             } else {
@@ -136,16 +128,17 @@ public class PlatformViewsChannel {
                       : PlatformViewCreationRequest.RequestedDisplayMode
                           .TEXTURE_WITH_VIRTUAL_FALLBACK;
               final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
-                      (int) createArgs.get("id"),
-                      (String) createArgs.get("viewType"),
-                      createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
-                      createArgs.containsKey("left") ? (double) createArgs.get("left") : 0.0,
-                      (double) createArgs.get("width"),
-                      (double) createArgs.get("height"),
-                      (int) createArgs.get("direction"),
-                      displayMode,
-                      additionalParams);
+                      PlatformViewCreationRequest.createTLHCWithFallbacksRequest(
+                              (int) createArgs.get("id"),
+                              (String) createArgs.get("viewType"),
+                              (double) createArgs.get("top"),
+                              (double) createArgs.get("left"),
+                              (double) createArgs.get("width"),
+                              (double) createArgs.get("height"),
+                              (int) createArgs.get("direction"),
+                              hybridFallback,
+                              additionalParams
+                      );
               long textureId = handler.createForTextureLayer(request);
               if (textureId == PlatformViewsHandler.NON_TEXTURE_FALLBACK) {
                 if (!hybridFallback) {
@@ -329,7 +322,7 @@ public class PlatformViewsChannel {
 
     public boolean isHcppEnabled();
 
-    void createPlatformViewHcpp(@NonNull PlatformViewsChannel.PlatformViewCreationRequest request);
+    void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request);
 
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
@@ -386,94 +379,6 @@ public class PlatformViewsChannel {
      * to true.
      */
     void synchronizeToNativeViewHierarchy(boolean yes);
-  }
-
-  /** Request sent from Flutter to create a new platform view. */
-  public static class PlatformViewCreationRequest {
-    /** Platform view display modes that can be requested at creation time. */
-    public enum RequestedDisplayMode {
-      /** Use Texture Layer if possible, falling back to Virtual Display if not. */
-      TEXTURE_WITH_VIRTUAL_FALLBACK,
-      /** Use Texture Layer if possible, falling back to Hybrid Composition if not. */
-      TEXTURE_WITH_HYBRID_FALLBACK,
-      /** Use Hybrid Composition in all cases. */
-      HYBRID_ONLY,
-    }
-
-    /** The ID of the platform view as seen by the Flutter side. */
-    public final int viewId;
-
-    /** The type of Android {@code View} to create for this platform view. */
-    @NonNull public final String viewType;
-
-    /** The density independent width to display the platform view. */
-    public final double logicalWidth;
-
-    /** The density independent height to display the platform view. */
-    public final double logicalHeight;
-
-    /** The density independent top position to display the platform view. */
-    public final double logicalTop;
-
-    /** The density independent left position to display the platform view. */
-    public final double logicalLeft;
-
-    /**
-     * The layout direction of the new platform view.
-     *
-     * <p>See {@link android.view.View#LAYOUT_DIRECTION_LTR} and {@link
-     * android.view.View#LAYOUT_DIRECTION_RTL}
-     */
-    public final int direction;
-
-    public final RequestedDisplayMode displayMode;
-
-    /** Custom parameters that are unique to the desired platform view. */
-    @Nullable public final ByteBuffer params;
-
-    /** Creates a request to construct a platform view. */
-    public PlatformViewCreationRequest(
-        int viewId,
-        @NonNull String viewType,
-        double logicalTop,
-        double logicalLeft,
-        double logicalWidth,
-        double logicalHeight,
-        int direction,
-        @Nullable ByteBuffer params) {
-      this(
-          viewId,
-          viewType,
-          logicalTop,
-          logicalLeft,
-          logicalWidth,
-          logicalHeight,
-          direction,
-          RequestedDisplayMode.TEXTURE_WITH_VIRTUAL_FALLBACK,
-          params);
-    }
-
-    /** Creates a request to construct a platform view with the given display mode. */
-    public PlatformViewCreationRequest(
-        int viewId,
-        @NonNull String viewType,
-        double logicalTop,
-        double logicalLeft,
-        double logicalWidth,
-        double logicalHeight,
-        int direction,
-        RequestedDisplayMode displayMode,
-        @Nullable ByteBuffer params) {
-      this.viewId = viewId;
-      this.viewType = viewType;
-      this.logicalTop = logicalTop;
-      this.logicalLeft = logicalLeft;
-      this.logicalWidth = logicalWidth;
-      this.logicalHeight = logicalHeight;
-      this.direction = direction;
-      this.displayMode = displayMode;
-      this.params = params;
-    }
   }
 
   /** Request sent from Flutter to resize a platform view. */
