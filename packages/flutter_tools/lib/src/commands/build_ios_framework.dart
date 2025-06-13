@@ -12,7 +12,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
@@ -275,7 +274,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
       );
 
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -383,17 +382,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
       lldbInitSourceFile.copySync(lldbInitTargetFile.path);
       lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
-      globals.printStatus(
-        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
-        'ensure debug mode works, please complete one of the following in your '
-        'native Xcode project:\n'
-        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
-        'Test actions, set LLDB Init File to: \n\n'
-        '    ${lldbInitTargetFile.path}\n\n'
-        '  * If you are already using an LLDB Init File, please append the '
-        'following to your LLDB Init File:\n\n'
-        '    command source ${lldbInitTargetFile.path}\n',
-      );
     }
 
     return FlutterCommandResult.success();
@@ -588,7 +576,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = sentenceCase(BuildMode.debug.cliName);
+      final String simulatorConfiguration = BuildMode.debug.uppercaseName;
       pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
