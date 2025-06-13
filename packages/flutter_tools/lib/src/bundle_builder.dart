@@ -43,6 +43,7 @@ class BundleBuilder {
     String? depfilePath,
     String? assetDirPath,
     bool buildNativeAssets = true,
+    bool buildNativeAssetDevDependencies = false,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
@@ -68,6 +69,7 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
         if (!buildNativeAssets) kNativeAssets: 'false',
+        if (buildNativeAssetDevDependencies) kNativeAssetsBuildDevDeps: 'true',
       },
       artifacts: globals.artifacts!,
       fileSystem: globals.fs,

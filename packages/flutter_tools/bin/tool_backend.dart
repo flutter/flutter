@@ -29,6 +29,8 @@ Future<void> main(List<String> arguments) async {
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
   final bool prefixedErrors = Platform.environment['PREFIXED_ERROR_LOGGING'] == 'true';
+  final bool buildNativeAssetsForDevDependencies =
+      Platform.environment['NATIVE_ASSETS_BUILD_DEV_DEPS'] == 'true';
 
   if (projectDirectory == null) {
     stderr.write(
@@ -99,6 +101,7 @@ or
     if (extraGenSnapshotOptions != null) '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
     if (frontendServerStarterPath != null) '-dFrontendServerStarterPath=$frontendServerStarterPath',
     if (extraFrontEndOptions != null) '--ExtraFrontEndOptions=$extraFrontEndOptions',
+    if (buildNativeAssetsForDevDependencies) '-dNativeAssetsBuildDevDeps=true',
     target,
   ]);
   assembleProcess.stdout

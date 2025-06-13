@@ -564,6 +564,8 @@ class FlutterPlugin : Plugin<Project> {
                 project.findProperty("filesystem-scheme")?.toString()
             val trackWidgetCreationValue: Boolean =
                 project.findProperty("track-widget-creation")?.toString()?.toBoolean() ?: true
+            val nativeAssetsBuildDevDepsValue: Boolean =
+                project.findProperty("native-assets-build-dev-deps")?.toString()?.toBoolean() ?: true
             val frontendServerStarterPathValue: String? =
                 project.findProperty("frontend-server-starter-path")?.toString()
             val extraFrontEndOptionsValue: String? =
@@ -657,6 +659,7 @@ class FlutterPlugin : Plugin<Project> {
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue
+                    nativeAssetsBuildDevDeps = nativeAssetsBuildDevDepsValue
                     targetPlatformValues = targetPlatforms
                     sourceDir = FlutterPluginUtils.getFlutterSourceDirectory(project)
                     intermediateDir =

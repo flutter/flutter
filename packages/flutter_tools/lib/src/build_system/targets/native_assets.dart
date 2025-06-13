@@ -51,6 +51,7 @@ abstract class DartBuild extends Target {
         );
       }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+      final bool includeDevDependencies = environment.defines[kNativeAssetsBuildDevDeps] == 'true';
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -59,7 +60,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName,
-            includeDevDependencies: false,
+            includeDevDependencies: includeDevDependencies,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
