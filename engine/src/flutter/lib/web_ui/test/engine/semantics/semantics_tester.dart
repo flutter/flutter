@@ -220,8 +220,8 @@ class SemanticsTester {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
-      minValue: minValue ?? 0,
-      maxValue: maxValue ?? 0,
+      minValue: minValue ?? '0.0',
+      maxValue: maxValue ?? '0.0',
     );
     _nodeUpdates.add(update);
     return update;
