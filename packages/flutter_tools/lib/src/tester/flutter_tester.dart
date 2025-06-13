@@ -151,7 +151,6 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath: applicationKernelFilePath,
       platform: TargetPlatform.tester,
       assetDirPath: assetDirectory.path,
-      buildNativeAssetDevDependencies: true,
     );
 
     final List<String> command = <String>[

@@ -131,9 +131,6 @@ object BaseFlutterTaskHelper {
             baseFlutterTask.trackWidgetCreation?.let {
                 args("-dTrackWidgetCreation=$it")
             }
-            baseFlutterTask.nativeAssetsBuildDevDeps?.let {
-                args("-dNativeAssetsBuildDevDeps=$it")
-            }
             baseFlutterTask.splitDebugInfo?.let {
                 args("-dSplitDebugInfo=$it")
             }

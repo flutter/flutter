@@ -413,7 +413,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
-      buildNativeAssetsForDevDependencies: true,
     );
 
     TestTimeRecorder? testTimeRecorder;

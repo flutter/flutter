@@ -1582,7 +1582,6 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
-    bool? buildNativeAssetsForDevDependencies,
   }) async {
     return const BuildInfo(
       BuildMode.debug,
