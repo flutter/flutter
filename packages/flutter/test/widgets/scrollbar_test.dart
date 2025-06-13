@@ -2320,9 +2320,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       // Regression test for issue: https://github.com/flutter/flutter/issues/170246
       // First scroll to the top, then drag the thumb to scroll down.
       final double minScrollExtent = scrollController.position.minScrollExtent; // -600
-      await tester.runAsync(() async {
-        scrollController.jumpTo(minScrollExtent);
-      });
+      scrollController.jumpTo(minScrollExtent);
       await tester.pumpAndSettle();
       expect(scrollController.offset, minScrollExtent);
       const Rect thumbRectBefore = Rect.fromLTRB(794.0, 0.0, 800.0, 200.0); // Scrollbar thumb
