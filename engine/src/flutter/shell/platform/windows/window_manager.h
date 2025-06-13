@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
 
 #include <windows.h>
 #include <optional>
@@ -55,10 +55,10 @@ struct WindowCreationRequest {
 // A unique instance of this class is owned by |FlutterWindowsEngine| and used
 // in |WindowingHandler| to handle methods and messages enabling multi-window
 // support.
-class FlutterHostWindowController {
+class WindowManager {
  public:
-  explicit FlutterHostWindowController(FlutterWindowsEngine* engine);
-  virtual ~FlutterHostWindowController() = default;
+  explicit WindowManager(FlutterWindowsEngine* engine);
+  virtual ~WindowManager() = default;
 
   void Initialize(const WindowingInitRequest* request);
 
@@ -95,7 +95,7 @@ class FlutterHostWindowController {
   // shutdown.
   std::unordered_map<HWND, std::unique_ptr<FlutterHostWindow>> active_windows_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindowController);
+  FML_DISALLOW_COPY_AND_ASSIGN(WindowManager);
 };
 
 }  // namespace flutter
@@ -135,4 +135,4 @@ void InternalFlutterWindows_WindowManager_SetWindowContentSize(
     const flutter::FlutterWindowSizing* size);
 }
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

@@ -7,9 +7,9 @@
 #include <dwmapi.h>
 
 #include "flutter/shell/platform/windows/dpi_utils.h"
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 
 namespace {
 
@@ -276,7 +276,7 @@ void SetChildContent(HWND content, HWND window) {
 namespace flutter {
 
 std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
-    FlutterHostWindowController* controller,
+    WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const FlutterWindowSizing& content_size) {
   DWORD window_style = WS_OVERLAPPEDWINDOW;
@@ -387,18 +387,18 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   // last one will be shown.
   ShowWindow(hwnd, SW_SHOWNORMAL);
   return std::unique_ptr<FlutterHostWindow>(new FlutterHostWindow(
-      controller, engine, WindowArchetype::kRegular, std::move(view_controller),
-      BoxConstraints(min_size, max_size), hwnd));
+      window_manager, engine, WindowArchetype::kRegular,
+      std::move(view_controller), BoxConstraints(min_size, max_size), hwnd));
 }
 
 FlutterHostWindow::FlutterHostWindow(
-    FlutterHostWindowController* controller,
+    WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     WindowArchetype archetype,
     std::unique_ptr<FlutterWindowsViewController> view_controller,
     const BoxConstraints& box_constraints,
     HWND hwnd)
-    : window_controller_(controller),
+    : window_manager_(window_manager),
       engine_(engine),
       archetype_(archetype),
       view_controller_(std::move(view_controller)),
