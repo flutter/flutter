@@ -74,9 +74,6 @@ class FlutterHostWindowController {
                                        WPARAM wparam,
                                        LPARAM lparam);
 
-  // Gets the engine that owns this controller.
-  FlutterWindowsEngine* engine() const;
-
   void OnEngineShutdown();
 
  private:
