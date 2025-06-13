@@ -474,7 +474,7 @@ class _DefaultPub implements Pub {
           'See https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment.',
         );
       }
-      throwToolExit('Failed to update packages. $pubStderr $buffer', exitCode: code);
+      throwToolExit('Failed to update packages.', exitCode: code);
     }
   }
 
