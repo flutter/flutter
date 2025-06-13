@@ -189,6 +189,10 @@ source_set("fml") {
     ]
   }
 
+  if (is_qnx) {
+    sources += [ "platform/qnx/paths_qnx.cc" ]
+  }
+
   if (is_fuchsia) {
     sources += [
       "platform/fuchsia/log_interest_listener.cc",

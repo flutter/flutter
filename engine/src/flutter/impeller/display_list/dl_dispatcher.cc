@@ -12,7 +12,6 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
@@ -547,46 +546,14 @@ void DlDispatcherBase::drawLine(const DlPoint& p0, const DlPoint& p1) {
   GetCanvas().DrawLine(p0, p1, paint_);
 }
 
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
                                       const DlPoint& p1,
                                       DlScalar on_length,
                                       DlScalar off_length) {
   AUTO_DEPTH_WATCHER(1u);
 
-  Scalar length = p0.GetDistance(p1);
-  // Reasons to defer to regular DrawLine:
-  //   length is non-positive - drawLine will draw appropriate "dot"
-  //   off_length is non-positive - no gaps, drawLine will draw it solid
-  //   on_length is negative - invalid dashing
-  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
-  // apart
-  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
-    Point delta = (p1 - p0) / length;  // length > 0 already tested
-    flutter::DlPathBuilder builder;
-
-    Scalar consumed = 0.0f;
-    while (consumed < length) {
-      builder.MoveTo(p0 + delta * consumed);
-
-      Scalar dash_end = consumed + on_length;
-      if (dash_end < length) {
-        builder.LineTo(p0 + delta * dash_end);
-      } else {
-        builder.LineTo(p1);
-        // Should happen anyway due to the math, but let's make it explicit
-        // in case of bit errors. We're done with this line.
-        break;
-      }
-
-      consumed = dash_end + off_length;
-    }
-
-    Paint stroke_paint = paint_;
-    stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(builder.TakePath(), stroke_paint);
-  } else {
-    drawLine(p0, p1);
-  }
+  GetCanvas().DrawDashedLine(p0, p1, on_length, off_length, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -679,8 +646,9 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawArc(oval_bounds, Degrees(start_degrees),
-                      Degrees(sweep_degrees), use_center, paint_);
+  GetCanvas().DrawArc(Arc(oval_bounds, Degrees(start_degrees),
+                          Degrees(sweep_degrees), use_center),
+                      paint_);
 }
 
 // |flutter::DlOpReceiver|

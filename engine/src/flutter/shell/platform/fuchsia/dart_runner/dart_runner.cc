@@ -228,9 +228,6 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
   params.shutdown_isolate = IsolateShutdownCallback;
   params.cleanup_group = IsolateGroupCleanupCallback;
   params.entropy_source = EntropySource;
-#if !defined(DART_PRODUCT)
-  params.get_service_assets = GetVMServiceAssetsArchiveCallback;
-#endif
   error = Dart_Initialize(&params);
   if (error)
     FML_LOG(FATAL) << "Dart_Initialize failed: " << error;
