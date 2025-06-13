@@ -59,6 +59,8 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
 /// A widget that builds a [RawRadio] with a macOS-style UI.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=D0xwcz2IqAY}
+///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group are
 /// deselected. The values are of type `T`, the type parameter of the

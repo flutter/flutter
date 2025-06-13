@@ -204,6 +204,76 @@ void _testSemanticRole() {
     <sem id="flt-semantic-node-612" flt-semantics-identifier="test-id-333"></sem>
 </sem>''');
   });
+
+  test(
+    'Sets id and flt-semantics-identifier on the element when SemanticRole has no behaviors',
+    () {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 372,
+            flags: const ui.SemanticsFlags(isTextField: true),
+          ), // SemanticTextField has no SemanticBehaviors.
+          tester.updateNode(id: 599),
+        ],
+      );
+      tester.apply();
+
+      tester.expectSemantics('''
+    <sem id="flt-semantic-node-0">
+        <sem id="flt-semantic-node-372">
+          <input />
+        </sem>
+        <sem id="flt-semantic-node-599"></sem>
+    </sem>''');
+
+      tester.updateNode(
+        id: 0,
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 372,
+            identifier: 'test-id-123',
+            flags: const ui.SemanticsFlags(isTextField: true),
+          ),
+          tester.updateNode(id: 599),
+        ],
+      );
+      tester.apply();
+
+      tester.expectSemantics('''
+    <sem id="flt-semantic-node-0">
+        <sem id="flt-semantic-node-372" flt-semantics-identifier="test-id-123">
+          <input />
+        </sem>
+        <sem id="flt-semantic-node-599"></sem>
+    </sem>''');
+
+      tester.updateNode(
+        id: 0,
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(id: 372, flags: const ui.SemanticsFlags(isTextField: true)),
+          tester.updateNode(id: 599, identifier: 'test-id-211'),
+          tester.updateNode(id: 612, identifier: 'test-id-333'),
+        ],
+      );
+      tester.apply();
+
+      tester.expectSemantics('''
+    <sem id="flt-semantic-node-0">
+        <sem id="flt-semantic-node-372">
+          <input />
+        </sem>
+        <sem id="flt-semantic-node-599" flt-semantics-identifier="test-id-211"></sem>
+        <sem id="flt-semantic-node-612" flt-semantics-identifier="test-id-333"></sem>
+    </sem>''');
+    },
+  );
 }
 
 void _testRoleLifecycle() {
