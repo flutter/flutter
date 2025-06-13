@@ -938,6 +938,7 @@ class DebuggingOptions {
     this.traceSystrace = false,
     this.traceToFile,
     this.endlessTraceBuffer = false,
+    this.profileMicrotasks = false,
     this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
@@ -1019,6 +1020,7 @@ class DebuggingOptions {
        traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
+       profileMicrotasks = false,
        purgePersistentCache = false,
        verboseSystemLogs = false,
        hostVmServicePort = null,
@@ -1053,6 +1055,7 @@ class DebuggingOptions {
     required this.traceSystrace,
     required this.traceToFile,
     required this.endlessTraceBuffer,
+    required this.profileMicrotasks,
     required this.purgePersistentCache,
     required this.useTestFonts,
     required this.verboseSystemLogs,
@@ -1110,6 +1113,7 @@ class DebuggingOptions {
   final bool traceSystrace;
   final String? traceToFile;
   final bool endlessTraceBuffer;
+  final bool profileMicrotasks;
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
@@ -1213,6 +1217,7 @@ class DebuggingOptions {
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
       if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (profileMicrotasks) '--profile-microtasks',
       if (verboseSystemLogs) '--verbose-logging',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
@@ -1248,6 +1253,7 @@ class DebuggingOptions {
     'traceSystrace': traceSystrace,
     'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
+    'profileMicrotasks': profileMicrotasks,
     'purgePersistentCache': purgePersistentCache,
     'useTestFonts': useTestFonts,
     'verboseSystemLogs': verboseSystemLogs,
@@ -1313,6 +1319,7 @@ class DebuggingOptions {
         traceSystrace: json['traceSystrace']! as bool,
         traceToFile: json['traceToFile'] as String?,
         endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+        profileMicrotasks: json['profileMicrotasks']! as bool,
         purgePersistentCache: json['purgePersistentCache']! as bool,
         useTestFonts: json['useTestFonts']! as bool,
         verboseSystemLogs: json['verboseSystemLogs']! as bool,
