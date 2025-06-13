@@ -196,9 +196,11 @@ class EngineAccessibilityFeaturesBuilder {
     _index = value ? _index | onOffSwitchLabels : _index & ~onOffSwitchLabels;
   }
 
+  // This setter uses an inverted check (!value instead of value) to set the noAnnounce
+  // field in EngineAccessibilityFeatures since far more platforms support announce
+  // than not.
   set announce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
-    // Since we are using noAnnounce for the embedder, we need to flip the value.
     _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
   }
 
