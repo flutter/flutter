@@ -18,6 +18,7 @@
 
 %{
 #include "flutter/tools/licenses_cpp/src/comments.h"
+#include "flutter/tools/licenses_cpp/src/comments_util.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -39,17 +40,15 @@ COMMENT_START (\/\/|#)
 %%
 ^[ \t]*{COMMENT_START}[^\n]* {
   BEGIN(BLOCK);
-  yyextra->buffer.append(yytext, yyleng);
+  CommentsUtil::AddTrimLine(&yyextra->buffer, yytext, yyleng);
 }
-^[ \t]*\/\* {
+^[ \t]*\/\*[\n]? {
   BEGIN(C_COMMENT);
-  yyextra->buffer.append(yytext, yyleng);
 }
 
 <C_COMMENT>{
   \*\/ {
     BEGIN(INITIAL);
-    yyextra->buffer.append(yytext, yyleng);
     yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
@@ -60,7 +59,8 @@ COMMENT_START (\/\/|#)
 
 <BLOCK>{
   \n[ \t]*{COMMENT_START}[^\n]* {
-    yyextra->buffer.append(yytext, yyleng);
+    yyextra->buffer.append("\n", 1);
+    CommentsUtil::AddTrimLine(&yyextra->buffer, yytext + 1, yyleng - 1);
   }
   \n|. {
     BEGIN(INITIAL);

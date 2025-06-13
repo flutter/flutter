@@ -17,7 +17,7 @@ TEST(CommentsTest, Simple) {
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "// Hello");
+  EXPECT_EQ(comments[0], "Hello");
 }
 
 TEST(CommentsTest, Nothing) {
@@ -47,7 +47,7 @@ dfdd
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "/*\nhello world\n*/");
+  EXPECT_EQ(comments[0], "hello world\n");
 }
 
 TEST(CommentsTest, MultilineCpp) {
@@ -64,5 +64,5 @@ daa
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "// hello\n// world");
+  EXPECT_EQ(comments[0], "hello\nworld");
 }
