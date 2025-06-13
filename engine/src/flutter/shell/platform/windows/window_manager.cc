@@ -135,7 +135,7 @@ FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
   return engine->window_manager()->CreateRegularWindow(request);
 }
 
-HWND InternalFlutterWindows_WindowManager_GetWindowHandle(
+HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
     int64_t engine_id,
     FlutterViewId view_id) {
   flutter::FlutterWindowsEngine* engine =
