@@ -108,6 +108,30 @@ bool FindError(const std::vector<absl::Status>& errors,
                                RE2::PartialMatch(status.message(), regex);
                       }) != errors.end();
 }
+
+class Repo {
+ public:
+  void Add(const std::string& file) { files_.emplace_back(std::string(file)); }
+
+  absl::Status Commit() {
+    if (std::system("git init") != 0) {
+      return absl::InternalError("git init failed");
+    }
+    for (const std::string& file : files_) {
+      if (std::system(("git add " + file).c_str()) != 0) {
+        return absl::InternalError("git add failed: " + file);
+      }
+    }
+    if (std::system("git commit -m \"test\"") != 0) {
+      return absl::InternalError("git commit failed");
+    }
+    return absl::OkStatus();
+  }
+
+ private:
+  std::vector<std::string> files_;
+};
+
 }  // namespace
 
 TEST_F(LicenseCheckerTest, SimplePass) {
@@ -118,12 +142,12 @@ TEST_F(LicenseCheckerTest, SimplePass) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -139,10 +163,10 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -160,10 +184,10 @@ TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -184,12 +208,12 @@ TEST_F(LicenseCheckerTest, SimpleWritesTwoFileLicensesFiles) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
   ASSERT_TRUE(WriteFile(kCHeader, *temp_path / "cmain.cc").ok());
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git add cmain.cc"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("cmain.cc");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -215,12 +239,12 @@ TEST_F(LicenseCheckerTest, SimpleWritesDuplicateFileLicensesFiles) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "a.cc").ok());
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "b.cc").ok());
-  ASSERT_EQ(std::system("git add a.cc"), 0);
-  ASSERT_EQ(std::system("git add b.cc"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add("a.cc");
+  repo.Add("b.cc");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -242,13 +266,13 @@ TEST_F(LicenseCheckerTest, FileLicenseMultiplePackages) {
 
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
-  ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "a.cc").ok());
   ASSERT_TRUE(
       WriteFile(kHeader, *temp_path / "third_party" / "foobar" / "b.cc").ok());
-  ASSERT_EQ(std::system("git add a.cc"), 0);
-  ASSERT_EQ(std::system("git add third_party/foobar/b.cc"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add("a.cc");
+  repo.Add("third_party/foobar/b.cc");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -272,10 +296,10 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
-  ASSERT_EQ(std::system("git init"), 0);
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
@@ -299,15 +323,18 @@ TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
   ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
-  ASSERT_EQ(std::system("echo \"Hello world!\" > third_party/foobar/foo.cc"), 0);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > third_party/foobar/foo.cc"),
+            0);
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
-  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE").ok());
-  ASSERT_EQ(std::system("git init"), 0);
-  ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
-  ASSERT_EQ(std::system("git add third_party/foobar/foo.cc"), 0);
-  ASSERT_EQ(std::system("git add third_party/foobar/LICENSE"), 0);
-  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+  ASSERT_TRUE(
+      WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
+          .ok());
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("LICENSE");
+  repo.Add("third_party/foobar/foo.cc");
+  repo.Add("third_party/foobar/LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
   std::vector<absl::Status> errors =
