@@ -43,9 +43,9 @@ bool FlutterHostWindowController::HasTopLevelWindows() const {
 
 FlutterViewId FlutterHostWindowController::CreateRegularWindow(
     const WindowCreationRequest* request) {
-  auto window = std::make_unique<FlutterHostWindow>(
-      this, WindowArchetype::kRegular, request->content_size);
-  if (!window->GetWindowHandle()) {
+  auto window = FlutterHostWindow::createRegularWindow(this, engine_,
+                                                       request->content_size);
+  if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return 0;
   }
@@ -106,10 +106,6 @@ std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
   } else {
     return std::nullopt;
   }
-}
-
-FlutterWindowsEngine* FlutterHostWindowController::engine() const {
-  return engine_;
 }
 
 }  // namespace flutter
