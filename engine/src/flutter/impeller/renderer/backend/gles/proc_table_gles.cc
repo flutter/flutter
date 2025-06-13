@@ -141,6 +141,10 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     DiscardFramebufferEXT.Reset();
   }
 
+  if (!description_->HasExtension("GL_ANGLE_framebuffer_blit")) {
+    BlitFramebufferANGLE.Reset();
+  }
+
   capabilities_ = std::make_shared<CapabilitiesGLES>(*this);
 
   is_valid_ = true;
