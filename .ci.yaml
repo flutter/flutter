@@ -4707,7 +4707,6 @@ targets:
     # runs on release branches, so this one does not need to.
     enabled_branches:
       - master
-    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
@@ -4721,7 +4720,6 @@ targets:
     # runs on release branches, so this one does not need to.
     enabled_branches:
       - master
-    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
