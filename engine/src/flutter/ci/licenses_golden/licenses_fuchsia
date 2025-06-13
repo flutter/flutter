@@ -1,4 +1,4 @@
-Signature: 90fec2d48e1e93bcb059f4f4abe931f9
+Signature: 579b42e5c719f62db8898c3c6775cb62
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14803,6 +14803,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnec
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/log_freeze.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14830,6 +14831,7 @@ FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnect.
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/log_freeze.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl
