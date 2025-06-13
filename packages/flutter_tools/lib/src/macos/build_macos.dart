@@ -14,6 +14,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -96,7 +97,7 @@ Future<void> buildMacOS({
     SecureRestorableStateMigration(flutterProject.macos, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
-      SupportedPlatform.macos,
+      FlutterDarwinPlatform.macos,
       buildInfo,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       logger: globals.logger,
@@ -156,7 +157,7 @@ Future<void> buildMacOS({
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: SupportedPlatform.macos,
+        platform: FlutterDarwinPlatform.macos,
         project: flutterProject.macos,
         deploymentTarget: macOSDeploymentTarget,
       );
@@ -197,7 +198,9 @@ Future<void> buildMacOS({
     _ => throw UnimplementedError('Unsupported platform'),
   };
   final String destination =
-      buildInfo.isDebug ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
+      buildInfo.isDebug
+          ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
+          : XcodeSdk.MacOSX.genericPlatform;
 
   try {
     result = await globals.processUtils.stream(

@@ -5,6 +5,7 @@
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
@@ -60,8 +61,8 @@ Future<void> processPodsIfNeeded(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
-    final SupportedPlatform platform =
-        xcodeProject is IosProject ? SupportedPlatform.ios : SupportedPlatform.macos;
+    final FlutterDarwinPlatform platform =
+        xcodeProject is IosProject ? FlutterDarwinPlatform.ios : FlutterDarwinPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }

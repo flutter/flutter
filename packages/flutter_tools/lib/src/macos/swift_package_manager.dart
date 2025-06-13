@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
+import '../darwin/darwin.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'swift_packages.dart';
@@ -33,28 +33,14 @@ class SwiftPackageManager {
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
 
-  static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform =
-      SwiftPackageSupportedPlatform(
-        platform: SwiftPackagePlatform.ios,
-        version: Version(13, 0, null),
-      );
-
-  static final SwiftPackageSupportedPlatform macosSwiftPackageSupportedPlatform =
-      SwiftPackageSupportedPlatform(
-        platform: SwiftPackagePlatform.macos,
-        version: Version(10, 15, null),
-      );
-
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
   /// has dependencies on Flutter plugins that are compatible with Swift
   /// Package Manager.
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
-    SupportedPlatform platform,
+    FlutterDarwinPlatform platform,
     XcodeBasedProject project,
   ) async {
-    _validatePlatform(platform);
-
     final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
     ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
     symlinkDirectory.createSync(recursive: true);
@@ -78,13 +64,6 @@ class SwiftPackageManager {
       return;
     }
 
-    final SwiftPackageSupportedPlatform swiftSupportedPlatform;
-    if (platform == SupportedPlatform.ios) {
-      swiftSupportedPlatform = iosSwiftPackageSupportedPlatform;
-    } else {
-      swiftSupportedPlatform = macosSwiftPackageSupportedPlatform;
-    }
-
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
     final SwiftPackageProduct generatedProduct = SwiftPackageProduct(
@@ -101,7 +80,7 @@ class SwiftPackageManager {
     final SwiftPackage pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
       name: kFlutterGeneratedPluginSwiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[swiftSupportedPlatform],
+      platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
       products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
       targets: <SwiftPackageTarget>[generatedTarget],
@@ -113,7 +92,7 @@ class SwiftPackageManager {
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)
   _dependenciesForPlugins({
     required List<Plugin> plugins,
-    required SupportedPlatform platform,
+    required FlutterDarwinPlatform platform,
     required Directory symlinkDirectory,
     required String pathRelativeTo,
   }) {
@@ -156,16 +135,6 @@ class SwiftPackageManager {
     return (packageDependencies, targetDependencies);
   }
 
-  /// Validates the platform is either iOS or macOS, otherwise throw an error.
-  static void _validatePlatform(SupportedPlatform platform) {
-    if (platform != SupportedPlatform.ios && platform != SupportedPlatform.macos) {
-      throwToolExit(
-        'The platform ${platform.name} is not compatible with Swift Package Manager. '
-        'Only iOS and macOS are allowed.',
-      );
-    }
-  }
-
   /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
   /// higher than the FlutterGeneratedPluginSwiftPackage's default
   /// SupportedPlatform, increase the SupportedPlatform to match the project's
@@ -184,19 +153,12 @@ class SwiftPackageManager {
   /// deployment target for FlutterGeneratedPluginSwiftPackage.
   static void updateMinimumDeployment({
     required XcodeBasedProject project,
-    required SupportedPlatform platform,
+    required FlutterDarwinPlatform platform,
     required String deploymentTarget,
   }) {
     final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
-    final SwiftPackageSupportedPlatform defaultPlatform;
-    final SwiftPackagePlatform packagePlatform;
-    if (platform == SupportedPlatform.ios) {
-      defaultPlatform = iosSwiftPackageSupportedPlatform;
-      packagePlatform = SwiftPackagePlatform.ios;
-    } else {
-      defaultPlatform = macosSwiftPackageSupportedPlatform;
-      packagePlatform = SwiftPackagePlatform.macos;
-    }
+    final SwiftPackageSupportedPlatform defaultPlatform = platform.supportedPackagePlatform;
+    final SwiftPackagePlatform packagePlatform = platform.swiftPackagePlatform;
 
     if (projectDeploymentTargetVersion == null ||
         projectDeploymentTargetVersion <= defaultPlatform.version ||

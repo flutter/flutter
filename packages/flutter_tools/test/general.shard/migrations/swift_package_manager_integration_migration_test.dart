@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
@@ -16,9 +17,9 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
-  SupportedPlatform.ios,
-  SupportedPlatform.macos,
+const List<FlutterDarwinPlatform> supportedPlatforms = <FlutterDarwinPlatform>[
+  FlutterDarwinPlatform.ios,
+  FlutterDarwinPlatform.macos,
 ];
 
 void main() {
@@ -27,7 +28,7 @@ void main() {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
-        platform: SupportedPlatform.ios.name,
+        platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
         usesSwiftPackageManager: false,
@@ -37,7 +38,7 @@ void main() {
       final SwiftPackageManagerIntegrationMigration projectMigration =
           SwiftPackageManagerIntegrationMigration(
             project,
-            SupportedPlatform.ios,
+            FlutterDarwinPlatform.ios,
             BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
@@ -59,11 +60,11 @@ void main() {
       final SwiftPackageManagerIntegrationMigration projectMigration =
           SwiftPackageManagerIntegrationMigration(
             FakeXcodeProject(
-              platform: SupportedPlatform.ios.name,
+              platform: FlutterDarwinPlatform.ios.name,
               fileSystem: memoryFileSystem,
               logger: testLogger,
             ),
-            SupportedPlatform.ios,
+            FlutterDarwinPlatform.ios,
             BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
@@ -83,7 +84,7 @@ void main() {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
-        platform: SupportedPlatform.ios.name,
+        platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
       );
@@ -93,7 +94,7 @@ void main() {
       final SwiftPackageManagerIntegrationMigration projectMigration =
           SwiftPackageManagerIntegrationMigration(
             project,
-            SupportedPlatform.ios,
+            FlutterDarwinPlatform.ios,
             BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
@@ -113,17 +114,17 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios);
         project._projectInfo = null;
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -142,17 +143,17 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios);
         project.xcodeWorkspace = null;
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -171,17 +172,17 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios);
         project._projectInfo = XcodeProjectInfo(<String>[], <String>[], <String>[], testLogger);
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -202,16 +203,16 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios, createSchemeFile: false);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios, createSchemeFile: false);
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -231,22 +232,22 @@ void main() {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
       final FakeXcodeProject project = FakeXcodeProject(
-        platform: SupportedPlatform.ios.name,
+        platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
       );
-      _createProjectFiles(project, SupportedPlatform.ios);
+      _createProjectFiles(project, FlutterDarwinPlatform.ios);
       project.xcodeProjectSchemeFile().writeAsStringSync(
-        _validBuildActions(SupportedPlatform.ios, hasFrameworkScript: true),
+        _validBuildActions(FlutterDarwinPlatform.ios, hasFrameworkScript: true),
       );
       project.xcodeProjectInfoFile.writeAsStringSync(
-        _projectSettings(_allSectionsMigrated(SupportedPlatform.ios)),
+        _projectSettings(_allSectionsMigrated(FlutterDarwinPlatform.ios)),
       );
 
       final SwiftPackageManagerIntegrationMigration projectMigration =
           SwiftPackageManagerIntegrationMigration(
             project,
-            SupportedPlatform.ios,
+            FlutterDarwinPlatform.ios,
             BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
@@ -265,26 +266,26 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios);
         project.xcodeProjectSchemeFile().writeAsStringSync(
-          _validBuildActions(SupportedPlatform.ios, hasFrameworkScript: true),
+          _validBuildActions(FlutterDarwinPlatform.ios, hasFrameworkScript: true),
         );
 
         project.xcodeProjectInfoFile.writeAsStringSync('');
 
         final List<String> settingsAsJsonBeforeMigration = <String>[
-          ..._allSectionsMigratedAsJson(SupportedPlatform.ios),
+          ..._allSectionsMigratedAsJson(FlutterDarwinPlatform.ios),
         ];
         settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -295,7 +296,7 @@ void main() {
         expect(testLogger.traceText, contains('Runner.xcscheme already migrated. Skipping...'));
       });
 
-      for (final SupportedPlatform platform in supportedPlatforms) {
+      for (final FlutterDarwinPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
           testWithoutContext(
             'fails if scheme is missing BlueprintIdentifier for Runner native target',
@@ -621,25 +622,25 @@ void main() {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
+          platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, SupportedPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios);
 
         project.xcodeProjectInfoFile.writeAsStringSync(
-          _projectSettings(_allSectionsMigrated(SupportedPlatform.ios)),
+          _projectSettings(_allSectionsMigrated(FlutterDarwinPlatform.ios)),
         );
 
         final List<String> settingsAsJsonBeforeMigration = <String>[
-          ..._allSectionsMigratedAsJson(SupportedPlatform.ios),
+          ..._allSectionsMigratedAsJson(FlutterDarwinPlatform.ios),
         ];
         settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
             SwiftPackageManagerIntegrationMigration(
               project,
-              SupportedPlatform.ios,
+              FlutterDarwinPlatform.ios,
               BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
@@ -655,16 +656,16 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -681,16 +682,16 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -707,16 +708,16 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -735,17 +736,17 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
           project.xcodeProjectInfoFile.writeAsStringSync('78A318202AECB46A00862997');
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -762,17 +763,17 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
           project.xcodeProjectInfoFile.writeAsStringSync('78A3181F2AECB46A00862997');
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -789,17 +790,17 @@ void main() {
           final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
           final BufferLogger testLogger = BufferLogger.test();
           final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
+            platform: FlutterDarwinPlatform.ios.name,
             fileSystem: memoryFileSystem,
             logger: testLogger,
           );
-          _createProjectFiles(project, SupportedPlatform.ios);
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
           project.xcodeProjectInfoFile.writeAsStringSync('781AD8BC2B33823900A9FFBB');
 
           final SwiftPackageManagerIntegrationMigration projectMigration =
               SwiftPackageManagerIntegrationMigration(
                 project,
-                SupportedPlatform.ios,
+                FlutterDarwinPlatform.ios,
                 BuildInfo.debug,
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
@@ -813,7 +814,7 @@ void main() {
         });
       });
 
-      for (final SupportedPlatform platform in supportedPlatforms) {
+      for (final FlutterDarwinPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
           group('migrate PBXBuildFile', () {
             testWithoutContext('fails if missing Begin PBXBuildFile section', () async {
@@ -3075,7 +3076,7 @@ void main() {
       testWithoutContext('throw if settings fail to compile', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
-        const SupportedPlatform platform = SupportedPlatform.ios;
+        const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final FakeXcodeProject project = FakeXcodeProject(
           platform: platform.name,
           fileSystem: memoryFileSystem,
@@ -3110,7 +3111,7 @@ void main() {
       testWithoutContext('restore project settings from backup on failure', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
-        const SupportedPlatform platform = SupportedPlatform.ios;
+        const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final FakeXcodeProject project = FakeXcodeProject(
           platform: platform.name,
           fileSystem: memoryFileSystem,
@@ -3150,7 +3151,7 @@ void main() {
 
 void _createProjectFiles(
   FakeXcodeProject project,
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool createSchemeFile = true,
   String? scheme,
 }) {
@@ -3165,13 +3166,13 @@ void _createProjectFiles(
 }
 
 String _validBuildActions(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool hasPreActions = false,
   bool hasFrameworkScript = false,
   bool hasBuildEntries = true,
 }) {
   final String scriptText;
-  if (platform == SupportedPlatform.ios) {
+  if (platform == FlutterDarwinPlatform.ios) {
     scriptText =
         r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
   } else {
@@ -3238,7 +3239,7 @@ ${_validBuildableReference(platform)}
 ''';
 }
 
-String _validBuildableReference(SupportedPlatform platform) {
+String _validBuildableReference(FlutterDarwinPlatform platform) {
   return '''
             <BuildableReference
                BuildableIdentifier = "primary"
@@ -3258,7 +3259,7 @@ const int _projectSectionIndex = 5;
 const int _localSwiftPackageReferenceSectionIndex = 6;
 const int _swiftPackageProductDependencySectionIndex = 7;
 
-List<String> _allSectionsMigrated(SupportedPlatform platform) {
+List<String> _allSectionsMigrated(FlutterDarwinPlatform platform) {
   return <String>[
     migratedBuildFileSection,
     migratedFileReferenceSection(platform),
@@ -3271,7 +3272,7 @@ List<String> _allSectionsMigrated(SupportedPlatform platform) {
   ];
 }
 
-List<String> _allSectionsMigratedAsJson(SupportedPlatform platform) {
+List<String> _allSectionsMigratedAsJson(FlutterDarwinPlatform platform) {
   return <String>[
     migratedBuildFileSectionAsJson,
     migratedFileReferenceAsJson(platform),
@@ -3284,7 +3285,7 @@ List<String> _allSectionsMigratedAsJson(SupportedPlatform platform) {
   ];
 }
 
-List<String> _allSectionsUnmigrated(SupportedPlatform platform) {
+List<String> _allSectionsUnmigrated(FlutterDarwinPlatform platform) {
   return <String>[
     unmigratedBuildFileSection,
     unmigratedFileReferenceSection,
@@ -3297,7 +3298,7 @@ List<String> _allSectionsUnmigrated(SupportedPlatform platform) {
   ];
 }
 
-List<String> _allSectionsUnmigratedAsJson(SupportedPlatform platform) {
+List<String> _allSectionsUnmigratedAsJson(FlutterDarwinPlatform platform) {
   return <String>[
     unmigratedBuildFileSectionAsJson,
     unmigratedFileReferenceAsJson,
@@ -3328,32 +3329,32 @@ ${objects.join('\n')}
 ''';
 }
 
-String _runnerFrameworksBuildPhaseIdentifier(SupportedPlatform platform) {
-  return platform == SupportedPlatform.ios
+String _runnerFrameworksBuildPhaseIdentifier(FlutterDarwinPlatform platform) {
+  return platform == FlutterDarwinPlatform.ios
       ? '97C146EB1CF9000F007C117D'
       : '33CC10EA2044A3C60003C045';
 }
 
-String _flutterGroupIdentifier(SupportedPlatform platform) {
-  return platform == SupportedPlatform.ios
+String _flutterGroupIdentifier(FlutterDarwinPlatform platform) {
+  return platform == FlutterDarwinPlatform.ios
       ? '9740EEB11CF90186004384FC'
       : '33CEB47122A05771004F2AC0';
 }
 
-String _runnerNativeTargetIdentifier(SupportedPlatform platform) {
-  return platform == SupportedPlatform.ios
+String _runnerNativeTargetIdentifier(FlutterDarwinPlatform platform) {
+  return platform == FlutterDarwinPlatform.ios
       ? '97C146ED1CF9000F007C117D'
       : '33CC10EC2044A3C60003C045';
 }
 
-String _projectIdentifier(SupportedPlatform platform) {
-  return platform == SupportedPlatform.ios
+String _projectIdentifier(FlutterDarwinPlatform platform) {
+  return platform == FlutterDarwinPlatform.ios
       ? '97C146E61CF9000F007C117D'
       : '33CC10E52044A3C60003C045';
 }
 
-String _relativeEphemeralPath(SupportedPlatform platform) {
-  return platform == SupportedPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
+String _relativeEphemeralPath(FlutterDarwinPlatform platform) {
+  return platform == FlutterDarwinPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
 }
 
 // PBXBuildFile
@@ -3400,7 +3401,7 @@ const String unmigratedFileReferenceSection = '''
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 ''';
-String migratedFileReferenceSection(SupportedPlatform platform) {
+String migratedFileReferenceSection(FlutterDarwinPlatform platform) {
   return '''
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
@@ -3424,7 +3425,7 @@ const String unmigratedFileReferenceAsJson = '''
       "sourceTree": "<group>",
       "fileEncoding": "4"
     }''';
-String migratedFileReferenceAsJson(SupportedPlatform platform) {
+String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
   return '''
     "1498D2321E8E86230040F4C2": {
       "path": "GeneratedPluginRegistrant.h",
@@ -3450,7 +3451,7 @@ String migratedFileReferenceAsJson(SupportedPlatform platform) {
 
 // PBXFrameworksBuildPhase
 String unmigratedFrameworksBuildPhaseSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool withCocoapods = false,
   bool missingFiles = false,
 }) {
@@ -3471,7 +3472,7 @@ String unmigratedFrameworksBuildPhaseSection(
 }
 
 String migratedFrameworksBuildPhaseSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool withCocoapods = false,
   bool missingFiles = false,
 }) {
@@ -3495,7 +3496,7 @@ String migratedFrameworksBuildPhaseSection(
 }
 
 String unmigratedFrameworksBuildPhaseSectionAsJson(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool withCocoapods = false,
   bool missingFiles = false,
 }) {
@@ -3513,7 +3514,7 @@ String unmigratedFrameworksBuildPhaseSectionAsJson(
   ].join('\n');
 }
 
-String migratedFrameworksBuildPhaseSectionAsJson(SupportedPlatform platform) {
+String migratedFrameworksBuildPhaseSectionAsJson(FlutterDarwinPlatform platform) {
   return '''
     "${_runnerFrameworksBuildPhaseIdentifier(platform)}" : {
       "buildActionMask" : "2147483647",
@@ -3526,7 +3527,7 @@ String migratedFrameworksBuildPhaseSectionAsJson(SupportedPlatform platform) {
 }
 
 // PBXGroup
-String unmigratedGroupSection(SupportedPlatform platform, {bool missingChildren = false}) {
+String unmigratedGroupSection(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
   return <String>[
     '/* Begin PBXGroup section */',
     '		${_flutterGroupIdentifier(platform)} /* Flutter */ = {',
@@ -3546,7 +3547,7 @@ String unmigratedGroupSection(SupportedPlatform platform, {bool missingChildren 
   ].join('\n');
 }
 
-String migratedGroupSection(SupportedPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSection(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
   return <String>[
     '/* Begin PBXGroup section */',
     '		${_flutterGroupIdentifier(platform)} /* Flutter */ = {',
@@ -3572,7 +3573,10 @@ String migratedGroupSection(SupportedPlatform platform, {bool missingChildren = 
   ].join('\n');
 }
 
-String unmigratedGroupSectionAsJson(SupportedPlatform platform, {bool missingChildren = false}) {
+String unmigratedGroupSectionAsJson(
+  FlutterDarwinPlatform platform, {
+  bool missingChildren = false,
+}) {
   return <String>[
     '    "${_flutterGroupIdentifier(platform)}" : {',
     '      "isa": "PBXGroup",',
@@ -3590,7 +3594,7 @@ String unmigratedGroupSectionAsJson(SupportedPlatform platform, {bool missingChi
   ].join('\n');
 }
 
-String migratedGroupSectionAsJson(SupportedPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSectionAsJson(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
   return <String>[
     '    "${_flutterGroupIdentifier(platform)}" : {',
     '      "isa": "PBXGroup",',
@@ -3611,7 +3615,7 @@ String migratedGroupSectionAsJson(SupportedPlatform platform, {bool missingChild
 
 // PBXNativeTarget
 String unmigratedNativeTargetSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
 }) {
@@ -3647,7 +3651,7 @@ String unmigratedNativeTargetSection(
 }
 
 String migratedNativeTargetSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
 }) {
@@ -3686,7 +3690,7 @@ String migratedNativeTargetSection(
 }
 
 String unmigratedNativeTargetSectionAsJson(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageProductDependencies = false,
 }) {
   return <String>[
@@ -3717,7 +3721,7 @@ String unmigratedNativeTargetSectionAsJson(
   ].join('\n');
 }
 
-String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
+String migratedNativeTargetSectionAsJson(FlutterDarwinPlatform platform) {
   return '''
     "${_runnerNativeTargetIdentifier(platform)}" : {
       "buildConfigurationList" : "97C147051CF9000F007C117D",
@@ -3748,7 +3752,7 @@ String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
 
 // PBXProject
 String unmigratedProjectSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
 }) {
@@ -3799,7 +3803,7 @@ String unmigratedProjectSection(
 }
 
 String migratedProjectSection(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
 }) {
@@ -3853,7 +3857,7 @@ String migratedProjectSection(
 }
 
 String unmigratedProjectSectionAsJson(
-  SupportedPlatform platform, {
+  FlutterDarwinPlatform platform, {
   bool missingPackageReferences = false,
 }) {
   return <String>[
@@ -3895,7 +3899,7 @@ String unmigratedProjectSectionAsJson(
   ].join('\n');
 }
 
-String migratedProjectSectionAsJson(SupportedPlatform platform) {
+String migratedProjectSectionAsJson(FlutterDarwinPlatform platform) {
   return '''
     "${_projectIdentifier(platform)}" : {
       "attributes" : {
