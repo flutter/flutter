@@ -1,1 +1,0 @@
-This file is here only to ensure the parent folder is stored in Git to act as a fake extension folder for tests.
