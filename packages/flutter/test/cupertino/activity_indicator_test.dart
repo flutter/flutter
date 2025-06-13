@@ -157,7 +157,7 @@ void main() {
   });
 
   group('CupertinoLinearActivityIndicator', () {
-    testWidgets('It should draw the linear activity indicator', (WidgetTester tester) async {
+    testWidgets('draws the linear activity indicator', (WidgetTester tester) async {
       await tester.pumpWidget(const Center(child: CupertinoLinearActivityIndicator(progress: 0.2)));
 
       expect(
@@ -180,7 +180,7 @@ void main() {
       );
     });
 
-    testWidgets('It should draw the linear activity indicator with a custom height and color', (
+    testWidgets('draws the linear activity indicator with a custom height and color', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
