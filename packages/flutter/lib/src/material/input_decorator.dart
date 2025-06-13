@@ -322,7 +322,6 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void initState() {
     super.initState();
     _controller = AnimationController(duration: _kTransitionDuration, vsync: this);
-    // TODO(ash2moon): https://github.com/flutter/flutter/issues/168022
     if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
