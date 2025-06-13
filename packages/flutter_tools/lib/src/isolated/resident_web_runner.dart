@@ -86,6 +86,8 @@ const String kExitMessage =
     'instance in Chrome.\nThis can happen if the websocket connection used by the '
     'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
+const String kLuciEnvName = 'LUCI_CONTEXT';
+
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
@@ -328,6 +330,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           isWindows: _platform.isWindows,
+          isCi: _platform.environment.containsKey(kLuciEnvName),
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {

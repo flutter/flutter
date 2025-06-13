@@ -868,6 +868,7 @@ class WebDevFS implements DevFS {
     required this.useLocalCanvasKit,
     required this.rootDirectory,
     required this.isWindows,
+    required this.isCi,
     this.testMode = false,
   }) : _port = port {
     // TODO(srujzs): Remove this assertion when the library bundle format is
@@ -901,6 +902,7 @@ class WebDevFS implements DevFS {
   final bool isWasm;
   final bool useLocalCanvasKit;
   final bool isWindows;
+  final bool isCi;
 
   late WebAssetServer webAssetServer;
 
@@ -1106,6 +1108,7 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               nativeNullAssertions: nativeNullAssertions,
               onLoadEndBootstrap: onLoadEndBootstrap,
+              isCi: isCi,
             )
             : generateMainModule(
               entrypoint: entrypoint,
