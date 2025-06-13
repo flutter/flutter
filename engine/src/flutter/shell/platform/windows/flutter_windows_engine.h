@@ -316,7 +316,7 @@ class FlutterWindowsEngine {
   // Sets the cursor directly from a cursor handle.
   void SetFlutterCursor(HCURSOR cursor) const;
 
-  WindowManager* get_window_manager() { return window_manager_.get(); }
+  WindowManager* window_manager() { return window_manager_.get(); }
 
   // Returns the root view associated with the top-level window with |hwnd| as
   // the window handle.
