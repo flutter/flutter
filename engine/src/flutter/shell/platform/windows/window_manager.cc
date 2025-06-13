@@ -117,14 +117,14 @@ void InternalFlutterWindows_WindowManager_Initialize(
     const flutter::WindowingInitRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  engine->get_window_manager()->Initialize(request);
+  engine->window_manager()->Initialize(request);
 }
 
 bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
     int64_t engine_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_window_manager()->HasTopLevelWindows();
+  return engine->window_manager()->HasTopLevelWindows();
 }
 
 int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
@@ -132,7 +132,7 @@ int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
     const flutter::WindowCreationRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_window_manager()->CreateRegularWindow(request);
+  return engine->window_manager()->CreateRegularWindow(request);
 }
 
 HWND InternalFlutterWindows_WindowManager_GetWindowHandle(
