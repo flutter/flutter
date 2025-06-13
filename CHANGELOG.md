@@ -31,6 +31,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 ## Flutter 3.32 Changes
 
+### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
+
+- [flutter/170536](https://github.com/flutter/flutter/issues/170536) - Fixes a code-signing issue on Mac hosts when running `dart` tooling.
+
 ### [3.32.3](https://github.com/flutter/flutter/releases/tag/3.32.3)
 
 - [flutter/170052](https://github.com/flutter/flutter/pull/170052) - Fixes "active" indicator for `NavigationBar` and `NavigationDrawer`
