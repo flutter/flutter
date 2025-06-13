@@ -34,7 +34,7 @@ abstract final class SemanticsService {
   /// other platforms. The default mode is [Assertiveness.polite].
   ///
   /// Not all platforms support announcements. Check to see if it is supported using
-  /// [MediaQuery.announceOf] before calling this method.
+  /// [MediaQuery.supportsAnnounceOf] before calling this method.
   ///
   /// ### Android
   /// Android has [deprecated announcement events][1] due to its disruptive

@@ -9247,8 +9247,8 @@ void main() {
     semantics.dispose();
   });
 
-  for (final bool announce in <bool>[true, false]) {
-    testWidgets('InputDecoration errorText semantics (announce=$announce)', (
+  for (final bool supportsAnnounce in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (supportsAnnounce=$supportsAnnounce)', (
       WidgetTester tester,
     ) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -9258,7 +9258,7 @@ void main() {
       await tester.pumpWidget(
         overlay(
           child: MediaQuery(
-            data: MediaQueryData(announce: announce),
+            data: MediaQueryData(supportsAnnounce: supportsAnnounce),
             child: TextField(
               key: key,
               controller: controller,
@@ -9292,7 +9292,7 @@ void main() {
                   TestSemantics(
                     label: 'oh no!',
                     textDirection: TextDirection.ltr,
-                    flags: <SemanticsFlag>[if (!announce) SemanticsFlag.isLiveRegion],
+                    flags: <SemanticsFlag>[if (!supportsAnnounce) SemanticsFlag.isLiveRegion],
                   ),
                 ],
               ),

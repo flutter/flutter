@@ -171,12 +171,12 @@ void main() {
 
   for (final _PlatformAnnounceScenario test in <_PlatformAnnounceScenario>[
     _PlatformAnnounceScenario(
-      announce: false,
+      supportsAnnounce: false,
       testName:
           'Should announce only the first error message when validate returns errors and announce = false',
     ),
     _PlatformAnnounceScenario(
-      announce: true,
+      supportsAnnounce: true,
       testName:
           'Should not announce error message when validate returns errors and announce = true',
     ),
@@ -186,7 +186,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: MediaQueryData(announce: test.announce),
+            data: MediaQueryData(supportsAnnounce: test.supportsAnnounce),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -218,7 +218,7 @@ void main() {
       expect(find.text('First error message'), findsOneWidget);
       expect(find.text('Second error message'), findsOneWidget);
 
-      if (test.announce) {
+      if (test.supportsAnnounce) {
         final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
         expect(announcement.message, 'First error message');
         expect(announcement.textDirection, TextDirection.ltr);
@@ -405,7 +405,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(announce: true),
+          data: const MediaQueryData(supportsAnnounce: true),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -1634,7 +1634,7 @@ void main() {
 }
 
 class _PlatformAnnounceScenario {
-  _PlatformAnnounceScenario({required this.announce, required this.testName});
-  final bool announce;
+  _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
+  final bool supportsAnnounce;
   final String testName;
 }
