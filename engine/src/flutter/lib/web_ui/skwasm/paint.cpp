@@ -43,6 +43,10 @@ SKWASM_EXPORT void paint_setShader(SkPaint* paint, SkShader* shader) {
   paint->setShader(sk_ref_sp<SkShader>(shader));
 }
 
+SKWASM_EXPORT void paint_setDither(SkPaint* paint, bool isDither) {
+  paint->setDither(isDither);
+}
+
 SKWASM_EXPORT void paint_setImageFilter(SkPaint* paint, SkImageFilter* filter) {
   paint->setImageFilter(sk_ref_sp<SkImageFilter>(filter));
 }

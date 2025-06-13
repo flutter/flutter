@@ -48,6 +48,9 @@ class CkPaint implements ui.Paint {
     final shader = _shader;
     if (shader != null) {
       skPaint.setShader(shader.getSkShader(filterQuality));
+      if (shader.isGradient) {
+        skPaint.setDither(true);
+      }
     }
 
     final localMaskFilter = maskFilter;
@@ -338,6 +341,9 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @visibleForTesting
   UniqueRef<SkShader>? ref;
+
+  @override
+  bool get isGradient => false;
 
   @override
   SkShader getSkShader(ui.FilterQuality contextualQuality) {
