@@ -3,3 +3,6 @@
 .*\/test\/.*
 .*\/testing\/.*
 .*\/tests\/.*
+.*/third_party/swiftshader/third_party/llvm-16.0/.*
+.*/third_party/swiftshader/third_party/llvm-10.0/.*
+.*/third_party/llvm-project/.*
