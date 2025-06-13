@@ -134,15 +134,28 @@ public interface TextureRegistry {
      * time you need to draw. The surface may change when the texture is resized or has its format
      * changed.
      *
+     * <p>Calling this method is the same as calling {@link #getSurface(boolean)} with false.
+     *
      * @return a Surface to use for a drawing target for various APIs.
      */
     Surface getSurface();
 
     /**
-     * POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously
-     * unretrieved Surface by calling `SurfaceProducer.getSurface`.
+     * Direct access to a surface object that is different from any previous calls to {@link
+     * #getSurface()} or {@link #getSurface(boolean)}.
+     *
+     * <p>When using this API, you will usually need to implement {@link SurfaceProducer.Callback}
+     * and provide it to {@link #setCallback(Callback)} in order to be notified when an existing
+     * surface has been destroyed (such as when the application goes to the background) or a new
+     * surface has been created (such as when the application is resumed back to the foreground).
+     *
+     * <p>NOTE: You should not cache the returned surface but instead invoke {@code getSurface} each
+     * time you need to draw. The surface may change when the texture is resized or has its format
+     * changed.
+     *
+     * @return a Surface to use for a drawing target for various APIs.
      */
-    void invalidateSurface();
+    Surface getSurface(boolean forceNewSurface);
 
     /**
      * Sets a callback that is notified when a previously created {@link Surface} returned by {@link

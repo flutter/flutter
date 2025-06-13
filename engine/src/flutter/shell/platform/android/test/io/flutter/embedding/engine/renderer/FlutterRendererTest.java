@@ -1021,13 +1021,12 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void invalidateSurface_forcesGetSurfaceToReturnNewSurface() {
+  public void getSurfaceWithForceNewSurface_forcesGetSurfaceToReturnNewSurface() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     Surface firstSurface = producer.getSurface();
-    producer.invalidateSurface();
-    Surface secondSurface = producer.getSurface();
+    Surface secondSurface = producer.getSurface(true);
 
     assertNotEquals(firstSurface, secondSurface);
   }

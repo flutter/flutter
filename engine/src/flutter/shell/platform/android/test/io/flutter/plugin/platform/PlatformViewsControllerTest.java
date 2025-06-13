@@ -1669,9 +1669,6 @@ public class PlatformViewsControllerTest {
               }
 
               @Override
-              public void invalidateSurface() {}
-
-              @Override
               public void release() {}
 
               @Override
@@ -1689,6 +1686,11 @@ public class PlatformViewsControllerTest {
 
               @Override
               public Surface getSurface() {
+                return null;
+              }
+
+              @Override
+              public Surface getSurface(boolean forceNewSurface) {
                 return null;
               }
 
