@@ -2043,6 +2043,7 @@ class FocusTraversalGroup extends StatefulWidget {
     FocusTraversalPolicy? policy,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
+    this.onFocusChange,
     required this.child,
   }) : policy = policy ?? ReadingOrderTraversalPolicy();
 
@@ -2068,6 +2069,13 @@ class FocusTraversalGroup extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
   final bool descendantsAreTraversable;
+
+  /// Handler called when any FocusNode within the [FocusTraversalGroup]
+  /// receives or looses focus.
+  ///
+  /// Called with true if any node within the group has focus, and false
+  /// otherwise.
+  final ValueChanged<bool>? onFocusChange;
 
   /// The child widget of this [FocusTraversalGroup].
   ///
@@ -2234,6 +2242,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
       includeSemantics: false,
       descendantsAreFocusable: widget.descendantsAreFocusable,
       descendantsAreTraversable: widget.descendantsAreTraversable,
+      onFocusChange: widget.onFocusChange,
       child: widget.child,
     );
   }
