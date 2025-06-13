@@ -65,8 +65,7 @@ void main() {
 }
 )header";
 
-const char* kLicense = R"lic(
-Test License
+const char* kLicense = R"lic(Test License
 v2.0
 )lic";
 
@@ -132,7 +131,7 @@ TEST_F(LicenseCheckerTest, SimplePass) {
   EXPECT_EQ(errors.size(), 0u);
 }
 
-TEST_F(LicenseCheckerTest, SimpleMissingLicense) {
+TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -148,14 +147,12 @@ TEST_F(LicenseCheckerTest, SimpleMissingLicense) {
   std::stringstream ss;
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
-  EXPECT_EQ(errors.size(), 2u);
-  EXPECT_TRUE(
-      FindError(errors, absl::StatusCode::kNotFound, "Expected LICENSE at"));
+  EXPECT_EQ(errors.size(), 1u);
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
                         "Expected copyright in.*main.cc"));
 }
 
-TEST_F(LicenseCheckerTest, SimpleWritesLicensesFile) {
+TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -165,9 +162,7 @@ TEST_F(LicenseCheckerTest, SimpleWritesLicensesFile) {
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
-  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
   ASSERT_EQ(std::system("git add main.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
   ASSERT_EQ(std::system("git commit -m \"test\""), 0);
 
   std::stringstream ss;
@@ -181,7 +176,7 @@ Copyright Test
 )output");
 }
 
-TEST_F(LicenseCheckerTest, SimpleWritesTwoLicensesFiles) {
+TEST_F(LicenseCheckerTest, SimpleWritesTwoFileLicensesFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -192,10 +187,8 @@ TEST_F(LicenseCheckerTest, SimpleWritesTwoLicensesFiles) {
   ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
   ASSERT_TRUE(WriteFile(kCHeader, *temp_path / "cmain.cc").ok());
-  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
   ASSERT_EQ(std::system("git add main.cc"), 0);
   ASSERT_EQ(std::system("git add cmain.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
   ASSERT_EQ(std::system("git commit -m \"test\""), 0);
 
   std::stringstream ss;
@@ -214,7 +207,7 @@ Copyright Test
 )output");
 }
 
-TEST_F(LicenseCheckerTest, SimpleWritesDuplicateLicensesFiles) {
+TEST_F(LicenseCheckerTest, SimpleWritesDuplicateFileLicensesFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -225,10 +218,8 @@ TEST_F(LicenseCheckerTest, SimpleWritesDuplicateLicensesFiles) {
   ASSERT_EQ(std::system("git init"), 0);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "a.cc").ok());
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "b.cc").ok());
-  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
   ASSERT_EQ(std::system("git add a.cc"), 0);
   ASSERT_EQ(std::system("git add b.cc"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
   ASSERT_EQ(std::system("git commit -m \"test\""), 0);
 
   std::stringstream ss;
@@ -242,7 +233,7 @@ Copyright Test
 )output");
 }
 
-TEST_F(LicenseCheckerTest, MultiplePackages) {
+TEST_F(LicenseCheckerTest, FileLicenseMultiplePackages) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -255,14 +246,8 @@ TEST_F(LicenseCheckerTest, MultiplePackages) {
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "a.cc").ok());
   ASSERT_TRUE(
       WriteFile(kHeader, *temp_path / "third_party" / "foobar" / "b.cc").ok());
-  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
-  ASSERT_TRUE(
-      WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
-          .ok());
   ASSERT_EQ(std::system("git add a.cc"), 0);
   ASSERT_EQ(std::system("git add third_party/foobar/b.cc"), 0);
-  ASSERT_EQ(std::system("git add third_party/foobar/LICENSE"), 0);
-  ASSERT_EQ(std::system("git add LICENSE"), 0);
   ASSERT_EQ(std::system("git commit -m \"test\""), 0);
 
   std::stringstream ss;
@@ -274,5 +259,32 @@ TEST_F(LicenseCheckerTest, MultiplePackages) {
 foobar
 
 Copyright Test
+)output");
+}
+
+TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  ASSERT_EQ(std::system("git init"), 0);
+  ASSERT_EQ(std::system("git add main.cc"), 0);
+  ASSERT_EQ(std::system("git add LICENSE"), 0);
+  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Test License
+v2.0
 )output");
 }

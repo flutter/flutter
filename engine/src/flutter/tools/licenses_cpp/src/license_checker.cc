@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -67,15 +68,14 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
   return files;
 }
 
-absl::Status CheckLicense(const fs::path& git_repo) {
+std::optional<fs::path> FindLicense(const fs::path& path) {
   for (std::string_view license_name : kLicenseFileNames) {
-    fs::path license_path = git_repo / license_name;
+    fs::path license_path = path / license_name;
     if (fs::exists(license_path)) {
-      return absl::UnimplementedError("");
+      return license_path;
     }
   }
-  return absl::NotFoundError(
-      absl::StrCat("Expected LICENSE at ", git_repo.string()));
+  return std::nullopt;
 }
 
 void PrintProgress(size_t idx, size_t count) {
@@ -124,19 +124,32 @@ class LicensesWriter {
   bool first_write_ = true;
 };
 
-std::string GetPackageName(const fs::path& full_path) {
-  std::optional<std::string> result;
+struct Package {
+  std::string name;
+  std::optional<fs::path> license_file;
+};
+
+Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
+  Package result = {
+      .name = "engine",
+      .license_file = FindLicense(working_dir),
+  };
+  fs::path relative = fs::relative(full_path, working_dir);
   bool after_third_party = false;
-  for (const fs::path& component : full_path) {
+  fs::path current = working_dir;
+  for (const fs::path& component : relative) {
+    current += component;
     if (after_third_party) {
-      result = component;
+      result.name = component;
       after_third_party = false;
+      result.license_file = FindLicense(current);
     } else if (component.string() == "third_party") {
       after_third_party = true;
+      result.license_file = std::nullopt;
     }
   }
 
-  return result.has_value() ? result.value() : "engine";
+  return result;
 }
 }  // namespace
 
@@ -145,6 +158,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                                               const Data& data) {
   std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
+  fs::path working_dir_path(working_dir);
 
   RE2 pattern(kHeaderLicenseRegex);
 
@@ -152,11 +166,6 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
   for (const fs::path& git_repo : git_repos) {
     if (IsStdoutTerminal()) {
       PrintProgress(count++, git_repos.size());
-    }
-    absl::Status license_status = CheckLicense(git_repo);
-    if (!license_status.ok() &&
-        license_status.code() != absl::StatusCode::kUnimplemented) {
-      errors.push_back(license_status);
     }
 
     absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
@@ -175,7 +184,23 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         continue;
       }
 
-      std::string package = GetPackageName(full_path);
+      Package package = GetPackage(working_dir_path, full_path);
+      if (package.license_file.has_value()) {
+        std::ifstream stream(package.license_file.value());
+        assert(stream.good());
+        std::string license((std::istreambuf_iterator<char>(stream)),
+                            std::istreambuf_iterator<char>());
+        if (license[license.size()-1] == '\n') {
+          license.pop_back();
+        }
+        auto package_emplace_result = license_map.try_emplace(
+            license, absl::flat_hash_set<std::string>());
+        absl::flat_hash_set<std::string>& comment_set =
+            package_emplace_result.first->second;
+        if (comment_set.find(package.name) == comment_set.end()) {
+          comment_set.emplace(std::string(package.name));
+        }
+      }
 
       VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
@@ -189,26 +214,26 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           return errors;
         }
       }
-      IterateComments(file->GetData(), file->GetSize(),
-                      [&](std::string_view comment) {
-                        VLOG(2) << comment;
-                        re2::StringPiece match;
-                        if (RE2::PartialMatch(comment, pattern, &match)) {
-                          did_find_copyright = true;
-                          VLOG(1) << comment;
+      IterateComments(
+          file->GetData(), file->GetSize(), [&](std::string_view comment) {
+            VLOG(2) << comment;
+            re2::StringPiece match;
+            if (RE2::PartialMatch(comment, pattern, &match)) {
+              did_find_copyright = true;
+              VLOG(1) << comment;
 
-                          auto package_emplace_result = license_map.try_emplace(
-                              comment, absl::flat_hash_set<std::string>());
-                          absl::flat_hash_set<std::string>& comment_set =
-                              package_emplace_result.first->second;
-                          if (comment_set.find(package) != comment_set.end()) {
-                            // License is already seen.
-                            return;
-                          }
-                          comment_set.emplace(std::string(package));
-                        }
-                      });
-      if (!did_find_copyright) {
+              auto package_emplace_result = license_map.try_emplace(
+                  comment, absl::flat_hash_set<std::string>());
+              absl::flat_hash_set<std::string>& comment_set =
+                  package_emplace_result.first->second;
+              if (comment_set.find(package.name) != comment_set.end()) {
+                // License is already seen.
+                return;
+              }
+              comment_set.emplace(std::string(package.name));
+            }
+          });
+      if (!did_find_copyright && !package.license_file.has_value()) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
