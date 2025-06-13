@@ -248,7 +248,7 @@ sk_sp<SkColorFilter> ToSk(const DlColorFilter* filter) {
     case DlColorFilterType::kBlend: {
       const DlBlendColorFilter* blend_filter = filter->asBlend();
       FML_DCHECK(blend_filter != nullptr);
-      return SkColorFilters::Blend(ToSk(blend_filter->color()),
+      return SkColorFilters::Blend(ToSk(blend_filter->color()), nullptr,
                                    ToSk(blend_filter->mode()));
     }
     case DlColorFilterType::kMatrix: {
