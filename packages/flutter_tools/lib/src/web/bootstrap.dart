@@ -480,6 +480,7 @@ String generateDDCLibraryBundleMainModule({
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
+  window.\$dartLoader.loadConfig.maxRequestPoolSize = 100;
   // Set up a final script that lets us know when all scripts have been loaded.
   // Only then can we call the main method.
   let onLoadEndSrc = '$onLoadEndBootstrap';

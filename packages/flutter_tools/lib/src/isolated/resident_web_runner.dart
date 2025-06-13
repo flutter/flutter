@@ -304,6 +304,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 : null;
 
         _logger.printStatus('creating webdevfs');
+        _logger.printError('In CI: ${_platform.environment.containsKey('LUCI_CONTEXT')}');
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
