@@ -388,7 +388,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   ShowWindow(hwnd, SW_SHOWNORMAL);
   return std::unique_ptr<FlutterHostWindow>(new FlutterHostWindow(
       controller, engine, WindowArchetype::kRegular, std::move(view_controller),
-      min_size, max_size, hwnd));
+      BoxConstraints(min_size, max_size), hwnd));
 }
 
 FlutterHostWindow::FlutterHostWindow(
@@ -396,16 +396,14 @@ FlutterHostWindow::FlutterHostWindow(
     FlutterWindowsEngine* engine,
     WindowArchetype archetype,
     std::unique_ptr<FlutterWindowsViewController> view_controller,
-    const std::optional<Size>& min_size,
-    const std::optional<Size>& max_size,
+    const BoxConstraints& box_constraints,
     HWND hwnd)
     : window_controller_(controller),
       engine_(engine),
       archetype_(archetype),
       view_controller_(std::move(view_controller)),
-      min_size_(min_size),
-      max_size_(max_size),
-      window_handle_(hwnd) {
+      window_handle_(hwnd),
+      box_constraints_(box_constraints) {
   SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
@@ -488,18 +486,22 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
           static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
 
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
-      if (min_size_) {
+      if (box_constraints_.min_size()) {
         Size const min_physical_size = ClampToVirtualScreen(
-            Size(min_size_->width() * scale_factor + non_client_width,
-                 min_size_->height() * scale_factor + non_client_height));
+            Size(box_constraints_.min_size()->width() * scale_factor +
+                     non_client_width,
+                 box_constraints_.min_size()->height() * scale_factor +
+                     non_client_height));
 
         info->ptMinTrackSize.x = min_physical_size.width();
         info->ptMinTrackSize.y = min_physical_size.height();
       }
-      if (max_size_) {
+      if (box_constraints_.max_size()) {
         Size const max_physical_size = ClampToVirtualScreen(
-            Size(max_size_->width() * scale_factor + non_client_width,
-                 max_size_->height() * scale_factor + non_client_height));
+            Size(box_constraints_.max_size()->width() * scale_factor +
+                     non_client_width,
+                 box_constraints_.max_size()->height() * scale_factor +
+                     non_client_height));
 
         info->ptMaxTrackSize.x = max_physical_size.width();
         info->ptMaxTrackSize.y = max_physical_size.height();
@@ -547,17 +549,21 @@ void FlutterHostWindow::SetContentSize(const FlutterWindowSizing& size) {
   WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
   GetWindowInfo(window_handle_, &window_info);
 
+  std::optional<Size> min_size, max_size;
   if (size.has_constraints) {
-    min_size_ = Size(size.min_width, size.min_height);
+    min_size = Size(size.min_width, size.min_height);
     if (size.max_width > 0 && size.max_height > 0) {
-      max_size_ = Size(size.max_width, size.max_height);
+      max_size = Size(size.max_width, size.max_height);
     }
   }
 
+  box_constraints_ = BoxConstraints(min_size, max_size);
+
   if (size.has_size) {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        Size(size.width, size.height), min_size_, max_size_,
-        window_info.dwStyle, window_info.dwExStyle, nullptr);
+        Size(size.width, size.height), box_constraints_.min_size(),
+        box_constraints_.max_size(), window_info.dwStyle, window_info.dwExStyle,
+        nullptr);
 
     if (window_size) {
       SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),

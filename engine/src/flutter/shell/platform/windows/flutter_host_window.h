@@ -55,8 +55,7 @@ class FlutterHostWindow {
       FlutterWindowsEngine* engine,
       WindowArchetype archetype,
       std::unique_ptr<FlutterWindowsViewController> view_controller,
-      const std::optional<Size>& min_size,
-      const std::optional<Size>& max_size,
+      const BoxConstraints& constraints,
       HWND hwnd);
 
   // Sets the focus to the child view window of |window|.
@@ -90,11 +89,8 @@ class FlutterHostWindow {
   // Backing handle for this window.
   HWND window_handle_ = nullptr;
 
-  // The minimum size of the window's client area, if defined.
-  std::optional<Size> min_size_;
-
-  // The maximum size of the window's client area, if defined.
-  std::optional<Size> max_size_;
+  // The constraints on the window's client area.
+  BoxConstraints box_constraints_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
 };
