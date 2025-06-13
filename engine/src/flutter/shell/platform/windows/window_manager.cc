@@ -127,7 +127,7 @@ bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
   return engine->window_manager()->HasTopLevelWindows();
 }
 
-int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
+FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request) {
   flutter::FlutterWindowsEngine* engine =
