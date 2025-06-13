@@ -109,7 +109,7 @@ FLUTTER_EXPORT
 bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
 
 FLUTTER_EXPORT
-int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
+FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request);
 
