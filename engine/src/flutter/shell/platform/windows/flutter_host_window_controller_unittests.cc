@@ -21,7 +21,6 @@ class FlutterHostWindowControllerTest : public WindowsTest {
   void SetUp() override {
     auto& context = GetContext();
     FlutterWindowsEngineBuilder builder(context);
-    builder.SetSwitches({"--enable-windowing=true"});
 
     engine_ = builder.Build();
     ASSERT_TRUE(engine_);
