@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 /// The feature flags this app was built with.
 ///
 /// Do not use this API. Flutter can and will make breaking changes to this API.
-@visibleForTesting
+@internal
 Set<String> debugEnabledFeatureFlags = <String>{
   ...const String.fromEnvironment('FLUTTER_ENABLED_FEATURE_FLAGS').split(','),
 };
