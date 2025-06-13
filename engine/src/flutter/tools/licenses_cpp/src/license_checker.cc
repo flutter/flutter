@@ -151,6 +151,41 @@ Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
 
   return result;
 }
+
+class LicenseMap {
+ public:
+  void Add(std::string_view package, std::string_view license) {
+    auto package_emplace_result =
+        map_.try_emplace(license, absl::flat_hash_set<std::string>());
+    absl::flat_hash_set<std::string>& comment_set =
+        package_emplace_result.first->second;
+    if (comment_set.find(package) == comment_set.end()) {
+      // License is already seen.
+      comment_set.emplace(std::string(package));
+    }
+  }
+
+  void Write(std::ostream& licenses) {
+    LicensesWriter writer(licenses);
+    for (const auto& comment_entry : map_) {
+      writer.Write(comment_entry.second, comment_entry.first);
+    }
+  }
+
+ private:
+  absl::btree_map<std::string, absl::flat_hash_set<std::string>> map_;
+};
+
+std::string ReadFile(const fs::path path) {
+  std::ifstream stream(path);
+  assert(stream.good());
+  std::string license((std::istreambuf_iterator<char>(stream)),
+                      std::istreambuf_iterator<char>());
+  if (license[license.size() - 1] == '\n') {
+    license.pop_back();
+  }
+  return license;
+}
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
@@ -173,8 +208,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       errors.push_back(git_files.status());
       return errors;
     }
-    LicensesWriter writer(licenses);
-    absl::btree_map<std::string, absl::flat_hash_set<std::string>> license_map;
+    LicenseMap license_map;
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
@@ -186,20 +220,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
       Package package = GetPackage(working_dir_path, full_path);
       if (package.license_file.has_value()) {
-        std::ifstream stream(package.license_file.value());
-        assert(stream.good());
-        std::string license((std::istreambuf_iterator<char>(stream)),
-                            std::istreambuf_iterator<char>());
-        if (license[license.size() - 1] == '\n') {
-          license.pop_back();
-        }
-        auto package_emplace_result = license_map.try_emplace(
-            license, absl::flat_hash_set<std::string>());
-        absl::flat_hash_set<std::string>& comment_set =
-            package_emplace_result.first->second;
-        if (comment_set.find(package.name) == comment_set.end()) {
-          comment_set.emplace(std::string(package.name));
-        }
+        std::string license = ReadFile(package.license_file.value());
+        license_map.Add(package.name, license);
       }
 
       VLOG(1) << full_path.string();
@@ -214,32 +236,22 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           return errors;
         }
       }
-      IterateComments(
-          file->GetData(), file->GetSize(), [&](std::string_view comment) {
-            VLOG(2) << comment;
-            re2::StringPiece match;
-            if (RE2::PartialMatch(comment, pattern, &match)) {
-              did_find_copyright = true;
-              VLOG(1) << comment;
-
-              auto package_emplace_result = license_map.try_emplace(
-                  comment, absl::flat_hash_set<std::string>());
-              absl::flat_hash_set<std::string>& comment_set =
-                  package_emplace_result.first->second;
-              if (comment_set.find(package.name) == comment_set.end()) {
-                // License is already seen.
-                comment_set.emplace(std::string(package.name));
-              }
-            }
-          });
+      IterateComments(file->GetData(), file->GetSize(),
+                      [&](std::string_view comment) {
+                        VLOG(2) << comment;
+                        re2::StringPiece match;
+                        if (RE2::PartialMatch(comment, pattern, &match)) {
+                          did_find_copyright = true;
+                          VLOG(1) << comment;
+                          license_map.Add(package.name, comment);
+                        }
+                      });
       if (!did_find_copyright && !package.license_file.has_value()) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
     }
-    for (const auto& comment_entry : license_map) {
-      writer.Write(comment_entry.second, comment_entry.first);
-    }
+    license_map.Write(licenses);
   }
   if (IsStdoutTerminal()) {
     PrintProgress(count++, git_repos.size());
