@@ -51,10 +51,8 @@ struct WindowCreationRequest {
   FlutterWindowSizing content_size;
 };
 
-// A controller class for managing |FlutterHostWindow| instances.
-// A unique instance of this class is owned by |FlutterWindowsEngine| and used
-// in |WindowingHandler| to handle methods and messages enabling multi-window
-// support.
+// A manager class for managing |FlutterHostWindow| instances.
+// A unique instance of this class is owned by |FlutterWindowsEngine|.
 class WindowManager {
  public:
   explicit WindowManager(FlutterWindowsEngine* engine);
