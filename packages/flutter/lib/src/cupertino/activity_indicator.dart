@@ -206,6 +206,10 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 ///
 /// ** See code in examples/api/lib/cupertino/activity_indicator/cupertino_linear_activity_indicator.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
 class CupertinoLinearActivityIndicator extends StatelessWidget {
   /// Creates a linear iOS-style activity indicator.
   const CupertinoLinearActivityIndicator({
