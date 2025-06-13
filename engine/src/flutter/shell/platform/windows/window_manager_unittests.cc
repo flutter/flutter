@@ -73,7 +73,7 @@ TEST_F(WindowManagerTest, WindowingInitialize) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), creation_request());
-  DestroyWindow(InternalFlutterWindows_WindowManager_GetWindowHandle(
+  DestroyWindow(InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
       engine_id(), view_id));
 
   EXPECT_TRUE(received_message);
@@ -109,8 +109,8 @@ TEST_F(WindowManagerTest, GetWindowHandle) {
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), creation_request());
   const HWND window_handle =
-      InternalFlutterWindows_WindowManager_GetWindowHandle(engine_id(),
-                                                           view_id);
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
   EXPECT_NE(window_handle, nullptr);
 }
 
@@ -121,8 +121,8 @@ TEST_F(WindowManagerTest, GetWindowSize) {
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), creation_request());
   const HWND window_handle =
-      InternalFlutterWindows_WindowManager_GetWindowHandle(engine_id(),
-                                                           view_id);
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
 
   FlutterWindowSize size =
       InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
@@ -138,8 +138,8 @@ TEST_F(WindowManagerTest, SetWindowSize) {
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), creation_request());
   const HWND window_handle =
-      InternalFlutterWindows_WindowManager_GetWindowHandle(engine_id(),
-                                                           view_id);
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
 
   FlutterWindowSizing requestedSize{
       .has_size = true,
