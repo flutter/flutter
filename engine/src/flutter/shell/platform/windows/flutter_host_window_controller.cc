@@ -116,20 +116,22 @@ std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
 
 }  // namespace flutter
 
-void FlutterWindowingInitialize(int64_t engine_id,
-                                const flutter::WindowingInitRequest* request) {
+void InternalFlutterWindows_WindowManager_Initialize(
+    int64_t engine_id,
+    const flutter::WindowingInitRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   engine->get_host_window_controller()->Initialize(request);
 }
 
-bool FlutterWindowingHasTopLevelWindows(int64_t engine_id) {
+bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
+    int64_t engine_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   return engine->get_host_window_controller()->HasTopLevelWindows();
 }
 
-int64_t FlutterCreateRegularWindow(
+int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request) {
   flutter::FlutterWindowsEngine* engine =
@@ -137,7 +139,9 @@ int64_t FlutterCreateRegularWindow(
   return engine->get_host_window_controller()->CreateRegularWindow(request);
 }
 
-HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id) {
+HWND InternalFlutterWindows_WindowManager_GetWindowHandle(
+    int64_t engine_id,
+    FlutterViewId view_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   flutter::FlutterWindowsView* view = engine->view(view_id);
@@ -148,7 +152,8 @@ HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id) {
   }
 }
 
-FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd) {
+FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
+    HWND hwnd) {
   RECT rect;
   GetClientRect(hwnd, &rect);
   double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
@@ -161,8 +166,9 @@ FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd) {
   };
 }
 
-void FlutterSetWindowContentSize(HWND hwnd,
-                                 const flutter::FlutterWindowSizing* size) {
+void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+    HWND hwnd,
+    const flutter::FlutterWindowSizing* size) {
   flutter::FlutterHostWindow* window =
       flutter::FlutterHostWindow::GetThisFromHandle(hwnd);
   if (window) {

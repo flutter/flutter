@@ -103,19 +103,22 @@ class FlutterHostWindowController {
 extern "C" {
 
 FLUTTER_EXPORT
-void FlutterWindowingInitialize(int64_t engine_id,
-                                const flutter::WindowingInitRequest* request);
+void InternalFlutterWindows_WindowManager_Initialize(
+    int64_t engine_id,
+    const flutter::WindowingInitRequest* request);
 
 FLUTTER_EXPORT
-bool FlutterWindowingHasTopLevelWindows(int64_t engine_id);
+bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
 
 FLUTTER_EXPORT
-int64_t FlutterCreateRegularWindow(
+int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request);
 
 FLUTTER_EXPORT
-HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id);
+HWND InternalFlutterWindows_WindowManager_GetWindowHandle(
+    int64_t engine_id,
+    FlutterViewId view_id);
 
 struct FlutterWindowSize {
   double width;
@@ -123,11 +126,13 @@ struct FlutterWindowSize {
 };
 
 FLUTTER_EXPORT
-FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd);
+FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
+    HWND hwnd);
 
 FLUTTER_EXPORT
-void FlutterSetWindowContentSize(HWND hwnd,
-                                 const flutter::FlutterWindowSizing* size);
+void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+    HWND hwnd,
+    const flutter::FlutterWindowSizing* size);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
