@@ -116,7 +116,7 @@ FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
 // Retrives the HWND associated with this |engine_id| and |view_id|. Returns
 // NULL if the HWND cannot be found
 FLUTTER_EXPORT
-HWND InternalFlutterWindows_WindowManager_GetWindowHandle(
+HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
     int64_t engine_id,
     FlutterViewId view_id);
 
