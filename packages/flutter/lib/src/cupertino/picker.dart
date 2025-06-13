@@ -192,6 +192,10 @@ class CupertinoPicker extends StatefulWidget {
   /// The behavior of reporting the selected item index.
   ///
   /// This determines when the `onSelectedItemChanged` callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
   /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
   final ChangeReportingBehavior changeReportingBehavior;
 
