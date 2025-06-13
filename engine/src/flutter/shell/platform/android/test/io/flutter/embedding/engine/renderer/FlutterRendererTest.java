@@ -9,6 +9,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -21,12 +22,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.media.ImageReader;
 import android.os.Looper;
 import android.view.Surface;
 import androidx.lifecycle.Lifecycle;
@@ -36,6 +39,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.renderer.FlutterRenderer.ImageReaderSurfaceProducer.PerImageReader;
 import io.flutter.view.TextureRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -990,5 +994,41 @@ public class FlutterRendererTest {
     // The dequeue should not call scheduleEngineFrame because the queue
     // is now empty.
     verify(flutterRenderer, times(3)).scheduleEngineFrame();
+  }
+
+  @Test
+  public void getSurface_doesNotReturnInvalidSurface() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer spyImageReaderSurfaceProducer =
+        spy((FlutterRenderer.ImageReaderSurfaceProducer) producer);
+    ImageReader mockImageReader = mock(ImageReader.class);
+    PerImageReader fakePerImageReader =
+        spyImageReaderSurfaceProducer.new PerImageReader(mockImageReader);
+    Surface mockSurface = mock(Surface.class);
+    Surface mockSurface2 = mock(Surface.class);
+
+    when(mockSurface.isValid()).thenReturn(false);
+    when(mockImageReader.getSurface()).thenReturn(mockSurface).thenReturn(mockSurface2);
+    when(spyImageReaderSurfaceProducer.createImageReader()).thenReturn(mockImageReader);
+    when(spyImageReaderSurfaceProducer.createPerImageReader(mockImageReader))
+        .thenReturn(fakePerImageReader);
+
+    Surface firstSurface = spyImageReaderSurfaceProducer.getSurface();
+    Surface secondSurface = spyImageReaderSurfaceProducer.getSurface();
+
+    assertNotEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void invalidateSurface_forcesGetSurfaceToReturnNewSurface() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    Surface firstSurface = producer.getSurface();
+    producer.invalidateSurface();
+    Surface secondSurface = producer.getSurface();
+
+    assertNotEquals(firstSurface, secondSurface);
   }
 }

@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 
@@ -94,9 +95,14 @@ final class SurfaceTextureSurfaceProducer
   public Surface getSurface() {
     // POTENTIAL FIX #2 (does not fix camera issue): We should never return an invalid Surface.
     if (surface == null || !surface.isValid()) {
-      surface = new Surface(texture.surfaceTexture());
+      surface = createSurface(texture.surfaceTexture());
     }
     return surface;
+  }
+
+  @VisibleForTesting
+  public Surface createSurface(SurfaceTexture surfaceTexture) {
+    return new Surface(surfaceTexture);
   }
 
   // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously

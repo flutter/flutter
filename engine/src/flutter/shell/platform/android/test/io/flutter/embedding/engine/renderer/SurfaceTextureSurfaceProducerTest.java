@@ -7,8 +7,11 @@ package io.flutter.embedding.engine.renderer;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.annotation.TargetApi;
@@ -19,6 +22,7 @@ import android.os.Looper;
 import android.view.Surface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.view.TextureRegistry;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,5 +87,44 @@ public final class SurfaceTextureSurfaceProducerTest {
     assertTrue(surface.isValid());
     producer.release();
     assertFalse(surface.isValid());
+  }
+
+  @Test
+  public void getSurface_doesNotReturnInvalidSurface() {
+    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
+    final Handler handler = new Handler(Looper.getMainLooper());
+    final SurfaceTexture mockSurfaceTexture = mock(SurfaceTexture.class);
+    final TextureRegistry.SurfaceTextureEntry spyTexture =
+        spy(flutterRenderer.registerSurfaceTexture(mockSurfaceTexture));
+    final SurfaceTextureSurfaceProducer producerSpy =
+        spy(new SurfaceTextureSurfaceProducer(0, handler, fakeJNI, spyTexture));
+    final Surface mockSurface = mock(Surface.class);
+    final Surface mockSurface2 = mock(Surface.class);
+
+    when(spyTexture.surfaceTexture()).thenReturn(mockSurfaceTexture);
+    when(mockSurface.isValid()).thenReturn(false);
+    when(producerSpy.createSurface(mockSurfaceTexture))
+        .thenReturn(mockSurface)
+        .thenReturn(mockSurface2);
+
+    final Surface surface1 = producerSpy.getSurface();
+    final Surface surface2 = producerSpy.getSurface();
+
+    assertNotEquals(surface1, surface2);
+  }
+
+  @Test
+  public void invalidateSurface_forcesGetSurfaceToReturnNewSurface() {
+    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
+    final Handler handler = new Handler(Looper.getMainLooper());
+    final SurfaceTextureSurfaceProducer producer =
+        new SurfaceTextureSurfaceProducer(
+            0, handler, fakeJNI, flutterRenderer.registerSurfaceTexture(new SurfaceTexture(0)));
+
+    final Surface surface1 = producer.getSurface();
+    producer.invalidateSurface();
+    final Surface surface2 = producer.getSurface();
+
+    assertNotEquals(surface1, surface2);
   }
 }

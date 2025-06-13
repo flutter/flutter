@@ -1669,6 +1669,9 @@ public class PlatformViewsControllerTest {
               }
 
               @Override
+              public void invalidateSurface() {}
+
+              @Override
               public void release() {}
 
               @Override
