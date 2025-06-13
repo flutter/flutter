@@ -494,8 +494,10 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // Otherwise there would be a visible flash when nothing is rendered for
     // one frame.
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _closeContextMenu();
-      _openController.reset();
+      if (mounted) {
+        _closeContextMenu();
+        _openController.reset();
+      }
     }, debugLabel: 'removeContextMenuDecoy');
   }
 
