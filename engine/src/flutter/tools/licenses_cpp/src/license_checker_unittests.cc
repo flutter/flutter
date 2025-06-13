@@ -288,3 +288,36 @@ Test License
 v2.0
 )output");
 }
+
+TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > third_party/foobar/foo.cc"), 0);
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE").ok());
+  ASSERT_EQ(std::system("git init"), 0);
+  ASSERT_EQ(std::system("git add main.cc"), 0);
+  ASSERT_EQ(std::system("git add LICENSE"), 0);
+  ASSERT_EQ(std::system("git add third_party/foobar/foo.cc"), 0);
+  ASSERT_EQ(std::system("git add third_party/foobar/LICENSE"), 0);
+  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+
+  EXPECT_EQ(ss.str(), R"output(engine
+foobar
+
+Test License
+v2.0
+)output");
+}

@@ -138,7 +138,7 @@ Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
   bool after_third_party = false;
   fs::path current = working_dir;
   for (const fs::path& component : relative) {
-    current += component;
+    current /= component;
     if (after_third_party) {
       result.name = component;
       after_third_party = false;
@@ -250,7 +250,9 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                         if (RE2::PartialMatch(comment, pattern, &match)) {
                           did_find_copyright = true;
                           VLOG(1) << comment;
-                          license_map.Add(package.name, comment);
+                          if (!package.license_file.has_value()) {
+                            license_map.Add(package.name, comment);
+                          }
                         }
                       });
       if (!did_find_copyright && !package.license_file.has_value()) {
