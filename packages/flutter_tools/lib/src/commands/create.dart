@@ -70,7 +70,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
       help:
-          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy). '
+          'Only supported for "--template=plugin".',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -324,12 +325,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
         argResults!.wasParsed('platforms') &&
         platforms.contains('web')) {
       throwToolExit('The web platform is not supported in plugin_ffi template.', exitCode: 2);
-    } else if (generateFfi && argResults!.wasParsed('ios-language')) {
-      throwToolExit(
-        'The "ios-language" option is not supported with the ${template.cliName} '
-        'template: the language will always be C or C++.',
-        exitCode: 2,
-      );
     } else if (generateFfi && argResults!.wasParsed('android-language')) {
       throwToolExit(
         'The "android-language" option is not supported with the ${template.cliName} '
@@ -337,12 +332,19 @@ class CreateCommand extends FlutterCommand with CreateBase {
         exitCode: 2,
       );
     } else if (argResults!.wasParsed('ios-language')) {
-      globals.printWarning(
-        'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
-      );
-      if (stringArg('ios-language') == 'objc') {
+      if (generateMethodChannelsPlugin) {
         globals.printWarning(
-          'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.',
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
+        );
+        if (stringArg('ios-language') == 'objc') {
+          globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/169683 describing your use-case for using Objective-C instead of Swift.',
+          );
+        }
+      } else {
+        throwToolExit(
+          'The "ios-language" option is only supported for "--template=plugin".',
+          exitCode: 2,
         );
       }
     }

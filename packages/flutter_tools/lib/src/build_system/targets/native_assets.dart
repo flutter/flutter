@@ -59,6 +59,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName,
+            includeDevDependencies: false,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
@@ -99,7 +100,7 @@ abstract class DartBuild extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
@@ -187,7 +188,7 @@ class InstallCodeAssets extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override

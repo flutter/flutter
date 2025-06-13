@@ -59,12 +59,10 @@ class AccessibilityAnnouncements {
 
   /// Looks up the element used to announce messages of the given [assertiveness].
   DomHTMLElement ariaLiveElementFor(Assertiveness assertiveness) {
-    switch (assertiveness) {
-      case Assertiveness.polite:
-        return _politeElement;
-      case Assertiveness.assertive:
-        return _assertiveElement;
-    }
+    return switch (assertiveness) {
+      Assertiveness.polite => _politeElement,
+      Assertiveness.assertive => _assertiveElement,
+    };
   }
 
   /// Makes an accessibity announcement from a message sent by the framework
