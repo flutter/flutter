@@ -20,6 +20,7 @@ void main() {
     // Check Fade is expanded.
     expect(find.text('Fade Transition - Collapse me'), findsOneWidget);
     expect(find.textContaining('expanded content of the fade transition'), findsOneWidget);
+    expect(find.textContaining('expanded content of the scroll transition'), findsNothing);
 
     // Tap to collapse the Fade Transition tile.
     await tester.tap(find.text('Fade Transition - Collapse me'));
@@ -35,6 +36,7 @@ void main() {
     // Check Scroll is expanded.
     expect(find.text('Scroll Transition - Collapse me'), findsOneWidget);
     expect(find.textContaining('expanded content of the scroll transition'), findsOneWidget);
+    expect(find.textContaining('expanded content of the fade transition'), findsNothing);
 
     // Tap to collapse the Scroll Transition tile.
     await tester.tap(find.text('Scroll Transition - Collapse me'));

@@ -17,6 +17,7 @@ class CupertinoExpansionTileApp extends StatelessWidget {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(middle: Text('Cupertino Expansion Tile')),
+        backgroundColor: CupertinoColors.systemGroupedBackground,
         child: SafeArea(child: ExpansionTileExamples()),
       ),
     );
@@ -46,6 +47,7 @@ class ExpansionTileExamples extends StatelessWidget {
 
 class TransitionTileSection extends StatefulWidget {
   const TransitionTileSection({required this.title, required this.transitionMode, super.key});
+
   final String title;
   final ExpansionTileTransitionMode transitionMode;
 
@@ -54,6 +56,7 @@ class TransitionTileSection extends StatefulWidget {
 }
 
 class _TransitionTileSectionState extends State<TransitionTileSection> {
+
   late ExpansibleController _controller;
   bool _isExpanded = false;
 
@@ -76,22 +79,26 @@ class _TransitionTileSectionState extends State<TransitionTileSection> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoExpansionTile(
-      title: Text(
-        '${widget.title} - ${_isExpanded ? 'Collapse me' : 'Tap to expand'}',
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-      ),
-      controller: _controller,
-      transitionMode: widget.transitionMode,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        color: CupertinoColors.white,
-        child: Text(
-          'This is the expanded content of the ${widget.title.toLowerCase()}. '
-          'You can place anything here: text, images, buttons, etc.',
-          style: const TextStyle(fontSize: 16, color: CupertinoColors.black),
+    return CupertinoListSection.insetGrouped(
+      children: <Widget>[
+        CupertinoExpansionTile(
+          title: Text(
+            '${widget.title} - ${_isExpanded ? 'Collapse me' : 'Tap to expand'}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          controller: _controller,
+          transitionMode: widget.transitionMode,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            color: CupertinoColors.systemGreen,
+            child: Text(
+              'This is the expanded content of the ${widget.title.toLowerCase()}. '
+              'You can place anything here: text, images, buttons, etc.',
+              style: const TextStyle(fontSize: 16, color: CupertinoColors.black),
+            ),
+          ),
         ),
-      ),
+      ]
     );
   }
 }
