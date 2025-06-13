@@ -165,8 +165,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         // TODO(gmackall) Update these java docs.
         // TODO(egarciad): Remove the need for this.
         // https://github.com/flutter/flutter/issues/96679
-        public void createForPlatformViewLayer(
-            @NonNull PlatformViewCreationRequest request) {
+        public void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request) {
           // API level 19 is required for `android.graphics.ImageReader`.
           enforceMinimumAndroidApiVersion(19);
           ensureValidRequest(request);
@@ -186,15 +185,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        public void createPlatformViewHcpp(
-            @NonNull PlatformViewCreationRequest request) {
+        public void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request) {
           // no op
         }
 
         @SuppressLint("NewApi")
         @Override
-        public long createForTextureLayer(
-            @NonNull PlatformViewCreationRequest request) {
+        public long createForTextureLayer(@NonNull PlatformViewCreationRequest request) {
           ensureValidRequest(request);
           final int viewId = request.viewId;
           if (viewWrappers.get(viewId) != null) {
@@ -237,8 +234,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // fallback mode is requested.
           if (!supportsTextureLayerMode) {
             if (request.displayMode
-                == PlatformViewCreationRequest.RequestedDisplayMode
-                    .TEXTURE_WITH_HYBRID_FALLBACK) {
+                == PlatformViewCreationRequest.RequestedDisplayMode.TEXTURE_WITH_HYBRID_FALLBACK) {
               configureForHybridComposition(platformView, request);
               return PlatformViewsChannel.PlatformViewsHandler.NON_TEXTURE_FALLBACK;
             } else if (!usesSoftwareRendering) { // Virtual Display doesn't support software mode.
@@ -509,8 +505,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
   }
 
-  private void ensureValidRequest(
-      @NonNull PlatformViewCreationRequest request) {
+  private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
     if (!validateDirection(request.direction)) {
       throw new IllegalStateException(
           "Trying to create a view with unknown direction value: "
@@ -529,7 +524,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // all display modes, and adds it to `platformViews`.
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   public PlatformView createPlatformView(
-          @NonNull PlatformViewCreationRequest request, boolean wrapContext) {
+      @NonNull PlatformViewCreationRequest request, boolean wrapContext) {
     final PlatformViewFactory viewFactory = registry.getFactory(request.viewType);
     if (viewFactory == null) {
       throw new IllegalStateException(
@@ -562,8 +557,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // Configures the view for Hybrid Composition mode.
   private void configureForHybridComposition(
-      @NonNull PlatformView platformView,
-      @NonNull PlatformViewCreationRequest request) {
+      @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
@@ -579,8 +573,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // Configures the view for Virtual Display mode, returning the associated texture ID.
   private long configureForVirtualDisplay(
-      @NonNull PlatformView platformView,
-      @NonNull PlatformViewCreationRequest request) {
+      @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     // This mode adds the view to a virtual display, which is wired up to a GL texture that
     // is composed by the Flutter engine.
 
@@ -631,8 +624,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @RequiresApi(API_LEVELS.API_23)
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   public long configureForTextureLayerComposition(
-      @NonNull PlatformView platformView,
-      @NonNull PlatformViewCreationRequest request) {
+      @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     // This mode attaches the view to the Android view hierarchy and record its drawing
     // operations, so they can be forwarded to a GL texture that is composed by the
     // Flutter engine.
@@ -722,7 +714,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @VisibleForTesting
   public MotionEvent toMotionEvent(
-          float density, PlatformViewTouch touch, boolean usingVirtualDiplay) {
+      float density, PlatformViewTouch touch, boolean usingVirtualDiplay) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);

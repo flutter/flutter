@@ -96,12 +96,11 @@ public class PlatformViewsChannel {
             if (handler.isHcppEnabled()) {
               Log.e("HI GRAY", "USING HCPP");
               final PlatformViewCreationRequest request =
-                      PlatformViewCreationRequest.createHCPPRequest(
-                              (int) createArgs.get("id"),
-                              (String) createArgs.get("viewType"),
-                              (int) createArgs.get("direction"),
-                              additionalParams
-                      );
+                  PlatformViewCreationRequest.createHCPPRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      (int) createArgs.get("direction"),
+                      additionalParams);
               handler.createPlatformViewHcpp(request);
               result.success(null);
               return;
@@ -109,12 +108,11 @@ public class PlatformViewsChannel {
             Log.e("HI GRAY", "USING USING LEGACY");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
-                      PlatformViewCreationRequest.createHybridCompositionRequest(
-                              (int) createArgs.get("id"),
-                              (String) createArgs.get("viewType"),
-                              (int) createArgs.get("direction"),
-                              additionalParams
-                      );
+                  PlatformViewCreationRequest.createHybridCompositionRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      (int) createArgs.get("direction"),
+                      additionalParams);
               handler.createForPlatformViewLayer(request);
               result.success(null);
             } else {
@@ -128,17 +126,16 @@ public class PlatformViewsChannel {
                       : PlatformViewCreationRequest.RequestedDisplayMode
                           .TEXTURE_WITH_VIRTUAL_FALLBACK;
               final PlatformViewCreationRequest request =
-                      PlatformViewCreationRequest.createTLHCWithFallbacksRequest(
-                              (int) createArgs.get("id"),
-                              (String) createArgs.get("viewType"),
-                              (double) createArgs.get("top"),
-                              (double) createArgs.get("left"),
-                              (double) createArgs.get("width"),
-                              (double) createArgs.get("height"),
-                              (int) createArgs.get("direction"),
-                              hybridFallback,
-                              additionalParams
-                      );
+                  PlatformViewCreationRequest.createTLHCWithFallbacksRequest(
+                      (int) createArgs.get("id"),
+                      (String) createArgs.get("viewType"),
+                      (double) createArgs.get("top"),
+                      (double) createArgs.get("left"),
+                      (double) createArgs.get("width"),
+                      (double) createArgs.get("height"),
+                      (int) createArgs.get("direction"),
+                      hybridFallback,
+                      additionalParams);
               long textureId = handler.createForTextureLayer(request);
               if (textureId == PlatformViewsHandler.NON_TEXTURE_FALLBACK) {
                 if (!hybridFallback) {

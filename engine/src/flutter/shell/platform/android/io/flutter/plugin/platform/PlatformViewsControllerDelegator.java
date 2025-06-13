@@ -12,7 +12,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
@@ -124,22 +123,19 @@ public class PlatformViewsControllerDelegator
 
   // hc only
   @Override
-  public void createForPlatformViewLayer(
-      @NonNull PlatformViewCreationRequest request) {
+  public void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request) {
     platformViewsController.channelHandler.createForPlatformViewLayer(request);
   }
 
   // tlhc w/ fallbacks
   @Override
-  public long createForTextureLayer(
-      @NonNull PlatformViewCreationRequest request) {
+  public long createForTextureLayer(@NonNull PlatformViewCreationRequest request) {
     return platformViewsController.channelHandler.createForTextureLayer(request);
   }
 
   // hcpp
   @Override
-  public void createPlatformViewHcpp(
-      @NonNull PlatformViewCreationRequest request) {
+  public void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request) {
     platformViewsController2.channelHandler.createPlatformView(request);
   }
 

@@ -1121,7 +1121,8 @@ public class FlutterView extends FrameLayout
             this,
             this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getScribeChannel(),
-            this.flutterEngine.getPlatformViewsController(), // TODO(gmackall): this can be the delegator
+            this.flutterEngine
+                .getPlatformViewsController(), // TODO(gmackall): this can be the delegator
             this.flutterEngine.getPlatformViewsController2());
 
     try {

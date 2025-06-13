@@ -95,8 +95,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return false;
   }
 
-  public PlatformView createFlutterPlatformView(
-      @NonNull PlatformViewCreationRequest request) {
+  public PlatformView createFlutterPlatformView(@NonNull PlatformViewCreationRequest request) {
     final PlatformViewFactory viewFactory = registry.getFactory(request.viewType);
     if (viewFactory == null) {
       throw new IllegalStateException(
@@ -627,8 +626,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       new PlatformViewsChannel2.PlatformViewsHandler() {
 
         @Override
-        public void createPlatformView(
-            @NonNull PlatformViewCreationRequest request) {
+        public void createPlatformView(@NonNull PlatformViewCreationRequest request) {
           createFlutterPlatformView(request);
         }
 

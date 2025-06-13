@@ -32,7 +32,6 @@ import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -116,7 +115,8 @@ public class PlatformViewsController2Test {
     int viewId = 0;
 
     final PlatformViewCreationRequest request =
-            PlatformViewCreationRequest.createHCPPRequest(viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
     PlatformView pView = PlatformViewsController2.createFlutterPlatformView(request);
     assertTrue(pView instanceof CountingPlatformView);
     CountingPlatformView cpv = (CountingPlatformView) pView;
@@ -149,7 +149,8 @@ public class PlatformViewsController2Test {
     // Create the platform view.
     int viewId = 0;
     final PlatformViewCreationRequest request =
-            PlatformViewCreationRequest.createHCPPRequest(viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
 
     PlatformView pView = PlatformViewsController2.createFlutterPlatformView(request);
     assertTrue(pView instanceof CountingPlatformView);

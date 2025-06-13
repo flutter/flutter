@@ -95,12 +95,11 @@ public class PlatformViewsChannel2 {
                   : null;
           try {
             final PlatformViewCreationRequest request =
-                    PlatformViewCreationRequest.createHCPPRequest(
-                            (int) createArgs.get("id"),
-                            (String) createArgs.get("viewType"),
-                            (int) createArgs.get("direction"),
-                            additionalParams
-                    );
+                PlatformViewCreationRequest.createHCPPRequest(
+                    (int) createArgs.get("id"),
+                    (String) createArgs.get("viewType"),
+                    (int) createArgs.get("direction"),
+                    additionalParams);
             handler.createPlatformView(request);
             result.success(null);
 
