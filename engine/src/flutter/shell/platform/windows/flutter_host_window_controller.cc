@@ -95,6 +95,12 @@ std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
 
   // Not initialized yet.
   if (!isolate_) {
+    if (pending_messages_.size() > 1024) {
+      FML_LOG(ERROR) << "The pending message cache has been maxed out, "
+                        "something must be going wrong.";
+      return std::nullopt;
+    }
+
     pending_messages_.push_back(message_struct);
     return std::nullopt;
   }
