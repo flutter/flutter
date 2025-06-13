@@ -15,8 +15,8 @@ void CommentsUtil::AddTrimLine(std::string* buffer,
 }
 
 void CommentsUtil::AddCTrimLine(std::string* buffer,
-                               const char* text,
-                               size_t length) {
+                                const char* text,
+                                size_t length) {
   std::string chopped(text, length);
   RE2 regex(R"regex(^\s*\**\s?)regex");
   RE2::Replace(&chopped, regex, "");
@@ -24,8 +24,8 @@ void CommentsUtil::AddCTrimLine(std::string* buffer,
 }
 
 void CommentsUtil::AddCEndTrimLine(std::string* buffer,
-                               const char* text,
-                               size_t length) {
+                                   const char* text,
+                                   size_t length) {
   RE2 regex(R"regex(^\s*(.*?)\*/)regex");
   re2::StringPiece captured_content;
   RE2::PartialMatch(re2::StringPiece(text), regex, &captured_content);

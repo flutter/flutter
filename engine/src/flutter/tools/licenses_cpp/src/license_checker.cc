@@ -190,7 +190,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         assert(stream.good());
         std::string license((std::istreambuf_iterator<char>(stream)),
                             std::istreambuf_iterator<char>());
-        if (license[license.size()-1] == '\n') {
+        if (license[license.size() - 1] == '\n') {
           license.pop_back();
         }
         auto package_emplace_result = license_map.try_emplace(
@@ -226,11 +226,10 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                   comment, absl::flat_hash_set<std::string>());
               absl::flat_hash_set<std::string>& comment_set =
                   package_emplace_result.first->second;
-              if (comment_set.find(package.name) != comment_set.end()) {
+              if (comment_set.find(package.name) == comment_set.end()) {
                 // License is already seen.
-                return;
+                comment_set.emplace(std::string(package.name));
               }
-              comment_set.emplace(std::string(package.name));
             }
           });
       if (!did_find_copyright && !package.license_file.has_value()) {
