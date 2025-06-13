@@ -304,11 +304,7 @@ class WebTestsSuite {
     tests.shuffle(math.Random(0));
 
     await _ensureChromeDriverIsRunning();
-    //await _runGalleryE2eWebTest('debug');
-    await _runGalleryE2eWebTest('profile');
-    await _runGalleryE2eWebTest('release');
-
-    // await runShardRunnerIndexOfTotalSubshard(tests);
+    await runShardRunnerIndexOfTotalSubshard(tests);
     await _stopChromeDriver();
   }
 
