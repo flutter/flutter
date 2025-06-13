@@ -94,8 +94,8 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
-  node.minValue = minValue;
-  node.maxValue = maxValue;
+  node.minValue = std::move(minValue);
+  node.maxValue = std::move(maxValue);
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
   node.identifier = std::move(identifier);
