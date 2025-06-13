@@ -29,6 +29,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/testbed.dart';
 
+const String kLuciEnvName = 'LUCI_CONTEXT';
+
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
   0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
@@ -51,6 +53,7 @@ void main() {
   late BufferLogger logger;
   const bool usesDdcModuleSystem = false;
   const bool canaryFeatures = false;
+  final bool isCi = globals.platform.environment.containsKey(kLuciEnvName);
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -931,6 +934,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1039,6 +1043,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1153,6 +1158,7 @@ void main() {
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
           isWindows: false,
+          isCi: isCi,
         );
         webDevFS.requireJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1230,6 +1236,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1282,6 +1289,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1335,6 +1343,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1505,6 +1514,7 @@ void main() {
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
         isWindows: false,
+        isCi: isCi,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
