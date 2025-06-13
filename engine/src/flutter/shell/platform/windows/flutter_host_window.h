@@ -12,11 +12,11 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/common/windowing.h"
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 
 namespace flutter {
 
-class FlutterHostWindowController;
+class WindowManager;
 class FlutterWindowsView;
 class FlutterWindowsViewController;
 
@@ -32,7 +32,7 @@ class FlutterHostWindow {
   // via |FlutterHostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
   static std::unique_ptr<FlutterHostWindow> createRegularWindow(
-      FlutterHostWindowController* controller,
+      WindowManager* controller,
       FlutterWindowsEngine* engine,
       const FlutterWindowSizing& content_size);
 
@@ -48,10 +48,10 @@ class FlutterHostWindow {
   void SetContentSize(const FlutterWindowSizing& size);
 
  private:
-  friend FlutterHostWindowController;
+  friend WindowManager;
 
   FlutterHostWindow(
-      FlutterHostWindowController* controller,
+      WindowManager* controller,
       FlutterWindowsEngine* engine,
       WindowArchetype archetype,
       std::unique_ptr<FlutterWindowsViewController> view_controller,
@@ -73,7 +73,7 @@ class FlutterHostWindow {
   LRESULT HandleMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
   // Controller for this window.
-  FlutterHostWindowController* const window_controller_ = nullptr;
+  WindowManager* const window_manager_ = nullptr;
 
   // The Flutter engine that owns this window.
   FlutterWindowsEngine* engine_;

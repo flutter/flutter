@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 
 #include <dwmapi.h>
 #include <optional>
@@ -20,12 +20,9 @@
 
 namespace flutter {
 
-FlutterHostWindowController::FlutterHostWindowController(
-    FlutterWindowsEngine* engine)
-    : engine_(engine) {}
+WindowManager::WindowManager(FlutterWindowsEngine* engine) : engine_(engine) {}
 
-void FlutterHostWindowController::Initialize(
-    const WindowingInitRequest* request) {
+void WindowManager::Initialize(const WindowingInitRequest* request) {
   on_message_ = request->on_message;
   isolate_ = Isolate::Current();
 
@@ -37,11 +34,11 @@ void FlutterHostWindowController::Initialize(
   pending_messages_.clear();
 }
 
-bool FlutterHostWindowController::HasTopLevelWindows() const {
+bool WindowManager::HasTopLevelWindows() const {
   return !active_windows_.empty();
 }
 
-FlutterViewId FlutterHostWindowController::CreateRegularWindow(
+FlutterViewId WindowManager::CreateRegularWindow(
     const WindowCreationRequest* request) {
   auto window = FlutterHostWindow::createRegularWindow(this, engine_,
                                                        request->content_size);
@@ -54,7 +51,7 @@ FlutterViewId FlutterHostWindowController::CreateRegularWindow(
   return view_id;
 }
 
-void FlutterHostWindowController::OnEngineShutdown() {
+void WindowManager::OnEngineShutdown() {
   // Don't send any more messages to isolate.
   on_message_ = nullptr;
   std::vector<HWND> active_handles;
@@ -70,11 +67,10 @@ void FlutterHostWindowController::OnEngineShutdown() {
   }
 }
 
-std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
-    HWND hwnd,
-    UINT message,
-    WPARAM wparam,
-    LPARAM lparam) {
+std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
+                                                    UINT message,
+                                                    WPARAM wparam,
+                                                    LPARAM lparam) {
   if (message == WM_NCDESTROY) {
     active_windows_.erase(hwnd);
   }
@@ -121,14 +117,14 @@ void InternalFlutterWindows_WindowManager_Initialize(
     const flutter::WindowingInitRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  engine->get_host_window_controller()->Initialize(request);
+  engine->get_window_manager()->Initialize(request);
 }
 
 bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
     int64_t engine_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_host_window_controller()->HasTopLevelWindows();
+  return engine->get_window_manager()->HasTopLevelWindows();
 }
 
 int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
@@ -136,7 +132,7 @@ int64_t InternalFlutterWindows_WindowManager_CreateRegularWindow(
     const flutter::WindowCreationRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_host_window_controller()->CreateRegularWindow(request);
+  return engine->get_window_manager()->CreateRegularWindow(request);
 }
 
 HWND InternalFlutterWindows_WindowManager_GetWindowHandle(

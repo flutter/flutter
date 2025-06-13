@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -12,10 +12,10 @@ namespace testing {
 
 namespace {
 
-class FlutterHostWindowControllerTest : public WindowsTest {
+class WindowManagerTest : public WindowsTest {
  public:
-  FlutterHostWindowControllerTest() = default;
-  virtual ~FlutterHostWindowControllerTest() = default;
+  WindowManagerTest() = default;
+  virtual ~WindowManagerTest() = default;
 
  protected:
   void SetUp() override {
@@ -57,12 +57,12 @@ class FlutterHostWindowControllerTest : public WindowsTest {
           },
   };
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindowControllerTest);
+  FML_DISALLOW_COPY_AND_ASSIGN(WindowManagerTest);
 };
 
 }  // namespace
 
-TEST_F(FlutterHostWindowControllerTest, WindowingInitialize) {
+TEST_F(WindowManagerTest, WindowingInitialize) {
   IsolateScope isolate_scope(isolate());
 
   static bool received_message = false;
@@ -79,7 +79,7 @@ TEST_F(FlutterHostWindowControllerTest, WindowingInitialize) {
   EXPECT_TRUE(received_message);
 }
 
-TEST_F(FlutterHostWindowControllerTest, HasTopLevelWindows) {
+TEST_F(WindowManagerTest, HasTopLevelWindows) {
   IsolateScope isolate_scope(isolate());
 
   bool has_top_level_windows =
@@ -93,7 +93,7 @@ TEST_F(FlutterHostWindowControllerTest, HasTopLevelWindows) {
   EXPECT_TRUE(has_top_level_windows);
 }
 
-TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
+TEST_F(WindowManagerTest, CreateRegularWindow) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
@@ -102,7 +102,7 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   EXPECT_EQ(view_id, 0);
 }
 
-TEST_F(FlutterHostWindowControllerTest, GetWindowHandle) {
+TEST_F(WindowManagerTest, GetWindowHandle) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
@@ -114,7 +114,7 @@ TEST_F(FlutterHostWindowControllerTest, GetWindowHandle) {
   EXPECT_NE(window_handle, nullptr);
 }
 
-TEST_F(FlutterHostWindowControllerTest, GetWindowSize) {
+TEST_F(WindowManagerTest, GetWindowSize) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
@@ -131,7 +131,7 @@ TEST_F(FlutterHostWindowControllerTest, GetWindowSize) {
   EXPECT_EQ(size.height, creation_request()->content_size.height);
 }
 
-TEST_F(FlutterHostWindowControllerTest, SetWindowSize) {
+TEST_F(WindowManagerTest, SetWindowSize) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
