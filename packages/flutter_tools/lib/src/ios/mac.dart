@@ -42,7 +42,6 @@ import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/uiapplicationmain_deprecation_migration.dart';
-import 'migrations/uiscenedelegate_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
@@ -153,7 +152,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     IOSDeploymentTargetMigration(app.project, globals.logger),
     XcodeProjectObjectVersionMigration(app.project, globals.logger),
     HostAppInfoPlistMigration(app.project, globals.logger),
-    UISceneDelegateMigration(app.project, globals.logger),
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
