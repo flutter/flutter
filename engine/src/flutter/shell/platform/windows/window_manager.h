@@ -23,7 +23,7 @@ class FlutterHostWindow;
 struct WindowingInitRequest;
 
 struct WindowsMessage {
-  int64_t view_id;
+  FlutterViewId view_id;
   HWND hwnd;
   UINT message;
   WPARAM wParam;
