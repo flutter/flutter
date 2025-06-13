@@ -981,7 +981,7 @@ class AccessibilityFeatures {
   /// Use this flag to conditionally avoid making announcements on Android.
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // "announce" than discourage it.
-  bool get announce => _kNoAnnounceIndex & _index == 0;
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -1007,8 +1007,8 @@ class AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (announce) {
-      features.add('announce');
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
     }
     return 'AccessibilityFeatures$features';
   }
