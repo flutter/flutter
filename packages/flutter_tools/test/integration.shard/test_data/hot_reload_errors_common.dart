@@ -34,7 +34,7 @@ void testAll({
     });
 
     testWithoutContext(
-      'hot reload displays a formatted error message when removing a field from a const class, and hot restart succeeds',
+      'hot reload displays a formatted error message when removing a field from a const class',
       () async {
         await flutter.run(
           device:
@@ -53,9 +53,16 @@ void testAll({
             ),
           ),
         );
-
-        await expectLater(flutter.hotRestart(), completes);
       },
     );
+
+    testWithoutContext('hot restart succeeds when removing a field from a const class', () async {
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
+      project.removeFieldFromConstClass();
+      await expectLater(flutter.hotRestart(), completes);
+    });
   });
 }

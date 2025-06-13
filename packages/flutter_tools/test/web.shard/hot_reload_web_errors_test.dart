@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('linux') // https://github.com/flutter/flutter/issues/170062
 @Tags(<String>['flutter-test-driver'])
 library;
 
