@@ -1484,7 +1484,6 @@
 ../../../flutter/third_party/dart/runtime/observatory/lib/src/elements/css/shared.css
 ../../../flutter/third_party/dart/runtime/observatory/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/observatory/tests
-../../../flutter/third_party/dart/runtime/observatory/update_sources.py
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
 ../../../flutter/third_party/dart/runtime/tests
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
@@ -3769,6 +3768,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.debugdata/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/meta.json
