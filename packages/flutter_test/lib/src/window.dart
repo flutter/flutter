@@ -69,7 +69,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool onOffSwitchLabels;
 
   @override
-  final bool supportsSupportsAnnounce;
+  final bool supportsAnnounce;
 
   @override
   bool operator ==(Object other) {
