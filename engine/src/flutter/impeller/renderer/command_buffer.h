@@ -107,7 +107,11 @@ class CommandBuffer {
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() = 0;
 
-  [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
+  /// @brief Submit the command buffer to the GPU for execution.
+  ///
+  /// See also: [SubmitCommands].
+  [[nodiscard]] virtual bool OnSubmitCommands(bool block_on_schedule,
+                                              CompletionCallback callback) = 0;
 
   virtual void OnWaitUntilCompleted() = 0;
 
@@ -124,12 +128,15 @@ class CommandBuffer {
   ///             performed immediately on the calling thread.
   ///
   ///             A command buffer may only be committed once.
-  ///
+  /// @param[in]  block_on_schedule  If true, this function will not return
+  ///             until the command buffer has been scheduled. This only impacts
+  ///             the Metal backend.
   /// @param[in]  callback  The completion callback.
   ///
-  [[nodiscard]] bool SubmitCommands(const CompletionCallback& callback);
+  [[nodiscard]] bool SubmitCommands(bool block_on_schedule,
+                                    const CompletionCallback& callback);
 
-  [[nodiscard]] bool SubmitCommands();
+  [[nodiscard]] bool SubmitCommands(bool block_on_schedule);
 
   CommandBuffer(const CommandBuffer&) = delete;
 

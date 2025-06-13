@@ -124,7 +124,7 @@ class MockCommandBuffer : public CommandBuffer {
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
   MOCK_METHOD(bool,
               OnSubmitCommands,
-              (CompletionCallback callback),
+              (bool block_on_schedule, CompletionCallback callback),
               (override));
   MOCK_METHOD(void, OnWaitUntilCompleted, (), (override));
   MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
@@ -239,7 +239,8 @@ class MockCommandQueue : public CommandQueue {
   MOCK_METHOD(fml::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-               const CompletionCallback& cb),
+               const CompletionCallback& cb,
+               bool block_on_schedule),
               (override));
 };
 
