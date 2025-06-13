@@ -292,7 +292,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   }
 
   // TODO(knopp): What about windows sized to content?
-  assert(content_size.has_size);
+  FML_CHECK(content_size.has_size);
 
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
