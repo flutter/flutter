@@ -5639,7 +5639,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (predicate(candidate.route)) {
         return;
       }
-      // Check what would be next if we pop this route
+      // Check what would be next if we pop this route.
       final _RouteEntry? next = _lastRouteEntryWhereOrNull(
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
       );
