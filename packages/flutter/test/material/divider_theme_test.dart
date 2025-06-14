@@ -19,6 +19,7 @@ void main() {
     expect(dividerTheme.thickness, null);
     expect(dividerTheme.indent, null);
     expect(dividerTheme.endIndent, null);
+    expect(dividerTheme.radius, null);
   });
 
   testWidgets('Default DividerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -42,6 +43,7 @@ void main() {
       thickness: 4.0,
       indent: 3.0,
       endIndent: 2.0,
+      radius: BorderRadius.all(Radius.circular(20)),
     ).debugFillProperties(builder);
 
     final List<String> description =
@@ -56,6 +58,7 @@ void main() {
       'thickness: 4.0',
       'indent: 3.0',
       'endIndent: 2.0',
+      'radius: BorderRadius.circular(20.0)',
     ]);
   });
 
@@ -100,6 +103,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.left, dividerRect.left + dividerTheme.indent!);
       expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(1));
+      expect(borderRadius.topRight, const Radius.circular(2));
+      expect(borderRadius.bottomLeft, const Radius.circular(3));
+      expect(borderRadius.bottomRight, const Radius.circular(4));
     });
 
     testWidgets('DividerTheme overrides defaults', (WidgetTester tester) async {
@@ -132,6 +141,7 @@ void main() {
               thickness: thickness,
               indent: indent,
               endIndent: endIndent,
+              radius: BorderRadiusGeometry.all(Radius.circular(5)),
             ),
           ),
         ),
@@ -149,6 +159,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.left, dividerRect.left + indent);
       expect(lineRect.right, dividerRect.right - endIndent);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(5));
+      expect(borderRadius.topRight, const Radius.circular(5));
+      expect(borderRadius.bottomLeft, const Radius.circular(5));
+      expect(borderRadius.bottomRight, const Radius.circular(5));
     });
   });
 
@@ -197,6 +213,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.top, dividerRect.top + dividerTheme.indent!);
       expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(1));
+      expect(borderRadius.topRight, const Radius.circular(2));
+      expect(borderRadius.bottomLeft, const Radius.circular(3));
+      expect(borderRadius.bottomRight, const Radius.circular(4));
     });
 
     testWidgets('DividerTheme overrides defaults', (WidgetTester tester) async {
@@ -232,6 +254,7 @@ void main() {
               thickness: thickness,
               indent: indent,
               endIndent: endIndent,
+              radius: BorderRadiusGeometry.all(Radius.circular(5)),
             ),
           ),
         ),
@@ -250,6 +273,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.top, dividerRect.top + indent);
       expect(lineRect.bottom, dividerRect.bottom - endIndent);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(5));
+      expect(borderRadius.topRight, const Radius.circular(5));
+      expect(borderRadius.bottomLeft, const Radius.circular(5));
+      expect(borderRadius.bottomRight, const Radius.circular(5));
     });
   });
 
@@ -290,6 +319,12 @@ void main() {
         final BoxDecoration decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, theme.thickness);
         expect(decoration.border!.bottom.color, theme.color);
+
+        final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+        expect(borderRadius.topLeft, const Radius.circular(1));
+        expect(borderRadius.topRight, const Radius.circular(2));
+        expect(borderRadius.bottomLeft, const Radius.circular(3));
+        expect(borderRadius.bottomRight, const Radius.circular(4));
       });
     });
 
@@ -329,5 +364,11 @@ DividerThemeData _dividerTheme() {
     thickness: 2.0,
     indent: 7.0,
     endIndent: 5.0,
+    radius: BorderRadiusGeometry.only(
+      topLeft: Radius.circular(1),
+      topRight: Radius.circular(2),
+      bottomLeft: Radius.circular(3),
+      bottomRight: Radius.circular(4),
+    ),
   );
 }
