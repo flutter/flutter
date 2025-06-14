@@ -2326,9 +2326,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       const Rect thumbRectBefore = Rect.fromLTRB(794.0, 0.0, 800.0, 200.0); // Scrollbar thumb
       expect(
         find.byType(RawScrollbar),
-        paints
-          ..rect(rect: trackRect)
-          ..rect(rect: thumbRectBefore, color: const Color(0x66BCBCBC)),
+        paints..rect(rect: trackRect)..rect(rect: thumbRectBefore, color: const Color(0x66BCBCBC)),
       );
 
       // Drag the thumb to scroll down.
@@ -2345,8 +2343,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(scrollController.offset - minScrollExtent, 1800 * scrollDownAmount / 600);
       expect(
         find.byType(RawScrollbar),
-        paints
-          ..rect(rect: trackRect)
+        paints..rect(rect: trackRect)
           ..rect(
             rect: thumbRectBefore.shift(const Offset(0.0, scrollDownAmount)),
             color: const Color(0x66BCBCBC),
