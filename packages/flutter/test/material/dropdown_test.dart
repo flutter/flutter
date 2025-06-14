@@ -619,7 +619,7 @@ void main() {
     expect(fieldKey.currentState!.value, 'one');
 
     // Open the dropdown menu.
-    await tester.tap(find.text('one'), warnIfMissed: false);
+    await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('three').last);
