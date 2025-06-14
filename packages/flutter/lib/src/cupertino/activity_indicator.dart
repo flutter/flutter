@@ -29,6 +29,7 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///
 /// See also:
 ///
+///  * [CupertinoLinearActivityIndicator], which displays progress along a line.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
@@ -209,33 +210,34 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 ///
 /// See also:
 ///
+///  * [CupertinoActivityIndicator], which is an iOS-style activity indicator that spins clockwise.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
 class CupertinoLinearActivityIndicator extends StatelessWidget {
   /// Creates a linear iOS-style activity indicator.
   const CupertinoLinearActivityIndicator({
+    super.key,
     required this.progress,
     this.height = 4.5,
     this.color,
-    super.key,
   }) : assert(height > 0),
        assert(progress >= 0.0 && progress <= 1.0);
 
   /// The current progress of the linear activity indicator.
   ///
-  /// This value must be between zero and one. A value of 0.0 means no progress
-  /// and 1.0 means that progress is complete. The value will be clamped to be
-  /// in the range 0.0-1.0.
+  /// This value must be between 0.0 and 1.0. A value of 0.0 means no progress
+  /// and 1.0 means that progress is complete.
   final double progress;
 
   /// The height of the line used to draw the linear activity indicator.
   ///
-  /// The default height is 4.5 units. Must be positive.
+  /// Defaults to 4.5 units. Must be positive.
   final double height;
 
   /// The color of the progress bar.
   ///
-  /// Defaults to [CupertinoColors.activeBlue] if no color is specified. This
-  /// color represents the portion of the bar that indicates progress.
+  /// This color represents the portion of the bar that indicates progress.
+  ///
+  /// Defaults to [CupertinoColors.activeBlue] if no color is specified.
   final Color? color;
 
   @override
