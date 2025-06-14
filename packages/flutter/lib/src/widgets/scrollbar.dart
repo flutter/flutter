@@ -674,7 +674,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double minFraction = _lastMetrics!.minScrollExtent / scrollableExtent;
 
     final double fractionPast =
-        (scrollableExtent > 0) ? clampDouble(_lastMetrics!.pixels / scrollableExtent, minFraction, maxFraction) : 0;
+        (scrollableExtent > 0)
+            ? clampDouble(_lastMetrics!.pixels / scrollableExtent, minFraction, maxFraction)
+            : 0;
 
     return fractionPast * (_traversableTrackExtent - _thumbExtent);
   }
