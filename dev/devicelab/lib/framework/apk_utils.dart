@@ -27,7 +27,7 @@ final List<String> baseApkFiles = <String>['classes.dex', 'AndroidManifest.xml']
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFunction) async {
   final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_gradle_plugin_test.',
+    'flutter devicelab_gradle_plugin_test.',
   );
   final FlutterProject project = await FlutterProject.create(tempDir, 'hello');
 
