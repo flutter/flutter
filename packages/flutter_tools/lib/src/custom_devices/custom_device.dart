@@ -457,6 +457,7 @@ class CustomDevice extends Device {
   final Map<ApplicationPackage, CustomDeviceAppSession> _sessions =
       <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
+  Process? _globalLogReaderProcess = null;
 
   @override
   final DevicePortForwarder portForwarder;
@@ -610,6 +611,8 @@ class CustomDevice extends Device {
     _sessions
       ..forEach((_, CustomDeviceAppSession session) => session.dispose())
       ..clear();
+    _globalLogReaderProcess?.kill();
+    _globalLogReaderProcess = null;
   }
 
   @override
@@ -619,6 +622,17 @@ class CustomDevice extends Device {
   FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
+    }
+
+    if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
+      // launch the readLogs command
+      return _processUtils
+        .start(_config.readLogsCommand!)
+        .then((Process process) {
+          _globalLogReaderProcess = process;
+          _globalLogReader.listenToProcessOutput(process);
+          return _globalLogReader;
+        });
     }
 
     return _globalLogReader;
