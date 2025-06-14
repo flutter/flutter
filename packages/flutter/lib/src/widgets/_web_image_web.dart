@@ -17,10 +17,14 @@ import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
 
+/// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
+@visibleForTesting
+typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
+
 /// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
   /// Creates a platform view backed with an `<img>` element.
-  ImgElementPlatformView(this.src, {super.key}) {
+  ImgElementPlatformView(this.src, {this.fit, super.key}) {
     if (!_registered) {
       _register();
     }
@@ -29,15 +33,29 @@ class ImgElementPlatformView extends StatelessWidget {
   static const String _viewType = 'Flutter__ImgElementImage__';
   static bool _registered = false;
 
+  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  ///
+  /// This should only be used for testing.
+  @visibleForTesting
+  static RegisterViewFactory? debugOverrideRegisterViewFactory;
+  static RegisterViewFactory get _registerViewFactory =>
+      debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
+
   static void _register() {
     assert(!_registered);
     _registered = true;
-    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
+    _registerViewFactory(_viewType, (int viewId, {Object? params}) {
       final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      final String? fit = paramsMap['fit'] as String?;
+      if (fit != null) {
+        img.style.objectFit = fit;
+      }
       return img;
     });
   }
@@ -45,12 +63,18 @@ class ImgElementPlatformView extends StatelessWidget {
   /// The `src` URL for the `<img>` tag.
   final String? src;
 
+  /// The `object-fit` CSS property for the `<img>` tag.
+  final web.CSSObjectFit? fit;
+
   @override
   Widget build(BuildContext context) {
     if (src == null) {
       return const SizedBox.expand();
     }
-    return HtmlElementView(viewType: _viewType, creationParams: <String, String?>{'src': src});
+    return HtmlElementView(
+      viewType: _viewType,
+      creationParams: <String, String?>{'src': src, 'fit': fit?.name},
+    );
   }
 }
 
@@ -67,7 +91,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
-  }) : super(child: ImgElementPlatformView(image.htmlImage.src));
+  }) : super(child: ImgElementPlatformView(image.htmlImage.src, fit: fit?.cssObjectFit));
 
   /// The underlying HTML element to be displayed.
   final WebImageInfo image;
@@ -364,5 +388,22 @@ class RenderWebImage extends RenderShiftedBox {
     properties.add(
       DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
     );
+  }
+}
+
+extension on BoxFit {
+  web.CSSObjectFit get cssObjectFit {
+    switch (this) {
+      case BoxFit.contain:
+      case BoxFit.cover:
+      case BoxFit.fitWidth:
+      case BoxFit.fitHeight:
+      case BoxFit.scaleDown:
+        return web.CSSObjectFit.cover;
+      case BoxFit.fill:
+        return web.CSSObjectFit.fill;
+      case BoxFit.none:
+        return web.CSSObjectFit.none;
+    }
   }
 }
