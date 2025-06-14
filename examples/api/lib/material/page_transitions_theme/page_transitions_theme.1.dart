@@ -15,7 +15,7 @@ class PageTransitionsThemeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        pageTransitionsTheme: const PageTransitionsTheme(
+        pageTransitionsTheme: const PageTransitionsThemeData(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.android: ZoomPageTransitionsBuilder(allowSnapshotting: false),
           },

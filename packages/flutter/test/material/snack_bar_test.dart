@@ -2768,7 +2768,7 @@ void main() {
     const Key transitionTarget = Key('transition-target');
 
     Widget buildApp() {
-      final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+      final PageTransitionsThemeData pageTransitionTheme = PageTransitionsThemeData(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),

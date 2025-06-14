@@ -14,8 +14,9 @@ void main() {
 
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
-    final PageTransitionsTheme theme =
-        Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
+    final PageTransitionsThemeData theme = PageTransitionsTheme.of(
+      tester.element(find.text('home')),
+    );
     expect(theme.builders, isNotNull);
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
@@ -27,16 +28,117 @@ void main() {
           expect(
             theme.builders[platform],
             isNotNull,
-            reason: 'theme builder for $platform is null',
-          );
-        case TargetPlatform.fuchsia:
-          expect(
-            theme.builders[platform],
-            isNull,
             reason: 'theme builder for $platform is not null',
           );
+        case TargetPlatform.fuchsia:
+          expect(theme.builders[platform], isNull, reason: 'theme builder for $platform is null');
       }
     }
+  });
+
+  test('PageTransitionsThemeData lerp special cases', () {
+    const PageTransitionsThemeData theme1 = PageTransitionsThemeData(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      },
+    );
+    const PageTransitionsThemeData theme2 = PageTransitionsThemeData(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+      },
+    );
+
+    expect(
+      PageTransitionsThemeData.lerp(theme1, theme2, 0.5),
+      const PageTransitionsThemeData(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+        },
+      ),
+    );
+  });
+
+  testWidgets('Default PageTransitionsThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const PageTransitionsThemeData().debugFillProperties(builder);
+
+    final List<DiagnosticsNode> properties = builder.properties;
+    expect(properties.length, 1);
+    expect(properties[0].name, 'builders');
+
+    // Verify that the builders map contains the expected default platform builders
+    final Map<TargetPlatform, PageTransitionsBuilder> builders =
+        properties[0].value! as Map<TargetPlatform, PageTransitionsBuilder>;
+    expect(builders[TargetPlatform.android], isA<ZoomPageTransitionsBuilder>());
+    expect(builders[TargetPlatform.iOS], isA<CupertinoPageTransitionsBuilder>());
+    expect(builders[TargetPlatform.macOS], isA<CupertinoPageTransitionsBuilder>());
+    expect(builders[TargetPlatform.windows], isA<ZoomPageTransitionsBuilder>());
+    expect(builders[TargetPlatform.linux], isA<ZoomPageTransitionsBuilder>());
+  });
+
+  testWidgets('PageTransitionsThemeData implements debugFillProperties', (
+    WidgetTester tester,
+  ) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const PageTransitionsThemeData(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      },
+    ).debugFillProperties(builder);
+
+    final List<String> description =
+        builder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
+    expect(description, <String>[
+      "builders: {TargetPlatform.android: Instance of 'FadeUpwardsPageTransitionsBuilder'}",
+    ]);
+  });
+
+  testWidgets('Local PageTransitionsTheme overrides defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/':
+              (BuildContext context) => PageTransitionsTheme(
+                data: const PageTransitionsThemeData(
+                  builders: <TargetPlatform, PageTransitionsBuilder>{
+                    TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+                  },
+                ),
+                child: Material(
+                  child: TextButton(
+                    child: const Text('push'),
+                    onPressed: () => Navigator.of(context).pushNamed('/b'),
+                  ),
+                ),
+              ),
+          '/b': (BuildContext context) => const Text('page b'),
+        },
+      ),
+    );
+
+    // Verify local theme is applied.
+    expect(
+      PageTransitionsTheme.of(tester.element(find.text('push'))).builders[TargetPlatform.android],
+      isA<FadeUpwardsPageTransitionsBuilder>(),
+    );
+
+    // Test navigation and transition.
+    await tester.tap(find.text('push'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // Verify that both pages are visible during the transition.
+    // The new page ('page b') is visible
+    // while the original page ('push') is still visible during the animation.
+    expect(find.text('page b'), findsOneWidget);
+    expect(find.text('push'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    // Verify that only the new page is visible in the final state.
+    expect(find.text('page b'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
   });
 
   testWidgets(
@@ -134,7 +236,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
               },
@@ -190,7 +292,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
                   backgroundColor: Colors.lightGreen,
@@ -340,7 +442,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
               },
@@ -397,7 +499,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
               },
@@ -426,7 +528,7 @@ void main() {
       Widget buildApp(PageTransitionsBuilder pageTransitionBuilder) {
         return MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: PageTransitionsTheme(
+            pageTransitionsTheme: PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: pageTransitionBuilder,
               },
@@ -516,7 +618,7 @@ void main() {
   );
 
   testWidgets(
-    'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
+    'PageTransitionsThemeData override builds a _OpenUpwardsPageTransition',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/':
@@ -534,7 +636,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android:
                     OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
@@ -569,7 +671,7 @@ void main() {
   );
 
   testWidgets(
-    'PageTransitionsTheme override builds a CupertinoPageTransition on android',
+    'PageTransitionsThemeData override builds a CupertinoPageTransition on android',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/':
@@ -587,7 +689,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: CupertinoPageTransitionsBuilder(),
               },
@@ -630,7 +732,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: CupertinoPageTransitionsBuilder(),
               },
@@ -669,7 +771,7 @@ void main() {
   );
 
   testWidgets(
-    'PageTransitionsTheme override builds a _FadeUpwardsTransition',
+    'PageTransitionsThemeData override builds a _FadeUpwardsTransition',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/':
@@ -687,7 +789,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android:
                     FadeUpwardsPageTransitionsBuilder(), // creates a _FadeUpwardsTransition
@@ -727,7 +829,7 @@ void main() {
   }) {
     return MaterialApp(
       theme: ThemeData(
-        pageTransitionsTheme: PageTransitionsTheme(
+        pageTransitionsTheme: PageTransitionsThemeData(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.android: ZoomPageTransitionsBuilder(
               allowSnapshotting: themeAllowSnapshotting,
@@ -891,7 +993,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android:
                     ZoomPageTransitionsBuilder(), // creates a _ZoomPageTransition
@@ -1061,7 +1163,7 @@ void main() {
               seedColor: Colors.blue,
               surface: themeTestSurfaceColor,
             ),
-            pageTransitionsTheme: PageTransitionsTheme(
+            pageTransitionsTheme: PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 // Force all platforms to use ZoomPageTransitionsBuilder to test each one.
                 for (final TargetPlatform platform in TargetPlatform.values)
@@ -1176,7 +1278,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: Colors.blue),
-            pageTransitionsTheme: PageTransitionsTheme(
+            pageTransitionsTheme: PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 // Force all platforms to use ZoomPageTransitionsBuilder to test each one.
                 for (final TargetPlatform platform in TargetPlatform.values)
@@ -1255,7 +1357,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
               },
