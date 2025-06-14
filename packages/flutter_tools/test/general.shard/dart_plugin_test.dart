@@ -1174,10 +1174,9 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
+          await generateProjectPluginRegistrant(
             flutterProject,
             packageConfig,
-            'package:app/main.dart',
             mainFile,
           );
           expect(
@@ -1300,10 +1299,9 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
+            generateProjectPluginRegistrant(
               flutterProject,
               packageConfig,
-              'package:app/main.dart',
               mainFile,
             ),
             throwsToolExit(
@@ -1344,10 +1342,9 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
+            generateProjectPluginRegistrant(
               flutterProject,
               packageConfig,
-              'package:app/main.dart',
               mainFile,
             ),
             throwsToolExit(
@@ -1382,10 +1379,9 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
+          await generateProjectPluginRegistrant(
             flutterProject,
             packageConfig,
-            'package:app/main.dart',
             mainFile,
           );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
@@ -1423,10 +1419,9 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
+          await generateProjectPluginRegistrant(
             flutterProject,
             packageConfig,
-            'package:app/main.dart',
             mainFile,
           );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
@@ -1434,10 +1429,9 @@ void main() {
           // No plugins.
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{});
 
-          await generateMainDartWithPluginRegistrant(
+          await generateProjectPluginRegistrant(
             flutterProject,
             packageConfig,
-            'package:app/main.dart',
             mainFile,
           );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
