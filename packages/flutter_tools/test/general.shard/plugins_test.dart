@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -107,7 +108,6 @@ void main() {
       flutterProject
         ..manifest = flutterManifest
         ..directory = fileSystem.systemTempDirectory.childDirectory('app')
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         );
@@ -431,7 +431,7 @@ dependencies:
       testUsingContext(
         'Refreshing the plugin list deletes the plugin file when there were plugins but no longer are',
         () async {
-          flutterProject.flutterPluginsFile.createSync();
+          flutterProject.flutterPluginsDependenciesFile.createSync();
 
           await refreshPluginsList(flutterProject);
 
@@ -458,7 +458,6 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsFile, isNot(exists), reason: 'No longer emitted');
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
 
           final String pluginsFileContents =
@@ -479,28 +478,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        'Opting in to explicit-package-dependencies omits .flutter-plugins',
-        () async {
-          createFakePlugins(fs, <String>[
-            'plugin_d',
-            'plugin_a',
-            '/local_plugins/plugin_c',
-            '/local_plugins/plugin_b',
-          ]);
-
-          await refreshPluginsList(flutterProject);
-
-          expect(flutterProject.flutterPluginsFile, isNot(exists));
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: FakeProcessManager.empty,
           Pub: ThrowingPub.new,
         },
       );
@@ -1897,9 +1874,9 @@ flutter:
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
-          expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[
-            SupportedPlatform.ios,
-            SupportedPlatform.macos,
+          expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[
+            FlutterDarwinPlatform.ios,
+            FlutterDarwinPlatform.macos,
           ]);
         },
         overrides: <Type, Generator>{
@@ -1919,7 +1896,7 @@ flutter:
             releaseMode: false,
             darwinDependencyManagement: dependencyManagement,
           );
-          expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[]);
+          expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[]);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2752,7 +2729,6 @@ flutter:
 
       flutterProject
         ..manifest = flutterManifest
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         )
@@ -2829,9 +2805,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late Directory directory;
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;
@@ -3032,10 +3005,10 @@ class FakeSystemClock extends Fake implements SystemClock {
 }
 
 class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyManagement {
-  List<SupportedPlatform> setupPlatforms = <SupportedPlatform>[];
+  List<FlutterDarwinPlatform> setupPlatforms = <FlutterDarwinPlatform>[];
 
   @override
-  Future<void> setUp({required SupportedPlatform platform}) async {
+  Future<void> setUp({required FlutterDarwinPlatform platform}) async {
     setupPlatforms.add(platform);
   }
 }
