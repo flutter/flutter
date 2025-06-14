@@ -61,6 +61,8 @@ class EmbedderConfigBuilder {
 
   void SetViewFocusChangeRequestHook();
 
+  void SetResizeViewCallbackHook();
+
   // Used to set a custom log tag.
   void SetLogTag(std::string tag);
 
@@ -86,6 +88,9 @@ class EmbedderConfigBuilder {
   void SetViewFocusChangeRequestCallback(
       const std::function<void(const FlutterViewFocusChangeRequest*)>&
           callback);
+
+  void SetResizeViewCallback(
+      const std::function<void(int64_t, double, double)>& callback);
 
   void SetCompositor(bool avoid_backing_store_cache = false,
                      bool use_present_layers_callback = false);

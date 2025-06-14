@@ -139,6 +139,9 @@ class PlatformViewAndroid final : public PlatformView {
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|
+  void ResizeView(int64_t view_id, double width, double height) override;
+
+  // |PlatformView|
   void UpdateSemantics(
       int64_t view_id,
       flutter::SemanticsNodeUpdates update,

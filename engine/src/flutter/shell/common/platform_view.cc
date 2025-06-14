@@ -124,6 +124,8 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
+void PlatformView::ResizeView(int64_t view_id, double width, double height) {}
+
 void PlatformView::UpdateSemantics(
     int64_t view_id,
     SemanticsNodeUpdates update,  // NOLINT(performance-unnecessary-value-param)
