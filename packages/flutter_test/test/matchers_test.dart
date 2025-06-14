@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1539,6 +1540,376 @@ void main() {
       expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
+  });
+
+  group('findsAscendinglyOrderedWidgets', () {
+    test('An empty list causes an ArgumentError', () {
+      expect(
+        () => findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[]),
+        throwsA(
+          predicate(
+            (Error e) =>
+                e is ArgumentError &&
+                e.message ==
+                    'findsAscendinglyOrderedWidgets takes a list that has at least two FinderBases as its argument',
+          ),
+        ),
+      );
+    });
+
+    test('A singular list causes an ArgumentError', () {
+      expect(
+        () => findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[find.text('Save')]),
+        throwsA(
+          predicate(
+            (Error e) =>
+                e is ArgumentError &&
+                e.message ==
+                    'findsAscendinglyOrderedWidgets takes a list that has at least two FinderBases as its argument',
+          ),
+        ),
+      );
+    });
+
+    testWidgets(
+      'does not find any matching candidate for the first FinderBase in the finderBasesList',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.text('foo'),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('bar'),
+              find.byType(SizedBox),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+        expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+        expect(message, contains('means none were found but some were expected'));
+      },
+    );
+
+    testWidgets(
+      'finds a matching candidate only for the first FinderBase in the finderBasesList: 1',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.text('foo'),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('foo'),
+              find.byType(SizedBox),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+        expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+        expect(message, contains('means one was found but some were expected'));
+      },
+    );
+
+    testWidgets(
+      'finds a matching candidate only for the first FinderBase in the finderBasesList: 2',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.bySubtype<Widget>(),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('foo'),
+              find.byType(SizedBox),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+        expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+        expect(message, contains('means one was found but some were expected'));
+      },
+    );
+
+    testWidgets(
+      'finds a matching candidate only for the first FinderBase in the finderBasesList: 3',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[const Text('foo', textDirection: TextDirection.ltr), Container()],
+          ),
+        );
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.bySubtype<Widget>(),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('foo'),
+              find.byType(SizedBox),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+        expect(message, contains('Text("foo"'));
+        expect(message, contains('Container'));
+        expect(message, contains('means one was found but some were expected'));
+      },
+    );
+
+    testWidgets('finds matching candidates only for some of the FinderBases in the finderBasesList', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[const Text('foo', textDirection: TextDirection.ltr), Container()],
+        ),
+      );
+
+      late TestFailure failure;
+      try {
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+            find.text('foo'),
+            find.byType(CircularProgressIndicator),
+            find.byType(Container),
+          ]),
+        );
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+      expect(failure, isNotNull);
+      final String message = failure.message!;
+      expect(
+        message,
+        contains(
+          'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+        ),
+      );
+      expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+      expect(message, contains('Text("foo"'));
+      expect(message, contains('Container'));
+      expect(message, contains('is not enough'));
+    });
+
+    testWidgets(
+      'finds matching candidates for all of the FinderBases in the finderBasesList, but at locations that is not compatible with the ascending order of the finderBasesList: 1',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[
+              const Text('foo', textDirection: TextDirection.ltr),
+              Container(),
+              const CircularProgressIndicator(),
+            ],
+          ),
+        );
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.bySubtype<Widget>(),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('foo'),
+              find.byType(CircularProgressIndicator),
+              find.byType(Container),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+        expect(message, contains('Text("foo"'));
+        expect(message, contains('Container'));
+        expect(message, contains('CircularProgressIndicator'));
+        expect(
+          message,
+          contains(
+            'means all were found but in locations that are not compatible with the ascending order of the finderBasesList',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'finds matching candidates for all of the FinderBases in the finderBasesList, but at locations that is not compatible with the ascending order of the finderBasesList: 2',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const Column(
+            children: <Widget>[
+              Text('foo', textDirection: TextDirection.ltr),
+              Text('foo', textDirection: TextDirection.ltr),
+              CircularProgressIndicator(),
+            ],
+          ),
+        );
+
+        late TestFailure failure;
+        try {
+          expect(
+            find.bySubtype<Widget>(),
+            findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+              find.text('foo'),
+              find.byType(CircularProgressIndicator),
+              find.text('foo'),
+            ]),
+          );
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+        expect(failure, isNotNull);
+        final String message = failure.message!;
+        expect(
+          message,
+          contains(
+            'Expected: at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList\n',
+          ),
+        );
+        expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+        expect(message, stringContainsInOrder(['Text("foo"', 'Text("foo"']));
+        expect(message, contains('CircularProgressIndicator'));
+        expect(
+          message,
+          contains(
+            'means all were found but in locations that are not compatible with the ascending order of the finderBasesList',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'finds matching candidates for all of the FinderBases in the finderBasesList at locations that is compatible with the ascending order of the finderBasesList',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[
+              const Text('foo', textDirection: TextDirection.ltr),
+              const CircularProgressIndicator(),
+              Container(),
+            ],
+          ),
+        );
+
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+            find.text('foo'),
+            find.byType(CircularProgressIndicator),
+            find.byType(Container),
+          ]),
+        );
+      },
+    );
+
+    testWidgets(
+      'finds matching candidates for all of the FinderBases in the finderBasesList at locations that is compatible with the ascending order of the finderBasesList when the finderBasesList contains more than one FinderBase that finds the same things',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[
+              Container(),
+              const Text('foo', textDirection: TextDirection.ltr),
+              Container(),
+              const Text('foo', textDirection: TextDirection.ltr),
+              Container(),
+            ],
+          ),
+        );
+
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+            find.byType(Container),
+            find.text('foo'),
+            find.byType(Container),
+            find.text('foo'),
+            find.byType(Container),
+          ]),
+        );
+      },
+    );
+
+    testWidgets(
+      'finds matching candidates for all of the FinderBases in the finderBasesList at locations that is compatible with the ascending order of the finderBasesList when the finderBasesList contains more than one FinderBase that finds the same things',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Column(
+            children: <Widget>[
+              Container(),
+              Container(),
+              const Text('foo', textDirection: TextDirection.ltr),
+              Container(),
+              const Text('foo', textDirection: TextDirection.ltr),
+              Container(),
+            ],
+          ),
+        );
+
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+            find.byType(Container),
+            find.byType(Container),
+            find.text('foo'),
+            find.byType(Container),
+            find.text('foo'),
+            find.byType(Container),
+          ]),
+        );
+      },
+    );
   });
 }
 
