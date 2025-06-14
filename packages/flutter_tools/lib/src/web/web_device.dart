@@ -125,6 +125,7 @@ abstract class ChromiumDevice extends Device {
     } else {
       url = platformArgs['uri']! as String;
     }
+    _logger.printStatus('launching chrome');
     final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(

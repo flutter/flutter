@@ -303,6 +303,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
                 : null;
 
+        _logger.printStatus('creating webdevfs');
+        _logger.printError('In CI: ${_platform.environment.containsKey('LUCI_CONTEXT')}');
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
@@ -334,8 +336,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
+          _logger.printStatus('updating devfs');
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
+          _logger.printStatus('updated devfs');
           if (!report.success) {
             _logger.printError('Failed to compile application.');
             appFailedToStart();
@@ -360,6 +364,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
+        _logger.printStatus('webdevfs.connect');
         final WebDevFS webDevFS = device!.devFS! as WebDevFS;
         final bool useDebugExtension =
             device!.device is WebServerDevice && debuggingOptions.startPaused;
@@ -367,12 +372,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         // when we attach.
         final Future<ConnectionResult?>? connectDebug =
             supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
+        _logger.printStatus('starting app');
         await device!.device!.startApp(
           package,
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{'uri': url.toString()},
         );
+        _logger.printStatus('started app and attaching');
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
@@ -768,6 +775,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
+      _logger.printStatus('launching chromium');
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
       final ChromeTab? chromeTab = await getChromeTabGuarded(
         chrome.chromeConnection,
@@ -785,11 +793,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         throwToolExit('Failed to connect to Chrome instance.');
       }
       _wipConnection = await chromeTab.connect();
+      _logger.printStatus('connected to chromium');
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
+      _logger.printStatus('setting up vmservice');
       _connectionResult = await connectDebug;
+      _logger.printStatus('webdevfs.connected');
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event) {
@@ -814,6 +825,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           );
         }
       }
+      _logger.printStatus('set startpaused');
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
       _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
@@ -842,6 +854,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
+      _logger.printStatus('setting up vmservice 2');
       await setUpVmService(
         reloadSources: (String isolateId, {bool? force, bool? pause}) async {
           await restart(pause: pause);
@@ -851,6 +864,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         printStructuredErrorLogMethod: printStructuredErrorLog,
         vmService: _vmService.service,
       );
+      _logger.printStatus('set up vm service');
 
       websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
       device!.vmService = _vmService;
@@ -859,6 +873,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       // is no debugger attached. Otherwise, runMain when a resume event
       // is received.
       if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
+        _logger.printStatus('running main');
         _connectionResult!.appConnection!.runMain();
       } else {
         late StreamSubscription<void> resumeSub;
@@ -888,6 +903,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       }
       _logger.printStatus('Debug service listening on $websocketUri');
     }
+    _logger.printStatus('completing app start');
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
     if (stayResident) {
