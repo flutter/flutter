@@ -97,7 +97,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     }
 
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -114,12 +115,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(
           aiks_context->GetContentContext(),                                //
           render_target,                                                    //
           display_list,                                                     //
-          sk_cull_rect,                                                     //
+          cull_rect,                                                        //
           /*reset_host_buffer=*/surface_frame.submit_info().frame_boundary  //
       );
     };
@@ -195,7 +195,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
         transients_, wrapped_onscreen, [&]() -> bool { return true; });
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -212,11 +213,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                       render_target,                      //
                                       display_list,                       //
-                                      sk_cull_rect,                       //
+                                      cull_rect,                          //
                                       /*reset_host_buffer=*/true          //
       );
     };

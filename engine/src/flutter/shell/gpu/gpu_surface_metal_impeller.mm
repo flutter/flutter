@@ -170,15 +170,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
           return true;
         }
 
-        impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
+        impeller::Rect cull_rect = impeller::Rect::Make(surface->coverage());
         surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
 
         const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
         auto render_result = impeller::RenderToTarget(aiks_context->GetContentContext(),       //
                                                       surface->GetRenderTarget(),              //
                                                       display_list,                            //
-                                                      sk_cull_rect,                            //
+                                                      cull_rect,                               //
                                                       /*reset_host_buffer=*/reset_host_buffer  //
         );
         if (!render_result) {
@@ -288,12 +287,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
           return surface->Present();
         }
 
-        impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
+        impeller::Rect cull_rect = impeller::Rect::Make(surface->coverage());
         auto render_result = impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                                       surface->GetRenderTarget(),         //
                                                       display_list,                       //
-                                                      sk_cull_rect,                       //
+                                                      cull_rect,                          //
                                                       /*reset_host_buffer=*/true          //
         );
         if (!render_result) {

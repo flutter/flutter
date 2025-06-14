@@ -1293,13 +1293,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
 bool RenderToTarget(ContentContext& context,
                     RenderTarget render_target,
                     const sk_sp<flutter::DisplayList>& display_list,
-                    SkIRect cull_rect,
+                    Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen) {
-  Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
-                                     cull_rect.right(), cull_rect.bottom());
-  FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
-  display_list->Dispatch(collector, ip_cull_rect);
+  FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
+  display_list->Dispatch(collector, cull_rect);
 
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
@@ -1307,7 +1305,7 @@ bool RenderToTarget(ContentContext& context,
       /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      IRect::RoundOut(ip_cull_rect)              //
+      IRect::RoundOut(cull_rect)                 //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
@@ -1319,7 +1317,7 @@ bool RenderToTarget(ContentContext& context,
     context.GetTextShadowCache().MarkFrameEnd();
   });
 
-  display_list->Dispatch(impeller_dispatcher, ip_cull_rect);
+  display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
