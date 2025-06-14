@@ -36,6 +36,7 @@ String getDefaultCachedKernelPath({
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
   String buildPrefix = '';
+
   if (buffer.isNotEmpty) {
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));

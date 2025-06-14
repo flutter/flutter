@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
@@ -81,7 +82,31 @@ final class TestCompilerFailure extends TestCompilerResult {
   }
 }
 
-class CompilerWorker {}
+class KernelCacheFile {
+  final io.File file;
+
+  bool _created = false;
+
+  KernelCacheFile(this.file);
+
+  String get path => file.path;
+
+  Future<void> maybeUpdateWith(File other, {required bool force}) async {
+    if (force || !_created || (file.lengthSync() < other.lengthSync())) {
+      // The idea is to keep the cache file up-to-date and include as
+      // much as possible in an effort to re-use as many packages as
+      // possible.
+      if (!_created) {
+        file.parent.createSync(recursive: true);
+        _created = true;
+      }
+
+      globals.printTrace('Copying updated $other to kernel cache: $file');
+
+      await other.copy(file.path);
+    }
+  }
+}
 
 /// A frontend_server wrapper for the flutter test runner.
 ///
@@ -92,7 +117,7 @@ class TestCompiler {
   final List<_CompilationRequest> compilationQueue = [];
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
-  final String testFilePath;
+  final KernelCacheFile cacheKernelFile;
   final TestTimeRecorder? testTimeRecorder;
 
   ResidentCompiler? compiler;
@@ -112,14 +137,18 @@ class TestCompiler {
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(this.buildInfo, FlutterProject? flutterProject, {this.testTimeRecorder})
     : flutterProject = flutterProject!,
-      testFilePath = globals.fs.path.join(
-        flutterProject.directory.path,
-        getBuildDirectory(),
-        'test_cache',
-        getDefaultCachedKernelPath(
-          trackWidgetCreation: buildInfo.trackWidgetCreation,
-          dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      cacheKernelFile = KernelCacheFile(
+        globals.fs.file(
+          globals.fs.path.join(
+            flutterProject.directory.path,
+            getBuildDirectory(),
+            'test_cache',
+            getDefaultCachedKernelPath(
+              trackWidgetCreation: buildInfo.trackWidgetCreation,
+              dartDefines: buildInfo.dartDefines,
+              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+            ),
+          ),
         ),
       ) {
     // Compiler maintains and updates single incremental dill file.
@@ -132,6 +161,9 @@ class TestCompiler {
     globals.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
+
+    globals.printTrace('Compiler will use the cache kernel path: ${cacheKernelFile}');
+
     globals.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
@@ -176,7 +208,7 @@ class TestCompiler {
       processManager: globals.processManager,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      initializeFromDill: testFilePath,
+      initializeFromDill: cacheKernelFile.path,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packageConfigPath,
       frontendServerStarterPath: buildInfo.frontendServerStarterPath,
@@ -242,26 +274,12 @@ class TestCompiler {
         );
         await _shutdown();
       } else {
-        final String outputPath = compilerOutput.outputFilename;
-
         final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
-        final File outputFile = globals.fs.file(outputPath);
-        final File kernelReadyToRun = await outputFile.copy('$path.dill');
-        final File testCache = globals.fs.file(testFilePath);
-        if (firstCompile ||
-            !testCache.existsSync() ||
-            (testCache.lengthSync() < outputFile.lengthSync())) {
-          // The idea is to keep the cache file up-to-date and include as
-          // much as possible in an effort to re-use as many packages as
-          // possible.
-          if (!testCache.parent.existsSync()) {
-            testCache.parent.createSync(recursive: true);
-          }
+        final File compilerOutputFile = globals.fs.file(compilerOutput.outputFilename);
+        final File kernelReadyToRun = await compilerOutputFile.copy('$path.dill');
 
-          globals.printTrace('Copying $outputFile to actual test $kernelReadyToRun');
+        await cacheKernelFile.maybeUpdateWith(compilerOutputFile, force: firstCompile);
 
-          await outputFile.copy(testFilePath);
-        }
         request._result.complete(
           TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
         );
