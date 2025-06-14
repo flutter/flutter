@@ -92,7 +92,6 @@ name: foo
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
-        precompiledDillPath: 'precompiled.dill',
       );
 
       final Uri input = Uri.parse('test/foo.dart');
@@ -275,15 +274,14 @@ class FakeTestCompiler extends TestCompiler {
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
-    super.precompiledDillPath,
     super.testTimeRecorder,
   });
 
   final FakeResidentCompiler? residentCompiler;
 
   @override
-  Future<ResidentCompiler?> createCompiler() async {
-    return residentCompiler;
+  ResidentCompiler createCompiler() {
+    return residentCompiler!;
   }
 }
 

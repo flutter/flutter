@@ -77,7 +77,6 @@ void main() {
         final FlutterPlatform flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
-          precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
           fileSystem: fileSystem,
@@ -205,7 +204,6 @@ void main() {
       );
 
       FlutterPlatform? capturedPlatform;
-      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         flutterTesterBinPath: 'abc',
         debuggingOptions: DebuggingOptions.enabled(
@@ -216,8 +214,6 @@ void main() {
         ),
         enableVmService: true,
         machine: true,
-        precompiledDillPath: 'def',
-        precompiledDillFiles: expectedPrecompiledDillFiles,
         updateGoldens: true,
         testAssetDirectory: '/build/test',
         serverType: InternetAddressType.IPv6,
@@ -240,8 +236,6 @@ void main() {
       expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
-      expect(flutterPlatform.precompiledDillPath, equals('def'));
-      expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));

@@ -1717,10 +1717,9 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 /// Throws [ToolExit] if unable to generate the file.
 ///
 /// For more details, see https://flutter.dev/go/federated-plugins.
-Future<void> generateMainDartWithPluginRegistrant(
+Future<void> generateProjectPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
-  String currentMainUri,
   File mainFile,
 ) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
@@ -1728,29 +1727,24 @@ Future<void> generateMainDartWithPluginRegistrant(
     plugins,
     selectDartPluginsOnly: true,
   );
-  final LanguageVersion entrypointVersion = determineLanguageVersion(
-    mainFile,
-    packageConfig.packageOf(mainFile.absolute.uri),
-    Cache.flutterRoot!,
-  );
-  final Map<String, Object> templateContext = <String, Object>{
-    'mainEntrypoint': currentMainUri,
+  final entrypointVersion = currentLanguageVersion(mainFile.fileSystem, Cache.flutterRoot!);
+  final Map<String, Object> templateContext = {
     'dartLanguageVersion': entrypointVersion.toString(),
-    AndroidPlugin.kConfigKey: <Object?>[],
-    IOSPlugin.kConfigKey: <Object?>[],
-    LinuxPlugin.kConfigKey: <Object?>[],
-    MacOSPlugin.kConfigKey: <Object?>[],
-    WindowsPlugin.kConfigKey: <Object?>[],
+    AndroidPlugin.kConfigKey: [],
+    IOSPlugin.kConfigKey: [],
+    LinuxPlugin.kConfigKey: [],
+    MacOSPlugin.kConfigKey: [],
+    WindowsPlugin.kConfigKey: [],
   };
-  final File newMainDart = rootProject.dartPluginRegistrant;
+  final File registrantFile = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (await newMainDart.exists()) {
-        await newMainDart.delete();
+      if (await registrantFile.exists()) {
+        await registrantFile.delete();
       }
     } on FileSystemException catch (error) {
       globals.printWarning(
-        'Unable to remove ${newMainDart.path}, received error: $error.\n'
+        'Unable to remove ${registrantFile.path}, received error: $error.\n'
         'You might need to run flutter clean.',
       );
       rethrow;
@@ -1765,11 +1759,11 @@ Future<void> generateMainDartWithPluginRegistrant(
     await _renderTemplateToFile(
       _dartPluginRegistryForNonWebTemplate,
       templateContext,
-      newMainDart,
+      registrantFile,
       globals.templateRenderer,
     );
   } on FileSystemException catch (error) {
-    globals.printError('Unable to write ${newMainDart.path}, received error: $error');
+    globals.printError('Unable to write ${registrantFile.path}, received error: $error');
     rethrow;
   }
 }

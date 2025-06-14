@@ -158,8 +158,6 @@ interface class FlutterTestRunner {
       enableVmService: enableVmService,
       machine: machine,
       serverType: serverType,
-      precompiledDillPath: precompiledDillPath,
-      precompiledDillFiles: precompiledDillFiles,
       updateGoldens: updateGoldens,
       testAssetDirectory: testAssetDirectory,
       projectRootDirectory: globals.fs.currentDirectory.uri,
