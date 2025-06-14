@@ -16,6 +16,7 @@ workspace:
   - packages/fuchsia_remote_debug_protocol
   - packages/flutter_web_plugins
   - packages/flutter_goldens
+  - dev/checks_tool
   - dev/devicelab
   - dev/manual_tests
   - dev/tracing_tests

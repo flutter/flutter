@@ -2677,6 +2677,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 
+  'dev/checks',
   'dev/conductor/bin/conductor',
   'dev/conductor/bin/packages_autoroller',
   'dev/conductor/core/lib/src/proto/compile_proto.sh',
