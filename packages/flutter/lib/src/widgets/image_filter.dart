@@ -13,20 +13,6 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
-/// A no-op [ImageFilter] that uses the identity matrix.
-///
-/// Useful as a default filter with no visual effect.
-///
-/// {@tool snippet}
-/// ```dart
-/// ImageFiltered(
-///   imageFilter: kEmptyFilter,
-///   child: const Text('Hello, World!'),
-/// );
-/// ```
-/// {@end-tool}
-final ImageFilter kEmptyFilter = ImageFilter.matrix(Matrix4.identity().storage);
-
 /// Applies an [ImageFilter] to its child.
 ///
 /// An image filter will always apply its filter operation to the child widget,

@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -16,10 +17,10 @@ import 'image_filter.dart';
 /// a stretch visual feedback when the user overscrolls at the edges.
 ///
 /// Only supported when using the Impeller rendering engine.
-class StretchEffect extends StatefulWidget {
-  /// Creates a StretchEffect widget that applies a stretch
+class StretchOverscrollEffect extends StatefulWidget {
+  /// Creates a StretchOverscrollEffect widget that applies a stretch
   /// effect when the user overscrolls horizontally or vertically.
-  const StretchEffect({
+  const StretchOverscrollEffect({
     super.key,
     this.stretchStrengthX = 0.0,
     this.stretchStrengthY = 0.0,
@@ -43,7 +44,7 @@ class StretchEffect extends StatefulWidget {
   /// This example shows how to set the horizontal stretch strength to pull right.
   ///
   /// ```dart
-  /// const StretchEffect(
+  /// const StretchOverscrollEffect(
   ///   stretchStrengthX: 0.5,
   ///   child: Text('Hello, World!'),
   /// );
@@ -61,7 +62,7 @@ class StretchEffect extends StatefulWidget {
   /// This example shows how to set the vertical stretch strength to pull bottom.
   ///
   /// ```dart
-  /// const StretchEffect(
+  /// const StretchOverscrollEffect(
   ///   stretchStrengthY: 0.5,
   ///   child: Text('Hello, World!'),
   /// );
@@ -73,10 +74,10 @@ class StretchEffect extends StatefulWidget {
   final Widget child;
 
   @override
-  State<StretchEffect> createState() => _StretchOverscrollEffectState();
+  State<StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
 }
 
-class _StretchOverscrollEffectState extends State<StretchEffect> {
+class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
   /// The maximum scale multiplier applied during a stretch effect.
@@ -84,6 +85,9 @@ class _StretchOverscrollEffectState extends State<StretchEffect> {
 
   /// The strength of the interpolation used for smoothing the effect.
   static const double interpolationStrength = 0.7;
+
+  /// A no-op [ui.ImageFilter] that uses the identity matrix.
+  static final ui.ImageFilter _emptyFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
 
   @override
   void dispose() {
@@ -118,7 +122,7 @@ class _StretchOverscrollEffectState extends State<StretchEffect> {
       _fragmentShader?.dispose();
       _fragmentShader = null;
 
-      imageFilter = kEmptyFilter;
+      imageFilter = _emptyFilter;
     }
 
     return ImageFiltered(
