@@ -29,5 +29,6 @@
   "shareButtonLabel": "Yabelana...",
   "clearButtonLabel": "Sula",
   "cancelButtonLabel": "Khansela",
-  "backButtonLabel": "Emuva"
+  "backButtonLabel": "Emuva",
+  "translateButtonLabel": "Translate"
 }

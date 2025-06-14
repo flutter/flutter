@@ -39,5 +39,6 @@
   "shareButtonLabel": "שיתוף…",
   "clearButtonLabel": "ניקוי",
   "cancelButtonLabel": "ביטול",
-  "backButtonLabel": "למסך הקודם"
+  "backButtonLabel": "למסך הקודם",
+  "translateButtonLabel": "Translate"
 }

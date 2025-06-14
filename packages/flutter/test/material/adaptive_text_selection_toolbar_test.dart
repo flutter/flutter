@@ -182,6 +182,7 @@ void main() {
                 onLiveTextInput: () {},
                 onLookUp: () {},
                 onSearchWeb: () {},
+                onTranslate: () {},
                 onShare: () {},
               ),
             ),

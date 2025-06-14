@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Maghanap sa Web",
   "shareButtonLabel": "I-share",
   "clearButtonTooltip": "I-clear ang text",
-  "selectedDateLabel": "Napili"
+  "selectedDateLabel": "Napili",
+  "translateButtonLabel": "Translate"
 }

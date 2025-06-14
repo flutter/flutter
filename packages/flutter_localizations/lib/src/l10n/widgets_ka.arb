@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება",
   "pasteButtonLabel": "ჩასმა",
-  "selectAllButtonLabel": "ყველას არჩევა"
+  "selectAllButtonLabel": "ყველას არჩევა",
+  "translateButtonLabel": "Translate"
 }

@@ -39,5 +39,6 @@
   "shareButtonLabel": "Udostępnij…",
   "clearButtonLabel": "Wyczyść",
   "cancelButtonLabel": "Anuluj",
-  "backButtonLabel": "Wstecz"
+  "backButtonLabel": "Wstecz",
+  "translateButtonLabel": "Translate"
 }
