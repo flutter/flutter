@@ -140,16 +140,22 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///  * <https://developer.apple.com/design/human-interface-guidelines/sheets>
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
-  required WidgetBuilder pageBuilder,
+  @Deprecated(
+    'Use builder instead. '
+    'This feature was deprecated after v3.33.0-0.2.pre.',
+  )
+  WidgetBuilder? pageBuilder,
+  WidgetBuilder? builder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
 }) {
-  final WidgetBuilder builder;
+  assert(pageBuilder != null || builder != null);
+  final WidgetBuilder widgetBuilder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
-    builder = pageBuilder;
+    widgetBuilder = (pageBuilder ?? builder)!;
   } else {
-    builder = (BuildContext context) {
+    widgetBuilder = (BuildContext context) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
           nestedNavigatorKey.currentState!.maybePop();
@@ -169,7 +175,7 @@ Future<T?> showCupertinoSheet<T>({
                       }
                       Navigator.of(context, rootNavigator: true).pop(result);
                     },
-                    child: pageBuilder(context),
+                    child: (pageBuilder ?? builder)!(context),
                   );
                 },
               ),
@@ -183,7 +189,7 @@ Future<T?> showCupertinoSheet<T>({
   return Navigator.of(
     context,
     rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: builder, enableDrag: enableDrag));
+  ).push<T>(CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag));
 }
 
 /// Provides an iOS-style sheet transition.
