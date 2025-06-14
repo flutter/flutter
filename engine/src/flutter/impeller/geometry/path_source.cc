@@ -27,7 +27,6 @@ void RectPathSource::Dispatch(PathReceiver& receiver) const {
   receiver.LineTo(rect_.GetLeftBottom());
   receiver.LineTo(rect_.GetLeftTop());
   receiver.Close();
-  receiver.PathEnd();
 }
 
 EllipsePathSource::EllipsePathSource(const Rect& bounds) : bounds_(bounds) {}
@@ -60,7 +59,6 @@ void EllipsePathSource::Dispatch(PathReceiver& receiver) const {
   receiver.ConicTo(Point(left, bottom), Point(left, center.y), kSqrt2Over2);
 
   receiver.Close();
-  receiver.PathEnd();
 }
 
 }  // namespace impeller

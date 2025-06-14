@@ -19,19 +19,23 @@ namespace testing {
 
 class DlPathVerbCounter : public DlPathReceiver {
  public:
-  void MoveTo(const DlPoint& p2, bool will_be_closed) { verb_count_++; }
-  void LineTo(const DlPoint& p2) { verb_count_++; }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) { verb_count_++; }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    verb_count_++;
+  }
+  void LineTo(const DlPoint& p2) override { verb_count_++; }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override { verb_count_++; }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
     verb_count_++;
     return false;
   }
-  void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2) {
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
     verb_count_++;
   }
-  void Close() { verb_count_++; }
+  void Close() override { verb_count_++; }
 
-  uint32_t GetVerbCount() { return verb_count_; }
+  uint32_t GetVerbCount() const { return verb_count_; }
 
  private:
   uint32_t verb_count_ = 0u;

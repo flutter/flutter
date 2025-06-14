@@ -50,7 +50,6 @@ class PathReceiver {
   }
   virtual void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) = 0;
   virtual void Close() = 0;
-  virtual void PathEnd() {}
 };
 
 class PathSource {

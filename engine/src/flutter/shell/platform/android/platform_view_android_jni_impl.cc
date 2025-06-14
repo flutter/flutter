@@ -2130,7 +2130,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
     env_->CallVoidMethod(android_path_, path_close_method);
   }
 
-  jobject TakePath() { return android_path_; }
+  jobject TakePath() const { return android_path_; }
 
  private:
   JNIEnv* env_;

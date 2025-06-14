@@ -120,7 +120,6 @@ const SkPath& DlPath::GetSkPath() const {
 void DlPath::Dispatch(DlPathReceiver& receiver) const {
   const SkPath& path = data_->sk_path;
   if (path.isEmpty()) {
-    receiver.PathEnd();
     return;
   }
 
@@ -170,7 +169,6 @@ void DlPath::Dispatch(DlPathReceiver& receiver) const {
         break;
     }
   } while (verb != SkPath::Verb::kDone_Verb);
-  receiver.PathEnd();
 }
 
 void DlPath::WillRenderSkPath() const {

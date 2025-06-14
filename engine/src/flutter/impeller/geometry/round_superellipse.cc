@@ -60,7 +60,6 @@ void RoundSuperellipsePathSource::Dispatch(PathReceiver& receiver) const {
   auto param = RoundSuperellipseParam::MakeBoundsRadii(
       round_superellipse_.GetBounds(), round_superellipse_.GetRadii());
   param.Dispatch(receiver);
-  receiver.PathEnd();
 }
 
 }  // namespace impeller

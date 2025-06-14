@@ -149,7 +149,7 @@ class PathPruner : public impeller::PathReceiver {
     // See SegmentEncountered()
   }
 
-  void PathEnd() override {
+  void PathEnd() {
     if (!is_stroking_ && current_point_ != contour_origin_) {
       FML_DCHECK(contour_has_segments_);
       FML_DCHECK(contour_has_points_);
@@ -284,12 +284,14 @@ void PathTessellator::PathToFilledSegments(const PathSource& source,
                                            SegmentReceiver& receiver) {
   PathPruner pruner(receiver, false);
   source.Dispatch(pruner);
+  pruner.PathEnd();
 }
 
 void PathTessellator::PathToStrokedSegments(const PathSource& source,
                                             SegmentReceiver& receiver) {
   PathPruner pruner(receiver, true);
   source.Dispatch(pruner);
+  pruner.PathEnd();
 }
 
 std::pair<size_t, size_t> PathTessellator::CountFillStorage(
@@ -298,6 +300,7 @@ std::pair<size_t, size_t> PathTessellator::CountFillStorage(
   StorageCounter counter(scale);
   PathPruner pruner(counter, false);
   source.Dispatch(pruner);
+  pruner.PathEnd();
   return {counter.GetPointCount(), counter.GetContourCount()};
 }
 
@@ -307,6 +310,7 @@ void PathTessellator::PathToFilledVertices(const PathSource& source,
   PathFillWriter path_writer(writer, scale);
   PathPruner pruner(path_writer, false);
   source.Dispatch(pruner);
+  pruner.PathEnd();
 }
 
 }  // namespace impeller

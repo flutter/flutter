@@ -13,18 +13,21 @@ using DlScalar = flutter::DlScalar;
 
 class DlComplexityPathReceiver : public flutter::DlPathReceiver {
  public:
-  void MoveTo(const DlPoint& p2, bool will_be_closed) {}
-  void LineTo(const DlPoint& p2) { line_verb_count++; }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) { quad_verb_count++; }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {}
+  void LineTo(const DlPoint& p2) override { line_verb_count++; }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    quad_verb_count++;
+  }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
     conic_verb_count++;
     return true;
   }
-  void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2) {
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
     cubic_verb_count++;
   }
-  void Close() {}
-  void PathEnd() {}
+  void Close() override {}
 
   uint32_t line_verb_count;
   uint32_t quad_verb_count;
