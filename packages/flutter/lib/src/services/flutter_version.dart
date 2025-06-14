@@ -19,10 +19,18 @@ abstract final class FlutterVersion {
   /// used to compile the app, possibly followed by whitespace and other
   /// version and build details.
   ///
-  /// Flutter doesn't follow [semantic versioning](https://semver.org/).
+  /// Flutter uses a modified [CalVer](https://calver.org/) scheme.
+  /// The major version is incremented when the product team decides
+  /// there are features impactful enough to increment this value.
+  /// Minor is incremented on a monthly basis. Example: Flutter 3.0.0 shipped
+  /// in May 2022, meaning an August 2022 release would put the Flutter version
+  /// at 3.3.0 as it is 3 months after the last stable release.
+  /// The patch version is incremented whenever a hotfix is applied
+  /// to the current stable release.
+  ///
   /// See [here](https://docs.flutter.dev/release/breaking-changes)
   /// for whether this version contains breaking changes.
-  /// 
+  ///
   /// See also:
   ///  - [Platform.version]
   ///  - [dartVersion]
