@@ -89,7 +89,9 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
-  }) : assert(expandedTitleScale >= 1);
+    this.collapsedOpacity = 0.0,
+  }) : assert(expandedTitleScale >= 1),
+       assert(collapsedOpacity >= 0.0 && collapsedOpacity <= 1.0);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -144,6 +146,18 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to 1.5 and must be greater than 1.
   final double expandedTitleScale;
+
+  /// The opacity of the background when the flexible space bar is fully collapsed.
+  ///
+  /// This value controls how transparent the background becomes when the space bar
+  /// reaches its minimum extent. The opacity will smoothly animate between 1.0
+  /// (fully expanded) and this value.
+  ///
+  /// Defaults to 0.0, which means the background will fade out completely when collapsed.
+  /// Set to 1.0 to maintain full opacity throughout the collapse animation.
+  ///
+  /// The value must be between 0.0 and 1.0, inclusive.
+  final double collapsedOpacity;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -250,7 +264,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           final double opacity =
               settings.maxExtent == settings.minExtent
                   ? 1.0
-                  : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+                  : 1.0 -
+                      ((1.0 - widget.collapsedOpacity) * Interval(fadeStart, fadeEnd).transform(t));
           double height = settings.maxExtent;
 
           // StretchMode.zoomBackground
