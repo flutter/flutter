@@ -20,7 +20,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
@@ -448,25 +447,26 @@ class FlutterPlatform extends PlatformPlugin {
     if (compiler == null || compiler!.compiler == null) {
       throw Exception('Compiler is not set up properly to compile $expression');
     }
-    final CompilerOutput? compilerOutput = await compiler!.compiler!.compileExpression(
-      expression,
-      definitions,
-      definitionTypes,
-      typeDefinitions,
-      typeBounds,
-      typeDefaults,
-      libraryUri,
-      klass,
-      method,
-      isStatic,
-    );
-    if (compilerOutput != null) {
-      if (compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
-        return base64.encode(compilerOutput.expressionData!);
-      } else if (compilerOutput.errorCount > 0 && compilerOutput.errorMessage != null) {
-        throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
-      }
-    }
+    throw UnimplementedError("demeter where are you?");
+    // final CompilerOutput? compilerOutput = await compiler!.compiler!.compileExpression(
+    //   expression,
+    //   definitions,
+    //   definitionTypes,
+    //   typeDefinitions,
+    //   typeBounds,
+    //   typeDefaults,
+    //   libraryUri,
+    //   klass,
+    //   method,
+    //   isStatic,
+    // );
+    // if (compilerOutput != null) {
+    //   if (compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
+    //     return base64.encode(compilerOutput.expressionData!);
+    //   } else if (compilerOutput.errorCount > 0 && compilerOutput.errorMessage != null) {
+    //     throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
+    //   }
+    // }
     throw Exception('Failed to compile $expression');
   }
 
@@ -788,10 +788,12 @@ class FlutterPlatform extends PlatformPlugin {
       packageConfig[flutterProject!.manifest.appName],
       Cache.flutterRoot!,
     );
+
+    final File? testConfigFile = findTestConfigFile(globals.fs.file(testUrl), globals.logger);
+
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // This MUST be a file URI.
+      testConfigFile: testConfigFile,
       packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,

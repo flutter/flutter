@@ -91,8 +91,8 @@ class KernelCacheFile {
 
   String get path => file.path;
 
-  Future<void> maybeUpdateWith(File other, {required bool force}) async {
-    if (force || !_created || (file.lengthSync() < other.lengthSync())) {
+  Future<void> maybeUpdateWith(File other) async {
+    if (!_created || (file.lengthSync() < other.lengthSync())) {
       // The idea is to keep the cache file up-to-date and include as
       // much as possible in an effort to re-use as many packages as
       // possible.
@@ -108,45 +108,119 @@ class KernelCacheFile {
   }
 }
 
+class ActualTestCompiler {
+  ResidentCompiler compiler;
+  final FlutterProject project;
+  final BuildInfo buildInfo;
+  final Directory output;
+  final KernelCacheFile cacheKernelFile;
+  final File outputDill;
+
+  ActualTestCompiler({
+    required this.project,
+    required this.output,
+    required this.buildInfo,
+    required this.cacheKernelFile,
+  }) : outputDill = output.childFile('output.dill'),
+       compiler = _createCompiler(buildInfo, cacheKernelFile) {
+    globals.printTrace(
+      'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
+    );
+  }
+
+  Future<TestCompilerResult> compile(Uri mainUri) async {
+    final CompilerOutput? compilerOutput = await compiler.recompile(
+      mainUri,
+      [mainUri, project.dartPluginRegistrant.absolute.uri],
+      outputPath: outputDill.path,
+      packageConfig: buildInfo.packageConfig,
+      projectRootPath: project.directory.absolute.path,
+      checkDartPluginRegistry: true,
+      fs: globals.fs,
+    );
+
+    if (compilerOutput == null || compilerOutput.errorCount > 0) {
+      unawaited(compiler.shutdown());
+      compiler = _createCompiler(buildInfo, cacheKernelFile);
+      return TestCompilerFailure(
+        error: compilerOutput!.errorMessage ?? 'Unknown Error',
+        mainUri: mainUri,
+      );
+    } else {
+      try {
+        final File compilerOutputFile = globals.fs.file(compilerOutput.outputFilename);
+        await cacheKernelFile.maybeUpdateWith(compilerOutputFile);
+
+        final String path = mainUri.toFilePath(windows: globals.platform.isWindows);
+        final File kernelReadyToRun = await compilerOutputFile.copy('$path.dill');
+        return TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: mainUri);
+      } finally {
+        compiler.accept();
+        compiler.reset();
+      }
+    }
+  }
+
+  Future<void> shutdown() async {
+    await compiler.shutdown();
+    globals.printTrace('Deleting ${output.path}...');
+    output.deleteSync(recursive: true);
+  }
+}
+
+ResidentCompiler _createCompiler(BuildInfo bi, KernelCacheFile cacheFile) {
+  return ResidentCompiler(
+    globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    artifacts: globals.artifacts!,
+    logger: globals.logger,
+    processManager: globals.processManager,
+    buildMode: bi.mode,
+    trackWidgetCreation: bi.trackWidgetCreation,
+    initializeFromDill: cacheFile.path,
+    dartDefines: bi.dartDefines,
+    packagesPath: bi.packageConfigPath,
+    frontendServerStarterPath: bi.frontendServerStarterPath,
+    extraFrontEndOptions: bi.extraFrontEndOptions,
+    platform: globals.platform,
+    testCompilation: true,
+    fileSystem: globals.fs,
+    fileSystemRoots: bi.fileSystemRoots,
+    fileSystemScheme: bi.fileSystemScheme,
+  );
+}
+
 /// A frontend_server wrapper for the flutter test runner.
 ///
 /// This class is a wrapper around compiler that allows multiple isolates to
-/// enqueue compilation requests, but ensures only one compilation at a time.
+/// enqueue compilation requests.
 class TestCompiler {
   final StreamController<_CompilationRequest> compilerController = StreamController();
   final List<_CompilationRequest> compilationQueue = [];
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
-  final KernelCacheFile cacheKernelFile;
   final TestTimeRecorder? testTimeRecorder;
+  final ActualTestCompiler compiler;
 
-  ResidentCompiler? compiler;
-  late File outputDill;
-
-  /// Creates a new [TestCompiler] which acts as a frontend_server proxy.
-  ///
   /// [trackWidgetCreation] configures whether the kernel transform is applied
   /// to the output. This also changes the output file to include a '.track`
   /// extension.
-  ///
-  /// [flutterProject] is the project for which we are running tests.
-  ///
-  /// If [precompiledDillPath] is passed, it will be used to initialize the
-  /// compiler.
-  ///
-  /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(this.buildInfo, FlutterProject? flutterProject, {this.testTimeRecorder})
     : flutterProject = flutterProject!,
-      cacheKernelFile = KernelCacheFile(
-        globals.fs.file(
-          globals.fs.path.join(
-            flutterProject.directory.path,
-            getBuildDirectory(),
-            'test_cache',
-            getDefaultCachedKernelPath(
-              trackWidgetCreation: buildInfo.trackWidgetCreation,
-              dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      compiler = ActualTestCompiler(
+        project: flutterProject,
+        output: globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.'),
+        buildInfo: buildInfo,
+        cacheKernelFile: KernelCacheFile(
+          globals.fs.file(
+            globals.fs.path.join(
+              flutterProject.directory.path,
+              getBuildDirectory(),
+              'test_cache',
+              getDefaultCachedKernelPath(
+                trackWidgetCreation: buildInfo.trackWidgetCreation,
+                dartDefines: buildInfo.dartDefines,
+                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+              ),
             ),
           ),
         ),
@@ -154,24 +228,8 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync(
-      'flutter_test_compiler.',
-    );
-    outputDill = outputDillDirectory.childFile('output.dill');
-    globals.printTrace(
-      'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
-    );
-
-    globals.printTrace('Compiler will use the cache kernel path: ${cacheKernelFile}');
-
     globals.printTrace('Listening to compiler controller...');
-    compilerController.stream.listen(
-      _onCompilationRequest,
-      onDone: () {
-        globals.printTrace('Deleting ${outputDillDirectory.path}...');
-        outputDillDirectory.deleteSync(recursive: true);
-      },
-    );
+    compilerController.stream.listen(_onCompilationRequest);
   }
 
   /// Compiles the Dart program (an entrypoint containing `main()`).
@@ -185,12 +243,7 @@ class TestCompiler {
   }
 
   Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
-    // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler!.shutdown();
-      compiler = null;
-    }
+    await compiler.shutdown();
   }
 
   Future<void> dispose() async {
@@ -198,30 +251,6 @@ class TestCompiler {
     await _shutdown();
   }
 
-  /// Create the resident compiler used to compile the test.
-  @visibleForTesting
-  ResidentCompiler createCompiler() {
-    return ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      initializeFromDill: cacheKernelFile.path,
-      dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packageConfigPath,
-      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      platform: globals.platform,
-      testCompilation: true,
-      fileSystem: globals.fs,
-      fileSystemRoots: buildInfo.fileSystemRoots,
-      fileSystemScheme: buildInfo.fileSystemScheme,
-    );
-  }
-
-  // Handle a compilation request.
   Future<void> _onCompilationRequest(_CompilationRequest request) async {
     final bool isEmpty = compilationQueue.isEmpty;
     compilationQueue.add(request);
@@ -231,64 +260,34 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
+
+    bool isFirst = true;
+
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
-      final Stopwatch compilerTime = Stopwatch()..start();
-      final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
-      bool firstCompile = false;
-      if (compiler == null) {
-        compiler = createCompiler();
-        firstCompile = true;
 
+      if (isFirst) {
         globals.printTrace(
           "Generating registrant for project:'${flutterProject.directory}' thing:${request.mainUri}",
         );
+
         await generateProjectPluginRegistrant(
           flutterProject,
           buildInfo.packageConfig,
           globals.fs.file(request.mainUri),
         );
+
+        isFirst = false;
       }
 
-      final CompilerOutput? compilerOutput = await compiler!.recompile(
-        request.mainUri,
-        <Uri>[request.mainUri, flutterProject.dartPluginRegistrant.absolute.uri],
-        outputPath: outputDill.path,
-        packageConfig: buildInfo.packageConfig,
-        projectRootPath: flutterProject.directory.absolute.path,
-        checkDartPluginRegistry: true,
-        fs: globals.fs,
-      );
+      final Stopwatch compilerTime = Stopwatch()..start();
+      final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-      // In case compiler didn't produce output or reported compilation
-      // errors, pass [null] upwards to the consumer and shutdown the
-      // compiler to avoid reusing compiler that might have gotten into
-      // a weird state.
-      if (compilerOutput == null || compilerOutput.errorCount > 0) {
-        request._result.complete(
-          TestCompilerFailure(
-            error: compilerOutput!.errorMessage ?? 'Unknown Error',
-            mainUri: request.mainUri,
-          ),
-        );
-        await _shutdown();
-      } else {
-        final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
-        final File compilerOutputFile = globals.fs.file(compilerOutput.outputFilename);
-        final File kernelReadyToRun = await compilerOutputFile.copy('$path.dill');
+      request._result.complete(await compiler.compile(request.mainUri));
 
-        await cacheKernelFile.maybeUpdateWith(compilerOutputFile, force: firstCompile);
-
-        request._result.complete(
-          TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
-        );
-        compiler!.accept();
-        compiler!.reset();
-      }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
-      // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
   }

@@ -182,6 +182,9 @@ name: foo
     },
   );
 
+/*
+-- setting invalid state not a valid test..
+
   testUsingContext(
     'TestCompiler disposing test compiler shuts down backing compiler',
     () async {
@@ -208,6 +211,7 @@ name: foo
       Pub: FakePubWithPrimedDeps.new,
     },
   );
+*/
 
   testUsingContext(
     'TestCompiler updates dart_plugin_registrant.dart',
