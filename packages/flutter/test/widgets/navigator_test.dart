@@ -1263,7 +1263,7 @@ void main() {
                     (BuildContext context) => OnTapPage(
                       id: 'A',
                       onTap: () async {
-                        firstReturnValue = await Navigator.pushNamed(context, '/B');
+                        secondReturnValue = await Navigator.pushNamed(context, '/B');
                       },
                     ),
                 settings: settings,
