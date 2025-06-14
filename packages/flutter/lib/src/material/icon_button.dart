@@ -774,6 +774,8 @@ class IconButton extends StatelessWidget {
     final EdgeInsetsGeometry effectivePadding = padding ?? const EdgeInsets.all(8.0);
     final AlignmentGeometry effectiveAlignment = alignment ?? Alignment.center;
     final bool effectiveEnableFeedback = enableFeedback ?? true;
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
 
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
@@ -808,7 +810,7 @@ class IconButton extends StatelessWidget {
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
       radius:
-          splashRadius ??
+          splashRadius ?? (!useMaterial3 ? iconButtonTheme.splashRadius : null) ??
           math.max(
             Material.defaultSplashRadius,
             (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) *

@@ -5,6 +5,8 @@
 /// @docImport 'icon_button.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -32,14 +34,14 @@ import 'theme.dart';
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
 ///  * [WidgetStateProperty.resolve], "resolve" a material state property
 ///    to a simple value based on a set of [WidgetState]s.
-///  * [ThemeData.iconButtonTheme], which can be used to override the default
+///  * [hemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 @immutable
 class IconButtonThemeData with Diagnosticable {
   /// Creates a [IconButtonThemeData].
   ///
-  /// The [style] may be null.
-  const IconButtonThemeData({this.style});
+  /// The [style] and [splashRadius] may be null.
+  const IconButtonThemeData({this.style, this.splashRadius});
 
   /// Overrides for [IconButton]'s default style if [ThemeData.useMaterial3]
   /// is set to true.
@@ -50,16 +52,27 @@ class IconButtonThemeData with Diagnosticable {
   /// If [style] is null, then this theme doesn't override anything.
   final ButtonStyle? style;
 
+  /// The default splash radius for [IconButton], used only when [ThemeData.useMaterial3] is false.
+  ///
+  /// If this is non-null and no [splashRadius] is provided to an [IconButton] directly,
+  /// this value will be used in Material 2 mode.
+  ///
+  /// This value is ignored under Material 3, where splash behavior is handled differently.
+  final double? splashRadius;
+
   /// Linearly interpolate between two icon button themes.
   static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return IconButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
+    return IconButtonThemeData(
+      style: ButtonStyle.lerp(a?.style, b?.style, t),
+      splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
+    );
   }
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => Object.hash(style, splashRadius);
 
   @override
   bool operator ==(Object other) {
@@ -69,13 +82,15 @@ class IconButtonThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconButtonThemeData && other.style == style;
+    return other is IconButtonThemeData && other.style == style
+    && other.splashRadius == splashRadius;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 }
 
