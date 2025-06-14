@@ -303,6 +303,27 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
                 : null;
 
+        // Retrieve connected web devices, excluding the web server device.
+        final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+        final Set<String> supportedWebDeviceIds =
+            devices
+                ?.where(
+                  (Device d) =>
+                      d.platformType == PlatformType.web &&
+                      d.isConnected &&
+                      d.id != WebServerDevice.kWebServerDeviceId,
+                )
+                .map((Device d) => d.id)
+                .toSet() ??
+            <String>{};
+
+        // If no web devices are connected, or the specified device does not support full debugging (ie. web-server),
+        // we should use DWDS WebSocket connection instead of Chrome-based connection. If no device is specified,
+        // we fall back to the default Chrome connection.
+        final bool useDwdsWebSocketConnection =
+            supportedWebDeviceIds.isEmpty ||
+            !supportedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome');
+
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
@@ -328,6 +349,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           isWindows: _platform.isWindows,
+          useDwdsWebSocketConnection: useDwdsWebSocketConnection,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
