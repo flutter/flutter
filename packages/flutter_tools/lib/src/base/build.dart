@@ -6,6 +6,7 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../build_info.dart';
+import '../darwin/darwin.dart';
 import '../macos/xcode.dart';
 
 import 'file_system.dart';
@@ -266,7 +267,7 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=13.0',
+        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
     ];
 

@@ -6,8 +6,11 @@
 
 #include <unistd.h>
 #include <filesystem>
+#include <iostream>
 #include <vector>
 
+#include "flutter/third_party/abseil-cpp/absl/container/btree_map.h"
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
@@ -92,9 +95,53 @@ void PrintProgress(size_t idx, size_t count) {
 bool IsStdoutTerminal() {
   return isatty(STDOUT_FILENO);
 }
+
+class LicensesWriter {
+ public:
+  explicit LicensesWriter(std::ostream& licenses) : licenses_(licenses) {}
+
+  void Write(const absl::flat_hash_set<std::string>& packages,
+             std::string_view license) {
+    std::vector<std::string_view> sorted;
+    sorted.reserve(packages.size());
+    sorted.insert(sorted.end(), packages.begin(), packages.end());
+    std::sort(sorted.begin(), sorted.end());
+    if (!first_write_) {
+      for (int i = 0; i < 80; ++i) {
+        licenses_.put('-');
+      }
+      licenses_.put('\n');
+    }
+    first_write_ = false;
+    for (std::string_view package : sorted) {
+      licenses_ << package << "\n";
+    }
+    licenses_ << "\n" << license << "\n";
+  }
+
+ private:
+  std::ostream& licenses_;
+  bool first_write_ = true;
+};
+
+std::string GetPackageName(const fs::path& full_path) {
+  std::optional<std::string> result;
+  bool after_third_party = false;
+  for (const fs::path& component : full_path) {
+    if (after_third_party) {
+      result = component;
+      after_third_party = false;
+    } else if (component.string() == "third_party") {
+      after_third_party = true;
+    }
+  }
+
+  return result.has_value() ? result.value() : "engine";
+}
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
+                                              std::ostream& licenses,
                                               const Data& data) {
   std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
@@ -117,6 +164,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       errors.push_back(git_files.status());
       return errors;
     }
+    LicensesWriter writer(licenses);
+    absl::btree_map<std::string, absl::flat_hash_set<std::string>> license_map;
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
@@ -125,6 +174,9 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         // Ignore file.
         continue;
       }
+
+      std::string package = GetPackageName(full_path);
+
       VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
@@ -144,12 +196,25 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                         if (RE2::PartialMatch(comment, pattern, &match)) {
                           did_find_copyright = true;
                           VLOG(1) << comment;
+
+                          auto package_emplace_result = license_map.try_emplace(
+                              comment, absl::flat_hash_set<std::string>());
+                          absl::flat_hash_set<std::string>& comment_set =
+                              package_emplace_result.first->second;
+                          if (comment_set.find(package) != comment_set.end()) {
+                            // License is already seen.
+                            return;
+                          }
+                          comment_set.emplace(std::string(package));
                         }
                       });
       if (!did_find_copyright) {
         errors.push_back(
             absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
+    }
+    for (const auto& comment_entry : license_map) {
+      writer.Write(comment_entry.second, comment_entry.first);
     }
   }
   if (IsStdoutTerminal()) {
@@ -161,6 +226,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 }
 
 int LicenseChecker::Run(std::string_view working_dir,
+                        std::ostream& licenses,
                         std::string_view data_dir) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
@@ -168,7 +234,7 @@ int LicenseChecker::Run(std::string_view working_dir,
               << std::endl;
     return 1;
   }
-  std::vector<absl::Status> errors = Run(working_dir, data.value());
+  std::vector<absl::Status> errors = Run(working_dir, licenses, data.value());
   for (const absl::Status& status : errors) {
     std::cerr << status << std::endl;
   }

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -1873,9 +1874,9 @@ flutter:
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
-          expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[
-            SupportedPlatform.ios,
-            SupportedPlatform.macos,
+          expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[
+            FlutterDarwinPlatform.ios,
+            FlutterDarwinPlatform.macos,
           ]);
         },
         overrides: <Type, Generator>{
@@ -1895,7 +1896,7 @@ flutter:
             releaseMode: false,
             darwinDependencyManagement: dependencyManagement,
           );
-          expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[]);
+          expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[]);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -3004,10 +3005,10 @@ class FakeSystemClock extends Fake implements SystemClock {
 }
 
 class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyManagement {
-  List<SupportedPlatform> setupPlatforms = <SupportedPlatform>[];
+  List<FlutterDarwinPlatform> setupPlatforms = <FlutterDarwinPlatform>[];
 
   @override
-  Future<void> setUp({required SupportedPlatform platform}) async {
+  Future<void> setUp({required FlutterDarwinPlatform platform}) async {
     setupPlatforms.add(platform);
   }
 }

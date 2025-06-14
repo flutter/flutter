@@ -4,6 +4,8 @@ source_set("licenses") {
     "src/catalog.h",
     "src/comments.cc",
     "src/comments.h",
+    "src/comments_util.cc",
+    "src/comments_util.h",
     "src/data.cc",
     "src/data.h",
     "src/filter.cc",

@@ -349,9 +349,9 @@ struct yy_trans_info {
   flex_int32_t yy_verify;
   flex_int32_t yy_nxt;
 };
-static const flex_int16_t yy_accept[27] = {0, 0, 0, 0, 0, 0, 0, 9, 7,
-                                           7, 1, 7, 4, 4, 6, 6, 0, 1,
-                                           0, 1, 2, 3, 0, 5, 0, 5, 0};
+static const flex_int16_t yy_accept[28] = {0, 0, 0, 0, 0, 0, 0, 9, 7, 7,
+                                           1, 7, 4, 4, 6, 6, 0, 1, 0, 1,
+                                           2, 3, 0, 5, 0, 2, 5, 0};
 
 static const YY_CHAR yy_ec[256] = {
     0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -371,23 +371,23 @@ static const YY_CHAR yy_ec[256] = {
 
 static const YY_CHAR yy_meta[7] = {0, 1, 1, 2, 1, 1, 3};
 
-static const flex_int16_t yy_base[34] = {
-    0, 0, 0, 24, 12, 12, 7, 8, 34, 5,  0,  7,  34, 0,  34, 12, 0,
-    0, 0, 0, 34, 34, 0,  0, 0, 0,  34, 18, 21, 24, 27, 2,  30, 0};
+static const flex_int16_t yy_base[36] = {
+    0, 0, 0, 27, 24, 14, 12, 10, 34, 5,  0,  7,  34, 0,  34, 12, 0,  0,
+    0, 0, 0, 34, 0,  0,  0,  34, 0,  34, 18, 21, 24, 27, 5,  3,  30, 0};
 
-static const flex_int16_t yy_def[34] = {
-    0,  27, 27, 28, 28, 29, 29, 26, 26, 26, 30, 26, 26, 31, 26, 26, 9,
-    30, 11, 30, 26, 26, 15, 32, 33, 32, 0,  26, 26, 26, 26, 26, 26, 26};
+static const flex_int16_t yy_def[36] = {
+    0,  28, 28, 29, 29, 30, 30, 27, 27, 27, 31, 27, 27, 32, 27, 27, 9,  31,
+    11, 31, 33, 27, 15, 34, 35, 27, 34, 0,  27, 27, 27, 27, 27, 27, 27, 27};
 
 static const flex_int16_t yy_nxt[41] = {
-    0,  26, 9,  23, 10, 21, 11, 16, 26, 17, 15, 18, 20, 17,
-    22, 15, 23, 13, 24, 8,  8,  8,  12, 12, 12, 14, 14, 14,
-    19, 13, 19, 25, 26, 25, 7,  26, 26, 26, 26, 26, 26};
+    0,  27, 9,  23, 10, 25, 11, 16, 21, 17, 27, 18, 20, 17,
+    22, 15, 23, 15, 24, 8,  8,  8,  12, 12, 12, 14, 14, 14,
+    19, 13, 19, 26, 13, 26, 7,  27, 27, 27, 27, 27, 27};
 
 static const flex_int16_t yy_chk[41] = {
-    0,  0, 2,  33, 2,  31, 2,  9,  7,  9,  6,  9,  11, 11,
-    15, 5, 15, 4,  15, 27, 27, 27, 28, 28, 28, 29, 29, 29,
-    30, 3, 30, 32, 0,  32, 26, 26, 26, 26, 26, 26, 26};
+    0,  0, 2,  35, 2,  33, 2,  9,  32, 9,  7,  9,  11, 11,
+    15, 6, 15, 5,  15, 28, 28, 28, 29, 29, 29, 30, 30, 30,
+    31, 4, 31, 34, 3,  34, 27, 27, 27, 27, 27, 27, 27};
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -409,6 +409,7 @@ static const flex_int16_t yy_chk[41] = {
 
 #line 20 "comments.l"
 #include "flutter/tools/licenses_cpp/src/comments.h"
+#include "flutter/tools/licenses_cpp/src/comments_util.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -420,9 +421,9 @@ struct LexerContext {
   std::function<void(std::string_view)> callback;
   std::string buffer;
 };
-#line 461 "comments.cc"
+#line 462 "comments.cc"
 
-#line 463 "comments.cc"
+#line 464 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -678,9 +679,9 @@ YY_DECL {
   }
 
   {
-#line 39 "comments.l"
+#line 40 "comments.l"
 
-#line 728 "comments.cc"
+#line 729 "comments.cc"
 
     while (/*CONSTCOND*/ 1) /* loops until end-of-file is reached */
     {
@@ -705,7 +706,7 @@ YY_DECL {
         }
         while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
           yy_current_state = (int)yy_def[yy_current_state];
-          if (yy_current_state >= 27)
+          if (yy_current_state >= 28)
             yy_c = yy_meta[yy_c];
         }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -734,18 +735,18 @@ YY_DECL {
 
         case 1:
           YY_RULE_SETUP
-#line 40 "comments.l"
+#line 41 "comments.l"
           {
             BEGIN(BLOCK);
-            yyextra->buffer.append(yytext, yyleng);
+            CommentsUtil::AddTrimLine(&yyextra->buffer, yytext, yyleng);
           }
           YY_BREAK
         case 2:
+          /* rule 2 can match eol */
           YY_RULE_SETUP
-#line 44 "comments.l"
+#line 45 "comments.l"
           {
             BEGIN(C_COMMENT);
-            yyextra->buffer.append(yytext, yyleng);
           }
           YY_BREAK
 
@@ -754,7 +755,6 @@ YY_DECL {
 #line 50 "comments.l"
           {
             BEGIN(INITIAL);
-            yyextra->buffer.append(yytext, yyleng);
             yyextra->callback(yyextra->buffer);
             yyextra->buffer.clear();
           }
@@ -762,7 +762,7 @@ YY_DECL {
         case 4:
           /* rule 4 can match eol */
           YY_RULE_SETUP
-#line 56 "comments.l"
+#line 55 "comments.l"
           {
             yyextra->buffer.append(yytext, yyleng);
           }
@@ -771,9 +771,10 @@ YY_DECL {
         case 5:
           /* rule 5 can match eol */
           YY_RULE_SETUP
-#line 62 "comments.l"
+#line 61 "comments.l"
           {
-            yyextra->buffer.append(yytext, yyleng);
+            yyextra->buffer.append("\n", 1);
+            CommentsUtil::AddTrimLine(&yyextra->buffer, yytext + 1, yyleng - 1);
           }
           YY_BREAK
         case 6:
@@ -799,7 +800,7 @@ YY_DECL {
 #line 73 "comments.l"
           ECHO;
           YY_BREAK
-#line 853 "comments.cc"
+#line 854 "comments.cc"
         case YY_STATE_EOF(INITIAL):
         case YY_STATE_EOF(C_COMMENT):
         case YY_STATE_EOF(BLOCK):
@@ -1079,7 +1080,7 @@ static yy_state_type yy_get_previous_state(yyscan_t yyscanner) {
     }
     while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
       yy_current_state = (int)yy_def[yy_current_state];
-      if (yy_current_state >= 27)
+      if (yy_current_state >= 28)
         yy_c = yy_meta[yy_c];
     }
     yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1107,11 +1108,11 @@ static yy_state_type yy_try_NUL_trans(yy_state_type yy_current_state,
   }
   while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
     yy_current_state = (int)yy_def[yy_current_state];
-    if (yy_current_state >= 27)
+    if (yy_current_state >= 28)
       yy_c = yy_meta[yy_c];
   }
   yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-  yy_is_jam = (yy_current_state == 26);
+  yy_is_jam = (yy_current_state == 27);
 
   (void)yyg;
   return yy_is_jam ? 0 : yy_current_state;

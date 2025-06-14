@@ -1,4 +1,4 @@
-Signature: bf0d1cd9161247a8b7177a09ef4ab9d6
+Signature: f9fb3c9288c6070e5e48d5852a89c489
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1900,10 +1900,48 @@ ORIGIN: ../../../flutter/third_party/skia/include/core/SkRRect.h + ../../../flut
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkStrokeRec.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkSurface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLFunctions.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/pathops/SkPathOps.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/SkPathRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/SkWeakRefCnt.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/utils/SkNullCanvas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/include/SkPathOps.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkAddIntersections.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkAddIntersections.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkDCubicLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkDLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkDQuadLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersectionHelper.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersections.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersections.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkLineParameters.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpAngle.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpAngle.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCubicHull.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpEdgeBuilder.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpEdgeBuilder.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSegment.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSegment.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSpan.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsBounds.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCommon.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCommon.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCubic.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCubic.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCurve.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsLine.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsLine.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsOp.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsPoint.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsQuad.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsQuad.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsRect.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsRect.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsSimplify.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTypes.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathWriter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathWriter.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkReduceOrder.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkReduceOrder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkMathPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkTInternalLList.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkColorPalette.h + ../../../flutter/third_party/skia/LICENSE
@@ -1952,44 +1990,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/image/SkSurface.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkSurface_Base.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkSurface_Raster.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkSurface_Raster.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkAddIntersections.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkAddIntersections.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkDCubicLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkDLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkDQuadLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkIntersectionHelper.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkIntersections.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkIntersections.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkLineParameters.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpAngle.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpAngle.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpCubicHull.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpEdgeBuilder.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpEdgeBuilder.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpSegment.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpSegment.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpSpan.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsBounds.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCommon.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCommon.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCubic.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCubic.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCurve.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsLine.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsLine.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsOp.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsPoint.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsQuad.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsQuad.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsRect.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsRect.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsSimplify.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTypes.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTypes.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathWriter.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathWriter.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkReduceOrder.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkReduceOrder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkIBMFamilyClass.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkOTTableTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_OS_2.h + ../../../flutter/third_party/skia/LICENSE
@@ -2058,10 +2058,48 @@ FILE: ../../../flutter/third_party/skia/include/core/SkRRect.h
 FILE: ../../../flutter/third_party/skia/include/core/SkStrokeRec.h
 FILE: ../../../flutter/third_party/skia/include/core/SkSurface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLFunctions.h
-FILE: ../../../flutter/third_party/skia/include/pathops/SkPathOps.h
 FILE: ../../../flutter/third_party/skia/include/private/SkPathRef.h
 FILE: ../../../flutter/third_party/skia/include/private/SkWeakRefCnt.h
 FILE: ../../../flutter/third_party/skia/include/utils/SkNullCanvas.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/include/SkPathOps.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkAddIntersections.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkAddIntersections.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkDCubicLineIntersection.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkDLineIntersection.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkDQuadLineIntersection.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersectionHelper.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersections.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkIntersections.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkLineParameters.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpAngle.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpAngle.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCubicHull.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpEdgeBuilder.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpEdgeBuilder.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSegment.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSegment.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSpan.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsBounds.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCommon.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCommon.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCubic.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCubic.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCurve.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsLine.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsLine.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsOp.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsPoint.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsQuad.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsQuad.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsRect.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsRect.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsSimplify.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTypes.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTypes.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathWriter.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathWriter.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkReduceOrder.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkReduceOrder.h
 FILE: ../../../flutter/third_party/skia/src/base/SkMathPriv.h
 FILE: ../../../flutter/third_party/skia/src/base/SkTInternalLList.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkColorPalette.h
@@ -2110,44 +2148,6 @@ FILE: ../../../flutter/third_party/skia/src/image/SkSurface.cpp
 FILE: ../../../flutter/third_party/skia/src/image/SkSurface_Base.h
 FILE: ../../../flutter/third_party/skia/src/image/SkSurface_Raster.cpp
 FILE: ../../../flutter/third_party/skia/src/image/SkSurface_Raster.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkAddIntersections.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkAddIntersections.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkDCubicLineIntersection.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkDLineIntersection.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkDQuadLineIntersection.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkIntersectionHelper.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkIntersections.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkIntersections.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkLineParameters.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpAngle.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpAngle.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpCubicHull.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpEdgeBuilder.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpEdgeBuilder.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpSegment.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpSegment.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpSpan.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsBounds.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCommon.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCommon.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCubic.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCubic.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCurve.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsLine.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsLine.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsOp.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsPoint.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsQuad.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsQuad.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsRect.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsRect.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsSimplify.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTypes.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTypes.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathWriter.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathWriter.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkReduceOrder.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkReduceOrder.h
 FILE: ../../../flutter/third_party/skia/src/sfnt/SkIBMFamilyClass.h
 FILE: ../../../flutter/third_party/skia/src/sfnt/SkOTTableTypes.h
 FILE: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_OS_2.h
@@ -2376,6 +2376,11 @@ ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkTLogic.h + ../.
 ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkDiscardableMemory.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/utils/SkCanvasStateUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCoincidence.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpContour.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpContour.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsDebug.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsDebug.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapDevice.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapDevice.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDataTable.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2420,11 +2425,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrOvalOpFactory.cpp
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrOvalOpFactory.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/lazy/SkDiscardableMemoryPool.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/lazy/SkDiscardableMemoryPool.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpCoincidence.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpContour.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpContour.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsDebug.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsDebug.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFResourceDict.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFResourceDict.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkDiscardableMemory_none.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2513,6 +2513,11 @@ FILE: ../../../flutter/third_party/skia/include/private/base/SkTLogic.h
 FILE: ../../../flutter/third_party/skia/include/private/chromium/SkDiscardableMemory.h
 FILE: ../../../flutter/third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h
 FILE: ../../../flutter/third_party/skia/include/utils/SkCanvasStateUtils.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCoincidence.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpContour.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpContour.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsDebug.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsDebug.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapDevice.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDataTable.cpp
@@ -2557,11 +2562,6 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrOvalOpFactory.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/GrOvalOpFactory.h
 FILE: ../../../flutter/third_party/skia/src/lazy/SkDiscardableMemoryPool.cpp
 FILE: ../../../flutter/third_party/skia/src/lazy/SkDiscardableMemoryPool.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpCoincidence.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpContour.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpContour.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsDebug.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsDebug.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFResourceDict.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFResourceDict.h
 FILE: ../../../flutter/third_party/skia/src/ports/SkDiscardableMemory_none.cpp
@@ -2699,6 +2699,11 @@ ORIGIN: ../../../flutter/third_party/skia/include/core/SkPictureRecorder.h + ../
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkSurfaceProps.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkTextBlob.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLAssembleInterface.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpBuilder.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSpan.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTSect.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTSect.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTightBounds.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkHalf.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkHalf.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBBHFactory.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2781,11 +2786,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/DashOp.cpp + ../../
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/DashOp.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/SmallPathRenderer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/surface/SkSurface_Ganesh.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpBuilder.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpSpan.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTSect.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTSect.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTightBounds.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_android.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_win_dw.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2858,6 +2858,11 @@ FILE: ../../../flutter/third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../flutter/third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../flutter/third_party/skia/include/core/SkTextBlob.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLAssembleInterface.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpBuilder.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpSpan.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTSect.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTSect.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTightBounds.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkHalf.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkHalf.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBBHFactory.cpp
@@ -2940,11 +2945,6 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/DashOp.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/DashOp.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/ops/SmallPathRenderer.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/surface/SkSurface_Ganesh.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpBuilder.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpSpan.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTSect.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTSect.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTightBounds.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_android.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_win_dw.cpp
@@ -3154,6 +3154,13 @@ ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkSemaphore.h + .
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkThreadID.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/svg/SkSVGCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/utils/SkPaintFilterCanvas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkDConicLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkDCubicToQuads.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCoincidence.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsConic.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsConic.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCurve.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsWinding.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkSemaphore.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkSharedMutex.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkSharedMutex.h + ../../../flutter/third_party/skia/LICENSE
@@ -3323,13 +3330,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/image/SkImage_Lazy.cpp + ../../../
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkPictureImageGenerator.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkBlitMask_opts.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkBlitRow_opts.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkDConicLineIntersection.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkDCubicToQuads.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkOpCoincidence.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsConic.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsConic.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCurve.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsWinding.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkDocument_PDF_None.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.h + ../../../flutter/third_party/skia/LICENSE
@@ -3428,6 +3428,13 @@ FILE: ../../../flutter/third_party/skia/include/private/base/SkSemaphore.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkThreadID.h
 FILE: ../../../flutter/third_party/skia/include/svg/SkSVGCanvas.h
 FILE: ../../../flutter/third_party/skia/include/utils/SkPaintFilterCanvas.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkDConicLineIntersection.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkDCubicToQuads.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkOpCoincidence.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsConic.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsConic.h
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsCurve.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsWinding.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkSemaphore.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkSharedMutex.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkSharedMutex.h
@@ -3597,13 +3604,6 @@ FILE: ../../../flutter/third_party/skia/src/image/SkImage_Lazy.cpp
 FILE: ../../../flutter/third_party/skia/src/image/SkPictureImageGenerator.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkBlitMask_opts.h
 FILE: ../../../flutter/third_party/skia/src/opts/SkBlitRow_opts.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkDConicLineIntersection.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkDCubicToQuads.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkOpCoincidence.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsConic.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsConic.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsCurve.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsWinding.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkDocument_PDF_None.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFBitmap.h
@@ -5013,6 +5013,8 @@ ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkTo.h + ../../..
 ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/vk/SkiaVulkan.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/utils/SkTextUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/jsonreader/SkJSONReader.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsAsWinding.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTCurve.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/skcms.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/Transform_inl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_internals.h + ../../../flutter/third_party/skia/LICENSE
@@ -5150,8 +5152,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_hsw.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_lasx.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_skx.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkRasterPipeline_opts.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsAsWinding.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTCurve.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkClusterator.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkClusterator.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFTag.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -5226,6 +5226,8 @@ FILE: ../../../flutter/third_party/skia/include/private/base/SkTo.h
 FILE: ../../../flutter/third_party/skia/include/private/gpu/vk/SkiaVulkan.h
 FILE: ../../../flutter/third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../flutter/third_party/skia/modules/jsonreader/SkJSONReader.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsAsWinding.cpp
+FILE: ../../../flutter/third_party/skia/modules/pathops/src/SkPathOpsTCurve.h
 FILE: ../../../flutter/third_party/skia/modules/skcms/skcms.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/Transform_inl.h
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_internals.h
@@ -5363,8 +5365,6 @@ FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_lasx.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_skx.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkRasterPipeline_opts.h
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
-FILE: ../../../flutter/third_party/skia/src/pathops/SkPathOpsTCurve.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkClusterator.cpp
 FILE: ../../../flutter/third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFTag.cpp
@@ -9900,6 +9900,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/include/pathops/SkPathOps.h + ../../../flutter/third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/include/pathops/SkPathOps.h
+----------------------------------------------------------------------------------------------------
+Copyright 2025 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
@@ -10036,4 +10073,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
-Total license count: 73
+Total license count: 74
