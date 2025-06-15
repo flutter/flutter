@@ -23,6 +23,7 @@ namespace {
 
 constexpr char kTextPlainFormat[] = "text/plain";
 const UInt32 kKeyPressClickSoundId = 1306;
+const UInt32 kPickerTickSoundId = 1157;
 
 NSString* const kSearchURLPrefix = @"x-web-search://?";
 
@@ -243,6 +244,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     // All feedback types are specific to Android and are treated as equal on
     // iOS.
     AudioServicesPlaySystemSound(kKeyPressClickSoundId);
+  } else if ([soundType isEqualToString:@"SystemSoundType.tick"]) {
+    AudioServicesPlaySystemSound(kPickerTickSoundId);
   }
 }
 
