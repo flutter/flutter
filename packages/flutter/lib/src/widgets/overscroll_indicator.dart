@@ -12,6 +12,7 @@ library;
 
 import 'dart:async' show Timer;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart' show Tolerance, nearEqual;
@@ -23,6 +24,7 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
+import 'stretch_overscroll_effect.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -804,31 +806,49 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double x = 1.0;
-          double y = 1.0;
+          double overscrollX = 0.0;
+          double overscrollY = 0.0;
           final double mainAxisSize;
 
           switch (widget.axis) {
             case Axis.horizontal:
-              x += stretch;
+              overscrollX += stretch;
               mainAxisSize = MediaQuery.widthOf(context);
             case Axis.vertical:
-              y += stretch;
+              overscrollY += stretch;
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
-          final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _stretchController.stretchDirection,
-          );
-
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-          final Widget transform = Transform(
-            alignment: alignment,
-            transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.medium,
-            child: widget.child,
-          );
+          final Widget transform;
+
+          if (ui.ImageFilter.isShaderFilterSupported) {
+            if (_stretchController.stretchDirection == _StretchDirection.trailing) {
+              overscrollX = -overscrollX;
+              overscrollY = -overscrollY;
+            }
+
+            transform = StretchOverscrollEffect(
+              stretchStrengthX: overscrollX,
+              stretchStrengthY: overscrollY,
+              child: widget.child!,
+            );
+          } else {
+            final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
+              _stretchController.stretchDirection,
+            );
+
+            final double x = 1.0 + overscrollX;
+            final double y = 1.0 + overscrollY;
+
+            transform = Transform(
+              alignment: alignment,
+              transform: Matrix4.diagonal3Values(x, y, 1.0),
+              filterQuality: stretch == 0 ? null : FilterQuality.medium,
+              child: widget.child,
+            );
+          }
 
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
