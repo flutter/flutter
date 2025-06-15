@@ -11,9 +11,6 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-const int _kSoftLineBreak = 0;
-const int _kHardLineBreak = 100;
-
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   if (!ui_web.debugEmulateFlutterTesterEnvironment) {
@@ -1072,7 +1069,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       final LineBreakFragment fragment = lineBreaks[i];
       lineBreakPointer[i + 1].position = fragment.end;
       lineBreakPointer[i + 1].lineBreakType =
-          fragment.type == LineBreakType.mandatory ? _kHardLineBreak : _kSoftLineBreak;
+          fragment.type == LineBreakType.mandatory ? kHardLineBreak : kSoftLineBreak;
     }
     paragraphBuilderSetLineBreaksUtf16(handle, lineBreakBuffer);
     lineBreakBufferFree(lineBreakBuffer);
