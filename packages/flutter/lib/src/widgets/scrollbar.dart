@@ -668,10 +668,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   /// The thumb's corresponding scroll offset in the track.
   double getThumbScrollOffset() {
+    assert(_lastMetrics!.maxScrollExtent.isFinite && _lastMetrics!.minScrollExtent.isFinite);
     final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
+    final double maxFraction = _lastMetrics!.maxScrollExtent / scrollableExtent;
+    final double minFraction = _lastMetrics!.minScrollExtent / scrollableExtent;
 
     final double fractionPast =
-        (scrollableExtent > 0) ? clampDouble(_lastMetrics!.pixels / scrollableExtent, 0.0, 1.0) : 0;
+        (scrollableExtent > 0)
+            ? clampDouble(_lastMetrics!.pixels / scrollableExtent, minFraction, maxFraction)
+            : 0;
 
     return fractionPast * (_traversableTrackExtent - _thumbExtent);
   }
