@@ -700,6 +700,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
+    if (apkAnalyzerPath.contains(' ')) {
+      apkAnalyzerPath.replaceAll(r' ', r'\ ');
+    }
+
     final RunResult result = await _processUtils.run(
       <String>[apkAnalyzerPath, 'files', 'list', aabPath],
       workingDirectory: project.android.hostAppGradleRoot.path,
