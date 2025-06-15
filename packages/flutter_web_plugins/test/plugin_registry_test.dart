@@ -30,8 +30,10 @@ class TestPlugin {
 }
 
 void main() {
-  // Disabling tester emulation because this test relies on real message channel communication.
-  ui_web.debugEmulateFlutterTesterEnvironment = false;
+  setUp(() {
+    // Disabling tester emulation because this test relies on real message channel communication.
+    ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.production());
+  });
 
   group('Plugin Registry', () {
     setUp(() {
