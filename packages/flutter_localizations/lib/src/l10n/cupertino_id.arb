@@ -29,5 +29,6 @@
   "shareButtonLabel": "Bagikan...",
   "clearButtonLabel": "Hapus",
   "cancelButtonLabel": "Batal",
-  "backButtonLabel": "Kembali"
+  "backButtonLabel": "Kembali",
+  "translateButtonLabel": "Translate"
 }

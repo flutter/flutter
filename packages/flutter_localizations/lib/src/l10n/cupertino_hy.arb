@@ -29,5 +29,6 @@
   "shareButtonLabel": "Կիսվել...",
   "clearButtonLabel": "Մաքրել",
   "cancelButtonLabel": "Չեղարկել",
-  "backButtonLabel": "Հետ"
+  "backButtonLabel": "Հետ",
+  "translateButtonLabel": "Translate"
 }

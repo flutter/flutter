@@ -29,5 +29,6 @@
   "shareButtonLabel": "Deel …",
   "clearButtonLabel": "Vee uit",
   "cancelButtonLabel": "Kanselleer",
-  "backButtonLabel": "Terug"
+  "backButtonLabel": "Terug",
+  "translateButtonLabel": "Translate"
 }

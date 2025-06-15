@@ -29,5 +29,6 @@
   "searchWebButtonLabel": "Im Web suchen",
   "shareButtonLabel": "Teilen…",
   "cancelButtonLabel": "Abbrechen",
-  "backButtonLabel": "Zurück"
+  "backButtonLabel": "Zurück",
+  "translateButtonLabel": "Translate"
 }

@@ -688,6 +688,18 @@ void main() {
   );
 
   test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemTranslate',
+        () {
+      const IOSSystemContextMenuItemTranslate item = IOSSystemContextMenuItemTranslate();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      expect(
+        item.getData(localizations),
+        IOSSystemContextMenuItemDataTranslate(title: localizations.translateButtonLabel),
+      );
+    },
+  );
+
+  test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemShare',
     () {
       const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare();

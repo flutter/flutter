@@ -29,5 +29,6 @@
   "shareButtonLabel": "Teilen…",
   "clearButtonLabel": "Löschen",
   "cancelButtonLabel": "Abbrechen",
-  "backButtonLabel": "Zurück"
+  "backButtonLabel": "Zurück",
+  "translateButtonLabel": "Translate"
 }

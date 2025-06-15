@@ -29,5 +29,6 @@
   "shareButtonLabel": "共享…",
   "clearButtonLabel": "清除",
   "cancelButtonLabel": "取消",
-  "backButtonLabel": "返回"
+  "backButtonLabel": "返回",
+  "translateButtonLabel": "Translate"
 }

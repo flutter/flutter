@@ -1264,6 +1264,9 @@ mixin TextSelectionDelegate {
   /// Whether search web is enabled.
   bool get searchWebEnabled => true;
 
+  /// Whether translate is enabled.
+  bool get translateEnabled => true;
+
   /// Whether share is enabled.
   bool get shareEnabled => true;
 
@@ -3011,6 +3014,37 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
   @override
   String toString() {
     return 'IOSSystemContextMenuItemDataSearchWeb(title: $title)';
+  }
+}
+
+/// A [IOSSystemContextMenuItemData] for the system's built-in translate
+/// button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.translateButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [IOSSystemContextMenuItemTranslate], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default localized
+///    value.
+final class IOSSystemContextMenuItemDataTranslate extends IOSSystemContextMenuItemData {
+  /// Creates an instance of [IOSSystemContextMenuItemDataTranslate].
+  const IOSSystemContextMenuItemDataTranslate({required this.title});
+
+  @override
+  final String title;
+
+  @override
+  String get _jsonType => 'translate';
+
+  @override
+  String toString() {
+    return 'IOSSystemContextMenuItemDataTranslate(title: $title)';
   }
 }
 
