@@ -3245,6 +3245,155 @@ void main() {
       await tester.pump();
       expect(primaryFocus, equals(focusNode));
     });
+
+    testWidgets('onFocusChange is called correctly when child is focused and unfocused', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode focusNodeGroup1Child1 = FocusNode();
+      final FocusNode focusNodeGroup1Child2 = FocusNode();
+      final FocusNode focusNodeGroup2Child1 = FocusNode();
+
+      addTearDown(focusNodeGroup1Child1.dispose);
+      addTearDown(focusNodeGroup1Child2.dispose);
+      addTearDown(focusNodeGroup2Child1.dispose);
+
+      bool? group1HasFocus;
+      bool? group2HasFocus;
+
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            FocusTraversalGroup(
+              onFocusChange: (bool focused) => group1HasFocus = focused,
+              child: Column(
+                children: <Widget>[
+                  Focus(
+                    focusNode: focusNodeGroup1Child1,
+                    child: const SizedBox(height: 100, width: 100),
+                  ),
+                  Focus(
+                    focusNode: focusNodeGroup1Child2,
+                    child: const SizedBox(height: 100, width: 100),
+                  ),
+                ],
+              ),
+            ),
+            FocusTraversalGroup(
+              onFocusChange: (bool focused) => group2HasFocus = focused,
+              child: Focus(
+                focusNode: focusNodeGroup2Child1,
+                child: const SizedBox(height: 100, width: 100),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isNull);
+      expect(group2HasFocus, isNull);
+
+      focusNodeGroup1Child1.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isTrue);
+      expect(group2HasFocus, isNull);
+
+      focusNodeGroup1Child2.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isTrue);
+      expect(group2HasFocus, isNull);
+
+      focusNodeGroup2Child1.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isFalse);
+      expect(group2HasFocus, isTrue);
+    });
+
+    testWidgets('onFocusChange is called correctly when focus is traversed', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode focusNodeGroup1Child1 = FocusNode();
+      final FocusNode focusNodeGroup1Child2 = FocusNode();
+      final FocusNode focusNodeGroup2Child1 = FocusNode();
+
+      addTearDown(focusNodeGroup1Child1.dispose);
+      addTearDown(focusNodeGroup1Child2.dispose);
+      addTearDown(focusNodeGroup2Child1.dispose);
+
+      bool? group1HasFocus;
+      bool? group2HasFocus;
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          onGenerateRoute: (RouteSettings settings) {
+            return TestRoute(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: FocusScope(
+                  debugLabel: 'scope',
+                  child: Column(
+                    children: <Widget>[
+                      FocusTraversalGroup(
+                        onFocusChange: (bool focused) => group1HasFocus = focused,
+                        child: Column(
+                          children: <Widget>[
+                            Focus(
+                              focusNode: focusNodeGroup1Child1,
+                              child: const SizedBox(height: 100, width: 100),
+                            ),
+                            Focus(
+                              focusNode: focusNodeGroup1Child2,
+                              child: const SizedBox(height: 100, width: 100),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FocusTraversalGroup(
+                        onFocusChange: (bool focused) => group2HasFocus = focused,
+                        child: Focus(
+                          focusNode: focusNodeGroup2Child1,
+                          child: const SizedBox(height: 100, width: 100),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isNull);
+      expect(group2HasFocus, isNull);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isTrue);
+      expect(group2HasFocus, isNull);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isTrue);
+      expect(group2HasFocus, isNull);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(group1HasFocus, isFalse);
+      expect(group2HasFocus, isTrue);
+    });
   });
 
   group(RawKeyboardListener, () {
