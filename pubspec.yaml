@@ -16,6 +16,7 @@ workspace:
   - packages/fuchsia_remote_debug_protocol
   - packages/flutter_web_plugins
   - packages/flutter_goldens
+  - dev/checks_tool
   - dev/devicelab
   - dev/manual_tests
   - dev/tracing_tests
@@ -90,7 +91,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
-  code_assets: 0.19.3
+  code_assets: 0.19.4
   collection: 1.19.1
   convert: 3.1.2
   coverage: 1.14.1
@@ -114,7 +115,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
   googleapis_auth: 1.6.0
-  hooks: 0.19.3
+  hooks: 0.19.5
   html: 0.15.6
   http: 1.4.0
   http_multi_server: 3.2.2
@@ -212,4 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: vsmjan
+# PUBSPEC CHECKSUM: kolr2k
