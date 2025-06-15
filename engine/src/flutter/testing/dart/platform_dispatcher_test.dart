@@ -84,4 +84,144 @@ void main() {
     expect(drawFrameCalled.isCompleted, true);
     expect(microtaskFlushed, true);
   });
+
+  group('SemanticsEvent', () {
+    test('creates SemanticsEvent with required parameters', () {
+      const event = SemanticsEvent(type: 'focus', data: <String, dynamic>{'key': 'value'});
+
+      expect(event.type, equals('focus'));
+      expect(event.data, equals(<String, dynamic>{'key': 'value'}));
+      expect(event.nodeId, isNull);
+    });
+
+    test('creates SemanticsEvent with optional nodeId', () {
+      const event = SemanticsEvent(
+        type: 'focus',
+        data: <String, dynamic>{'key': 'value'},
+        nodeId: 123,
+      );
+
+      expect(event.type, equals('focus'));
+      expect(event.data, equals(<String, dynamic>{'key': 'value'}));
+      expect(event.nodeId, equals(123));
+    });
+
+    test('toString returns correct format', () {
+      const event = SemanticsEvent(
+        type: 'focus',
+        data: <String, dynamic>{'key': 'value'},
+        nodeId: 123,
+      );
+
+      expect(event.toString(), equals('SemanticsEvent(focus, nodeId: 123)'));
+    });
+
+    test('toString handles null nodeId', () {
+      const event = SemanticsEvent(type: 'focus', data: <String, dynamic>{'key': 'value'});
+
+      expect(event.toString(), equals('SemanticsEvent(focus, nodeId: null)'));
+    });
+
+    test('supports different event types', () {
+      const focusEvent = SemanticsEvent(type: 'focus', data: <String, dynamic>{});
+
+      const announceEvent = SemanticsEvent(
+        type: 'announce',
+        data: <String, dynamic>{'message': 'Hello'},
+      );
+
+      expect(focusEvent.type, equals('focus'));
+      expect(announceEvent.type, equals('announce'));
+    });
+
+    test('supports complex data structures', () {
+      const event = SemanticsEvent(
+        type: 'focus',
+        data: <String, dynamic>{
+          'nested': <String, dynamic>{'key': 'value', 'number': 42},
+          'list': <int>[1, 2, 3],
+        },
+      );
+
+      expect(event.data['nested']['key'], equals('value'));
+      expect(event.data['nested']['number'], equals(42));
+      expect(event.data['list'], equals(<int>[1, 2, 3]));
+    });
+
+    test('supports empty data', () {
+      const event = SemanticsEvent(type: 'focus', data: <String, dynamic>{});
+
+      expect(event.data, isEmpty);
+      expect(event.type, equals('focus'));
+    });
+  });
+
+  group('SemanticsEventCallback', () {
+    test('callback typedef accepts SemanticsEvent', () {
+      SemanticsEvent? receivedEvent;
+
+      void callback(SemanticsEvent event) {
+        receivedEvent = event;
+      }
+
+      // Verify the callback can be assigned to SemanticsEventCallback
+      final SemanticsEventCallback typedCallback = callback;
+
+      const testEvent = SemanticsEvent(
+        type: 'focus',
+        data: <String, dynamic>{'test': true},
+        nodeId: 456,
+      );
+
+      typedCallback(testEvent);
+
+      expect(receivedEvent, isNotNull);
+      expect(receivedEvent!.type, equals('focus'));
+      expect(receivedEvent!.nodeId, equals(456));
+      expect(receivedEvent!.data['test'], isTrue);
+    });
+
+    test('callback can handle multiple event types', () {
+      final List<SemanticsEvent> receivedEvents = <SemanticsEvent>[];
+
+      void callback(SemanticsEvent event) {
+        receivedEvents.add(event);
+      }
+
+      final SemanticsEventCallback typedCallback = callback;
+
+      const focusEvent = SemanticsEvent(
+        type: 'focus',
+        data: <String, dynamic>{'focus': true},
+        nodeId: 1,
+      );
+
+      const announceEvent = SemanticsEvent(
+        type: 'announce',
+        data: <String, dynamic>{'message': 'Hello'},
+        nodeId: 2,
+      );
+
+      typedCallback(focusEvent);
+      typedCallback(announceEvent);
+
+      expect(receivedEvents, hasLength(2));
+      expect(receivedEvents[0].type, equals('focus'));
+      expect(receivedEvents[1].type, equals('announce'));
+    });
+
+    test('callback can be null', () {
+      SemanticsEventCallback? nullCallback;
+
+      expect(nullCallback, isNull);
+
+      // Assigning a callback should work
+      nullCallback = (SemanticsEvent event) {};
+      expect(nullCallback, isNotNull);
+
+      // Setting back to null should work
+      nullCallback = null;
+      expect(nullCallback, isNull);
+    });
+  });
 }
