@@ -323,7 +323,7 @@ class DriveCommand extends RunCommandBase {
       throwOnError: false,
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
-    final BuildInfo buildInfo = await getBuildInfo(buildNativeAssetsForDevDependencies: true);
+    final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
     final File? applicationBinary =
         applicationBinaryPath == null ? null : _fileSystem.file(applicationBinaryPath);

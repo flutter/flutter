@@ -51,7 +51,12 @@ abstract class DartBuild extends Target {
         );
       }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
-      final bool includeDevDependencies = environment.defines[kNativeAssetsBuildDevDeps] == 'true';
+      final String? buildModeEnvironment = environment.defines[kBuildMode];
+      if (buildModeEnvironment == null) {
+        throw MissingDefineException(kBuildMode, name);
+      }
+      final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+      final bool includeDevDependencies = !buildMode.isRelease;
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(

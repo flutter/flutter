@@ -684,7 +684,6 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
-      '-dNativeAssetsBuildDevDeps=${environment['NATIVE_ASSETS_BUILD_DEV_DEPS'] ?? ''}',
     ]);
 
     if (platform == TargetPlatform.ios) {
