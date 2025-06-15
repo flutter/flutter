@@ -191,6 +191,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.flutterRoot!!.absolutePath } returns BaseFlutterTaskPropertiesTest.FLUTTER_ROOT_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.trackWidgetCreation } returns true
+        every { baseFlutterTask.nativeAssetsBuildDevDeps } returns true
         every { baseFlutterTask.splitDebugInfo } returns BaseFlutterTaskPropertiesTest.SPLIT_DEBUG_INFO_TEST
         every { baseFlutterTask.treeShakeIcons } returns true
 
@@ -291,6 +292,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.flutterRoot!!.absolutePath } returns BaseFlutterTaskPropertiesTest.FLUTTER_ROOT_ABSOLUTE_PATH_TEST
 
         every { baseFlutterTask.trackWidgetCreation } returns null
+        every { baseFlutterTask.nativeAssetsBuildDevDeps } returns null
         every { baseFlutterTask.splitDebugInfo } returns null
         every { baseFlutterTask.treeShakeIcons } returns null
 
@@ -375,6 +377,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_PATH
 
         every { baseFlutterTask.trackWidgetCreation } returns true
+        every { baseFlutterTask.nativeAssetsBuildDevDeps } returns true
         every { baseFlutterTask.splitDebugInfo } returns BaseFlutterTaskPropertiesTest.SPLIT_DEBUG_INFO_TEST
         every { baseFlutterTask.treeShakeIcons } returns true
 
@@ -474,6 +477,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_PATH
 
         every { baseFlutterTask.trackWidgetCreation } returns true
+        every { baseFlutterTask.nativeAssetsBuildDevDeps } returns true
         every { baseFlutterTask.splitDebugInfo } returns BaseFlutterTaskPropertiesTest.SPLIT_DEBUG_INFO_TEST
         every { baseFlutterTask.treeShakeIcons } returns true
 

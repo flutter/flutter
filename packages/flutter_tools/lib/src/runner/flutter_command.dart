@@ -1294,6 +1294,7 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool buildNativeAssetsForDevDependencies = false,
   }) async {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
@@ -1469,6 +1470,7 @@ abstract class FlutterCommand extends Command<void> {
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: webEnableHotReload,
+      buildNativeAssetsForDevDependencies: buildNativeAssetsForDevDependencies,
     );
   }
 

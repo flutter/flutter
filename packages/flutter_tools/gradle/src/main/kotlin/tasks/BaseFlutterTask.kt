@@ -65,6 +65,9 @@ open class BaseFlutterTask : DefaultTask() {
     @Input
     var trackWidgetCreation: Boolean? = null
 
+    @Input
+    var nativeAssetsBuildDevDeps: Boolean? = null
+
     @Optional
     @Input
     var targetPlatformValues: List<String>? = null

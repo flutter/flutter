@@ -52,6 +52,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.buildNativeAssetsForDevDependencies = false,
     this.useLocalCanvasKit = false,
     this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
@@ -180,6 +181,9 @@ class BuildInfo {
 
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
+
+  /// If set, also builds dev dependencies of the root package.
+  final bool buildNativeAssetsForDevDependencies;
 
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
@@ -348,6 +352,7 @@ class BuildInfo {
       'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
       if (flavor != null) 'FLAVOR': flavor!,
+      if (buildNativeAssetsForDevDependencies) 'NATIVE_ASSETS_BUILD_DEV_DEPS': 'true',
     };
   }
 
@@ -372,6 +377,7 @@ class BuildInfo {
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
       if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
+      if (buildNativeAssetsForDevDependencies) '-Pnative-assets-build-dev-deps=true',
     ];
   }
 }
@@ -980,6 +986,9 @@ const String kDartObfuscation = 'DartObfuscation';
 ///
 /// Defaults to 'true'.
 const String kNativeAssets = 'NativeAssets';
+
+/// Whether to build the native assets for dev dependencies in `flutter assemble`.
+const String kNativeAssetsBuildDevDeps = 'NativeAssetsBuildDevDeps';
 
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
