@@ -100,14 +100,14 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // gradients.
     final (Color color1, Color color2, Color color3) = switch (colorScheme.brightness) {
       Brightness.light => (
-        Colors.blue.withOpacity(1.0),
-        Colors.orange.withOpacity(1.0),
-        Colors.yellow.withOpacity(1.0),
+        Colors.blue.withValues(alpha: 1.0),
+        Colors.orange.withValues(alpha: 1.0),
+        Colors.yellow.withValues(alpha: 1.0),
       ),
       Brightness.dark => (
-        Colors.purple.withOpacity(1.0),
-        Colors.cyan.withOpacity(1.0),
-        Colors.yellow.withOpacity(1.0),
+        Colors.purple.withValues(alpha: 1.0),
+        Colors.cyan.withValues(alpha: 1.0),
+        Colors.yellow.withValues(alpha: 1.0),
       ),
     };
 

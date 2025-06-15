@@ -68,7 +68,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                  child: Container(height: 1000, color: Colors.deepPurple.withValues(alpha: 0.5)),
                 ),
               ),
             ],
