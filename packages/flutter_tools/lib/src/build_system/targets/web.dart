@@ -648,14 +648,16 @@ class WebBuiltInAssets extends Target {
   List<String> get depfiles => const <String>[];
 
   @override
-  List<Source> get inputs => const <Source>[Source.hostArtifact(HostArtifact.flutterWebSdk)];
+  List<Source> get inputs => const <Source>[
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  ];
 
   Directory get _canvasKitDirectory => globals.fs.directory(
-    fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      'canvaskit',
-    ),
-  );
+        fileSystem.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        ),
+      );
 
   List<File> get _canvasKitFiles =>
       _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
@@ -665,13 +667,15 @@ class WebBuiltInAssets extends Target {
 
   @override
   List<Source> get outputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/flutter.js'),
-    for (final File file in _canvasKitFiles)
-      Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
-  ];
+        const Source.pattern('{BUILD_DIR}/flutter.js'),
+        for (final File file in _canvasKitFiles)
+          Source.pattern(
+              '{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
+      ];
 
   @override
   Future<void> build(Environment environment) async {
+    // Copy CanvasKit files
     for (final File file in _canvasKitFiles) {
       final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
       final String targetPath = fileSystem.path.join(
@@ -682,17 +686,39 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
-    // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
+    // Copy flutter.js
+    final String flutterJsOut =
+        fileSystem.path.join(environment.outputDir.path, 'flutter.js');
+
     final File flutterJsFile = fileSystem.file(
       fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+        globals.artifacts!
+            .getHostArtifact(HostArtifact.flutterJsDirectory)
+            .path,
         'flutter.js',
       ),
     );
     flutterJsFile.copySync(flutterJsOut);
+
+    // 🧠 Patch flutter.js with case-handling warning for entryPointBaseUrl
+    final File outputFile = fileSystem.file(flutterJsOut);
+    String contents = await outputFile.readAsString();
+
+    contents = contents.replaceFirst(
+      'onEntrypointLoaded: async function(engineInitializer) {',
+      '''
+onEntrypointLoaded: async function(engineInitializer) {
+  if (config.entrypointBaseUrl && !config.entryPointBaseUrl) {
+    console.warn("⚠️ 'entrypointBaseUrl' is incorrect. Use 'entryPointBaseUrl'.");
+    config.entryPointBaseUrl = config.entrypointBaseUrl;
+  }
+''',
+    );
+
+    await outputFile.writeAsString(contents);
   }
 }
+
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
