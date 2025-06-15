@@ -54,6 +54,7 @@ TaskFunction createNativeAssetsTest({
 
         await inDirectory<void>(exampleDirectory, () async {
           final int runFlutterResult = await runFlutter(
+            command: 'run',
             options: options,
             onLine: (String line, Process process) {
               error |= line.contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY');
@@ -110,6 +111,27 @@ TaskFunction createNativeAssetsTest({
         if (error) {
           return TaskResult.failure('Error during hot reload or hot restart.');
         }
+
+        if (buildMode == _buildModes.last) {
+          // Only run integration tests once.
+          addIntegrationTest(exampleDirectory.uri, _packageName);
+          done = false;
+          final int integrationTestResult = await inDirectory<int>(exampleDirectory, () async {
+            return runFlutter(
+              command: 'test',
+              options: <String>['integration_test', '-d', deviceIdOverride!],
+              onLine: (String line, Process _) {
+                if (line.contains('All tests passed!')) {
+                  done = true;
+                }
+              },
+            );
+          });
+          if (!done && integrationTestResult != 0) {
+            return TaskResult.failure('flutter test integration test failed');
+          }
+        }
+
         return TaskResult.success(null);
       });
       if (buildModeResult.failed) {
@@ -121,10 +143,11 @@ TaskFunction createNativeAssetsTest({
 }
 
 Future<int> runFlutter({
+  required String command,
   required List<String> options,
   required void Function(String, Process) onLine,
 }) async {
-  final Process process = await startFlutter('run', options: options);
+  final Process process = await startFlutter(command, options: options);
 
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
@@ -183,4 +206,41 @@ Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
       // Ignore failures to delete a temporary directory.
     }
   }
+}
+
+void addIntegrationTest(Uri exampleDirectory, String packageName) {
+  final ProcessResult result = Process.runSync('flutter', <String>[
+    'pub',
+    'add',
+    'dev:integration_test:{"sdk":"flutter"}',
+  ], workingDirectory: exampleDirectory.toFilePath());
+  if (result.exitCode != 0) {
+    throw Exception(
+      'flutter pub add failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
+  }
+
+  final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
+  final File integrationTestFile = File.fromUri(integrationTestPath);
+  integrationTestFile
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:${packageName}_example/main.dart';
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('invoke native code', (tester) async {
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
+
+      // Verify the native function was called.
+      expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+    });
+  });
+}
+''');
 }
