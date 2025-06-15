@@ -588,6 +588,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0xff2196f3))
         ..circle(color: const Color(0xff2196f3)),
     );
@@ -605,6 +606,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -620,6 +622,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0x61000000))
         ..circle(color: const Color(0x61000000)),
     );
@@ -681,6 +684,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..circle(color: theme.colorScheme.primary),
     );
@@ -695,6 +699,7 @@ void main() {
       paints
         ..rect()
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface),
     );
 
@@ -710,6 +715,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
@@ -766,6 +772,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0xff2196f3))
         ..circle(color: const Color(0xff2196f3)),
     );
@@ -787,6 +794,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -802,6 +810,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0x61000000))
         ..circle(color: const Color(0x61000000)),
     );
@@ -858,6 +867,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..circle(color: theme.colorScheme.primary),
     );
@@ -879,6 +889,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.orange[500])
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -894,6 +905,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
@@ -1186,6 +1198,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: activeEnabledFillColor)
         ..circle(color: activeEnabledFillColor),
     );
@@ -1201,6 +1214,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -1215,6 +1229,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: activeDisabledFillColor)
         ..circle(color: activeDisabledFillColor),
     );
@@ -1230,6 +1245,7 @@ void main() {
           color: const Color(0xffffffff),
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -1300,6 +1316,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: Colors.black12)
+        ..circle(color: Colors.transparent)
         ..circle(color: focusedFillColor),
     );
 
@@ -1318,6 +1335,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: theme.hoverColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: hoveredFillColor),
     );
 
@@ -1387,6 +1405,7 @@ void main() {
       paints
         ..rect()
         ..circle(color: theme.colorScheme.primary.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: focusedFillColor),
     );
 
@@ -1405,6 +1424,7 @@ void main() {
           rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
         )
         ..circle(color: theme.colorScheme.primary.withOpacity(0.08))
+        ..circle(color: Colors.transparent)
         ..circle(color: hoveredFillColor),
     );
 
@@ -1641,6 +1661,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0xFF2196F3)) // Outer circle - primary value
         ..circle(color: const Color(0xFF2196F3))
         ..restore(), // Inner circle - primary value
@@ -1654,6 +1675,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..save()
+        ..circle(color: Colors.transparent)
         ..circle(color: const Color(0xFF2196F3))
         ..restore(),
     );
@@ -1664,7 +1686,9 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: Colors.black38),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: Colors.black38),
     );
   });
 
@@ -1685,6 +1709,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary) // Outer circle - primary value
         ..circle(color: theme.colorScheme.primary)
         ..restore(), // Inner circle - primary value
@@ -1698,6 +1723,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..save()
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..restore(),
     );
@@ -1708,7 +1734,9 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
   });
 
@@ -1740,7 +1768,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.secondary),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: colors.secondary),
     );
 
     // selected radio in pressed state
@@ -1754,6 +1784,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.secondary.withAlpha(0x1F))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.secondary),
     );
 
@@ -1768,6 +1799,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: theme.unselectedWidgetColor.withAlpha(0x1F))
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.unselectedWidgetColor),
     );
 
@@ -1781,6 +1813,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: theme.focusColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.secondary),
     );
 
@@ -1794,6 +1827,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: theme.focusColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.unselectedWidgetColor),
     );
 
@@ -1809,6 +1843,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: theme.hoverColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.secondary),
     );
 
@@ -1848,7 +1883,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(1)),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: colors.primary.withOpacity(1)),
     );
 
     // selected radio in pressed state
@@ -1862,6 +1899,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.onSurface.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.primary.withOpacity(1)),
     );
 
@@ -1876,6 +1914,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.primary.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.onSurfaceVariant.withOpacity(1)),
     );
 
@@ -1889,6 +1928,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.primary.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.primary.withOpacity(1)),
     );
 
@@ -1902,6 +1942,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.onSurface.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.onSurface.withOpacity(1)),
     );
 
@@ -1917,6 +1958,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..circle(color: colors.primary.withOpacity(0.08))
+        ..circle(color: Colors.transparent)
         ..circle(color: colors.primary.withOpacity(1)),
     );
 
@@ -1997,6 +2039,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.hoverColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.secondary),
     );
 
@@ -2008,6 +2051,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.colorScheme.secondary.withAlpha(kRadialReactionAlpha))
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.secondary),
     );
     // Remove pressed and hovered states
@@ -2024,6 +2068,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.focusColor)
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.secondary),
     );
     focusNode.dispose();
@@ -2065,6 +2110,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.colorScheme.primary.withOpacity(0.08))
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary),
     );
 
@@ -2076,6 +2122,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary),
     );
     // Remove pressed and hovered states
@@ -2092,6 +2139,7 @@ void main() {
       getRadioMaterial(tester),
       paints
         ..circle(color: theme.colorScheme.primary.withOpacity(0.1))
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary),
     );
     focusNode.dispose();
@@ -2145,7 +2193,7 @@ void main() {
                     child: Radio<int>(
                       key: radioKey,
                       value: 0,
-                      fillColor: backgroundColor,
+                      backgroundColor: backgroundColor,
                       enabled: enabled,
                     ),
                   ),
@@ -2214,7 +2262,9 @@ void main() {
     );
   });
 
-  testWidgets('Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgets('Radio background color resolves in hovered/focused states', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredBackgroundColor = Color(0xFF000001);
@@ -2260,7 +2310,7 @@ void main() {
                       focusNode: focusNode,
                       key: radioKey,
                       value: 0,
-                      fillColor: backgroundColor,
+                      backgroundColor: backgroundColor,
                     ),
                   ),
                 );
