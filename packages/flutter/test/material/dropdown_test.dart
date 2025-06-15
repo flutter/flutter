@@ -588,6 +588,55 @@ void main() {
     expect(value, equals('three'));
   });
 
+  testWidgets('Dropdown form field only uses value parameter when first built and when reset', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                key: fieldKey,
+                value: 'one',
+                hint: const Text('Select Value'),
+                items:
+                    menuItems.map((String val) {
+                      return DropdownMenuItem<String>(value: val, child: Text(val));
+                    }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    // Do nothing, just to trigger a rebuild.
+                  });
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    expect(fieldKey.currentState!.value, 'one');
+
+    // Open the dropdown menu.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    // The value should update to selected, not the initial value.
+    expect(find.text('three'), findsOneWidget);
+    expect(fieldKey.currentState!.value, 'three');
+
+    fieldKey.currentState!.reset();
+    await tester.pump();
+
+    // Reset to the initial value.
+    expect(find.text('one'), findsOneWidget);
+    expect(fieldKey.currentState!.value, 'one');
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
