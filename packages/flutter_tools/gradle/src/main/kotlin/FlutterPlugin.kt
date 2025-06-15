@@ -598,7 +598,7 @@ class FlutterPlugin : Plugin<Project> {
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
-                        output.versionCodeOverride
+                        output.versionCodeOverride = abiVersionCode * 1000 + variant.mergedFlavor.versionCode as Int
                     }
                 }
             }
