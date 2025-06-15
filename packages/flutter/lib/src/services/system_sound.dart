@@ -11,6 +11,11 @@ enum SystemSoundType {
   /// A short indication that a button was pressed.
   click,
 
+  /// A short indication that a picker value was changed.
+  ///
+  /// This is ignored on all platforms except iOS.
+  tick,
+
   /// A short system alert sound indicating the need for user attention.
   ///
   /// Desktop platforms are the only platforms that support a system alert
