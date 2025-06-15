@@ -33,7 +33,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(
-              pageTransitionsTheme: PageTransitionsTheme(
+              pageTransitionsTheme: PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   for (final TargetPlatform platform in TargetPlatform.values)
                     platform: pageTransitionsBuilder,
@@ -144,7 +144,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(
-              pageTransitionsTheme: PageTransitionsTheme(
+              pageTransitionsTheme: PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   for (final TargetPlatform platform in TargetPlatform.values)
                     platform: pageTransitionsBuilder,
@@ -271,7 +271,7 @@ void main() {
                                   (BuildContext context) => Material(
                                     child: Theme(
                                       data: ThemeData(
-                                        pageTransitionsTheme: PageTransitionsTheme(
+                                        pageTransitionsTheme: PageTransitionsThemeData(
                                           builders: <TargetPlatform, PageTransitionsBuilder>{
                                             for (final TargetPlatform platform
                                                 in TargetPlatform.values)
@@ -299,7 +299,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(
-              pageTransitionsTheme: PageTransitionsTheme(
+              pageTransitionsTheme: PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   for (final TargetPlatform platform in TargetPlatform.values)
                     platform: pageTransitionsBuilder,
@@ -454,7 +454,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: PageTransitionsTheme(
+            pageTransitionsTheme: PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 for (final TargetPlatform platform in TargetPlatform.values)
                   platform: pageTransitionsBuilder,

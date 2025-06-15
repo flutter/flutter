@@ -19,7 +19,7 @@ class PageTransitionsThemeApp extends StatelessWidget {
         // for different target platforms.
         // Non-specified target platforms will default to
         // ZoomPageTransitionsBuilder().
-        pageTransitionsTheme: const PageTransitionsTheme(
+        pageTransitionsTheme: const PageTransitionsThemeData(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
             TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),

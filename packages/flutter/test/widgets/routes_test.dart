@@ -774,7 +774,7 @@ void main() {
           MaterialApp(
             navigatorKey: navigator,
             theme: ThemeData(
-              pageTransitionsTheme: const PageTransitionsTheme(
+              pageTransitionsTheme: const PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   TargetPlatform.android: CupertinoPageTransitionsBuilder(),
                 },
@@ -1452,7 +1452,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android:
                     FadeUpwardsPageTransitionsBuilder(), // use a fade transition
@@ -2163,7 +2163,7 @@ void main() {
         MaterialApp(
           navigatorKey: navigatorKey,
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
                 TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -2227,7 +2227,7 @@ void main() {
           MaterialApp(
             navigatorKey: navigatorKey,
             theme: ThemeData(
-              pageTransitionsTheme: const PageTransitionsTheme(
+              pageTransitionsTheme: const PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
                   TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -2290,7 +2290,7 @@ void main() {
           MaterialApp(
             navigatorKey: navigatorKey,
             theme: ThemeData(
-              pageTransitionsTheme: const PageTransitionsTheme(
+              pageTransitionsTheme: const PageTransitionsThemeData(
                 builders: <TargetPlatform, PageTransitionsBuilder>{
                   TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
                   TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -2366,7 +2366,7 @@ void main() {
         MaterialApp(
           navigatorKey: navigatorKey,
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
                 TargetPlatform.android: ZoomPageTransitionsBuilder(),
