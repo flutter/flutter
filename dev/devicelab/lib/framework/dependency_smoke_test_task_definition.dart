@@ -111,9 +111,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
-      final File appGradleBuild = getAndroidBuildFile(
-        localFileSystem.path.join(appPath, 'android', 'app'),
-      );
+      final File appGradleBuild = getAndroidBuildFile(localFileSystem.path.join(appPath));
       if (versions.compileSdkVersion != null) {
         final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
           flutterCompileSdkString,
@@ -132,13 +130,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       // Modify gradle version to passed in version.
       final File gradleWrapperProperties = localFileSystem.file(
-        localFileSystem.path.join(
-          appPath,
-          'android',
-          'gradle',
-          'wrapper',
-          'gradle-wrapper.properties',
-        ),
+        localFileSystem.path.join(appPath, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
       );
       final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
         gradleReplacementString,
