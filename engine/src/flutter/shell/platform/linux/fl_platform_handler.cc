@@ -18,7 +18,7 @@ static constexpr char kTextPlainFormat[] = "text/plain";
 
 static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
 static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
-static constexpr char kSoundTypeClick[] = "SystemSoundType.tick";
+static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
 struct _FlPlatformHandler {
   GObject parent_instance;
