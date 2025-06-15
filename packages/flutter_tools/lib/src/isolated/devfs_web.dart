@@ -41,6 +41,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
+import '../web/web_device.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -49,7 +50,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
-      bool injectDebuggingSupportCode,
+      bool useDwdsWebSocketConnection,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -261,6 +262,7 @@ class WebAssetServer implements AssetReader {
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
     bool canaryFeatures = false,
+    bool useDwdsWebSocketConnection = false,
   }) async {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -376,15 +378,6 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen(log);
 
-    // Retrieve connected web devices.
-    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-    final Set<String> connectedWebDeviceIds =
-        devices
-            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
-            .map((Device d) => d.id)
-            .toSet() ??
-        <String>{};
-
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -435,15 +428,15 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Inject the debugging support code if connected web devices are present,
-      // and user specified a device id that matches a connected web device.
-      // If the user did not specify a device id, we use chrome as the default.
-      injectDebuggingSupportCode:
-          connectedWebDeviceIds.isNotEmpty &&
-          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
+      // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
-    if (enableDwds) {
+
+    final bool shouldEnableMiddleware =
+        globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
+        ddcModuleSystem;
+    if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware);
       pipeline = pipeline.addMiddleware(dwds.middleware);
     }
@@ -868,6 +861,7 @@ class WebDevFS implements DevFS {
     required this.useLocalCanvasKit,
     required this.rootDirectory,
     required this.isWindows,
+    this.useDwdsWebSocketConnection = false,
     this.testMode = false,
   }) : _port = port {
     // TODO(srujzs): Remove this assertion when the library bundle format is
@@ -901,6 +895,7 @@ class WebDevFS implements DevFS {
   final bool isWasm;
   final bool useLocalCanvasKit;
   final bool isWindows;
+  final bool useDwdsWebSocketConnection;
 
   late WebAssetServer webAssetServer;
 
@@ -1003,6 +998,7 @@ class WebDevFS implements DevFS {
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
     return baseUri!;
   }
@@ -1079,6 +1075,8 @@ class WebDevFS implements DevFS {
         '// Service worker not loaded in run mode.',
       );
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
+      final bool shouldEnabledLoadIndicator =
+          globals.deviceManager?.specifiedDeviceId != WebServerDevice.kWebServerDeviceId;
       webAssetServer.writeFile(
         'main.dart.js',
         ddcModuleSystem
@@ -1086,13 +1084,13 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnabledLoadIndicator,
               isWindows: isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnabledLoadIndicator,
             ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
