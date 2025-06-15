@@ -3822,6 +3822,7 @@ void main() {
         isTextField: true,
         hasEnabledState: true,
         isEnabled: true,
+        isFocusable: true,
         label: 'Test',
         textDirection: TextDirection.ltr,
       ),

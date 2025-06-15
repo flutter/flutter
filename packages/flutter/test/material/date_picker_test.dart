@@ -1852,6 +1852,7 @@ void main() {
             hasEnabledState: true,
             isTextField: true,
             isFocused: true,
+            isFocusable: true,
             value: '01/15/2016',
             hasTapAction: true,
             hasFocusAction: true,
