@@ -355,6 +355,77 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
+  EXPECT_CALL(epoxy, glEGLImageTargetTexture2DOES).Times(0);
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
+
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
+                         1.0, nullptr, nullptr, nullptr);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
+
+  EXPECT_EQ(fl_mock_renderable_get_redraw_count(renderable),
+            static_cast<size_t>(0));
+  EXPECT_EQ(fl_mock_renderable_get_redraw_count(secondary_renderable),
+            static_cast<size_t>(0));
+
+  FlutterBackingStoreConfig config = {
+      .struct_size = sizeof(FlutterBackingStoreConfig),
+      .size = {.width = 1024, .height = 1024}};
+  FlutterBackingStore backing_store;
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor), view_id, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(secondary_renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
+  EXPECT_EQ(fl_mock_renderable_get_redraw_count(renderable),
+            static_cast<size_t>(0));
+  EXPECT_EQ(fl_mock_renderable_get_redraw_count(secondary_renderable),
+            static_cast<size_t>(1));
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
+}
+
+TEST(FlRendererTest, MultiViewEGLImage) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  // OpenGL 3.0
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
+  ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
+  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_egl_extension(::testing::_,
+                                         ::testing::StrEq("EGL_KHR_image")))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::StrEq("GL_OES_EGL_image")))
+      .WillByDefault(::testing::Return(true));
+
+  EXPECT_CALL(epoxy, glEGLImageTargetTexture2DOES);
+
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
