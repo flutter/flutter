@@ -46,7 +46,7 @@ class ExpansionTileExamples extends StatelessWidget {
 }
 
 class TransitionTileSection extends StatefulWidget {
-  const TransitionTileSection({required this.title, required this.transitionMode, super.key});
+  const TransitionTileSection({super.key, required this.title, required this.transitionMode});
 
   final String title;
   final ExpansionTileTransitionMode transitionMode;
@@ -56,7 +56,6 @@ class TransitionTileSection extends StatefulWidget {
 }
 
 class _TransitionTileSectionState extends State<TransitionTileSection> {
-
   late ExpansibleController _controller;
   bool _isExpanded = false;
 
@@ -79,26 +78,32 @@ class _TransitionTileSectionState extends State<TransitionTileSection> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection.insetGrouped(
-      children: <Widget>[
-        CupertinoExpansionTile(
-          title: Text(
-            '${widget.title} - ${_isExpanded ? 'Collapse me' : 'Tap to expand'}',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+    return CupertinoExpansionTile(
+      title: Text(
+        '${widget.title} - ${_isExpanded ? 'Collapse me' : 'Tap to expand'}',
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      ),
+      controller: _controller,
+      transitionMode: widget.transitionMode,
+      child: CupertinoListSection.insetGrouped(
+        children: const <Widget>[
+          CupertinoListTile(
+            leading: Icon(CupertinoIcons.person),
+            backgroundColor: CupertinoColors.white,
+            title: Text('Profile', style: TextStyle(color: CupertinoColors.black)),
           ),
-          controller: _controller,
-          transitionMode: widget.transitionMode,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            color: CupertinoColors.systemGreen,
-            child: Text(
-              'This is the expanded content of the ${widget.title.toLowerCase()}. '
-              'You can place anything here: text, images, buttons, etc.',
-              style: const TextStyle(fontSize: 16, color: CupertinoColors.black),
-            ),
+          CupertinoListTile(
+            leading: Icon(CupertinoIcons.mail),
+            backgroundColor: CupertinoColors.white,
+            title: Text('Messages', style: TextStyle(color: CupertinoColors.black)),
           ),
-        ),
-      ]
+          CupertinoListTile(
+            leading: Icon(CupertinoIcons.settings),
+            backgroundColor: CupertinoColors.white,
+            title: Text('Settings', style: TextStyle(color: CupertinoColors.black)),
+          ),
+        ],
+      ),
     );
   }
 }
