@@ -1805,6 +1805,8 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
+class RSuperellipseCache {}
+
 /// An immutable rounded superellipse.
 ///
 /// A rounded superellipse (not to be confused with a standard superellipse) is
