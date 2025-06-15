@@ -1308,4 +1308,49 @@ void main() {
       );
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155909
+  testWidgets('NestedScrollView ensureVisible', (WidgetTester tester) async {
+    final GlobalKey scrollKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NestedScrollView(
+          headerSliverBuilder:
+              (BuildContext context, bool innerBoxScrolled) => <Widget>[
+                SliverToBoxAdapter(child: Container(height: 300)),
+              ],
+          body: SizedBox(
+            height: 500,
+            child: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: List<Widget>.generate(10, (int index) {
+                      return SizedBox(height: 200, key: index == 4 ? scrollKey : null);
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    Scrollable.ensureVisible(scrollKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(scrollKey)).dy, equals(0.0));
+    final ScrollPosition position = Scrollable.of(scrollKey.currentContext!).position;
+    position.jumpTo(position.pixels + 20);
+    await tester.pumpAndSettle();
+    Scrollable.ensureVisible(scrollKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(scrollKey)).dy, equals(0.0));
+    position.jumpTo(position.pixels - 40);
+    await tester.pumpAndSettle();
+    Scrollable.ensureVisible(scrollKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(scrollKey)).dy, equals(0.0));
+  });
 }
