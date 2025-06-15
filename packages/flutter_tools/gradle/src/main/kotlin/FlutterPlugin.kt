@@ -595,7 +595,7 @@ class FlutterPlugin : Plugin<Project> {
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
-                    val filterIdentifier: String =
+                    val filterIdentifier: String? =
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
