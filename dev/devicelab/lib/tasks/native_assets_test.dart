@@ -209,7 +209,7 @@ Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
 }
 
 void addIntegrationTest(Uri exampleDirectory, String packageName) {
-  final ProcessResult result = Process.runSync('flutter', <String>[
+  final ProcessResult result = Process.runSync(_flutterBin, <String>[
     'pub',
     'add',
     'dev:integration_test:{"sdk":"flutter"}',
