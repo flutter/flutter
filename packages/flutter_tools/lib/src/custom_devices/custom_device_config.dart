@@ -215,8 +215,8 @@ class CustomDeviceConfig {
         typedMap[_kReadLogsCommand],
         _kReadLogsCommand,
         'array of strings with at least one element',
-        minLength: 1
-      )
+        minLength: 1,
+      ),
     );
   }
 
@@ -560,7 +560,7 @@ class CustomDeviceConfig {
     bool explicitScreenshotCommand = false,
     List<String>? screenshotCommand,
     bool explicitReadLogsCommand = false,
-    List<String>? readLogsCommand
+    List<String>? readLogsCommand,
   }) {
     return CustomDeviceConfig(
       id: id ?? this.id,
@@ -588,9 +588,7 @@ class CustomDeviceConfig {
           ? screenshotCommand
           : (screenshotCommand ?? this.screenshotCommand),
       readLogsCommand:
-          explicitReadLogsCommand
-              ? readLogsCommand
-              : (readLogsCommand ?? this.readLogsCommand),
+          explicitReadLogsCommand ? readLogsCommand : (readLogsCommand ?? this.readLogsCommand),
     );
   }
 
