@@ -5,7 +5,6 @@
 /// @docImport 'package:flutter/cupertino.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, SemanticsInputType, TextBox;
 
