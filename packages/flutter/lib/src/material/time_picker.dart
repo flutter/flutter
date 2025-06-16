@@ -1636,6 +1636,7 @@ class _TimePickerInput extends StatefulWidget {
     required this.helpText,
     required this.autofocusHour,
     required this.autofocusMinute,
+    this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1665,6 +1666,13 @@ class _TimePickerInput extends StatefulWidget {
   /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.
   final String? restorationId;
+
+  /// If true and [TimePickerEntryMode.input] is used, hour and minute fields
+  /// start empty instead of using [initialSelectedTime].
+  ///
+  /// Useful when users prefer manual input without clearing pre-filled values.
+  /// Ignored in dial mode.
+  final bool? emptyInitialTime;
 
   @override
   _TimePickerInputState createState() => _TimePickerInputState();
@@ -1851,6 +1859,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                               onSavedSubmitted: _handleHourSavedSubmitted,
                               onChanged: _handleHourChanged,
                               hourLabelText: widget.hourLabelText,
+                              emptyInitialTime: widget.emptyInitialTime,
                             ),
                           ),
                           if (!hourHasError.value && !minuteHasError.value)
@@ -1885,6 +1894,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                               validator: _validateMinute,
                               onSavedSubmitted: _handleMinuteSavedSubmitted,
                               minuteLabelText: widget.minuteLabelText,
+                              emptyInitialTime: widget.emptyInitialTime,
                             ),
                           ),
                           if (!hourHasError.value && !minuteHasError.value)
@@ -1935,6 +1945,7 @@ class _HourTextField extends StatelessWidget {
     required this.onSavedSubmitted,
     required this.onChanged,
     required this.hourLabelText,
+    this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1947,6 +1958,7 @@ class _HourTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String? hourLabelText;
   final String? restorationId;
+  final bool? emptyInitialTime;
 
   @override
   Widget build(BuildContext context) {
@@ -1960,6 +1972,7 @@ class _HourTextField extends StatelessWidget {
       semanticHintText: hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
+      emptyInitialTime: emptyInitialTime,
       onChanged: onChanged,
     );
   }
@@ -1974,6 +1987,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.validator,
     required this.onSavedSubmitted,
     required this.minuteLabelText,
+    this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1985,6 +1999,7 @@ class _MinuteTextField extends StatelessWidget {
   final ValueChanged<String?> onSavedSubmitted;
   final String? minuteLabelText;
   final String? restorationId;
+  final bool? emptyInitialTime;
 
   @override
   Widget build(BuildContext context) {
@@ -1997,6 +2012,7 @@ class _MinuteTextField extends StatelessWidget {
       style: style,
       semanticHintText: minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
       validator: validator,
+      emptyInitialTime: emptyInitialTime,
       onSavedSubmitted: onSavedSubmitted,
     );
   }
@@ -2013,6 +2029,7 @@ class _HourMinuteTextField extends StatefulWidget {
     required this.validator,
     required this.onSavedSubmitted,
     this.restorationId,
+    this.emptyInitialTime,
     this.onChanged,
   });
 
@@ -2026,6 +2043,7 @@ class _HourMinuteTextField extends StatefulWidget {
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String>? onChanged;
   final String? restorationId;
+  final bool? emptyInitialTime;
 
   @override
   _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
@@ -2060,7 +2078,8 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     // version yet.
     if (!controllerHasBeenSet.value) {
       controllerHasBeenSet.value = true;
-      controller.value.value = TextEditingValue(text: _formattedValue);
+      final String initialTextValue = (widget.emptyInitialTime ?? false) ? '' : _formattedValue;
+      controller.value.value = TextEditingValue(text: initialTextValue);
     }
   }
 
@@ -2213,6 +2232,7 @@ class TimePickerDialog extends StatefulWidget {
     this.onEntryModeChanged,
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
+    this.emptyInitialTimeInInputMode,
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2278,6 +2298,13 @@ class TimePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
   final Icon? switchToTimerEntryModeIcon;
+
+  /// If true and entry mode is [TimePickerEntryMode.input], the hour and minute
+  /// fields will be empty on start instead of pre-filled with [initialTime].
+  ///
+  /// Improves UX by removing the need to delete default values before typing.
+  /// Skipped in dial mode.
+  final bool? emptyInitialTimeInInputMode;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2617,6 +2644,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                               onEntryModeChanged: _handleEntryModeChanged,
                               switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
                               switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
+                              emptyInitialTimeInInputMode: widget.emptyInitialTimeInInputMode,
                             ),
                           );
                           if (_entryMode.value != TimePickerEntryMode.input &&
@@ -2661,6 +2689,7 @@ class _TimePicker extends StatefulWidget {
     this.onEntryModeChanged,
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
+    this.emptyInitialTimeInInputMode,
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2734,6 +2763,9 @@ class _TimePicker extends StatefulWidget {
 
   /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
   final Icon? switchToTimerEntryModeIcon;
+
+  /// If true, input fields start empty in input mode.
+  final bool? emptyInitialTimeInInputMode;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -2996,6 +3028,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
               autofocusHour: _autofocusHour.value,
               autofocusMinute: _autofocusMinute.value,
               restorationId: 'time_picker_input',
+              emptyInitialTime: widget.emptyInitialTimeInInputMode,
             ),
           ],
         );
@@ -3148,6 +3181,7 @@ Future<TimeOfDay?> showTimePicker({
   Orientation? orientation,
   Icon? switchToInputEntryModeIcon,
   Icon? switchToTimerEntryModeIcon,
+  bool? emptyInitialTimeInInputMode,
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -3164,6 +3198,7 @@ Future<TimeOfDay?> showTimePicker({
     onEntryModeChanged: onEntryModeChanged,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToTimerEntryModeIcon: switchToTimerEntryModeIcon,
+    emptyInitialTimeInInputMode: emptyInitialTimeInInputMode,
   );
   return showDialog<TimeOfDay>(
     context: context,
