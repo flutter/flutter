@@ -4,8 +4,55 @@
 
 #include "flutter/tools/licenses_cpp/src/catalog.h"
 
+#include <fstream>
+
+namespace fs = std::filesystem;
+
 absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
-  return absl::UnimplementedError("");
+  fs::path data_dir_path(data_dir);
+  if (!fs::exists(data_dir_path)) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Data directory doesn't exist ", data_dir));
+  }
+  fs::path licenses_path = data_dir_path / "licenses";
+  if (!fs::exists(licenses_path)) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        "Licenses directory doesn't exist ", licenses_path.string()));
+  }
+
+  RE2::Set selector(RE2::Options(), RE2::Anchor::UNANCHORED);
+  std::vector<std::unique_ptr<RE2>> matchers;
+  std::vector<std::string> names;
+
+  for (const fs::path& file : fs::directory_iterator(licenses_path)) {
+    std::ifstream infile(file.string());
+    if (!infile.good()) {
+      return absl::InvalidArgumentError("Unable to open file " + file.string());
+    }
+
+    absl::StatusOr<Entry> entry = ParseEntry(infile);
+    if (!entry.ok()) {
+      return absl::InvalidArgumentError(
+          absl::StrCat("Unable to parse data entry at ", file.string(), " : ",
+                       entry.status()));
+    }
+
+    std::string err;
+    selector.Add(entry->unique, &err);
+    if (!err.empty()) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Unable to add unique key from ", file.string(), " : ", err));
+    }
+    names.emplace_back(std::move(entry->name));
+    matchers.emplace_back(std::move(entry->matcher));
+  }
+
+  bool did_compile = selector.Compile();
+  if (!did_compile) {
+    return absl::UnknownError("Unable to compile selector.");
+  }
+
+  return Catalog(std::move(selector), std::move(matchers), std::move(names));
 }
 
 absl::StatusOr<Catalog> Catalog::Make(
@@ -62,4 +109,8 @@ absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) const {
   } else {
     return absl::NotFoundError("Selection didn't match.");
   }
+}
+
+absl::StatusOr<Catalog::Entry> Catalog::ParseEntry(std::istream& is) {
+  return absl::UnimplementedError("Catalog::ParseEntry");
 }

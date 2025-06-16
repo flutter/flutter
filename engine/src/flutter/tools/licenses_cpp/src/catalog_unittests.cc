@@ -43,3 +43,20 @@ TEST(CatalogTest, NoSelectionMatch) {
   ASSERT_FALSE(match.ok());
   ASSERT_EQ(match.status().code(), absl::StatusCode::kNotFound);
 }
+
+TEST(CatalogTest, SimpleParseEntry) {
+  std::stringstream ss;
+  ss << "foobar\n";
+  ss << "unique\n";
+  ss << R"match(Multiline
+matcher
+.*)match";
+
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  EXPECT_TRUE(entry.ok()) << entry.status();
+  if (entry.ok()) {
+    EXPECT_EQ(entry->name, "foobar");
+    EXPECT_EQ(entry->unique, "unique");
+    EXPECT_TRUE(entry->matcher);
+  }
+}
