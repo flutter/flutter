@@ -348,8 +348,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
-          isWindows: _platform.isWindows,
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: _platform,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
