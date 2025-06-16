@@ -603,6 +603,27 @@ class TextField extends StatefulWidget {
   ///
   /// If non-null this property overrides the [decoration]'s
   /// [InputDecoration.enabled] property.
+  ///
+  /// When a text field is disabled, all of its children widgets are also
+  /// disabled, including the [InputDecoration.suffixIcon]. If you need to keep
+  /// the suffix icon interactive while disabling the text field, consider using
+  /// [readOnly] and [enableInteractiveSelection] instead:
+  ///
+  /// ```dart
+  /// TextField(
+  ///   enabled: true,
+  ///   readOnly: true,
+  ///   enableInteractiveSelection: false,
+  ///   decoration: InputDecoration(
+  ///     suffixIcon: IconButton(
+  ///       onPressed: () {
+  ///         // This will work because the TextField is enabled
+  ///       },
+  ///       icon: const Icon(Icons.edit_outlined),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
   final bool? enabled;
 
   /// Determines whether this widget ignores pointer events.

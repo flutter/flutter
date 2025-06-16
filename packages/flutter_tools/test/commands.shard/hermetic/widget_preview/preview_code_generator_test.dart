@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
@@ -26,6 +27,8 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   flutter_test:
     sdk: flutter
@@ -45,6 +48,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/widget_previews.dart';
 
 import 'brightness.dart';
+import 'localizations.dart';
 import 'theme.dart';
 import 'wrapper.dart';
 
@@ -61,6 +65,7 @@ Widget barPreview2() => Text('Foo');
   wrapper: wrapper,
   brightness: Brightness.dark,
   theme: myThemeData,
+  localizations: myLocalizations,
 )
 WidgetBuilder barPreview3() => (BuildContext context) {
   return Text('Foo');
@@ -87,6 +92,48 @@ Widget wrapper(Widget widget) {
 }
 ''';
 
+const String kLocalizationsDart = '''
+import 'dart:ui';
+import 'package:flutter/widget_previews.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+PreviewLocalizationsData myLocalizations() {
+  return PreviewLocalizationsData(
+    locale: Locale('en'),
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      Locale('en'), // English
+      Locale('es'), // Spanish
+    ],
+    localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) => null,
+    localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => null,
+  );
+}''';
+
+const String kErrorContainingLibrary = '''
+invalid-symbol;
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter/widget_previews.dart';
+
+@Preview()
+Widget preview() => Text('Error in library');
+''';
+
+const String kTransitiveErrorLibrary = '''
+import 'error.dart';
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter/widget_previews.dart';
+
+@Preview()
+Widget preview() => Text('Error in dependency');
+''';
+
 // Note: this test isn't under the general.shard since tests under that directory
 // have a 2000ms time out and these tests write to the real file system and watch
 // directories for changes. This can be slow on heavily loaded machines and cause
@@ -97,13 +144,16 @@ void main() {
     late PreviewCodeGenerator codeGenerator;
     late FlutterProject project;
     late PreviewDetector previewDetector;
+    // We perform this initialization just so we can build the generated file path for test
+    // descriptions.
+    LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
       Cache.flutterRoot = getFlutterRoot();
       // Note: we don't use a MemoryFileSystem since we don't have a way to
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
-      final FileSystem fs = LocalFileSystem.test(signals: Signals.test());
+      fs = LocalFileSystem.test(signals: Signals.test());
       final BufferLogger logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
       final Directory projectDir =
@@ -113,8 +163,11 @@ void main() {
             ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
             ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
             ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
+            ..childFile('lib/src/localizations.dart').writeAsStringSync(kLocalizationsDart)
             ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
-            ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart);
+            ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart)
+            ..childFile('lib/src/error.dart').writeAsStringSync(kErrorContainingLibrary)
+            ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
         projectRoot: projectDir,
@@ -142,16 +195,14 @@ void main() {
     });
 
     testUsingContext(
-      'correctly generates ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         // Check that the generated preview file doesn't exist yet.
         final File generatedPreviewFile = project.directory.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
         expect(generatedPreviewFile, isNot(exists));
-        final PreviewMapping details = await previewDetector.findPreviewFunctions(
-          project.directory,
-        );
+        final PreviewDependencyGraph details = await previewDetector.initialize();
 
         // Populate the generated preview file.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
@@ -172,8 +223,10 @@ import 'package:foo_project/src/bar.dart' as _i3;
 import 'package:foo_project/src/brightness.dart' as _i4;
 import 'dart:ui' as _i5;
 import 'package:foo_project/src/theme.dart' as _i6;
-import 'package:foo_project/src/wrapper.dart' as _i7;
-import 'package:flutter/widgets.dart' as _i8;
+import 'package:foo_project/src/localizations.dart' as _i7;
+import 'package:foo_project/src/wrapper.dart' as _i8;
+import 'package:flutter/widgets.dart' as _i9;
+import 'package:flutter/material.dart' as _i10;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(builder: () => _i2.preview()),
@@ -191,15 +244,22 @@ List<_i1.WidgetPreview> previews() => [
         textScaleFactor: 50,
         theme: _i6.myThemeData(),
         brightness: _i5.Brightness.dark,
-        builder: () => _i7.wrapper(_i8.Builder(builder: _i3.barPreview3())),
+        localizations: _i7.myLocalizations(),
+        builder: () => _i8.wrapper(_i9.Builder(builder: _i3.barPreview3())),
       ),
+      _i1.WidgetPreview(
+          builder: () =>
+              _i10.Text('package:foo_project/src/error.dart has errors!')),
+      _i1.WidgetPreview(
+          builder: () => _i10.Text(
+              'Dependency of package:foo_project/src/transitive_error.dart has errors!')),
     ];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
-          const <PreviewPath, List<PreviewDetails>>{},
+          const <PreviewPath, PreviewDependencyNode>{},
         );
         expect(generatedPreviewFile, exists);
 

@@ -386,6 +386,7 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -576,10 +577,6 @@ targets:
 
   - name: Linux docs_generate_release
     recipe: flutter/docs
-    # TODO(matanlurey): This has no effect, is used to allow creating a builder.
-    # Remove in the next PR.
-    # https://github.com/flutter/flutter/issues/168913
-    bringup: true
     scheduler: release
     presubmit: false
     postsubmit: false
@@ -1168,6 +1165,7 @@ targets:
 
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -1640,6 +1638,7 @@ targets:
 
   - name: Linux_android_emu android_engine_vulkan_tests
     recipe: flutter/flutter_drone
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -1666,6 +1665,7 @@ targets:
 
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       shard: android_engine_opengles_tests
@@ -1692,7 +1692,6 @@ targets:
 
   - name: Linux web_benchmarks_ddc
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1707,7 +1706,6 @@ targets:
 
   - name: Linux web_benchmarks_ddc_hot_reload
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2293,6 +2291,7 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -4707,6 +4706,32 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       shard: verify_binaries_codesigned
+
+  - name: Mac_x64 verify_binaries_pre_codesigned
+    # verify_binaries_codesigned, which verifies all binaries,
+    # runs on release branches, so this one does not need to.
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+      shard: verify_binaries_pre_codesigned
+
+  - name: Mac_arm64 verify_binaries_pre_codesigned
+    # verify_binaries_codesigned, which verifies all binaries,
+    # runs on release branches, so this one does not need to.
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+      shard: verify_binaries_pre_codesigned
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone

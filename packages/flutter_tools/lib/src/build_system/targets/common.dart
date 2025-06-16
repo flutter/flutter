@@ -11,6 +11,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -216,7 +217,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
@@ -231,8 +231,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.android ||
       TargetPlatform.android_arm ||
       TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 ||
-      TargetPlatform.android_x86 => 'android',
+      TargetPlatform.android_x64 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
@@ -292,10 +291,13 @@ class KernelSnapshot extends Target {
     // not get from the FLAVOR environment variable. This is because when built
     // from Xcode, the scheme/flavor can be changed through the UI and is not
     // reflected in the environment variable.
-    if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+    final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromTargetPlatform(
+      targetPlatform,
+    );
+
+    if (darwinPlatform != null) {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final XcodeBasedProject xcodeProject =
-          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
       flavor = environment.defines[kFlavor];

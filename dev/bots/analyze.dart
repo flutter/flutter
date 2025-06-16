@@ -95,6 +95,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('Release branch validation');
+  await verifyReleaseBranchState(flutterRoot);
+
   printProgress('TargetPlatform tool/framework consistency');
   await verifyTargetPlatform(flutterRoot);
 
@@ -298,6 +301,15 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
     parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
   );
   return _Line(lineNumber, content);
+}
+
+Future<void> verifyReleaseBranchState(String workringDirerctory) async {
+  final ProcessResult result = await Process.run(dart, <String>[
+    'bin/check_engine_version.dart',
+  ], workingDirectory: path.join(workringDirerctory, 'dev', 'tools'));
+  if (result.exitCode != 0) {
+    foundError(<String>['${result.stderr}']);
+  }
 }
 
 Future<void> verifyTargetPlatform(String workingDirectory) async {
@@ -2665,6 +2677,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 
+  'dev/checks',
   'dev/conductor/bin/conductor',
   'dev/conductor/bin/packages_autoroller',
   'dev/conductor/core/lib/src/proto/compile_proto.sh',
@@ -2677,6 +2690,8 @@ const Set<String> kExecutableAllowlist = <String>{
 
   'dev/integration_tests/deferred_components_test/download_assets.sh',
   'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/packages_autoroller/run',
 
   'dev/tools/gen_keycodes/bin/gen_keycodes',
   'dev/tools/repackage_gradle_wrapper.sh',

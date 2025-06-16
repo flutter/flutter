@@ -405,7 +405,7 @@ class FlutterDevice {
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device!.displayName} in $modeName mode...',
@@ -481,7 +481,7 @@ class FlutterDevice {
 
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.mode.friendlyName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
@@ -1542,7 +1542,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';

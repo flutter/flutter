@@ -60,7 +60,11 @@ class ImpellerEntityUnitTestAccessor {
       const PathSource& path,
       const StrokeParameters& stroke,
       Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVertices(path, stroke, scale);
+    // We could create a single Tessellator instance for the whole suite,
+    // but we don't really need performance for unit tests.
+    Tessellator tessellator;
+    return StrokePathGeometry::GenerateSolidStrokeVertices(  //
+        tessellator, path, stroke, scale);
   }
 };
 
