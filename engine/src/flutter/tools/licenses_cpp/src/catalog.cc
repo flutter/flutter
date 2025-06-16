@@ -44,7 +44,13 @@ absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
           "Unable to add unique key from ", file.string(), " : ", err));
     }
     names.emplace_back(std::move(entry->name));
-    matchers.emplace_back(std::move(entry->matcher));
+
+    auto matcher_re2 = std::make_unique<RE2>(entry->matcher);
+    if (!matcher_re2) {
+      return absl::InvalidArgumentError("Unable to make matcher.");
+    }
+
+    matchers.emplace_back(std::move(matcher_re2));
   }
 
   bool did_compile = selector.Compile();
@@ -55,24 +61,20 @@ absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
   return Catalog(std::move(selector), std::move(matchers), std::move(names));
 }
 
-absl::StatusOr<Catalog> Catalog::Make(
-    const std::vector<std::vector<std::string_view>>& entries) {
+absl::StatusOr<Catalog> Catalog::Make(const std::vector<Entry>& entries) {
   RE2::Set selector(RE2::Options(), RE2::Anchor::UNANCHORED);
   std::vector<std::unique_ptr<RE2>> matchers;
   std::vector<std::string> names;
 
-  for (const std::vector<std::string_view>& entry : entries) {
-    if (entry.size() != 3) {
-      return absl::InvalidArgumentError("Entry doesn't have 3 items");
-    }
+  for (const Entry& entry : entries) {
     std::string err;
-    names.push_back(std::string(entry[0]));
-    int idx = selector.Add(entry[1], &err);
+    names.push_back(std::string(entry.name));
+    int idx = selector.Add(entry.unique, &err);
     if (idx < 0) {
       return absl::InvalidArgumentError(
-          absl::StrCat("Unable to add set entry: ", entry[1], " ", err));
+          absl::StrCat("Unable to add set entry: ", entry.unique, " ", err));
     }
-    matchers.push_back(std::make_unique<RE2>(entry[2]));
+    matchers.push_back(std::make_unique<RE2>(entry.matcher));
   }
 
   bool did_compile = selector.Compile();
@@ -107,7 +109,7 @@ absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) const {
       RE2::PartialMatch(query, *matchers_[selector_results[0]])) {
     return names_[selector_results[0]];
   } else {
-    return absl::NotFoundError("Selection didn't match.");
+    return absl::NotFoundError("Selected matcher didn't match.");
   }
 }
 
@@ -129,12 +131,7 @@ absl::StatusOr<Catalog::Entry> Catalog::ParseEntry(std::istream& is) {
   std::string matcher_text((std::istreambuf_iterator<char>(is)),
                            std::istreambuf_iterator<char>());
 
-  auto matcher = std::make_unique<RE2>(matcher_text);
-  if (!matcher) {
-    return absl::InvalidArgumentError("Unable to make matcher.");
-  }
-
   return Catalog::Entry{.name = std::move(name),
                         .unique = std::move(unique),
-                        .matcher = std::move(matcher)};
+                        .matcher = std::move(matcher_text)};
 }

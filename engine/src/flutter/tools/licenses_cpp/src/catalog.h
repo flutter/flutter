@@ -24,16 +24,13 @@ class Catalog {
   struct Entry {
     std::string name;
     std::string unique;
-    std::unique_ptr<RE2> matcher;
+    std::string matcher;
   };
 
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);
 
   /// Make a Catalog for testing.
-  /// The format is [[<name>, <unique regex>, <full regex>]*] where the unique
-  /// regex should only match one license.
-  static absl::StatusOr<Catalog> Make(
-      const std::vector<std::vector<std::string_view>>& entries);
+  static absl::StatusOr<Catalog> Make(const std::vector<Entry>& entries);
 
   /// @brief Tries to identify a match for the `query` across the `Catalog`.
   /// @param query The text that will be matched against. @return
