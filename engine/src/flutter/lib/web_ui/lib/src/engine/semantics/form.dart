@@ -22,4 +22,3 @@ class SemanticForm extends SemanticRole {
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
-
