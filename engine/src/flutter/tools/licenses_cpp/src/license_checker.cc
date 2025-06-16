@@ -281,7 +281,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                 absl::StatusOr<Catalog::Match> match =
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
-                  license_map.Add(package.name, comment);
+                  license_map.Add(package.name, match->matched_text);
                 } else {
                   errors.emplace_back(absl::NotFoundError(
                       absl::StrCat("Unknown license in ", full_path.string(),
