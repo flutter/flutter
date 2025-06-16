@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_v));
 
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
-  std::optional<std::string> data_dir = absl::GetFlag(FLAGS_working_dir);
+  std::optional<std::string> data_dir = absl::GetFlag(FLAGS_data_dir);
   std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
   if (working_dir.has_value() && data_dir.has_value() &&
       licenses_path.has_value()) {
@@ -49,6 +49,10 @@ int main(int argc, char** argv) {
 
   if (!working_dir.has_value()) {
     std::cerr << "Expected --working_dir flag." << std::endl;
+  }
+
+  if (!licenses_path.has_value()) {
+    std::cerr << "Expected --licenses_path flag." << std::endl;
   }
 
   if (!data_dir.has_value()) {
