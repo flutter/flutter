@@ -1867,6 +1867,10 @@ class OverlayPortal extends StatefulWidget {
 }
 
 class _OverlayPortalState extends State<OverlayPortal> {
+  final String identifier = UniqueKey().toString();
+  late final String parentIdentifier;
+  late final String childIdentifier;
+
   int? _zOrderIndex;
   // The location of the overlay child within the overlay. This object will be
   // used as the slot of the overlay child widget.
@@ -1915,6 +1919,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void initState() {
     super.initState();
     _setupController(widget.controller);
+    parentIdentifier = '$identifier parent';
+    childIdentifier = '$identifier child';
   }
 
   void _setupController(OverlayPortalController controller) {
@@ -1989,12 +1995,21 @@ class _OverlayPortalState extends State<OverlayPortal> {
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
     if (zOrderIndex == null) {
-      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child);
+      return _OverlayPortal(
+        overlayLocation: null,
+        overlayChild: null,
+        child: Semantics(identifier: parentIdentifier, child: widget.child),
+      );
     }
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
-      overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
-      child: widget.child,
+      overlayChild: _DeferredLayout(
+        child: Semantics(
+          identifier: childIdentifier,
+          child: Builder(builder: widget.overlayChildBuilder),
+        ),
+      ),
+      child: Semantics(identifier: parentIdentifier, child: widget.child),
     );
   }
 }
