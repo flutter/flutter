@@ -376,6 +376,9 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     }
 
     size_t element_count = member.array_elements.value_or(1);
+    if (element_count == 0) {
+      element_count = 1;
+    }
     size_t element_stride = member.byte_length / element_count;
     auto* buffer_data =
         reinterpret_cast<const GLfloat*>(buffer_ptr + member.offset);
