@@ -25,76 +25,34 @@ flutter::Size ClampToVirtualScreen(flutter::Size size) {
                        std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
-// Dynamically loads the |EnableNonClientDpiScaling| from the User32 module
-// so that the non-client area automatically responds to changes in DPI.
-// This API is only needed for PerMonitor V1 awareness mode.
-void EnableFullDpiSupportIfAvailable(HWND hwnd) {
-  HMODULE user32_module = LoadLibraryA("User32.dll");
-  if (!user32_module) {
-    return;
-  }
+void EnableTransparentWindowBackground(
+    HWND hwnd,
+    flutter::WindowsProcTable const& proc_table) {
+  enum ACCENT_STATE { ACCENT_DISABLED = 0 };
 
-  using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
-
-  auto enable_non_client_dpi_scaling =
-      reinterpret_cast<EnableNonClientDpiScaling*>(
-          GetProcAddress(user32_module, "EnableNonClientDpiScaling"));
-  if (enable_non_client_dpi_scaling != nullptr) {
-    enable_non_client_dpi_scaling(hwnd);
-  }
-
-  FreeLibrary(user32_module);
-}
-
-// Dynamically loads |SetWindowCompositionAttribute| from the User32 module to
-// make the window's background transparent.
-void EnableTransparentWindowBackground(HWND hwnd) {
-  HMODULE const user32_module = LoadLibraryA("User32.dll");
-  if (!user32_module) {
-    return;
-  }
-
-  enum WINDOWCOMPOSITIONATTRIB { WCA_ACCENT_POLICY = 19 };
-
-  struct WINDOWCOMPOSITIONATTRIBDATA {
-    WINDOWCOMPOSITIONATTRIB Attrib;
-    PVOID pvData;
-    SIZE_T cbData;
+  struct ACCENT_POLICY {
+    ACCENT_STATE AccentState;
+    DWORD AccentFlags;
+    DWORD GradientColor;
+    DWORD AnimationId;
   };
 
-  using SetWindowCompositionAttribute =
-      BOOL(__stdcall*)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
+  // Set the accent policy to disable window composition.
+  ACCENT_POLICY accent = {ACCENT_DISABLED, 2, static_cast<DWORD>(0), 0};
+  flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIBDATA data = {
+      .Attrib =
+          flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIB::WCA_ACCENT_POLICY,
+      .pvData = &accent,
+      .cbData = sizeof(accent)};
+  proc_table.SetWindowCompositionAttribute(hwnd, &data);
 
-  auto set_window_composition_attribute =
-      reinterpret_cast<SetWindowCompositionAttribute>(
-          GetProcAddress(user32_module, "SetWindowCompositionAttribute"));
-  if (set_window_composition_attribute != nullptr) {
-    enum ACCENT_STATE { ACCENT_DISABLED = 0 };
-
-    struct ACCENT_POLICY {
-      ACCENT_STATE AccentState;
-      DWORD AccentFlags;
-      DWORD GradientColor;
-      DWORD AnimationId;
-    };
-
-    // Set the accent policy to disable window composition.
-    ACCENT_POLICY accent = {ACCENT_DISABLED, 2, static_cast<DWORD>(0), 0};
-    WINDOWCOMPOSITIONATTRIBDATA data = {.Attrib = WCA_ACCENT_POLICY,
-                                        .pvData = &accent,
-                                        .cbData = sizeof(accent)};
-    set_window_composition_attribute(hwnd, &data);
-
-    // Extend the frame into the client area and set the window's system
-    // backdrop type for visual effects.
-    MARGINS const margins = {-1};
-    ::DwmExtendFrameIntoClientArea(hwnd, &margins);
-    INT effect_value = 1;
-    ::DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &effect_value,
-                            sizeof(BOOL));
-  }
-
-  FreeLibrary(user32_module);
+  // Extend the frame into the client area and set the window's system
+  // backdrop type for visual effects.
+  MARGINS const margins = {-1};
+  proc_table.DwmExtendFrameIntoClientArea(hwnd, &margins);
+  INT effect_value = 1;
+  proc_table.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE,
+                                   &effect_value, sizeof(BOOL));
 }
 
 // Retrieves the calling thread's last-error code message as a string,
@@ -139,6 +97,7 @@ std::string GetLastErrorAsString() {
 // resulting size includes window borders, non-client areas, and drop shadows.
 // On error, returns std::nullopt and logs an error message.
 std::optional<flutter::Size> GetWindowSizeForClientSize(
+    flutter::WindowsProcTable const& proc_table,
     flutter::Size const& client_size,
     std::optional<flutter::Size> min_size,
     std::optional<flutter::Size> max_size,
@@ -152,28 +111,8 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
       .right = static_cast<LONG>(client_size.width() * scale_factor),
       .bottom = static_cast<LONG>(client_size.height() * scale_factor)};
 
-  HMODULE const user32_raw = LoadLibraryA("User32.dll");
-  auto free_user32_module = [](HMODULE module) { FreeLibrary(module); };
-  std::unique_ptr<std::remove_pointer_t<HMODULE>, decltype(free_user32_module)>
-      user32_module(user32_raw, free_user32_module);
-  if (!user32_module) {
-    FML_LOG(ERROR) << "Failed to load User32.dll.\n";
-    return std::nullopt;
-  }
-
-  using AdjustWindowRectExForDpi = BOOL __stdcall(
-      LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
-  auto* const adjust_window_rect_ext_for_dpi =
-      reinterpret_cast<AdjustWindowRectExForDpi*>(
-          GetProcAddress(user32_raw, "AdjustWindowRectExForDpi"));
-  if (!adjust_window_rect_ext_for_dpi) {
-    FML_LOG(ERROR) << "Failed to retrieve AdjustWindowRectExForDpi address "
-                      "from User32.dll.";
-    return std::nullopt;
-  }
-
-  if (!adjust_window_rect_ext_for_dpi(&rect, window_style, FALSE,
-                                      extended_window_style, dpi)) {
+  if (!proc_table.AdjustWindowRectExForDpi(&rect, window_style, FALSE,
+                                           extended_window_style, dpi)) {
     FML_LOG(ERROR) << "Failed to run AdjustWindowRectExForDpi: "
                    << GetLastErrorAsString();
     return std::nullopt;
@@ -299,6 +238,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   // if the window has no owner.
   Rect const initial_window_rect = [&]() -> Rect {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine->windows_proc_table(),
         Size(content_size.width, content_size.height), min_size, max_size,
         window_style, extended_window_style, nullptr);
     return {{CW_USEDEFAULT, CW_USEDEFAULT},
@@ -351,11 +291,11 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   }
 
   // Create the native window.
-  HWND hwnd =
-      CreateWindowEx(extended_window_style, kWindowClassName, L"", window_style,
-                     initial_window_rect.left(), initial_window_rect.top(),
-                     initial_window_rect.width(), initial_window_rect.height(),
-                     nullptr, nullptr, GetModuleHandle(nullptr), nullptr);
+  HWND hwnd = CreateWindowEx(
+      extended_window_style, kWindowClassName, L"", window_style,
+      initial_window_rect.left(), initial_window_rect.top(),
+      initial_window_rect.width(), initial_window_rect.height(), nullptr,
+      nullptr, GetModuleHandle(nullptr), engine->windows_proc_table().get());
   if (!hwnd) {
     FML_LOG(ERROR) << "Cannot create window: " << GetLastErrorAsString();
     return nullptr;
@@ -439,8 +379,11 @@ LRESULT FlutterHostWindow::WndProc(HWND hwnd,
                                    WPARAM wparam,
                                    LPARAM lparam) {
   if (message == WM_NCCREATE) {
-    EnableFullDpiSupportIfAvailable(hwnd);
-    EnableTransparentWindowBackground(hwnd);
+    auto* const create_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
+    auto* const windows_proc_table =
+        static_cast<WindowsProcTable*>(create_struct->lpCreateParams);
+    windows_proc_table->EnableNonClientDpiScaling(hwnd);
+    EnableTransparentWindowBackground(hwnd, *windows_proc_table);
   } else if (FlutterHostWindow* const window = GetThisFromHandle(hwnd)) {
     return window->HandleMessage(hwnd, message, wparam, lparam);
   }
@@ -561,9 +504,9 @@ void FlutterHostWindow::SetContentSize(const FlutterWindowSizing& size) {
 
   if (size.has_size) {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        Size(size.width, size.height), box_constraints_.min_size(),
-        box_constraints_.max_size(), window_info.dwStyle, window_info.dwExStyle,
-        nullptr);
+        *engine_->windows_proc_table(), Size(size.width, size.height),
+        box_constraints_.min_size(), box_constraints_.max_size(),
+        window_info.dwStyle, window_info.dwExStyle, nullptr);
 
     if (window_size) {
       SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
