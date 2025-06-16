@@ -39,6 +39,7 @@ class IsolateScope {
   IsolateScope() = delete;
   IsolateScope(IsolateScope const&) = delete;
 };
+
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_COMMON_ISOLATE_SCOPE_H_
