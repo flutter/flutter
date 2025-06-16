@@ -62,11 +62,9 @@ std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
 RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
     const std::shared_ptr<fml::Mapping>& payload) {
   if (payload == nullptr || !payload->GetMapping()) {
-    VALIDATION_LOG << "Invalid payload.";
     return {};
   }
   if (!fb::RuntimeStagesBufferHasIdentifier(payload->GetMapping())) {
-    VALIDATION_LOG << "Incorrect payload identifier.";
     return {};
   }
 
