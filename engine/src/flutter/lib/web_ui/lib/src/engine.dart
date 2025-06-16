@@ -17,6 +17,7 @@ library engine;
 
 export 'engine/alarm_clock.dart';
 export 'engine/app_bootstrap.dart';
+export 'engine/arena.dart';
 export 'engine/browser_detection.dart';
 export 'engine/canvaskit/canvas.dart';
 export 'engine/canvaskit/canvaskit_api.dart';
@@ -77,6 +78,7 @@ export 'engine/js_interop/js_typed_data.dart';
 export 'engine/key_map.g.dart';
 export 'engine/keyboard_binding.dart';
 export 'engine/layers.dart';
+export 'engine/lazy_path.dart';
 export 'engine/mouse/context_menu.dart';
 export 'engine/mouse/cursor.dart';
 export 'engine/mouse/prevent_default.dart';
