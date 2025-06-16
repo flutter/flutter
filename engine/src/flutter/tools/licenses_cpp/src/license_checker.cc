@@ -204,8 +204,9 @@ absl::Status MatchLicenseFile(const fs::path& path,
       }
       license_map->Add(package.name, std::string_view(data, size));
     } else {
-      return absl::NotFoundError("Unknown license in " +
-                                 package.license_file->string());
+      return absl::NotFoundError(absl::StrCat("Unknown license in ",
+                                              package.license_file->string(),
+                                              " : ", match.status().message()));
     }
   }
   return absl::OkStatus();
@@ -283,7 +284,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                   license_map.Add(package.name, comment);
                 } else {
                   errors.emplace_back(absl::NotFoundError(
-                      absl::StrCat("Unknown license in ", full_path.string())));
+                      absl::StrCat("Unknown license in ", full_path.string(),
+                                   " : ", match.status().message())));
                 }
               }
             }
