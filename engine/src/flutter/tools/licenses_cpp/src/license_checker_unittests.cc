@@ -208,9 +208,12 @@ TEST_F(LicenseCheckerTest, UnknownLicense) {
 
   fs::current_path(*temp_path);
   ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  // Make sure the error is only reported once.
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "foo.cc").ok());
   ASSERT_TRUE(WriteFile(kUnknownLicense, *temp_path / "LICENSE").ok());
   Repo repo;
   repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "foo.cc");
   repo.Add(*temp_path / "LICENSE");
   ASSERT_TRUE(repo.Commit().ok());
 

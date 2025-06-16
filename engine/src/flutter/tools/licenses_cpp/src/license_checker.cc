@@ -224,6 +224,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
   size_t count = 0;
   LicenseMap license_map;
+  absl::flat_hash_set<fs::path> seen_license_files;
   for (const fs::path& git_repo : git_repos) {
     if (IsStdoutTerminal()) {
       PrintProgress(count++, git_repos.size());
@@ -245,10 +246,14 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
       Package package = GetPackage(working_dir_path, full_path);
       if (package.license_file.has_value()) {
-        absl::Status match_status = MatchLicenseFile(
-            package.license_file.value(), package, data, &license_map);
-        if (!match_status.ok()) {
-          errors.emplace_back(std::move(match_status));
+        auto [_, is_new_item] =
+            seen_license_files.insert(package.license_file.value());
+        if (is_new_item) {
+          absl::Status match_status = MatchLicenseFile(
+              package.license_file.value(), package, data, &license_map);
+          if (!match_status.ok()) {
+            errors.emplace_back(std::move(match_status));
+          }
         }
       }
 
