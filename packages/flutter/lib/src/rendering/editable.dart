@@ -324,8 +324,8 @@ class RenderEditable extends RenderBox
     bool paintCursorAboveText = false,
     Offset cursorOffset = Offset.zero,
     double devicePixelRatio = 1.0,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
     bool? enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
@@ -1318,7 +1318,11 @@ class RenderEditable extends RenderBox
   List<TextBox> getBoxesForSelection(TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter
-        .getBoxesForSelection(selection)
+        .getBoxesForSelection(
+          selection,
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
         .map(
           (TextBox textBox) => TextBox.fromLTRBD(
             textBox.left + _paintOffset.dx,
@@ -2921,11 +2925,14 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
     highlightPaint.color = color;
     final TextPainter textPainter = renderEditable._textPainter;
-    final List<TextBox> boxes = textPainter.getBoxesForSelection(
-      TextSelection(baseOffset: range.start, extentOffset: range.end),
-      boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle,
-    );
+    final Set<TextBox> boxes =
+        textPainter
+            .getBoxesForSelection(
+              TextSelection(baseOffset: range.start, extentOffset: range.end),
+              boxHeightStyle: selectionHeightStyle,
+              boxWidthStyle: selectionWidthStyle,
+            )
+            .toSet();
 
     for (final TextBox box in boxes) {
       canvas.drawRect(

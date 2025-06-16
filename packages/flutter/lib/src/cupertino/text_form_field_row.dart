@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -159,6 +161,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     ),
     EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
     SpellCheckConfiguration? spellCheckConfiguration,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     super.restorationId,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
@@ -236,6 +240,10 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                  placeholderStyle: placeholderStyle,
                  contextMenuBuilder: contextMenuBuilder,
                  spellCheckConfiguration: spellCheckConfiguration,
+                 selectionHeightStyle:
+                     selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+                 selectionWidthStyle:
+                     selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
                ),
              ),
            );
