@@ -168,7 +168,7 @@ void DlSkCanvasDispatcher::drawPaint() {
 void DlSkCanvasDispatcher::drawColor(DlColor color, DlBlendMode mode) {
   // SkCanvas::drawColor(SkColor) does the following conversion anyway
   // We do it here manually to increase precision on applying opacity
-  SkColor4f color4f = ToSk(color);
+  SkColor4f color4f = ToSkColor4f(color);
   color4f.fA *= opacity();
   canvas_->drawColor(color4f, ToSk(mode));
 }
