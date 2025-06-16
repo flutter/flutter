@@ -5011,10 +5011,10 @@ class EditableTextState extends State<EditableText>
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
-  /// if there is no magnifier visible.
+  /// if no magnifier exists.
   ///
   /// Updates the magnifier to the position given by `positionToShow`,
-  /// if there is a magnifier visible.
+  /// if a magnifier exits.
   ///
   /// Does nothing if a magnifier couldn't be shown, such as when the selection
   /// overlay does not currently exist.
@@ -5023,22 +5023,20 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
+    if (_selectionOverlay!.magnifierExists) {
       _selectionOverlay!.updateMagnifier(positionToShow);
     } else {
       _selectionOverlay!.showMagnifier(positionToShow);
     }
   }
 
-  /// Hides the magnifier if it is visible.
+  /// Hides the magnifier.
   void hideMagnifier() {
     if (_selectionOverlay == null) {
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.hideMagnifier();
-    }
+    _selectionOverlay!.hideMagnifier();
   }
 
   // Tracks the location a [_ScribblePlaceholder] should be rendered in the
@@ -5576,7 +5574,10 @@ class EditableTextState extends State<EditableText>
       ),
     ),
     ScrollToDocumentBoundaryIntent: _makeOverridable(
-      CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary),
+      _WebComposingDisablingCallbackAction<ScrollToDocumentBoundaryIntent>(
+        this,
+        onInvoke: _scrollToDocumentBoundary,
+      ),
     ),
     ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
 
@@ -6484,7 +6485,13 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
   }
 
   @override
-  bool get isActionEnabled => state._value.selection.isValid;
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return state._value.selection.isValid;
+  }
 }
 
 class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementIntent>
@@ -6564,7 +6571,28 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   }
 
   @override
-  bool get isActionEnabled => state._value.selection.isValid;
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return state._value.selection.isValid;
+  }
+}
+
+class _WebComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _WebComposingDisablingCallbackAction(this.state, {required super.onInvoke});
+
+  final EditableTextState state;
+
+  @override
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return super.isActionEnabled;
+  }
 }
 
 class _SelectAllAction extends ContextAction<SelectAllTextIntent> {

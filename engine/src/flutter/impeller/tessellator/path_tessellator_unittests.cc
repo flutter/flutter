@@ -9,8 +9,7 @@
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
 #include "flutter/display_list/geometry/dl_path.h"
-#include "flutter/impeller/geometry/path.h"
-#include "flutter/impeller/geometry/path_builder.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 
 namespace impeller {
 namespace testing {
@@ -41,9 +40,9 @@ class MockSegmentReceiver : public impeller::PathTessellator::SegmentReceiver {
 };
 
 TEST(PathTessellatorTest, EmptyPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   PathTessellator::PathToFilledSegments(path, mock_receiver);
@@ -57,11 +56,11 @@ TEST(PathTessellatorTest, EmptyPath) {
 }
 
 TEST(PathTessellatorTest, EmptyPathMultipleMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.MoveTo({10, 10});
   builder.MoveTo({20, 20});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   PathTessellator::PathToFilledSegments(path, mock_receiver);
@@ -75,12 +74,12 @@ TEST(PathTessellatorTest, EmptyPathMultipleMoveTo) {
 }
 
 TEST(PathTessellatorTest, SimpleClosedPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -113,12 +112,12 @@ TEST(PathTessellatorTest, SimpleClosedPath) {
 }
 
 TEST(PathTessellatorTest, SimpleUnclosedPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   // Close not really needed for filled paths
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -151,13 +150,13 @@ TEST(PathTessellatorTest, SimpleUnclosedPath) {
 }
 
 TEST(PathTessellatorTest, SimplePathTrailingMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
   builder.MoveTo({500, 100});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -190,7 +189,7 @@ TEST(PathTessellatorTest, SimplePathTrailingMoveTo) {
 }
 
 TEST(PathTessellatorTest, DegenerateSegmentsPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({0, 0});
   builder.LineTo({0, 0});
@@ -201,7 +200,7 @@ TEST(PathTessellatorTest, DegenerateSegmentsPath) {
   builder.CubicCurveTo({0, 0}, {0, 0}, {0, 0});
   builder.CubicCurveTo({0, 0}, {0, 0}, {0, 0});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -228,14 +227,14 @@ TEST(PathTessellatorTest, DegenerateSegmentsPath) {
 }
 
 TEST(PathTessellatorTest, QuadToLineToOptimization) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   // CP == P1
   builder.QuadraticCurveTo({0, 0}, {10, 10});
   // CP == P2
   builder.QuadraticCurveTo({20, 10}, {20, 10});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -268,7 +267,7 @@ TEST(PathTessellatorTest, QuadToLineToOptimization) {
 }
 
 TEST(PathTessellatorTest, ConicToLineToOptimization) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   // CP == P1
   builder.ConicCurveTo({0, 0}, {10, 10}, 2.0f);
@@ -277,7 +276,7 @@ TEST(PathTessellatorTest, ConicToLineToOptimization) {
   // weight == 0
   builder.ConicCurveTo({20, 0}, {10, 0}, 0.0f);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -315,12 +314,12 @@ TEST(PathTessellatorTest, ConicToQuadToOptimization) {
   // The conic below will simplify to this quad
   PathTessellator::Quad quad{{0, 0}, {10, 0}, {0, 10}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo(quad.p1);
   // weight == 1
   builder.ConicCurveTo(quad.cp, quad.p2, 1.0f);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -356,13 +355,13 @@ TEST(PathTessellatorTest, ConicToQuadToOptimization) {
 }
 
 TEST(PathTessellatorTest, SimplePathMultipleMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({500, 100});
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -399,14 +398,14 @@ TEST(PathTessellatorTest, ComplexPath) {
   PathTessellator::Conic conic{{20, 10}, {30, 20}, {30, 10}, 2.0f};
   PathTessellator::Cubic cubic{{30, 10}, {40, 20}, {40, 10}, {42, 15}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.QuadraticCurveTo(quad.cp, quad.p2);
   builder.ConicCurveTo(conic.cp, conic.p2, conic.weight);
   builder.CubicCurveTo(cubic.cp1, cubic.cp2, cubic.p2);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -474,7 +473,7 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   PathTessellator::Conic conic{{20, 10}, {30, 20}, {30, 10}, 2.0f};
   PathTessellator::Cubic cubic{{30, 10}, {40, 20}, {40, 10}, {42, 15}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.QuadraticCurveTo(quad.cp, quad.p2);
@@ -482,7 +481,7 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   builder.CubicCurveTo(cubic.cp1, cubic.cp2, cubic.p2);
   builder.Close();
   builder.MoveTo({500, 100});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
@@ -543,6 +542,42 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
     EXPECT_CALL(mock_writer, EndContour());
   }
   PathTessellator::PathToFilledVertices(path, mock_writer, 1.0f);
+}
+
+TEST(PathTessellatorTest, LinearQuadToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.QuadraticCurveTo({316.4, 121.5}, {316.5, 121.5});
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
+}
+
+TEST(PathTessellatorTest, LinearConicToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.ConicCurveTo({316.4, 121.5}, {316.5, 121.5}, 2.0f);
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
+}
+
+TEST(PathTessellatorTest, LinearCubicToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.CubicCurveTo({316.4, 121.5}, {316.5, 121.5}, {316.6, 121.5});
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
 }
 
 }  // namespace testing

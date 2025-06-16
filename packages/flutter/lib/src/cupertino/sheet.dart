@@ -85,6 +85,8 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// Shows a Cupertino-style sheet widget that slides up from the bottom of the
 /// screen and stacks the previous route behind the new sheet.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
+///
 /// This is a convenience method for displaying [CupertinoSheetRoute] for common,
 /// straightforward use cases. The Widget returned from `pageBuilder` will be
 /// used to display the content on the [CupertinoSheetRoute].
@@ -274,26 +276,39 @@ class CupertinoSheetTransition extends StatefulWidget {
             )
             : child;
 
-    return SlideTransition(
-      position: slideAnimation,
-      child: ScaleTransition(
-        scale: scaleAnimation,
-        filterQuality: FilterQuality.medium,
-        alignment: Alignment.topCenter,
-        child: AnimatedBuilder(
-          animation: radiusAnimation,
-          child: child,
-          builder: (BuildContext context, Widget? child) {
-            return ClipRRect(
-              borderRadius:
-                  !secondaryAnimation.isDismissed
-                      ? radiusAnimation.value
-                      : BorderRadius.circular(0),
-              child: contrastedChild,
-            );
-          },
+    final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+
+    return Stack(
+      children: <Widget>[
+        AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: SizedBox(height: topGapHeight, width: double.infinity),
         ),
-      ),
+        SlideTransition(
+          position: slideAnimation,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            filterQuality: FilterQuality.medium,
+            alignment: Alignment.topCenter,
+            child: AnimatedBuilder(
+              animation: radiusAnimation,
+              child: child,
+              builder: (BuildContext context, Widget? child) {
+                return ClipRSuperellipse(
+                  borderRadius:
+                      !secondaryAnimation.isDismissed
+                          ? radiusAnimation.value
+                          : BorderRadius.circular(0),
+                  child: contrastedChild,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -320,7 +335,7 @@ class CupertinoSheetTransition extends StatefulWidget {
         scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: child,
         ),
@@ -348,12 +363,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
     _setupAnimation();
   }
 
@@ -450,6 +459,8 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 
 /// Route for displaying an iOS sheet styled page.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
+///
 /// The `CupertinoSheetRoute` will slide up from the bottom of the screen and stop
 /// below the top of the screen. If the previous route is a non-sheet route, then
 /// it will animate downwards to stack behind the new sheet. If the previous route
@@ -498,7 +509,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
       removeTop: true,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding),
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,

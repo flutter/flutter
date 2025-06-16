@@ -137,7 +137,7 @@ const String androidX86DeprecationWarning =
 
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
+/// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
@@ -204,11 +204,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       outputDirectory = outputDirectory.childDirectory('host');
     }
 
-    final bool containsX86Targets =
-        androidBuildInfo.where((AndroidBuildInfo info) => info.containsX86Target).isNotEmpty;
-    if (containsX86Targets) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
       await generateTooling(project, releaseMode: androidBuildInfo.buildInfo.isRelease);
       await buildGradleAar(
@@ -454,9 +449,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
-    if (androidBuildInfo.containsX86Target) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
     }
@@ -723,14 +715,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym is present for at least one architecture,
+    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
     // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym')) {
+    if (result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg')) {
       return true;
     }
 
     _logger.printTrace(
-      'libflutter.so.sym not present when checking final appbundle for debug symbols.',
+      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
     );
     return false;
   }
@@ -777,10 +770,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   /// Builds AAR and POM files.
   ///
-  /// * [project] is typically [FlutterProject.current()].
+  /// * [project] is typically [FlutterProject.current].
   /// * [androidBuildInfo] is the build configuration.
-  /// * [outputDir] is the destination of the artifacts,
-  /// * [buildNumber] is the build number of the output aar,
+  /// * [outputDirectory] is the destination of the artifacts.
+  /// * [buildNumber] is the build number of the output aar.
   Future<void> buildGradleAar({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -830,7 +823,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }
@@ -1091,7 +1084,7 @@ void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) 
   );
 }
 
-/// Returns [true] if the current app uses AndroidX.
+/// Returns `true` if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
 bool isAppUsingAndroidX(Directory androidDirectory) {
@@ -1297,9 +1290,9 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 }
 
 /// Returns the local Maven repository for a local engine build.
-/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`.
 /// This method generates symlinks in the temp directory to the engine artifacts
-/// following the convention specified on https://maven.apache.org/pom.html#Repositories
+/// following the convention specified on https://maven.apache.org/pom.html#Repositories.
 Directory _getLocalEngineRepo({
   required String engineOutPath,
   required AndroidBuildInfo androidBuildInfo,
@@ -1354,9 +1347,7 @@ Directory _getLocalEngineRepo({
 
 String _getAbiByLocalEnginePath(String engineOutPath) {
   String result = 'armeabi_v7a';
-  if (engineOutPath.contains('x86')) {
-    result = 'x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'x86_64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'arm64_v8a';
@@ -1366,9 +1357,7 @@ String _getAbiByLocalEnginePath(String engineOutPath) {
 
 String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
   String result = 'android-arm';
-  if (engineOutPath.contains('x86')) {
-    result = 'android-x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'android-x64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'android-arm64';

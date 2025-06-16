@@ -100,7 +100,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 
   impeller::RenderTarget render_target = surface->GetRenderTarget();
 
-  SurfaceFrame::EncodeCallback encode_calback =
+  SurfaceFrame::EncodeCallback encode_callback =
       [aiks_context = aiks_context_,  //
        render_target](SurfaceFrame& surface_frame,
                       DlCanvas* canvas) mutable -> bool {
@@ -114,12 +114,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       return false;
     }
 
-    auto cull_rect = render_target.GetRenderTargetSize();
-    SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
     return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                     render_target,                      //
                                     display_list,                       //
-                                    sk_cull_rect,                       //
+                                    cull_rect,                          //
                                     /*reset_host_buffer=*/true          //
     );
     return true;
@@ -128,7 +128,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
   return std::make_unique<SurfaceFrame>(
       nullptr,                                // surface
       delegate_->GLContextFramebufferInfo(),  // framebuffer info
-      encode_calback,                         // encode callback
+      encode_callback,                        // encode callback
       fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
         return surface->Present();
       }),                         // submit callback

@@ -32,8 +32,6 @@
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -548,46 +546,14 @@ void DlDispatcherBase::drawLine(const DlPoint& p0, const DlPoint& p1) {
   GetCanvas().DrawLine(p0, p1, paint_);
 }
 
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
                                       const DlPoint& p1,
                                       DlScalar on_length,
                                       DlScalar off_length) {
   AUTO_DEPTH_WATCHER(1u);
 
-  Scalar length = p0.GetDistance(p1);
-  // Reasons to defer to regular DrawLine:
-  //   length is non-positive - drawLine will draw appropriate "dot"
-  //   off_length is non-positive - no gaps, drawLine will draw it solid
-  //   on_length is negative - invalid dashing
-  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
-  // apart
-  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
-    Point delta = (p1 - p0) / length;  // length > 0 already tested
-    PathBuilder builder;
-
-    Scalar consumed = 0.0f;
-    while (consumed < length) {
-      builder.MoveTo(p0 + delta * consumed);
-
-      Scalar dash_end = consumed + on_length;
-      if (dash_end < length) {
-        builder.LineTo(p0 + delta * dash_end);
-      } else {
-        builder.LineTo(p1);
-        // Should happen anyway due to the math, but let's make it explicit
-        // in case of bit errors. We're done with this line.
-        break;
-      }
-
-      consumed = dash_end + off_length;
-    }
-
-    Paint stroke_paint = paint_;
-    stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(DlPath(builder), stroke_paint);
-  } else {
-    drawLine(p0, p1);
-  }
+  GetCanvas().DrawDashedLine(p0, p1, on_length, off_length, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -623,11 +589,7 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
                                          const DlRoundRect& inner) {
   AUTO_DEPTH_WATCHER(1u);
 
-  PathBuilder builder;
-  builder.AddRoundRect(outer);
-  builder.AddRoundRect(inner);
-  builder.SetBounds(outer.GetBounds().Union(inner.GetBounds()));
-  GetCanvas().DrawPath(DlPath(builder, FillType::kOdd), paint_);
+  GetCanvas().DrawDiffRoundRect(outer, inner, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -684,26 +646,9 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  if (paint_.stroke.width >
-      std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
-    // This is a special case for rendering arcs whose stroke width is so large
-    // you are effectively drawing a sector of a circle.
-    // https://github.com/flutter/flutter/issues/158567
-    DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke.width / 2));
-    PathBuilder builder;
-    Paint fill_paint = paint_;
-    fill_paint.style = Paint::Style::kFill;
-    fill_paint.stroke.width = 1;
-    builder.AddArc(expanded_rect, Degrees(start_degrees),
-                   Degrees(sweep_degrees),
-                   /*use_center=*/true);
-    GetCanvas().DrawPath(DlPath(builder), fill_paint);
-  } else {
-    PathBuilder builder;
-    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                   use_center);
-    GetCanvas().DrawPath(DlPath(builder), paint_);
-  }
+  GetCanvas().DrawArc(Arc(oval_bounds, Degrees(start_degrees),
+                          Degrees(sweep_degrees), use_center),
+                      paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -1348,13 +1293,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
 bool RenderToTarget(ContentContext& context,
                     RenderTarget render_target,
                     const sk_sp<flutter::DisplayList>& display_list,
-                    SkIRect cull_rect,
+                    Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen) {
-  Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
-                                     cull_rect.right(), cull_rect.bottom());
-  FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
-  display_list->Dispatch(collector, ip_cull_rect);
+  FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
+  display_list->Dispatch(collector, cull_rect);
 
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
@@ -1362,7 +1305,7 @@ bool RenderToTarget(ContentContext& context,
       /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      IRect::RoundOut(ip_cull_rect)              //
+      IRect::RoundOut(cull_rect)                 //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
@@ -1374,7 +1317,7 @@ bool RenderToTarget(ContentContext& context,
     context.GetTextShadowCache().MarkFrameEnd();
   });
 
-  display_list->Dispatch(impeller_dispatcher, ip_cull_rect);
+  display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
