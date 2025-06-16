@@ -457,7 +457,7 @@ class CustomDevice extends Device {
   final Map<ApplicationPackage, CustomDeviceAppSession> _sessions =
       <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
-  Process? _globalLogReaderProcess = null;
+  Process? _globalLogReaderProcess;
 
   @override
   final DevicePortForwarder portForwarder;
