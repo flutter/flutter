@@ -166,7 +166,7 @@ TEST_F(LicenseCheckerTest, SimplePass) {
   std::stringstream ss;
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
-  EXPECT_EQ(errors.size(), 0u);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
 }
 
 TEST_F(LicenseCheckerTest, UnknownLicense) {

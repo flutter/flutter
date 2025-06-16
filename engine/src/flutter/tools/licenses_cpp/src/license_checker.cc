@@ -176,6 +176,41 @@ class LicenseMap {
   absl::btree_map<std::string, absl::flat_hash_set<std::string>> map_;
   absl::flat_hash_set<std::string> license_files_;
 };
+
+/// Checks the a license against known licenses and potentially adds it to the
+/// license map.
+/// @param path Path of the license file to check.
+/// @param package Package the license file belongs to.
+/// @param data The Data catalog of known licenses.
+/// @param license_map The LicenseMap tracking seen licenses.
+/// @return OkStatus if the license is known and successfully written to the
+/// catalog.
+absl::Status MatchLicenseFile(const fs::path& path,
+                              const Package& package,
+                              const Data& data,
+                              LicenseMap* license_map) {
+  absl::StatusOr<MMapFile> license = MMapFile::Make(path.string());
+  if (!license.ok()) {
+    return license.status();
+  } else {
+    absl::StatusOr<std::string> match = data.catalog.FindMatch(
+        std::string_view(license->GetData(), license->GetSize()));
+
+    if (match.ok()) {
+      size_t size = license->GetSize();
+      const char* data = license->GetData();
+      if (size >= 1 && data[size - 1] == '\n') {
+        size -= 1;
+      }
+      license_map->Add(package.name, std::string_view(data, size));
+    } else {
+      return absl::NotFoundError("Unknown license in " +
+                                 package.license_file->string());
+    }
+  }
+  return absl::OkStatus();
+}
+
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
@@ -210,25 +245,10 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
       Package package = GetPackage(working_dir_path, full_path);
       if (package.license_file.has_value()) {
-        absl::StatusOr<MMapFile> license =
-            MMapFile::Make(package.license_file->string());
-        if (!license.ok()) {
-          errors.push_back(license.status());
-        } else {
-          absl::StatusOr<std::string> match = data.catalog.FindMatch(
-              std::string_view(license->GetData(), license->GetSize()));
-
-          if (match.ok()) {
-            size_t size = license->GetSize();
-            const char* data = license->GetData();
-            if (size >= 1 && data[size - 1] == '\n') {
-              size -= 1;
-            }
-            license_map.Add(package.name, std::string_view(data, size));
-          } else {
-            errors.push_back(absl::NotFoundError(
-                "Unknown license in " + package.license_file->string()));
-          }
+        absl::Status match_status = MatchLicenseFile(
+            package.license_file.value(), package, data, &license_map);
+        if (!match_status.ok()) {
+          errors.emplace_back(std::move(match_status));
         }
       }
 
