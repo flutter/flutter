@@ -626,13 +626,11 @@ class CustomDevice extends Device {
 
     if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
       // launch the readLogs command
-      return _processUtils
-        .start(_config.readLogsCommand!)
-        .then((Process process) {
-          _globalLogReaderProcess = process;
-          _globalLogReader.listenToProcessOutput(process);
-          return _globalLogReader;
-        });
+      return _processUtils.start(_config.readLogsCommand!).then((Process process) {
+        _globalLogReaderProcess = process;
+        _globalLogReader.listenToProcessOutput(process);
+        return _globalLogReader;
+      });
     }
 
     return _globalLogReader;
