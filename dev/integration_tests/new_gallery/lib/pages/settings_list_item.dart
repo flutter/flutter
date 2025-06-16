@@ -81,7 +81,7 @@ class SettingsListItem<T> extends StatefulWidget {
     required this.isExpanded,
   });
 
-  final LinkedHashMap<T, DisplayOption> optionsMap;
+  final Map<T, DisplayOption> optionsMap;
   final String title;
   final T selectedOption;
   final ValueChanged<T> onOptionChanged;

@@ -110,7 +110,7 @@ Future<void> pumpDeferredLibraries() {
 class Demos {
   static Map<String?, GalleryDemo> asSlugToDemoMap(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    return LinkedHashMap<String?, GalleryDemo>.fromIterable(
+    return Map<String?, GalleryDemo>.fromIterable(
       all(localizations),
       // ignore: avoid_dynamic_calls
       key: (dynamic demo) => demo.slug as String?,
