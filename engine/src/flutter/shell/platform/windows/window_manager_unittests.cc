@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -12,16 +12,15 @@ namespace testing {
 
 namespace {
 
-class FlutterHostWindowControllerTest : public WindowsTest {
+class WindowManagerTest : public WindowsTest {
  public:
-  FlutterHostWindowControllerTest() = default;
-  virtual ~FlutterHostWindowControllerTest() = default;
+  WindowManagerTest() = default;
+  virtual ~WindowManagerTest() = default;
 
  protected:
   void SetUp() override {
     auto& context = GetContext();
     FlutterWindowsEngineBuilder builder(context);
-    builder.SetSwitches({"--enable-windowing=true"});
 
     engine_ = builder.Build();
     ASSERT_TRUE(engine_);
@@ -58,82 +57,100 @@ class FlutterHostWindowControllerTest : public WindowsTest {
           },
   };
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindowControllerTest);
+  FML_DISALLOW_COPY_AND_ASSIGN(WindowManagerTest);
 };
 
 }  // namespace
 
-TEST_F(FlutterHostWindowControllerTest, WindowingInitialize) {
+TEST_F(WindowManagerTest, WindowingInitialize) {
   IsolateScope isolate_scope(isolate());
 
   static bool received_message = false;
   WindowingInitRequest init_request{
       .on_message = [](WindowsMessage* message) { received_message = true; }};
 
-  FlutterWindowingInitialize(engine_id(), &init_request);
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
   const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  DestroyWindow(FlutterGetWindowHandle(engine_id(), view_id));
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  DestroyWindow(InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+      engine_id(), view_id));
 
   EXPECT_TRUE(received_message);
 }
 
-TEST_F(FlutterHostWindowControllerTest, HasTopLevelWindows) {
+TEST_F(WindowManagerTest, HasTopLevelWindows) {
   IsolateScope isolate_scope(isolate());
 
-  bool has_top_level_windows = FlutterWindowingHasTopLevelWindows(engine_id());
+  bool has_top_level_windows =
+      InternalFlutterWindows_WindowManager_HasTopLevelWindows(engine_id());
   EXPECT_FALSE(has_top_level_windows);
 
-  FlutterCreateRegularWindow(engine_id(), creation_request());
-  has_top_level_windows = FlutterWindowingHasTopLevelWindows(engine_id());
+  InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                           creation_request());
+  has_top_level_windows =
+      InternalFlutterWindows_WindowManager_HasTopLevelWindows(engine_id());
   EXPECT_TRUE(has_top_level_windows);
 }
 
-TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
+TEST_F(WindowManagerTest, CreateRegularWindow) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
   EXPECT_EQ(view_id, 0);
 }
 
-TEST_F(FlutterHostWindowControllerTest, GetWindowHandle) {
+TEST_F(WindowManagerTest, GetWindowHandle) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  const HWND window_handle = FlutterGetWindowHandle(engine_id(), view_id);
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
   EXPECT_NE(window_handle, nullptr);
 }
 
-TEST_F(FlutterHostWindowControllerTest, GetWindowSize) {
+TEST_F(WindowManagerTest, GetWindowSize) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  const HWND window_handle = FlutterGetWindowHandle(engine_id(), view_id);
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
 
-  FlutterWindowSize size = FlutterGetWindowContentSize(window_handle);
+  FlutterWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
 
   EXPECT_EQ(size.width, creation_request()->content_size.width);
   EXPECT_EQ(size.height, creation_request()->content_size.height);
 }
 
-TEST_F(FlutterHostWindowControllerTest, SetWindowSize) {
+TEST_F(WindowManagerTest, SetWindowSize) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  const HWND window_handle = FlutterGetWindowHandle(engine_id(), view_id);
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
 
   FlutterWindowSizing requestedSize{
       .has_size = true,
       .width = 640,
       .height = 480,
   };
-  FlutterSetWindowContentSize(window_handle, &requestedSize);
+  InternalFlutterWindows_WindowManager_SetWindowContentSize(window_handle,
+                                                            &requestedSize);
 
-  FlutterWindowSize actual_size = FlutterGetWindowContentSize(window_handle);
+  FlutterWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
   EXPECT_EQ(actual_size.width, 640);
   EXPECT_EQ(actual_size.height, 480);
 }

@@ -21,11 +21,11 @@
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 #include "flutter/shell/platform/windows/compositor_software.h"
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
 #include "shell/platform/windows/flutter_project_bundle.h"
 
@@ -212,7 +212,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
           return true;
         }
         auto message_result =
-            that->host_window_controller_->HandleMessage(hwnd, msg, wpar, lpar);
+            that->window_manager_->HandleMessage(hwnd, msg, wpar, lpar);
         if (message_result) {
           *result = *message_result;
           return true;
@@ -235,7 +235,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::make_unique<CursorHandler>(messenger_wrapper_.get(), this);
   platform_handler_ =
       std::make_unique<PlatformHandler>(messenger_wrapper_.get(), this);
-  host_window_controller_ = std::make_unique<FlutterHostWindowController>(this);
+  window_manager_ = std::make_unique<WindowManager>(this);
   settings_plugin_ = std::make_unique<SettingsPlugin>(messenger_wrapper_.get(),
                                                       task_runner_.get());
 }
@@ -511,7 +511,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
 bool FlutterWindowsEngine::Stop() {
   if (engine_) {
-    host_window_controller_->OnEngineShutdown();
+    window_manager_->OnEngineShutdown();
     for (const auto& [callback, registrar] :
          plugin_registrar_destruction_callbacks_) {
       callback(registrar);

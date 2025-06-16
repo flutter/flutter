@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window_controller.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 
 #include <dwmapi.h>
 #include <optional>
@@ -20,12 +20,9 @@
 
 namespace flutter {
 
-FlutterHostWindowController::FlutterHostWindowController(
-    FlutterWindowsEngine* engine)
-    : engine_(engine) {}
+WindowManager::WindowManager(FlutterWindowsEngine* engine) : engine_(engine) {}
 
-void FlutterHostWindowController::Initialize(
-    const WindowingInitRequest* request) {
+void WindowManager::Initialize(const WindowingInitRequest* request) {
   on_message_ = request->on_message;
   isolate_ = Isolate::Current();
 
@@ -37,15 +34,15 @@ void FlutterHostWindowController::Initialize(
   pending_messages_.clear();
 }
 
-bool FlutterHostWindowController::HasTopLevelWindows() const {
+bool WindowManager::HasTopLevelWindows() const {
   return !active_windows_.empty();
 }
 
-FlutterViewId FlutterHostWindowController::CreateRegularWindow(
+FlutterViewId WindowManager::CreateRegularWindow(
     const WindowCreationRequest* request) {
-  auto window = std::make_unique<FlutterHostWindow>(
-      this, WindowArchetype::kRegular, request->content_size);
-  if (!window->GetWindowHandle()) {
+  auto window = FlutterHostWindow::createRegularWindow(this, engine_,
+                                                       request->content_size);
+  if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return 0;
   }
@@ -54,7 +51,7 @@ FlutterViewId FlutterHostWindowController::CreateRegularWindow(
   return view_id;
 }
 
-void FlutterHostWindowController::OnEngineShutdown() {
+void WindowManager::OnEngineShutdown() {
   // Don't send any more messages to isolate.
   on_message_ = nullptr;
   std::vector<HWND> active_handles;
@@ -70,11 +67,10 @@ void FlutterHostWindowController::OnEngineShutdown() {
   }
 }
 
-std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
-    HWND hwnd,
-    UINT message,
-    WPARAM wparam,
-    LPARAM lparam) {
+std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
+                                                    UINT message,
+                                                    WPARAM wparam,
+                                                    LPARAM lparam) {
   if (message == WM_NCDESTROY) {
     active_windows_.erase(hwnd);
   }
@@ -95,6 +91,12 @@ std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
 
   // Not initialized yet.
   if (!isolate_) {
+    if (pending_messages_.size() > 1024) {
+      FML_LOG(ERROR) << "The pending message cache has been maxed out, "
+                        "something must be going wrong.";
+      return std::nullopt;
+    }
+
     pending_messages_.push_back(message_struct);
     return std::nullopt;
   }
@@ -108,34 +110,34 @@ std::optional<LRESULT> FlutterHostWindowController::HandleMessage(
   }
 }
 
-FlutterWindowsEngine* FlutterHostWindowController::engine() const {
-  return engine_;
-}
-
 }  // namespace flutter
 
-void FlutterWindowingInitialize(int64_t engine_id,
-                                const flutter::WindowingInitRequest* request) {
+void InternalFlutterWindows_WindowManager_Initialize(
+    int64_t engine_id,
+    const flutter::WindowingInitRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  engine->get_host_window_controller()->Initialize(request);
+  engine->window_manager()->Initialize(request);
 }
 
-bool FlutterWindowingHasTopLevelWindows(int64_t engine_id) {
+bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
+    int64_t engine_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_host_window_controller()->HasTopLevelWindows();
+  return engine->window_manager()->HasTopLevelWindows();
 }
 
-int64_t FlutterCreateRegularWindow(
+FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->get_host_window_controller()->CreateRegularWindow(request);
+  return engine->window_manager()->CreateRegularWindow(request);
 }
 
-HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id) {
+HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+    int64_t engine_id,
+    FlutterViewId view_id) {
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   flutter::FlutterWindowsView* view = engine->view(view_id);
@@ -146,7 +148,8 @@ HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id) {
   }
 }
 
-FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd) {
+FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
+    HWND hwnd) {
   RECT rect;
   GetClientRect(hwnd, &rect);
   double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
@@ -159,8 +162,9 @@ FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd) {
   };
 }
 
-void FlutterSetWindowContentSize(HWND hwnd,
-                                 const flutter::FlutterWindowSizing* size) {
+void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+    HWND hwnd,
+    const flutter::FlutterWindowSizing* size) {
   flutter::FlutterHostWindow* window =
       flutter::FlutterHostWindow::GetThisFromHandle(hwnd);
   if (window) {

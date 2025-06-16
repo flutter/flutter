@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
 
 #include <windows.h>
 #include <optional>
@@ -23,7 +23,7 @@ class FlutterHostWindow;
 struct WindowingInitRequest;
 
 struct WindowsMessage {
-  int64_t view_id;
+  FlutterViewId view_id;
   HWND hwnd;
   UINT message;
   WPARAM wParam;
@@ -51,14 +51,12 @@ struct WindowCreationRequest {
   FlutterWindowSizing content_size;
 };
 
-// A controller class for managing |FlutterHostWindow| instances.
-// A unique instance of this class is owned by |FlutterWindowsEngine| and used
-// in |WindowingHandler| to handle methods and messages enabling multi-window
-// support.
-class FlutterHostWindowController {
+// A manager class for managing |FlutterHostWindow| instances.
+// A unique instance of this class is owned by |FlutterWindowsEngine|.
+class WindowManager {
  public:
-  explicit FlutterHostWindowController(FlutterWindowsEngine* engine);
-  virtual ~FlutterHostWindowController() = default;
+  explicit WindowManager(FlutterWindowsEngine* engine);
+  virtual ~WindowManager() = default;
 
   void Initialize(const WindowingInitRequest* request);
 
@@ -73,9 +71,6 @@ class FlutterHostWindowController {
                                        UINT message,
                                        WPARAM wparam,
                                        LPARAM lparam);
-
-  // Gets the engine that owns this controller.
-  FlutterWindowsEngine* engine() const;
 
   void OnEngineShutdown();
 
@@ -98,7 +93,7 @@ class FlutterHostWindowController {
   // shutdown.
   std::unordered_map<HWND, std::unique_ptr<FlutterHostWindow>> active_windows_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindowController);
+  FML_DISALLOW_COPY_AND_ASSIGN(WindowManager);
 };
 
 }  // namespace flutter
@@ -106,19 +101,24 @@ class FlutterHostWindowController {
 extern "C" {
 
 FLUTTER_EXPORT
-void FlutterWindowingInitialize(int64_t engine_id,
-                                const flutter::WindowingInitRequest* request);
+void InternalFlutterWindows_WindowManager_Initialize(
+    int64_t engine_id,
+    const flutter::WindowingInitRequest* request);
 
 FLUTTER_EXPORT
-bool FlutterWindowingHasTopLevelWindows(int64_t engine_id);
+bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
 
 FLUTTER_EXPORT
-int64_t FlutterCreateRegularWindow(
+FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
     const flutter::WindowCreationRequest* request);
 
+// Retrives the HWND associated with this |engine_id| and |view_id|. Returns
+// NULL if the HWND cannot be found
 FLUTTER_EXPORT
-HWND FlutterGetWindowHandle(int64_t engine_id, FlutterViewId view_id);
+HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+    int64_t engine_id,
+    FlutterViewId view_id);
 
 struct FlutterWindowSize {
   double width;
@@ -126,11 +126,13 @@ struct FlutterWindowSize {
 };
 
 FLUTTER_EXPORT
-FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd);
+FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
+    HWND hwnd);
 
 FLUTTER_EXPORT
-void FlutterSetWindowContentSize(HWND hwnd,
-                                 const flutter::FlutterWindowSizing* size);
+void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+    HWND hwnd,
+    const flutter::FlutterWindowSizing* size);
 }
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_CONTROLLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
