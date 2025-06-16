@@ -57,7 +57,9 @@ class Surface {
   void dispose();
   void renderPictures(SkPicture** picture, int count, uint32_t callbackId);
   void renderPictureDirect(SkPicture* picture, uint32_t callbackId);
-  void rasterizeImage(SkImage* image, ImageByteFormat format, uint32_t callbackId);
+  void rasterizeImage(SkImage* image,
+                      ImageByteFormat format,
+                      uint32_t callbackId);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
   void onRasterizeComplete(uint32_t callbackId, SkData* data);

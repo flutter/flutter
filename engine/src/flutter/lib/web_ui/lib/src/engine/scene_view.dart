@@ -21,7 +21,6 @@ abstract class PictureRenderer {
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
 }
 
-
 typedef SurfaceFactory = SceneSurface Function(DomOffscreenCanvas canvas);
 
 class _SceneRender {
@@ -41,7 +40,11 @@ class _SceneRender {
 
 // This class builds a DOM tree that composites an `EngineScene`.
 class EngineSceneView {
-  factory EngineSceneView(PictureRenderer pictureRenderer, SurfaceFactory factory, EngineFlutterView flutterView) {
+  factory EngineSceneView(
+    PictureRenderer pictureRenderer,
+    SurfaceFactory factory,
+    EngineFlutterView flutterView,
+  ) {
     final DomElement sceneElement = createDomElement('flt-scene');
     return EngineSceneView._(pictureRenderer, factory, flutterView, sceneElement);
   }

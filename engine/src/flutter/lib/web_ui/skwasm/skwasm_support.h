@@ -27,9 +27,9 @@ extern void skwasm_dispatchRenderPictures(unsigned long threadId,
                                           int count,
                                           uint32_t callbackId);
 extern void skwasm_dispatchRenderPictureDirect(unsigned long threadId,
-                                       Skwasm::Surface* surface,
-                                       SkPicture* picture,
-                                       uint32_t callbackId);
+                                               Skwasm::Surface* surface,
+                                               SkPicture* picture,
+                                               uint32_t callbackId);
 extern uint32_t skwasm_createOffscreenCanvas(SkwasmObject canvas);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
 extern SkwasmObject skwasm_captureImageBitmap(uint32_t contextHandle,

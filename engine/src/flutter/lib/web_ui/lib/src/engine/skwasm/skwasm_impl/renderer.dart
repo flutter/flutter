@@ -396,9 +396,8 @@ class SkwasmRenderer implements Renderer {
 
   @override
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
-        ? FrameTimingRecorder()
-        : null;
+    final FrameTimingRecorder? recorder =
+        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
     recorder?.recordBuildFinish();
 
     final EngineSceneView sceneView = _getSceneViewForView(view);
@@ -481,12 +480,13 @@ class SkwasmRenderer implements Renderer {
     required bool transferOwnership,
   }) async {
     if (!transferOwnership) {
-      textureSource = (await createImageBitmap(textureSource, (
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-      ))).toJSAnyShallow;
+      textureSource =
+          (await createImageBitmap(textureSource, (
+            x: 0,
+            y: 0,
+            width: width,
+            height: height,
+          ))).toJSAnyShallow;
     }
     return SkwasmImage(
       imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),

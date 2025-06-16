@@ -49,7 +49,9 @@ void Surface::dispose() {
 }
 
 // Main thread only
-void Surface::renderPictures(SkPicture** pictures, int count, uint32_t callbackId) {
+void Surface::renderPictures(SkPicture** pictures,
+                             int count,
+                             uint32_t callbackId) {
   assert(emscripten_is_main_browser_thread());
   std::unique_ptr<sk_sp<SkPicture>[]> picturePointers =
       std::make_unique<sk_sp<SkPicture>[]>(count);
@@ -69,7 +71,9 @@ void Surface::renderPictureDirect(SkPicture* picture, uint32_t callbackId) {
 }
 
 // Main thread only
-void Surface::rasterizeImage(SkImage* image, ImageByteFormat format, uint32_t callbackId) {
+void Surface::rasterizeImage(SkImage* image,
+                             ImageByteFormat format,
+                             uint32_t callbackId) {
   assert(emscripten_is_main_browser_thread());
   image->ref();
 
