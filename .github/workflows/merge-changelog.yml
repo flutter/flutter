@@ -19,12 +19,12 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: master
-      
+
       - name: Configure git
-        run: | 
+        run: |
           git config user.name "[bot] Merge Changelog"
           git config user.email "<>"
-          
+
       - name: Read CHANGELOG.md from the stable branch
         id: read_stable_changelog
         run: |
@@ -34,7 +34,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Prepare PR branch and commit changes
-        id: prepare_pr_branch 
+        id: prepare_pr_branch
         run: |
           PR_BRANCH="sync-changelog-stable-to-master-$(date +%s)"
           echo "pr_branch_name=$PR_BRANCH" >> "$GITHUB_OUTPUT"
@@ -56,4 +56,3 @@ jobs:
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \
             --label autosubmit
-          
