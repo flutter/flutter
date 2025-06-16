@@ -112,5 +112,29 @@ absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) const {
 }
 
 absl::StatusOr<Catalog::Entry> Catalog::ParseEntry(std::istream& is) {
-  return absl::UnimplementedError("Catalog::ParseEntry");
+  if (!is.good()) {
+    return absl::InvalidArgumentError("Bad stream.");
+  }
+  std::string name;
+  std::getline(is, name);
+  if (is.eof()) {
+    return absl::InvalidArgumentError("Bad stream.");
+  }
+  std::string unique;
+  std::getline(is, unique);
+  if (is.eof()) {
+    return absl::InvalidArgumentError("Bad stream.");
+  }
+
+  std::string matcher_text((std::istreambuf_iterator<char>(is)),
+                           std::istreambuf_iterator<char>());
+
+  auto matcher = std::make_unique<RE2>(matcher_text);
+  if (!matcher) {
+    return absl::InvalidArgumentError("Unable to make matcher.");
+  }
+
+  return Catalog::Entry{.name = std::move(name),
+                        .unique = std::move(unique),
+                        .matcher = std::move(matcher)};
 }
