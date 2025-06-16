@@ -5402,8 +5402,8 @@ void _testLandmarks() {
   semantics().semanticsEnabled = false;
 }
 
-void _testForms(){
-    test('nodes with form role', () {
+void _testForms() {
+  test('nodes with form role', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5425,6 +5425,7 @@ void _testForms(){
   });
   semantics().semanticsEnabled = false;
 }
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
