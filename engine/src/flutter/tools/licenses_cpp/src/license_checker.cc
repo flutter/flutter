@@ -189,6 +189,9 @@ absl::Status MatchLicenseFile(const fs::path& path,
                               const Package& package,
                               const Data& data,
                               LicenseMap* license_map) {
+  if (!package.license_file.has_value()) {
+    return absl::InvalidArgumentError("No license file.");
+  }
   absl::StatusOr<MMapFile> license = MMapFile::Make(path.string());
   if (!license.ok()) {
     return license.status();
@@ -197,11 +200,6 @@ absl::Status MatchLicenseFile(const fs::path& path,
         std::string_view(license->GetData(), license->GetSize()));
 
     if (match.ok()) {
-      size_t size = license->GetSize();
-      const char* data = license->GetData();
-      if (size >= 1 && data[size - 1] == '\n') {
-        size -= 1;
-      }
       license_map->Add(package.name, match->matched_text);
     } else {
       return absl::NotFoundError(absl::StrCat("Unknown license in ",
