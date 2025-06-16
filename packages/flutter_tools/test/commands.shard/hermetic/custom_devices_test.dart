@@ -90,7 +90,8 @@ const String defaultConfigLinux1 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ]
 }
@@ -154,7 +155,8 @@ const String defaultConfigLinux2 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ],
   "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
