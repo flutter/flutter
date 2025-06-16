@@ -109,7 +109,8 @@ absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) const {
       RE2::PartialMatch(query, *matchers_[selector_results[0]])) {
     return names_[selector_results[0]];
   } else {
-    return absl::NotFoundError("Selected matcher didn't match.");
+    return absl::NotFoundError(absl::StrCat(
+        "Selected matcher (", names_[selector_results[0]], ") didn't match."));
   }
 }
 
