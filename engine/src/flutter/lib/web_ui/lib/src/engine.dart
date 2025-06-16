@@ -111,6 +111,7 @@ export 'engine/semantics/checkable.dart';
 export 'engine/semantics/disable.dart';
 export 'engine/semantics/expandable.dart';
 export 'engine/semantics/focusable.dart';
+export 'engine/semantics/form.dart';
 export 'engine/semantics/header.dart';
 export 'engine/semantics/heading.dart';
 export 'engine/semantics/image.dart';
