@@ -318,11 +318,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             <String>{};
 
         // If no web devices are connected, or the specified device does not support full debugging (ie. web-server),
-        // we should use DWDS WebSocket connection instead of Chrome-based connection. If no device is specified,
-        // we fall back to the default Chrome connection.
+        // we should use DWDS WebSocket connection instead of Chrome-based connection.
+
         final bool useDwdsWebSocketConnection =
             supportedWebDeviceIds.isEmpty ||
-            !supportedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome');
+            (globals.deviceManager?.specifiedDeviceId != null &&
+                !supportedWebDeviceIds.contains(globals.deviceManager!.specifiedDeviceId));
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',

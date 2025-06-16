@@ -1090,8 +1090,9 @@ class WebDevFS implements DevFS {
         '// Service worker not loaded in run mode.',
       );
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
-      final bool shouldEnabledLoadIndicator =
-          globals.deviceManager?.specifiedDeviceId != WebServerDevice.kWebServerDeviceId;
+      final bool shouldEnableLoadIndicator =
+          globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
+          ddcModuleSystem;
       webAssetServer.writeFile(
         'main.dart.js',
         ddcModuleSystem
@@ -1099,13 +1100,13 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnabledLoadIndicator,
+              generateLoadingIndicator: shouldEnableLoadIndicator,
               isWindows: platform.isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnabledLoadIndicator,
+              generateLoadingIndicator: shouldEnableLoadIndicator,
             ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
