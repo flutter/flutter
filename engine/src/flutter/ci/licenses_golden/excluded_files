@@ -1484,7 +1484,6 @@
 ../../../flutter/third_party/dart/runtime/observatory/lib/src/elements/css/shared.css
 ../../../flutter/third_party/dart/runtime/observatory/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/observatory/tests
-../../../flutter/third_party/dart/runtime/observatory/update_sources.py
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
 ../../../flutter/third_party/dart/runtime/tests
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
@@ -3179,6 +3178,9 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
+../../../flutter/third_party/skia/modules/pathops/BUILD.bazel
+../../../flutter/third_party/skia/modules/pathops/include/BUILD.bazel
+../../../flutter/third_party/skia/modules/pathops/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3769,6 +3771,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.debugdata/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/meta.json
@@ -3813,6 +3816,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.suspend/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.fastrpc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.registers/meta.json
