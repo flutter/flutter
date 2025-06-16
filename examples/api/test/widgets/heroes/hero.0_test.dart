@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Has Hero animation', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.HeroApp());
+    final TransitionDurationObserver observer = TransitionDurationObserver();
+    await tester.pumpWidget(example.HeroApp(navigatorObservers: <NavigatorObserver>[observer]));
 
     expect(find.text('Hero Sample'), findsOneWidget);
     await tester.tap(find.byType(Container));
@@ -16,9 +17,7 @@ void main() {
 
     Size heroSize = tester.getSize(find.byType(Container));
 
-    const Duration quarterTransition = Duration(
-      milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 4,
-    );
+    final Duration quarterTransition = observer.transitionDuration ~/ 4;
     await tester.pump(quarterTransition);
     heroSize = tester.getSize(find.byType(Container));
     expect(heroSize.width.roundToDouble(), 103.0);

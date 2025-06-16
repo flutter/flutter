@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // TODO(justinmc): Remove all hardcoded uses of FadeForwardsPageTransitionsBuilder and replace with this approach.
   testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
     late TransitionRoute<void> currentRoute;
-    final _TestNavigatorObserver testNavigatorObserver =
+    final _TestNavigatorObserver observer =
         _TestNavigatorObserver()
           ..onPopped = (Route<void> route, Route<void>? previousRoute) {
             currentRoute = route as TransitionRoute<void>;
@@ -20,7 +19,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        navigatorObservers: <NavigatorObserver>[testNavigatorObserver],
+        navigatorObservers: <NavigatorObserver>[observer],
         onGenerateRoute: (RouteSettings settings) {
           return switch (settings.name) {
             // A route that uses the default page transition.
