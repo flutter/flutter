@@ -13,7 +13,7 @@ dependencies:
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   characters: 1.4.0
-  collection: 1.19.1
+  collection: 1.19.0
   material_color_utilities: 0.11.1
   meta: 1.16.0
   vector_math: 2.2.0
