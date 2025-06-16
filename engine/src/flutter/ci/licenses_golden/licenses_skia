@@ -1,4 +1,4 @@
-Signature: f9fb3c9288c6070e5e48d5852a89c489
+Signature: e6b7dad35def3475d8e20113c4fdbfe0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -434,6 +434,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/analytic-clip.md
 FILE: ../../../flutter/third_party/skia/relnotes/dng_sdk.md
 FILE: ../../../flutter/third_party/skia/relnotes/fontconfig.md
 FILE: ../../../flutter/third_party/skia/relnotes/ganesh-vulkan11.md
