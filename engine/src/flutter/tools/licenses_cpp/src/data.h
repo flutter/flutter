@@ -6,8 +6,8 @@
 #define FLUTTER_TOOLS_LICENSES_CPP_SRC_DATA_H_
 
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
-#include "flutter/tools/licenses_cpp/src/filter.h"
 #include "flutter/tools/licenses_cpp/src/catalog.h"
+#include "flutter/tools/licenses_cpp/src/filter.h"
 
 /// In memory representation of the contents of the data directory
 ///
