@@ -16,12 +16,12 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
+import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
-import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -712,9 +712,9 @@ Your $application code is in $relativeAppMain.
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] =
-          SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
+          FlutterDarwinPlatform.ios.supportedPackagePlatform.format();
       templateContext['macosSupportedPlatform'] =
-          SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
+          FlutterDarwinPlatform.macos.supportedPackagePlatform.format();
     } else {
       templates.add('plugin_cocoapods');
     }
