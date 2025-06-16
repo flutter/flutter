@@ -152,7 +152,7 @@ Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
   return result;
 }
 
-std::string ReadFile(const fs::path path) {
+std::string ReadFile(const fs::path& path) {
   std::ifstream stream(path);
   assert(stream.good());
   std::string license((std::istreambuf_iterator<char>(stream)),
