@@ -24,6 +24,17 @@ namespace impeller {
   Modifiers std::enable_if_t<std::is_floating_point_v<U>, Return>
 #define ONLY_ON_FLOAT(Return) DL_ONLY_ON_FLOAT_M(, Return)
 
+#define CHECK_INTERSECT(al, at, ar, ab, bl, bt, br, bb) \
+  T RL = std::max(al, bl);                              \
+  T RR = std::min(ar, br);                              \
+  T RT = std::max(at, bt);                              \
+  T RB = std::min(ab, bb);                              \
+  do {                                                  \
+    if (!(RL < RR && RT < RB))                          \
+      return std::nullopt;                              \
+  } while (0)
+// do the !(opposite) check so we return false if either arg is NaN
+
 /// Templated struct for holding an axis-aligned rectangle.
 ///
 /// Rectangles are defined as 4 axis-aligned edges that might contain
@@ -556,24 +567,13 @@ struct TRect {
 
   [[nodiscard]] constexpr std::optional<TRect> Intersection(
       const TRect& o) const {
-    if (IntersectsWithRect(o)) {
-      return TRect{
-          std::max(left_, o.left_),
-          std::max(top_, o.top_),
-          std::min(right_, o.right_),
-          std::min(bottom_, o.bottom_),
-      };
-    } else {
-      return std::nullopt;
-    }
-  }
-
-  [[nodiscard]] constexpr TRect FastIntersection(const TRect& o) const {
+    CHECK_INTERSECT(o.left_, o.top_, o.right_, o.bottom_, left_, top_, right_,
+                    bottom_);
     return TRect{
-        std::max(left_, o.left_),
-        std::max(top_, o.top_),
-        std::min(right_, o.right_),
-        std::min(bottom_, o.bottom_),
+        RL,
+        RT,
+        RR,
+        RB,
     };
   }
 

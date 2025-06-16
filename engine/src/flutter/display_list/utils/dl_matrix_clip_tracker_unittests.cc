@@ -756,27 +756,33 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   EXPECT_TRUE(state.IsTranslateScale());
 
   // Translate has no impact on translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.translate(10, 10);
   EXPECT_TRUE(state.IsTranslateScale());
 
   // Scale has no impact on translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.scale(2, 2);
   EXPECT_TRUE(state.IsTranslateScale());
 
   // Skew resets translate scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.skew(1.1, 0.5);
   EXPECT_FALSE(state.IsTranslateScale());
 
   // Set identity resets translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.setIdentity();
   EXPECT_TRUE(state.IsTranslateScale());
 
   // Rotate resets translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.rotate(DlRadians(0.5));
   EXPECT_FALSE(state.IsTranslateScale());
   state.setIdentity();
 
   // Transform re-computes translate scale.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.transform(DlMatrix::MakeTranslateScale({1, 1, 1}, {100, 10, 0}));
   EXPECT_TRUE(state.IsTranslateScale());
 
@@ -785,6 +791,7 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   state.setIdentity();
 
   // SetTransform recomputes translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.setTransform(DlMatrix::MakeTranslateScale({1, 1, 1}, {100, 10, 0}));
   EXPECT_TRUE(state.IsTranslateScale());
 
@@ -793,6 +800,7 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   state.setIdentity();
 
   // transform2DAffine recomputes translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.transform2DAffine(2, 0, 10, 0, 2, 10);
   EXPECT_TRUE(state.IsTranslateScale());
 
@@ -801,6 +809,7 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   state.setIdentity();
 
   // transformFullPerspective recomputes translate-scale state.
+  EXPECT_TRUE(state.IsTranslateScale());
   state.transformFullPerspective(1, 0, 0, 0,  //
                                  0, 1, 0, 0,  //
                                  0, 0, 1, 0,  //
