@@ -110,13 +110,13 @@ v\d\.\d)lic"},
   };
 }
 
-absl::Status WriteFile(const char* data, const fs::path& path) {
+absl::Status WriteFile(std::string_view data, const fs::path& path) {
   std::ofstream of;
   of.open(path.string(), std::ios::binary);
   if (!of.good()) {
     return absl::InternalError("can't open file");
   }
-  of.write(data, std::strlen(data));
+  of.write(data.data(), data.length());
   of.close();
   return absl::OkStatus();
 }
@@ -384,7 +384,7 @@ v2.0
 )output");
 }
 
-TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
+TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -414,6 +414,35 @@ TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
 
   EXPECT_EQ(ss.str(), R"output(engine
 foobar
+
+Test License
+v2.0
+)output");
+}
+
+TEST_F(LicenseCheckerTest, OnlyPrintMatch) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(absl::StrCat(kLicense, "\n----------------------\n"),
+                        *temp_path / "LICENSE")
+                  .ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Test License
 v2.0

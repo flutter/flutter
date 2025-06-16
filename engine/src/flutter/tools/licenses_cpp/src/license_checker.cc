@@ -193,7 +193,7 @@ absl::Status MatchLicenseFile(const fs::path& path,
   if (!license.ok()) {
     return license.status();
   } else {
-    absl::StatusOr<std::string> match = data.catalog.FindMatch(
+    absl::StatusOr<Catalog::Match> match = data.catalog.FindMatch(
         std::string_view(license->GetData(), license->GetSize()));
 
     if (match.ok()) {
@@ -202,7 +202,7 @@ absl::Status MatchLicenseFile(const fs::path& path,
       if (size >= 1 && data[size - 1] == '\n') {
         size -= 1;
       }
-      license_map->Add(package.name, std::string_view(data, size));
+      license_map->Add(package.name, match->matched_text);
     } else {
       return absl::NotFoundError(absl::StrCat("Unknown license in ",
                                               package.license_file->string(),
@@ -278,7 +278,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
               did_find_copyright = true;
               VLOG(1) << comment;
               if (!package.license_file.has_value()) {
-                absl::StatusOr<std::string> match =
+                absl::StatusOr<Catalog::Match> match =
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
                   license_map.Add(package.name, comment);

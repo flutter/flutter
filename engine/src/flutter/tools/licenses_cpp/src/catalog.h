@@ -27,17 +27,22 @@ class Catalog {
     std::string matcher;
   };
 
+  struct Match {
+    std::string_view matcher;
+    std::string_view matched_text;
+  };
+
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);
 
   /// Make a Catalog for testing.
   static absl::StatusOr<Catalog> Make(const std::vector<Entry>& entries);
 
   /// @brief Tries to identify a match for the `query` across the `Catalog`.
-  /// @param query The text that will be matched against. @return
-  /// absl::StatusCode::kNotFound when a match can't be found.
+  /// @param query The text that will be matched against.
+  /// @return absl::StatusCode::kNotFound when a match can't be found.
   /// absl::StatusCode::kInvalidArgument if more than one match comes up from
   /// the selector.
-  absl::StatusOr<std::string> FindMatch(std::string_view query) const;
+  absl::StatusOr<Match> FindMatch(std::string_view query) const;
 
   /// VisibleForTesting
   static absl::StatusOr<Entry> ParseEntry(std::istream& is);
