@@ -305,7 +305,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
         // Retrieve connected web devices, excluding the web server device.
         final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-        final Set<String> supportedWebDeviceIds =
+        final Set<String> nonWebServerConnectedDeviceIds =
             devices
                 ?.where(
                   (Device d) =>
@@ -321,9 +321,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         // we should use DWDS WebSocket connection instead of Chrome-based connection.
 
         final bool useDwdsWebSocketConnection =
-            supportedWebDeviceIds.isEmpty ||
+            nonWebServerConnectedDeviceIds.isEmpty ||
             (globals.deviceManager?.specifiedDeviceId != null &&
-                !supportedWebDeviceIds.contains(globals.deviceManager!.specifiedDeviceId));
+                !nonWebServerConnectedDeviceIds.contains(globals.deviceManager!.specifiedDeviceId));
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',

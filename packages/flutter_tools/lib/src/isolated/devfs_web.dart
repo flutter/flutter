@@ -1090,7 +1090,8 @@ class WebDevFS implements DevFS {
         '// Service worker not loaded in run mode.',
       );
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
-      final bool shouldEnableLoadIndicator =
+      // Load indicator is only turned off when the injected client is added.
+      final bool shouldEnableMiddleware =
           globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
           ddcModuleSystem;
       webAssetServer.writeFile(
@@ -1100,13 +1101,13 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableLoadIndicator,
+              generateLoadingIndicator: shouldEnableMiddleware,
               isWindows: platform.isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableLoadIndicator,
+              generateLoadingIndicator: shouldEnableMiddleware,
             ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
