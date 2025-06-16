@@ -69,6 +69,11 @@ const char* kLicense = R"lic(Test License
 v2.0
 )lic";
 
+const char* kUnknownLicense = R"lic(Unknown License
+2025
+v2.0
+)lic";
+
 absl::StatusOr<Data> MakeTestData() {
   std::stringstream include;
   include << ".*\\.cc" << std::endl;
@@ -82,9 +87,18 @@ absl::StatusOr<Data> MakeTestData() {
   if (!exclude_filter.ok()) {
     return exclude_filter.status();
   }
+
+  absl::StatusOr<Catalog> catalog =
+      Catalog::Make({{"test", "Test License", R"lic(Test License
+v\d\.\d)lic"}});
+  if (!catalog.ok()) {
+    return catalog.status();
+  }
+
   return Data{
       .include_filter = std::move(*include_filter),
       .exclude_filter = std::move(*exclude_filter),
+      .catalog = std::move(catalog.value()),
   };
 }
 
@@ -153,6 +167,30 @@ TEST_F(LicenseCheckerTest, SimplePass) {
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
+}
+
+TEST_F(LicenseCheckerTest, UnknownLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(kUnknownLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Unknown license in.*LICENSE"))
+      << errors[0];
 }
 
 TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {

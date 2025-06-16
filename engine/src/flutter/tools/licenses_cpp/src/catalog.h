@@ -32,7 +32,7 @@ class Catalog {
   /// absl::StatusCode::kNotFound when a match can't be found.
   /// absl::StatusCode::kInvalidArgument if more than one match comes up from
   /// the selector.
-  absl::StatusOr<std::string> FindMatch(std::string_view query);
+  absl::StatusOr<std::string> FindMatch(std::string_view query) const;
 
  private:
   explicit Catalog(RE2::Set selector,

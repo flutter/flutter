@@ -152,17 +152,6 @@ Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
   return result;
 }
 
-std::string ReadFile(const fs::path& path) {
-  std::ifstream stream(path);
-  assert(stream.good());
-  std::string license((std::istreambuf_iterator<char>(stream)),
-                      std::istreambuf_iterator<char>());
-  if (license[license.size() - 1] == '\n') {
-    license.pop_back();
-  }
-  return license;
-}
-
 class LicenseMap {
  public:
   void Add(std::string_view package, std::string_view license) {
@@ -173,13 +162,6 @@ class LicenseMap {
     if (comment_set.find(package) == comment_set.end()) {
       // License is already seen.
       comment_set.emplace(std::string(package));
-    }
-  }
-
-  void AddFile(std::string_view package, const fs::path& path) {
-    if (!license_files_.contains(path.string())) {
-      Add(package, ReadFile(path));
-      license_files_.insert(path);
     }
   }
 
@@ -228,7 +210,26 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
       Package package = GetPackage(working_dir_path, full_path);
       if (package.license_file.has_value()) {
-        license_map.AddFile(package.name, package.license_file.value());
+        absl::StatusOr<MMapFile> license =
+            MMapFile::Make(package.license_file->string());
+        if (!license.ok()) {
+          errors.push_back(license.status());
+        } else {
+          absl::StatusOr<std::string> match = data.catalog.FindMatch(
+              std::string_view(license->GetData(), license->GetSize()));
+
+          if (match.ok()) {
+            size_t size = license->GetSize();
+            const char* data = license->GetData();
+            if (size >= 1 && data[size - 1] == '\n') {
+              size -= 1;
+            }
+            license_map.Add(package.name, std::string_view(data, size));
+          } else {
+            errors.push_back(absl::NotFoundError(
+                "Unknown license in " + package.license_file->string()));
+          }
+        }
       }
 
       VLOG(1) << full_path.string();

@@ -42,7 +42,7 @@ Catalog::Catalog(RE2::Set selector,
       matchers_(std::move(matchers)),
       names_(std::move(names)) {}
 
-absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) {
+absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) const {
   std::vector<int> selector_results;
   if (!selector_.Match(query, &selector_results)) {
     return absl::NotFoundError("Selector didn't match.");
@@ -57,7 +57,7 @@ absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) {
   }
 
   if (selector_results.size() == 1 &&
-      RE2::FullMatch(query, *matchers_[selector_results[0]])) {
+      RE2::PartialMatch(query, *matchers_[selector_results[0]])) {
     return names_[selector_results[0]];
   } else {
     return absl::NotFoundError("Selection didn't match.");
