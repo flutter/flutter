@@ -616,6 +616,37 @@ abstract class SemanticRole {
       // rasterization needs to be done.
       element.style.color = 'rgba(0,0,0,0)';
     }
+    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // print(
+    //   'semanticsObject id: ${semanticsObject.id} isOverlayPortal: ${semanticsObject.isOverlayPortal}',
+    // );
+    // if (semanticsObject.hasFlag(ui.SemanticsFlag.isEnabled)) {
+    //   print('semanticsObject label: ${semanticsObject.label}');
+    // }
+    // print(
+    //   'semanticsObject flags isOverlayPortal?: ${semanticsObject.hasFlag(ui.SemanticsFlag.isOverlayPortal)}',
+    // );
+    // print('semanticsObject label: ${semanticsObject.label}');
+    // if (semanticsObject.label == 'Open Menu') {
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   element.setAttribute('aria-owns', 'flt-semantic-node-18');
+    // }
+    // if (semanticsObject.label == 'Nested Submenu') {
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   // print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    //   element.setAttribute('aria-owns', 'flt-semantic-node-25');
+    // }
 
     // Make semantic elements visible for debugging by outlining them using a
     // green border. Do not use `border` attribute because it affects layout
@@ -2390,8 +2421,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
