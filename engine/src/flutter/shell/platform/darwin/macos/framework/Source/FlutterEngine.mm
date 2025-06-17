@@ -452,7 +452,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // factories. Lifecycle is tied to the engine.
   FlutterPlatformViewController* _platformViewController;
 
-  // Used to manage Flutter windows.
+  // Used to manage Flutter windows created by the Dart application
   FlutterWindowController* _windowController;
 
   // A message channel for sending user settings to the flutter engine.
