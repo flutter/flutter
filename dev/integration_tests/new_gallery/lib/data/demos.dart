@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -110,7 +108,7 @@ Future<void> pumpDeferredLibraries() {
 class Demos {
   static Map<String?, GalleryDemo> asSlugToDemoMap(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    return LinkedHashMap<String?, GalleryDemo>.fromIterable(
+    return Map<String?, GalleryDemo>.fromIterable(
       all(localizations),
       // ignore: avoid_dynamic_calls
       key: (dynamic demo) => demo.slug as String?,
