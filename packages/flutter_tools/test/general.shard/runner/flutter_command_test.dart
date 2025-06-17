@@ -370,6 +370,28 @@ void main() {
       },
     );
 
+    // TODO(nshahan): Delete when hot reload on web is always enabled
+    // https://github.com/flutter/flutter/issues/170685.
+    testUsingContext('web hot reload enabled by default', () async {
+      final DummyFlutterCommand dummyCommand =
+          DummyFlutterCommand()..usesWebOptions(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(dummyCommand);
+      await runner.run(<String>['dummy']);
+      final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.webEnableHotReload, isTrue);
+    });
+
+    // TODO(nshahan): Delete when hot reload doesn't break on web-server
+    // https://github.com/dart-lang/sdk/issues/60289.
+    testUsingContext('web hot reload disabled when device is web-server', () async {
+      final DummyFlutterCommand dummyCommand =
+          DummyFlutterCommand()..usesWebOptions(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(dummyCommand);
+      await runner.run(<String>['dummy', '-d', 'web-server']);
+      final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+      expect(buildInfo.webEnableHotReload, isFalse);
+    });
+
     group('signals tests', () {
       late FakeIoProcessSignal mockSignal;
       late ProcessSignal signalUnderTest;
@@ -1269,6 +1291,98 @@ flutter:
         },
       );
     });
+
+    testUsingContext(
+      "tool exits when $kAppFlavor is already set in user's environemnt",
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          _TestRunCommandThatOnlyValidates(),
+        );
+        expect(
+          runner.run(<String>['run', '--no-pub', '--no-hot']),
+          throwsToolExit(
+            message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager:
+            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        FileSystem: () {
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          return fileSystem;
+        },
+        ProcessManager: FakeProcessManager.empty,
+        Platform: () => FakePlatform()..environment = <String, String>{kAppFlavor: 'AlreadySet'},
+      },
+    );
+
+    testUsingContext(
+      'tool exits when $kAppFlavor is set in --dart-define',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          _TestRunCommandThatOnlyValidates(),
+        );
+        expect(
+          runner.run(<String>[
+            'run',
+            '--dart-define=$kAppFlavor=AlreadySet',
+            '--no-pub',
+            '--no-hot',
+          ]),
+          throwsToolExit(
+            message: '$kAppFlavor is used by the framework and cannot be set using --dart-define',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager:
+            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        FileSystem: () {
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          return fileSystem;
+        },
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
+
+    testUsingContext(
+      'tool exits when $kAppFlavor is set in --dart-define-from-file',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          _TestRunCommandThatOnlyValidates(),
+        );
+        expect(
+          runner.run(<String>[
+            'run',
+            '--dart-define-from-file=config.json',
+            '--no-pub',
+            '--no-hot',
+          ]),
+          throwsToolExit(
+            message: '$kAppFlavor is used by the framework and cannot be set using --dart-define',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager:
+            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        FileSystem: () {
+          final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('config.json')
+            ..createSync()
+            ..writeAsStringSync('{"$kAppFlavor": "AlreadySet"}');
+          return fileSystem;
+        },
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
 
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {

@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -31,12 +31,6 @@ import '../../src/throwing_pub.dart';
 
 void main() {
   late BufferLogger logger;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   setUp(() {
     logger = BufferLogger.test();
@@ -206,7 +200,7 @@ void main() {
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(
@@ -297,7 +291,7 @@ Error launching application on iPhone.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
@@ -339,7 +333,7 @@ Error launching application on iPhone.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
@@ -383,7 +377,7 @@ Could not build the precompiled application for the device.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(
@@ -440,7 +434,7 @@ Could not build the precompiled application for the device.''',
           logger: logger,
           analytics: fakeAnalytics,
           fileSystem: fs,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: FakeFlutterProject(fileSystem: fs),
         );
         expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
@@ -480,7 +474,7 @@ Could not build the precompiled application for the device.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -529,7 +523,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -575,7 +569,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -620,7 +614,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -672,7 +666,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           logger: logger,
           analytics: fakeAnalytics,
           fileSystem: fs,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: project,
         );
         expect(
@@ -685,7 +679,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
@@ -841,9 +834,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late FlutterManifest manifest;
-
-  @override
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   @override
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');

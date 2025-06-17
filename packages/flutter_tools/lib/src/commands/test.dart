@@ -294,7 +294,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
@@ -461,7 +460,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      serveObservatory: boolArg('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
@@ -473,7 +471,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
-    final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
+    final Uri? nativeAssetsJson =
+        _isIntegrationTest
+            ? null // Don't build for host when running integration tests.
+            : await nativeAssetsBuilder?.build(buildInfo);
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
@@ -717,7 +718,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     testTimeRecorder?.print();
 
     if (result != 0) {
-      throwToolExit(null);
+      throwToolExit(null, exitCode: result);
     }
     return FlutterCommandResult.success();
   }

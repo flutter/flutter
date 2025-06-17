@@ -12,7 +12,6 @@ import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
@@ -214,7 +213,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -360,7 +358,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
-        serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
@@ -788,7 +785,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${sentenceCase(getFriendlyModeName(buildMode))} '
+          '${buildMode.uppercaseFriendlyName}'
           'mode is not supported by ${device.displayName}.',
         );
       }

@@ -22,6 +22,7 @@ import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -130,8 +131,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
       packageName,
       dependency.rootUri,
       project.manifest.dependencies,
-      isDevDependency:
-          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
+      isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -247,8 +247,8 @@ bool _writeFlutterPluginsList(
   result['version'] = globals.flutterVersion.frameworkVersion;
 
   result['swift_package_manager_enabled'] = <String, bool>{
-    'ios': swiftPackageManagerEnabledIos,
-    'macos': swiftPackageManagerEnabledMacos,
+    FlutterDarwinPlatform.ios.name: swiftPackageManagerEnabledIos,
+    FlutterDarwinPlatform.macos.name: swiftPackageManagerEnabledMacos,
   };
 
   // Only write the plugins file if its content have changed. This ensures
@@ -385,33 +385,6 @@ List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
     });
   }
   return directAppDependencies;
-}
-
-// The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.
-// TODO(franciscojma): Remove this method once deprecated.
-// https://github.com/flutter/flutter/issues/48918
-//
-/// Writes the `.flutter-plugins` files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
-///
-/// Finally, returns `true` if `.flutter-plugins` has changed, otherwise returns `false`.
-bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
-  final File pluginsFile = project.flutterPluginsFile;
-  if (plugins.isEmpty) {
-    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
-  }
-
-  const String info = 'This is a generated file; do not edit or check into version control.';
-  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
-
-  for (final Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${globals.fsUtils.escapePath(plugin.path)}\n');
-  }
-  final String? oldPluginFileContent = _readFileContent(pluginsFile);
-  final String pluginFileContent = flutterPluginsBuffer.toString();
-  pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
-
-  return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
 /// Returns the contents of [File] or `null` if that file does not exist.
@@ -814,9 +787,9 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     IOSPlugin.kConfigKey,
   );
   final Map<String, Object> context = <String, Object>{
-    'os': 'ios',
-    'deploymentTarget': '13.0',
-    'framework': 'Flutter',
+    'os': FlutterDarwinPlatform.ios.name,
+    'deploymentTarget': FlutterDarwinPlatform.ios.deploymentTarget().toString(),
+    'framework': FlutterDarwinPlatform.ios.binaryName,
     'methodChannelPlugins': iosPlugins,
   };
   if (project.isModule) {
@@ -929,8 +902,8 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
     MacOSPlugin.kConfigKey,
   );
   final Map<String, Object> context = <String, Object>{
-    'os': 'macos',
-    'framework': 'FlutterMacOS',
+    'os': FlutterDarwinPlatform.macos.name,
+    'framework': FlutterDarwinPlatform.macos.binaryName,
     'methodChannelPlugins': macosMethodChannelPlugins,
   };
   await _renderTemplateToFile(
@@ -1187,24 +1160,17 @@ void _createPlatformPluginSymlinks(
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 ///
-/// If [FeatureFlags.isExplicitPackageDependenciesEnabled] is `true`,
-/// plugins that are development-only dependencies might be labeled or,
+/// Plugins that are development-only dependencies might be labeled or,
 /// depending on the platform, omitted from metadata or platform-specific artifacts.
 Future<void> refreshPluginsList(
   FlutterProject project, {
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
-  bool? generateLegacyPlugins,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  // TODO(matanlurey): Remove once migration is complete.
-  // Write the legacy plugin files to avoid breaking existing apps.
-  generateLegacyPlugins ??= !featureFlags.isExplicitPackageDependenciesEnabled;
-  final bool legacyChanged =
-      generateLegacyPlugins && _writeFlutterPluginsListLegacy(project, plugins);
 
   bool swiftPackageManagerEnabledIos = false;
   bool swiftPackageManagerEnabledMacos = false;
@@ -1223,7 +1189,7 @@ Future<void> refreshPluginsList(
     swiftPackageManagerEnabledIos: swiftPackageManagerEnabledIos,
     swiftPackageManagerEnabledMacos: swiftPackageManagerEnabledMacos,
   );
-  if (changed || legacyChanged || forceCocoaPodsOnly) {
+  if (changed || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
     if (iosPlatform) {
       globals.cocoaPods?.invalidatePodInstallOutput(project.ios);
@@ -1334,10 +1300,10 @@ Future<void> injectPlugins(
           analytics: globals.analytics,
         );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: SupportedPlatform.ios);
+      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: SupportedPlatform.macos);
+      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
     }
   }
 }
