@@ -339,7 +339,7 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
         fuchsia::accessibility::semantics::CheckedState::NONE);
   } else {
     states.set_checked_state(
-        node.flags.isChecked == == flutter::SemanticsCheckState::kTrue
+        node.flags.isChecked == flutter::SemanticsCheckState::kTrue
             ? fuchsia::accessibility::semantics::CheckedState::CHECKED
             : fuchsia::accessibility::semantics::CheckedState::UNCHECKED);
   }
@@ -353,7 +353,8 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   }
 
   // Set selected state.
-  states.set_selected(node.flags.isSelected);
+  states.set_selected(node.flags.isSelected ==
+                      flutter::SemanticsTristate::kTrue);
 
   // Flutter's definition of a hidden node is different from Fuchsia, so it must
   // not be set here.
@@ -446,7 +447,7 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
   // If a flutter node has a checked state, then we assume it is either a
   // checkbox or a radio button. We distinguish between checkboxes and
   // radio buttons based on membership in a mutually exclusive group.
-  if (node.flags.isChecked ! = flutter::SemanticsCheckState::kNone) {
+  if (node.flags.isChecked != flutter::SemanticsCheckState::kNone) {
     if (node.flags.isInMutuallyExclusiveGroup) {
       return fuchsia::accessibility::semantics::Role::RADIO_BUTTON;
     } else {
@@ -802,7 +803,7 @@ bool AccessibilityBridge::IsFocusable(
     return false;
   }
 
-  if (node.flags.isFocusable) {
+  if (node.flags.isFocused != flutter::SemanticsCheckState::kNone) {
     return true;
   }
 
