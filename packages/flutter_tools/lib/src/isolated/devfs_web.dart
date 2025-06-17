@@ -269,6 +269,7 @@ class WebAssetServer implements AssetReader {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
+    bool shouldEnableMiddleware = false,
   }) async {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -440,9 +441,6 @@ class WebAssetServer implements AssetReader {
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
 
-    final bool shouldEnableMiddleware =
-        globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
-        ddcModuleSystem;
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware);
       pipeline = pipeline.addMiddleware(dwds.middleware);
@@ -915,6 +913,12 @@ class WebDevFS implements DevFS {
 
   Dwds get dwds => webAssetServer.dwds;
 
+  /// Whether middleware should be enabled for this web development server.
+  /// Middleware is enabled when using Chrome device or DDC module system.
+  bool get shouldEnableMiddleware =>
+      globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
+      ddcModuleSystem;
+
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
   bool hasSetAssetDirectory = false;
@@ -1016,6 +1020,7 @@ class WebDevFS implements DevFS {
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      shouldEnableMiddleware: shouldEnableMiddleware,
     );
     return baseUri!;
   }
@@ -1090,10 +1095,6 @@ class WebDevFS implements DevFS {
         '// Service worker not loaded in run mode.',
       );
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
-      // Load indicator is only turned off when the injected client is added.
-      final bool shouldEnableMiddleware =
-          globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
-          ddcModuleSystem;
       webAssetServer.writeFile(
         'main.dart.js',
         ddcModuleSystem
