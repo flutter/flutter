@@ -324,18 +324,6 @@ Future<void> forceQuitRunningProcesses() async {
   _runningProcesses.clear();
 }
 
-/// Type definition of the [exec] function.
-typedef ExecFunction =
-    Future<int> Function(
-      String executable,
-      List<String> arguments, {
-      Map<String, String>? environment,
-      bool canFail,
-      String? workingDirectory,
-      StringBuffer? output,
-      StringBuffer? stderr,
-    });
-
 /// Executes a command and returns its exit code.
 Future<int> exec(
   String executable,
@@ -435,20 +423,6 @@ Future<void> forwardStandardStreams(
 
   return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
 }
-
-/// Type definition of the [eval] function.
-typedef EvalFunction =
-    Future<String> Function(
-      String executable,
-      List<String> arguments, {
-      Map<String, String>? environment,
-      bool canFail,
-      String? workingDirectory,
-      StringBuffer? stdout,
-      StringBuffer? stderr,
-      bool printStdout,
-      bool printStderr,
-    });
 
 /// Executes a command and returns its standard output as a String.
 ///
