@@ -2566,8 +2566,7 @@ const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
 String _getFlutterLicense() {
-  return
-      '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '// Use of this source code is governed by a BSD-style license that can be\n'
       '// found in the LICENSE file.\n'
       '\n';
