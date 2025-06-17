@@ -84,7 +84,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
-        other.announce == announce;
+        other.supportsAnnounce == supportsAnnounce;
   }
 
   @override
