@@ -375,6 +375,11 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       continue;
     }
 
+    // The reflector/runtime stage data is confused as to whether 0 means
+    // no elements or whether it is not an array. For non-array, this
+    // value actually needs to be 1, but changing the compiler to always
+    // provide a value of zero confuses other parts of the code generation
+    // stages.
     size_t element_count = member.array_elements.value_or(1);
     if (element_count == 0) {
       element_count = 1;
