@@ -5720,7 +5720,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = childParentData;
     }
     for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
-      assert(!childSemantics.renderObject._needsLayout);
       childSemantics._didUpdateParentData(effectiveChildParentData);
       for (final _SemanticsFragment fragment in childSemantics.mergeUp) {
         if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {

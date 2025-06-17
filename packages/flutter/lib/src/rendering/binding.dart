@@ -262,7 +262,20 @@ mixin RendererBinding
   )
   late final PipelineOwner pipelineOwner = PipelineOwner(
     onSemanticsOwnerCreated: () {
+      final RenderView? root = pipelineOwner.rootNode as RenderView?;
       (pipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
+      if (root != null) {
+        root.scheduleInitialSemantics();
+        // Synchronously flush semantics if possible. This should send the
+        // update to platform synchronously if UI and platform threads are
+        // merged.
+        //
+        // Doing this let's OS to read the semantics tree synchronously even if
+        // semantics has not been built before.
+        if (root.child?.hasSize ?? false) {
+          pipelineOwner.flushSemantics();
+        }
+      }
     },
     onSemanticsUpdate: (ui.SemanticsUpdate update) {
       (pipelineOwner.rootNode as RenderView?)?.updateSemantics(update);

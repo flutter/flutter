@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_update_tester.dart';
 
 void main() {
   SemanticsUpdateTestBinding();
@@ -15,6 +14,7 @@ void main() {
   testWidgets('Semantics update does not send update for merged nodes.', (
     WidgetTester tester,
   ) async {
+    addTearDown(SemanticsUpdateBuilderSpy.observations.clear);
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
