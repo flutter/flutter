@@ -7,15 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
-    late TransitionRoute<void> currentRoute;
-    final _TestNavigatorObserver observer =
-        _TestNavigatorObserver()
-          ..onPopped = (Route<void> route, Route<void>? previousRoute) {
-            currentRoute = route as TransitionRoute<void>;
-          }
-          ..onPushed = (Route<void> route, Route<void>? previousRoute) {
-            currentRoute = route as TransitionRoute<void>;
-          };
+    final TransitionDurationObserver observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -44,6 +36,8 @@ void main() {
             ),
             // A route that uses ZoomPageTransitionsBuilder.
             '/2' => _TestTransitionRoute<void>(
+              transitionDurationOverride: const Duration(milliseconds: 456),
+              reverseTransitionDurationOverride: const Duration(milliseconds: 567),
               pageTransitionsBuilder: const ZoomPageTransitionsBuilder(),
               builder: (BuildContext context) {
                 return Scaffold(
@@ -103,7 +97,7 @@ void main() {
     await tester.tap(find.text('Next'));
 
     await tester.pump();
-    await tester.pump(currentRoute.transitionDuration + const Duration(milliseconds: 1));
+    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsOneWidget);
@@ -112,7 +106,7 @@ void main() {
     await tester.tap(find.text('Next'));
 
     await tester.pump();
-    await tester.pump(currentRoute.transitionDuration + const Duration(milliseconds: 1));
+    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsNothing);
@@ -121,7 +115,7 @@ void main() {
     await tester.tap(find.text('Back'));
 
     await tester.pump();
-    await tester.pump(currentRoute.transitionDuration + const Duration(milliseconds: 1));
+    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsOneWidget);
@@ -130,7 +124,7 @@ void main() {
     await tester.tap(find.text('Back'));
 
     await tester.pump();
-    await tester.pump(currentRoute.transitionDuration + const Duration(milliseconds: 1));
+    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
@@ -139,9 +133,16 @@ void main() {
 }
 
 class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
-  _TestTransitionRoute({required super.builder, required this.pageTransitionsBuilder});
+  _TestTransitionRoute({
+    required super.builder,
+    required this.pageTransitionsBuilder,
+    this.transitionDurationOverride,
+    this.reverseTransitionDurationOverride,
+  });
 
   final PageTransitionsBuilder pageTransitionsBuilder;
+  final Duration? transitionDurationOverride;
+  final Duration? reverseTransitionDurationOverride;
 
   @override
   Widget buildTransitions(
@@ -160,46 +161,9 @@ class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => pageTransitionsBuilder.transitionDuration;
+  Duration get transitionDuration =>
+      transitionDurationOverride ?? pageTransitionsBuilder.transitionDuration;
   @override
-  Duration get reverseTransitionDuration => pageTransitionsBuilder.reverseTransitionDuration;
-}
-
-class _TestNavigatorObserver extends NavigatorObserver {
-  void Function(Route<dynamic> route, Route<dynamic>? previousRoute)? onPushed;
-  void Function(Route<dynamic> route, Route<dynamic>? previousRoute)? onPopped;
-  void Function(Route<dynamic> route, Route<dynamic>? previousRoute)? onRemoved;
-  void Function(Route<dynamic>? route, Route<dynamic>? previousRoute)? onReplaced;
-  void Function(Route<dynamic> route, Route<dynamic>? previousRoute)? onStartUserGesture;
-  void Function()? onStopUserGesture;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onPushed?.call(route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onPopped?.call(route, previousRoute);
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onRemoved?.call(route, previousRoute);
-  }
-
-  @override
-  void didReplace({Route<dynamic>? oldRoute, Route<dynamic>? newRoute}) {
-    onReplaced?.call(newRoute, oldRoute);
-  }
-
-  @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onStartUserGesture?.call(route, previousRoute);
-  }
-
-  @override
-  void didStopUserGesture() {
-    onStopUserGesture?.call();
-  }
+  Duration get reverseTransitionDuration =>
+      reverseTransitionDurationOverride ?? pageTransitionsBuilder.reverseTransitionDuration;
 }

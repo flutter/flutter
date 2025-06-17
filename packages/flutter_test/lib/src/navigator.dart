@@ -10,18 +10,20 @@ import 'package:flutter/widgets.dart';
 // Examples can assume:
 // final TransitionDurationObserver transitionDurationObserver = TransitionDurationObserver();
 
-/// Tracks the page transition duration of the current route.
+/// Tracks the duration of the most recent page transition.
 ///
 /// Pass an instance to [Navigator.observers] or
 /// [WidgetsApp.navigatorObservers], then access [transitionDuration].
 class TransitionDurationObserver extends NavigatorObserver {
-  TransitionRoute<void>? _currentTransitionRoute;
+  Duration? _transitionDuration;
 
-  /// The total duration of the current route's page transition.
+  /// The total duration of the most recent page transition.
   ///
-  /// This does not consider whether a page transition is currently running. For
-  /// example, if this is called halfway through a page transition, it will
-  /// still return the full duration, not half.
+  /// When called during a page transition, it will return the full duration of
+  /// the currently active page transition. If called immediately after a call
+  /// to `Navigator.pop`, for example, it will return the duration of the
+  /// transition triggered by that call. If called halfway through a page
+  /// transition, it will still return the full duration, not half.
   ///
   /// To pump until the route transition is finished and the previous route is
   /// completely gone, use the following:
@@ -29,43 +31,48 @@ class TransitionDurationObserver extends NavigatorObserver {
   /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget', (WidgetTester tester) async {
-  ///   // ...Set up app and start a page transition, then:
+  ///   // ...Pump the app and start a page transition, then:
   ///   await tester.pump();
   ///   await tester.pump(transitionDurationObserver.transitionDuration + const Duration(milliseconds: 1));
   /// });
   /// ```
   /// {@end-tool}
   ///
-  /// Throws if there is no current route or if the current route has no
-  /// transition duration.
+  /// Throws if there has never been a page transition.
   Duration get transitionDuration {
-    if (_currentTransitionRoute == null) {
-      throw FlutterError('The current route is not a route with a page transition.');
+    if (_transitionDuration == null) {
+      throw FlutterError('No route transition has occurred, but the transition duration was requested.');
     }
-    return _currentTransitionRoute!.transitionDuration;
+    return _transitionDuration!;
   }
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _currentTransitionRoute = route is TransitionRoute ? route : null;
+    // When pushing, the incoming route determines the transition duration.
+    if (route is TransitionRoute) {
+      _transitionDuration = route.transitionDuration;
+    }
     super.didPush(route, previousRoute);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _currentTransitionRoute = previousRoute is TransitionRoute ? previousRoute : null;
+    // When popping, the outgoing route's reverseTransitionDuration determines
+    // the transition duration.
+    if (route is TransitionRoute) {
+      _transitionDuration = route.reverseTransitionDuration;
+    }
     super.didPop(route, previousRoute);
   }
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    _currentTransitionRoute = previousRoute is TransitionRoute ? previousRoute : null;
-    super.didRemove(route, previousRoute);
-  }
-
-  @override
   void didReplace({Route<dynamic>? oldRoute, Route<dynamic>? newRoute}) {
-    _currentTransitionRoute = newRoute is TransitionRoute ? newRoute : null;
+    // When replacing, the new route determines the transition duration.
+    if (newRoute is TransitionRoute) {
+      _transitionDuration = newRoute.transitionDuration;
+    }
     super.didReplace(oldRoute: oldRoute, newRoute: newRoute);
   }
+
+  // didRemove is not included because it does not trigger a page transition.
 }
