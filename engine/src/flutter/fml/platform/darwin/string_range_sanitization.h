@@ -15,14 +15,11 @@ namespace fml {
 // character is returned.
 NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index);
 
-// Returns a range encompassing the grapheme clusters falling in |range|.
+// Returns the smallest range encompassing the grapheme clusters which are with
+// in |range| or clipped by |range|.
 //
-// This method will not alter the length of the input range, but will ensure
-// that the range's location is not in the middle of a multi-byte unicode
-// sequence.
-//
-// If the given |range| is first clamped to the closest valid string length 
-// An invalid range will result in `NSRange(NSNotFound, 0)`.
+// The given |range| is first clamped to a valid range within the length of the
+// string before it is used to determine the grapheme clusters.
 NSRange RangeForCharactersInRange(NSString* text, NSRange range);
 
 }  // namespace fml

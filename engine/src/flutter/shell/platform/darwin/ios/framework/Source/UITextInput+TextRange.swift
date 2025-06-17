@@ -45,6 +45,28 @@ public final class TextRange: UITextRange, NSCopying {
   }
 
   override public var isEmpty: Bool { range.length == 0 }
+  
+  /// Returns the smallest TextRange that contains this TextRange and doesn't contain unpaired surrogates.
+  ///
+  /// This method assumes the receiver is a valid range with in the given document, and the text of the
+  /// document is a well-formed string.
+  ///
+  /// On iOS 13, the default standard Korean keyboard incorrectly may delete the low surrogate and
+  /// leaves the high surrogate in the string, resulting in a malformed string and subsequently a crash during
+  /// UTF8 encoding. See: https://github.com/flutter/flutter/issues/111494.
+  @objc public func safeRange(in document: UITextInput) -> TextRange {
+    let fullText = document.fullText
+    let start = self.start.index
+    let end = self.end.index
+    let startsWithTrailingSurrogate = start > 0 && Unicode.UTF16.isTrailSurrogate( fullText.utf16[start])
+    let endsWithLeadingSurrogate = isEmpty
+      ? startsWithTrailingSurrogate
+    : Unicode.UTF16.isLeadSurrogate(fullText.utf16[end - 1])
+    
+    let newStart = startsWithTrailingSurrogate ? start - 1 : start
+    let newEnd = endsWithLeadingSurrogate ? end + 1 : end
+    return TextRange(NSRange: NSRange(location: Int(newStart), length: newStart.distance(to: newEnd)))
+  }
 
   override public var description: String {
     "TextRange(\(range))"

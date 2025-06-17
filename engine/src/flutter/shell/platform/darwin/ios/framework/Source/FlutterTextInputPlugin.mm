@@ -1880,7 +1880,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   CGFloat maxY = CGFLOAT_MIN;
 
   FlutterTextRange* textRange = [FlutterTextRange
-      rangeWithNSRange:self.text, NSMakeRange(0, self.text.length)];
+      rangeWithNSRange: NSMakeRange(0, self.text.length)];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     BOOL startsOnOrBeforeStartOfRange = _selectionRects[i].position <= first;
     BOOL isLastSelectionRect = i + 1 == [_selectionRects count];
@@ -1924,7 +1924,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
-  NSUInteger index = position.index;
+  NSInteger index = position.index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
   
@@ -2096,7 +2096,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
-  NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger currentIndex = _selectedTextRange.start.index;
   return [FlutterTextRange rangeWithNSRange:fml::RangeForCharacterAtIndex(self.text, currentIndex)];
 }
 
@@ -2320,42 +2320,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (deleteRange) {
      _selectedTextRange = deleteRange.isEmpty ?
     [FlutterTextRange rangeWithNSRange:[_text getBackspaceDeleteRangeForCaretLocation: deleteRange.start.index]]
-  : deleteRange;
+  : [deleteRange safeRangeIn: self];
   [self replaceRange:_selectedTextRange withText: @""];
   }
   
   //NSLog(@"backspace delete with range: %@, marked: %@, selected: %@", NSStringFromRange(deleteRange.range), NSStringFromRange(_markedTextRange.range), NSStringFromRange(_selectedTextRange.range));
-  return;
-  
-//  if (_selectedTextRange.isEmpty && [self hasText]) {
-//    UITextRange* oldSelectedRange = _selectedTextRange;
-//    NSRange oldRange = ((FlutterTextRange*)oldSelectedRange).range;
-//    if (oldRange.location > 0) {
-//      NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
-//
-//      // We should check if the last character is a part of emoji.
-//      // If so, we must delete the entire emoji to prevent the text from being malformed.
-//      NSRange charRange = fml::RangeForCharacterAtIndex(self.text, oldRange.location - 1);
-//      if (IsEmoji(self.text, charRange)) {
-//        newRange = NSMakeRange(charRange.location, oldRange.location - charRange.location);
-//      }
-//
-//      _selectedTextRange = [[FlutterTextRange rangeWithNSRange:newRange] copy];
-//    }
-//  }
-//
-//  if (!_selectedTextRange.isEmpty) {
-//    // Cache the last deleted emoji to use for an iOS bug where the next
-//    // insertion corrupts the emoji characters.
-//    // See: https://github.com/flutter/flutter/issues/111494#issuecomment-1248441346
-//    if (IsEmoji(self.text, _selectedTextRange.range)) {
-//      NSString* deletedText = [self.text substringWithRange:_selectedTextRange.range];
-//      NSRange deleteFirstCharacterRange = fml::RangeForCharacterAtIndex(deletedText, 0);
-//      self.temporarilyDeletedComposedCharacter =
-//          [deletedText substringWithRange:deleteFirstCharacterRange];
-//    }
-//    [self replaceRange:_selectedTextRange withText:@""];
-//  }
 }
 
 - (void)postAccessibilityNotification:(UIAccessibilityNotifications)notification target:(id)target {
