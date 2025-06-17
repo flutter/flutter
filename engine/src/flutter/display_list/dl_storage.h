@@ -43,6 +43,9 @@ class DisplayListStorage {
 
   DisplayListStorage& operator=(DisplayListStorage&& other);
 
+  /// @brief Compute the next power of two from [x].
+  static size_t NextPowerOfTwoSize(size_t x);
+
  private:
   void realloc(size_t count);
 
