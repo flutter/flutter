@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:flutter/widgets.dart';
+
+// Examples can assume:
+// final TransitionDurationObserver transitionDurationObserver = TransitionDurationObserver();
 
 /// Tracks the page transition duration of the current route.
 ///
