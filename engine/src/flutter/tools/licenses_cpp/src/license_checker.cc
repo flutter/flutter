@@ -201,6 +201,7 @@ absl::Status MatchLicenseFile(const fs::path& path,
 
     if (match.ok()) {
       license_map->Add(package.name, match->matched_text);
+      VLOG(1) << "OK: " << path << " : " << match->matcher;
     } else {
       return absl::NotFoundError(absl::StrCat("Unknown license in ",
                                               package.license_file->string(),
@@ -225,7 +226,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
   LicenseMap license_map;
   absl::flat_hash_set<fs::path> seen_license_files;
   for (const fs::path& git_repo : git_repos) {
-    if (IsStdoutTerminal()) {
+    if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
       PrintProgress(count++, git_repos.size());
     }
 
@@ -256,7 +257,6 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         }
       }
 
-      VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
         if (file.status().code() == absl::StatusCode::kInvalidArgument) {
@@ -274,17 +274,19 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
             re2::StringPiece match;
             if (RE2::PartialMatch(comment, pattern, &match)) {
               did_find_copyright = true;
-              VLOG(1) << comment;
               if (!package.license_file.has_value()) {
                 absl::StatusOr<Catalog::Match> match =
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
                   license_map.Add(package.name, match->matched_text);
+                  VLOG(1) << "OK: " << full_path << " : " << match->matcher;
                 } else {
                   errors.emplace_back(absl::NotFoundError(
                       absl::StrCat("Unknown license in ", full_path.string(),
                                    " : ", match.status().message())));
                 }
+              } else {
+                VLOG(1) << "OK: " << full_path << " : dir license";
               }
             }
           });
@@ -295,7 +297,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
     }
   }
   license_map.Write(licenses);
-  if (IsStdoutTerminal()) {
+  if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
     PrintProgress(count++, git_repos.size());
     std::cout << std::endl;
   }
@@ -314,7 +316,7 @@ int LicenseChecker::Run(std::string_view working_dir,
   }
   std::vector<absl::Status> errors = Run(working_dir, licenses, data.value());
   for (const absl::Status& status : errors) {
-    std::cerr << status << std::endl;
+    std::cerr << status << "\n";
   }
 
   return errors.empty() ? 0 : 1;

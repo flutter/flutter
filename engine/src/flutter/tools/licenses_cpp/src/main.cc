@@ -8,6 +8,7 @@
 #include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
 #include "flutter/third_party/abseil-cpp/absl/log/globals.h"
+#include "flutter/third_party/abseil-cpp/absl/log/initialize.h"
 #include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
@@ -32,6 +33,8 @@ int main(int argc, char** argv) {
 
   std::vector<char*> args = absl::ParseCommandLine(argc, argv);
   absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_v));
+  absl::InitializeLog();
+  absl::SetStderrThreshold(absl::LogSeverity::kInfo);
 
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_data_dir);
