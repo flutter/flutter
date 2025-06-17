@@ -201,18 +201,12 @@ class XcodeProjectInterpreter {
       if (scheme != null) ...<String>['-scheme', scheme],
       if (configuration != null) ...<String>['-configuration', configuration],
       if (target != null) ...<String>['-target', target],
-      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>['-sdk', 'iphonesimulator'],
+      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>[
+        '-sdk',
+        XcodeSdk.IPhoneSimulator.platformName,
+      ],
       '-destination',
-      if (deviceId != null)
-        'id=$deviceId'
-      else
-        switch (buildContext.sdk) {
-          XcodeSdk.IPhoneOS => 'generic/platform=iOS',
-          XcodeSdk.IPhoneSimulator => 'generic/platform=iOS Simulator',
-          XcodeSdk.MacOSX => 'generic/platform=macOS',
-          XcodeSdk.WatchOS => 'generic/platform=watchOS',
-          XcodeSdk.WatchSimulator => 'generic/platform=watchOS Simulator',
-        },
+      if (deviceId != null) 'id=$deviceId' else buildContext.sdk.genericPlatform,
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(buildDir)}',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
@@ -270,7 +264,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-alltargets',
       '-sdk',
-      'iphonesimulator',
+      XcodeSdk.IPhoneSimulator.platformName,
       '-project',
       podXcodeProject.path,
       '-showBuildSettings',
@@ -395,7 +389,34 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 
 /// Xcode SDKs. Corresponds to undocumented Xcode SUPPORTED_PLATFORMS values.
 /// Use `xcodebuild -showsdks` to get a list of SDKs installed on your machine.
-enum XcodeSdk { IPhoneOS, IPhoneSimulator, MacOSX, WatchOS, WatchSimulator }
+enum XcodeSdk {
+  IPhoneOS(displayName: 'iOS', platformName: 'iphoneos', sdkType: EnvironmentType.physical),
+  IPhoneSimulator(
+    displayName: 'iOS Simulator',
+    platformName: 'iphonesimulator',
+    sdkType: EnvironmentType.simulator,
+  ),
+  MacOSX(displayName: 'macOS', platformName: 'macosx', sdkType: EnvironmentType.physical),
+  WatchOS(displayName: 'watchOS', platformName: 'watchos', sdkType: EnvironmentType.physical),
+  WatchSimulator(
+    displayName: 'watchOS Simulator',
+    platformName: 'watchsimulator',
+    sdkType: EnvironmentType.simulator,
+  );
+
+  const XcodeSdk({required this.displayName, required this.platformName, required this.sdkType});
+
+  /// Corresponds to Xcode value PLATFORM_DISPLAY_NAME.
+  final String displayName;
+
+  /// Corresponds to Xcode value PLATFORM_NAME.
+  final String platformName;
+
+  /// The [EnvironmentType] for the sdk (simulator, physical).
+  final EnvironmentType sdkType;
+
+  String get genericPlatform => 'generic/platform=$displayName';
+}
 
 @immutable
 class XcodeProjectBuildContext {

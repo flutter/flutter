@@ -10,17 +10,14 @@ resolution: workspace
 
 dependencies:
   args: any
-  meta: any
-  path: any
-  process: any
-  protobuf: any
-
   file: any
   fixnum: any
+  meta: any
+  path: any
   platform: any
+  process: any
 
 dev_dependencies:
   test: any
 
-
-# PUBSPEC CHECKSUM: 1p5qu
+# PUBSPEC CHECKSUM: av6331
