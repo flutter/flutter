@@ -90,7 +90,7 @@ std::string GetLastErrorAsString() {
 
 // Calculates the required window size, in physical coordinates, to
 // accommodate the given |client_size|, in logical coordinates, constrained by
-// optional |min_size| and |max_size|, for a window with the specified
+// optional |smallest| and |biggest|, for a window with the specified
 // |window_style| and |extended_window_style|. If |owner_hwnd| is not null, the
 // DPI of the display with the largest area of intersection with |owner_hwnd| is
 // used for the calculation; otherwise, the primary display's DPI is used. The
@@ -99,8 +99,8 @@ std::string GetLastErrorAsString() {
 std::optional<flutter::Size> GetWindowSizeForClientSize(
     flutter::WindowsProcTable const& proc_table,
     flutter::Size const& client_size,
-    std::optional<flutter::Size> min_size,
-    std::optional<flutter::Size> max_size,
+    std::optional<flutter::Size> smallest,
+    std::optional<flutter::Size> biggest,
     DWORD window_style,
     DWORD extended_window_style,
     HWND owner_hwnd) {
@@ -125,17 +125,17 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
   double const non_client_width = width - (client_size.width() * scale_factor);
   double const non_client_height =
       height - (client_size.height() * scale_factor);
-  if (min_size) {
+  if (smallest) {
     flutter::Size min_physical_size = ClampToVirtualScreen(
-        flutter::Size(min_size->width() * scale_factor + non_client_width,
-                      min_size->height() * scale_factor + non_client_height));
+        flutter::Size(smallest->width() * scale_factor + non_client_width,
+                      smallest->height() * scale_factor + non_client_height));
     width = std::max(width, min_physical_size.width());
     height = std::max(height, min_physical_size.height());
   }
-  if (max_size) {
+  if (biggest) {
     flutter::Size max_physical_size = ClampToVirtualScreen(
-        flutter::Size(max_size->width() * scale_factor + non_client_width,
-                      max_size->height() * scale_factor + non_client_height));
+        flutter::Size(biggest->width() * scale_factor + non_client_width,
+                      biggest->height() * scale_factor + non_client_height));
     width = std::min(width, max_physical_size.width());
     height = std::min(height, max_physical_size.height());
   }
@@ -220,13 +220,13 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
     const FlutterWindowSizing& content_size) {
   DWORD window_style = WS_OVERLAPPEDWINDOW;
   DWORD extended_window_style = 0;
-  std::optional<Size> min_size = std::nullopt;
-  std::optional<Size> max_size = std::nullopt;
+  std::optional<Size> smallest = std::nullopt;
+  std::optional<Size> biggest = std::nullopt;
 
   if (content_size.has_constraints) {
-    min_size = Size(content_size.min_width, content_size.min_height);
+    smallest = Size(content_size.min_width, content_size.min_height);
     if (content_size.max_width > 0 && content_size.max_height > 0) {
-      max_size = Size(content_size.max_width, content_size.max_height);
+      biggest = Size(content_size.max_width, content_size.max_height);
     }
   }
 
@@ -239,7 +239,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   Rect const initial_window_rect = [&]() -> Rect {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine->windows_proc_table(),
-        Size(content_size.width, content_size.height), min_size, max_size,
+        Size(content_size.width, content_size.height), smallest, biggest,
         window_style, extended_window_style, nullptr);
     return {{CW_USEDEFAULT, CW_USEDEFAULT},
             window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
@@ -328,7 +328,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   ShowWindow(hwnd, SW_SHOWNORMAL);
   return std::unique_ptr<FlutterHostWindow>(new FlutterHostWindow(
       window_manager, engine, WindowArchetype::kRegular,
-      std::move(view_controller), BoxConstraints(min_size, max_size), hwnd));
+      std::move(view_controller), BoxConstraints(smallest, biggest), hwnd));
 }
 
 FlutterHostWindow::FlutterHostWindow(
@@ -429,21 +429,21 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
           static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
 
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
-      if (box_constraints_.min_size()) {
+      if (box_constraints_.smallest()) {
         Size const min_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.min_size()->width() * scale_factor +
+            Size(box_constraints_.smallest()->width() * scale_factor +
                      non_client_width,
-                 box_constraints_.min_size()->height() * scale_factor +
+                 box_constraints_.smallest()->height() * scale_factor +
                      non_client_height));
 
         info->ptMinTrackSize.x = min_physical_size.width();
         info->ptMinTrackSize.y = min_physical_size.height();
       }
-      if (box_constraints_.max_size()) {
+      if (box_constraints_.biggest()) {
         Size const max_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.max_size()->width() * scale_factor +
+            Size(box_constraints_.biggest()->width() * scale_factor +
                      non_client_width,
-                 box_constraints_.max_size()->height() * scale_factor +
+                 box_constraints_.biggest()->height() * scale_factor +
                      non_client_height));
 
         info->ptMaxTrackSize.x = max_physical_size.width();
@@ -492,20 +492,20 @@ void FlutterHostWindow::SetContentSize(const FlutterWindowSizing& size) {
   WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
   GetWindowInfo(window_handle_, &window_info);
 
-  std::optional<Size> min_size, max_size;
+  std::optional<Size> smallest, biggest;
   if (size.has_constraints) {
-    min_size = Size(size.min_width, size.min_height);
+    smallest = Size(size.min_width, size.min_height);
     if (size.max_width > 0 && size.max_height > 0) {
-      max_size = Size(size.max_width, size.max_height);
+      biggest = Size(size.max_width, size.max_height);
     }
   }
 
-  box_constraints_ = BoxConstraints(min_size, max_size);
+  box_constraints_ = BoxConstraints(smallest, biggest);
 
   if (size.has_size) {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(), Size(size.width, size.height),
-        box_constraints_.min_size(), box_constraints_.max_size(),
+        box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
     if (window_size) {

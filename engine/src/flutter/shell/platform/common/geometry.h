@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_COMMON_GEOMETRY_H_
 
 #include <cmath>
+#include <limits>
 #include <optional>
 
 namespace flutter {
@@ -85,22 +86,20 @@ class Rect {
 class BoxConstraints {
  public:
   BoxConstraints() = default;
-  BoxConstraints(const std::optional<Size>& min_size,
-                 const std::optional<Size>& max_size)
-      : min_size_(min_size), max_size_(max_size) {}
-  static BoxConstraints tight(const Size& size) {
-    return BoxConstraints(size, size);
-  }
-  static BoxConstraints loose(const Size& size) {
-    return BoxConstraints(Size(0, 0), size);
-  }
+  BoxConstraints(const std::optional<Size>& smallest,
+                 const std::optional<Size>& biggest)
+      : smallest_(smallest.value_or(Size(0, 0))),
+        biggest_(
+            biggest.value_or(Size(std::numeric_limits<double>::infinity(),
+                                  std::numeric_limits<double>::infinity()))) {}
   BoxConstraints(const BoxConstraints& other) = default;
-  std::optional<Size> max_size() const { return max_size_; }
-  std::optional<Size> min_size() const { return min_size_; }
+  std::optional<Size> biggest() const { return biggest_; }
+  std::optional<Size> smallest() const { return smallest_; }
 
  private:
-  std::optional<Size> min_size_;
-  std::optional<Size> max_size_;
+  Size smallest_ = Size(0, 0);
+  Size biggest_ = Size(std::numeric_limits<double>::infinity(),
+                       std::numeric_limits<double>::infinity());
 };
 
 }  // namespace flutter
