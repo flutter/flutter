@@ -3856,11 +3856,6 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///
 ///  * [SemanticsProperties], which contains a complete documentation for each
 ///    of the constructor parameters that belongs to semantics properties.
-///  * [MergeSemantics], which marks a subtree as being a single node for
-///    accessibility purposes.
-///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
-///    (which might be useful if it is, e.g., totally decorative and not
-///    important to the user).
 ///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
 ///    through which the [Semantics] widget and [SliverSemantics] sliver are
 ///    actually implemented.
@@ -3869,6 +3864,11 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
 ///    be enabled using [WidgetsApp.showSemanticsDebugger],
 ///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
+///  * [MergeSemantics], a widget which marks a subtree as being a single node for
+///    accessibility purposes.
+///  * [ExcludeSemantics], a widget which excludes a subtree from the semantics tree
+///    (which might be useful if it is, e.g., totally decorative and not
+///    important to the user).
 /// {@endtemplate}
 @immutable
 sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
