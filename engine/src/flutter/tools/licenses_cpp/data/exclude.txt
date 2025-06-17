@@ -1,15 +1,17 @@
 # This file describes all the files we don't need to do a copyright header
 # check on.
+.*/flutter/third_party/inja/third_party/amalgamate/.*
+.*/flutter/third_party/inja/third_party/include/doctest/.*
 .*/skia/third_party/freetype2/.*
 .*/skia/third_party/icu/.*
 .*/skia/third_party/libgrapheme/.*
 .*/skia/third_party/libpng/.*
 .*/skia/third_party/vello/.*
+.*/test/.*
+.*/testing/.*
+.*/tests/.*
 .*/third_party/benchmark/.*
 .*/third_party/llvm-project/.*
 .*/third_party/ocmock/.*
 .*/third_party/swiftshader/third_party/llvm-10.0/.*
 .*/third_party/swiftshader/third_party/llvm-16.0/.*
-.*/test/.*
-.*/testing/.*
-.*/tests/.*
