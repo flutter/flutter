@@ -909,6 +909,10 @@ targets:
       - .ci.yaml
       - engine/**
       - DEPS
+      - /**/*.gradle
+      - /**/*.gradle.kts
+      - /**/gradle-wrapper.properties
+      - /**/*.lockfile
 
   - name: Linux gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
@@ -3090,13 +3094,13 @@ targets:
         ["devicelab", "android", "linux", "mokey"]
       task_name: list_text_layout_impeller_perf__e2e_summary
 
-  - name: Linux_pixel_7pro native_assets_android
+  - name: Linux_android_emu native_assets_android
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
+        ["devicelab", "linux"]
       task_name: native_assets_android
 
   # linux mokey benchmark
