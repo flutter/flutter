@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -818,6 +818,301 @@ void main() {
 
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
+  });
+
+  group('default semantics', () {
+    testWidgets('tap', (WidgetTester tester) async {
+      TapDownDetails? receivedTapDownDetails;
+      TapUpDetails? receivedTapUpDetails;
+      bool tapped = false;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                    () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+                    (TapGestureRecognizer instance) {
+                      instance.onTapDown = (TapDownDetails details) {
+                        receivedTapDownDetails = details;
+                      };
+                      instance.onTapUp = (TapUpDetails details) {
+                        receivedTapUpDetails = details;
+                      };
+                      instance.onTap = () {
+                        tapped = true;
+                      };
+                    },
+                  ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(receivedTapDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedTapDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedTapUpDetails!.localPosition, const Offset(10, 10));
+      expect(receivedTapUpDetails!.globalPosition, const Offset(400, 300));
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('long press', (WidgetTester tester) async {
+      LongPressDownDetails? receivedLongPressDownDetails;
+      LongPressStartDetails? receivedLongPressStartDetails;
+      LongPressEndDetails? receivedLongPressEndDetails;
+      bool pressed = false;
+      bool upped = false;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  LongPressGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                        () => LongPressGestureRecognizer(),
+                        (LongPressGestureRecognizer instance) {
+                          instance.onLongPressDown = (LongPressDownDetails details) {
+                            receivedLongPressDownDetails = details;
+                          };
+                          instance.onLongPressStart = (LongPressStartDetails details) {
+                            receivedLongPressStartDetails = details;
+                          };
+                          instance.onLongPressEnd = (LongPressEndDetails details) {
+                            receivedLongPressEndDetails = details;
+                          };
+                          instance.onLongPressUp = () {
+                            upped = true;
+                          };
+                          instance.onLongPress = () {
+                            pressed = true;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.longPress), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.longPress);
+      await tester.pump();
+      expect(receivedLongPressDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedLongPressStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressStartDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedLongPressEndDetails!.localPosition, const Offset(10, 10));
+      expect(receivedLongPressEndDetails!.globalPosition, const Offset(400, 300));
+      expect(pressed, isTrue);
+      expect(upped, isTrue);
+    });
+
+    testWidgets('horizontal drag', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  HorizontalDragGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+                        () => HorizontalDragGestureRecognizer(),
+                        (HorizontalDragGestureRecognizer instance) {
+                          instance.onDown = (DragDownDetails details) {
+                            receivedDragDownDetails = details;
+                          };
+                          instance.onStart = (DragStartDetails details) {
+                            receivedDragStartDetails = details;
+                          };
+                          instance.onUpdate = (DragUpdateDetails details) {
+                            receivedDragUpdateDetails = details;
+                          };
+                          instance.onEnd = (DragEndDetails details) {
+                            receivedDragEndDetails = details;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollRight);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      final Offset delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
+
+    testWidgets('vertical drag', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  VerticalDragGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+                        () => VerticalDragGestureRecognizer(),
+                        (VerticalDragGestureRecognizer instance) {
+                          instance.onDown = (DragDownDetails details) {
+                            receivedDragDownDetails = details;
+                          };
+                          instance.onStart = (DragStartDetails details) {
+                            receivedDragStartDetails = details;
+                          };
+                          instance.onUpdate = (DragUpdateDetails details) {
+                            receivedDragUpdateDetails = details;
+                          };
+                          instance.onEnd = (DragEndDetails details) {
+                            receivedDragEndDetails = details;
+                          };
+                        },
+                      ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollUp), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollUp);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      final Offset delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
+
+    testWidgets('pan', (WidgetTester tester) async {
+      DragDownDetails? receivedDragDownDetails;
+      DragStartDetails? receivedDragStartDetails;
+      DragUpdateDetails? receivedDragUpdateDetails;
+      DragEndDetails? receivedDragEndDetails;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawGestureDetector(
+                key: key,
+                gestures: <Type, GestureRecognizerFactory>{
+                  PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                    () => PanGestureRecognizer(),
+                    (PanGestureRecognizer instance) {
+                      instance.onDown = (DragDownDetails details) {
+                        receivedDragDownDetails = details;
+                      };
+                      instance.onStart = (DragStartDetails details) {
+                        receivedDragStartDetails = details;
+                      };
+                      instance.onUpdate = (DragUpdateDetails details) {
+                        receivedDragUpdateDetails = details;
+                      };
+                      instance.onEnd = (DragEndDetails details) {
+                        receivedDragEndDetails = details;
+                      };
+                    },
+                  ),
+                },
+                child: const SizedBox(width: 20, height: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.semantics.find(find.byKey(key));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollRight);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      Offset delta = receivedDragUpdateDetails!.delta;
+
+      expect(receivedDragEndDetails!.localPosition, const Offset(10, 10) + delta);
+      expect(receivedDragEndDetails!.globalPosition, const Offset(400, 300) + delta);
+
+      // scroll vertically
+      receivedDragDownDetails = null;
+      receivedDragStartDetails = null;
+      receivedDragUpdateDetails = null;
+      receivedDragEndDetails = null;
+
+      expect(node.getSemanticsData().hasAction(SemanticsAction.scrollUp), isTrue);
+
+      semanticsOwner.performAction(node.id, SemanticsAction.scrollUp);
+      await tester.pump();
+      expect(receivedDragDownDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragDownDetails!.globalPosition, const Offset(400, 300));
+      expect(receivedDragStartDetails!.localPosition, const Offset(10, 10));
+      expect(receivedDragStartDetails!.globalPosition, const Offset(400, 300));
+      delta = receivedDragUpdateDetails!.delta;
+      final Offset local = const Offset(10, 10) + delta;
+      final RenderObject object = tester.renderObject(find.byKey(key));
+      final Matrix4 transform = object.getTransformTo(null);
+      final Offset global = MatrixUtils.transformPoint(transform, local);
+      expect(receivedDragEndDetails!.localPosition, local);
+      expect(receivedDragEndDetails!.globalPosition, global);
+    });
   });
 
   group("RawGestureDetectorState's debugFillProperties", () {
