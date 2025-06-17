@@ -3862,7 +3862,8 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///    (which might be useful if it is, e.g., totally decorative and not
 ///    important to the user).
 ///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
-///    through which the [Semantics] widget and [SliverSemantics] sliver are actually implemented.
+///    through which the [Semantics] widget and [SliverSemantics] sliver are
+///    actually implemented.
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
@@ -3870,11 +3871,11 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
 /// {@endtemplate}
 @immutable
-sealed class SemanticsBase extends SingleChildRenderObjectWidget {
+sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
   ///
-  /// To create a `const` instance of [SemanticsBase], use the
-  /// [SemanticsBase.fromProperties] constructor.
+  /// To create a `const` instance of [_SemanticsBase], use the
+  /// [_SemanticsBase.fromProperties] constructor.
   ///
   /// {@template flutter.widgets.SemanticsBase.constructor}
   /// See also:
@@ -3886,7 +3887,7 @@ sealed class SemanticsBase extends SingleChildRenderObjectWidget {
   /// {@endtemplate}
   // Properties added to this constructor should be marked required
   // to enforce its subclasses add it to their constructors.
-  SemanticsBase({
+  _SemanticsBase({
     Key? key,
     Widget? child,
     required bool container,
@@ -4051,7 +4052,7 @@ sealed class SemanticsBase extends SingleChildRenderObjectWidget {
   /// {@endtemplate}
   // Properties added to this constructor should be marked required
   // to enforce its subclasses add it to their constructors.
-  const SemanticsBase.fromProperties({
+  const _SemanticsBase.fromProperties({
     super.key,
     super.child,
     required this.container,
@@ -4204,7 +4205,7 @@ sealed class SemanticsBase extends SingleChildRenderObjectWidget {
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
 @immutable
-class SliverSemantics extends SemanticsBase {
+class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
   ///
   /// To create a `const` instance of [SliverSemantics], use the
@@ -7777,7 +7778,7 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [SliverSemantics], the sliver variant of this widget.
 @immutable
-class Semantics extends SemanticsBase {
+class Semantics extends _SemanticsBase {
   /// Creates a semantic annotation.
   ///
   /// To create a `const` instance of [Semantics], use the
