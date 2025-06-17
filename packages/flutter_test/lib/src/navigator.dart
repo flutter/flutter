@@ -28,8 +28,11 @@ class TransitionDurationObserver extends NavigatorObserver {
   ///
   /// {@tool snippet}
   /// ```dart
-  /// await tester.pump();
-  /// await tester.pump(transitionDurationObserver.transitionDuration + const Duration(milliseconds: 1));
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   // ...Set up app and start a page transition, then:
+  ///   await tester.pump();
+  ///   await tester.pump(transitionDurationObserver.transitionDuration + const Duration(milliseconds: 1));
+  /// });
   /// ```
   /// {@end-tool}
   ///
