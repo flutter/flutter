@@ -7,4 +7,6 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h"
 
+extern CFRange CFStringGetRangeOfCharacterClusterAtIndex(CFStringRef string, CFIndex charIndex, CFIndex type);
+
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_

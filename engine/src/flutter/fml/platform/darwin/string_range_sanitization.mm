@@ -20,6 +20,8 @@ NSRange RangeForCharactersInRange(NSString* text, NSRange range) {
   if (text == nil || range.location + range.length > text.length) {
     return NSMakeRange(NSNotFound, 0);
   }
+  NSUInteger location = MIN(text.length, range.location)
+  NSUInteger length = MIN(text.length - location, range.length)
   NSRange sanitizedRange = [text rangeOfComposedCharacterSequencesForRange:range];
   // We don't want to override the length, we just want to make sure we don't
   // select into the middle of a multi-byte character. Taking the

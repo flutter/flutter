@@ -190,15 +190,4 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, readonly) id flutterFirstResponder;
 @end
 
-
-@interface FlutterTextInputView (UITextInputDefaultImpl) <UITextInputDefaultImpl>
-- (NSString*)fullText;
-@end
-
-@implementation FlutterTextInputView (UITextInputDefaultImpl)
-- (NSString*)fullText {
-  return self.text;
-}
-@end
-
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_

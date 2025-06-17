@@ -11,8 +11,8 @@ namespace fml {
 
 // Returns a range encompassing the grapheme cluster in which |index| is located.
 //
-// A nil |text| or an index greater than or equal to text.length will result in
-// `NSRange(NSNotFound, 0)`.
+// If the |index| is larger than the length of the |text|, the range of the last
+// character is returned.
 NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index);
 
 // Returns a range encompassing the grapheme clusters falling in |range|.
@@ -21,6 +21,7 @@ NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index);
 // that the range's location is not in the middle of a multi-byte unicode
 // sequence.
 //
+// If the given |range| is first clamped to the closest valid string length 
 // An invalid range will result in `NSRange(NSNotFound, 0)`.
 NSRange RangeForCharactersInRange(NSString* text, NSRange range);
 

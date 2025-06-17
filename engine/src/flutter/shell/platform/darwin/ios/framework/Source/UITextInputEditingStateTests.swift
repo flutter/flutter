@@ -2,209 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import InternalFlutterSwift
 import UIKit
 import XCTest
-
-enum Either<L, R> {
-  case left(L)
-  case right(R)
-}
 
 /// Tests in this file verify that our custom UITextInput implementations
 /// matches the behavior of UITextViews when receive the same input from the
 /// IME.
 
-// Swift tuples can't conform to Equtable (yet).
-struct TextSelection: Equatable {
-  init(base: UInt, extent: UInt, markedRange: Range<UInt>?) {
-    self.base = base
-    self.extent = extent
-    assert(
-      markedRange.map { $0.lowerBound <= min(base, extent) && max(base, extent) <= $0.upperBound }
-        ?? true)
-    assert(!(markedRange?.isEmpty ?? false))
-    self.markedRange = markedRange
-  }
-
-  let base: UInt
-  let extent: UInt
-  let markedRange: Range<UInt>?
-
-  var range: Range<UInt> {
-    min(base, extent)..<max(base, extent)
-  }
-  var relativeRange: Range<UInt> {
-    let range = self.range
-    let baseOffset = markedRange?.lowerBound ?? 0
-    return (range.lowerBound - baseOffset)..<(range.upperBound - baseOffset)
-  }
-}
-
-struct EditingState: Equatable, ExpressibleByStringLiteral {
-  init(string: String, selectedTextRange: TextSelection?) {
-    self.string = string
-    self.selectedTextRange = selectedTextRange
-  }
-
-  init(string: String) {
-    let caret = UInt(string.utf16.count)
-    self.init(
-      string: string, selectedTextRange: TextSelection(base: caret, extent: caret, markedRange: nil)
-    )
-  }
-
-  init(string: String, markedTextRange: Range<UInt>) {
-    self.init(
-      string: string,
-      selectedTextRange: TextSelection(
-        base: markedTextRange.upperBound, extent: markedTextRange.upperBound,
-        markedRange: markedTextRange))
-  }
-
-  private static func parseComposingRegion(string: String) -> Either<
-    (String, String, String), String
-  > {
-    // "|" is the token that represents composing regions
-    let components = string.components(separatedBy: "|")
-    if components.count == 1 {
-      return .right(string)
-    } else {
-      assert(components.count == 3)
-      assert(!components[1].isEmpty)
-      return .left((components[0], components[1], components[2]))
-    }
-  }
-
-  private static func parseSelection(string: String) -> (String, UInt, UInt) {
-    assert(string.count(where: { $0 == "<" }) <= 1)
-    assert(string.count(where: { $0 == ">" }) == string.count(where: { $0 == "<" }))
-    let baseIndex = string.prefix(while: { $0 != "<" }).utf16.count
-    let extentIndex = string.prefix(while: { $0 != ">" }).utf16.count
-    if extentIndex == baseIndex {
-      let caret = UInt(string.utf16.count)
-      return (string, caret, caret)
-    }
-    let text = string.filter { c in c != "<" || c != ">" }
-    return baseIndex < extentIndex
-      ? (text, UInt(baseIndex), UInt(extentIndex - 1))
-      : (text, UInt(baseIndex - 1), UInt(extentIndex - 1))
-  }
-
-  init(stringLiteral: StaticString) {
-    let selection: TextSelection
-    let string: String
-
-    switch EditingState.parseComposingRegion(string: stringLiteral.description) {
-    case let .left((p1, p2, p3)):
-      let (text, start, end) = EditingState.parseSelection(string: p2)
-      let markedRange = UInt(p1.utf16.count)..<UInt(p1.utf16.count + p2.utf16.count)
-      selection = TextSelection(
-        base: markedRange.lowerBound + start, extent: markedRange.lowerBound + end,
-        markedRange: markedRange)
-      string = p1 + text + p3
-    case let .right(s):
-      let (text, start, end) = EditingState.parseSelection(string: s)
-      selection = TextSelection(base: start, extent: end, markedRange: nil)
-      string = text
-    }
-
-    self.init(string: string, selectedTextRange: selection)
-  }
-
-  let string: String
-
-  let selectedTextRange: TextSelection?
-}
-
-protocol UITextInputTestable: UITextInput {
-  var editingState: EditingState { get set }
-}
-
-extension UITextInput {
-  fileprivate func offsetOf(_ position: UITextPosition) -> UInt {
-    UInt(offset(from: self.beginningOfDocument, to: position))
-  }
-  fileprivate func rangeOf(_ range: UITextRange) -> Range<UInt> {
-    offsetOf(range.start)..<offsetOf(range.end)
-  }
-}
-
-extension UITextInputTestable {
-  var editingState: EditingState {
-    get {
-      let selection = selectedTextRange.map { range in
-        TextSelection(
-          base: offsetOf(range.start), extent: offsetOf(range.end),
-          markedRange: markedTextRange.map(rangeOf))
-      }
-      return EditingState(
-        string: text(in: textRange(from: beginningOfDocument, to: endOfDocument)!)!,
-        selectedTextRange: selection)
-    }
-    set {
-      unmarkText()
-      selectedTextRange = textRange(from: beginningOfDocument, to: endOfDocument)
-      insertText(newValue.string)
-      if let selectedTextRange = editingState.selectedTextRange,
-        let markedTextRange = selectedTextRange.markedRange
-      {
-        let markedCharacterRange: Range<String.Index> =
-          String.Index(
-            utf16Offset: Int(markedTextRange.lowerBound), in: newValue.string)..<String.Index(
-            utf16Offset: Int(markedTextRange.upperBound), in: newValue.string)
-        let markedText = newValue.string[markedCharacterRange]
-        setMarkedText(String(markedText), selectedRange: NSRange(selectedTextRange.relativeRange))
-      } else if let selectedRange = editingState.selectedTextRange {
-        selectedTextRange = self.textRange(
-          from: position(from: beginningOfDocument, offset: Int(selectedRange.base))!,
-          to: position(from: beginningOfDocument, offset: Int(selectedRange.extent))!)
-      } else {
-        selectedTextRange = nil
-      }
-    }
-  }
-
-  // Returns all unique UITextPositions in the EditingState's text.
-  var allPositions: [UITextPosition] {
-    var position: UITextPosition? = beginningOfDocument
-    var positions: [UITextPosition] = []
-    while let p = position {
-      positions.append(p)
-      position = self.position(from: p, offset: 1)
-    }
-    return positions
-  }
-
-  func textBefore(position: UITextPosition) -> String? {
-    text(in: textRange(from: beginningOfDocument, to: position)!)
-  }
-
-  func textAfter(position: UITextPosition) -> String? {
-    text(in: textRange(from: position, to: endOfDocument)!)
-  }
-}
-
 extension UITextView: UITextInputTestable {}
 extension FlutterTextInputView: UITextInputTestable {}
-
-let fakeTextInputDelegate = FakeTextInputDelegate()
-
-//func allTestables() -> [any UITextInputTestable] {
-//  [FlutterTextInputView(owner: FlutterTextInputPlugin(delegate: fakeTextInputDelegate))]
-//}
-//
-//@Suite
-//struct UITextInputTestableTests {
-//  //@Test(arguments: [EditingState.empty])
-//  //func huh(implementation: any UITextInputTestable, initialState: EditingState) {
-//    //#expect(Bool(false), "test")
-//  //}
-//  @Test
-//  func test() {
-//    #expect(1 == 1)
-//  }
-//}
 
 class UITextInputImplementationTests: XCTestCase {
   var inputClient: UITextInputTestable!
@@ -214,6 +20,25 @@ class UITextInputImplementationTests: XCTestCase {
       owner: FlutterTextInputPlugin(delegate: fakeTextInputDelegate))
     textView = UITextView()
   }
+
+  let zwj = "\u{200d}"
+  // Indic script with virama, no ZWJs
+  let indic = "क्षि"
+  // pre-composed Hangul syllable block, single code unit 0xD4DB
+  let precomposedHangul = "퓛"
+  // 3 decomposed Hangul syllables, 3 code units
+  let decomposedHangul = "퓛"
+  // Jamos that don't actually combine
+  let jamos = String(repeating: "ᄌ", count: 3)
+  // Emoji ZWJ sequence
+  let emojiZWJ = "🧑‍🤝‍🧑"
+  // À but decomposed
+  let latinGrave = "A\u{0300}"
+  let surrogatePair = "😀"
+  // Thai cluster with diacritic marks
+  let thai = "ห้"
+  // Arabic with diacritic marks
+  let arabic = "كُتِبَ"
 
   private func performTest<T: Equatable>(
     initialState: EditingState, actions: (UITextInputTestable) -> T
@@ -226,11 +51,10 @@ class UITextInputImplementationTests: XCTestCase {
 
     XCTAssert(inputClient.editingState == textView.editingState)
     XCTAssert(returnValue1 == returnValue2)
-    print("test: \(returnValue1), textView: \(returnValue2)")
     return returnValue1
   }
 
-  // This is the same performTest method as before but for T == Void.
+  // This is the same performTest method as the one above, but for T == Void.
   private func performTest(initialState: EditingState, actions: (UITextInputTestable) -> Void) {
     inputClient.editingState = initialState
     textView.editingState = initialState
@@ -241,20 +65,13 @@ class UITextInputImplementationTests: XCTestCase {
       inputClient.editingState, textView.editingState, "failed with input \(initialState)")
   }
 
-  // First and foremost, make sure the UITextInput's interpretation of position
+  // First and foremost, make sure the UITextInput's interpretation of "position"
   // is in-line with UITextView.
   func testPositions() {
-    let initialStates: [EditingState] = [
-      "",
-      "text",
-      "क्षि",  // Indic script
-      "퓛",  // pre-composed Hangul syllable block
-      "퓛",   // 3 decomposed Hangul syllables
-      "🧑‍🤝‍🧑",  // Emoji ZWJ sequence
-      "😀",  // surrogate pair
-    ]
+    let editingStateTextCases = EditingState.allVariations(
+      zwj + emojiZWJ + jamos + precomposedHangul + decomposedHangul + thai)
 
-    initialStates.forEach { initialState in
+    editingStateTextCases.forEach { initialState in
       inputClient.editingState = initialState
       textView.editingState = initialState
 
@@ -271,7 +88,6 @@ class UITextInputImplementationTests: XCTestCase {
 
       // Verify that inputClient has the same unique TextPositions as a
       // UITextView if the text is the same.
-
       XCTAssertEqual(
         inputClient.allPositions.count, textView.allPositions.count, initialState.string)
       for (offset, (p1, p2)) in zip(inputClient.allPositions, textView.allPositions).enumerated() {
@@ -286,113 +102,74 @@ class UITextInputImplementationTests: XCTestCase {
   }
 
   func testRanges() {
+    let text = zwj + emojiZWJ + jamos + precomposedHangul + decomposedHangul + thai
+    let utf16Length = UInt(text.utf16.count)
+    let allRanges: [Range<UInt>] =
+      (0..<utf16Length)
+      .flatMap { start in ((start + 1)...utf16Length).map { start..<$0 } }
 
+    allRanges.forEach { range in
+      let initialState = EditingState(string: text)
+      inputClient.editingState = initialState
+      textView.editingState = initialState
+
+      XCTAssertEqual(
+        inputClient.text(in: inputClient.rangeFrom(range)),
+        textView.text(in: textView.rangeFrom(range)))
+    }
   }
 
-  // MARK: deleteBackward
-  func testDeleteBackward() {
-    let initialStates: [EditingState] = [
-      "",
-      "String",         // collapsed selection
-      "123 n<ihao>",    // has selection
-      "123 n|<iha>o|",  // with marked text and selection
-      "क्षि",             // Indic script
-      "퓛",             // pre-composed Hangul syllable block
-      "퓛",             // 3 decomposed Hangul syllables
-      "🧑‍🤝‍🧑",            // Emoji ZWJ sequence
-      "😀",            // surrogate pair
-    ]
+  // MARK: UIKeyInput tests
 
-    initialStates.forEach {
+  func testDeleteBackward() {
+    // This test string set is arbitrary.
+    //
+    // Ideally, this should test all combinations of the shorter strings.
+    // Unfortunately that creates too many test cases and slows down tests
+    // significantly.
+    let strings: [String] = [
+      "",
+      "a",
+      "הֽ͏ַ",  // test CGJ
+      arabic,
+      precomposedHangul + zwj + surrogatePair,
+      decomposedHangul + zwj + surrogatePair,
+      indic + zwj + indic,
+      jamos + precomposedHangul,
+      jamos + decomposedHangul,
+      latinGrave + zwj + emojiZWJ,
+      surrogatePair + zwj + jamos,
+      surrogatePair + zwj + thai,
+    ]
+    let editingStates = strings.flatMap(EditingState.allVariations).filter {
+      !$0.selectionBreaksCodepoint
+    }
+    editingStates.forEach {
       self.performTest(initialState: $0) { input in input.deleteBackward() }
     }
   }
-  // MARK: insertText
 
-}
-
-@objc class FakeTextInputDelegate: NSObject, FlutterTextInputDelegate {
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, updateEditingClient client: Int32,
-    withState state: [AnyHashable: Any]
-  ) {
+  func testInsertText() {
+    let editingStateTextCases = EditingState.allVariations(
+      zwj + emojiZWJ + jamos + thai)
+    editingStateTextCases.filter { !$0.selectionBreaksCodepoint }.forEach {
+      self.performTest(initialState: $0) { input in input.insertText("i") }
+      self.performTest(initialState: $0) { input in input.insertText("") }
+    }
   }
 
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, updateEditingClient client: Int32,
-    withState state: [AnyHashable: Any], withTag tag: String
-  ) {
-  }
+  // MARK: UITextInput tests
 
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, updateEditingClient client: Int32,
-    withDelta state: [AnyHashable: Any]
-  ) {
-  }
+  // Makes sure the textInRange implementation handles OOB ranges gracefully.
+  func testTextInRangeWithInvalidRanges() {
+    let newEditingState = EditingState(string: String(repeating: "a", count: 3))
 
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, perform action: FlutterTextInputAction,
-    withClient client: Int32
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView,
-    updateFloatingCursor state: FlutterFloatingCursorDragState, withClient client: Int32,
-    withPosition point: [AnyHashable: Any]
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, showAutocorrectionPromptRectForStart start: UInt,
-    end: UInt, withClient client: Int32
-  ) {
-  }
-
-  func flutterTextInputView(_ textInputView: FlutterTextInputView, showToolbar client: Int32) {
-  }
-
-  func flutterTextInputViewScribbleInteractionBegan(_ textInputView: FlutterTextInputView) {
-  }
-
-  func flutterTextInputViewScribbleInteractionFinished(_ textInputView: FlutterTextInputView) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, insertTextPlaceholderWith size: CGSize,
-    withClient client: Int32
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, removeTextPlaceholder client: Int32
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView,
-    didResignFirstResponderWithTextInputClient textInputClient: Int32
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView,
-    willDismissEditMenuWithTextInputClient textInputClient: Int32
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, shareSelectedText selectedText: String
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, searchWebWithSelectedText selectedText: String
-  ) {
-  }
-
-  func flutterTextInputView(
-    _ textInputView: FlutterTextInputView, lookUpSelectedText selectedText: String
-  ) {
+    self.performTest(initialState: EditingState(string: String(repeating: "a", count: 100))) {
+      input in
+      let range = input.rangeFrom(0..<100)
+      input.editingState = newEditingState
+      print(input.text(in: range))
+      return input.text(in: range)
+    }
   }
 }

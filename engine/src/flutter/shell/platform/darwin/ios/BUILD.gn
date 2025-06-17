@@ -54,7 +54,7 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/UIPressProxy.swift",
-    "framework/Source/UITextInput+TextManipulation.swift",
+    "framework/Source/UITextInput+TextRange.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -215,6 +215,7 @@ if (enable_ios_unittests) {
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/UITextInputEditingStateTests.swift",
+      "framework/Source/UITextInputEditingStateTest+Utils.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":flutter_framework_source" ]
