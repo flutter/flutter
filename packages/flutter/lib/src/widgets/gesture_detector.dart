@@ -1704,10 +1704,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     return Rect.fromLTWH(0, 0, size.width, size.height);
   }
 
-  static Rect _getGlobalRectFromRenderObject(RenderObject renderObject) {
-    final Rect localRect = _getLocalRectFromRenderObject(renderObject);
-    final Matrix4 transform = renderObject.getTransformTo(null);
-    return MatrixUtils.transformRect(transform, localRect);
+  static Offset _transformOffsetToGlobal(RenderObject object, Offset local) {
+    final Matrix4 transform = object.getTransformTo(null);
+    return MatrixUtils.transformPoint(transform, local);
   }
 
   @override
@@ -1732,7 +1731,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
     return () {
       final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-      final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+      final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
       tap.onTapDown?.call(
         TapDownDetails(
           globalPosition: globalCenter,
@@ -1763,7 +1762,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
     return () {
       final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-      final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+      final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
 
       longPress.onLongPressDown?.call(
         LongPressDownDetails(localPosition: localCenter, globalPosition: globalCenter),
@@ -1792,9 +1791,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             ? null
             : (DragUpdateDetails details) {
               final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-              final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+              final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
               final Offset newLocalOffset = localCenter + details.delta;
-              final Offset newGlobalOffset = globalCenter + details.delta;
+              final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
               horizontal.onDown?.call(
                 DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
               );
@@ -1816,9 +1815,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             ? null
             : (DragUpdateDetails details) {
               final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-              final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+              final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
               final Offset newLocalOffset = localCenter + details.delta;
-              final Offset newGlobalOffset = globalCenter + details.delta;
+              final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
 
               pan.onDown?.call(
                 DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
@@ -1854,9 +1853,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             ? null
             : (DragUpdateDetails details) {
               final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-              final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+              final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
               final Offset newLocalOffset = localCenter + details.delta;
-              final Offset newGlobalOffset = globalCenter + details.delta;
+              final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
               vertical.onDown?.call(
                 DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
               );
@@ -1878,9 +1877,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             ? null
             : (DragUpdateDetails details) {
               final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
-              final Offset globalCenter = _getGlobalRectFromRenderObject(renderObject).center;
+              final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
               final Offset newLocalOffset = localCenter + details.delta;
-              final Offset newGlobalOffset = globalCenter + details.delta;
+              final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
               pan.onDown?.call(
                 DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
               );
