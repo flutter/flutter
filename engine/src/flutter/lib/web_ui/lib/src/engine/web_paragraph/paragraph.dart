@@ -137,15 +137,33 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
-extension type ClusterRange._(ui.TextRange _range) {
-  ClusterRange({required int start, required int end})
-    : _range = ui.TextRange(start: start, end: end);
+class ClusterRange {
+  ClusterRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
 
-  int get start => _range.start;
-  int get end => _range.end;
+  factory ClusterRange.collapsed(int offset) => ClusterRange(start: offset, end: offset);
 
-  int get size => _range.end - _range.start;
+  factory ClusterRange.empty() => ClusterRange.collapsed(0);
+
+  int start;
+  int end;
+
+  int get size => end - start;
   bool get isEmpty => start == end;
+
+  ClusterRange clone() => ClusterRange(start: start, end: end);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ClusterRange && other.start == start && other.end == end;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(start, end);
+  }
 }
 
 class StyledTextRange {

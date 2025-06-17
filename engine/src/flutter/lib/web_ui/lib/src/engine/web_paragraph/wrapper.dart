@@ -20,7 +20,7 @@ class TextWrapper {
   double _top = 0.0;
 
   // Whitespaces always separates text from clusters even if it's empty
-  ClusterRange _whitespaces = ClusterRange.empty;
+  late ClusterRange _whitespaces;
 
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
@@ -44,7 +44,7 @@ class TextWrapper {
 
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
-    _whitespaces = ClusterRange(start: start, end: start);
+    _whitespaces = ClusterRange.collapsed(start);
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
     _widthLetters = clusterWidth;
@@ -68,13 +68,12 @@ class TextWrapper {
         if (_whitespaces.end < index) {
           // Take letters into account
           _widthText += _widthWhitespaces + _widthLetters;
-          _whitespaces.start = index;
-          _whitespaces.end = index;
+          _whitespaces.start = _whitespaces.end = index;
         }
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           _widthText,
-          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+          _whitespaces.clone(),
           _widthWhitespaces,
           hardLineBreak,
           _top,
@@ -107,7 +106,7 @@ class TextWrapper {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
           _widthLetters = 0.0;
-          _whitespaces = ClusterRange(start: index, end: index);
+          _whitespaces = ClusterRange.collapsed(index);
           _widthWhitespaces = 0.0;
         }
         // Add the cluster to the current whitespace sequence (empty or not)
@@ -128,8 +127,7 @@ class TextWrapper {
             _widthText = _widthWhitespaces + _widthLetters;
             _widthWhitespaces = 0.0;
             _widthLetters = 0.0;
-            _whitespaces.start = index;
-            _whitespaces.end = index;
+            _whitespaces.start = _whitespaces.end = index;
           } else {
             // We only have whitespaces on the line
             _widthText = 0.0;
@@ -143,8 +141,7 @@ class TextWrapper {
                 _widthLetters == 0.0,
           );
           _widthText = widthCluster;
-          _whitespaces.start = index + 1;
-          _whitespaces.end = index + 1;
+          _whitespaces.start = _whitespaces.end = index + 1;
           widthCluster = 0.0; // Since we already processed this cluster
         }
 
@@ -152,7 +149,7 @@ class TextWrapper {
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           _widthText,
-          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+          _whitespaces.clone(),
           _widthWhitespaces,
           hardLineBreak,
           _top,
@@ -170,10 +167,7 @@ class TextWrapper {
     if (_whitespaces.end < _layout.textClusters.length - 1) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange(
-        start: _layout.textClusters.length - 1,
-        end: _layout.textClusters.length - 1,
-      );
+      _whitespaces = ClusterRange.collapsed(_layout.textClusters.length - 1);
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
@@ -181,7 +175,7 @@ class TextWrapper {
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
       _widthText,
-      ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+      _whitespaces.clone(),
       _widthWhitespaces,
       hardLineBreak,
       _top,
