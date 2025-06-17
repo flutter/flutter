@@ -19,12 +19,12 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -773,7 +773,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         analytics: globals.analytics,
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
       final String presentParticiple =

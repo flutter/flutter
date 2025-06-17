@@ -2672,6 +2672,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 
+  'dev/checks',
   'dev/conductor/bin/conductor',
   'dev/conductor/bin/packages_autoroller',
   'dev/conductor/core/lib/src/proto/compile_proto.sh',
@@ -2684,6 +2685,8 @@ const Set<String> kExecutableAllowlist = <String>{
 
   'dev/integration_tests/deferred_components_test/download_assets.sh',
   'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/packages_autoroller/run',
 
   'dev/tools/gen_keycodes/bin/gen_keycodes',
   'dev/tools/repackage_gradle_wrapper.sh',
