@@ -360,7 +360,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         _updateSystemChrome();
       }
       assert(configuration.logicalConstraints.isSatisfiedBy(size));
-      _view.render(scene, size: configuration.toPhysicalSize(size));
+      print("pre render ${configuration.toPhysicalSize(size)}");
+      _view.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {

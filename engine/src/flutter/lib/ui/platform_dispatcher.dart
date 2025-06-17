@@ -1869,8 +1869,12 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    this.viewConstraints = const ViewConstraints(minHeight: 0, maxHeight: 0, minWidth: 0, maxWidth: 0),
     // TODO: is this where we add the ViewConstraints?
   });
+
+  /// TODO: .... add comments
+  final ViewConstraints viewConstraints;
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].

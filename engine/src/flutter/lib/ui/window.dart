@@ -145,7 +145,7 @@ class FlutterView {
   ///
   /// The view can take on any [Size] that fulfills these constraints. These
   /// constraints are typically used by an UI framework as the input for its
-  /// layout algorithm to determine an approrpiate size for the view. To size
+  /// layout algorithm to determine an appropriate size for the view. To size
   /// the view, the selected size must be provided to the [render] method and it
   /// must satisfy the constraints.
   ///
@@ -168,7 +168,39 @@ class FlutterView {
   //   also require to message the size provided to the render call back to the
   //   embedder. Change this from ViewConstraints.tight to a lookup of the
   //   stored view constraints on the FlutterView object.
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  ViewConstraints get physicalConstraints {
+    final double dpr = devicePixelRatio;
+    // print('dpr:$dpr');
+    // final Size currentLogicalSize = physicalSize / dpr;
+    // print('currentLogicalSize:$currentLogicalSize');
+
+    return ViewConstraints(
+      minWidth: _computeMinConstraintValue(
+          _viewConfiguration.viewConstraints.minWidth,
+          physicalSize.width),
+      minHeight: _computeMinConstraintValue(
+          _viewConfiguration.viewConstraints.minHeight,
+          physicalSize.height),
+      maxWidth: _computeMaxConstraintValue(
+          _viewConfiguration.viewConstraints.maxWidth,
+          physicalSize.width),
+      maxHeight: _computeMaxConstraintValue(
+          _viewConfiguration.viewConstraints.maxHeight,
+          physicalSize.height),
+    );
+  }
+
+  double _computeMinConstraintValue(double? desired, double available) {
+    assert(desired == null || desired >= 0, 'Minimum constraint must be >= 0 if set.');
+    assert(desired == null || desired.isFinite, 'Minimum constraint must be finite.');
+    return desired ?? available;
+  }
+
+
+  double _computeMaxConstraintValue(double? desired, double available) {
+    assert(desired == null || desired >= 0, 'Maximum constraint must be >= 0 if set.');
+    return desired ?? available;
+  }
 
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
@@ -376,13 +408,19 @@ class FlutterView {
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
   void render(Scene scene, {Size? size}) {
+    // print('window.dart 378');
+    print(size);
+    print("physical constraints : ${physicalConstraints}");
+    print("view constraints : ${_viewConfiguration.viewConstraints}");
+    // print(physicalSize);
     _render(
       viewId,
       scene as _NativeScene,
-      size?.width ?? physicalSize.width,
-      size?.height ?? physicalSize.height,
+      size?.width ?? physicalConstraints.maxWidth,
+      size?.height ?? physicalConstraints.maxHeight,
     );
   }
+
 
   @Native<Void Function(Int64, Pointer<Void>, Double, Double)>(
     symbol: 'PlatformConfigurationNativeApi::Render',

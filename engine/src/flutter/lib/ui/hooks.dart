@@ -190,6 +190,7 @@ _ViewConfiguration _buildViewConfiguration(
       devicePixelRatio: devicePixelRatio,
     ),
     displayId: displayId,
+    viewConstraints: ViewConstraints(minWidth: width, maxWidth: width, minHeight: height, maxHeight: height)
   );
 }
 

@@ -420,6 +420,8 @@ void RuntimeController::Render(int64_t view_id,
                                double height) {
   const ViewportMetrics* view_metrics =
       UIDartState::Current()->platform_configuration()->GetMetrics(view_id);
+  std::cout << "width: " << width << std::endl;
+  std::cout << "height: " << height << std::endl;
   if (view_metrics == nullptr) {
     return;
   }
