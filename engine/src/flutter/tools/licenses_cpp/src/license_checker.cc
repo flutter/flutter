@@ -131,7 +131,7 @@ struct Package {
 
 Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
   Package result = {
-      .name = "engine",
+      .name = working_dir.filename(),
       .license_file = FindLicense(working_dir),
   };
   fs::path relative = fs::relative(full_path, working_dir);
