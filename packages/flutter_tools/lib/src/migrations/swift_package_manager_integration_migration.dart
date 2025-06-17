@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_package_manager.dart';
@@ -21,7 +22,7 @@ import '../project.dart';
 class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
-    SupportedPlatform platform,
+    FlutterDarwinPlatform platform,
     BuildInfo buildInfo, {
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Logger logger,
@@ -37,7 +38,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
-  final SupportedPlatform _platform;
+  final FlutterDarwinPlatform _platform;
   final BuildInfo? _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
@@ -86,23 +87,23 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
   String get _runnerFrameworksBuildPhaseIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosRunnerFrameworksBuildPhaseIdentifier
         : _macosRunnerFrameworksBuildPhaseIdentifier;
   }
 
   String get _runnerNativeTargetIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosRunnerNativeTargetIdentifier
         : _macosRunnerNativeTargetIdentifier;
   }
 
   String get _projectIdentifier {
-    return _platform == SupportedPlatform.ios ? _iosProjectIdentifier : _macosProjectIdentifier;
+    return _platform == FlutterDarwinPlatform.ios ? _iosProjectIdentifier : _macosProjectIdentifier;
   }
 
   String get _flutterGroupIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosFlutterGroupIdentifier
         : _macosFlutterGroupIdentifier;
   }
@@ -114,7 +115,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// `Flutter/Flutter/ephemeral`. This is likely due to the macOS Flutter `PBXGroup`
   /// using `path` whereas the iOS Flutter `PBXGroup` uses `name`.
   String get _relativeEphemeralPath {
-    return _platform == SupportedPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
+    return _platform == FlutterDarwinPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
   }
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
@@ -300,7 +301,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
 
     final String scriptText;
-    if (_platform == SupportedPlatform.ios) {
+    if (_platform == FlutterDarwinPlatform.ios) {
       scriptText =
           r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
     } else {
