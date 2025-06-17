@@ -1550,7 +1550,7 @@ mixin WidgetInspectorService {
     pubRootDirectories =
         pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
-    final Set<String> directorySet = Set<String>.from(pubRootDirectories);
+    final Set<String> directorySet = Set<String>.of(pubRootDirectories);
     if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
@@ -1573,7 +1573,7 @@ mixin WidgetInspectorService {
     pubRootDirectories =
         pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
-    final Set<String> directorySet = Set<String>.from(_pubRootDirectories!);
+    final Set<String> directorySet = Set<String>.of(_pubRootDirectories!);
     directorySet.removeAll(pubRootDirectories);
 
     _pubRootDirectories = directorySet.toList();

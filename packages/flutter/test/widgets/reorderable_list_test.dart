@@ -431,7 +431,7 @@ void main() {
 
     // This SliverReorderableList has just one item: "item 0".
     await tester.pumpWidget(
-      TestList(items: List<int>.from(<int>[0]), textColor: textColor, iconColor: iconColor),
+      TestList(items: List<int>.of(<int>[0]), textColor: textColor, iconColor: iconColor),
     );
     expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
     expect(getIconStyle().color, iconColor);
@@ -461,7 +461,7 @@ void main() {
 
     await tester.pumpWidget(
       TestList(
-        items: List<int>.from(<int>[0, 1, 2, 3]),
+        items: List<int>.of(<int>[0, 1, 2, 3]),
         proxyDecorator: (Widget child, int index, Animation<double> animation) {
           return AnimatedBuilder(
             animation: animation,

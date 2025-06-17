@@ -398,7 +398,7 @@ void main() {
     final Widget temp = children[5];
     children[5] = children[0];
     children[0] = temp;
-    children = List<Widget>.from(children);
+    children = List<Widget>.of(children);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
