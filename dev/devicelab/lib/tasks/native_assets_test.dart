@@ -114,7 +114,6 @@ TaskFunction createNativeAssetsTest({
 
         if (buildMode == _buildModes.last) {
           // Only run integration tests once.
-          addIntegrationTest(exampleDirectory.uri, _packageName);
           done = false;
           final int integrationTestResult = await inDirectory<int>(exampleDirectory, () async {
             return runFlutter(
@@ -182,6 +181,8 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await _pinDependencies(File(path.join(packageDirectory.path, 'pubspec.yaml')));
   await _pinDependencies(File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')));
 
+  await _addIntegrationTest(packageDirectory.uri.resolve('example/'), _packageName);
+
   await exec(_flutterBin, <String>['pub', 'get'], workingDirectory: packageDirectory.path);
 
   return packageDirectory;
@@ -208,17 +209,12 @@ Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
   }
 }
 
-void addIntegrationTest(Uri exampleDirectory, String packageName) {
-  final ProcessResult result = Process.runSync(_flutterBin, <String>[
+Future<void> _addIntegrationTest(Uri exampleDirectory, String packageName) async {
+  await exec(_flutterBin, <String>[
     'pub',
     'add',
     'dev:integration_test:{"sdk":"flutter"}',
   ], workingDirectory: exampleDirectory.toFilePath());
-  if (result.exitCode != 0) {
-    throw Exception(
-      'flutter pub add failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-    );
-  }
 
   final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
   final File integrationTestFile = File.fromUri(integrationTestPath);
