@@ -3592,10 +3592,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
     } else {
-      List<SemanticsNode> updatedChildren = updateChildrenInTraversalOrder();
+      List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
 
-      childrenInTraversalOrder = Int32List(updatedChildren.length);
+      childrenInTraversalOrder = Int32List(updatedChildren!.length);
       for (int i = 0; i < updatedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
@@ -3660,12 +3660,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _dirty = false;
   }
 
-  List<SemanticsNode> updateChildrenInTraversalOrder() {
+  List<SemanticsNode>? updateChildrenInTraversalOrder() {
+    if (kIsWeb) {
+      return _children;
+    }
+
     List<SemanticsNode> updatedChildren = [];
     bool isOverlayPortalParent = getSemanticsData().identifier.endsWith('parent');
     for (final SemanticsNode child in _children!) {
-      if (child.getSemanticsData().identifier.endsWith('child') && !isOverlayPortalParent) {
-        // then we should remove child from children
+      bool isOverlayPortalChild = child.getSemanticsData().identifier.endsWith('child');
+      if (isOverlayPortalChild && !isOverlayPortalParent) {
+        // then we should remove child from children; we don't add it to updatedChildren list.
         continue;
       }
 
@@ -3685,7 +3690,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    List<SemanticsNode> updatedChildren = updateChildrenInTraversalOrder();
+    List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
 
     TextDirection? inheritedTextDirection = textDirection;
     SemanticsNode? ancestor = parent;
@@ -3696,7 +3701,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     List<SemanticsNode>? childrenInDefaultOrder;
     if (inheritedTextDirection != null) {
-      childrenInDefaultOrder = _childrenInDefaultOrder(updatedChildren, inheritedTextDirection);
+      childrenInDefaultOrder = _childrenInDefaultOrder(updatedChildren!, inheritedTextDirection);
     } else {
       // In the absence of text direction default to paint order.
       childrenInDefaultOrder = updatedChildren;
@@ -3709,7 +3714,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
     final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
     SemanticsSortKey? lastSortKey;
-    for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
+    for (int position = 0; position < childrenInDefaultOrder!.length; position += 1) {
       final SemanticsNode child = childrenInDefaultOrder[position];
       final SemanticsSortKey? sortKey = child.sortKey;
       lastSortKey = position > 0 ? childrenInDefaultOrder[position - 1].sortKey : null;
