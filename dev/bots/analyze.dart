@@ -2566,12 +2566,11 @@ const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
 String _getFlutterLicense() {
-  const String rawLicense = '''
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-''';
-  return '$rawLicense\n\n\n';
+  return
+      '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+      '// Use of this source code is governed by a BSD-style license that can be\n'
+      '// found in the LICENSE file.\n'
+      '\n';
 }
 
 String _removeLicenseIfPresent(String fileContents, String license) {
