@@ -41,7 +41,9 @@ class TransitionDurationObserver extends NavigatorObserver {
   /// Throws if there has never been a page transition.
   Duration get transitionDuration {
     if (_transitionDuration == null) {
-      throw FlutterError('No route transition has occurred, but the transition duration was requested.');
+      throw FlutterError(
+        'No route transition has occurred, but the transition duration was requested.',
+      );
     }
     return _transitionDuration!;
   }
