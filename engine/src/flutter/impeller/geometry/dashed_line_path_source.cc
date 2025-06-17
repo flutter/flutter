@@ -62,7 +62,6 @@ void DashedLinePathSource::Dispatch(PathReceiver& receiver) const {
     receiver.MoveTo(p0_, false);
     receiver.LineTo(p1_);
   }
-  receiver.PathEnd();
 }
 
 }  // namespace impeller
