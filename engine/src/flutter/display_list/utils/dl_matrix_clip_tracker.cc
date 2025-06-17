@@ -43,12 +43,8 @@ bool DisplayListMatrixClipState::mapAndClipRect(const DlRect& src,
   }
   std::optional<impeller::Rect> dl_intersected =
       dl_mapped.Intersection(cull_rect_);
-  if (!dl_intersected.has_value()) {
-    *mapped = dl_intersected.value();
-    return true;
-  }
-  *mapped = DlRect();
-  return false;
+  *mapped = dl_intersected.value_or(DlRect());
+  return dl_intersected.has_value();
 }
 
 void DisplayListMatrixClipState::clipRect(const DlRect& rect,
