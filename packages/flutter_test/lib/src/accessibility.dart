@@ -509,6 +509,48 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
+/// A guideline which verifies that all nodes that contribute semantics via text
+/// meet **WCAG AAA** contrast levels.
+///
+/// The AAA level is defined by the Web Content Accessibility Guidelines:
+/// https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+///
+/// This guideline enforces a stricter contrast ratio:
+///  * Normal text must have a contrast ratio of at least 7.0
+///  * Large or bold text must have a contrast ratio of at least 4.5
+///
+/// See also:
+///  * [MinimumTextContrastGuideline], which follows the WCAG AA level.
+///  * [AccessibilityGuideline], which provides an overview of guidelines.
+@visibleForTesting
+class MinimumTextContrastGuidelineAAA extends MinimumTextContrastGuideline {
+  /// Create a new [MinimumTextContrastGuidelineAAA].
+  const MinimumTextContrastGuidelineAAA();
+
+  /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
+  ///
+  /// Defined by WCAG AAA standard.
+  static const double kAAAMinimumRatioLargeText = 4.5;
+
+  /// The minimum contrast ratio for normal text.
+  ///
+  /// Defined by WCAG AAA standard.
+  static const double kAAAMinimumRatioNormalText = 7.0;
+
+  @override
+  double targetContrastRatio(double? fontSize, {required bool bold}) {
+    final double fontSizeOrDefault = fontSize ?? MinimumTextContrastGuideline._kDefaultFontSize;
+    if ((bold && fontSizeOrDefault >= MinimumTextContrastGuideline.kBoldTextMinimumSize) ||
+        fontSizeOrDefault >= MinimumTextContrastGuideline.kLargeTextMinimumSize) {
+      return kAAAMinimumRatioLargeText;
+    }
+    return kAAAMinimumRatioNormalText;
+  }
+
+  @override
+  String get description => 'Text contrast should follow WCAG AAA guidelines';
+}
+
 /// A guideline which verifies that all elements specified by [finder]
 /// meet minimum contrast levels.
 ///
