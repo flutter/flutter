@@ -141,8 +141,9 @@ public interface TextureRegistry {
     Surface getSurface();
 
     /**
-     * Direct access to a surface object that is different from any previous calls to {@link
-     * #getSurface()} or {@link #getSurface(boolean)}.
+     * Direct access to a surface, which will be newly created (and thus, different from any surface
+     * objects returned from previous calls to {@link #getSurface()} or {@link #getSurface(boolean)}
+     * if {@code forceNewSurface} is true.
      *
      * <p>When using this API, you will usually need to implement {@link SurfaceProducer.Callback}
      * and provide it to {@link #setCallback(Callback)} in order to be notified when an existing

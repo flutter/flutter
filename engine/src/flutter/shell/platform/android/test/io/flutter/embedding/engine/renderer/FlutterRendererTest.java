@@ -1009,7 +1009,10 @@ public class FlutterRendererTest {
     Surface mockSurface2 = mock(Surface.class);
 
     when(mockSurface.isValid()).thenReturn(false);
-    when(mockImageReader.getSurface()).thenReturn(mockSurface).thenReturn(mockSurface2);
+    when(mockImageReader.getSurface())
+        .thenReturn(mockSurface)
+        .thenReturn(mockSurface)
+        .thenReturn(mockSurface2);
     when(spyImageReaderSurfaceProducer.createImageReader()).thenReturn(mockImageReader);
     when(spyImageReaderSurfaceProducer.createPerImageReader(mockImageReader))
         .thenReturn(fakePerImageReader);
@@ -1021,7 +1024,31 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void getSurfaceWithForceNewSurface_forcesGetSurfaceToReturnNewSurface() {
+  public void getSurface_consecutiveCallsReturnSameSurfaceIfStillValid() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer spyImageReaderSurfaceProducer =
+        spy((FlutterRenderer.ImageReaderSurfaceProducer) producer);
+    ImageReader mockImageReader = mock(ImageReader.class);
+    PerImageReader fakePerImageReader =
+        spyImageReaderSurfaceProducer.new PerImageReader(mockImageReader);
+    Surface mockSurface = mock(Surface.class);
+    Surface mockSurface2 = mock(Surface.class);
+
+    when(mockSurface.isValid()).thenReturn(true);
+    when(mockImageReader.getSurface()).thenReturn(mockSurface);
+    when(spyImageReaderSurfaceProducer.createImageReader()).thenReturn(mockImageReader);
+    when(spyImageReaderSurfaceProducer.createPerImageReader(mockImageReader))
+        .thenReturn(fakePerImageReader);
+
+    Surface firstSurface = spyImageReaderSurfaceProducer.getSurface();
+    Surface secondSurface = spyImageReaderSurfaceProducer.getSurface();
+
+    assertEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void getSurfaceWithForceNewSurface_forcesGetSurfaceToReturnNewSurfaceAsExpected() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
@@ -1029,5 +1056,16 @@ public class FlutterRendererTest {
     Surface secondSurface = producer.getSurface(true);
 
     assertNotEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void getSurfaceWithForceNewSurface_doesNotForceGetSurfaceToReturnNewSurfaceAsExpected() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    Surface firstSurface = producer.getSurface();
+    Surface secondSurface = producer.getSurface(false);
+
+    assertEquals(firstSurface, secondSurface);
   }
 }
