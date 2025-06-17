@@ -25,8 +25,8 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(License|Copyright)";
 
 namespace {
-const std::array<std::string_view, 3> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md"};
+const std::array<std::string_view, 4> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT"};
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
@@ -139,10 +139,13 @@ Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
   fs::path current = working_dir;
   for (const fs::path& component : relative) {
     current /= component;
+    std::optional<fs::path> current_license = FindLicense(current);
+    if (current_license.has_value()) {
+      result.license_file = current_license;
+    }
     if (after_third_party) {
       result.name = component;
       after_third_party = false;
-      result.license_file = FindLicense(current);
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
