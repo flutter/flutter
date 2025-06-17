@@ -480,8 +480,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     /** Internal class: state held per ImageReader. */
-    @VisibleForTesting
-    public class PerImageReader {
+    private class PerImageReader {
       public final ImageReader reader;
       private final ArrayDeque<PerImage> imageQueue = new ArrayDeque<>();
       private boolean closed = false;

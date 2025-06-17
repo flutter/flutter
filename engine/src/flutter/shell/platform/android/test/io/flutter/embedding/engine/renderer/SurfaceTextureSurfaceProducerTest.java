@@ -98,14 +98,14 @@ public final class SurfaceTextureSurfaceProducerTest {
         spy(flutterRenderer.registerSurfaceTexture(mockSurfaceTexture));
     final SurfaceTextureSurfaceProducer producerSpy =
         spy(new SurfaceTextureSurfaceProducer(0, handler, fakeJNI, spyTexture));
-    final Surface mockSurface = mock(Surface.class);
-    final Surface mockSecondSurface = mock(Surface.class);
+    final Surface firstMockSurface = mock(Surface.class);
+    final Surface secondMockSurface = mock(Surface.class);
 
     when(spyTexture.surfaceTexture()).thenReturn(mockSurfaceTexture);
-    when(mockSurface.isValid()).thenReturn(false);
+    when(firstMockSurface.isValid()).thenReturn(false);
     when(producerSpy.createSurface(mockSurfaceTexture))
-        .thenReturn(mockSurface)
-        .thenReturn(mockSecondSurface);
+        .thenReturn(firstMockSurface)
+        .thenReturn(secondMockSurface);
 
     final Surface firstSurface = producerSpy.getSurface();
     final Surface secondSurface = producerSpy.getSurface();

@@ -39,7 +39,6 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.renderer.FlutterRenderer.ImageReaderSurfaceProducer.PerImageReader;
 import io.flutter.view.TextureRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1003,24 +1002,23 @@ public class FlutterRendererTest {
     FlutterRenderer.ImageReaderSurfaceProducer spyImageReaderSurfaceProducer =
         spy((FlutterRenderer.ImageReaderSurfaceProducer) producer);
     ImageReader mockImageReader = mock(ImageReader.class);
-    PerImageReader fakePerImageReader =
-        spyImageReaderSurfaceProducer.new PerImageReader(mockImageReader);
-    Surface mockSurface = mock(Surface.class);
-    Surface mockSurface2 = mock(Surface.class);
+    ImageReader mockSecondImageReader = mock(ImageReader.class);
+    Surface firstMockSurface = mock(Surface.class);
+    Surface secondMockSurface = mock(Surface.class);
 
-    when(mockSurface.isValid()).thenReturn(false);
-    when(mockImageReader.getSurface())
-        .thenReturn(mockSurface)
-        .thenReturn(mockSurface)
-        .thenReturn(mockSurface2);
-    when(spyImageReaderSurfaceProducer.createImageReader()).thenReturn(mockImageReader);
-    when(spyImageReaderSurfaceProducer.createPerImageReader(mockImageReader))
-        .thenReturn(fakePerImageReader);
+    when(mockImageReader.getSurface()).thenReturn(firstMockSurface);
+    when(mockSecondImageReader.getSurface()).thenReturn(secondMockSurface);
+    when(firstMockSurface.isValid()).thenReturn(false);
+    when(spyImageReaderSurfaceProducer.createImageReader())
+        .thenReturn(mockImageReader)
+        .thenReturn(mockSecondImageReader);
 
     Surface firstSurface = spyImageReaderSurfaceProducer.getSurface();
     Surface secondSurface = spyImageReaderSurfaceProducer.getSurface();
 
     assertNotEquals(firstSurface, secondSurface);
+    assertEquals(firstSurface, firstMockSurface);
+    assertEquals(secondSurface, secondMockSurface);
   }
 
   @Test
@@ -1030,21 +1028,17 @@ public class FlutterRendererTest {
     FlutterRenderer.ImageReaderSurfaceProducer spyImageReaderSurfaceProducer =
         spy((FlutterRenderer.ImageReaderSurfaceProducer) producer);
     ImageReader mockImageReader = mock(ImageReader.class);
-    PerImageReader fakePerImageReader =
-        spyImageReaderSurfaceProducer.new PerImageReader(mockImageReader);
     Surface mockSurface = mock(Surface.class);
-    Surface mockSurface2 = mock(Surface.class);
 
     when(mockSurface.isValid()).thenReturn(true);
     when(mockImageReader.getSurface()).thenReturn(mockSurface);
     when(spyImageReaderSurfaceProducer.createImageReader()).thenReturn(mockImageReader);
-    when(spyImageReaderSurfaceProducer.createPerImageReader(mockImageReader))
-        .thenReturn(fakePerImageReader);
 
     Surface firstSurface = spyImageReaderSurfaceProducer.getSurface();
     Surface secondSurface = spyImageReaderSurfaceProducer.getSurface();
 
     assertEquals(firstSurface, secondSurface);
+    assertEquals(firstSurface, mockSurface);
   }
 
   @Test
