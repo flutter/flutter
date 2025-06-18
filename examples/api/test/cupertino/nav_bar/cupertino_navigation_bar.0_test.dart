@@ -16,6 +16,8 @@ void main() {
       navBarFinder,
     );
     expect(
-        cupertinoNavigationBar.backgroundColor, CupertinoColors.systemGrey.withValues(alpha: 0.5));
+      cupertinoNavigationBar.backgroundColor,
+      CupertinoColors.systemGrey.withValues(alpha: 0.5),
+    );
   });
 }
