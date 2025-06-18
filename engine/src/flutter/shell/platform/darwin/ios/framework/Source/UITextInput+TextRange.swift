@@ -169,7 +169,6 @@ extension String.UTF16View {
       return NSRange(location: 0, length: 0)
     }
     precondition(utf16Offset <= length)
-    //let range = CFStringGetRangeOfCharacterClusterAtIndex(self as CFString, Int(utf16Offset - 1), 4)
     let index = utf16Offset - 1
     // Under the hood, rangeOfComposedCharacterSequencet calls
     // CFStringGetRangeOfCharacterClusterAtIndex with type = kCFStringComposedCharacterCluster

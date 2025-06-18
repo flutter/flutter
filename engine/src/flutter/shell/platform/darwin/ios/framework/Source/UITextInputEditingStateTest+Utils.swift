@@ -7,10 +7,10 @@ struct TextSelection: Equatable {
   init(base: UInt, extent: UInt, markedRange: Range<UInt>?) {
     self.base = base
     self.extent = extent
-    assert(
+    precondition(
       markedRange.map { $0.lowerBound <= min(base, extent) && max(base, extent) <= $0.upperBound }
         ?? true)
-    assert(!(markedRange?.isEmpty ?? false))
+    precondition(!(markedRange?.isEmpty ?? false))
     self.markedRange = markedRange
   }
 
