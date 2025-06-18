@@ -784,14 +784,15 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
       return false;
     }
 
-    if (widget.changeReportingBehavior == ChangeReportingBehavior.onScrollEnd) {
-      if (notification is ScrollEndNotification) {
-        _reportSelectedItemChanged(notification);
-      }
-    } else {
-      if (notification is ScrollUpdateNotification) {
-        _reportSelectedItemChanged(notification);
-      }
+    switch (widget.changeReportingBehavior) {
+      case ChangeReportingBehavior.onScrollEnd:
+        if (notification is ScrollEndNotification) {
+          _reportSelectedItemChanged(notification);
+        }
+      case ChangeReportingBehavior.onScrollUpdate:
+        if (notification is ScrollUpdateNotification) {
+          _reportSelectedItemChanged(notification);
+        }
     }
     return false;
   }
