@@ -771,7 +771,7 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   EXPECT_FALSE(state.IsTranslateScale());
 
   // Set identity resets translate-scale state.
-  EXPECT_TRUE(state.IsTranslateScale());
+  EXPECT_FALSE(state.IsTranslateScale());
   state.setIdentity();
   EXPECT_TRUE(state.IsTranslateScale());
 
