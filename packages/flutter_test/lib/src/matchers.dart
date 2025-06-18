@@ -9,7 +9,6 @@ import 'dart:convert' show LineSplitter;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
@@ -183,9 +182,10 @@ Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
 /// Asserts that the [FinderBase] locates at least one widget that could be found
 /// by each FinderBase in the provided [finderBasesList] at a location that is
-/// compatible with the ascending order of the provided [finderBasesList]
+/// compatible with the ascending order of the provided [finderBasesList].
 ///
 /// ## Sample code
+///
 /// ```dart
 /// expect(
 ///  find.bySubtype<Widget>(),
@@ -196,10 +196,11 @@ Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 ///  ]),
 /// );
 /// ```
-/// This asserts that there is a widget that could be found by find.text('Save') that precedes
+///
+/// This example asserts that there is a widget that could be found by find.text('Save') that precedes
 /// a widget that could be found by find.byType(CircularProgressIndicator) that precedes
 /// a widget that could be found by find.byType(Container) in the widgets that could be
-/// found by find.bySubtype<Widget>()
+/// found by find.bySubtype<Widget>().
 Matcher findsAscendinglyOrderedWidgets(List<FinderBase<dynamic>> finderBasesList) =>
     _FindsAscendinglyOrderedWidgets(finderBasesList);
 
@@ -1204,7 +1205,7 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
             matchState.keys
                 .where(
                   (dynamic e) =>
-                      // I need to compare FinderBases to find the FinderBases that finds the same things
+                      // Compares FinderBases to find the FinderBases that finds the same things
                       finderBasesList.elementAt(i).describeMatch(Plurality.zero) ==
                           e.describeMatch(Plurality.zero) &&
                       finderBasesList.elementAt(i).describeMatch(Plurality.one) ==
