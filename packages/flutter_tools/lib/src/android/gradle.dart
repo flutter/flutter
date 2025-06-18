@@ -717,7 +717,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // As long as libflutter.so.sym/dbg and libapp.so.sym/dbg are present for at least
     // one architecture, assume AGP succeeded in stripping.
-    if (!(result.stdout.contains('libflutter.so.sym') || result.stdout.contains('libflutter.so.dbg'))) {
+    if (!(result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg'))) {
       _logger.printTrace(
         'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
       );
