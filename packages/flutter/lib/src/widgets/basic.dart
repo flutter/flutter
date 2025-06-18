@@ -4156,10 +4156,10 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   ///     slivers: <Widget>[
   ///       SliverSemantics(
   ///         onTap: _myTap,
-  ///         child: SliverSemantics(
+  ///         sliver: SliverSemantics(
   ///           blockUserActions: true,
   ///           onLongPress: _myLongPress,
-  ///           child: const SliverToBoxAdapter(
+  ///           sliver: const SliverToBoxAdapter(
   ///             child: Text('label'),
   ///           ),
   ///         ),
