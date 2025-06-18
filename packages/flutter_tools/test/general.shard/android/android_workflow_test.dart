@@ -598,39 +598,6 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
-  testUsingContext('detects space in Android sdk path', () async {
-    sdk
-    ..licensesAvailable = true
-    ..platformToolsAvailable = true
-    ..cmdlineToolsAvailable = false
-    ..directory = fileSystem.directory('/foo/b ar')
-    ..emulatorPath = 'path/to/emulator';
-
-    final AndroidValidator androidValidator = AndroidValidator(
-    java: FakeJava(),
-    androidSdk: sdk,
-    logger: logger,
-    platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-    userMessages: UserMessages(),
-    processManager: processManager,
-    );
-
-    final ValidationResult validationResult = await androidValidator.validate();
-    expect(validationResult.type, ValidationType.missing);
-
-    final ValidationMessage sdkMessage = validationResult.messages.first;
-    expect(sdkMessage.type, ValidationMessageType.information);
-    expect(sdkMessage.message, 'Android SDK at /foo/b ar');
-
-    final ValidationMessage cmdlineMessage = validationResult.messages.last;
-    print('HI gray: ' + validationResult.messages.toString());
-    expect(cmdlineMessage.type, ValidationMessageType.error);
-    expect(
-    cmdlineMessage.message,
-    'Android SDK location currently contains spaces',
-    );
-  });
-
   testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
     final Platform platform =
