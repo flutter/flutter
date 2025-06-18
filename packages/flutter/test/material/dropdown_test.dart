@@ -2691,7 +2691,8 @@ void main() {
     );
 
     await tester.pumpWidget(buildFormField());
-    final FocusNode internalNode = tester.widget<Focus>(find.byType(Focus).last).focusNode!;
+    final FocusNode internalNode =
+        tester.widget<Focus>(find.byKey(const Key('dropdown-focus'))).focusNode!;
 
     // Replace internal FocusNode with external FocusNode.
     focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
