@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/vertex_buffer.h"
+#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -78,20 +79,24 @@ static size_t GetVKClearValues(
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
-    const std::shared_ptr<CommandBufferVK>& command_buffer) const {
-  RenderPassBuilderVK builder;
+    const std::shared_ptr<CommandBufferVK>& command_buffer,
+    bool is_swapchain) const {
+  if (recycled_renderpass != nullptr) {
+    return recycled_renderpass;
+  }
 
+  RenderPassBuilderVK builder;
   render_target_.IterateAllColorAttachments([&](size_t bind_point,
                                                 const ColorAttachment&
                                                     attachment) -> bool {
     builder.SetColorAttachment(
-        bind_point,                                                          //
-        attachment.texture->GetTextureDescriptor().format,                   //
-        attachment.texture->GetTextureDescriptor().sample_count,             //
-        attachment.load_action,                                              //
-        attachment.store_action,                                             //
-        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout()  //
-    );
+        bind_point,                                                           //
+        attachment.texture->GetTextureDescriptor().format,                    //
+        attachment.texture->GetTextureDescriptor().sample_count,              //
+        attachment.load_action,                                               //
+        attachment.store_action,                                              //
+        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout(),  //
+        /*is_swapchain=*/is_swapchain);
     return true;
   });
 
@@ -110,10 +115,6 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         stencil->load_action,                                   //
         stencil->store_action                                   //
     );
-  }
-
-  if (recycled_renderpass != nullptr) {
-    return recycled_renderpass;
   }
 
   auto pass = builder.Build(context.GetDevice());
@@ -144,28 +145,33 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return true;
   });
 
-  SharedHandleVK<vk::RenderPass> recycled_render_pass;
-  SharedHandleVK<vk::Framebuffer> recycled_framebuffer;
+  FramebufferAndRenderPass frame_data;
+  bool is_swapchain = false;
+  SampleCount sample_count =
+      color_image_vk_->GetTextureDescriptor().sample_count;
   if (resolve_image_vk_) {
-    recycled_render_pass =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedRenderPass();
-    recycled_framebuffer =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedFramebuffer();
+    frame_data =
+        TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData(sample_count);
+    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
+  } else {
+    frame_data =
+        TextureVK::Cast(*color_image_vk_).GetCachedFrameData(sample_count);
+    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  render_pass_ =
-      CreateVKRenderPass(vk_context, recycled_render_pass, command_buffer_);
+  render_pass_ = CreateVKRenderPass(vk_context, frame_data.render_pass,
+                                    command_buffer_, is_swapchain);
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
     is_valid_ = false;
     return;
   }
 
-  auto framebuffer = (recycled_framebuffer == nullptr)
+  auto framebuffer = (frame_data.framebuffer == nullptr)
                          ? CreateVKFramebuffer(vk_context, *render_pass_)
-                         : recycled_framebuffer;
+                         : frame_data.framebuffer;
   if (!framebuffer) {
     VALIDATION_LOG << "Could not create framebuffer.";
     is_valid_ = false;
@@ -177,11 +183,34 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     is_valid_ = false;
     return;
   }
+
+  frame_data.framebuffer = framebuffer;
+  frame_data.render_pass = render_pass_;
+
   if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
-    TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
     TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetCachedFrameData(frame_data, sample_count);
+  } else {
+    TextureVK::Cast(*color_image_vk_)
+        .SetCachedFrameData(frame_data, sample_count);
+  }
+
+  // If the resolve image exists and has mipmaps, transition mip levels besides
+  // the base to shader read only in preparation for mipmap generation.
+  if (resolve_image_vk_ &&
+      resolve_image_vk_->GetTextureDescriptor().mip_count > 1) {
+    if (TextureVK::Cast(*resolve_image_vk_).GetLayout() ==
+        vk::ImageLayout::eUndefined) {
+      BarrierVK barrier;
+      barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+      barrier.cmd_buffer = command_buffer_->GetCommandBuffer();
+      barrier.src_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
+      barrier.src_access = {};
+      barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+      barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+      barrier.base_mip_level = 1;
+      TextureVK::Cast(*resolve_image_vk_).SetLayout(barrier);
+    }
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;
@@ -200,7 +229,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            is_swapchain ? vk::ImageLayout::eGeneral
+                         : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
     TextureVK::Cast(*color_image_vk_)
@@ -340,6 +371,10 @@ void RenderPassVK::SetCommandLabel(std::string_view label) {
 
 // |RenderPass|
 void RenderPassVK::SetStencilReference(uint32_t value) {
+  if (current_stencil_ == value) {
+    return;
+  }
+  current_stencil_ = value;
   command_buffer_vk_.setStencilReference(
       vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
 }
@@ -485,7 +520,8 @@ fml::Status RenderPassVK::Draw() {
   const auto& pipeline_vk = PipelineVK::Cast(*pipeline_);
 
   auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), context_vk);
+      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
+      context_vk);
   if (!descriptor_result.ok()) {
     return fml::Status(fml::StatusCode::kAborted,
                        "Could not allocate descriptor sets.");
@@ -654,29 +690,6 @@ bool RenderPassVK::BindResource(ShaderStage stage,
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   command_buffer_->GetCommandBuffer().endRenderPass();
-
-  // If this render target will be consumed by a subsequent render pass,
-  // perform a layout transition to a shader read state.
-  const std::shared_ptr<Texture>& result_texture =
-      resolve_image_vk_ ? resolve_image_vk_ : color_image_vk_;
-  if (result_texture->GetTextureDescriptor().usage &
-      TextureUsage::kShaderRead) {
-    BarrierVK barrier;
-    barrier.cmd_buffer = command_buffer_vk_;
-    barrier.src_access = vk::AccessFlagBits::eColorAttachmentWrite |
-                         vk::AccessFlagBits::eTransferWrite;
-    barrier.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                        vk::PipelineStageFlagBits::eTransfer;
-    barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-    barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
-
-    barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-    if (!TextureVK::Cast(*result_texture).SetLayout(barrier)) {
-      return false;
-    }
-  }
-
   return true;
 }
 

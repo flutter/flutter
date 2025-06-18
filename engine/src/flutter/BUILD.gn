@@ -74,11 +74,15 @@ group("flutter") {
   testonly = true
 
   # Compile the engine.
-  public_deps = [
-    ":unittests",
-    "//flutter/shell/platform/embedder:flutter_engine",
-    "//flutter/sky",
-  ]
+  public_deps = []
+
+  if (!is_qnx) {
+    public_deps = [
+      ":unittests",
+      "//flutter/shell/platform/embedder:flutter_engine",
+      "//flutter/sky",
+    ]
+  }
 
   # Ensure the example for a sample embedder compiles.
   if (build_embedder_examples) {
@@ -93,7 +97,7 @@ group("flutter") {
   }
 
   # If enabled, compile the SDK / snapshot.
-  if (!is_fuchsia) {
+  if (!is_fuchsia && !is_qnx) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
     if (build_engine_artifacts) {
@@ -113,6 +117,13 @@ group("flutter") {
         # path_ops
         "//flutter/tools/path_ops",
       ]
+
+      if (host_os == "linux" || host_os == "mac") {
+        public_deps += [
+          "//flutter/tools/licenses_cpp",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        ]
+      }
 
       if (host_os == "linux") {
         public_deps += [
@@ -149,12 +160,12 @@ group("flutter") {
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
       "//flutter/shell/common:shell_benchmarks",
-      "//flutter/third_party/txt:txt_benchmarks",
+      "//flutter/txt:txt_benchmarks",
     ]
   }
 
   # Build the standalone Impeller library.
-  if (is_mac || is_linux || is_win || is_android) {
+  if (is_mac || is_linux || is_win || is_android || is_qnx) {
     public_deps += [ "//flutter/impeller/toolkit/interop:sdk" ]
   }
 
@@ -170,17 +181,18 @@ group("unittests") {
   public_deps = []
   if (is_android) {
     public_deps += [
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
       "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
     ]
   }
 
-  if (is_ios) {
+  if (enable_ios_unittests) {
     public_deps += [ "//flutter/shell/platform/darwin/ios:ios_test_flutter" ]
   }
 
-  # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
       "//flutter/assets:assets_unittests",
@@ -200,7 +212,7 @@ group("unittests") {
       "//flutter/testing/dart",
       "//flutter/testing/smoke_test_failure",
       "//flutter/third_party/tonic/tests:tonic_unittests",
-      "//flutter/third_party/txt:txt_unittests",
+      "//flutter/txt:txt_unittests",
     ]
 
     # The accessibility library only supports Mac and Windows at the moment.
@@ -226,6 +238,7 @@ group("unittests") {
         "//flutter/impeller/golden_tests:impeller_golden_tests",
         "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:availability_version_check_unittests",
+        "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
       ]
@@ -267,7 +280,10 @@ group("unittests") {
       }
 
       if (is_mac) {
-        public_deps += [ "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests" ]
+        public_deps += [
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+        ]
       }
 
       if (is_win) {

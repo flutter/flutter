@@ -35,6 +35,7 @@ uniform FragInfo {
   mat4 color_m;
   f16vec4 color_v;
   float16_t input_alpha;
+  float16_t output_alpha;
 }
 frag_info;
 
@@ -54,5 +55,5 @@ void main() {
                 float16_t(0), float16_t(1.0));
 
   // premultiply the outputs
-  frag_color = f16vec4(color.rgb * color.a, color.a);
+  frag_color = IPHalfPremultiply(color) * frag_info.output_alpha;
 }

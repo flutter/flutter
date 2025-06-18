@@ -35,8 +35,9 @@ import '../../src/common.dart';
 import '../../src/context.dart' hide FakeXcodeProjectInterpreter;
 import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
   return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
@@ -68,13 +69,6 @@ const List<String> kRunReleaseArgs = <String>[
   'FLUTTER_SUPPRESS_ANALYTICS=true',
   'COMPILER_INDEX_STORE_ENABLE=NO',
 ];
-
-// TODO(matanlurey): XCode builds call processPodsIfNeeded -> refreshPluginsList
-// ... which in turn requires that `dart pub deps --json` is called in order to
-// label which plugins are dependency plugins.
-//
-// Ideally processPodsIfNeeded should rely on the command (removing this call).
-final Pub fakePubBecauseRefreshPluginsList = FakePubWithPrimedDeps();
 
 const String kConcurrentBuildErrorMessage = '''
 "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
@@ -172,7 +166,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
-        Pub: () => fakePubBecauseRefreshPluginsList,
+        Pub: () => const ThrowingPub(),
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -294,7 +288,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
-        Pub: () => fakePubBecauseRefreshPluginsList,
+        Pub: () => const ThrowingPub(),
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -403,7 +397,7 @@ void main() {
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
-        Pub: () => fakePubBecauseRefreshPluginsList,
+        Pub: () => const ThrowingPub(),
         Platform: () => macPlatform,
         XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
         Xcode: () => xcode,
@@ -492,7 +486,7 @@ void main() {
         OperatingSystemUtils:
             () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         Platform: () => macPlatform,
-        Pub: () => fakePubBecauseRefreshPluginsList,
+        Pub: () => const ThrowingPub(),
         XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
         Xcode: () => xcode,
       },
@@ -558,7 +552,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -604,7 +598,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -650,7 +644,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -699,7 +693,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -779,7 +773,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -807,6 +801,7 @@ void main() {
         testUsingContext(
           'succeeds',
           () async {
+            const String flavor = 'free';
             final IOSDevice iosDevice = setUpIOSDevice(
               fileSystem: fileSystem,
               processManager: FakeProcessManager.any(),
@@ -816,7 +811,7 @@ void main() {
               coreDeviceControl: FakeIOSCoreDeviceControl(),
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
-                  scheme: 'free',
+                  scheme: flavor,
                   xcodeWorkspace: fileSystem.directory('/ios/Runner.xcworkspace'),
                   xcodeProject: fileSystem.directory('/ios/Runner.xcodeproj'),
                   hostAppProjectName: 'Runner',
@@ -824,11 +819,11 @@ void main() {
                 expectedDeviceId: '123',
                 expectedLaunchArguments: <String>['--enable-dart-profiling'],
                 expectedSchemeFilePath:
-                    '/ios/Runner.xcodeproj/xcshareddata/xcschemes/free.xcscheme',
+                    '/ios/Runner.xcodeproj/xcshareddata/xcschemes/$flavor.xcscheme',
               ),
             );
 
-            setUpIOSProject(fileSystem);
+            setUpIOSProject(fileSystem, scheme: flavor);
             final FlutterProject flutterProject = FlutterProject.fromDirectory(
               fileSystem.currentDirectory,
             );
@@ -874,7 +869,7 @@ void main() {
           },
           overrides: <Type, Generator>{
             ProcessManager: () => FakeProcessManager.any(),
-            Pub: () => fakePubBecauseRefreshPluginsList,
+            Pub: () => const ThrowingPub(),
             FileSystem: () => fileSystem,
             Logger: () => logger,
             OperatingSystemUtils: () => os,
@@ -970,7 +965,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -1025,7 +1020,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           Platform: () => macPlatform,
@@ -1079,7 +1074,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => fakePubBecauseRefreshPluginsList,
+          Pub: () => const ThrowingPub(),
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -1155,14 +1150,24 @@ void main() {
   });
 }
 
-void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
-  fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+void setUpIOSProject(
+  FileSystem fileSystem, {
+  bool createWorkspace = true,
+  String scheme = 'Runner',
+}) {
+  fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+  writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();
   }
   fileSystem.file('ios/Runner.xcodeproj/project.pbxproj').createSync(recursive: true);
+  final File schemeFile = fileSystem.file(
+    'ios/Runner.xcodeproj/xcshareddata/xcschemes/$scheme.xcscheme',
+  )..createSync(recursive: true);
+  schemeFile.writeAsStringSync(_validScheme);
   // This is the expected output directory.
   fileSystem.directory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
 }
@@ -1327,3 +1332,69 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     return launchSuccess;
   }
 }
+
+const String _validScheme = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1510"
+   version = "1.3">
+   <BuildAction>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+            BuildableName = "Runner.app"
+            BlueprintName = "Runner"
+            ReferencedContainer = "container:Runner.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "331C8080294A63A400263BE5"
+               BuildableName = "RunnerTests.xctest"
+               BlueprintName = "RunnerTests"
+               ReferencedContainer = "container:Runner.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      enableGPUValidationMode = "1"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+            BuildableName = "Runner.app"
+            BlueprintName = "Runner"
+            ReferencedContainer = "container:Runner.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>
+''';

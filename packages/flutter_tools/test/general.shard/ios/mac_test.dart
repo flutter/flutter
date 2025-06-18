@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,8 +11,8 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -22,21 +20,17 @@ import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   late BufferLogger logger;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   setUp(() {
     logger = BufferLogger.test();
@@ -206,7 +200,7 @@ void main() {
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(
@@ -297,7 +291,7 @@ Error launching application on iPhone.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
@@ -339,7 +333,7 @@ Error launching application on iPhone.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
@@ -383,7 +377,7 @@ Could not build the precompiled application for the device.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
       );
       expect(
@@ -440,7 +434,7 @@ Could not build the precompiled application for the device.''',
           logger: logger,
           analytics: fakeAnalytics,
           fileSystem: fs,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: FakeFlutterProject(fileSystem: fs),
         );
         expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
@@ -480,7 +474,7 @@ Could not build the precompiled application for the device.''',
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -529,7 +523,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -575,7 +569,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -620,7 +614,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger: logger,
         analytics: fakeAnalytics,
         fileSystem: fs,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project,
       );
       expect(
@@ -658,7 +652,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final FakeFlutterProject project = FakeFlutterProject(fileSystem: fs);
         project.ios.podfile.createSync(recursive: true);
         project.manifest = FakeFlutterManifest();
-        createFakePlugins(project, fs, <String>['plugin_1_name', 'plugin_2_name']);
+        final List<String> pluginNames = <String>['plugin_1_name', 'plugin_2_name'];
+        project.manifest.dependencies.addAll(pluginNames);
+        createFakePlugins(project, fs, pluginNames);
         fs.systemTempDirectory
             .childFile('cache/plugin_1_name/ios/plugin_1_name/Package.swift')
             .createSync(recursive: true);
@@ -670,7 +666,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           logger: logger,
           analytics: fakeAnalytics,
           fileSystem: fs,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: project,
         );
         expect(
@@ -683,8 +679,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
@@ -770,23 +765,6 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
   });
 }
 
-void addToPackageConfig(FlutterProject flutterProject, String name, Directory packageDir) {
-  final File packageConfigFile = flutterProject.directory
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json');
-
-  final Map<String, Object?> packageConfig =
-      jsonDecode(packageConfigFile.readAsStringSync()) as Map<String, Object?>;
-
-  (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
-    'name': name,
-    'rootUri': packageDir.uri.toString(),
-    'packageUri': 'lib/',
-  });
-
-  packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
-}
-
 void createFakePlugins(
   FlutterProject flutterProject,
   FileSystem fileSystem,
@@ -803,17 +781,15 @@ void createFakePlugins(
   ''';
 
   final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-  flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "packages": [],
-  "configVersion": 2
-}
-''');
+  writePackageConfigFiles(
+    directory: flutterProject.directory,
+    mainLibName: 'my_app',
+    packages: <String, String>{
+      for (final String name in pluginNames) name: fakePubCache.childDirectory(name).path,
+    },
+  );
   for (final String name in pluginNames) {
     final Directory pluginDirectory = fakePubCache.childDirectory(name);
-    addToPackageConfig(flutterProject, name, pluginDirectory);
     pluginDirectory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
       ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
@@ -860,10 +836,10 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late FlutterManifest manifest;
 
   @override
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   @override
-  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
 
   @override
   late final IosProject ios = FakeIosProject(
@@ -877,5 +853,11 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  Set<String> get dependencies => <String>{};
+  late final Set<String> dependencies = <String>{};
+
+  @override
+  String get appName => 'my_app';
+
+  @override
+  YamlMap toYaml() => YamlMap.wrap(<String, String>{});
 }

@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_records.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -300,10 +301,12 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kClipIntersectRect:
     case DisplayListOpType::kClipIntersectOval:
     case DisplayListOpType::kClipIntersectRoundRect:
+    case DisplayListOpType::kClipIntersectRoundSuperellipse:
     case DisplayListOpType::kClipIntersectPath:
     case DisplayListOpType::kClipDifferenceRect:
     case DisplayListOpType::kClipDifferenceOval:
     case DisplayListOpType::kClipDifferenceRoundRect:
+    case DisplayListOpType::kClipDifferenceRoundSuperellipse:
     case DisplayListOpType::kClipDifferencePath:
       return DisplayListOpCategory::kClip;
 
@@ -316,6 +319,7 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kDrawCircle:
     case DisplayListOpType::kDrawRoundRect:
     case DisplayListOpType::kDrawDiffRoundRect:
+    case DisplayListOpType::kDrawRoundSuperellipse:
     case DisplayListOpType::kDrawArc:
     case DisplayListOpType::kDrawPath:
     case DisplayListOpType::kDrawPoints:

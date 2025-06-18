@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsRole, TextHeightBehavior;
+import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -965,6 +965,11 @@ class ClipRect extends SingleChildRenderObjectWidget {
 ///
 ///  * [CustomClipper], for information about creating custom clips.
 ///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipRSuperellipse], for a similar clipping shape with smoother
+///    transitions between the straight sides and the rounded corners. This
+///    shape closely matches the rounded rectangles commonly used in Apple’s
+///    design language, resembling the `RoundedRectangle` shape in SwiftUI with
+///    the `.continuous` corner style.
 ///  * [ClipOval], for an elliptical clip.
 ///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipRRect extends SingleChildRenderObjectWidget {
@@ -1032,6 +1037,94 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     );
     properties.add(
       DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null),
+    );
+  }
+}
+
+/// A widget that clips its child using a rounded superellipse.
+///
+/// A rounded superellipse is a shape similar to a typical rounded rectangle
+/// ([ClipRRect]), but with smoother transitions between the straight sides and
+/// the rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI
+/// with the `.continuous` corner style. Technically, it is created by replacing
+/// the four corners of a superellipse (also known as a Lamé curve) with
+/// circular arcs.
+///
+/// By default, [ClipRSuperellipse] uses its own bounds as the base rectangle
+/// for the clip, but the size and location of the clip can be customized using
+/// a custom [clipper].
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipRRect], for a typical rounded rectangle, which is created by
+///    replacing the four corners of a rectangle with circular arcs.
+///  * [ClipOval], for an elliptical clip.
+///  * [ClipPath], for an arbitrarily shaped clip.
+class ClipRSuperellipse extends SingleChildRenderObjectWidget {
+  /// Creates a rounded-superellipse clip.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  const ClipRSuperellipse({
+    super.key,
+    this.borderRadius = BorderRadius.zero,
+    this.clipper,
+    this.clipBehavior = Clip.antiAlias,
+    super.child,
+  });
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  ///
+  /// This value is ignored if [clipper] is non-null.
+  final BorderRadiusGeometry borderRadius;
+
+  /// If non-null, determines which clip to use.
+  final CustomClipper<RSuperellipse>? clipper;
+
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
+  final Clip clipBehavior;
+
+  @override
+  RenderClipRSuperellipse createRenderObject(BuildContext context) {
+    return RenderClipRSuperellipse(
+      borderRadius: borderRadius,
+      clipBehavior: clipBehavior,
+      clipper: clipper,
+      textDirection: Directionality.maybeOf(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderClipRSuperellipse renderObject) {
+    renderObject
+      ..borderRadius = borderRadius
+      ..clipBehavior = clipBehavior
+      ..clipper = clipper
+      ..textDirection = Directionality.maybeOf(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>(
+        'borderRadius',
+        borderRadius,
+        showName: false,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<CustomClipper<RSuperellipse>>('clipper', clipper, defaultValue: null),
     );
   }
 }
@@ -4149,7 +4242,14 @@ class IndexedStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility.maintain(visible: i == index, child: children[i]);
+      return Visibility(
+        visible: i == index,
+        maintainInteractivity: true,
+        maintainSize: true,
+        maintainState: true,
+        maintainAnimation: true,
+        child: children[i],
+      );
     });
     return _RawIndexedStack(
       alignment: alignment,
@@ -4172,7 +4272,13 @@ class _RawIndexedStack extends Stack {
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
-  }) : super(fit: sizing);
+  }) : assert(
+         index == null ||
+             (index == 0 && children.length == 0) ||
+             (index >= 0 && index < children.length),
+         'The index must be null or within the range of children.',
+       ),
+       super(fit: sizing);
 
   /// The index of the child to show.
   final int? index;
@@ -6884,7 +6990,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 ///  * [debugRepaintRainbowEnabled], a debugging flag to help visually monitor
 ///    render tree repaints in a running app.
 ///  * [debugProfilePaintsEnabled], a debugging flag to show render tree
-///    repaints in the observatory's timeline view.
+///    repaints in Flutter DevTools' timeline view.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({super.key, super.child});
@@ -7249,6 +7355,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? image,
     bool? liveRegion,
     bool? expanded,
+    bool? isRequired,
     int? maxValueLength,
     int? currentValueLength,
     String? identifier,
@@ -7288,7 +7395,10 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback? onDidLoseAccessibilityFocus,
     VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
-    ui.SemanticsRole? role,
+    SemanticsRole? role,
+    Set<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    ui.SemanticsInputType? inputType,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7322,6 +7432,7 @@ class Semantics extends SingleChildRenderObjectWidget {
            hidden: hidden,
            image: image,
            liveRegion: liveRegion,
+           isRequired: isRequired,
            maxValueLength: maxValueLength,
            currentValueLength: currentValueLength,
            identifier: identifier,
@@ -7364,6 +7475,9 @@ class Semantics extends SingleChildRenderObjectWidget {
                    ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
                    : null,
            role: role,
+           controlsNodes: controlsNodes,
+           validationResult: validationResult,
+           inputType: inputType,
          ),
        );
 
@@ -7471,10 +7585,16 @@ class Semantics extends SingleChildRenderObjectWidget {
     }
 
     final bool containsText =
-        properties.attributedLabel != null ||
         properties.label != null ||
+        properties.attributedLabel != null ||
         properties.value != null ||
+        properties.attributedValue != null ||
+        properties.increasedValue != null ||
+        properties.attributedIncreasedValue != null ||
+        properties.decreasedValue != null ||
+        properties.attributedDecreasedValue != null ||
         properties.hint != null ||
+        properties.attributedHint != null ||
         properties.tooltip != null;
 
     if (!containsText) {
@@ -7683,7 +7803,10 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 ///
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
-  /// Creates a widget that builds its child.
+  /// Creates a widget that builds its child while assigning it a key.
+  ///
+  /// This is useful when you want to preserve the state of a widget when it moves
+  /// around in the widget tree by associating it with a consistent key.
   const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.

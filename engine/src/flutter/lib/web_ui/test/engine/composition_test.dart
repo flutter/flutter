@@ -114,7 +114,11 @@ Future<void> testMain() async {
 
     group('determine composition state', () {
       test('should return editing state if extentOffset is null', () {
-        final EditingState editingState = EditingState(text: 'Test');
+        final EditingState editingState = EditingState(
+          text: 'Test',
+          baseOffset: 0,
+          extentOffset: 0,
+        );
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
@@ -137,7 +141,7 @@ Future<void> testMain() async {
       });
 
       test('should return editing state if text is null', () {
-        final EditingState editingState = EditingState(baseOffset: 0, extentOffset: 0);
+        final EditingState editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
@@ -204,6 +208,35 @@ Future<void> testMain() async {
             composingBaseOffset: expectedComposingBase,
             composingExtentOffset: expectedComposingBase + composingText.length,
           ),
+        );
+      });
+
+      test('should retain composing base offset if composing text area is changed', () {
+        const String composingText = '今日は寒い日です';
+
+        EditingState editingState = EditingState(text: '今日は寒い日です', baseOffset: 0, extentOffset: 8);
+
+        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
+            _MockWithCompositionAwareMixin();
+        mockWithCompositionAwareMixin.composingText = composingText;
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
+        );
+
+        editingState = editingState.copyWith(baseOffset: 0, extentOffset: 3);
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
+        );
+
+        editingState = editingState.copyWith(baseOffset: 3, extentOffset: 6);
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
         );
       });
     });
@@ -336,12 +369,12 @@ Future<void> testMain() async {
           <Object?, Object?>{'data': newComposingText},
         ),
       );
-      // On Chrome and Safari, a `compositionupdate` event automatically
+      // On Chrome, a `compositionupdate` event automatically
       // triggers a `selectionchange` event, which leads to triggering
       // `DefaultTextEditingStrategy.handleChange`.
       //
-      // But in Firefox, `selectionchange` event is not triggered, so we need to
-      // manually dispatch an `input` event to trigger
+      // But in Firefox and Safari, `selectionchange` event is not triggered,
+      // so we need to manually dispatch an `input` event to trigger
       // `DefaultTextEditingStrategy.handleChange`.
       _inputElement.dispatchEvent(createDomInputEvent('input'));
 
@@ -394,6 +427,14 @@ Future<void> testMain() async {
               <Object?, Object?>{'data': currComposingSubstr},
             ),
           );
+          // On Chrome, a `compositionupdate` event automatically
+          // triggers a `selectionchange` event, which leads to triggering
+          // `DefaultTextEditingStrategy.handleChange`.
+          //
+          // But in Firefox and Safari, `selectionchange` event is not triggered,
+          // so we need to manually dispatch an `input` event to trigger
+          // `DefaultTextEditingStrategy.handleChange`.
+          _inputElement.dispatchEvent(createDomInputEvent('input'));
 
           await containExpect;
         }

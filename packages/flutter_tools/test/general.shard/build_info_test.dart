@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/test_build_system.dart';
 
 void main() {
   late BufferLogger logger;
@@ -232,7 +233,6 @@ void main() {
       frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
@@ -251,7 +251,6 @@ void main() {
       'SplitDebugInfo': 'foo/',
       'TrackWidgetCreation': 'true',
       'TreeShakeIcons': 'true',
-      'BundleSkSLPath': 'foo/bar/baz.sksl.json',
       'CodeSizeDirectory': 'foo/code-size',
       'FileSystemRoots': 'test5,test6',
       'FileSystemScheme': 'scheme',
@@ -272,7 +271,6 @@ void main() {
       frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
@@ -288,7 +286,6 @@ void main() {
       'FRONTEND_SERVER_STARTER_PATH': 'foo/bar/frontend_server_starter.dart',
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
-      'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
       'FLAVOR': 'strawberry',
@@ -307,14 +304,13 @@ void main() {
       frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
     );
 
     expect(buildInfo.toGradleConfig(), <String>[
-      '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
+      '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
       '-Pdart-obfuscation=true',
       '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
       '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
@@ -322,7 +318,6 @@ void main() {
       '-Psplit-debug-info=foo/',
       '-Ptrack-widget-creation=true',
       '-Ptree-shake-icons=true',
-      '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
       '-Pfizz=bazz',
@@ -363,5 +358,32 @@ void main() {
       decodeDartDefines(<String, String>{kDartDefines: 'MTIzMiw0NTY=,Mg=='}, kDartDefines),
       <String>['1232,456', '2'],
     );
+  });
+
+  testWithoutContext('BuildMode names', () {
+    for (final BuildMode buildMode in BuildMode.values) {
+      switch (buildMode) {
+        case BuildMode.debug:
+          expect(buildMode.cliName, 'debug');
+          expect(buildMode.uppercaseName, 'Debug');
+          expect(buildMode.friendlyName, 'debug');
+          expect(buildMode.uppercaseFriendlyName, 'Debug');
+        case BuildMode.profile:
+          expect(buildMode.cliName, 'profile');
+          expect(buildMode.uppercaseName, 'Profile');
+          expect(buildMode.friendlyName, 'profile');
+          expect(buildMode.uppercaseFriendlyName, 'Profile');
+        case BuildMode.release:
+          expect(buildMode.cliName, 'release');
+          expect(buildMode.uppercaseName, 'Release');
+          expect(buildMode.friendlyName, 'release');
+          expect(buildMode.uppercaseFriendlyName, 'Release');
+        case BuildMode.jitRelease:
+          expect(buildMode.cliName, 'jit_release');
+          expect(buildMode.uppercaseName, 'Jit_release');
+          expect(buildMode.friendlyName, 'jit release');
+          expect(buildMode.uppercaseFriendlyName, 'Jit release');
+      }
+    }
   });
 }

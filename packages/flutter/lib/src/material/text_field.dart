@@ -232,7 +232,8 @@ class TextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
+  /// to [EditableText.defaultSelectionHeightStyle] and
+  /// [EditableText.defaultSelectionHeightStyle], respectively.
   ///
   /// See also:
   ///
@@ -264,7 +265,7 @@ class TextField extends StatefulWidget {
     this.statesController,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -286,12 +287,13 @@ class TextField extends StatefulWidget {
     this.cursorOpacityAnimates,
     this.cursorColor,
     this.cursorErrorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.onTapAlwaysCalled = false,
@@ -316,6 +318,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -485,7 +488,7 @@ class TextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -601,6 +604,27 @@ class TextField extends StatefulWidget {
   ///
   /// If non-null this property overrides the [decoration]'s
   /// [InputDecoration.enabled] property.
+  ///
+  /// When a text field is disabled, all of its children widgets are also
+  /// disabled, including the [InputDecoration.suffixIcon]. If you need to keep
+  /// the suffix icon interactive while disabling the text field, consider using
+  /// [readOnly] and [enableInteractiveSelection] instead:
+  ///
+  /// ```dart
+  /// TextField(
+  ///   enabled: true,
+  ///   readOnly: true,
+  ///   enableInteractiveSelection: false,
+  ///   decoration: InputDecoration(
+  ///     suffixIcon: IconButton(
+  ///       onPressed: () {
+  ///         // This will work because the TextField is enabled
+  ///       },
+  ///       icon: const Icon(Icons.edit_outlined),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
   final bool? enabled;
 
   /// Determines whether this widget ignores pointer events.
@@ -642,12 +666,12 @@ class TextField extends StatefulWidget {
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
-  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
-  final ui.BoxWidthStyle selectionWidthStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -661,6 +685,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
+
+  /// {@macro flutter.widgets.editableText.selectAllOnFocus}
+  final bool? selectAllOnFocus;
 
   /// {@macro flutter.widgets.editableText.selectionControls}
   final TextSelectionControls? selectionControls;
@@ -845,10 +872,16 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -958,7 +991,7 @@ class TextField extends StatefulWidget {
       DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'),
     );
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
@@ -1086,6 +1119,9 @@ class TextField extends StatefulWidget {
                 : kDefaultContentInsertionMimeTypes,
       ),
     );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
+    );
   }
 }
 
@@ -1152,7 +1188,10 @@ class _TextFieldState extends State<TextField>
         .applyDefaults(themeData.inputDecorationTheme)
         .copyWith(
           enabled: _isEnabled,
-          hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
+          hintMaxLines:
+              widget.decoration?.hintMaxLines ??
+              themeData.inputDecorationTheme.hintMaxLines ??
+              widget.maxLines,
         );
 
     // No need to build anything if counter or counterText were given directly.
@@ -1324,8 +1363,9 @@ class _TextFieldState extends State<TextField>
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
+    // selection toolbar, we shouldn't show the handles either.
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar ||
+        !_selectionGestureDetectorBuilder.shouldShowSelectionHandles) {
       return false;
     }
 
@@ -1686,9 +1726,11 @@ class _TextFieldState extends State<TextField>
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           enableInteractiveSelection: widget.enableInteractiveSelection,
+          selectAllOnFocus: widget.selectAllOnFocus,
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
+          autofillHints: widget.autofillHints,
           autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           clipBehavior: widget.clipBehavior,
@@ -1701,6 +1743,7 @@ class _TextFieldState extends State<TextField>
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          hintLocales: widget.hintLocales,
         ),
       ),
     );

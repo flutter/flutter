@@ -14,6 +14,28 @@
 
 namespace impeller {
 
+namespace {
+ConicalKind GetConicalKind(Point center,
+                           Scalar radius,
+                           std::optional<Point> focus,
+                           Scalar focus_radius) {
+  ConicalKind kind = ConicalKind::kConical;
+  if (!focus.has_value() ||
+      center.GetDistance(focus.value()) < kEhCloseEnough) {
+    kind = ConicalKind::kRadial;
+  }
+  if (focus.has_value() && std::fabsf(radius - focus_radius) < kEhCloseEnough) {
+    if (kind == ConicalKind::kRadial) {
+      kind = ConicalKind::kStripAndRadial;
+    } else {
+      kind = ConicalKind::kStrip;
+    }
+  }
+  return kind;
+}
+
+}  // namespace
+
 ConicalGradientContents::ConicalGradientContents() = default;
 
 ConicalGradientContents::~ConicalGradientContents() = default;
@@ -51,7 +73,7 @@ void ConicalGradientContents::SetFocus(std::optional<Point> focus,
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 #define UNIFORM_FRAG_INFO(t) \
-  t##GradientUniformFillPipeline::FragmentShader::FragInfo
+  t##GradientUniformFillConicalPipeline::FragmentShader::FragInfo
 #define UNIFORM_COLOR_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::colors)
 #define UNIFORM_STOP_SIZE ARRAY_LEN(UNIFORM_FRAG_INFO(Conical)::stop_pairs)
 static_assert(UNIFORM_COLOR_SIZE == kMaxUniformGradientStops);
@@ -79,9 +101,10 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
+  ConicalKind kind = GetConicalKind(center_, radius_, focus_, focus_radius_);
   PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetConicalGradientSSBOFillPipeline(options);
+      [&renderer, kind](ContentContextOptions options) {
+        return renderer.GetConicalGradientSSBOFillPipeline(options, kind);
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
@@ -108,7 +131,7 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
         frag_info.colors_length = colors.size();
         auto color_buffer =
             host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                DefaultUniformAlignment());
+                                host_buffer.GetMinimumUniformAlignment());
 
         FS::BindFragInfo(
             pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
@@ -122,15 +145,16 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
 bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
                                             const Entity& entity,
                                             RenderPass& pass) const {
-  using VS = ConicalGradientUniformFillPipeline::VertexShader;
-  using FS = ConicalGradientUniformFillPipeline::FragmentShader;
+  using VS = ConicalGradientUniformFillConicalPipeline::VertexShader;
+  using FS = ConicalGradientUniformFillConicalPipeline::FragmentShader;
 
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
+  ConicalKind kind = GetConicalKind(center_, radius_, focus_, focus_radius_);
   PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetConicalGradientUniformFillPipeline(options);
+      [&renderer, kind](ContentContextOptions options) {
+        return renderer.GetConicalGradientUniformFillPipeline(options, kind);
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
@@ -165,8 +189,8 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
 bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
                                             const Entity& entity,
                                             RenderPass& pass) const {
-  using VS = ConicalGradientFillPipeline::VertexShader;
-  using FS = ConicalGradientFillPipeline::FragmentShader;
+  using VS = ConicalGradientFillConicalPipeline::VertexShader;
+  using FS = ConicalGradientFillConicalPipeline::FragmentShader;
 
   auto gradient_data = CreateGradientBuffer(colors_, stops_);
   auto gradient_texture =
@@ -178,9 +202,10 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
+  ConicalKind kind = GetConicalKind(center_, radius_, focus_, focus_radius_);
   PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetConicalGradientFillPipeline(options);
+      [&renderer, kind](ContentContextOptions options) {
+        return renderer.GetConicalGradientFillPipeline(options, kind);
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,

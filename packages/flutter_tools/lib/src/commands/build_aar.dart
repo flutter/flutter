@@ -48,13 +48,12 @@ class BuildAarCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-      allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
+      allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
       help: 'The target platform for which the project is compiled.',
     );
   }
@@ -63,9 +62,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  @override
-  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -112,6 +108,9 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (_androidSdk == null) {
       exitWithNoSdkMessage();
@@ -148,11 +147,11 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder?.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
+      generateTooling: regeneratePlatformSpecificToolingIfApplicable,
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );

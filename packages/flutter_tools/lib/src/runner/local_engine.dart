@@ -50,6 +50,10 @@ class LocalEngineLocator {
     String? localWebSdk,
     String? packagePath,
   }) async {
+    if (localHostEngine != null && localEngine == null) {
+      throwToolExit(_userMessages.runnerHostEngineRequiresLocalEngine, exitCode: 2);
+    }
+
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
     if (engineSourcePath == null &&
         localEngine == null &&

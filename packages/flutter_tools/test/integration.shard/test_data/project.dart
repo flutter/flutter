@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hot_reload_project.dart';
+library;
+
 import 'package:file/file.dart';
 
+import '../../src/package_config.dart';
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
@@ -66,7 +70,7 @@ abstract class Project {
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackageConfig(dir.path);
+    writePackageConfigFiles(directory: dir, mainLibName: 'test');
     await getPackages(dir.path);
   }
 

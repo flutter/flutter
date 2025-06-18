@@ -6,7 +6,6 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.SparseArray;
@@ -27,6 +26,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
@@ -42,14 +42,19 @@ import java.util.List;
  *
  * <p>Each {@link io.flutter.embedding.engine.FlutterEngine} has a single platform views controller.
  * A platform views controller can be attached to at most one Flutter view.
+ * [PlatformViewsController2] is intentionally a different class from [PlatformViewsController] in
+ * order to separate out the complexity of the first 3 platform view implementations (Virtual
+ * Display, Texture Layer, and Hybrid Composition). From the 4th platform view implementation,
+ * Hybrid Composition++.
  */
 public class PlatformViewsController2 implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController2";
 
-  private final PlatformViewRegistryImpl registry;
+  private PlatformViewRegistryImpl registry;
   private AndroidTouchProcessor androidTouchProcessor;
   private Context context;
   private FlutterView flutterView;
+  private FlutterJNI flutterJNI = null;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -63,15 +68,24 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
   private Surface overlayerSurface = null;
+  private SurfaceControl overlaySurfaceControl = null;
 
   public PlatformViewsController2() {
-    registry = new PlatformViewRegistryImpl();
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
     pendingTransactions = new ArrayList<>();
     activeTransactions = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
+  }
+
+  public void setRegistry(@NonNull PlatformViewRegistry registry) {
+    this.registry = (PlatformViewRegistryImpl) registry;
+  }
+
+  /** Whether the SurfaceControl swapchain mode is enabled. */
+  public void setFlutterJNI(FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
   }
 
   @Override
@@ -509,7 +523,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -531,7 +544,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -540,7 +552,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void applyTransactions() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -551,7 +562,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     pendingTransactions.clear();
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
@@ -560,12 +570,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       surfaceControlBuilder.setFormat(PixelFormat.RGBA_8888);
       surfaceControlBuilder.setName("Flutter Overlay Surface");
       surfaceControlBuilder.setOpaque(false);
+      surfaceControlBuilder.setHidden(false);
       final SurfaceControl surfaceControl = surfaceControlBuilder.build();
       final SurfaceControl.Transaction tx =
           flutterView.getRootSurfaceControl().buildReparentTransaction(surfaceControl);
       tx.setLayer(surfaceControl, 1000);
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
+      overlaySurfaceControl = surfaceControl;
     }
 
     return new FlutterOverlaySurface(0, overlayerSurface);
@@ -575,7 +587,28 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlayerSurface != null) {
       overlayerSurface.release();
       overlayerSurface = null;
+      overlaySurfaceControl = null;
     }
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  public void showOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
+    tx.apply();
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  public void hideOverlaySurface() {
+    if (overlaySurfaceControl == null) {
+      return;
+    }
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
+    tx.apply();
   }
 
   //// Message Handler ///////
@@ -674,6 +707,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public boolean isSurfaceControlEnabled() {
+          if (flutterJNI == null) {
+            return false;
+          }
+          return flutterJNI.IsSurfaceControlEnabled();
         }
       };
 }

@@ -161,6 +161,9 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle.iconColor] and [iconSize] is used to construct
   /// [ButtonStyle.iconSize].
   ///
+  /// If [iconColor] is null, the button icon will use [foregroundColor]. If [foregroundColor] is also
+  /// null, the button icon will use the default icon color.
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
@@ -536,7 +539,6 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
         buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
-    final double gap = lerpDouble(8, 4, scale)!;
     final ElevatedButtonThemeData elevatedButtonTheme = ElevatedButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
@@ -545,10 +547,11 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
         IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: lerpDouble(8, 4, scale)!,
       children:
           effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
     );
   }
 }

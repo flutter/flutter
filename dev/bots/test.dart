@@ -149,6 +149,7 @@ Future<void> main(List<String> args) async {
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
       kTestHarnessShardName:
           testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -236,10 +237,17 @@ Future<void> _runIntegrationToolTests() async {
   );
 }
 
+Future<void> _runWidgetPreviewScaffoldToolTests() async {
+  await runFlutterTest(
+    path.join(_toolsPath, 'test', 'widget_preview_scaffold.shard', 'widget_preview_scaffold'),
+  );
+}
+
 Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
+    'widget_preview_scaffold': _runWidgetPreviewScaffoldToolTests,
   });
 }
 
@@ -288,7 +296,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
@@ -300,7 +308,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     '--forbidden-type',
@@ -344,7 +352,6 @@ Future<void> _runBuildTests() async {
         ..add(
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
-        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
@@ -589,6 +596,7 @@ Future<void> _flutterBuild(
   await runCommand(flutter, <String>[
     'build',
     platformBuildName,
+    if (verifyCaching) '--performance-measurement-file=perf.json',
     ...additionalArgs,
     if (release) '--release' else '--debug',
     '-v',

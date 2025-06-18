@@ -17,20 +17,19 @@ import '../base/io.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
+import '../version.dart';
+import '../web/web_device.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -131,18 +130,16 @@ abstract final class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
-  static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
-  static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kDeviceConnection = 'device-connection';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
-  static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -153,6 +150,7 @@ abstract final class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
 }
 
 /// flutter command categories for usage.
@@ -171,9 +169,6 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom VM Service port.
   static const String vmServicePortOption = 'vm-service-port';
 
-  /// The option name for a custom VM Service port.
-  static const String observatoryPortOption = 'observatory-port';
-
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
 
@@ -182,6 +177,41 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
+
+  /// The dart define used for adding the Flutter version at runtime.
+  @visibleForTesting
+  static const String flutterVersionDefine = 'FLUTTER_VERSION';
+
+  /// The dart define used for adding the Flutter channel at runtime.
+  @visibleForTesting
+  static const String flutterChannelDefine = 'FLUTTER_CHANNEL';
+
+  /// The dart define used for adding the Flutter git URL at runtime.
+  @visibleForTesting
+  static const String flutterGitUrlDefine = 'FLUTTER_GIT_URL';
+
+  /// The dart define used for adding the Flutter framework revision at runtime.
+  @visibleForTesting
+  static const String flutterFrameworkRevisionDefine = 'FLUTTER_FRAMEWORK_REVISION';
+
+  /// The dart define used for adding the Flutter engine revision at runtime.
+  @visibleForTesting
+  static const String flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
+
+  /// The dart define used for adding the Dart version at runtime.
+  @visibleForTesting
+  static const String flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
+
+  /// List of all dart defines used for adding Flutter version information at runtime
+  @visibleForTesting
+  static const List<String> flutterVersionDartDefines = <String>[
+    flutterVersionDefine,
+    flutterChannelDefine,
+    flutterGitUrlDefine,
+    flutterFrameworkRevisionDefine,
+    flutterEngineRevisionDefine,
+    flutterDartVersionDefine,
+  ];
 
   @override
   ArgParser get argParser => _argParser;
@@ -338,6 +368,12 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      FlutterOptions.kWebExperimentalHotReload,
+      help: 'Enables new module format that supports hot reload.',
+      defaultsTo: true,
+      hide: !verboseHelp,
+    );
     argParser.addOption(
       'web-launch-url',
       help:
@@ -481,16 +517,6 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
     );
     argParser.addOption(
-      observatoryPortOption,
-      help:
-          '(deprecated; use host-vmservice-port instead) '
-          'Listen to the given port for a Dart VM Service connection.\n'
-          'Specifying port 0 (the default) will find a random free port.\n '
-          'if the Dart Development Service (DDS) is enabled, this will not be the port '
-          'of the VmService instance advertised on the command line.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
       'device-vmservice-port',
       help:
           'Look for vmservice connections only from the specified port.\n'
@@ -570,14 +596,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addServeObservatoryOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      'serve-observatory',
-      hide: !verboseHelp,
-      help: 'Serve the legacy Observatory developer tooling through the VM service.',
-    );
-  }
-
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -608,12 +626,10 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get _hostVmServicePortProvided =>
       (argResults?.wasParsed(vmServicePortOption) ?? false) ||
-      (argResults?.wasParsed(observatoryPortOption) ?? false) ||
       (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort =
-        stringArg(vmServicePortOption) ?? stringArg(observatoryPortOption);
+    final String? vmServicePort = stringArg(vmServicePortOption);
     final String? hostPort = stringArg('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
@@ -659,7 +675,6 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     if ((argResults?.wasParsed(vmServicePortOption) ?? false) &&
-        (argResults?.wasParsed(observatoryPortOption) ?? false) &&
         (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit(
         'Only one of "--vm-service-port" and '
@@ -827,9 +842,6 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
-
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
         (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
@@ -939,18 +951,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBundleSkSLPathOption({required bool hide}) {
-    argParser.addOption(
-      FlutterOptions.kBundleSkSLPathOption,
-      help:
-          'A path to a file containing precompiled SkSL shaders generated '
-          'during "flutter run". These can be included in an application to '
-          'improve the first frame render times.',
-      hide: hide,
-      valueHelp: 'flutter_1.sksl',
-    );
-  }
-
   void addTreeShakeIconsFlag({bool? enabledByDefault}) {
     argParser.addFlag(
       'tree-shake-icons',
@@ -966,20 +966,6 @@ abstract class FlutterCommand extends Command<void> {
       help:
           'This flag has no effect. Code shrinking is always enabled in release builds. '
           'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-    );
-  }
-
-  void addNullSafetyModeOptions({required bool hide}) {
-    argParser.addFlag(
-      FlutterOptions.kNullSafety,
-      help: 'This flag is deprecated as only null-safe code is supported.',
-      defaultsTo: true,
-      hide: true,
-    );
-    argParser.addFlag(
-      FlutterOptions.kNullAssertions,
-      help: 'This flag is deprecated as only null-safe code is supported.',
-      hide: true,
     );
   }
 
@@ -1084,6 +1070,10 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
       abbr: 'P',
     );
+    argParser.addOption(
+      FlutterOptions.kAndroidGradleProjectCacheDir,
+      help: 'Specifies the project-specific cache directory. Defaults to .gradle.',
+    );
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -1143,10 +1133,8 @@ abstract class FlutterCommand extends Command<void> {
   void addCommonDesktopBuildOptions({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
@@ -1343,6 +1331,15 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    // TODO(natebiggs): Delete this when new DDC module system is the default.
+    final bool webEnableHotReload =
+        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload) &&
+        // TODO(nshahan): Enable on web-server when the app is started correctly
+        // https://github.com/dart-lang/sdk/issues/60289.
+        (globals.deviceManager == null ||
+            globals.deviceManager!.specifiedDeviceId != WebServerDevice.kWebServerDeviceId);
+
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
@@ -1356,23 +1353,6 @@ abstract class FlutterCommand extends Command<void> {
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
-    }
-
-    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
-    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool wasNullSafetyFlagParsed =
-          argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
-      // Extra frontend options are only provided if explicitly
-      // requested.
-      if (wasNullSafetyFlagParsed) {
-        if (boolArg(FlutterOptions.kNullSafety)) {
-          nullSafetyMode = NullSafetyMode.sound;
-          extraFrontEndOptions.add('--sound-null-safety');
-        } else {
-          nullSafetyMode = NullSafetyMode.unsound;
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      }
     }
 
     final bool dartObfuscation =
@@ -1397,6 +1377,11 @@ abstract class FlutterCommand extends Command<void> {
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
 
+    final String? androidGradleProjectCacheDir =
+        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+            : null;
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1418,15 +1403,6 @@ abstract class FlutterCommand extends Command<void> {
         buildMode.isPrecompiled &&
         boolArg('tree-shake-icons');
 
-    final String? bundleSkSLPath =
-        argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-            ? stringArg(FlutterOptions.kBundleSkSLPathOption)
-            : null;
-
-    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
-      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
-    }
-
     final String? performanceMeasurementFile =
         argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
             ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
@@ -1447,20 +1423,20 @@ abstract class FlutterCommand extends Command<void> {
     final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
-    if (flavor != null) {
-      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.',
-        );
-      }
-      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
-        throwToolExit(
-          'FLUTTER_APP_FLAVOR is used by the framework and cannot be '
-          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-        );
-      }
-      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+
+    if (globals.platform.environment[kAppFlavor] != null) {
+      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
     }
+    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+      throwToolExit(
+        '$kAppFlavor is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
+    if (flavor != null) {
+      dartDefines.add('$kAppFlavor=$flavor');
+    }
+    _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
     return BuildInfo(
       buildMode,
@@ -1480,16 +1456,15 @@ abstract class FlutterCommand extends Command<void> {
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
       dartDefines: dartDefines,
-      bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packagesPath ?? packageConfigFile.path,
-      nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)
@@ -1498,7 +1473,30 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: webEnableHotReload,
     );
+  }
+
+  // This adds the Dart defines used to access various Flutter version information at runtime.
+  void _addFlutterVersionToDartDefines(FlutterVersion version, List<String> dartDefines) {
+    for (final String dartDefine in flutterVersionDartDefines) {
+      if (dartDefines.any((String define) => define.startsWith(dartDefine))) {
+        throwToolExit(
+          '$dartDefine is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}. '
+          'Use FlutterVersion to access it in Flutter code',
+        );
+      }
+    }
+
+    dartDefines.addAll(<String>[
+      '$flutterVersionDefine=${version.frameworkVersion}',
+      '$flutterChannelDefine=${version.channel}',
+      '$flutterGitUrlDefine=${version.repositoryUrl}',
+      '$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}',
+      '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
+      '$flutterDartVersionDefine=${version.dartSdkVersion}',
+    ]);
   }
 
   void setupApplicationPackages() {
@@ -1543,8 +1541,6 @@ abstract class FlutterCommand extends Command<void> {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
-        // Prints the welcome message if needed.
-        globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
         if (commandPath != null) {
@@ -1823,16 +1819,6 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
-        argResults![FlutterOptions.kNullSafety] == false &&
-        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
-      throwToolExit('''
-Could not find an option named "no-${FlutterOptions.kNullSafety}".
-
-Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
-''');
-    }
-
     globals.preRunValidator.validate();
 
     if (refreshWirelessDevices) {
@@ -1866,47 +1852,18 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
       await pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
       );
+    }
 
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+    if (regeneratePlatformSpecificToolingDuringVerify) {
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: getBuildMode().isRelease,
       );
-
-      // null implicitly means all plugins are allowed
-      List<String>? allowedPlugins;
-      if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
-        // The preview device does not currently support any plugins.
-        allowedPlugins = PreviewDevice.supportedPubPlugins;
-      }
-      await project.regeneratePlatformSpecificTooling(
-        allowedPlugins: allowedPlugins,
-        releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && getBuildMode().isRelease,
-      );
-      if (reportNullSafety) {
-        await _sendNullSafetyAnalyticsEvents(project);
-      }
     }
 
     setupApplicationPackages();
@@ -1918,14 +1875,36 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     return runCommand();
   }
 
-  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
-    final BuildInfo buildInfo = await getBuildInfo();
-    NullSafetyAnalysisEvent(
-      buildInfo.packageConfig,
-      buildInfo.nullSafetyMode,
-      project.manifest.appName,
-      globals.flutterUsage,
-    ).send();
+  /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  ///
+  /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
+  /// builds sequentially in one-go) may choose to override this and provide `false`, instead
+  /// calling [FlutterProject.regeneratePlatformSpecificTooling] manually when applicable.
+  @visibleForOverriding
+  bool get regeneratePlatformSpecificToolingDuringVerify => true;
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
+  ///
+  /// This method should only be called when [shouldRunPub] is `true`:
+  /// ```dart
+  /// if (shouldRunPub) {
+  ///   await regeneratePlatformSpecificTooling(project);
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// - <https://github.com/flutter/flutter/issues/162649>.
+  @protected
+  @nonVirtual
+  Future<void> regeneratePlatformSpecificToolingIfApplicable(
+    FlutterProject project, {
+    required bool releaseMode,
+  }) async {
+    if (!shouldRunPub) {
+      return;
+    }
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.
@@ -2083,7 +2062,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
@@ -2115,9 +2093,3 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
-
-/// Whether the tool should allow non-null safe builds.
-///
-/// The Dart SDK no longer supports non-null safe builds, so this value in the
-/// tool's context should always be [NonNullSafeBuilds.notAllowed].
-enum NonNullSafeBuilds { allowed, notAllowed }

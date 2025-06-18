@@ -13,59 +13,10 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart';
 
-/// Requests that the browser schedule a frame.
-///
-/// This may be overridden in tests, for example, to pump fake frames.
-ui.VoidCallback? scheduleFrameCallback;
-
-/// Signature of functions added as a listener to high contrast changes
-typedef HighContrastListener = void Function(bool enabled);
 typedef _KeyDataResponseCallback = void Function(bool handled);
 
 const StandardMethodCodec standardCodec = StandardMethodCodec();
 const JSONMethodCodec jsonCodec = JSONMethodCodec();
-
-/// Determines if high contrast is enabled using media query 'forced-colors: active' for Windows
-class HighContrastSupport {
-  static HighContrastSupport instance = HighContrastSupport();
-  static const String _highContrastMediaQueryString = '(forced-colors: active)';
-
-  final List<HighContrastListener> _listeners = <HighContrastListener>[];
-
-  /// Reference to css media query that indicates whether high contrast is on.
-  final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(
-    _highContrastMediaQueryString,
-  );
-  late final DomEventListener _onHighContrastChangeListener = createDomEventListener(
-    _onHighContrastChange,
-  );
-
-  bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
-
-  /// Adds function to the list of listeners on high contrast changes
-  void addListener(HighContrastListener listener) {
-    if (_listeners.isEmpty) {
-      _highContrastMediaQuery.addListener(_onHighContrastChangeListener);
-    }
-    _listeners.add(listener);
-  }
-
-  /// Removes function from the list of listeners on high contrast changes
-  void removeListener(HighContrastListener listener) {
-    _listeners.remove(listener);
-    if (_listeners.isEmpty) {
-      _highContrastMediaQuery.removeListener(_onHighContrastChangeListener);
-    }
-  }
-
-  JSVoid _onHighContrastChange(DomEvent event) {
-    final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-    final bool isHighContrastEnabled = mqEvent.matches!;
-    for (final HighContrastListener listener in _listeners) {
-      listener(isHighContrastEnabled);
-    }
-  }
-}
 
 /// Platform event dispatcher.
 ///
@@ -92,6 +43,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   late StreamSubscription<int> _onViewDisposedListener;
+
+  final Arena frameArena = Arena();
 
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
@@ -188,6 +141,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///   by the platform.
   @override
   EngineFlutterWindow? get implicitView => viewManager[kImplicitViewId] as EngineFlutterWindow?;
+
+  @override
+  int? get engineId => null;
 
   /// A callback that is invoked whenever the platform's [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
@@ -306,6 +262,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
+    frameArena.collect();
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -712,18 +669,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     const int vibrateHeavyImpact = 30;
     const int vibrateSelectionClick = 10;
 
-    switch (type) {
-      case 'HapticFeedbackType.lightImpact':
-        return vibrateLightImpact;
-      case 'HapticFeedbackType.mediumImpact':
-        return vibrateMediumImpact;
-      case 'HapticFeedbackType.heavyImpact':
-        return vibrateHeavyImpact;
-      case 'HapticFeedbackType.selectionClick':
-        return vibrateSelectionClick;
-      default:
-        return vibrateLongPress;
-    }
+    return switch (type) {
+      'HapticFeedbackType.lightImpact' => vibrateLightImpact,
+      'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
+      'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
+      'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      _ => vibrateLongPress,
+    };
   }
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
@@ -735,10 +687,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    scheduling of frames.
   @override
   void scheduleFrame() {
-    if (scheduleFrameCallback == null) {
-      throw Exception('scheduleFrameCallback must be initialized first.');
-    }
-    scheduleFrameCallback!();
+    FrameService.instance.scheduleFrame();
   }
 
   @override
@@ -746,15 +695,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     required ui.VoidCallback beginFrame,
     required ui.VoidCallback drawFrame,
   }) {
-    Timer.run(beginFrame);
-    // We use timers here to ensure that microtasks flush in between.
-    //
-    // TODO(dkwingsmt): This logic was moved from the framework and is different
-    // from how Web renders a regular frame, which doesn't flush microtasks
-    // between the callbacks at all (see `initializeEngineServices`). We might
-    // want to change this. See the to-do in `initializeEngineServices` and
-    // https://github.com/flutter/engine/pull/50570#discussion_r1496671676
-    Timer.run(drawFrame);
+    FrameService.instance.scheduleWarmUpFrame(beginFrame: beginFrame, drawFrame: drawFrame);
   }
 
   /// Updates the application's rendering on the GPU with the newly provided
@@ -797,7 +738,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // order to perform golden tests in Flutter framework because on the HTML
     // renderer, golden tests render to DOM and then take a browser screenshot,
     // https://github.com/flutter/flutter/issues/137073.
-    if (shouldRender || renderer.rendererTag == 'html') {
+    if (shouldRender) {
       await renderer.renderScene(scene, target);
     }
   }
@@ -887,11 +828,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return;
     }
     updateLocales(); // First time, for good measure.
-    _onLocaleChangedSubscription = DomSubscription(domWindow, 'languagechange', (DomEvent _) {
-      // Update internal config, then propagate the changes.
-      updateLocales();
-      invokeOnLocaleChanged();
-    });
+    _onLocaleChangedSubscription = DomSubscription(
+      domWindow,
+      'languagechange',
+      createDomEventListener((DomEvent _) {
+        // Update internal config, then propagate the changes.
+        updateLocales();
+        invokeOnLocaleChanged();
+      }),
+    );
   }
 
   /// Removes the [_onLocaleChangedSubscription].
@@ -1136,10 +1081,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener = createDomEventListener((DomEvent event) {
-      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    });
+    _brightnessMediaQueryListener =
+        (DomEvent event) {
+          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+        }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 
@@ -1248,11 +1194,28 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(int viewId, int nodeId, ui.SemanticsAction action, ByteData? args) {
-    invoke1<ui.SemanticsActionEvent>(
-      _onSemanticsActionEvent,
-      _onSemanticsActionEventZone,
-      ui.SemanticsActionEvent(type: action, nodeId: nodeId, viewId: viewId, arguments: args),
-    );
+    void sendActionToFramework() {
+      invoke1<ui.SemanticsActionEvent>(
+        _onSemanticsActionEvent,
+        _onSemanticsActionEventZone,
+        ui.SemanticsActionEvent(type: action, nodeId: nodeId, viewId: viewId, arguments: args),
+      );
+    }
+
+    // Semantic actions should not be sent to the framework while the framework
+    // is rendering a frame, even if the action is induced as a result of
+    // rendering it. An example of when the framework might need to be notified
+    // about an action as a result of rendering a new frame is a semantics
+    // update which results in the screen reader shifting focus (DOM "focus"
+    // events are delivered synchronously). In this situation a
+    // `SemanticsAction.focus` might be induced, and while it should be
+    // delivered to the framework asap, it must be done after the frame is done
+    // rendering at the earliest.
+    if (FrameService.instance.isRenderingFrame) {
+      Timer.run(sendActionToFramework);
+    } else {
+      sendActionToFramework();
+    }
   }
 
   // TODO(dnfield): make this work on web.

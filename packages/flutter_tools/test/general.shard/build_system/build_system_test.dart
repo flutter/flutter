@@ -86,6 +86,86 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
   });
 
+  testWithoutContext('build invalidates when outputs are added or removed', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory buildDir = fileSystem.systemTempDirectory.childDirectory('BuildDirectory');
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      buildDir: buildDir,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    // A unique hash of this build's particular environment. See class [Environment].
+    const String buildPrefix = '6666cd76f96956469e7be39d750cc7d9';
+
+    final File txt1 = buildDir.childDirectory(buildPrefix).childFile('1.txt')
+      ..createSync(recursive: true);
+    final File txt2 = buildDir.childDirectory(buildPrefix).childFile('2.txt')
+      ..createSync(recursive: true);
+
+    // Outputs added
+    TestTarget allFilesTarget =
+        TestTarget((Environment environment) async {})
+          ..name = 'allTextFiles'
+          ..outputs = const <Source>[
+            Source.pattern('{BUILD_DIR}/1.txt'),
+            Source.pattern('{BUILD_DIR}/2.txt'),
+          ]
+          ..dependencies = <Target>[];
+
+    final BufferLogger testLogger = BufferLogger.test();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem, logger: testLogger);
+    BuildResult result = await buildSystem.build(allFilesTarget, environment);
+    expect(result.success, true);
+    expect(
+      testLogger.traceText,
+      contains(
+        'InvalidatedReasonKind.outputSetAddition: The following outputs were added to the output set: '
+        '${txt1.path},'
+        '${txt2.path}',
+      ),
+    );
+
+    testLogger.clear();
+    expect(testLogger.traceText, isEmpty);
+
+    // No change
+    allFilesTarget =
+        TestTarget((Environment environment) async {})
+          ..name = 'allTextFiles'
+          ..outputs = const <Source>[
+            Source.pattern('{BUILD_DIR}/1.txt'),
+            Source.pattern('{BUILD_DIR}/2.txt'),
+          ]
+          ..dependencies = <Target>[];
+    result = await buildSystem.build(allFilesTarget, environment);
+    expect(result.success, true);
+    expect(testLogger.traceText, contains('Skipping target: allTextFiles'));
+    expect(testLogger.traceText, isNot(contains('InvalidatedReasonKind')));
+
+    testLogger.clear();
+    expect(testLogger.traceText, isEmpty);
+
+    // Output removed
+    allFilesTarget =
+        TestTarget((Environment environment) async {})
+          ..name = 'allTextFiles'
+          ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/1.txt')]
+          ..dependencies = <Target>[];
+    result = await buildSystem.build(allFilesTarget, environment);
+    expect(result.success, true);
+    expect(
+      testLogger.traceText,
+      contains(
+        'allTextFiles: Starting due to {InvalidatedReasonKind.outputSetRemoval: The following outputs were removed from the output set: '
+        '${txt2.path}',
+      ),
+    );
+  });
+
   testWithoutContext('Does not throw exception if asked to build with missing inputs', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
 
@@ -150,6 +230,79 @@ void main() {
 
     expect(result.inputFiles.single.path, '/foo.dart');
     expect(result.outputFiles.single.path, '${environment.buildDir.path}/out');
+  });
+
+  group('BuildResult.outputs filtering', () {
+    final TestTarget allFilesTarget =
+        TestTarget((Environment environment) async {})
+          ..name = 'allTextFiles'
+          ..inputs = const <Source>[
+            Source.pattern('{PROJECT_DIR}/*'),
+            Source.pattern('{PROJECT_DIR}/*/*'),
+          ]
+          ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/out')]
+          ..dependencies = <Target>[];
+    late BuildSystem buildSystem;
+
+    setUp(() {
+      buildSystem = setUpBuildSystem(fileSystem);
+    });
+
+    testWithoutContext('normally would update when something has changed', () async {
+      environment.projectDir.childFile('foo.dart').createSync();
+      final BuildResult result = await buildSystem.build(allFilesTarget, environment);
+      expect(
+        result.inputFiles,
+        contains(isA<File>().having((File f) => f.path, 'path', endsWith('foo.dart'))),
+      );
+    });
+
+    testWithoutContext('ignores the .dart_tool directory', () async {
+      environment.projectDir.childDirectory('.dart_tool').createSync();
+      environment.projectDir.childDirectory('.dart_tool').childFile('IGNORE_ME.txt').createSync();
+      final BuildResult result = await buildSystem.build(allFilesTarget, environment);
+      expect(
+        result.inputFiles,
+        isNot(contains(isA<File>().having((File f) => f.path, 'path', endsWith('IGNORE_ME.txt')))),
+      );
+    });
+
+    testWithoutContext('ignores files named .flutter-plugins', () async {
+      environment.projectDir.childFile('.flutter-plugins').createSync();
+      final BuildResult result = await buildSystem.build(allFilesTarget, environment);
+      expect(
+        result.inputFiles,
+        isNot(
+          contains(isA<File>().having((File f) => f.path, 'path', endsWith('.flutter-plugins'))),
+        ),
+      );
+    });
+
+    testWithoutContext('ignores files named .flutter-plugins-dependencies', () async {
+      environment.projectDir.childFile('.flutter-plugins-dependencies').createSync();
+      final BuildResult result = await buildSystem.build(allFilesTarget, environment);
+      expect(
+        result.inputFiles,
+        isNot(
+          contains(
+            isA<File>().having(
+              (File f) => f.path,
+              'path',
+              endsWith('.flutter-plugins-dependencies'),
+            ),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('ignores files ending with .xcconfig', () async {
+      environment.projectDir.childFile('foo.xcconfig').createSync();
+      final BuildResult result = await buildSystem.build(allFilesTarget, environment);
+      expect(
+        result.inputFiles,
+        isNot(contains(isA<File>().having((File f) => f.path, 'path', endsWith('.xcconfig')))),
+      );
+    });
   });
 
   testWithoutContext('Does not re-invoke build if stamp is valid', () async {
@@ -666,7 +819,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = setUpBuildSystem(
       fileSystem,
-      FakePlatform(
+      platform: FakePlatform(
         numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
       ),
     );
@@ -701,10 +854,10 @@ void main() {
   });
 }
 
-BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
+BuildSystem setUpBuildSystem(FileSystem fileSystem, {FakePlatform? platform, Logger? logger}) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
-    logger: BufferLogger.test(),
+    logger: logger ?? BufferLogger.test(),
     platform: platform ?? FakePlatform(),
   );
 }
@@ -718,7 +871,7 @@ class TestTarget extends Target {
   final bool Function(Environment environment)? _canSkip;
 
   @override
-  bool canSkip(Environment environment) {
+  Future<bool> canSkip(Environment environment) async {
     if (_canSkip != null) {
       return _canSkip(environment);
     }

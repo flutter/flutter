@@ -5,9 +5,8 @@ This directory exists to support building Flutter on our build infrastructure.
 Flutter build results are available at: <https://flutter-dashboard.appspot.com>.
 
 Flutter infra requires special permissions to retrigger builds on the
-[build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
-[infra ticket](../../docs/infra/Infra-Ticket-Queue.md) to
-request permission.
+[build dashboard](https://flutter-dashboard.appspot.com/#/build). File a `team-infra`
+issue to request permission.
 
 The [LUCI](https://chromium.googlesource.com/infra/luci/luci-py/+/refs/heads/main/README.md)-based
 bots run the [`test.dart`](test.dart) script for each PR and submission. This
@@ -26,8 +25,7 @@ The build dashboard includes post-commit testing run on physical devices. See
 
 A [set of infra scripts](https://flutter.googlesource.com/recipes/)
 run on Windows, Linux, and Mac machines. The configuration for how many
-machines and what kind are managed internally by Google. File an
-[infra ticket](../../docs/infra/Infra-Ticket-Queue.md)
+machines and what kind are managed internally by Google. File a `team-infra` issue
 to request new machine types to be added. Both of these technologies are highly
 specific to the [LUCI](https://github.com/luci) project, which is the successor
 to Chromium's infra and the foundation to Flutter's infrastructure.
@@ -72,7 +70,7 @@ The typical cycle for editing a recipe is:
    the existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -pa git_ref='refs/pull/<PR number>/head' | led edit -pa git_url='https://github.com/flutter/<repo>' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -pa git_ref='refs/pull/<PR number>/head' | led edit -pa git_url='https://github.com/flutter/<repo>' | led edit-recipe-bundle | led edit -pa is_fusion='true' | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
    `git_ref`/`git_url` is the ref/url of the intended changes to build.
    * If `led` fails, ensure that your `depot_tools` checkout is up to date.
 5. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).

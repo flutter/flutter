@@ -12,6 +12,7 @@
 #include <lib/fdio/directory.h>
 #include <lib/fdio/io.h>
 #include <lib/fdio/namespace.h>
+#include <lib/fidl/cpp/client.h>
 #include <lib/vfs/cpp/composed_service_dir.h>
 #include <lib/vfs/cpp/remote_dir.h>
 #include <lib/vfs/cpp/service.h>
@@ -267,7 +268,8 @@ ComponentV2::ComponentV2(
   }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
-  composed_service_dir->set_fallback(std::move(flutter_public_dir));
+  composed_service_dir->SetFallback(
+      fidl::ClientEnd<fuchsia_io::Directory>(flutter_public_dir.TakeChannel()));
 
   // Request an event from the directory to ensure it is servicing requests.
   directory_ptr_->Open3(".",
@@ -467,8 +469,9 @@ ComponentV2::ComponentV2(
       std::bind(&fml::CurrentMessageLoopAddAfterTaskObserver,
                 std::placeholders::_1, std::placeholders::_2);
 
-  settings_.task_observer_remove = std::bind(
-      &fml::CurrentMessageLoopRemoveAfterTaskObserver, std::placeholders::_1);
+  settings_.task_observer_remove =
+      std::bind(&fml::CurrentMessageLoopRemoveAfterTaskObserver,
+                std::placeholders::_1, std::placeholders::_2);
 
   settings_.log_message_callback = [](const std::string& tag,
                                       const std::string& message) {
@@ -657,5 +660,11 @@ void ComponentV2::WriteProfileToTrace() const {
   }
 }
 #endif  // !defined(DART_PRODUCT)
+
+void ComponentV2::handle_unknown_method(uint64_t ordinal,
+                                        bool method_has_response) {
+  FML_LOG(ERROR) << "Unknown method called on ComponentV2. Ordinal: "
+                 << ordinal;
+}
 
 }  // namespace flutter_runner

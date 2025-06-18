@@ -25,7 +25,7 @@
 
 // Tripping this assertion means that the C++ wrapper needs to be updated to
 // account for impeller.h changes as necessary.
-static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 2, 0),
+static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 4, 0),
               "C++ bindings must be for the same version as the C API.");
 
 namespace IMPELLER_HPP_NAMESPACE {
@@ -44,140 +44,178 @@ struct Proc {
   }
 };
 
-#define IMPELLER_HPP_EACH_PROC(PROC)                        \
-  PROC(ImpellerColorFilterCreateBlendNew)                   \
-  PROC(ImpellerColorFilterCreateColorMatrixNew)             \
-  PROC(ImpellerColorFilterRelease)                          \
-  PROC(ImpellerColorFilterRetain)                           \
-  PROC(ImpellerColorSourceCreateConicalGradientNew)         \
-  PROC(ImpellerColorSourceCreateImageNew)                   \
-  PROC(ImpellerColorSourceCreateLinearGradientNew)          \
-  PROC(ImpellerColorSourceCreateRadialGradientNew)          \
-  PROC(ImpellerColorSourceCreateSweepGradientNew)           \
-  PROC(ImpellerColorSourceRelease)                          \
-  PROC(ImpellerColorSourceRetain)                           \
-  PROC(ImpellerContextCreateOpenGLESNew)                    \
-  PROC(ImpellerContextRelease)                              \
-  PROC(ImpellerContextRetain)                               \
-  PROC(ImpellerDisplayListBuilderClipOval)                  \
-  PROC(ImpellerDisplayListBuilderClipPath)                  \
-  PROC(ImpellerDisplayListBuilderClipRect)                  \
-  PROC(ImpellerDisplayListBuilderClipRoundedRect)           \
-  PROC(ImpellerDisplayListBuilderCreateDisplayListNew)      \
-  PROC(ImpellerDisplayListBuilderDrawDashedLine)            \
-  PROC(ImpellerDisplayListBuilderDrawDisplayList)           \
-  PROC(ImpellerDisplayListBuilderDrawLine)                  \
-  PROC(ImpellerDisplayListBuilderDrawOval)                  \
-  PROC(ImpellerDisplayListBuilderDrawPaint)                 \
-  PROC(ImpellerDisplayListBuilderDrawParagraph)             \
-  PROC(ImpellerDisplayListBuilderDrawPath)                  \
-  PROC(ImpellerDisplayListBuilderDrawRect)                  \
-  PROC(ImpellerDisplayListBuilderDrawRoundedRect)           \
-  PROC(ImpellerDisplayListBuilderDrawRoundedRectDifference) \
-  PROC(ImpellerDisplayListBuilderDrawTexture)               \
-  PROC(ImpellerDisplayListBuilderDrawTextureRect)           \
-  PROC(ImpellerDisplayListBuilderGetSaveCount)              \
-  PROC(ImpellerDisplayListBuilderGetTransform)              \
-  PROC(ImpellerDisplayListBuilderNew)                       \
-  PROC(ImpellerDisplayListBuilderRelease)                   \
-  PROC(ImpellerDisplayListBuilderResetTransform)            \
-  PROC(ImpellerDisplayListBuilderRestore)                   \
-  PROC(ImpellerDisplayListBuilderRestoreToCount)            \
-  PROC(ImpellerDisplayListBuilderRetain)                    \
-  PROC(ImpellerDisplayListBuilderRotate)                    \
-  PROC(ImpellerDisplayListBuilderSave)                      \
-  PROC(ImpellerDisplayListBuilderSaveLayer)                 \
-  PROC(ImpellerDisplayListBuilderScale)                     \
-  PROC(ImpellerDisplayListBuilderSetTransform)              \
-  PROC(ImpellerDisplayListBuilderTransform)                 \
-  PROC(ImpellerDisplayListBuilderTranslate)                 \
-  PROC(ImpellerDisplayListRelease)                          \
-  PROC(ImpellerDisplayListRetain)                           \
-  PROC(ImpellerGetVersion)                                  \
-  PROC(ImpellerImageFilterCreateBlurNew)                    \
-  PROC(ImpellerImageFilterCreateComposeNew)                 \
-  PROC(ImpellerImageFilterCreateDilateNew)                  \
-  PROC(ImpellerImageFilterCreateErodeNew)                   \
-  PROC(ImpellerImageFilterCreateMatrixNew)                  \
-  PROC(ImpellerImageFilterRelease)                          \
-  PROC(ImpellerImageFilterRetain)                           \
-  PROC(ImpellerMaskFilterCreateBlurNew)                     \
-  PROC(ImpellerMaskFilterRelease)                           \
-  PROC(ImpellerMaskFilterRetain)                            \
-  PROC(ImpellerPaintNew)                                    \
-  PROC(ImpellerPaintRelease)                                \
-  PROC(ImpellerPaintRetain)                                 \
-  PROC(ImpellerPaintSetBlendMode)                           \
-  PROC(ImpellerPaintSetColor)                               \
-  PROC(ImpellerPaintSetColorFilter)                         \
-  PROC(ImpellerPaintSetColorSource)                         \
-  PROC(ImpellerPaintSetDrawStyle)                           \
-  PROC(ImpellerPaintSetImageFilter)                         \
-  PROC(ImpellerPaintSetMaskFilter)                          \
-  PROC(ImpellerPaintSetStrokeCap)                           \
-  PROC(ImpellerPaintSetStrokeJoin)                          \
-  PROC(ImpellerPaintSetStrokeMiter)                         \
-  PROC(ImpellerPaintSetStrokeWidth)                         \
-  PROC(ImpellerParagraphBuilderAddText)                     \
-  PROC(ImpellerParagraphBuilderBuildParagraphNew)           \
-  PROC(ImpellerParagraphBuilderNew)                         \
-  PROC(ImpellerParagraphBuilderPopStyle)                    \
-  PROC(ImpellerParagraphBuilderPushStyle)                   \
-  PROC(ImpellerParagraphBuilderRelease)                     \
-  PROC(ImpellerParagraphBuilderRetain)                      \
-  PROC(ImpellerParagraphGetAlphabeticBaseline)              \
-  PROC(ImpellerParagraphGetHeight)                          \
-  PROC(ImpellerParagraphGetIdeographicBaseline)             \
-  PROC(ImpellerParagraphGetLineCount)                       \
-  PROC(ImpellerParagraphGetLongestLineWidth)                \
-  PROC(ImpellerParagraphGetMaxIntrinsicWidth)               \
-  PROC(ImpellerParagraphGetMaxWidth)                        \
-  PROC(ImpellerParagraphGetMinIntrinsicWidth)               \
-  PROC(ImpellerParagraphRelease)                            \
-  PROC(ImpellerParagraphRetain)                             \
-  PROC(ImpellerParagraphStyleNew)                           \
-  PROC(ImpellerParagraphStyleRelease)                       \
-  PROC(ImpellerParagraphStyleRetain)                        \
-  PROC(ImpellerParagraphStyleSetBackground)                 \
-  PROC(ImpellerParagraphStyleSetFontFamily)                 \
-  PROC(ImpellerParagraphStyleSetFontSize)                   \
-  PROC(ImpellerParagraphStyleSetFontStyle)                  \
-  PROC(ImpellerParagraphStyleSetFontWeight)                 \
-  PROC(ImpellerParagraphStyleSetForeground)                 \
-  PROC(ImpellerParagraphStyleSetHeight)                     \
-  PROC(ImpellerParagraphStyleSetLocale)                     \
-  PROC(ImpellerParagraphStyleSetMaxLines)                   \
-  PROC(ImpellerParagraphStyleSetTextAlignment)              \
-  PROC(ImpellerParagraphStyleSetTextDirection)              \
-  PROC(ImpellerPathBuilderAddArc)                           \
-  PROC(ImpellerPathBuilderAddOval)                          \
-  PROC(ImpellerPathBuilderAddRect)                          \
-  PROC(ImpellerPathBuilderAddRoundedRect)                   \
-  PROC(ImpellerPathBuilderClose)                            \
-  PROC(ImpellerPathBuilderCopyPathNew)                      \
-  PROC(ImpellerPathBuilderCubicCurveTo)                     \
-  PROC(ImpellerPathBuilderLineTo)                           \
-  PROC(ImpellerPathBuilderMoveTo)                           \
-  PROC(ImpellerPathBuilderNew)                              \
-  PROC(ImpellerPathBuilderQuadraticCurveTo)                 \
-  PROC(ImpellerPathBuilderRelease)                          \
-  PROC(ImpellerPathBuilderRetain)                           \
-  PROC(ImpellerPathBuilderTakePathNew)                      \
-  PROC(ImpellerPathRelease)                                 \
-  PROC(ImpellerPathRetain)                                  \
-  PROC(ImpellerSurfaceCreateWrappedFBONew)                  \
-  PROC(ImpellerSurfaceDrawDisplayList)                      \
-  PROC(ImpellerSurfaceRelease)                              \
-  PROC(ImpellerSurfaceRetain)                               \
-  PROC(ImpellerTextureCreateWithContentsNew)                \
-  PROC(ImpellerTextureCreateWithOpenGLTextureHandleNew)     \
-  PROC(ImpellerTextureGetOpenGLHandle)                      \
-  PROC(ImpellerTextureRelease)                              \
-  PROC(ImpellerTextureRetain)                               \
-  PROC(ImpellerTypographyContextNew)                        \
-  PROC(ImpellerTypographyContextRegisterFont)               \
-  PROC(ImpellerTypographyContextRelease)                    \
-  PROC(ImpellerTypographyContextRetain)
+#define IMPELLER_HPP_EACH_PROC(PROC)                              \
+  PROC(ImpellerColorFilterCreateBlendNew)                         \
+  PROC(ImpellerColorFilterCreateColorMatrixNew)                   \
+  PROC(ImpellerColorFilterRelease)                                \
+  PROC(ImpellerColorFilterRetain)                                 \
+  PROC(ImpellerColorSourceCreateConicalGradientNew)               \
+  PROC(ImpellerColorSourceCreateImageNew)                         \
+  PROC(ImpellerColorSourceCreateLinearGradientNew)                \
+  PROC(ImpellerColorSourceCreateRadialGradientNew)                \
+  PROC(ImpellerColorSourceCreateSweepGradientNew)                 \
+  PROC(ImpellerColorSourceRelease)                                \
+  PROC(ImpellerColorSourceRetain)                                 \
+  PROC(ImpellerContextCreateMetalNew)                             \
+  PROC(ImpellerContextCreateOpenGLESNew)                          \
+  PROC(ImpellerContextCreateVulkanNew)                            \
+  PROC(ImpellerContextGetVulkanInfo)                              \
+  PROC(ImpellerContextRelease)                                    \
+  PROC(ImpellerContextRetain)                                     \
+  PROC(ImpellerDisplayListBuilderClipOval)                        \
+  PROC(ImpellerDisplayListBuilderClipPath)                        \
+  PROC(ImpellerDisplayListBuilderClipRect)                        \
+  PROC(ImpellerDisplayListBuilderClipRoundedRect)                 \
+  PROC(ImpellerDisplayListBuilderCreateDisplayListNew)            \
+  PROC(ImpellerDisplayListBuilderDrawDashedLine)                  \
+  PROC(ImpellerDisplayListBuilderDrawDisplayList)                 \
+  PROC(ImpellerDisplayListBuilderDrawLine)                        \
+  PROC(ImpellerDisplayListBuilderDrawOval)                        \
+  PROC(ImpellerDisplayListBuilderDrawPaint)                       \
+  PROC(ImpellerDisplayListBuilderDrawParagraph)                   \
+  PROC(ImpellerDisplayListBuilderDrawPath)                        \
+  PROC(ImpellerDisplayListBuilderDrawRect)                        \
+  PROC(ImpellerDisplayListBuilderDrawRoundedRect)                 \
+  PROC(ImpellerDisplayListBuilderDrawRoundedRectDifference)       \
+  PROC(ImpellerDisplayListBuilderDrawShadow)                      \
+  PROC(ImpellerDisplayListBuilderDrawTexture)                     \
+  PROC(ImpellerDisplayListBuilderDrawTextureRect)                 \
+  PROC(ImpellerDisplayListBuilderGetSaveCount)                    \
+  PROC(ImpellerDisplayListBuilderGetTransform)                    \
+  PROC(ImpellerDisplayListBuilderNew)                             \
+  PROC(ImpellerDisplayListBuilderRelease)                         \
+  PROC(ImpellerDisplayListBuilderResetTransform)                  \
+  PROC(ImpellerDisplayListBuilderRestore)                         \
+  PROC(ImpellerDisplayListBuilderRestoreToCount)                  \
+  PROC(ImpellerDisplayListBuilderRetain)                          \
+  PROC(ImpellerDisplayListBuilderRotate)                          \
+  PROC(ImpellerDisplayListBuilderSave)                            \
+  PROC(ImpellerDisplayListBuilderSaveLayer)                       \
+  PROC(ImpellerDisplayListBuilderScale)                           \
+  PROC(ImpellerDisplayListBuilderSetTransform)                    \
+  PROC(ImpellerDisplayListBuilderTransform)                       \
+  PROC(ImpellerDisplayListBuilderTranslate)                       \
+  PROC(ImpellerDisplayListRelease)                                \
+  PROC(ImpellerDisplayListRetain)                                 \
+  PROC(ImpellerGetVersion)                                        \
+  PROC(ImpellerGlyphInfoGetGraphemeClusterBounds)                 \
+  PROC(ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin)     \
+  PROC(ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd)       \
+  PROC(ImpellerGlyphInfoGetTextDirection)                         \
+  PROC(ImpellerGlyphInfoIsEllipsis)                               \
+  PROC(ImpellerGlyphInfoRelease)                                  \
+  PROC(ImpellerGlyphInfoRetain)                                   \
+  PROC(ImpellerImageFilterCreateBlurNew)                          \
+  PROC(ImpellerImageFilterCreateComposeNew)                       \
+  PROC(ImpellerImageFilterCreateDilateNew)                        \
+  PROC(ImpellerImageFilterCreateErodeNew)                         \
+  PROC(ImpellerImageFilterCreateMatrixNew)                        \
+  PROC(ImpellerImageFilterRelease)                                \
+  PROC(ImpellerImageFilterRetain)                                 \
+  PROC(ImpellerLineMetricsGetAscent)                              \
+  PROC(ImpellerLineMetricsGetBaseline)                            \
+  PROC(ImpellerLineMetricsGetCodeUnitEndIndex)                    \
+  PROC(ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace) \
+  PROC(ImpellerLineMetricsGetCodeUnitEndIndexIncludingNewline)    \
+  PROC(ImpellerLineMetricsGetCodeUnitStartIndex)                  \
+  PROC(ImpellerLineMetricsGetDescent)                             \
+  PROC(ImpellerLineMetricsGetHeight)                              \
+  PROC(ImpellerLineMetricsGetLeft)                                \
+  PROC(ImpellerLineMetricsGetUnscaledAscent)                      \
+  PROC(ImpellerLineMetricsGetWidth)                               \
+  PROC(ImpellerLineMetricsIsHardbreak)                            \
+  PROC(ImpellerLineMetricsRelease)                                \
+  PROC(ImpellerLineMetricsRetain)                                 \
+  PROC(ImpellerMaskFilterCreateBlurNew)                           \
+  PROC(ImpellerMaskFilterRelease)                                 \
+  PROC(ImpellerMaskFilterRetain)                                  \
+  PROC(ImpellerPaintNew)                                          \
+  PROC(ImpellerPaintRelease)                                      \
+  PROC(ImpellerPaintRetain)                                       \
+  PROC(ImpellerPaintSetBlendMode)                                 \
+  PROC(ImpellerPaintSetColor)                                     \
+  PROC(ImpellerPaintSetColorFilter)                               \
+  PROC(ImpellerPaintSetColorSource)                               \
+  PROC(ImpellerPaintSetDrawStyle)                                 \
+  PROC(ImpellerPaintSetImageFilter)                               \
+  PROC(ImpellerPaintSetMaskFilter)                                \
+  PROC(ImpellerPaintSetStrokeCap)                                 \
+  PROC(ImpellerPaintSetStrokeJoin)                                \
+  PROC(ImpellerPaintSetStrokeMiter)                               \
+  PROC(ImpellerPaintSetStrokeWidth)                               \
+  PROC(ImpellerParagraphBuilderAddText)                           \
+  PROC(ImpellerParagraphBuilderBuildParagraphNew)                 \
+  PROC(ImpellerParagraphBuilderNew)                               \
+  PROC(ImpellerParagraphBuilderPopStyle)                          \
+  PROC(ImpellerParagraphBuilderPushStyle)                         \
+  PROC(ImpellerParagraphBuilderRelease)                           \
+  PROC(ImpellerParagraphBuilderRetain)                            \
+  PROC(ImpellerParagraphCreateGlyphInfoAtCodeUnitIndexNew)        \
+  PROC(ImpellerParagraphCreateGlyphInfoAtParagraphCoordinatesNew) \
+  PROC(ImpellerParagraphGetAlphabeticBaseline)                    \
+  PROC(ImpellerParagraphGetHeight)                                \
+  PROC(ImpellerParagraphGetIdeographicBaseline)                   \
+  PROC(ImpellerParagraphGetLineCount)                             \
+  PROC(ImpellerParagraphGetLineMetrics)                           \
+  PROC(ImpellerParagraphGetLongestLineWidth)                      \
+  PROC(ImpellerParagraphGetMaxIntrinsicWidth)                     \
+  PROC(ImpellerParagraphGetMaxWidth)                              \
+  PROC(ImpellerParagraphGetMinIntrinsicWidth)                     \
+  PROC(ImpellerParagraphGetWordBoundary)                          \
+  PROC(ImpellerParagraphRelease)                                  \
+  PROC(ImpellerParagraphRetain)                                   \
+  PROC(ImpellerParagraphStyleNew)                                 \
+  PROC(ImpellerParagraphStyleRelease)                             \
+  PROC(ImpellerParagraphStyleRetain)                              \
+  PROC(ImpellerParagraphStyleSetBackground)                       \
+  PROC(ImpellerParagraphStyleSetEllipsis)                         \
+  PROC(ImpellerParagraphStyleSetFontFamily)                       \
+  PROC(ImpellerParagraphStyleSetFontSize)                         \
+  PROC(ImpellerParagraphStyleSetFontStyle)                        \
+  PROC(ImpellerParagraphStyleSetFontWeight)                       \
+  PROC(ImpellerParagraphStyleSetForeground)                       \
+  PROC(ImpellerParagraphStyleSetHeight)                           \
+  PROC(ImpellerParagraphStyleSetLocale)                           \
+  PROC(ImpellerParagraphStyleSetMaxLines)                         \
+  PROC(ImpellerParagraphStyleSetTextAlignment)                    \
+  PROC(ImpellerParagraphStyleSetTextDirection)                    \
+  PROC(ImpellerParagraphStyleSetTextDecoration)                   \
+  PROC(ImpellerPathBuilderAddArc)                                 \
+  PROC(ImpellerPathBuilderAddOval)                                \
+  PROC(ImpellerPathBuilderAddRect)                                \
+  PROC(ImpellerPathBuilderAddRoundedRect)                         \
+  PROC(ImpellerPathBuilderClose)                                  \
+  PROC(ImpellerPathBuilderCopyPathNew)                            \
+  PROC(ImpellerPathBuilderCubicCurveTo)                           \
+  PROC(ImpellerPathBuilderLineTo)                                 \
+  PROC(ImpellerPathBuilderMoveTo)                                 \
+  PROC(ImpellerPathBuilderNew)                                    \
+  PROC(ImpellerPathBuilderQuadraticCurveTo)                       \
+  PROC(ImpellerPathBuilderRelease)                                \
+  PROC(ImpellerPathBuilderRetain)                                 \
+  PROC(ImpellerPathBuilderTakePathNew)                            \
+  PROC(ImpellerPathGetBounds)                                     \
+  PROC(ImpellerPathRelease)                                       \
+  PROC(ImpellerPathRetain)                                        \
+  PROC(ImpellerSurfaceCreateWrappedFBONew)                        \
+  PROC(ImpellerSurfaceCreateWrappedMetalDrawableNew)              \
+  PROC(ImpellerSurfaceDrawDisplayList)                            \
+  PROC(ImpellerSurfacePresent)                                    \
+  PROC(ImpellerSurfaceRelease)                                    \
+  PROC(ImpellerSurfaceRetain)                                     \
+  PROC(ImpellerTextureCreateWithContentsNew)                      \
+  PROC(ImpellerTextureCreateWithOpenGLTextureHandleNew)           \
+  PROC(ImpellerTextureGetOpenGLHandle)                            \
+  PROC(ImpellerTextureRelease)                                    \
+  PROC(ImpellerTextureRetain)                                     \
+  PROC(ImpellerTypographyContextNew)                              \
+  PROC(ImpellerTypographyContextRegisterFont)                     \
+  PROC(ImpellerTypographyContextRelease)                          \
+  PROC(ImpellerTypographyContextRetain)                           \
+  PROC(ImpellerVulkanSwapchainAcquireNextSurfaceNew)              \
+  PROC(ImpellerVulkanSwapchainCreateNew)                          \
+  PROC(ImpellerVulkanSwapchainRelease)                            \
+  PROC(ImpellerVulkanSwapchainRetain)
 
 struct ProcTable {
   bool Initialize(
@@ -195,7 +233,7 @@ struct ProcTable {
     return true;
   }
 
-#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name, nullptr};
+#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name};
   IMPELLER_HPP_EACH_PROC(IMPELLER_HPP_PROC)
 #undef IMPELLER_HPP_PROC
 };
@@ -274,7 +312,9 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerColorSource);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerContext);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayList);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayListBuilder);
+IMPELLER_HPP_DEFINE_TRAITS(ImpellerGlyphInfo);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerImageFilter);
+IMPELLER_HPP_DEFINE_TRAITS(ImpellerLineMetrics);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerMaskFilter);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerPaint);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerParagraph);
@@ -285,10 +325,11 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerPathBuilder);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerSurface);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerTexture);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerTypographyContext);
+IMPELLER_HPP_DEFINE_TRAITS(ImpellerVulkanSwapchain);
 
 #undef IMPELLER_HPP_DEFINE_TRAITS
 
-class Mapping final {
+class Mapping {
  public:
   Mapping(const uint8_t* mapping,
           size_t size,
@@ -310,7 +351,7 @@ class Mapping final {
 //------------------------------------------------------------------------------
 /// @see      ImpellerContext
 ///
-class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
+class Context : public Object<ImpellerContext, ImpellerContextTraits> {
  public:
   Context(ImpellerContext context, AdoptTag tag) : Object(context, tag) {}
 
@@ -335,12 +376,19 @@ class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
                                                           ),
         AdoptTag::kAdopt);
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerContextGetVulkanInfo
+  ///
+  bool GetVulkanInfo(ImpellerContextVulkanInfo& info) const {
+    return gGlobalProcTable.ImpellerContextGetVulkanInfo(Get(), &info);
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerTexture
 ///
-class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
+class Texture : public Object<ImpellerTexture, ImpellerTextureTraits> {
  public:
   Texture(ImpellerTexture texture, AdoptTag adopt) : Object(texture, adopt) {}
 
@@ -391,7 +439,7 @@ class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerColorFilter
 ///
-class ColorFilter final
+class ColorFilter
     : public Object<ImpellerColorFilter, ImpellerColorFilterTraits> {
  public:
   ColorFilter(ImpellerColorFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -418,7 +466,7 @@ class ColorFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerColorSource
 ///
-class ColorSource final
+class ColorSource
     : public Object<ImpellerColorSource, ImpellerColorSourceTraits> {
  public:
   ColorSource(ImpellerColorSource source, AdoptTag tag) : Object(source, tag) {}
@@ -547,7 +595,7 @@ class ColorSource final
 //------------------------------------------------------------------------------
 /// @see      ImpellerImageFilter
 ///
-class ImageFilter final
+class ImageFilter
     : public Object<ImpellerImageFilter, ImpellerImageFilterTraits> {
  public:
   ImageFilter(ImpellerImageFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -605,8 +653,7 @@ class ImageFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerMaskFilter
 ///
-class MaskFilter final
-    : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
+class MaskFilter : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
  public:
   MaskFilter(ImpellerMaskFilter filter, AdoptTag tag) : Object(filter, tag) {}
 
@@ -621,10 +668,153 @@ class MaskFilter final
 };
 
 //------------------------------------------------------------------------------
+/// @see      ImpellerGlyphInfo
+///
+class GlyphInfo : public Object<ImpellerGlyphInfo, ImpellerGlyphInfoTraits> {
+ public:
+  GlyphInfo(ImpellerGlyphInfo info, AdoptTag tag) : Object(info, tag) {}
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin
+  ///
+  size_t GetGraphemeClusterCodeUnitRangeBegin() const {
+    return gGlobalProcTable
+        .ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin(Get());
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd
+  ///
+  size_t GetGraphemeClusterCodeUnitRangeEnd() const {
+    return gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
+        Get());
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterBounds
+  ///
+  ImpellerRect GetGraphemeClusterBounds() const {
+    ImpellerRect rect = {};
+    gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterBounds(Get(), &rect);
+    return rect;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerGlyphInfoIsEllipsis
+  ///
+  bool IsEllipsis() const {
+    return gGlobalProcTable.ImpellerGlyphInfoIsEllipsis(Get());
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerGlyphInfoGetTextDirection
+  ///
+  ImpellerTextDirection GetTextDirection() const {
+    return gGlobalProcTable.ImpellerGlyphInfoGetTextDirection(Get());
+  }
+};
+
+//------------------------------------------------------------------------------
+/// @see      ImpellerLineMetrics
+///
+class LineMetrics
+    : public Object<ImpellerLineMetrics, ImpellerLineMetricsTraits> {
+ public:
+  LineMetrics(ImpellerLineMetrics metrics, AdoptTag tag)
+      : Object(metrics, tag) {}
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetUnscaledAscent
+  ///
+  double GetUnscaledAscent(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetUnscaledAscent(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetAscent
+  ///
+  double GetAscent(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetAscent(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetDescent
+  ///
+  double GetDescent(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetDescent(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetBaseline
+  ///
+  double GetBaseline(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetBaseline(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsIsHardbreak
+  ///
+  bool IsHardbreak(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsIsHardbreak(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetWidth
+  ///
+  double GetWidth(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetWidth(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetHeight
+  ///
+  double GetHeight(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetHeight(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetLeft
+  ///
+  double GetLeft(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetLeft(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetCodeUnitStartIndex
+  ///
+  size_t GetCodeUnitStartIndex(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetCodeUnitStartIndex(Get(),
+                                                                     line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetCodeUnitEndIndex
+  ///
+  size_t GetCodeUnitEndIndex(size_t line) const {
+    return gGlobalProcTable.ImpellerLineMetricsGetCodeUnitEndIndex(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace
+  ///
+  size_t GetCodeUnitEndIndexExcludingWhitespace(size_t line) const {
+    return gGlobalProcTable
+        .ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace(Get(), line);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see    ImpellerLineMetricsGetCodeUnitEndIndexIncludingNewline
+  ///
+  size_t GetCodeUnitEndIndexIncludingNewline(size_t line) const {
+    return gGlobalProcTable
+        .ImpellerLineMetricsGetCodeUnitEndIndexIncludingNewline(Get(), line);
+  }
+};
+
+//------------------------------------------------------------------------------
 /// @see      ImpellerParagraph
 ///
-class Paragraph final
-    : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
+class Paragraph : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
  public:
   Paragraph(ImpellerParagraph paragraph, AdoptTag tag)
       : Object(paragraph, AdoptTag::kAdopt) {}
@@ -684,12 +874,55 @@ class Paragraph final
   float GetMinIntrinsicWidth() {
     return gGlobalProcTable.ImpellerParagraphGetMinIntrinsicWidth(Get());
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphGetLineMetrics
+  ///
+  LineMetrics GetLineMetrics() const {
+    auto metrics = gGlobalProcTable.ImpellerParagraphGetLineMetrics(Get());
+    gGlobalProcTable.ImpellerLineMetricsRetain(metrics);
+    return LineMetrics(metrics, AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphCreateGlyphInfoAtCodeUnitIndexNew
+  ///
+  GlyphInfo GlyphInfoAtCodeUnitIndex(size_t code_unit_index) {
+    return GlyphInfo(
+        gGlobalProcTable.ImpellerParagraphCreateGlyphInfoAtCodeUnitIndexNew(
+            Get(), code_unit_index),
+        AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphCreateGlyphInfoAtParagraphCoordinatesNew
+  ///
+  GlyphInfo GlyphInfoAtParagraphCoordinates(double x, double y) {
+    return GlyphInfo(
+        gGlobalProcTable
+            .ImpellerParagraphCreateGlyphInfoAtParagraphCoordinatesNew(
+                Get(),  //
+                x,      //
+                y       //
+                ),
+        AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphGetWordBoundary
+  ///
+  ImpellerRange GetWordBoundary(size_t code_unit_index) {
+    ImpellerRange range = {};
+    gGlobalProcTable.ImpellerParagraphGetWordBoundary(Get(), code_unit_index,
+                                                      &range);
+    return range;
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerPaint
 ///
-class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
+class Paint : public Object<ImpellerPaint, ImpellerPaintTraits> {
  public:
   Paint() : Object(gGlobalProcTable.ImpellerPaintNew(), AdoptTag::kAdopt) {}
 
@@ -785,7 +1018,7 @@ class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphStyle
 ///
-class ParagraphStyle final
+class ParagraphStyle
     : public Object<ImpellerParagraphStyle, ImpellerParagraphStyleTraits> {
  public:
   ParagraphStyle()
@@ -857,6 +1090,14 @@ class ParagraphStyle final
   }
 
   //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetEllipsis
+  ///
+  ParagraphStyle& SetEllipsis(const char* ellipsis) {
+    gGlobalProcTable.ImpellerParagraphStyleSetEllipsis(Get(), ellipsis);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
   /// @see      ImpellerParagraphStyleSetMaxLines
   ///
   ParagraphStyle& SetMaxLines(uint32_t max_lines) {
@@ -879,13 +1120,22 @@ class ParagraphStyle final
     gGlobalProcTable.ImpellerParagraphStyleSetTextDirection(Get(), direction);
     return *this;
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetTextDecoration
+  ///
+  ParagraphStyle& SetTextDecoration(const ImpellerTextDecoration& decoration) {
+    gGlobalProcTable.ImpellerParagraphStyleSetTextDecoration(Get(),
+                                                             &decoration);
+    return *this;
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerTypographyContext
 ///
-class TypographyContext final : public Object<ImpellerTypographyContext,
-                                              ImpellerTypographyContextTraits> {
+class TypographyContext : public Object<ImpellerTypographyContext,
+                                        ImpellerTypographyContextTraits> {
  public:
   TypographyContext()
       : Object(gGlobalProcTable.ImpellerTypographyContextNew(),
@@ -917,7 +1167,7 @@ class TypographyContext final : public Object<ImpellerTypographyContext,
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphBuilder
 ///
-class ParagraphBuilder final
+class ParagraphBuilder
     : public Object<ImpellerParagraphBuilder, ImpellerParagraphBuilderTraits> {
  public:
   explicit ParagraphBuilder(const TypographyContext& context)
@@ -979,15 +1229,21 @@ class ParagraphBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerPath
 ///
-class Path final : public Object<ImpellerPath, ImpellerPathTraits> {
+class Path : public Object<ImpellerPath, ImpellerPathTraits> {
  public:
   Path(ImpellerPath path, AdoptTag tag) : Object(path, tag) {}
+
+  ImpellerRect GetBounds() const {
+    ImpellerRect bounds = {};
+    gGlobalProcTable.ImpellerPathGetBounds(Get(), &bounds);
+    return bounds;
+  }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerPathBuilder
 ///
-class PathBuilder final
+class PathBuilder
     : public Object<ImpellerPathBuilder, ImpellerPathBuilderTraits> {
  public:
   PathBuilder()
@@ -1100,7 +1356,7 @@ class PathBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayList
 ///
-class DisplayList final
+class DisplayList
     : public Object<ImpellerDisplayList, ImpellerDisplayListTraits> {
  public:
   DisplayList(ImpellerDisplayList display_list, AdoptTag tag)
@@ -1110,7 +1366,7 @@ class DisplayList final
 //------------------------------------------------------------------------------
 /// @see      ImpellerSurface
 ///
-class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
+class Surface : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
  public:
   explicit Surface(ImpellerSurface surface) : Object(surface) {}
 
@@ -1133,20 +1389,66 @@ class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
   }
 
   //----------------------------------------------------------------------------
+  /// @see      ImpellerSurfaceCreateWrappedMetalDrawableNew
+  ///
+  static Surface WrapMetalDrawable(const Context& context,
+                                   void* metal_drawable) {
+    return Surface(
+        gGlobalProcTable.ImpellerSurfaceCreateWrappedMetalDrawableNew(
+            context.Get(), metal_drawable),
+        AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
   /// @see      ImpellerSurfaceDrawDisplayList
   ///
-  bool Draw(const DisplayList& display_list) {
+  bool Draw(const DisplayList& display_list) const {
     return gGlobalProcTable.ImpellerSurfaceDrawDisplayList(Get(),
                                                            display_list.Get());
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerSurfacePresent
+  ///
+  bool Present() const {
+    return gGlobalProcTable.ImpellerSurfacePresent(Get());
+  }
+};
+
+//------------------------------------------------------------------------------
+/// @see      ImpellerVulkanSwapchain
+///
+class VulkanSwapchain
+    : public Object<ImpellerVulkanSwapchain, ImpellerVulkanSwapchainTraits> {
+ public:
+  VulkanSwapchain(ImpellerVulkanSwapchain swapchain, AdoptTag tag)
+      : Object(swapchain, tag) {}
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerVulkanSwapchainCreateNew
+  ///
+  static VulkanSwapchain Create(const Context& context,
+                                void* vulkan_surface_khr) {
+    return VulkanSwapchain(gGlobalProcTable.ImpellerVulkanSwapchainCreateNew(
+                               context.Get(), vulkan_surface_khr),
+                           AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerVulkanSwapchainAcquireNextSurfaceNew
+  ///
+  Surface AcquireNextSurface() const {
+    return Surface(
+        gGlobalProcTable.ImpellerVulkanSwapchainAcquireNextSurfaceNew(Get()),
+        AdoptTag::kAdopt);
   }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayListBuilder
 ///
-class DisplayListBuilder final
-    : public Object<ImpellerDisplayListBuilder,
-                    ImpellerDisplayListBuilderTraits> {
+class DisplayListBuilder : public Object<ImpellerDisplayListBuilder,
+                                         ImpellerDisplayListBuilderTraits> {
  public:
   //----------------------------------------------------------------------------
   /// @see      ImpellerDisplayListBuilderNew
@@ -1278,6 +1580,20 @@ class DisplayListBuilder final
                                     const ImpellerPoint& point) {
     gGlobalProcTable.ImpellerDisplayListBuilderDrawParagraph(
         Get(), paragraph.Get(), &point);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerDisplayListBuilderDrawShadow
+  ///
+  DisplayListBuilder& DrawShadow(const Path& path,
+                                 const ImpellerColor& shadow_color,
+                                 float elevation,
+                                 bool occluder_is_transparent,
+                                 float device_pixel_ratio) {
+    gGlobalProcTable.ImpellerDisplayListBuilderDrawShadow(
+        Get(), path.Get(), &shadow_color, elevation, occluder_is_transparent,
+        device_pixel_ratio);
     return *this;
   }
 

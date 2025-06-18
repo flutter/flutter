@@ -222,7 +222,7 @@ abstract class DesktopDevice extends Device {
   });
 
   /// Returns the path to the executable to run for [package] on this device for
-  /// the given [buildMode].
+  /// the given [BuildInfo.mode].
   String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
@@ -234,8 +234,8 @@ abstract class DesktopDevice extends Device {
   /// arguments.
   ///
   /// The format of the environment variables is:
-  ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
-  ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
+  ///   * `FLUTTER_ENGINE_SWITCHES` to the number of switches.
+  ///   * `FLUTTER_ENGINE_SWITCH_<N>` (indexing from 1) to the individual switches.
   Map<String, String> _computeEnvironment(
     DebuggingOptions debuggingOptions,
     bool traceStartup,
@@ -285,12 +285,6 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
-    if (debuggingOptions.dumpSkpOnShaderCompilation) {
-      addFlag('dump-skp-on-shader-compilation=true');
-    }
-    if (debuggingOptions.cacheSkSL) {
-      addFlag('cache-sksl=true');
-    }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
@@ -317,7 +311,7 @@ abstract class DesktopDevice extends Device {
       if (debuggingOptions.disableServiceAuthCodes) {
         addFlag('disable-service-auth-codes=true');
       }
-      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+      final String dartVmFlags = debuggingOptions.dartFlags;
       if (dartVmFlags.isNotEmpty) {
         addFlag('dart-flags=$dartVmFlags');
       }

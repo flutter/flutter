@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -27,7 +26,6 @@ import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -35,30 +33,25 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import '../src/testbed.dart';
+import '../src/throwing_pub.dart';
 import 'resident_runner_helpers.dart';
 
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
   late FakeDevice device;
   FakeVmServiceHost? fakeVmServiceHost;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.file(globals.fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
@@ -239,6 +232,14 @@ void main() {
             method: 'getIsolate',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
             jsonResponse: fakeUnpausedIsolate.toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
@@ -787,6 +788,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -853,18 +862,28 @@ void main() {
             jsonResponse: fakePausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'removeBreakpoint',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'breakpointId': 'test-breakpoint',
+            },
+          ),
+          FakeVmServiceRequest(
+            method: 'resume',
+            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
-          const FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, String>{'isolateId': '1', 'exceptionPauseMode': 'None'},
-          ),
-          const FakeVmServiceRequest(
-            method: 'removeBreakpoint',
-            args: <String, String>{'isolateId': '1', 'breakpointId': 'test-breakpoint'},
-          ),
-          const FakeVmServiceRequest(method: 'resume', args: <String, String>{'isolateId': '1'}),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -915,6 +934,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -942,6 +969,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -967,6 +1002,14 @@ void main() {
             method: 'getIsolate',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
             jsonResponse: fakeUnpausedIsolate.toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
@@ -1077,72 +1120,58 @@ void main() {
 
   testUsingContext(
     'ResidentRunner can run source generation',
-    () => testbed.run(
-      () async {
-        final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
-          ..createSync(recursive: true);
-        arbFile.writeAsStringSync('''
+    () => testbed.run(() async {
+      final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
 {
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-        globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+      globals.fs.file('l10n.yaml').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  generate: true''');
 
-        // Create necessary files for [DartPluginRegistrantTarget]
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../../../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
-        // Start from an empty dart_plugin_registrant.dart file.
-        globals.fs
-            .directory('.dart_tool')
-            .childDirectory('flutter_build')
-            .childFile('dart_plugin_registrant.dart')
-            .createSync(recursive: true);
+      // Create necessary files for [DartPluginRegistrantTarget]
+      writePackageConfigFiles(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+      );
 
-        await residentRunner.runSourceGenerators();
+      // Start from an empty dart_plugin_registrant.dart file.
+      globals.fs
+          .directory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('dart_plugin_registrant.dart')
+          .createSync(recursive: true);
 
-        expect(testLogger.errorText, isEmpty);
-        expect(testLogger.statusText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    ),
+      await residentRunner.runSourceGenerators();
+
+      expect(testLogger.errorText, isEmpty);
+      expect(testLogger.statusText, isEmpty);
+    }, overrides: <Type, Generator>{Pub: ThrowingPub.new}),
   );
 
   testUsingContext(
     'generated main uses correct target',
-    () => testbed.run(
-      () async {
-        final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
-          ..createSync(recursive: true);
-        arbFile.writeAsStringSync('''
+    () => testbed.run(() async {
+      final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
 {
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-        globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('''
+      globals.fs.file('l10n.yaml').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
 flutter:
   generate: true
 
@@ -1152,29 +1181,18 @@ dependencies:
   path_provider_linux: 1.0.0
 ''');
 
-        // Create necessary files for [DartPluginRegistrantTarget], including a
-        // plugin that will trigger generation.
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
-        final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
-        final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
-        pluginPubspec.createSync(recursive: true);
-        pluginPubspec.writeAsStringSync('''
+      // Create necessary files for [DartPluginRegistrantTarget], including a
+      // plugin that will trigger generation.
+      writePackageConfigFiles(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+      );
+
+      final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
+      final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
+      pluginPubspec.createSync(recursive: true);
+      pluginPubspec.writeAsStringSync('''
 name: path_provider_linux
 
 flutter:
@@ -1185,30 +1203,25 @@ flutter:
         dartPluginClass: PathProviderLinux
 ''');
 
-        residentRunner = HotRunner(
-          <FlutterDevice>[flutterDevice],
-          stayResident: false,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          target: 'custom_main.dart',
-          devtoolsHandler: createNoOpHandler,
-          analytics: fakeAnalytics,
-        );
-        await residentRunner.runSourceGenerators();
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'custom_main.dart',
+        devtoolsHandler: createNoOpHandler,
+        analytics: fakeAnalytics,
+      );
+      await residentRunner.runSourceGenerators();
 
-        final File generatedMain = globals.fs
-            .directory('.dart_tool')
-            .childDirectory('flutter_build')
-            .childFile('dart_plugin_registrant.dart');
+      final File generatedMain = globals.fs
+          .directory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('dart_plugin_registrant.dart');
 
-        expect(generatedMain.existsSync(), isTrue);
-        expect(testLogger.errorText, isEmpty);
-        expect(testLogger.statusText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    ),
+      expect(generatedMain.existsSync(), isTrue);
+      expect(testLogger.errorText, isEmpty);
+      expect(testLogger.statusText, isEmpty);
+    }, overrides: <Type, Generator>{Pub: ThrowingPub.new}),
   );
 
   testUsingContext(
@@ -1267,11 +1280,10 @@ flutter:
       await residentRunner.run();
 
       final File generatedLocalizationsFile = globals.fs
-          .directory('.dart_tool')
-          .childDirectory('flutter_gen')
-          .childDirectory('gen_l10n')
+          .directory('lib')
+          .childDirectory('l10n')
           .childFile('app_localizations.dart');
-      expect(generatedLocalizationsFile.existsSync(), isTrue);
+      expect(generatedLocalizationsFile, exists);
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
@@ -1291,8 +1303,6 @@ flutter:
       expect(residentRunner.supportsServiceProtocol, true);
       // isRunningDebug
       expect(residentRunner.isRunningDebug, true);
-      // does support SkSL
-      expect(residentRunner.supportsWriteSkSL, true);
       // commands
       expect(
         testLogger.statusText,
@@ -1316,7 +1326,6 @@ flutter:
             commandHelp.b,
             commandHelp.P,
             commandHelp.a,
-            commandHelp.M,
             commandHelp.g,
             commandHelp.hWithDetails,
             commandHelp.d,
@@ -1344,8 +1353,6 @@ flutter:
       expect(residentRunner.supportsServiceProtocol, true);
       // isRunningDebug
       expect(residentRunner.isRunningDebug, true);
-      // does support SkSL
-      expect(residentRunner.supportsWriteSkSL, true);
       // commands
       expect(
         testLogger.statusText,
@@ -1386,8 +1393,6 @@ flutter:
       expect(residentRunner.supportsServiceProtocol, false);
       // isRunningDebug
       expect(residentRunner.isRunningDebug, false);
-      // does support SkSL
-      expect(residentRunner.supportsWriteSkSL, false);
       // commands
       expect(
         testLogger.statusText,
@@ -1399,7 +1404,7 @@ flutter:
             commandHelp.hWithDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );
@@ -1425,8 +1430,6 @@ flutter:
       expect(residentRunner.supportsServiceProtocol, false);
       // isRunningDebug
       expect(residentRunner.isRunningDebug, false);
-      // does support SkSL
-      expect(residentRunner.supportsWriteSkSL, false);
       // commands
       expect(
         testLogger.statusText,
@@ -1436,69 +1439,11 @@ flutter:
             commandHelp.hWithoutDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );
     }),
-  );
-
-  testUsingContext(
-    'ResidentRunner handles writeSkSL returning no data',
-    () => testbed.run(() async {
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          listViews,
-          FakeVmServiceRequest(
-            method: kGetSkSLsMethod,
-            args: <String, Object>{'viewId': fakeFlutterView.id},
-            jsonResponse: <String, Object>{'SkSLs': <String, Object>{}},
-          ),
-        ],
-      );
-      await residentRunner.writeSkSL();
-
-      expect(testLogger.statusText, contains('No data was received'));
-      expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }),
-  );
-
-  testUsingContext(
-    'ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name',
-    () => testbed.run(
-      () async {
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            listViews,
-            FakeVmServiceRequest(
-              method: kGetSkSLsMethod,
-              args: <String, Object>{'viewId': fakeFlutterView.id},
-              jsonResponse: <String, Object>{
-                'SkSLs': <String, Object>{'A': 'B'},
-              },
-            ),
-          ],
-        );
-        await residentRunner.writeSkSL();
-
-        expect(testLogger.statusText, contains('flutter_01.sksl.json'));
-        expect(globals.fs.file('flutter_01.sksl.json'), exists);
-        expect(
-          json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()),
-          <String, Object>{
-            'platform': 'android',
-            'name': 'FakeDevice',
-            'engineRevision': 'abcdefg',
-            'data': <String, Object>{'A': 'B'},
-          },
-        );
-        expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystemUtils: () => FileSystemUtils(fileSystem: globals.fs, platform: globals.platform),
-        FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
-      },
-    ),
   );
 
   testUsingContext(
@@ -1854,7 +1799,6 @@ flutter:
                   BuildMode.debug,
                   '',
                   treeShakeIcons: false,
-                  nullSafetyMode: NullSafetyMode.unsound,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
                 target: null,
@@ -1864,7 +1808,7 @@ flutter:
 
       expect(
         residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'),
+        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
       expect(
         residentCompiler.librariesSpec,
@@ -1913,7 +1857,7 @@ flutter:
 
       expect(
         residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'),
+        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
       expect(
         residentCompiler.librariesSpec,
@@ -1929,7 +1873,7 @@ flutter:
       );
       expect(
         residentCompiler.platformDill,
-        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
+        'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
       );
     },
     overrides: <Type, Generator>{
@@ -2114,7 +2058,6 @@ flutter:
                   ReloadSources? reloadSources,
                   Restart? restart,
                   CompileExpression? compileExpression,
-                  GetSkSLMethod? getSkSLMethod,
                   FlutterProject? flutterProject,
                   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
                   io.CompressionOptions? compression,
@@ -2172,7 +2115,6 @@ flutter:
                   ReloadSources? reloadSources,
                   Restart? restart,
                   CompileExpression? compileExpression,
-                  GetSkSLMethod? getSkSLMethod,
                   FlutterProject? flutterProject,
                   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
                   io.CompressionOptions? compression,

@@ -323,6 +323,10 @@ class DisplayListOpFlags : DisplayListFlags {
       kBasePaintFlags |       //
       kBaseStrokeOrFillFlags  //
   };
+  static constexpr DisplayListAttributeFlags kDrawRSuperellipseFlags{
+      kBasePaintFlags |       //
+      kBaseStrokeOrFillFlags  //
+  };
   static constexpr DisplayListAttributeFlags kDrawPathFlags{
       kBasePaintFlags |         //
       kBaseStrokeOrFillFlags |  //
@@ -409,6 +413,13 @@ class DisplayListOpFlags : DisplayListFlags {
   };
   static constexpr DisplayListAttributeFlags kDrawShadowFlags{
       kIgnoresPaint  //
+  };
+
+  // Flags for usage in drawParagraph internal conversion.
+  static constexpr DisplayListAttributeFlags kDrawParagraphFlags{
+      kBasePaintFlags |         //
+      kBaseStrokeOrFillFlags |  //
+      kAnySpecialGeometryMask   //
   };
 };
 

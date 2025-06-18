@@ -48,7 +48,7 @@ def main():
     os.makedirs(args.out_dir)
 
   android_jar_path = os.path.join(
-      args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-35',
+      args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-36',
       'android.jar'
   )
   if not os.path.exists(android_jar_path):
@@ -66,6 +66,7 @@ def main():
     classpath.append(args.build_config_path)
 
   packages = [
+      'io.flutter.app',
       'io.flutter.embedding.android',
       'io.flutter.embedding.engine',
       'io.flutter.embedding.engine.dart',

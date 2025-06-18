@@ -48,6 +48,17 @@ void main() {
     );
   });
 
+  testWidgets('Minimum size minimumSize parameter', (WidgetTester tester) async {
+    const Size size = Size(60.0, 100.0);
+    await tester.pumpWidget(
+      boilerplate(
+        child: const CupertinoButton(onPressed: null, minimumSize: size, child: SizedBox.shrink()),
+      ),
+    );
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    expect(buttonBox.size, size);
+  });
+
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
@@ -368,11 +379,11 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration =
+    ShapeDecoration decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color, const Color(0x000000FF));
+    expect(decoration.color, const Color(0x000000FF));
 
     await tester.pumpWidget(
       boilerplate(
@@ -385,11 +396,11 @@ void main() {
       ),
     );
 
-    boxDecoration =
+    decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color, const Color(0x0000FF00));
+    expect(decoration.color, const Color(0x0000FF00));
   });
 
   testWidgets('Can specify dynamic colors', (WidgetTester tester) async {
@@ -417,11 +428,11 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration =
+    ShapeDecoration decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color!.value, 0xFF654321);
+    expect(decoration.color!.value, 0xFF654321);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -437,12 +448,12 @@ void main() {
       ),
     );
 
-    boxDecoration =
+    decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
     // Disabled color.
-    expect(boxDecoration.color!.value, 0xFF111111);
+    expect(decoration.color!.value, 0xFF111111);
   });
 
   testWidgets('Button respects themes', (WidgetTester tester) async {
@@ -477,7 +488,7 @@ void main() {
       ),
     );
     expect(textStyle.color, CupertinoColors.activeBlue);
-    BoxDecoration decoration =
+    ShapeDecoration decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -486,7 +497,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withOpacity(0.12)));
 
     await tester.pumpWidget(
@@ -512,7 +523,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue));
 
     await tester.pumpWidget(
@@ -555,7 +566,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withOpacity(0.26)));
 
     await tester.pumpWidget(
@@ -582,8 +593,35 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.filled(
+          color: CupertinoColors.systemRed,
+          onPressed: () {},
+          child: Builder(
+            builder: (BuildContext context) {
+              textStyle = DefaultTextStyle.of(context).style;
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    decoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoButton),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as ShapeDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
 
   testWidgets("All CupertinoButton const maps keys' match the available style sizes", (
@@ -629,16 +667,14 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final Border defaultFocusBorder = Border.fromBorderSide(
-      BorderSide(
-        color:
-            HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-                .withLightness(kCupertinoFocusColorBrightness)
-                .withSaturation(kCupertinoFocusColorSaturation)
-                .toColor(),
-        width: 3.5,
-        strokeAlign: BorderSide.strokeAlignOutside,
-      ),
+    final BorderSide defaultFocusBorder = BorderSide(
+      color:
+          HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+              .withLightness(kCupertinoFocusColorBrightness)
+              .withSaturation(kCupertinoFocusColorSaturation)
+              .toColor(),
+      width: 3.5,
+      strokeAlign: BorderSide.strokeAlignOutside,
     );
 
     await tester.pumpWidget(
@@ -657,33 +693,25 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
 
     // The button has no border.
-    final BoxDecoration unfocusedDecoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
+    expect(
+      _findBorder(
+        tester,
+        find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+      ),
+      BorderSide.none,
+    );
     await tester.pump();
-    expect(unfocusedDecoration.border, null);
 
     // When focused, the button has a light blue border outline by default.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    final BoxDecoration decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-    expect(decoration.border, defaultFocusBorder);
+    expect(
+      _findBorder(
+        tester,
+        find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+      ),
+      defaultFocusBorder,
+    );
   });
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
@@ -710,22 +738,12 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     focusNode.requestFocus();
     await tester.pump();
-    final BoxDecoration decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-    final Border border = decoration.border! as Border;
     await tester.pumpAndSettle();
-    expect(border.top.color, focusColor);
-    expect(border.left.color, focusColor);
-    expect(border.right.color, focusColor);
-    expect(border.bottom.color, focusColor);
+    final BorderSide borderSide = _findBorder(
+      tester,
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+    );
+    expect(borderSide.color, focusColor);
   });
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
@@ -847,8 +865,175 @@ void main() {
     await tester.pump();
     expect(value, isTrue);
   });
+
+  testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getTopLeft(find.byType(CupertinoButton)),
+    );
+    addTearDown(gesture.removePointer);
+    // Check opacity.
+    final FadeTransition opacity = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
+    );
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+    final double moveDistance = CupertinoButton.tapMoveSlop();
+    await gesture.moveBy(Offset(0, -moveDistance + 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+    await gesture.moveBy(const Offset(0, -2));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 1.0);
+    await gesture.moveBy(const Offset(0, 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Drag outside button within ListView does not leave the button pressed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: ListView(
+          children: <Widget>[CupertinoButton(onPressed: () {}, child: const Text('Tap me'))],
+        ),
+      ),
+    );
+    final FadeTransition opacity = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    addTearDown(gesture.removePointer);
+
+    await gesture.down(tester.getTopLeft(find.byType(CupertinoButton)));
+    await gesture.moveBy(const Offset(1, 1));
+    await gesture.moveBy(Offset(0, -CupertinoButton.tapMoveSlop() - 5));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 1.0);
+  });
+
+  testWidgets('onPressed trigger takes into account MoveSlop.', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {
+            value = true;
+          },
+          child: const Text('Tap me'),
+        ),
+      ),
+    );
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.up();
+    expect(value, isFalse);
+
+    gesture = await tester.startGesture(tester.getTopLeft(find.byType(CupertinoButton)));
+    await gesture.moveTo(
+      tester.getBottomRight(find.byType(CupertinoButton)) +
+          Offset(0, CupertinoButton.tapMoveSlop()),
+    );
+    await gesture.moveBy(const Offset(0, -1));
+    await gesture.up();
+    expect(value, isTrue);
+  });
+
+  testWidgets('Mouse cursor resolves in enabled/disabled/pressed/focused states', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(focusNode.dispose);
+    Widget buildButton({required bool enabled, MouseCursor? cursor}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            focusNode: focusNode,
+            onPressed: enabled ? () {} : null,
+            mouseCursor: cursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
+      );
+    }
+
+    // Test default mouse cursor
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    // Test disabled state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: false, cursor: const _ButtonMouseCursor()));
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+
+    // Test focused state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.copy,
+    );
+    focusNode.unfocus();
+
+    // Test pressed state mouse cursor
+    await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.down(tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+    await gesture.up();
+    await gesture.removePointer();
+  });
 }
 
 Widget boilerplate({required Widget child}) {
   return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+}
+
+class _ButtonMouseCursor extends WidgetStateMouseCursor {
+  const _ButtonMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    return const WidgetStateProperty<MouseCursor>.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.disabled: SystemMouseCursors.forbidden,
+      WidgetState.pressed: SystemMouseCursors.grab,
+      WidgetState.focused: SystemMouseCursors.copy,
+      WidgetState.any: SystemMouseCursors.basic,
+    }).resolve(states);
+  }
+
+  @override
+  String get debugDescription => '_ButtonMouseCursor()';
+}
+
+BorderSide _findBorder(WidgetTester tester, Finder finder) {
+  final ShapeDecoration decoration =
+      tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
+  return (decoration.shape as RoundedSuperellipseBorder).side;
 }

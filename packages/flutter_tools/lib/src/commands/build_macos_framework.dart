@@ -10,13 +10,14 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -51,6 +52,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   };
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
@@ -69,11 +73,21 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     );
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
-
     for (final BuildInfo buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+      // Create the build-mode specific metadata.
+      //
+      // This normally would be done in the verifyAndRun step of FlutterCommand, but special "meta"
+      // build commands (like flutter build ios-framework) make multiple builds, and do not have a
+      // single "buildInfo", so the step has to be done manually for each build.
+      //
+      // See regeneratePlatformSpecificToolingDurifyVerify.
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: buildInfo.mode.isRelease,
+      );
+
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -178,12 +192,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode =
-          mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
+      final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
+      final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
-  s.name                  = 'FlutterMacOS'
+  s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -197,11 +211,11 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/$frameworkName.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.osx.deployment_target = '10.14'
-  s.vendored_frameworks   = 'FlutterMacOS.framework'
-  s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
+  s.osx.deployment_target = '10.15'
+  s.vendored_frameworks   = '$frameworkName'
+  s.prepare_command       = 'unzip $frameworkName -d $frameworkName'
 end
 ''';
 
@@ -312,7 +326,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'macosx',
+        XcodeSdk.MacOSX.platformName,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${buildOutput.path}',

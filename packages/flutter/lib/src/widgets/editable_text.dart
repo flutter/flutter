@@ -25,6 +25,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_web_browser_detection_io.dart' if (dart.library.js_util) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -826,7 +827,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    bool? autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -876,12 +877,13 @@ class EditableText extends StatefulWidget {
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
     this.paintCursorAboveText = false,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    bool? selectAllOnFocus,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
@@ -907,7 +909,9 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
+       autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -923,6 +927,7 @@ class EditableText extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       selectAllOnFocus = selectAllOnFocus ?? _defaultSelectAllOnFocus,
        toolbarOptions =
            selectionControls is TextSelectionHandleControls && toolbarOptions == null
                ? ToolbarOptions.empty
@@ -960,7 +965,9 @@ class EditableText extends StatefulWidget {
                  ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
                ]
                : inputFormatters,
-       showCursor = showCursor ?? !readOnly;
+       showCursor = showCursor ?? !readOnly,
+       selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -1050,7 +1057,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true.
+  /// False on iOS if [autofillHints] contains password-related hints, otherwise true.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -1563,6 +1570,10 @@ class EditableText extends StatefulWidget {
   /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
   /// group when the text field is focused.
   ///
+  /// If this is null, [EditableTextTapUpOutsideIntent] will be invoked. In the
+  /// default implementation, this is a no-op. To change this behavior, set a
+  /// callback here or override [EditableTextTapUpOutsideIntent].
+  ///
   /// The [PointerUpEvent] passed to the function is the event that caused the
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
@@ -1573,6 +1584,8 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [TapRegion] for how the region group is determined.
   ///  * [onTapOutside], which is called for each tap down.
+  ///  * [EditableTextTapOutsideIntent], the intent that is invoked if
+  ///  this is null.
   final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -1791,6 +1804,16 @@ class EditableText extends StatefulWidget {
   /// [RenderEditable.selectionEnabled].
   /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
+
+  /// {@template flutter.widgets.editableText.selectAllOnFocus}
+  /// Whether this field should select all text when gaining focus.
+  ///
+  /// When false, focusing this text field will leave its
+  /// existing text selection unchanged.
+  ///
+  /// Defaults to true on web and desktop platforms, and false on mobile platforms.
+  /// {@endtemplate}
+  final bool selectAllOnFocus;
 
   /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
@@ -2026,10 +2049,59 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
+  /// The default value for [selectionHeightStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
+  ///
+  /// On native platforms, this defaults to [ui.BoxHeightStyle.includeLineSpacingMiddle] for all
+  /// platforms.
+  static ui.BoxHeightStyle get defaultSelectionHeightStyle {
+    if (kIsWeb) {
+      return ui.BoxHeightStyle.max;
+    }
+    return ui.BoxHeightStyle.includeLineSpacingMiddle;
+  }
+
+  /// The default value for [selectionWidthStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
+  /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
+  ///
+  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
+    if (kIsWeb) {
+      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
+        // On macOS web, the selection width behavior differs when running on
+        // Chrom(e|ium) (blink) or Safari (webkit).
+        return ui.BoxWidthStyle.max;
+      }
+      return ui.BoxWidthStyle.tight;
+    }
+    return ui.BoxWidthStyle.max;
+  }
+
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
+
+  /// The default value for [selectAllOnFocus].
+  static bool get _defaultSelectAllOnFocus {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => false,
+      TargetPlatform.iOS => false,
+      TargetPlatform.fuchsia => false,
+      TargetPlatform.linux => true,
+      TargetPlatform.macOS => true,
+      TargetPlatform.windows => true,
+    };
+  }
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu for an editable field.
@@ -2100,6 +2172,38 @@ class EditableText extends StatefulWidget {
     }
 
     return resultButtonItem;
+  }
+
+  // Infer the value of autocorrect from autofillHints.
+  static bool _inferAutocorrect({required Iterable<String>? autofillHints}) {
+    if (autofillHints == null || autofillHints.isEmpty || kIsWeb) {
+      return true;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        // username, password and newPassword are password related hint.
+        // newUsername is not supported on iOS.
+        final bool passwordRelatedHint = autofillHints.any(
+          (String hint) =>
+              hint == AutofillHints.username ||
+              hint == AutofillHints.password ||
+              hint == AutofillHints.newPassword,
+        );
+        if (passwordRelatedHint) {
+          // https://github.com/flutter/flutter/issues/134723
+          // Set autocorrect to false to prevent password bar from flashing.
+          return false;
+        }
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    return true;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -2254,7 +2358,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('readOnly', readOnly, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
@@ -2351,6 +2455,9 @@ class EditableText extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -2463,14 +2570,19 @@ class EditableTextState extends State<EditableText>
   /// Read-only input fields do not need a connection with the platform since
   /// there's no need for text editing capabilities (e.g. virtual keyboard).
   ///
+  /// On macOS, most of the selection and focus related shortcuts require a
+  /// connection with the platform because appropriate platform selectors are
+  /// sent from the engine and translated into intents. For read-only fields
+  /// those shortcuts should be available (for instance to allow tab traversal).
+  ///
   /// On the web, we always need a connection because we want some browser
   /// functionalities to continue to work on read-only input fields like:
-  ///
   /// - Relevant context menu.
   /// - cmd/ctrl+c shortcut to copy.
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
-  bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+  bool get _shouldCreateInputConnection =>
+      kIsWeb || defaultTargetPlatform == TargetPlatform.macOS || !widget.readOnly;
 
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
@@ -3025,6 +3137,8 @@ class EditableTextState extends State<EditableText>
   ///
   /// * [EditableText.getEditableButtonItems], which performs a similar role,
   ///   but for any editable field, not just specifically EditableText.
+  /// * [SystemContextMenu.getDefaultItems], which performs a similar role, but
+  ///   for the system-rendered context menu.
   /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
   ///   role but for content that is selectable but not editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
@@ -3258,7 +3372,8 @@ class EditableTextState extends State<EditableText>
     }
 
     if (_hasInputConnection) {
-      if (oldWidget.obscureText != widget.obscureText) {
+      if (oldWidget.obscureText != widget.obscureText ||
+          oldWidget.keyboardType != widget.keyboardType) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
@@ -3728,6 +3843,14 @@ class EditableTextState extends State<EditableText>
 
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
+
+  /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
+  /// was called.
+  ///
+  /// This is used to determine whether [onTapUpOutside] should be called.
+  /// The reason [_hasFocus] can't be used directly is because [onTapOutside]
+  /// might unfocus this [EditableText] and block the [onTapUpOutside] call.
+  bool _hadFocusOnTapDown = false;
 
   // Finds the closest scroll offset to the current scroll offset that fully
   // reveals the given caret rect. If the given rect's main axis extent is too
@@ -4617,13 +4740,9 @@ class EditableTextState extends State<EditableText>
 
   TextSelection? _adjustedSelectionWhenFocused() {
     TextSelection? selection;
-    final bool isDesktop = switch (defaultTargetPlatform) {
-      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
-      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
-    };
     final bool shouldSelectAll =
+        widget.selectAllOnFocus &&
         widget.selectionEnabled &&
-        (kIsWeb || isDesktop) &&
         !_isMultiline &&
         !_nextFocusChangeIsInternal &&
         !_justResumed;
@@ -4926,10 +5045,10 @@ class EditableTextState extends State<EditableText>
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
-  /// if there is no magnifier visible.
+  /// if no magnifier exists.
   ///
   /// Updates the magnifier to the position given by `positionToShow`,
-  /// if there is a magnifier visible.
+  /// if a magnifier exits.
   ///
   /// Does nothing if a magnifier couldn't be shown, such as when the selection
   /// overlay does not currently exist.
@@ -4938,22 +5057,20 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
+    if (_selectionOverlay!.magnifierExists) {
       _selectionOverlay!.updateMagnifier(positionToShow);
     } else {
       _selectionOverlay!.showMagnifier(positionToShow);
     }
   }
 
-  /// Hides the magnifier if it is visible.
+  /// Hides the magnifier.
   void hideMagnifier() {
     if (_selectionOverlay == null) {
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.hideMagnifier();
-    }
+    _selectionOverlay!.hideMagnifier();
   }
 
   // Tracks the location a [_ScribblePlaceholder] should be rendered in the
@@ -5042,6 +5159,7 @@ class EditableTextState extends State<EditableText>
           widget.contentInsertionConfiguration == null
               ? const <String>[]
               : widget.contentInsertionConfiguration!.allowedMimeTypes,
+      hintLocales: widget.hintLocales,
     );
   }
 
@@ -5360,6 +5478,31 @@ class EditableTextState extends State<EditableText>
     return Actions.invoke(context, intent);
   }
 
+  void _onTapOutside(BuildContext context, PointerDownEvent event) {
+    _hadFocusOnTapDown = true;
+
+    if (widget.onTapOutside != null) {
+      widget.onTapOutside!(event);
+    } else {
+      _defaultOnTapOutside(context, event);
+    }
+  }
+
+  void _onTapUpOutside(BuildContext context, PointerUpEvent event) {
+    if (!_hadFocusOnTapDown) {
+      return;
+    }
+
+    // Reset to false so that subsequent events doesn't trigger the callback based on old information.
+    _hadFocusOnTapDown = false;
+
+    if (widget.onTapUpOutside != null) {
+      widget.onTapUpOutside!(event);
+    } else {
+      _defaultOnTapUpOutside(context, event);
+    }
+  }
+
   /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
@@ -5367,6 +5510,16 @@ class EditableTextState extends State<EditableText>
     Actions.invoke(
       context,
       EditableTextTapOutsideIntent(focusNode: widget.focusNode, pointerDownEvent: event),
+    );
+  }
+
+  /// The default behavior used if [EditableText.onTapUpOutside] is null.
+  ///
+  /// The `event` argument is the [PointerUpEvent] that caused the notification.
+  void _defaultOnTapUpOutside(BuildContext context, PointerUpEvent event) {
+    Actions.invoke(
+      context,
+      EditableTextTapUpOutsideIntent(focusNode: widget.focusNode, pointerUpEvent: event),
     );
   }
 
@@ -5455,7 +5608,10 @@ class EditableTextState extends State<EditableText>
       ),
     ),
     ScrollToDocumentBoundaryIntent: _makeOverridable(
-      CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary),
+      _WebComposingDisablingCallbackAction<ScrollToDocumentBoundaryIntent>(
+        this,
+        onInvoke: _scrollToDocumentBoundary,
+      ),
     ),
     ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
 
@@ -5491,6 +5647,7 @@ class EditableTextState extends State<EditableText>
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
+    EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
   @protected
@@ -5505,6 +5662,17 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final ui.SemanticsInputType inputType;
+    switch (widget.keyboardType) {
+      case TextInputType.phone:
+        inputType = ui.SemanticsInputType.phone;
+      case TextInputType.url:
+        inputType = ui.SemanticsInputType.url;
+      case TextInputType.emailAddress:
+        inputType = ui.SemanticsInputType.email;
+      default:
+        inputType = ui.SemanticsInputType.text;
+    }
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -5516,11 +5684,8 @@ class EditableTextState extends State<EditableText>
             return TextFieldTapRegion(
               groupId: widget.groupId,
               onTapOutside:
-                  _hasFocus
-                      ? widget.onTapOutside ??
-                          (PointerDownEvent event) => _defaultOnTapOutside(context, event)
-                      : null,
-              onTapUpOutside: widget.onTapUpOutside,
+                  _hasFocus ? (PointerDownEvent event) => _onTapOutside(context, event) : null,
+              onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -5584,7 +5749,12 @@ class EditableTextState extends State<EditableText>
                         excludeFromSemantics: true,
                         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
                         controller: _scrollController,
-                        physics: widget.scrollPhysics,
+                        // On iOS a single-line TextField should not scroll.
+                        physics:
+                            widget.scrollPhysics ??
+                            (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
+                                ? const _NeverUserScrollableScrollPhysics()
+                                : null),
                         dragStartBehavior: widget.dragStartBehavior,
                         restorationId: widget.restorationId,
                         // If a ScrollBehavior is not provided, only apply scrollbars when
@@ -5599,6 +5769,7 @@ class EditableTextState extends State<EditableText>
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
                             child: Semantics(
+                              inputType: inputType,
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),
@@ -5786,15 +5957,17 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.cursorRadius,
     required this.cursorOffset,
     required this.paintCursorAboveText,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.enableInteractiveSelection = true,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
+  }) : selectionHeightStyle = selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
+       super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;
@@ -5921,6 +6094,20 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
   }
+}
+
+class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
+  /// Creates a scroll physics that prevents scrolling with user input, for example
+  /// by dragging, but still allows for programmatic scrolling.
+  const _NeverUserScrollableScrollPhysics({super.parent});
+
+  @override
+  _NeverUserScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _NeverUserScrollableScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool get allowUserScrolling => false;
 }
 
 @immutable
@@ -6334,7 +6521,13 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
   }
 
   @override
-  bool get isActionEnabled => state._value.selection.isValid;
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return state._value.selection.isValid;
+  }
 }
 
 class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementIntent>
@@ -6414,7 +6607,28 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   }
 
   @override
-  bool get isActionEnabled => state._value.selection.isValid;
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return state._value.selection.isValid;
+  }
+}
+
+class _WebComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _WebComposingDisablingCallbackAction(this.state, {required super.onInvoke});
+
+  final EditableTextState state;
+
+  @override
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return super.isActionEnabled;
+  }
 }
 
 class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
@@ -6501,5 +6715,14 @@ class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutside
       case TargetPlatform.windows:
         intent.focusNode.unfocus();
     }
+  }
+}
+
+class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOutsideIntent> {
+  _EditableTextTapUpOutsideAction();
+
+  @override
+  void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
+    // The default action is a no-op.
   }
 }

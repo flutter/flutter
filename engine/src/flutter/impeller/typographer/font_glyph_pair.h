@@ -5,9 +5,12 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
+#include <optional>
+
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/point.h"
+#include "impeller/geometry/rational.h"
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
@@ -15,20 +18,13 @@ namespace impeller {
 
 struct GlyphProperties {
   Color color = Color::Black();
-  Scalar stroke_width = 0.0;
-  Cap stroke_cap = Cap::kButt;
-  Join stroke_join = Join::kMiter;
-  Scalar stroke_miter = 4.0;
-  bool stroke = false;
+  std::optional<StrokeParameters> stroke;
 
   struct Equal {
-    constexpr bool operator()(const impeller::GlyphProperties& lhs,
-                              const impeller::GlyphProperties& rhs) const {
+    inline bool operator()(const impeller::GlyphProperties& lhs,
+                           const impeller::GlyphProperties& rhs) const {
       return lhs.color.ToARGB() == rhs.color.ToARGB() &&
-             lhs.stroke == rhs.stroke && lhs.stroke_cap == rhs.stroke_cap &&
-             lhs.stroke_join == rhs.stroke_join &&
-             lhs.stroke_miter == rhs.stroke_miter &&
-             lhs.stroke_width == rhs.stroke_width;
+             lhs.stroke == rhs.stroke;
     }
   };
 };
@@ -39,19 +35,48 @@ struct GlyphProperties {
 ///
 struct ScaledFont {
   Font font;
-  Scalar scale;
+  Rational scale;
 
   template <typename H>
   friend H AbslHashValue(H h, const ScaledFont& sf) {
-    return H::combine(std::move(h), sf.font.GetHash(), sf.scale);
+    return H::combine(std::move(h), sf.font.GetHash(), sf.scale.GetHash());
   }
 
   struct Equal {
-    constexpr bool operator()(const impeller::ScaledFont& lhs,
-                              const impeller::ScaledFont& rhs) const {
+    inline bool operator()(const impeller::ScaledFont& lhs,
+                           const impeller::ScaledFont& rhs) const {
       return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
     }
   };
+};
+
+/// All possible positions for a subpixel alignment.
+/// The name is in the format kSubpixelXY where X and Y are numerators to 1/4
+/// fractions in their respective directions.
+enum SubpixelPosition : uint8_t {
+  // Subpixel at {0, 0}.
+  kSubpixel00 = 0x0,
+  // Subpixel at {0.25, 0}.
+  kSubpixel10 = 0x1,
+  // Subpixel at {0.5, 0}.
+  kSubpixel20 = 0x2,
+  // Subpixel at {0.75, 0}.
+  kSubpixel30 = 0x3,
+  // Subpixel at {0, 0.25}.
+  kSubpixel01 = kSubpixel10 << 2,
+  // Subpixel at {0, 0.5}.
+  kSubpixel02 = kSubpixel20 << 2,
+  // Subpixel at {0, 0.75}.
+  kSubpixel03 = kSubpixel30 << 2,
+  kSubpixel11 = kSubpixel10 | kSubpixel01,
+  kSubpixel12 = kSubpixel10 | kSubpixel02,
+  kSubpixel13 = kSubpixel10 | kSubpixel03,
+  kSubpixel21 = kSubpixel20 | kSubpixel01,
+  kSubpixel22 = kSubpixel20 | kSubpixel02,
+  kSubpixel23 = kSubpixel20 | kSubpixel03,
+  kSubpixel31 = kSubpixel30 | kSubpixel01,
+  kSubpixel32 = kSubpixel30 | kSubpixel02,
+  kSubpixel33 = kSubpixel30 | kSubpixel03,
 };
 
 //------------------------------------------------------------------------------
@@ -59,11 +84,11 @@ struct ScaledFont {
 ///
 struct SubpixelGlyph {
   Glyph glyph;
-  Point subpixel_offset;
+  SubpixelPosition subpixel_offset;
   std::optional<GlyphProperties> properties;
 
   SubpixelGlyph(Glyph p_glyph,
-                Point p_subpixel_offset,
+                SubpixelPosition p_subpixel_offset,
                 std::optional<GlyphProperties> p_properties)
       : glyph(p_glyph),
         subpixel_offset(p_subpixel_offset),
@@ -72,14 +97,16 @@ struct SubpixelGlyph {
   template <typename H>
   friend H AbslHashValue(H h, const SubpixelGlyph& sg) {
     if (!sg.properties.has_value()) {
-      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
-                        sg.subpixel_offset.y);
+      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset);
     }
-    return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
-                      sg.subpixel_offset.y, sg.properties->color.ToARGB(),
-                      sg.properties->stroke, sg.properties->stroke_cap,
-                      sg.properties->stroke_join, sg.properties->stroke_miter,
-                      sg.properties->stroke_width);
+    StrokeParameters stroke;
+    bool has_stroke = sg.properties->stroke.has_value();
+    if (has_stroke) {
+      stroke = sg.properties->stroke.value();
+    }
+    return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
+                      sg.properties->color.ToARGB(), has_stroke, stroke.cap,
+                      stroke.join, stroke.miter_limit, stroke.width);
   }
 
   struct Equal {

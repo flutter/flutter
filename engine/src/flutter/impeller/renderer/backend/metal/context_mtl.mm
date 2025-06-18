@@ -22,34 +22,28 @@
 namespace impeller {
 
 static bool DeviceSupportsFramebufferFetch(id<MTLDevice> device) {
-  // The iOS simulator lies about supporting framebuffer fetch.
 #if FML_OS_IOS_SIMULATOR
+  // The iOS simulator lies about supporting framebuffer fetch.
   return false;
-#else  // FML_OS_IOS_SIMULATOR
-
-  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
-    return [device supportsFamily:MTLGPUFamilyApple2];
-  }
+#else   // FML_OS_IOS_SIMULATOR
   // According to
-  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf , Apple2
+  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf, Apple2
   // corresponds to iOS GPU family 2, which supports A8 devices.
-#if FML_OS_IOS
-  return [device supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v1];
-#else
-  return false;
-#endif  // FML_OS_IOS
+  return [device supportsFamily:MTLGPUFamilyApple2];
 #endif  // FML_OS_IOS_SIMULATOR
 }
 
 static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
-  bool supports_subgroups = false;
   // Refer to the "SIMD-scoped reduction operations" feature in the table
   // below: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
-  if (@available(ios 13.0, tvos 13.0, macos 10.15, *)) {
-    supports_subgroups = [device supportsFamily:MTLGPUFamilyApple7] ||
-                         [device supportsFamily:MTLGPUFamilyMac2];
-  }
-  return supports_subgroups;
+  return [device supportsFamily:MTLGPUFamilyApple7] ||
+         [device supportsFamily:MTLGPUFamilyMac2];
+}
+
+// See "Extended Range and wide color pixel formats" in the metal feature set
+// tables.
+static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
+  return [device supportsFamily:MTLGPUFamilyApple3];
 }
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
@@ -71,16 +65,25 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
+      .SetSupportsExtendedRangeFormats(
+          DeviceSupportsExtendedRangeFormats(device))
+#if FML_OS_IOS && !TARGET_OS_SIMULATOR
+      .SetMinimumUniformAlignment(16)
+#else
+      .SetMinimumUniformAlignment(256)
+#endif  // FML_OS_IOS && !TARGET_OS_SIMULATOR
       .Build();
 }
 
 ContextMTL::ContextMTL(
+    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     std::optional<PixelFormat> pixel_format_override)
-    : device_(device),
+    : Context(flags),
+      device_(device),
       command_queue_(command_queue),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
   // Validate device.
@@ -224,6 +227,7 @@ static id<MTLCommandQueue> CreateMetalCommandQueue(id<MTLDevice> device) {
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     const std::vector<std::string>& shader_library_paths,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch) {
   auto device = CreateMetalDevice();
@@ -232,7 +236,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
+      flags, device, command_queue,
       MTLShaderLibraryFromFilePaths(device, shader_library_paths),
       std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
@@ -243,6 +247,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label,
@@ -253,7 +258,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
+      flags, device, command_queue,
       MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                    library_label),
       std::move(is_gpu_disabled_sync_switch), pixel_format_override));
@@ -265,13 +270,14 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label) {
   auto context = std::shared_ptr<ContextMTL>(
-      new ContextMTL(device, command_queue,
+      new ContextMTL(flags, device, command_queue,
                      MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                                   library_label),
                      std::move(is_gpu_disabled_sync_switch)));
@@ -412,8 +418,26 @@ void ContextMTL::FlushTasksAwaitingGPU() {
     Lock lock(tasks_awaiting_gpu_mutex_);
     std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
   }
+  std::vector<PendingTasks> tasks_to_queue;
   for (const auto& task : tasks_awaiting_gpu) {
-    task.task();
+    is_gpu_disabled_sync_switch_->Execute(fml::SyncSwitch::Handlers()
+                                              .SetIfFalse([&] { task.task(); })
+                                              .SetIfTrue([&] {
+                                                // Lost access to the GPU
+                                                // immediately after it was
+                                                // activated. This may happen if
+                                                // the app was quickly
+                                                // foregrounded/backgrounded
+                                                // from a push notification.
+                                                // Store the tasks on the
+                                                // context again.
+                                                tasks_to_queue.push_back(task);
+                                              }));
+  }
+  if (!tasks_to_queue.empty()) {
+    Lock lock(tasks_awaiting_gpu_mutex_);
+    tasks_awaiting_gpu_.insert(tasks_awaiting_gpu_.end(),
+                               tasks_to_queue.begin(), tasks_to_queue.end());
   }
 }
 

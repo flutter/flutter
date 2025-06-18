@@ -11,10 +11,11 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
+#include "flutter/third_party/skia/include/core/SkSamplingOptions.h"
+#include "flutter/third_party/skia/include/core/SkTileMode.h"
+
 #include "gtest/gtest.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
-#include "third_party/skia/include/core/SkTileMode.h"
 
 namespace flutter {
 namespace testing {
@@ -140,8 +141,6 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kSaturation)                    \
   FUNC(kColor)                         \
   FUNC(kLuminosity)                    \
-  FUNC(kLastCoeffMode)                 \
-  FUNC(kLastSeparableMode)             \
   FUNC(kLastMode)
 
 TEST(DisplayListSkConversions, ToSkBlendMode){

@@ -443,8 +443,88 @@ void main() {
         expect(pageController.page, isNotNull);
         expect(pageController.page, 1.0);
       },
-      variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+      }),
+      // [intended] Web does not support double tap + drag gestures on the tested platforms.
+      skip: kIsWeb,
+    );
+
+    testWidgets(
+      'Vertical PageView beats SelectionArea child touch drag gestures on iOS',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/150897.
+        final PageController pageController = PageController();
+        const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+        addTearDown(pageController.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: PageView(
+              scrollDirection: Axis.vertical,
+              controller: pageController,
+              children: <Widget>[
+                Center(
+                  child: SelectableRegion(
+                    selectionControls: materialTextSelectionControls,
+                    child: const Text(testValue),
+                  ),
+                ),
+                const SizedBox(height: 200.0, child: Center(child: Text('Page 2'))),
+              ],
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(testValue), matching: find.byType(RichText)),
+        );
+        final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
+        final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
+
+        // A double tap + drag should take precedence over parent drags.
+        final TestGesture gesture = await tester.startGesture(gPos);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await gesture.down(gPos);
+        await tester.pumpAndSettle();
+        await gesture.moveTo(pPos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(
+          paragraph.selections[0],
+          TextSelection(
+            baseOffset: testValue.indexOf('g'),
+            extentOffset: testValue.indexOf('p') + 3,
+          ),
+        );
+
+        expect(pageController.page, isNotNull);
+        expect(pageController.page, 0.0);
+        // A vertical drag directly on the SelectableRegion should move the page
+        // view to the next page.
+        final Rect selectableTextRect = tester.getRect(find.byType(SelectableRegion));
+        // Simulate a pan by drag vertically first.
+        await gesture.down(selectableTextRect.center);
+        await tester.pump();
+        await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -200.0));
+        // Introduce horizontal movement.
+        await gesture.moveTo(selectableTextRect.center + const Offset(5.0, -300.0));
+        await gesture.moveTo(selectableTextRect.center + const Offset(-10.0, -400.0));
+        // Continue dragging vertically.
+        await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -500.0));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(pageController.page, isNotNull);
+        expect(pageController.page, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
 
     testWidgets('mouse single-click selection collapses the selection', (
@@ -4828,6 +4908,92 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets(
+      'should not throw range error when selecting previous paragraph',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              child: const Column(
+                children: <Widget>[
+                  Text('How are you?'),
+                  Text('Good, and you?'),
+                  Text('Fine, thank you.'),
+                ],
+              ),
+            ),
+          ),
+        );
+        // Select from offset 2 of paragraph3 to offset 6 of paragraph3.
+        final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph3, 2),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+        await gesture.up();
+        await tester.pump();
+
+        final bool alt;
+        final bool meta;
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            meta = false;
+            alt = true;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            meta = true;
+            alt = false;
+        }
+
+        // How are you?
+        // Good, and you?
+        // Fi[ne, ]thank you.
+        expect(paragraph3.selections.length, 1);
+        expect(paragraph3.selections[0].start, 2);
+        expect(paragraph3.selections[0].end, 6);
+
+        await sendKeyCombination(
+          tester,
+          SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: alt, meta: meta),
+        );
+        await tester.pump();
+        // How are you?
+        // Good, and you?
+        // [Fine, ]thank you.
+        expect(paragraph3.selections.length, 1);
+        expect(paragraph3.selections[0].start, 0);
+        expect(paragraph3.selections[0].end, 6);
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true),
+        );
+        await tester.pump();
+        // How are you?
+        // Good, and you[?
+        // Fine, ]thank you.
+        final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)),
+        );
+        expect(paragraph3.selections.length, 1);
+        expect(paragraph3.selections[0].start, 0);
+        expect(paragraph3.selections[0].end, 6);
+        expect(paragraph2.selections.length, 1);
+        expect(paragraph2.selections[0].start, 13);
+        expect(paragraph2.selections[0].end, 14);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
       'can use keyboard to granularly extend selection - document',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -6175,7 +6341,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Copy'), findsNothing);
       },
-      skip: !kIsWeb, // [intended]
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
   });
 
@@ -6273,17 +6439,13 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
   List<SelectionEvent> events = <SelectionEvent>[];
 
   @override
-  Size get size => _size;
-  Size _size = Size.zero;
-
-  @override
   List<Rect> get boundingBoxes => <Rect>[paintBounds];
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    _size = Size(constraints.maxWidth, constraints.maxHeight);
-    return _size;
-  }
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);

@@ -121,7 +121,8 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
       std::unique_ptr<flutter::KeyDataPacket> packet,
       std::function<void(bool)> callback) {}
   // |flutter::PlatformView::Delegate|
-  void OnPlatformViewDispatchSemanticsAction(int32_t id,
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
                                              flutter::SemanticsAction action,
                                              fml::MallocMapping args) {}
   // |flutter::PlatformView::Delegate|
@@ -157,6 +158,9 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   void UpdateAssetResolverByType(
       std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
       flutter::AssetResolver::AssetResolverType type) {}
+  // |flutter::PlatformView::Delegate|
+  void OnPlatformViewSendViewFocusEvent(const flutter::ViewFocusEvent& event) {
+  };
 
   flutter::Surface* surface() const { return surface_.get(); }
   flutter::PlatformMessage* message() const { return message_.get(); }

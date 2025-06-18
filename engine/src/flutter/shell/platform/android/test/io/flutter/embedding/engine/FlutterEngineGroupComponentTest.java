@@ -36,11 +36,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
 
 // It's a component test because it tests the FlutterEngineGroup its components such as the
 // FlutterEngine and the DartExecutor.
-@Config(manifest = Config.NONE)
+
 @RunWith(AndroidJUnit4.class)
 public class FlutterEngineGroupComponentTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -59,6 +58,7 @@ public class FlutterEngineGroupComponentTest {
     when(mockFlutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
     doAnswer(invocation -> jniAttached = true).when(mockFlutterJNI).attachToNative();
     GeneratedPluginRegistrant.clearRegisteredEngines();
+    FlutterEngine.resetNextEngineId();
 
     when(mockFlutterLoader.findAppBundlePath()).thenReturn("some/path/to/flutter_assets");
 
@@ -190,7 +190,8 @@ public class FlutterEngineGroupComponentTest {
             eq("other entrypoint"),
             isNull(),
             any(AssetManager.class),
-            nullable(List.class));
+            nullable(List.class),
+            eq(1l));
   }
 
   @Test
@@ -213,14 +214,20 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            nullable(List.class));
+            nullable(List.class),
+            eq(2l));
 
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class), "/bar");
 
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
     verify(mockFlutterJNI, times(1))
-        .spawn(nullable(String.class), nullable(String.class), eq("/bar"), nullable(List.class));
+        .spawn(
+            nullable(String.class),
+            nullable(String.class),
+            eq("/bar"),
+            nullable(List.class),
+            eq(2l));
   }
 
   @Test
@@ -238,7 +245,8 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             isNull(),
             any(AssetManager.class),
-            eq(firstDartEntrypointArgs));
+            eq(firstDartEntrypointArgs),
+            eq(1l));
 
     when(mockFlutterJNI.isAttached()).thenReturn(true);
     jniAttached = false;
@@ -251,7 +259,8 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            nullable(List.class));
+            nullable(List.class),
+            eq(2l));
     List<String> secondDartEntrypointArgs = new ArrayList<String>();
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(
@@ -265,7 +274,8 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            eq(secondDartEntrypointArgs));
+            eq(secondDartEntrypointArgs),
+            eq(2l));
   }
 
   @Test
@@ -309,7 +319,8 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             isNull(),
             any(AssetManager.class),
-            nullable(List.class));
+            nullable(List.class),
+            eq(1l));
 
     when(mockFlutterJNI.isAttached()).thenReturn(true);
     jniAttached = false;
@@ -322,7 +333,8 @@ public class FlutterEngineGroupComponentTest {
             nullable(String.class),
             nullable(String.class),
             nullable(String.class),
-            nullable(List.class));
+            nullable(List.class),
+            eq(2l));
 
     PlatformViewsController controller = new PlatformViewsController();
     boolean waitForRestorationData = false;

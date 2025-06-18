@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -288,6 +290,94 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
+  testWidgets('provides semantic role', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CustomPaint(
+        foregroundPainter: _PainterWithSemantics(
+          semantics: const CustomPainterSemantics(
+            rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+            properties: SemanticsProperties(
+              role: SemanticsRole.table,
+              label: 'this is a table',
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semanticsTester,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  role: SemanticsRole.table,
+                  label: 'this is a table',
+                  rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    semanticsTester.dispose();
+  });
+
+  testWidgets('provides semantic validation result', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CustomPaint(
+        foregroundPainter: _PainterWithSemantics(
+          semantics: const CustomPainterSemantics(
+            rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+            properties: SemanticsProperties(
+              textField: true,
+              label: 'email address',
+              textDirection: TextDirection.ltr,
+              validationResult: SemanticsValidationResult.invalid,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semanticsTester,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                  label: 'email address',
+                  validationResult: SemanticsValidationResult.invalid,
+                  rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    semanticsTester.dispose();
+  });
+
   testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       CustomPaint(
@@ -476,6 +566,7 @@ void _defineTests() {
               liveRegion: true,
               toggled: true,
               expanded: true,
+              isRequired: true,
             ),
           ),
         ),
@@ -529,6 +620,7 @@ void _defineTests() {
               image: true,
               liveRegion: true,
               expanded: true,
+              isRequired: true,
             ),
           ),
         ),
@@ -546,6 +638,78 @@ void _defineTests() {
           id: 1,
           children: <TestSemantics>[
             TestSemantics.rootChild(id: 2, rect: TestSemantics.fullScreen, flags: flags),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
+  });
+
+  testWidgets('semantics properties', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsProperties properties = SemanticsProperties(
+      label: 'label',
+      value: 'value',
+      increasedValue: 'increasedValue',
+      decreasedValue: 'decreasedValue',
+      hint: 'hint',
+      link: true,
+      linkUrl: Uri.parse('http://google.com'),
+      headingLevel: 1,
+      maxValueLength: 3,
+      currentValueLength: 1,
+      identifier: 'id',
+      tooltip: 'tooltip',
+      hintOverrides: const SemanticsHintOverrides(onLongPressHint: 'long', onTapHint: 'tap'),
+      textDirection: TextDirection.rtl,
+      tagForChildren: const SemanticsTag('tag'),
+      role: SemanticsRole.alertDialog,
+      controlsNodes: const <String>{'abc'},
+      inputType: SemanticsInputType.phone,
+      validationResult: SemanticsValidationResult.invalid,
+    );
+    await tester.pumpWidget(
+      CustomPaint(
+        painter: _PainterWithSemantics(
+          semantics: CustomPainterSemantics(
+            key: const ValueKey<int>(1),
+            rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+            properties: properties,
+          ),
+        ),
+      ),
+    );
+
+    const int expectedId = 2;
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: expectedId,
+              rect: TestSemantics.fullScreen,
+              label: properties.label!,
+              value: properties.value!,
+              increasedValue: properties.increasedValue!,
+              decreasedValue: properties.decreasedValue!,
+              hint: properties.hint!,
+              linkUrl: properties.linkUrl,
+              headingLevel: properties.headingLevel,
+              maxValueLength: properties.maxValueLength,
+              currentValueLength: properties.currentValueLength,
+              identifier: properties.identifier!,
+              tooltip: properties.tooltip!,
+              hintOverrides: properties.hintOverrides,
+              textDirection: properties.textDirection,
+              tags: <SemanticsTag>{properties.tagForChildren!},
+              role: properties.role!,
+              controlsNodes: properties.controlsNodes,
+              inputType: properties.inputType!,
+              validationResult: properties.validationResult,
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
+            ),
           ],
         ),
       ],

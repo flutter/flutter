@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 import '../cache.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
@@ -243,7 +242,6 @@ class PackagesGetCommand extends FlutterCommand {
     argParser.addFlag('enforce-lockfile');
     argParser.addFlag('precompile');
     argParser.addFlag('major-versions');
-    argParser.addFlag('null-safety');
     argParser.addFlag('example', defaultsTo: true);
     argParser.addOption('sdk');
     argParser.addOption('path');
@@ -305,12 +303,7 @@ class PackagesGetCommand extends FlutterCommand {
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
-      if (rootProject.manifest.generateLocalizations &&
-          !await generateLocalizationsSyntheticPackage(
-            environment: environment,
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
-          )) {
+      if (rootProject.manifest.generateLocalizations) {
         // If localizations were enabled, but we are not using synthetic packages.
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),
@@ -357,7 +350,6 @@ class PackagesGetCommand extends FlutterCommand {
       );
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
-      // ignore: avoid_catches_without_on_clauses
       final Duration elapsedDuration = timer.elapsed;
       analytics.send(
         Event.timing(
@@ -371,12 +363,25 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     if (rootProject != null) {
+      // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+      //
+      // `flutter packages get` inherently is neither a debug or release build,
+      // and since a future build (`flutter build apk`) will regenerate tooling
+      // anyway, we assume this is fine.
+      //
+      // It won't be if they do `flutter build --no-pub`, though.
+      const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      await rootProject.regeneratePlatformSpecificTooling();
+      await rootProject.regeneratePlatformSpecificTooling(
+        releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+      );
       if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
         final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling();
+        await exampleProject.regeneratePlatformSpecificTooling(
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+        );
       }
     }
 

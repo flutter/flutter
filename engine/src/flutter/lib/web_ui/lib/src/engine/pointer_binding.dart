@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -17,7 +18,6 @@ import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
 import 'pointer_converter.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'window.dart';
 
@@ -69,16 +69,12 @@ int _nthButton(int n) => 0x1 << n;
 @visibleForTesting
 int convertButtonToButtons(int button) {
   assert(button >= 0, 'Unexpected negative button $button.');
-  switch (button) {
-    case 0:
-      return _kPrimaryMouseButton;
-    case 1:
-      return _kMiddleMouseButton;
-    case 2:
-      return _kSecondaryMouseButton;
-    default:
-      return _nthButton(button);
-  }
+  return switch (button) {
+    0 => _kPrimaryMouseButton,
+    1 => _kMiddleMouseButton,
+    2 => _kSecondaryMouseButton,
+    _ => _nthButton(button),
+  };
 }
 
 /// Wrapping the Safari iOS workaround that adds a dummy event listener
@@ -91,7 +87,7 @@ class SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     // We only need to attach the listener once.
     if (_listener == null) {
-      _listener = createDomEventListener((_) {});
+      _listener = createDomEventListener((DomEvent _) {});
       domDocument.addEventListener('touchstart', _listener);
     }
   }
@@ -322,9 +318,9 @@ class ClickDebouncer {
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
 
     final DomEventTarget? target = event.target;
-    if (target is DomElement && target.hasAttribute('flt-tappable')) {
+    if (target.isA<DomElement>() && (target! as DomElement).hasAttribute('flt-tappable')) {
       _state = (
-        target: target,
+        target: target as DomElement,
         // The 200ms duration was chosen empirically by testing tapping, mouse
         // clicking, trackpad tapping and clicking, as well as the following
         // screen readers: TalkBack on Android, VoiceOver on macOS, Narrator/
@@ -439,7 +435,7 @@ class ClickDebouncer {
 class PointerSupportDetector {
   const PointerSupportDetector();
 
-  bool get hasPointerEvents => hasJsProperty(domWindow, 'PointerEvent');
+  bool get hasPointerEvents => domWindow.has('PointerEvent');
 
   @override
   String toString() => 'pointers:$hasPointerEvents';
@@ -471,7 +467,7 @@ class Listener {
       target.addEventListener(event, jsHandler);
     } else {
       final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
-      target.addEventListenerWithOptions(event, jsHandler, eventOptions);
+      target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
     }
 
     final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
@@ -528,9 +524,9 @@ abstract class _BaseAdapter {
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
   void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
-        if (domInstanceOfString(event, 'PointerEvent')) {
+        if (event.isA<DomPointerEvent>()) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
@@ -723,7 +719,14 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   void _handleWheelEvent(DomEvent event) {
-    assert(domInstanceOfString(event, 'WheelEvent'));
+    // Wheel events should switch semantics to pointer event mode, because wheel
+    // events should always be handled by the framework.
+    // See: https://github.com/flutter/flutter/issues/159358
+    if (!EngineSemantics.instance.receiveGlobalEvent(event)) {
+      return;
+    }
+
+    assert(event.isA<DomWheelEvent>());
     if (_debugLogPointerEvents) {
       print(event.type);
     }
@@ -1095,7 +1098,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   List<DomPointerEvent> _expandEvents(DomPointerEvent event) {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
-    if (hasJsProperty(event, 'getCoalescedEvents')) {
+    if (event.has('getCoalescedEvents')) {
       final List<DomPointerEvent> coalescedEvents =
           event.getCoalescedEvents().cast<DomPointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In
@@ -1112,16 +1115,12 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   }
 
   ui.PointerDeviceKind _pointerTypeToDeviceKind(String pointerType) {
-    switch (pointerType) {
-      case 'mouse':
-        return ui.PointerDeviceKind.mouse;
-      case 'pen':
-        return ui.PointerDeviceKind.stylus;
-      case 'touch':
-        return ui.PointerDeviceKind.touch;
-      default:
-        return ui.PointerDeviceKind.unknown;
-    }
+    return switch (pointerType) {
+      'mouse' => ui.PointerDeviceKind.mouse,
+      'pen' => ui.PointerDeviceKind.stylus,
+      'touch' => ui.PointerDeviceKind.touch,
+      _ => ui.PointerDeviceKind.unknown,
+    };
   }
 
   int _getPointerId(DomPointerEvent event) {

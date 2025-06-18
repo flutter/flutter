@@ -174,6 +174,15 @@
         }
       },
       {
+        "name": "licenses_cpp_testrunner",
+        "pattern": "../out/host_debug_unopt_arm64/licenses_cpp_testrunner",
+        "runTask": {
+          "before": [
+            "licenses_cpp_testrunner"
+          ]
+        }
+      },
+      {
         "name": "ui_unittests_arm64",
         "pattern": "../out/host_debug_unopt_arm64/ui_unittests",
         "runTask": {
@@ -330,6 +339,33 @@
         "group": {
           "kind": "build"
         },
+        "label": "licenses_cpp_testrunner",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
         "label": "shell_unittests_arm64",
         "args": [
           "build",
@@ -421,6 +457,37 @@
           "build",
           "-c",
           "ios_debug_unopt"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
+        "label": "ios_debug_sim_unopt_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "&&",
+          "./flutter/bin/et",
+          "build",
+          "-c",
+          "ios_debug_sim_unopt_arm64"
         ]
       },
       {

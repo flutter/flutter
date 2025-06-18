@@ -7,15 +7,18 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
-#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/impeller/typographer/text_frame.h"
+#include "flutter/third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {
 
@@ -291,6 +294,9 @@ class DlOpReceiver {
   virtual void clipRoundRect(const DlRoundRect& rrect,
                              DlClipOp clip_op,
                              bool is_aa) = 0;
+  virtual void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                     DlClipOp clip_op,
+                                     bool is_aa) = 0;
   virtual void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) = 0;
 
   // The following rendering methods all take their rendering attributes
@@ -313,6 +319,7 @@ class DlOpReceiver {
   virtual void drawRoundRect(const DlRoundRect& rrect) = 0;
   virtual void drawDiffRoundRect(const DlRoundRect& outer,
                                  const DlRoundRect& inner) = 0;
+  virtual void drawRoundSuperellipse(const DlRoundSuperellipse& rse) = 0;
   virtual void drawPath(const DlPath& path) = 0;
   virtual void drawArc(const DlRect& oval_bounds,
                        DlScalar start_degrees,

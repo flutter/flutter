@@ -10,6 +10,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,6 +52,11 @@ public class FlutterLoader {
       "io.flutter.embedding.android.DisableMergedPlatformUIThread";
   private static final String ENABLE_SURFACE_CONTROL =
       "io.flutter.embedding.android.EnableSurfaceControl";
+  private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
+  private static final String IMPELLER_LAZY_SHADER_MODE =
+      "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
+  private static final String IMPELLER_ANTIALIAS_LINES =
+      "io.flutter.embedding.android.ImpellerAntialiasLines";
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -200,6 +206,33 @@ public class FlutterLoader {
                     File nativeLibsDir = new File(flutterApplicationInfo.nativeLibraryDir);
                     String[] nativeLibsContents = nativeLibsDir.list();
 
+                    // To gather more information for
+                    // https://github.com/flutter/flutter/issues/151638,
+                    // log the contents of the split libraries directory as well.
+
+                    List<String> splitAndSourceDirs = new ArrayList<>();
+                    // Get supported ABI and prepare path suffix for lib directories
+                    String[] abis = Build.SUPPORTED_ABIS;
+                    for (String abi : abis) {
+                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+
+                      // Get split APK lib paths
+                      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
+                      List<String> splitLibPaths = new ArrayList<>();
+                      if (splitSourceDirs != null) {
+                        for (String splitSourceDir : splitSourceDirs) {
+                          splitLibPaths.add(splitSourceDir + libPathSuffix);
+                        }
+                        splitAndSourceDirs.addAll(splitLibPaths);
+                      }
+
+                      String baseApkPath = appContext.getApplicationInfo().sourceDir;
+                      if (baseApkPath != null && !baseApkPath.isEmpty()) {
+                        String baseApkLibDir = baseApkPath + libPathSuffix;
+                        splitAndSourceDirs.add(baseApkLibDir);
+                      }
+                    }
+
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
                             + " is running on an architecture that Flutter Android does not support (e.g. x86)"
@@ -213,7 +246,13 @@ public class FlutterLoader {
                             + (nativeLibsDir.exists()
                                 ? "contains the following files: "
                                     + Arrays.toString(nativeLibsContents)
-                                : "does not exist."),
+                                : "does not exist")
+                            + (splitAndSourceDirs.isEmpty()
+                                ? ""
+                                : ", and the split and source libraries directory (with path(s) "
+                                    + splitAndSourceDirs
+                                    + ")")
+                            + ".",
                         unsatisfiedLinkError);
                   }
 
@@ -363,12 +402,12 @@ public class FlutterLoader {
         if (metaData.getBoolean(IMPELLER_VULKAN_GPU_TRACING_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-gpu-tracing");
         }
-        if (metaData.containsKey(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY)) {
-          if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY)) {
-            shellArgs.add("--no-enable-merged-platform-ui-thread");
-          }
+        if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
+          shellArgs.add("--merged-platform-ui-thread=disabled");
         }
-
+        if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
+          shellArgs.add("--enable-flutter-gpu");
+        }
         if (metaData.getBoolean(ENABLE_SURFACE_CONTROL, false)) {
           shellArgs.add("--enable-surface-control");
         }
@@ -376,6 +415,12 @@ public class FlutterLoader {
         String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
         if (backend != null) {
           shellArgs.add("--impeller-backend=" + backend);
+        }
+        if (metaData.getBoolean(IMPELLER_LAZY_SHADER_MODE)) {
+          shellArgs.add("--impeller-lazy-shader-mode");
+        }
+        if (metaData.getBoolean(IMPELLER_ANTIALIAS_LINES)) {
+          shellArgs.add("--impeller-antialias-lines");
         }
       }
 
@@ -390,7 +435,8 @@ public class FlutterLoader {
           kernelPath,
           result.appStoragePath,
           result.engineCachesPath,
-          initTimeMillis);
+          initTimeMillis,
+          Integer.valueOf(android.os.Build.VERSION.SDK_INT));
 
       initialized = true;
     } catch (Exception e) {

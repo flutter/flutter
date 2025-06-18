@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -21,16 +18,10 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
-import '../src/fakes.dart';
+import '../src/package_config.dart';
+import '../src/throwing_pub.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Dart plugin registrant', () {
     late FileSystem fs;
     late FakeFlutterProject flutterProject;
@@ -44,13 +35,9 @@ void main() {
           FakeFlutterProject()
             ..manifest = flutterManifest
             ..directory = directory
-            ..flutterPluginsFile = directory.childFile('.flutter-plugins')
             ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
             ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
-      flutterProject.directory
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 
     group('resolvePlatformImplementation', () {
@@ -1112,7 +1099,6 @@ void main() {
         'Generates new entrypoint',
         () async {
           flutterProject.isModule = true;
-
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{
             'url_launcher_android': '''
   flutter:
@@ -1166,7 +1152,6 @@ void main() {
 
           final Directory libDir = flutterProject.directory.childDirectory('lib');
           libDir.createSync(recursive: true);
-
           final File mainFile = libDir.childFile('main.dart');
           mainFile.writeAsStringSync('''
 // @dart = 2.8
@@ -1273,8 +1258,7 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1282,7 +1266,7 @@ void main() {
         'Plugin without platform support throws tool exit',
         () async {
           flutterProject.isModule = false;
-
+          flutterManifest.dependencies.add('url_launcher_macos');
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{
             'url_launcher_macos': '''
   flutter:
@@ -1320,8 +1304,7 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1366,8 +1349,7 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1375,6 +1357,7 @@ void main() {
         'Does not create new entrypoint if there are no platform resolutions',
         () async {
           flutterProject.isModule = false;
+          createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{});
 
           final Directory libDir = flutterProject.directory.childDirectory('lib');
           libDir.createSync(recursive: true);
@@ -1396,8 +1379,7 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
 
@@ -1422,7 +1404,7 @@ void main() {
 
           final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-            flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+            flutterProject.packageConfig,
             logger: globals.logger,
             throwOnError: false,
           );
@@ -1448,29 +1430,11 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
         },
       );
     });
   });
-}
-
-void addToPackageConfig(FlutterProject project, String name, Directory packageDir) {
-  final File packageConfigFile = project.directory
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json');
-
-  final Map<String, Object?> packageConfig =
-      jsonDecode(packageConfigFile.readAsStringSync()) as Map<String, Object?>;
-
-  (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
-    'name': name,
-    'rootUri': packageDir.uri.toString(),
-    'packageUri': 'lib/',
-  });
-
-  packageConfigFile.writeAsStringSync(jsonEncode(packageConfig));
 }
 
 void createFakeDartPlugins(
@@ -1480,21 +1444,18 @@ void createFakeDartPlugins(
   Map<String, String> plugins,
 ) {
   final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-
-  flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..deleteSync(recursive: true)
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "packages": [],
-  "configVersion": 2
-}
-''');
+  writePackageConfigFiles(
+    directory: flutterProject.directory,
+    mainLibName: flutterProject.manifest.appName,
+    packages: <String, String>{
+      for (final String name in plugins.keys)
+        name: fakePubCache.childDirectory(name).uri.toString(),
+    },
+  );
 
   for (final MapEntry<String, String> entry in plugins.entries) {
     final String name = fs.path.basename(entry.key);
     final Directory pluginDirectory = fakePubCache.childDirectory(name);
-    addToPackageConfig(flutterProject, name, pluginDirectory);
     pluginDirectory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
       ..writeAsStringSync(entry.value);
@@ -1505,6 +1466,9 @@ void createFakeDartPlugins(
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
   Set<String> dependencies = <String>{};
+
+  @override
+  String get appName => 'myapp';
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -1518,7 +1482,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late Directory directory;
 
   @override
-  late File flutterPluginsFile;
+  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
 
   @override
   late File flutterPluginsDependenciesFile;

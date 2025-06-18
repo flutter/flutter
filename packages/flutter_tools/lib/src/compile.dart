@@ -410,6 +410,7 @@ class _RecompileRequest extends _CompilationRequest {
     this.suppressErrors, {
     this.additionalSourceUri,
     this.nativeAssetsYamlUri,
+    required this.recompileRestart,
   });
 
   Uri mainUri;
@@ -419,6 +420,7 @@ class _RecompileRequest extends _CompilationRequest {
   bool suppressErrors;
   final Uri? additionalSourceUri;
   final Uri? nativeAssetsYamlUri;
+  final bool recompileRestart;
 
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._recompile(this);
@@ -522,17 +524,20 @@ abstract class ResidentCompiler {
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
 
-  /// If invoked for the first time, it compiles Dart script identified by
-  /// [mainPath], [invalidatedFiles] list is ignored.
+  /// If invoked for the first time, it compiles the Dart script identified by
+  /// [mainUri], [invalidatedFiles] list is ignored.
   /// On successive runs [invalidatedFiles] indicates which files need to be
-  /// recompiled. If [mainPath] is [null], previously used [mainPath] entry
-  /// point that is used for recompilation.
+  /// recompiled.
+  ///
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   ///
   /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
   /// to ensure that the generated registrant file has been updated such that
   /// it is wrapping [mainUri].
+  ///
+  /// If [recompileRestart] is true, uses the `recompile-restart` instruction
+  /// intended for a hot restart instead.
   Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
@@ -544,6 +549,7 @@ abstract class ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -695,6 +701,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -717,6 +724,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         suppressErrors,
         additionalSourceUri: additionalSourceUri,
         nativeAssetsYamlUri: nativeAssetsYaml,
+        recompileRestart: recompileRestart,
       ),
     );
     return completer.future;
@@ -759,7 +767,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
       server.stdin.writeln('native-assets $nativeAssets');
       _logger.printTrace('<- native-assets $nativeAssets');
     }
-    server.stdin.writeln('recompile $mainUri $inputKey');
+    if (request.recompileRestart) {
+      server.stdin.writeln('recompile-restart $mainUri $inputKey');
+    } else {
+      server.stdin.writeln('recompile $mainUri $inputKey');
+    }
     _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
     if (invalidatedFiles != null) {
@@ -879,7 +891,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
             // process has died unexpectedly.
             if (_stdoutHandler.compilerOutput?.isCompleted == false) {
               _stdoutHandler.compilerOutput?.complete();
-              throwToolExit('the Dart compiler exited unexpectedly.');
+              throwToolExit('The Dart compiler exited unexpectedly.');
             }
           },
         );
@@ -892,7 +904,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     unawaited(
       _server?.exitCode.then((int code) {
         if (code != 0) {
-          throwToolExit('the Dart compiler exited unexpectedly.');
+          throwToolExit('The Dart compiler exited unexpectedly.');
         }
       }),
     );

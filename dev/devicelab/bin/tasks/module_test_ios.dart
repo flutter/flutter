@@ -18,13 +18,6 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    // Update pod repo.
-    await eval(
-      'pod',
-      <String>['repo', 'update'],
-      environment: <String, String>{'LANG': 'en_US.UTF-8'},
-    );
-
     // This variable cannot be `late`, as we reference it in the `finally` block
     // which may execute before this field has been initialized.
     String? simulatorDeviceId;
@@ -63,8 +56,6 @@ Future<void> main() async {
 
       section('Create package with native assets');
 
-      await flutter('config', options: <String>['--enable-native-assets']);
-
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 
@@ -85,7 +76,7 @@ dependencies:
       section('Build ephemeral host app in release mode without CocoaPods');
 
       await inDirectory(projectDir, () async {
-        await flutter('build', options: <String>['ios', '--no-codesign', '--verbose']);
+        await flutter('build', options: <String>['ios', '--no-codesign']);
       });
 
       // Check the tool is no longer copying to the legacy xcframework location.
@@ -266,7 +257,7 @@ dependencies:
       });
 
       await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
+        await flutter('build', options: <String>['ios', '--config-only']);
       });
 
       section('Add to existing iOS Objective-C app');
@@ -284,7 +275,13 @@ dependencies:
         section('Validate iOS Objective-C host app Podfile');
 
         final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
-        String podfileContent = await podfile.readAsString();
+        final String correctPodfileContents = await podfile.readAsString();
+        final File podfileMissingPostInstall = File(
+          path.join(objectiveCHostApp.path, 'PodfileMissingPostInstall'),
+        );
+
+        podfile.writeAsStringSync(podfileMissingPostInstall.readAsStringSync());
+
         final String podFailure = await eval(
           'pod',
           <String>['install'],
@@ -298,18 +295,12 @@ dependencies:
             !podFailure.contains(
               'Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins',
             )) {
-          print(podfileContent);
+          print(podfile.readAsStringSync());
           throw TaskResult.failure(
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        podfileContent = '''
-$podfileContent
-
-post_install do |installer|
-  flutter_post_install(installer)
-end
-          ''';
+        String podfileContent = correctPodfileContents;
         await podfile.writeAsString(podfileContent, flush: true);
 
         await exec(
@@ -606,7 +597,7 @@ end
       );
 
       if (!xcodebuildOutput.contains(
-            'flutter --verbose --local-engine-src-path=bogus assemble',
+            RegExp('flutter.*--local-engine-src-path=bogus assemble'),
           ) || // Verbose output
           !xcodebuildOutput.contains(
             'Unable to detect a Flutter engine build directory in bogus',

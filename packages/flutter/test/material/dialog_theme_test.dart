@@ -95,6 +95,7 @@ void main() {
     expect(dialogThemeData.barrierColor, null);
     expect(dialogThemeData.insetPadding, null);
     expect(dialogThemeData.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
 
     const DialogTheme dialogTheme = DialogTheme(data: DialogThemeData(), child: SizedBox());
     expect(dialogTheme.backgroundColor, null);
@@ -110,6 +111,7 @@ void main() {
     expect(dialogTheme.barrierColor, null);
     expect(dialogTheme.insetPadding, null);
     expect(dialogTheme.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
   });
 
   testWidgets('Default DialogThemeData debugFillProperties', (WidgetTester tester) async {
@@ -416,7 +418,6 @@ void main() {
       alignment: Alignment.topRight,
     );
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
       dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft),
     );
 
@@ -460,10 +461,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     );
     const AlertDialog dialog = AlertDialog(title: Text('Title'), actions: <Widget>[]);
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      dialogTheme: const DialogThemeData(shape: customBorder),
-    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(shape: customBorder));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -542,7 +540,7 @@ void main() {
   testWidgets('Material3 - Custom Icon Color - Theme - lowest preference', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const AlertDialog dialog = AlertDialog(icon: Icon(Icons.ac_unit), actions: <Widget>[]);
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
@@ -610,10 +608,7 @@ void main() {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(title: Text(titleText));
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      textTheme: const TextTheme(headlineSmall: titleTextStyle),
-    );
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(headlineSmall: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -727,10 +722,7 @@ void main() {
     const String contentText = 'Content';
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(content: Text(contentText));
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      textTheme: const TextTheme(bodyMedium: contentTextStyle),
-    );
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(bodyMedium: contentTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -842,5 +834,30 @@ void main() {
 
     final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('DialogThemeData.constraints is respected if Dialog.constraints is null', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints themeConstraints = BoxConstraints(maxWidth: 500, maxHeight: 500);
+    const DialogThemeData dialogTheme = DialogThemeData(
+      alignment: Alignment.center,
+      constraints: themeConstraints,
+    );
+
+    final Dialog dialog = Dialog(child: SizedBox.expand(child: Container(color: Colors.amber)));
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: ThemeData(dialogTheme: dialogTheme)),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the dialog respects the constraints from the theme
+    final Finder dialogFinder = find.byType(Container);
+    final RenderBox renderBox = tester.renderObject(dialogFinder);
+
+    expect(renderBox.constraints.maxWidth, themeConstraints.maxWidth);
+    expect(renderBox.constraints.maxHeight, themeConstraints.maxHeight);
   });
 }

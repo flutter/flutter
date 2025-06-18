@@ -34,7 +34,7 @@ class DlImageGPU final : public DlImage {
   bool isUIThreadSafe() const override;
 
   // |DlImage|
-  SkISize dimensions() const override;
+  DlISize GetSize() const override;
 
   // |DlImage|
   virtual size_t GetApproximateByteSize() const override;

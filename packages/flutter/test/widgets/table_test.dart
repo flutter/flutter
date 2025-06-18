@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'semantics_tester.dart';
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({super.key});
@@ -951,5 +952,69 @@ void main() {
     expect(boxD.size.height, greaterThan(boxA.size.height));
   });
 
-  // TODO(ianh): Test handling of TableCell object
+  testWidgets('Table has correct roles in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('Data Cell 1')),
+                  TableCell(child: Text('Data Cell 2')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      role: SemanticsRole.table,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          role: SemanticsRole.row,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Data Cell 1',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                            TestSemantics(
+                              label: 'Data Cell 2',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
+
+    semantics.dispose();
+  });
 }

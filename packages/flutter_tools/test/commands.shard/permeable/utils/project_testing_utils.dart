@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
@@ -37,6 +38,28 @@ class LoggingProcessManager extends LocalProcessManager {
     );
   }
 
+  @override
+  Future<ProcessResult> run(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+  }) {
+    commands.add(command.map((Object arg) => arg.toString()).toList());
+    return super.run(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
   void clear() {
     commands.clear();
   }
@@ -47,7 +70,7 @@ Future<void> analyzeProject(
   List<String> expectedFailures = const <String>[],
 }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final List<String> args = <String>[flutterToolsSnapshotPath, 'analyze'];

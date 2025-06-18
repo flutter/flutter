@@ -85,7 +85,10 @@ Future<void> main(List<String> args) async {
   final bool daemon = args.contains('daemon');
   final bool runMachine =
       (args.contains('--machine') && args.contains('run')) ||
-      (args.contains('--machine') && args.contains('attach'));
+      (args.contains('--machine') && args.contains('attach')) ||
+      // `flutter widget-preview start` starts an application that requires a logger
+      // to be setup for machine mode.
+      (args.contains('widget-preview') && args.contains('start'));
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -95,6 +98,17 @@ Future<void> main(List<String> args) async {
     fileSystem: globals.localFileSystem,
     userMessages: UserMessages(),
   );
+
+  // Silently add --start-paused if running with -d web-server and --web-experimental-hot-reload,
+  // and --start-paused is not already present. This is to support hot reload in web-server environment.
+  // TODO(yjessy): Remove this workaround once https://github.com/dart-lang/sdk/issues/60688 is resolved.
+
+  if (args.contains('-d') &&
+      args.contains('web-server') &&
+      args.contains('--web-experimental-hot-reload') &&
+      !args.contains('--start-paused')) {
+    args = List<String>.from(args)..add('--start-paused');
+  }
 
   await runner.run(
     args,
@@ -184,11 +198,9 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         fileSystem: globals.fs,
       ),
       BuildCommand(
-        artifacts: globals.artifacts!,
         fileSystem: globals.fs,
         buildSystem: globals.buildSystem,
         osUtils: globals.os,
-        processUtils: globals.processUtils,
         verboseHelp: verboseHelp,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
@@ -217,6 +229,8 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
         signals: globals.signals,
       ),
       EmulatorsCommand(),
@@ -247,16 +261,22 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
       ),
       WidgetPreviewCommand(
+        verboseHelp: verboseHelp,
         logger: globals.logger,
         fs: globals.fs,
         projectFactory: globals.projectFactory,
         cache: globals.cache,
+        platform: globals.platform,
+        shutdownHooks: globals.shutdownHooks,
+        os: globals.os,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
       ),
       UpgradeCommand(verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),
-      UpdatePackagesCommand(),
+      UpdatePackagesCommand(verboseHelp: verboseHelp),
     ];
 
 /// An abstraction for instantiation of the correct logger type.

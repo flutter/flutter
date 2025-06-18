@@ -1714,6 +1714,113 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   }
 }
 
+/// Clips its child using a rounded superellipse.
+///
+/// By default, [RenderClipRSuperellipse] uses its own bounds as the base
+/// rectangle for the clip, but the size and location of the clip can be
+/// customized using a custom [clipper].
+///
+/// Hit tests are performed based on the bounding box of the RSuperellipse.
+class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
+  /// Creates a rounded-superellipse clip.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  RenderClipRSuperellipse({
+    super.child,
+    BorderRadiusGeometry borderRadius = BorderRadius.zero,
+    super.clipper,
+    super.clipBehavior,
+    TextDirection? textDirection,
+  }) : _borderRadius = borderRadius,
+       _textDirection = textDirection;
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  ///
+  /// This value is ignored if [clipper] is non-null.
+  BorderRadiusGeometry get borderRadius => _borderRadius;
+  BorderRadiusGeometry _borderRadius;
+  set borderRadius(BorderRadiusGeometry value) {
+    if (_borderRadius == value) {
+      return;
+    }
+    _borderRadius = value;
+    _markNeedsClip();
+  }
+
+  /// The text direction with which to resolve [borderRadius].
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    _markNeedsClip();
+  }
+
+  @override
+  RSuperellipse get _defaultClip =>
+      _borderRadius.resolve(textDirection).toRSuperellipse(Offset.zero & size);
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip!.outerRect.contains(position)) {
+        return false;
+      }
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      if (clipBehavior != Clip.none) {
+        _updateClip();
+        layer = context.pushClipRSuperellipse(
+          needsCompositing,
+          offset,
+          _clip!.outerRect,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipRSuperellipseLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
+    } else {
+      layer = null;
+    }
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      if (child != null) {
+        super.debugPaintSize(context, offset);
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRSuperellipse(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(
+            context.canvas,
+            offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1),
+          );
+        }
+      }
+      return true;
+    }());
+  }
+}
+
 /// Clips its child using an oval.
 ///
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
@@ -1939,12 +2046,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     }
     _color = value;
     markNeedsPaint();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.elevation = elevation;
   }
 
   @override
@@ -2505,14 +2606,14 @@ class RenderTransform extends RenderProxyBox {
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
-    _transform!.translate(x, y, z);
+    _transform!.translateByDouble(x, y, z, 1);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double? y, double? z]) {
-    _transform!.scale(x, y, z);
+    _transform!.scaleByDouble(x, y ?? x, z ?? x, 1);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -2524,19 +2625,19 @@ class RenderTransform extends RenderProxyBox {
     }
     final Matrix4 result = Matrix4.identity();
     if (_origin != null) {
-      result.translate(_origin!.dx, _origin!.dy);
+      result.translateByDouble(_origin!.dx, _origin!.dy, 0, 1);
     }
     Offset? translation;
     if (resolvedAlignment != null) {
       translation = resolvedAlignment.alongSize(size);
-      result.translate(translation.dx, translation.dy);
+      result.translateByDouble(translation.dx, translation.dy, 0, 1);
     }
     result.multiply(_transform!);
     if (resolvedAlignment != null) {
-      result.translate(-translation!.dx, -translation.dy);
+      result.translateByDouble(-translation!.dx, -translation.dy, 0, 1);
     }
     if (_origin != null) {
-      result.translate(-_origin!.dx, -_origin!.dy);
+      result.translateByDouble(-_origin!.dx, -_origin!.dy, 0, 1);
     }
     return result;
   }
@@ -2591,7 +2692,7 @@ class RenderTransform extends RenderProxyBox {
         final Matrix4 effectiveTransform =
             Matrix4.translationValues(offset.dx, offset.dy, 0.0)
               ..multiply(transform)
-              ..translate(-offset.dx, -offset.dy);
+              ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
@@ -2810,8 +2911,8 @@ class RenderFittedBox extends RenderProxyBox {
       assert(scaleX.isFinite && scaleY.isFinite);
       _transform =
           Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
-            ..scale(scaleX, scaleY, 1.0)
-            ..translate(-sourceRect.left, -sourceRect.top);
+            ..scaleByDouble(scaleX, scaleY, 1.0, 1)
+            ..translateByDouble(-sourceRect.left, -sourceRect.top, 0, 1);
       assert(_transform!.storage.every((double value) => value.isFinite));
     }
   }
@@ -2971,7 +3072,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    transform.translateByDouble(translation.dx * size.width, translation.dy * size.height, 0, 1);
   }
 
   @override
@@ -4382,6 +4483,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.image != null) {
       config.isImage = _properties.image!;
     }
+    if (_properties.isRequired != null) {
+      config.isRequired = _properties.isRequired;
+    }
     if (_properties.identifier != null) {
       config.identifier = _properties.identifier!;
     }
@@ -4433,6 +4537,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (properties.role != null) {
       config.role = _properties.role!;
     }
+    if (_properties.controlsNodes != null) {
+      config.controlsNodes = _properties.controlsNodes;
+    }
+    if (config.validationResult != _properties.validationResult) {
+      config.validationResult = _properties.validationResult;
+    }
+
+    if (_properties.inputType != null) {
+      config.inputType = _properties.inputType!;
+    }
+
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.

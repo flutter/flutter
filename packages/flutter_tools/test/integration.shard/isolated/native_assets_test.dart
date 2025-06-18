@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test exercises the embedding of the native assets mapping in dill files.
-// An initial dill file is created by `flutter assemble` and used for running
-// the application. This dill must contain the mapping.
-// When doing hot reload, this mapping must stay in place.
-// When doing a hot restart, a new dill file is pushed. This dill file must also
-// contain the native assets mapping.
-// When doing a hot reload, this mapping must stay in place.
+// This test exercises dynamic libraries added to a flutter app or package.
+// It covers:
+//  * `flutter run`, including hot reload and hot restart
+//  * `flutter test`
+//  * `flutter build`
 
 @Timeout(Duration(minutes: 10))
 library;
@@ -16,11 +14,12 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:hooks/hooks.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart' show fileSystem, flutterBin, platform;
@@ -53,10 +52,6 @@ void main() {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
-
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
 
   for (final String device in devices) {
     for (final String buildMode in buildModes) {
@@ -164,6 +159,29 @@ void main() {
     });
   });
 
+  for (final String device in devices) {
+    testWithoutContext('flutter test integration_test $device native assets', () async {
+      await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+
+        final Uri exampleDirectory = Uri.directory(packageDirectory.path).resolve('example/');
+        addIntegrationTest(exampleDirectory, packageName);
+
+        final ProcessTestResult result = await runFlutter(
+          <String>['test', 'integration_test', '-d', device],
+          exampleDirectory.toFilePath(),
+          <Transition>[Barrier(RegExp('.* All tests passed!'))],
+          logging: false,
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter test integration_test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+      });
+    });
+  }
+
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
       testWithoutContext(
@@ -235,6 +253,43 @@ void main() {
       });
     });
   }
+}
+
+void addIntegrationTest(Uri exampleDirectory, String packageName) {
+  final ProcessResult result = processManager.runSync(<String>[
+    'flutter',
+    'pub',
+    'add',
+    'dev:integration_test:{"sdk":"flutter"}',
+  ], workingDirectory: exampleDirectory.toFilePath());
+  if (result.exitCode != 0) {
+    throw Exception(
+      'flutter pub add failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
+  }
+
+  final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
+  final File integrationTestFile = fileSystem.file(integrationTestPath);
+  integrationTestFile.createSync(recursive: true);
+  integrationTestFile.writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:${packageName}_example/main.dart';
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('invoke native code', (tester) async {
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
+
+      // Verify the native function was called.
+      expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+    });
+  });
+}
+''');
 }
 
 void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
@@ -456,7 +511,7 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 /// This inspects the build configuration to see if the C compiler was configured.
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory(
-    '.dart_tool/native_assets_builder/$packageName/',
+    '.dart_tool/hooks_runner/$packageName/',
   );
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The

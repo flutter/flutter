@@ -37,6 +37,7 @@ import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/raster_cache_use_memory.dart';
 import 'src/rrect_blur.dart' show RRectBlur;
+import 'src/rsuperellipse_blur.dart' show RSuperellipseBlur;
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -69,7 +70,10 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(),
+        kPathTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.fill),
+        kPathStrokeTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.stroke),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
@@ -106,6 +110,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kDrawAtlasPageRouteName: (BuildContext context) => const DrawAtlasPage(),
         kAnimatedAdvancedBlend: (BuildContext context) => const AnimatedAdvancedBlend(),
         kRRectBlurRouteName: (BuildContext context) => const RRectBlur(),
+        kRSuperellipseBlurRouteName: (BuildContext context) => const RSuperellipseBlur(),
         kVeryLongPictureScrollingRouteName:
             (BuildContext context) => const VeryLongPictureScrollingPerf(),
       },
@@ -186,6 +191,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Path Tessellation'),
             onPressed: () {
               Navigator.pushNamed(context, kPathTessellationRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPathStrokeTessellationRouteName),
+            child: const Text('Path Stroke Tessellation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPathStrokeTessellationRouteName);
             },
           ),
           ElevatedButton(
@@ -382,6 +394,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Rounded Rect Blur'),
             onPressed: () {
               Navigator.pushNamed(context, kRRectBlurRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kRSuperellipseBlurRouteName),
+            child: const Text('Rounded superellipse Blur'),
+            onPressed: () {
+              Navigator.pushNamed(context, kRSuperellipseBlurRouteName);
             },
           ),
           ElevatedButton(

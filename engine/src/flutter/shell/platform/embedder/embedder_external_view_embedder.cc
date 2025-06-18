@@ -145,42 +145,42 @@ struct PlatformView {
     view_identifier = view->GetViewIdentifier();
     params = view->GetEmbeddedViewParams();
 
-    clipped_frame = view->GetEmbeddedViewParams()->finalBoundingRect();
-    SkMatrix transform;
+    DlRect clip = ToDlRect(view->GetEmbeddedViewParams()->finalBoundingRect());
+    DlMatrix matrix;
     for (auto i = params->mutatorsStack().Begin();
          i != params->mutatorsStack().End(); ++i) {
       const auto& m = *i;
       switch (m->GetType()) {
-        case kClipRect: {
-          auto rect = transform.mapRect(m->GetRect());
-          if (!clipped_frame.intersect(rect)) {
-            clipped_frame = SkRect::MakeEmpty();
-          }
+        case MutatorType::kClipRect: {
+          auto rect = m->GetRect().TransformAndClipBounds(matrix);
+          clip = clip.IntersectionOrEmpty(rect);
           break;
         }
-        case kClipRRect: {
-          auto rect = transform.mapRect(m->GetRRect().getBounds());
-          if (!clipped_frame.intersect(rect)) {
-            clipped_frame = SkRect::MakeEmpty();
-          }
+        case MutatorType::kClipRRect: {
+          auto rect = m->GetRRect().GetBounds().TransformAndClipBounds(matrix);
+          clip = clip.IntersectionOrEmpty(rect);
           break;
         }
-        case kClipPath: {
-          auto rect = transform.mapRect(m->GetPath().getBounds());
-          if (!clipped_frame.intersect(rect)) {
-            clipped_frame = SkRect::MakeEmpty();
-          }
+        case MutatorType::kClipRSE: {
+          auto rect = m->GetRSE().GetBounds().TransformAndClipBounds(matrix);
+          clip = clip.IntersectionOrEmpty(rect);
           break;
         }
-        case kTransform: {
-          transform.preConcat(m->GetMatrix());
+        case MutatorType::kClipPath: {
+          auto rect = m->GetPath().GetBounds().TransformAndClipBounds(matrix);
+          clip = clip.IntersectionOrEmpty(rect);
           break;
         }
-        case kOpacity:
-        case kBackdropFilter:
+        case MutatorType::kTransform: {
+          matrix = matrix * m->GetMatrix();
+          break;
+        }
+        case MutatorType::kOpacity:
+        case MutatorType::kBackdropFilter:
           break;
       }
     }
+    clipped_frame = ToSkRect(clip);
   }
 };
 
@@ -207,7 +207,8 @@ class Layer {
   /// layer.
   bool IntersectsPlatformView(const DlRegion& region) {
     for (auto& platform_view : platform_views_) {
-      if (region.intersects(platform_view.clipped_frame.roundOut())) {
+      auto clipped_frame = ToDlIRect(platform_view.clipped_frame.roundOut());
+      if (region.intersects(clipped_frame)) {
         return true;
       }
     }
@@ -217,7 +218,7 @@ class Layer {
   /// Returns whether the rectangle intersects any of the Flutter contents of
   /// this layer.
   bool IntersectsFlutterContents(const SkRect& rect) {
-    return flutter_contents_region_.intersects(rect.roundOut());
+    return flutter_contents_region_.intersects(ToDlIRect(rect.roundOut()));
   }
 
   /// Returns whether the region intersects any of the Flutter contents of this

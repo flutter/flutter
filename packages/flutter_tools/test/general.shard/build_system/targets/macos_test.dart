@@ -10,13 +10,15 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   late Environment environment;
@@ -257,7 +259,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:',
+              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
@@ -413,7 +415,6 @@ void main() {
             artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
           )
           .createSync();
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       fileSystem
           .file(
             artifacts.getArtifactPath(
@@ -433,16 +434,6 @@ void main() {
           )
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final String inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
@@ -470,17 +461,94 @@ void main() {
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
         exists,
       );
-
-      final File skslFile = fileSystem.file(
-        'App.framework/Versions/A/Resources/flutter_assets/io.flutter.shaders.json',
-      );
-
-      expect(skslFile, exists);
-      expect(skslFile.readAsStringSync(), '{"data":{"A":"B"}}');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'debug macOS application copies correct assets with flavor',
+    () async {
+      fileSystem
+          .directory(
+            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+          )
+          .createSync();
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.isolateSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+
+      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      fileSystem.file(inputKernel)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('testing');
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+      fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+
+      await const DebugMacOSBundleFlutterAssets().build(environment);
+      final Directory frameworkDirectory = environment.outputDir.childDirectory(
+        '/App.framework/Versions/A/Resources/',
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
+        ),
+        exists,
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      XcodeProjectInterpreter:
+          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -743,7 +811,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_arm64',
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
@@ -752,7 +820,7 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_x64',
+            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
@@ -901,4 +969,18 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+
+  @override
+  final bool isInstalled;
+
+  List<String> schemes;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
 }
