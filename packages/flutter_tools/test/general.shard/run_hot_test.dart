@@ -41,7 +41,7 @@ void main() {
       vmService: _FakeFlutterVmService(service: fakeService),
     );
 
-    fakeService._vm._isolates.addAll([
+    fakeService._vm._isolates.addAll(<_FakeIsolateRef>[
       _FakeIsolateRef(isolateGroupId: 'Group A', id: 'Isolate A.1'),
       _FakeIsolateRef(isolateGroupId: 'Group B', id: 'Isolate B.1'),
       _FakeIsolateRef(isolateGroupId: 'Group B', id: 'Isolate B.2'),
@@ -166,14 +166,14 @@ class _FakeDevFS extends Fake implements DevFS {
 }
 
 class _FakeFlutterDevice extends Fake implements FlutterDevice {
+  _FakeFlutterDevice({FlutterVmService? vmService})
+    : vmService = vmService ?? _FakeFlutterVmService();
+
   @override
   final DevFS? devFS = _FakeDevFS();
 
   @override
   final FlutterVmService? vmService;
-
-  _FakeFlutterDevice({FlutterVmService? vmService})
-    : vmService = vmService ?? _FakeFlutterVmService();
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
@@ -208,10 +208,9 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService({vm_service.VmService? service}) : service = service ?? _FakeVmService();
   @override
   final vm_service.VmService service;
-
-  _FakeFlutterVmService({vm_service.VmService? service}) : service = service ?? _FakeVmService();
 }
 
 class _FakeVmService extends Fake implements vm_service.VmService {
@@ -245,10 +244,9 @@ class _FakeVm extends Fake implements vm_service.VM {
 }
 
 class _FakeIsolateRef extends Fake implements vm_service.IsolateRef {
+  _FakeIsolateRef({this.isolateGroupId, this.id});
   @override
   String? isolateGroupId;
   @override
   String? id;
-
-  _FakeIsolateRef({this.isolateGroupId, this.id});
 }
