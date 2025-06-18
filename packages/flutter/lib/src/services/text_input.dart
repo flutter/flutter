@@ -2255,6 +2255,7 @@ class TextInput {
       return;
     }
 
+    // Fixes issues related to composing characters such as Hangul. (Testing is unnecessary.)
     if (value.composing.isValid) {
       value = value.copyWith(selection: TextSelection.collapsed(offset: value.composing.end));
     }
