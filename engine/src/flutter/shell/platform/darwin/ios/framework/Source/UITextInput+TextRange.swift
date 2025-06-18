@@ -9,7 +9,7 @@ public final class TextPosition: UITextPosition, NSCopying {
   let offset: UInt
   @objc let affinity: UITextStorageDirection
 
-  @objc init(index: UInt, affinity: UITextStorageDirection = .forward) {
+  init(index: UInt, affinity: UITextStorageDirection = .forward) {
     self.offset = index
     self.affinity = affinity
   }
@@ -35,7 +35,7 @@ public final class TextPosition: UITextPosition, NSCopying {
 public final class TextRange: UITextRange, NSCopying {
   internal let nsRange: NSRange
 
-  @objc init(NSRange range: NSRange) {
+  init(NSRange range: NSRange) {
     precondition(range.location != NSNotFound)
     self.nsRange = range
   }
@@ -179,7 +179,8 @@ extension String.UTF16View {
     let breakCodepoints: Range<Unicode.UTF16.CodeUnit> = 0x0530..<0x1950
     // ... except for jamos. The jamos block is not continous (for instance
     // 0x11FA ... 0x11FF are not assigned in Unicode so they're for private use).
-    // The core foundation implementation doesn't consider
+    // The core foundation implementation doesn't consider those those codepoints
+    // jamos.
     let jamoCodepoints: Range<Unicode.UTF16.CodeUnit> = 0x1100..<0x1200
 
     func shouldBreak(_ offset: UInt) -> Bool {

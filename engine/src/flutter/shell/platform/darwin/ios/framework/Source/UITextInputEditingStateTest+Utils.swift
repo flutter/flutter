@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Swift tuples can't conform to Equtable (yet).
+// This should have been a tuple, but Swift tuples can't conform to Equtable (yet).
 struct TextSelection: Equatable {
   init(base: UInt, extent: UInt, markedRange: Range<UInt>?) {
     self.base = base
@@ -150,7 +150,6 @@ extension UITextInputTestable {
           from: position(from: beginningOfDocument, offset: Int(selectedRange.base))!,
           to: position(from: beginningOfDocument, offset: Int(selectedRange.extent))!)
         selectedTextRange = newSelectedTextRange
-        //print("!!!! selected = \(selectedTextRange), should be : \(newValue.selectedTextRange), \(position(from: beginningOfDocument, offset: Int(selectedRange.base)))")
       } else {
         selectedTextRange = nil
       }

@@ -1301,7 +1301,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // The `hasText` check isn't really necessary but that's what UITextView does.
   if (self.hasText) {
     _selectedTextRange = [selectedTextRange copy];
-    // TODO: range check
     NSAssert(_selectedTextRange.range.location + _selectedTextRange.range.length <= _text.length,
              @"Selection range out of bounds: %@", NSStringFromRange(_selectedTextRange.range));
   } else {
@@ -1534,28 +1533,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position offset:(NSInteger)offset {
   return [position offsetBy:offset inDocument:self];
 }
-//  NSUInteger offsetPosition = ((FlutterTextPosition*)position).index;
-//
-//  NSInteger newLocation = (NSInteger)offsetPosition + offset;
-//  if (newLocation < 0 || newLocation > (NSInteger)self.text.length) {
-//    return nil;
-//  }
-//
-//  if (_scribbleInteractionStatus != FlutterScribbleInteractionStatusNone) {
-//    return [FlutterTextPosition positionWithIndex:newLocation];
-//  }
-//
-//  if (offset >= 0) {
-//    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i) {
-//      offsetPosition = [self incrementOffsetPosition:offsetPosition];
-//    }
-//  } else {
-//    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i) {
-//      offsetPosition = [self decrementOffsetPosition:offsetPosition];
-//    }
-//  }
-//  return [FlutterTextPosition positionWithIndex:offsetPosition];
-//}
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position
                             inDirection:(UITextLayoutDirection)direction
@@ -1841,7 +1818,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSInteger index = position.index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
-
   NSArray<UITextSelectionRect*>* rects = [self
       selectionRectsForRange:[FlutterTextRange
                                  rangeWithNSRange:fml::RangeForCharactersInRange(
