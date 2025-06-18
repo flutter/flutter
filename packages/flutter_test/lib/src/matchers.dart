@@ -1207,7 +1207,7 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
                   (dynamic e) =>
                       // Compares FinderBases to find the FinderBases that finds the same things
                       finderBasesList.elementAt(i).describeMatch(Plurality.zero) ==
-                          e.describeMatch(Plurality.zero) &&
+                          (e as FinderBase<dynamic>).describeMatch(Plurality.zero) &&
                       finderBasesList.elementAt(i).describeMatch(Plurality.one) ==
                           e.describeMatch(Plurality.one) &&
                       finderBasesList.elementAt(i).describeMatch(Plurality.many) ==
@@ -1230,7 +1230,7 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
     }
     final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
       (MapEntry<dynamic, dynamic> me) =>
-          me.value.elementAt(0) as bool && me.value.elementAt(1) as bool,
+          (me.value as List<bool>).elementAt(0) && (me.value as List<bool>).elementAt(1),
     );
     if (found.length != finderBasesList.length) {
       return false;
@@ -1246,7 +1246,7 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
     bool verbose,
   ) {
     final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
-      (MapEntry<dynamic, dynamic> me) => me.value.elementAt(0) as bool,
+      (MapEntry<dynamic, dynamic> me) => (me.value as List<bool>).elementAt(0),
     );
     if (found.isEmpty) {
       return mismatchDescription.add('means none were found but some were expected');
