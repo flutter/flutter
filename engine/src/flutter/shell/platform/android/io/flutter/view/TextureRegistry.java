@@ -130,11 +130,11 @@ public interface TextureRegistry {
      * surface has been destroyed (such as when the application goes to the background) or a new
      * surface has been created (such as when the application is resumed back to the foreground).
      *
+     * <p>Calling this method is the same as calling {@link #getSurface(boolean)} with false.
+     *
      * <p>NOTE: You should not cache the returned surface but instead invoke {@code getSurface} each
      * time you need to draw. The surface may change when the texture is resized or has its format
      * changed.
-     *
-     * <p>Calling this method is the same as calling {@link #getSurface(boolean)} with false.
      *
      * @return a Surface to use for a drawing target for various APIs.
      */
