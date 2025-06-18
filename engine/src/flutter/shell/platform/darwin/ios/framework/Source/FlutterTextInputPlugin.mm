@@ -521,74 +521,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
            ((isAboveBottomOfLine && isCloserHorizontally) || (isBelowBottomOfLine && isFarther))));
 }
 
-#pragma mark - FlutterTextPosition
-
-@interface FlutterTextPosition (ClassMethod)
-+ (instancetype)positionWithIndex:(NSUInteger)index;
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-@end
-
-@implementation FlutterTextPosition (ClassMethod)
-+ (instancetype)positionWithIndex:(NSUInteger)index {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:UITextStorageDirectionForward];
-}
-
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:affinity];
-}
-//
-//- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-//  self = [super init];
-//  if (self) {
-//    _index = index;
-//    _affinity = affinity;
-//  }
-//  return self;
-//}
-
-@end
-
-#pragma mark - FlutterTextRange
-
-@interface FlutterTextRange (ClassMethod)
-+ (instancetype)rangeWithNSRange:(NSRange)range;
-@end
-@implementation FlutterTextRange (ClassMethod)
-+ (instancetype)rangeWithNSRange:(NSRange)range {
-  return [[FlutterTextRange alloc] initWithNSRange:range];
-}
-
-//- (instancetype)initWithNSRange:(NSRange)range {
-//  self = [super init];
-//  if (self) {
-//    _range = range;
-//  }
-//  return self;
-//}
-//
-//- (UITextPosition*)start {
-//  return [FlutterTextPosition positionWithIndex:self.range.location
-//                                       affinity:UITextStorageDirectionForward];
-//}
-//
-//- (UITextPosition*)end {
-//  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
-//                                       affinity:UITextStorageDirectionBackward];
-//}
-//
-//- (BOOL)isEmpty {
-//  return self.range.length == 0;
-//}
-//
-//- (id)copyWithZone:(NSZone*)zone {
-//  return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
-//}
-//
-//- (BOOL)isEqualTo:(FlutterTextRange*)other {
-//  return NSEqualRanges(self.range, other.range);
-//}
-@end
-
 #pragma mark - FlutterTokenizer
 
 @interface FlutterTokenizer ()
@@ -1650,25 +1582,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
   return [position compareTo: other];
-//  NSUInteger positionIndex = ((FlutterTextPosition*)position).index;
-//  NSUInteger otherIndex = ((FlutterTextPosition*)other).index;
-//  if (positionIndex < otherIndex) {
-//    return NSOrderedAscending;
-//  }
-//  if (positionIndex > otherIndex) {
-//    return NSOrderedDescending;
-//  }
-//  UITextStorageDirection positionAffinity = ((FlutterTextPosition*)position).affinity;
-//  UITextStorageDirection otherAffinity = ((FlutterTextPosition*)other).affinity;
-//  if (positionAffinity == otherAffinity) {
-//    return NSOrderedSame;
-//  }
-//  if (positionAffinity == UITextStorageDirectionBackward) {
-//    // positionAffinity points backwards, otherAffinity points forwards
-//    return NSOrderedAscending;
-//  }
-//  // positionAffinity points forwards, otherAffinity points backwards
-//  return NSOrderedDescending;
 }
 
 - (NSInteger)offsetFromPosition:(UITextPosition*)from toPosition:(UITextPosition*)toPosition {
