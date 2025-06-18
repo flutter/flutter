@@ -278,6 +278,13 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
+    _task = 'Validating Android SDK path does not contain spaces';
+    if (androidSdk.directory.absolute.path.contains(' ')) {
+      messages.add(ValidationMessage.error('Android SDK location currently contains spaces, which causes problems with NDK tools. '
+          'Try moving it from ${androidSdk.directory.absolute.path} to a path without spaces.'));
+      return ValidationResult(ValidationType.notAvailable, messages);
+    }
+
     _task = 'Finding Java binary';
 
     // Check JDK version.
