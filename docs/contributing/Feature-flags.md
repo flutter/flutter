@@ -45,7 +45,7 @@ _See also, [Flutter pubspec options > Fields > Config][pubspec-config]._
 
 ### Why feature flags
 
-Feature flags allow conditionally, consistently, and covenentiantly change
+Feature flags allow conditionally, consistently, and conveniently changing
 behavior.
 
 For example:
@@ -61,7 +61,8 @@ For example:
   use.
 
   We do not consider it a breaking change to modify or remove experimental flags
-  across releases.
+  across releases, or to make changes guarded by experimental flags. APIs that
+  are guarded by flags are subject to chage at any time.
 
 ## Adding a flag
 
@@ -80,7 +81,7 @@ The following steps are required:
    ```
 
    Additional parameters are required to make the flag configurable outside of
-   a unit test.
+   a [unit test](#tests).
 
    To allow `flutter config`, or in `pubspec.yaml`'s `config: ...` section,
    include `configSetting`:
@@ -119,7 +120,7 @@ The following steps are required:
    }
    ```
 
-1. Add an implement the same getter in [`FlutterFeatureFlagsIsEnabled`][]:
+1. Implement the same getter in [`FlutterFeatureFlagsIsEnabled`][]:
 
    ```dart
    mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
@@ -168,7 +169,7 @@ const Feature unicornEmojis = Feature(
 Once a flag is ready to be enabled by default, once again it can be configured
 on a per-channel basis.
 
-For example, enabled on `master` by default, but disabled elsewhere:
+For example, enabled on `master` by default, but disabled by default elsewhere:
 
 ```dart
 const Feature unicornEmojis = Feature(
@@ -197,7 +198,7 @@ should be removed so that the older behavior (or lack of a feature) can be
 refactored and removed from the codebase, and there is less of a possibility of
 conflicting flags.
 
-To a remove a flag, follow the opposite steps of
+To remove a flag, follow the opposite steps of
 [adding a flag](#adding-a-flag).
 
 You may need to remove references to the (disabled) flag from unit or
@@ -212,11 +213,14 @@ provide a different execution branch.
 
 ### Tool
 
-Feature flags can be accessed either by adding (and providing) an explicit
-`FeatureFlags` parameter (**recommended**):
+In the `flutter` tool, feature flags. flags can be accessed either by adding
+(and providing) an explicit `FeatureFlags` parameter (**recommended**):
 
 ```dart
 class WebDevices extends PollingDeviceDiscovery {
+  // While it could be injected from the global scope (see below), this larger
+  // feature (and tests of it) are made more explicit by directly taking a
+  // reference to a `FeatureFlags` instance.
   WebDevices({required FeatureFlags featureFlags}) : _featureFlags = featureFlags;
 
   final FeatureFlags _featureFlags;
@@ -251,7 +255,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
 ### Framework
 
-Feature flags can be accessed by importing `src/foundation/_features.dart`:
+In the framework, feature flags can be accessed by importing
+`src/foundation/_features.dart`:
 
 ```dart
 import 'package:flutter/src/foundation/_features.dart';
