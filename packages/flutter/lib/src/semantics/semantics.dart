@@ -5465,7 +5465,11 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] currently holds the input focus.
   bool get isFocused => _flags.isFocused == Tristate.isTrue;
   set isFocused(bool value) {
-    _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
+    if (value) {
+      _flags = _flags.copyWith(isFocused: Tristate.isTrue);
+    } else if (_flags.isFocused == Tristate.isTrue) {
+      _flags = _flags.copyWith(isFocused: Tristate.isFalse);
+    }
     _hasBeenAnnotated = true;
   }
 
