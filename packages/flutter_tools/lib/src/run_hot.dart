@@ -158,7 +158,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  void _addBenchmarkData(String name, int value) {
+  void addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
     benchmarkData[name]!.add(value);
   }
@@ -300,7 +300,7 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
-    _addBenchmarkData(
+    addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
     );
@@ -717,7 +717,7 @@ class HotRunner extends ResidentRunner {
     globals.printTrace(
       'Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.',
     );
-    _addBenchmarkData('hotRestartMillisecondsToFrame', restartTimer.elapsed.inMilliseconds);
+    addBenchmarkData('hotRestartMillisecondsToFrame', restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
@@ -1027,7 +1027,7 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took to synchronize to DevFS.
     bool shouldReportReloadTime = true;
-    _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
+    addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
@@ -1057,7 +1057,7 @@ class HotRunner extends ResidentRunner {
       }
       reloadMessage = result.message;
     } else {
-      _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
+      addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
     reloadVMTimer.stop();
     extraTimings.add(OperationResultExtraTiming('reload', reloadVMTimer.elapsedMilliseconds));
@@ -1079,7 +1079,7 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for Flutter to reassemble the application.
     reassembleTimer.stop();
-    _addBenchmarkData(
+    addBenchmarkData(
       'hotReloadFlutterReassembleMilliseconds',
       reassembleTimer.elapsed.inMilliseconds,
     );
@@ -1142,7 +1142,7 @@ class HotRunner extends ResidentRunner {
     if (shouldReportReloadTime) {
       globals.printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadDuration)}.');
       // Record complete time it took for the reload.
-      _addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
+      addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleResult.reassembleViews.length == 1) &&
@@ -1340,10 +1340,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
   // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
   // Record time it took for the VM to reload the sources.
-  hotRunner._addBenchmarkData(
-    'hotReloadVMReloadMilliseconds',
-    vmReloadTimer.elapsed.inMilliseconds,
-  );
+  hotRunner.addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
   return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
 }
 
