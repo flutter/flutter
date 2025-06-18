@@ -12,6 +12,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart' show Logger;
 import '../../base/process.dart';
+import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
@@ -486,6 +487,118 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   List<Source> get outputs => <Source>[];
 }
 
+abstract class IosLLDBInit extends Target {
+  const IosLLDBInit();
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @visibleForOverriding
+  BuildMode get buildMode;
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+      sdkRoot,
+      environment.fileSystem,
+    );
+
+    // LLDB Init File is only required for physical devices in debug mode.
+    if (!buildMode.isJit || environmentType != EnvironmentType.physical) {
+      return;
+    }
+
+    final String? targetDeviceVersionString = environment.defines[kTargetDeviceOSVersion];
+    if (targetDeviceVersionString == null) {
+      // Skip if TARGET_DEVICE_OS_VERSION is not found. TARGET_DEVICE_OS_VERSION
+      // is not set if "build ios-framework" is called, which builds the
+      // DebugIosApplicationBundle directly rather than through flutter assemble.
+      // If may also be null if the build is targeting multiple architectures.
+      return;
+    }
+
+    final Version? targetDeviceVersion = Version.parse(targetDeviceVersionString);
+    if (targetDeviceVersion == null) {
+      environment.logger.printError(
+        'Failed to parse TARGET_DEVICE_OS_VERSION: $targetDeviceVersionString',
+      );
+      return;
+    }
+
+    // LLDB Init File is only needed for iOS 26+.
+    if (targetDeviceVersion < Version(26, 0, null)) {
+      return;
+    }
+
+    // The scheme name is not available in Xcode Build Phases Run Scripts.
+    // Instead, find all xcscheme files in the Xcode project (this may be the
+    // Flutter Xcode project or an Add to App native Xcode project) and check
+    // if any of them contain "customLLDBInitFile". If none have it set, print
+    // a warning.
+    final String? srcRoot = environment.defines[kSrcRoot];
+    if (srcRoot == null) {
+      environment.logger.printError('Failed to find $srcRoot');
+      return;
+    }
+
+    final Directory xcodeProjectDir = environment.fileSystem.directory(srcRoot);
+    if (!xcodeProjectDir.existsSync()) {
+      environment.logger.printError('Failed to find ${xcodeProjectDir.path}');
+      return;
+    }
+
+    bool anyLLDBInitFound = false;
+    await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
+      if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
+        if (entity.readAsStringSync().contains('customLLDBInitFile')) {
+          anyLLDBInitFound = true;
+          break;
+        }
+      }
+    }
+    if (!anyLLDBInitFound) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final String tab = flutterProject.isModule ? 'Use CocoaPods' : 'Use frameworks';
+      printXcodeWarning(
+        'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+        'ensure debug mode works, please complete instructions found in '
+        '"Embed a Flutter module in your iOS app > $tab > Set LLDB Init File" '
+        'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+      );
+    }
+    return;
+  }
+}
+
+class DebugIosLLDBInit extends IosLLDBInit {
+  const DebugIosLLDBInit();
+
+  @override
+  String get name => 'debug_ios_lldb_init';
+
+  @override
+  BuildMode get buildMode => BuildMode.debug;
+}
+
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -641,7 +754,11 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[const DebugUniversalFramework(), ...super.dependencies];
+  List<Target> get dependencies => <Target>[
+    const DebugUniversalFramework(),
+    const DebugIosLLDBInit(),
+    ...super.dependencies,
+  ];
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.
