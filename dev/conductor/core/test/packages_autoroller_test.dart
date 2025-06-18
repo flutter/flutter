@@ -44,7 +44,6 @@ void main() {
       pathSeparator: localPathSeparator,
     );
     final Checkouts checkouts = Checkouts(
-      fileSystem: fileSystem,
       parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
       platform: platform,
       processManager: processManager,

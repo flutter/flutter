@@ -222,11 +222,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkPins(rootDirectory);
 
     await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
-    await _pubGet(toolProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
-    await _pubGet(
-      widgetPreviewScaffoldProject,
-      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
-    );
+
+    // See https://github.com/flutter/flutter/pull/170364.
+    await _pubGet(toolProject, false);
+    await _pubGet(widgetPreviewScaffoldProject, false);
 
     await _downloadCoverageData();
 
@@ -418,8 +417,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (checksum != actualChecksum) {
       throwToolExit(
         'Pubspec in ${directory.path} has out of date dependencies. '
-        'Please run "flutter update-packages --force-upgrade" to update them correctly. '
-        'The hash does not match the expectation.',
+        'Please run "flutter update-packages --force-upgrade --update-hashes" to '
+        'update them correctly. The hash ($checksum) does not match the '
+        'expectation ($actualChecksum).',
       );
     }
   }
