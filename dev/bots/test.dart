@@ -149,6 +149,7 @@ Future<void> main(List<String> args) async {
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
       kTestHarnessShardName:
           testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -295,7 +296,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
@@ -307,7 +308,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     '--forbidden-type',

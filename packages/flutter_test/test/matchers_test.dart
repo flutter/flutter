@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-const SemanticsFlags allFlags = SemanticsFlags(
+SemanticsFlags allFlags = SemanticsFlags(
   hasCheckedState: true,
   isChecked: true,
   isSelected: true,
@@ -746,8 +746,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1048,8 +1046,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1139,7 +1135,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1150,8 +1146,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1245,7 +1239,7 @@ void main() {
       }
 
       final SemanticsData emptyData = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1256,8 +1250,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1289,8 +1281,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1368,7 +1358,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1379,8 +1369,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
