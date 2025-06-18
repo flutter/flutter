@@ -597,14 +597,3 @@ class FakeCache extends Fake implements Cache {
     return olderThanToolsStamp;
   }
 }
-
-class FakeFileSystemUtils extends Fake implements FileSystemUtils {
-  FakeFileSystemUtils({this.olderThanReference = false});
-
-  bool olderThanReference;
-
-  @override
-  bool isOlderThanReference({required FileSystemEntity entity, required File referenceFile}) {
-    return olderThanReference;
-  }
-}
