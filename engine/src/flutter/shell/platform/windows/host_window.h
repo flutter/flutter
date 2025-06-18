@@ -34,7 +34,7 @@ class HostWindow {
   static std::unique_ptr<HostWindow> CreateRegularWindow(
       WindowManager* controller,
       FlutterWindowsEngine* engine,
-      const FlutterWindowSizing& content_size);
+      const WindowSizing& content_size);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
@@ -45,7 +45,7 @@ class HostWindow {
 
   // Resizes the window to accommodate a client area of the given
   // |size|.
-  void SetContentSize(const FlutterWindowSizing& size);
+  void SetContentSize(const WindowSizing& size);
 
  private:
   friend WindowManager;

@@ -32,7 +32,7 @@ struct WindowsMessage {
   bool handled;
 };
 
-struct FlutterWindowSizing {
+struct WindowSizing {
   bool has_size;
   double width;
   double height;
@@ -48,7 +48,7 @@ struct WindowingInitRequest {
 };
 
 struct WindowCreationRequest {
-  FlutterWindowSizing content_size;
+  WindowSizing content_size;
 };
 
 // A manager class for managing |HostWindow| instances.
@@ -132,7 +132,7 @@ FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_SetWindowContentSize(
     HWND hwnd,
-    const flutter::FlutterWindowSizing* size);
+    const flutter::WindowSizing* size);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

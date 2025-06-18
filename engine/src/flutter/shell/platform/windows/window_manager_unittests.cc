@@ -141,7 +141,7 @@ TEST_F(WindowManagerTest, SetWindowSize) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
                                                                    view_id);
 
-  FlutterWindowSizing requestedSize{
+  WindowSizing requestedSize{
       .has_size = true,
       .width = 640,
       .height = 480,
