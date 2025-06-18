@@ -25,9 +25,8 @@ flutter::Size ClampToVirtualScreen(flutter::Size size) {
                        std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
-void EnableTransparentWindowBackground(
-    HWND hwnd,
-    flutter::WindowsProcTable const& proc_table) {
+void EnableTransparentWindowBackground(HWND hwnd,
+                                       flutter::WindowsProcTable const& win32) {
   enum ACCENT_STATE { ACCENT_DISABLED = 0 };
 
   struct ACCENT_POLICY {
@@ -44,15 +43,15 @@ void EnableTransparentWindowBackground(
           flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIB::WCA_ACCENT_POLICY,
       .pvData = &accent,
       .cbData = sizeof(accent)};
-  proc_table.SetWindowCompositionAttribute(hwnd, &data);
+  win32.SetWindowCompositionAttribute(hwnd, &data);
 
   // Extend the frame into the client area and set the window's system
   // backdrop type for visual effects.
   MARGINS const margins = {-1};
-  proc_table.DwmExtendFrameIntoClientArea(hwnd, &margins);
+  win32.DwmExtendFrameIntoClientArea(hwnd, &margins);
   INT effect_value = 1;
-  proc_table.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE,
-                                   &effect_value, sizeof(BOOL));
+  win32.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &effect_value,
+                              sizeof(BOOL));
 }
 
 // Retrieves the calling thread's last-error code message as a string,
@@ -97,7 +96,7 @@ std::string GetLastErrorAsString() {
 // resulting size includes window borders, non-client areas, and drop shadows.
 // On error, returns std::nullopt and logs an error message.
 std::optional<flutter::Size> GetWindowSizeForClientSize(
-    flutter::WindowsProcTable const& proc_table,
+    flutter::WindowsProcTable const& win32,
     flutter::Size const& client_size,
     std::optional<flutter::Size> smallest,
     std::optional<flutter::Size> biggest,
@@ -111,8 +110,8 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
       .right = static_cast<LONG>(client_size.width() * scale_factor),
       .bottom = static_cast<LONG>(client_size.height() * scale_factor)};
 
-  if (!proc_table.AdjustWindowRectExForDpi(&rect, window_style, FALSE,
-                                           extended_window_style, dpi)) {
+  if (!win32.AdjustWindowRectExForDpi(&rect, window_style, FALSE,
+                                      extended_window_style, dpi)) {
     FML_LOG(ERROR) << "Failed to run AdjustWindowRectExForDpi: "
                    << GetLastErrorAsString();
     return std::nullopt;
