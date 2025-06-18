@@ -14,6 +14,14 @@ public final class TextPosition: UITextPosition, NSCopying {
     self.affinity = affinity
   }
 
+  override public func isEqual(_ object: Any?) -> Bool {
+    guard let other = object as? TextPosition else {
+      return false
+    }
+    // Affinity is only visual.
+    return offset == other.offset
+  }
+  
   public func copy(with zone: NSZone? = nil) -> Any {
     return TextPosition(index: offset, affinity: affinity)
   }
@@ -45,7 +53,14 @@ public final class TextRange: UITextRange, NSCopying {
   }
 
   override public var isEmpty: Bool { range.length == 0 }
-  
+
+  override public func isEqual(_ object: Any?) -> Bool {
+    guard let other = object as? TextRange else {
+      return false
+    }
+    return range == other.nsRange
+  }
+
   /// Returns the smallest TextRange that contains this TextRange and doesn't contain unpaired surrogates.
   ///
   /// This method assumes the receiver is a valid range with in the given document, and the text of the
@@ -58,14 +73,17 @@ public final class TextRange: UITextRange, NSCopying {
     let fullText = document.fullText
     let start = self.start.index
     let end = self.end.index
-    let startsWithTrailingSurrogate = start > 0 && Unicode.UTF16.isTrailSurrogate( fullText.utf16[start])
-    let endsWithLeadingSurrogate = isEmpty
+    let startsWithTrailingSurrogate =
+      start > 0 && Unicode.UTF16.isTrailSurrogate(fullText.utf16[start])
+    let endsWithLeadingSurrogate =
+      isEmpty
       ? startsWithTrailingSurrogate
-    : Unicode.UTF16.isLeadSurrogate(fullText.utf16[end - 1])
-    
+      : Unicode.UTF16.isLeadSurrogate(fullText.utf16[end - 1])
+
     let newStart = startsWithTrailingSurrogate ? start - 1 : start
     let newEnd = endsWithLeadingSurrogate ? end + 1 : end
-    return TextRange(NSRange: NSRange(location: Int(newStart), length: newStart.distance(to: newEnd)))
+    return TextRange(
+      NSRange: NSRange(location: Int(newStart), length: newStart.distance(to: newEnd)))
   }
 
   override public var description: String {
@@ -91,11 +109,6 @@ public final class TextRange: UITextRange, NSCopying {
   public class func range(withNSRange range: NSRange) -> TextRange {
     TextRange(NSRange: range)
   }
-
-  public class func range(withNSRange range: NSRange, forDocument document: UITextInput) {
-    let length = document.fullText.utf16.count
-
-  }
 }
 
 // MARK: Convenience extensions on UITextRange and UITextPosition
@@ -113,6 +126,19 @@ public final class TextRange: UITextRange, NSCopying {
   ///
   /// This computed property throws if the receiver is not a FlutterTextRange.
   public var index: UInt { (self as! TextPosition).offset }
+  
+  public func compare(to other: UITextPosition) -> ComparisonResult {
+    let otherIndex = other.index
+    let index = self.index
+    if (otherIndex == index) {
+      return .orderedSame
+    } else if (otherIndex > index) {
+      return .orderedAscending
+    }
+    return .orderedDescending
+  }
+
+
 
   public func offset(by offset: Int, inDocument document: UITextInput)
     -> TextPosition?

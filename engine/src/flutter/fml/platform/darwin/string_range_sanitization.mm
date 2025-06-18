@@ -7,7 +7,7 @@
 namespace fml {
 
 NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index) {
-    return [text rangeOfComposedCharacterSequenceAtIndex:MIN(text.length, index)];
+  return [text rangeOfComposedCharacterSequenceAtIndex:MIN(text.length, index)];
 }
 
 NSRange RangeForCharactersInRange(NSString* text, NSRange range) {

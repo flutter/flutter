@@ -219,8 +219,8 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
-      "framework/Source/UITextInputEditingStateTests.swift",
       "framework/Source/UITextInputEditingStateTest+Utils.swift",
+      "framework/Source/UITextInputEditingStateTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":flutter_framework_source" ]
