@@ -24,7 +24,43 @@ ABSL_FLAG(std::optional<std::string>,
           licenses_path,
           std::nullopt,
           "[REQUIRED] The path to write the licenses collection to.");
+ABSL_FLAG(std::optional<std::string>,
+          include_filter,
+          std::nullopt,
+          "Regex that overrides the include filter.");
 ABSL_FLAG(int, v, 0, "Set the verbosity of logs.");
+
+namespace {
+int Run(std::string_view working_dir,
+        std::ostream& licenses,
+        std::string_view data_dir,
+        std::string_view include_filter) {
+  absl::StatusOr<Data> data = Data::Open(data_dir);
+  if (!data.ok()) {
+    std::cerr << "Can't load data at " << data_dir << ": " << data.status()
+              << std::endl;
+    return 1;
+  }
+  std::stringstream ss;
+  ss << include_filter;
+
+  absl::StatusOr<Filter> filter = Filter::Open(ss);
+  if (!filter.ok()) {
+    std::cerr << "Invalid include_filter parameter." << std::endl;
+    return 1;
+  }
+
+  data->include_filter = std::move(filter.value());
+
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(working_dir, licenses, data.value());
+  for (const absl::Status& status : errors) {
+    std::cerr << status << "\n";
+  }
+
+  return errors.empty() ? 0 : 1;
+}
+}  // namespace
 
 int main(int argc, char** argv) {
   absl::SetProgramUsageMessage(
@@ -39,6 +75,8 @@ int main(int argc, char** argv) {
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_data_dir);
   std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
+  std::optional<std::string> include_filter =
+      absl::GetFlag(FLAGS_include_filter);
   if (working_dir.has_value() && data_dir.has_value() &&
       licenses_path.has_value()) {
     std::ofstream licenses;
@@ -47,7 +85,13 @@ int main(int argc, char** argv) {
       std::cerr << "Unable to write to '" << licenses_path.value() << "'.";
       return 1;
     }
-    return LicenseChecker::Run(working_dir.value(), licenses, data_dir.value());
+    if (include_filter.has_value()) {
+      return Run(working_dir.value(), licenses, data_dir.value(),
+                 include_filter.value());
+    } else {
+      return LicenseChecker::Run(working_dir.value(), licenses,
+                                 data_dir.value());
+    }
   }
 
   if (!working_dir.has_value()) {
