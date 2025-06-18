@@ -1299,7 +1299,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;
 
-  static const String _flutterSemanticNodePrefix = 'flt-semantic-node-';
   static const double _minTabIndex = 0;
 
   void _addNavigationFocusHandler() {
@@ -1327,9 +1326,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final DomElement element = currentNode as DomElement;
         final String? semanticsId = element.getAttribute('id');
 
-        if (semanticsId != null && semanticsId.startsWith(_flutterSemanticNodePrefix)) {
+        if (semanticsId != null && semanticsId.startsWith(kFlutterSemanticNodePrefix)) {
           if (_isLikelyNavigationElement(element)) {
-            final String nodeIdStr = semanticsId.substring(_flutterSemanticNodePrefix.length);
+            final String nodeIdStr = semanticsId.substring(kFlutterSemanticNodePrefix.length);
             final int? nodeId = int.tryParse(nodeIdStr);
             if (nodeId != null) {
               return NavigationTarget(element, nodeId);
@@ -1349,14 +1348,57 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   DomElement? _findFocusableElement(DomElement element) {
-    // Check if element itself is focusable
+    // Check if element itself is focusable via tabindex
     final double? tabIndex = element.tabIndex;
     if (tabIndex != null && tabIndex >= _minTabIndex) {
       return element;
     }
 
-    // Look for first focusable child
-    return element.querySelector('[tabindex]:not([tabindex="-1"])');
+    if (_supportsSemanticsFocusAction(element)) {
+      return element;
+    }
+
+    // Look for first focusable child (by tabindex)
+    final DomElement? focusableChild = element.querySelector('[tabindex]:not([tabindex="-1"])');
+    if (focusableChild != null) {
+      return focusableChild;
+    }
+
+    return _findFirstSemanticsFocusableChild(element);
+  }
+
+  bool _supportsSemanticsFocusAction(DomElement element) {
+    // Check if this is a semantic node element
+    final String? id = element.getAttribute('id');
+    if (id == null || !id.startsWith(kFlutterSemanticNodePrefix)) {
+      return false;
+    }
+
+    final String nodeIdString = id.substring(kFlutterSemanticNodePrefix.length);
+    final int? nodeId = int.tryParse(nodeIdString);
+    if (nodeId == null) {
+      return false;
+    }
+
+    // Get the semantics tree and check if the node supports focus action
+    final Map<int, SemanticsObject>? semanticsTree =
+        instance.implicitView?.semantics.semanticsTree;
+    if (semanticsTree == null) {
+      return false;
+    }
+
+    final SemanticsObject? semanticsObject = semanticsTree[nodeId];
+    return semanticsObject?.hasAction(ui.SemanticsAction.focus) ?? false;
+  }
+
+  DomElement? _findFirstSemanticsFocusableChild(DomElement element) {
+    final Iterable<DomElement> candidates = element.querySelectorAll('[id^="$kFlutterSemanticNodePrefix"]');
+    for (final DomElement candidate in candidates) {
+      if (_supportsSemanticsFocusAction(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
   }
 
   /// Determines if a click event is likely from assistive technology rather than
@@ -1376,6 +1418,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
 
     // Pattern 2: Integer coordinate navigation from sophisticated ATs
+    //
+    // SOPHISTICATED ASSISTIVE TECHNOLOGIES:
+    // • VoiceOver (macOS/iOS): Apple's advanced screen reader with spatial navigation and center-click behavior
+    // • Dragon NaturallySpeaking: Voice control software that issues precise pointer clicks via speech commands
+    // • Switch Control (iOS/macOS): Enables element-by-element scanning and activation using external switches
+    // • Eye-tracking systems: e.g., Tobii, EyeGaze — translate gaze into click or focus events
+    // • Head/mouth tracking: Hands-free inputs using webcam or sensors for cursor control
+    //
+    // In contrast, screen readers like NVDA, JAWS, and Narrator often operate in virtual-cursor modes,
+    // where activating elements can trigger synthetic clicks at (0,0) or similar minimal coordinates
+    //
+    // Sophisticated ATs tend to:
+    // • Send clicks at precise locations (e.g., element centers as with VoiceOver)
+    // • Depend on spatial awareness to mimic natural interactions
+    // • Use non-keyboard modalities (voice, gaze, head movement) to navigate UI
+
     if (_isIntegerCoordinateNavigation(event, clientX, clientY)) {
       return true;
     }
@@ -1384,6 +1442,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// Detects sophisticated AT navigation clicks with integer coordinates
+  ///
+  /// COORDINATE PATTERNS BY INPUT TYPE:
+  /// • Human mouse/trackpad clicks: Often fractional coordinates (e.g., 123.4, 456.7)
+  ///   due to sub-pixel precision and natural hand movement variations
+  /// • Sophisticated AT clicks: Precise integer coordinates (e.g., 123, 456) because:
+  ///   - Programmatically calculated positions (element center, computed layouts)
+  ///   - Voice commands like "click button" translate to calculated integer positions
+  ///   - Eye-tracking systems snap to discrete pixel grid positions
+  ///   - Switch control systems use computed element boundaries
+  ///
+  /// This heuristic helps distinguish AT-generated events from natural user input,
+  /// enabling appropriate focus restoration behavior for accessibility users.
+  ///
+  /// NOTE: Tests should use fractional coordinates (e.g., 10.5, 20.5) to avoid
+  /// triggering this detection logic.
   bool _isIntegerCoordinateNavigation(DomEvent event, double clientX, double clientY) {
     // Sophisticated ATs often generate integer coordinates, normal mouse clicks are often fractional
     if (clientX != clientX.round() || clientY != clientY.round()) {
@@ -1392,31 +1465,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final DomElement? element = event.target as DomElement?;
     if (element == null) {
-      return false;
-    }
-
-    // Exclude test coordinates to prevent false positives in Flutter tests
-    //
-    // PROBLEM: Flutter tests position elements at origin (0,0) for simplicity, causing
-    // test coordinates to trigger our AT detection incorrectly.
-    //
-    // EMPIRICAL EVIDENCE:
-    // • Test coordinates: Centers of origin-positioned test elements
-    //   - Rect.fromLTRB(0, 0, 100, 50) → center (50, 25)
-    //   - Rect.fromLTRB(0, 0, 20, 20) → center (10, 10)
-    //   - Rect.fromLTRB(0, 0, 5, 5) → center (2.5, 2.5)
-    //
-    // • Real app coordinates: Centers of screen-positioned elements
-    //   - VoiceOver clicks: (765, 246), (400, 300), (123, 456)
-    //   - User interactions: Typically > 100px from origin
-    //
-    // THRESHOLD JUSTIFICATION:
-    // • 100px effectively separates test domain from real app domain
-    // • Large enough to avoid false negatives in real apps
-    // • Small enough to catch test coordinates that would cause false positives
-    // • Chosen conservatively based on observed coordinate patterns
-    const double minRealAppCoordinate = 100;
-    if (clientX < minRealAppCoordinate || clientY < minRealAppCoordinate) {
       return false;
     }
 

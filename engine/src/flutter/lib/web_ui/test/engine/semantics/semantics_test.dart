@@ -1163,7 +1163,7 @@ void _testContainer() {
     expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}1')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
@@ -1207,7 +1207,7 @@ void _testContainer() {
     expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}1')!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     if (isSafari) {
@@ -1257,7 +1257,7 @@ void _testContainer() {
       expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
       final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+      final DomElement childElement = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}1')!;
 
       expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
       if (isSafari) {
@@ -1420,13 +1420,13 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'none');
 
-    final DomElement child1 = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+    final DomElement child1 = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}1')!;
     expect(child1.style.pointerEvents, 'all');
 
-    final DomElement child2 = owner().semanticsHost.querySelector('#flt-semantic-node-2')!;
+    final DomElement child2 = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}2')!;
     expect(child2.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1454,7 +1454,7 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1482,7 +1482,7 @@ void _testContainer() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
@@ -1688,7 +1688,7 @@ void _testContainer() {
 
       owner().updateSemantics(builder.build());
 
-      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+      final DomElement childElement = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}3')!;
 
       expectSemanticsTree(owner(), '''
   <sem>
@@ -1723,7 +1723,7 @@ void _testContainer() {
       updateNode(builder, id: 3);
       owner().updateSemantics(builder.build());
 
-      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+      final DomElement childElement = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}3')!;
       expectSemanticsTree(owner(), '''
     <sem>
         <sem style="z-index: 2">
@@ -3567,10 +3567,10 @@ void _testPlatformView() {
     <sem style="z-index: 1"></sem>
 </sem>''');
 
-    final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
+    final DomElement root = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}0')!;
     expect(root.style.pointerEvents, 'none');
 
-    final DomElement child1 = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
+    final DomElement child1 = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}1')!;
     expect(child1.style.pointerEvents, 'all');
     final DomRect child1Rect = child1.getBoundingClientRect();
     expect(child1Rect.left, 0);
@@ -3578,7 +3578,7 @@ void _testPlatformView() {
     expect(child1Rect.right, 20);
     expect(child1Rect.bottom, 25);
 
-    final DomElement child2 = owner().semanticsHost.querySelector('#flt-semantic-node-2')!;
+    final DomElement child2 = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}2')!;
     expect(child2.style.pointerEvents, 'none');
     final DomRect child2Rect = child2.getBoundingClientRect();
     expect(child2Rect.left, 0);
@@ -3586,7 +3586,7 @@ void _testPlatformView() {
     expect(child2Rect.right, 20);
     expect(child2Rect.bottom, 45);
 
-    final DomElement child3 = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+    final DomElement child3 = owner().semanticsHost.querySelector('#${kFlutterSemanticNodePrefix}3')!;
     expect(child3.style.pointerEvents, 'all');
     final DomRect child3Rect = child3.getBoundingClientRect();
     expect(child3Rect.left, 0);
