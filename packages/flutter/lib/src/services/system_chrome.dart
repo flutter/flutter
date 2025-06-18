@@ -665,6 +665,15 @@ abstract final class SystemChrome {
   /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
+  /// If your app targets Android SDK 15 (API 35), then your Flutter app uses [SystemUiMode.edgeToEdge] by default
+  /// on Android. When in [SystemUiMode.edgeToEdge], [SystemUiOverlayStyle.statusBarColor] and
+  /// [SystemUiOverlayStyle.systemNavigationBarColor] will not work unless the app opts out
+  /// instructions found in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+  ///
+  /// If your app targets Android SDK 16 (API 36) and later, then your Flutter app uses [SystemUiMode.edgeToEdge] by default
+  /// on Android, and there is no way to opt out.
+  ///
   /// To imperatively set the style of the system overlays, use [SystemChrome.setSystemUIOverlayStyle].
   ///
   /// {@tool snippet}
