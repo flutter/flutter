@@ -114,18 +114,98 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
   String? _previousLabel;
+  List<String>? _previousLabelParts;
 
   @override
   void update(String label) {
-    if (label == _previousLabel) {
+    final List<String>? labelParts = semanticsObject.labelParts;
+
+    // Use aria-labelledby if labelParts is provided, otherwise use aria-label
+    if (labelParts != null && labelParts.isNotEmpty) {
+      _updateAriaLabelledBy(labelParts);
+    } else {
+      _updateAriaLabel(label);
+    }
+  }
+
+  void _updateAriaLabel(String label) {
+    if (label == _previousLabel && _previousLabelParts == null) {
       return;
     }
+
+    // Clean up any previous aria-labelledby
+    if (_previousLabelParts != null) {
+      owner.removeAttribute('aria-labelledby');
+      _removeGeneratedLabels();
+    }
+
     owner.setAttribute('aria-label', label);
+    _previousLabel = label;
+    _previousLabelParts = null;
+  }
+
+  void _updateAriaLabelledBy(List<String> labelParts) {
+    if (_previousLabelParts != null &&
+        labelParts.length == _previousLabelParts!.length &&
+        labelParts.asMap().entries.every(
+          (entry) => entry.value == _previousLabelParts![entry.key],
+        )) {
+      return;
+    }
+
+    // Clean up any previous aria-label
+    if (_previousLabelParts == null) {
+      owner.removeAttribute('aria-label');
+    }
+
+    // Generate unique IDs for each label part and create hidden elements
+    final List<String> labelIds = <String>[];
+    for (int i = 0; i < labelParts.length; i++) {
+      final String labelId = 'label-${semanticsObject.id}-$i';
+      labelIds.add(labelId);
+
+      // Create or update hidden label element
+      DomElement? labelElement = owner.element.querySelector('#$labelId');
+      if (labelElement == null) {
+        labelElement = domDocument.createElement('span');
+        labelElement.id = labelId;
+        labelElement.style.display = 'none';
+        labelElement.setAttribute('aria-hidden', 'true');
+        owner.element.appendChild(labelElement);
+      } else {}
+      labelElement.text = labelParts[i];
+    }
+
+    // Remove any old label elements that are no longer needed
+    if (_previousLabelParts != null) {
+      for (int i = labelParts.length; i < _previousLabelParts!.length; i++) {
+        final String oldLabelId = 'label-${semanticsObject.id}-$i';
+        owner.element.querySelector('#$oldLabelId')?.remove();
+      }
+    }
+
+    // Set aria-labelledby attribute
+    final String ariaLabelledByValue = labelIds.join(' ');
+    owner.setAttribute('aria-labelledby', ariaLabelledByValue);
+
+    _previousLabelParts = List<String>.from(labelParts);
+    _previousLabel = null;
+  }
+
+  void _removeGeneratedLabels() {
+    if (_previousLabelParts == null) return;
+
+    for (int i = 0; i < _previousLabelParts!.length; i++) {
+      final String labelId = 'label-${semanticsObject.id}-$i';
+      owner.element.querySelector('#$labelId')?.remove();
+    }
   }
 
   @override
   void cleanUp() {
     owner.removeAttribute('aria-label');
+    owner.removeAttribute('aria-labelledby');
+    _removeGeneratedLabels();
   }
 
   // ARIA label does not introduce extra DOM elements, so focus should go to the

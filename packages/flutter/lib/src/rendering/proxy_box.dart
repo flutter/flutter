@@ -4504,6 +4504,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_attributedHint != null) {
       config.attributedHint = _attributedHint!;
     }
+    if (_properties.labelParts != null) {
+      config.labelParts = _properties.labelParts!;
+    }
     if (_properties.tooltip != null) {
       config.tooltip = _properties.tooltip!;
     }

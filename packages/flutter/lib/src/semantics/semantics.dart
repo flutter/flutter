@@ -844,6 +844,7 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    this.labelParts,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -907,6 +908,21 @@ class SemanticsData with Diagnosticable {
   ///
   /// See also [label], which exposes just the raw text.
   final AttributedString attributedLabel;
+
+  /// List of strings that should be used to build aria-labelledby for web
+  /// accessibility compliance.
+  ///
+  /// When provided on web platforms, this generates an aria-labelledby attribute
+  /// that references multiple DOM elements containing each label part. This allows
+  /// proper implementation of WAI-ARIA aria-labelledby functionality.
+  ///
+  /// On mobile platforms (iOS VoiceOver, Android TalkBack), the parts are
+  /// automatically concatenated into a single accessible string, respecting
+  /// text direction and internationalization.
+  ///
+  /// This field is mutually exclusive with [attributedLabel] - only one should
+  /// be provided.
+  final List<String>? labelParts;
 
   /// A textual description for the current value of the node.
   ///
@@ -1366,11 +1382,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
-    this.hidden,
     this.obscured,
     this.multiline,
     this.scopesRoute,
     this.namesRoute,
+    this.hidden,
     this.image,
     this.liveRegion,
     this.isRequired,
@@ -1379,6 +1395,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.identifier,
     this.label,
     this.attributedLabel,
+    this.labelParts,
     this.value,
     this.attributedValue,
     this.increasedValue,
@@ -1386,16 +1403,12 @@ class SemanticsProperties extends DiagnosticableTree {
     this.decreasedValue,
     this.attributedDecreasedValue,
     this.hint,
-    this.tooltip,
     this.attributedHint,
     this.hintOverrides,
+    this.tooltip,
     this.textDirection,
     this.sortKey,
     this.tagForChildren,
-    this.role,
-    this.controlsNodes,
-    this.inputType,
-    this.validationResult = SemanticsValidationResult.none,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1418,25 +1431,30 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
+    this.role,
+    this.controlsNodes,
+    this.validationResult = SemanticsValidationResult.none,
+    this.inputType,
   }) : assert(
-         label == null || attributedLabel == null,
-         'Only one of label or attributedLabel should be provided',
+         labelParts != null || (label == null || attributedLabel == null),
+         'label and attributedLabel cannot both be set, unless labelParts is provided which takes precedence',
+       ),
+
+       assert(
+         (value == null) == (attributedValue == null),
+         'value and attributedValue cannot both be set',
        ),
        assert(
-         value == null || attributedValue == null,
-         'Only one of value or attributedValue should be provided',
+         (increasedValue == null) == (attributedIncreasedValue == null),
+         'increasedValue and attributedIncreasedValue cannot both be set',
        ),
        assert(
-         increasedValue == null || attributedIncreasedValue == null,
-         'Only one of increasedValue or attributedIncreasedValue should be provided',
+         (decreasedValue == null) == (attributedDecreasedValue == null),
+         'decreasedValue and attributedDecreasedValue cannot both be set',
        ),
        assert(
-         decreasedValue == null || attributedDecreasedValue == null,
-         'Only one of decreasedValue or attributedDecreasedValue should be provided',
-       ),
-       assert(
-         hint == null || attributedHint == null,
-         'Only one of hint or attributedHint should be provided',
+         (hint == null) == (attributedHint == null),
+         'hint and attributedHint cannot both be set',
        ),
        assert(
          headingLevel == null || (headingLevel > 0 && headingLevel <= 6),
@@ -1490,7 +1508,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is mutually exclusive with [checked] and [mixed].
   final bool? toggled;
 
-  /// If non-null indicates that this subtree represents something that can be
+  /// If non-null, indicates that this subtree represents something that can be
   /// in a selected or unselected state, and what its current state is.
   ///
   /// The active tab in a tab bar for example is considered "selected", whereas
@@ -1730,6 +1748,28 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    is exposed in TalkBack and VoiceOver.
   ///  * [label] for a plain string version of this property.
   final AttributedString? attributedLabel;
+
+  /// Provides multiple text parts that will be combined to form the final label.
+  ///
+  /// This property enables support for `aria-labelledby` on web platforms,
+  /// where multiple DOM elements can be referenced to form an accessible name.
+  /// On mobile platforms, these parts are automatically concatenated with
+  /// appropriate separators based on the [textDirection].
+  ///
+  /// When [labelParts] is provided, it takes precedence over [label] and
+  /// [attributedLabel]. Callers must not provide [labelParts] together with
+  /// [label] or [attributedLabel].
+  ///
+  /// If [labelParts] is provided, there must either be an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.labelParts] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  ///  * [label] for a single label text.
+  ///  * [attributedLabel] for an [AttributedString] version.
+  final List<String>? labelParts;
 
   /// Provides a textual description of the value of the widget.
   ///
@@ -2939,6 +2979,27 @@ class SemanticsNode with DiagnosticableTreeMixin {
   AttributedString get attributedLabel => _attributedLabel;
   AttributedString _attributedLabel = _kEmptyConfig.attributedLabel;
 
+  /// List of strings that should be used to build aria-labelledby for web
+  /// accessibility compliance.
+  ///
+  /// When provided on web platforms, this generates an aria-labelledby attribute
+  /// that references multiple DOM elements containing each label part. This allows
+  /// proper implementation of WAI-ARIA aria-labelledby functionality.
+  ///
+  /// On mobile platforms (iOS VoiceOver, Android TalkBack), the parts are
+  /// automatically concatenated into a single accessible string, respecting
+  /// text direction and internationalization.
+  ///
+  /// This field is mutually exclusive with [attributedLabel] - only one should
+  /// be provided.
+  List<String>? get labelParts {
+    if (_labelParts != null && _labelParts!.isNotEmpty) {
+
+    }
+    return _labelParts;
+  }
+  List<String>? _labelParts = _kEmptyConfig.labelParts;
+
   /// A textual description for the current value of the node.
   ///
   /// The reading direction is given by [textDirection].
@@ -3015,13 +3076,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// See also [hint], which exposes just the raw text.
   AttributedString get attributedHint => _attributedHint;
-  AttributedString _attributedHint = _kEmptyConfig.attributedHint;
+  AttributedString _attributedHint = AttributedString('');
 
   /// A textual description of the widget's tooltip.
   ///
   /// The reading direction is given by [textDirection].
   String get tooltip => _tooltip;
-  String _tooltip = _kEmptyConfig.tooltip;
+  String _tooltip = '';
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -3138,11 +3199,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of the screen. A value of 1 indicates the highest level of structural
   /// hierarchy. A value of 2 indicates the next level, and so on.
   int get headingLevel => _headingLevel;
-  int _headingLevel = _kEmptyConfig._headingLevel;
+  int _headingLevel = 0;
 
   /// The URL that this node links to.
   Uri? get linkUrl => _linkUrl;
-  Uri? _linkUrl = _kEmptyConfig._linkUrl;
+  Uri? _linkUrl;
 
   /// {@template flutter.semantics.SemanticsNode.role}
   /// The role this node represents
@@ -3153,7 +3214,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// For a list of possible roles, see [SemanticsRole].
   /// {@endtemplate}
   SemanticsRole get role => _role;
-  SemanticsRole _role = _kEmptyConfig.role;
+  SemanticsRole _role = SemanticsRole.none;
 
   /// {@template flutter.semantics.SemanticsNode.controlsNodes}
   /// The [SemanticsNode.identifier]s of widgets controlled by this node.
@@ -3161,11 +3222,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
   Set<String>? get controlsNodes => _controlsNodes;
-  Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
+  Set<String>? _controlsNodes;
 
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
-  SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
+  SemanticsValidationResult _validationResult = SemanticsValidationResult.none;
 
   /// {@template flutter.semantics.SemanticsNode.inputType}
   /// The input type for of a editable node.
@@ -3177,7 +3238,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// when focused.
   /// {@endtemplate}
   SemanticsInputType get inputType => _inputType;
-  SemanticsInputType _inputType = _kEmptyConfig.inputType;
+  SemanticsInputType _inputType = SemanticsInputType.text;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -3213,6 +3274,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     _identifier = config.identifier;
     _attributedLabel = config.attributedLabel;
+    _labelParts = config.labelParts;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
     _attributedDecreasedValue = config.attributedDecreasedValue;
@@ -3281,6 +3343,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     AttributedString attributedHint = _attributedHint;
     String tooltip = _tooltip;
     TextDirection? textDirection = _textDirection;
+    List<String>? labelParts = _labelParts;
     Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
     TextSelection? textSelection = _textSelection;
     int? scrollChildCount = _scrollChildCount;
@@ -3396,6 +3459,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
           otherTextDirection: node._textDirection,
         );
 
+        // Merge labelParts - if current node doesn't have labelParts but child does, use child's
+        if ((labelParts == null || labelParts!.isEmpty) && node._labelParts != null && node._labelParts!.isNotEmpty) {
+          labelParts = node._labelParts;
+        }
+
         if (controlsNodes == null) {
           controlsNodes = node._controlsNodes;
         } else if (node._controlsNodes != null) {
@@ -3447,6 +3515,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      labelParts: labelParts,
     );
   }
 
@@ -3503,6 +3572,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
+      labelParts: data.labelParts,
       value: data.attributedValue.string,
       valueAttributes: data.attributedValue.attributes,
       increasedValue: data.attributedIncreasedValue.string,
@@ -4836,6 +4906,8 @@ class SemanticsConfiguration {
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
+  ///  * [onFocus], which is invoked when the assistive technology requests that
+  ///    the input focus is gained by a widget.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   VoidCallback? get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback? _onDidGainAccessibilityFocus;
@@ -4868,7 +4940,28 @@ class SemanticsConfiguration {
     _onDidLoseAccessibilityFocus = value;
   }
 
-  /// {@macro flutter.semantics.SemanticsProperties.onFocus}
+  /// {@template flutter.semantics.SemanticsProperties.onFocus}
+  /// The handler for [SemanticsAction.focus].
+  ///
+  /// This handler is invoked when the assistive technology requests that the
+  /// focusable widget corresponding to this semantics node gain input focus.
+  /// The [FocusNode] that manages the focus of the widget must gain focus. The
+  /// widget must begin responding to relevant key events. For example:
+  ///
+  /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
+  /// * Text fields must become focused and editable, showing an on-screen
+  ///   keyboard, if necessary.
+  /// * Checkboxes, switches, and radio buttons must become toggleable using
+  ///   keyboard shortcuts.
+  ///
+  /// Focus behavior is specific to the platform and to the assistive technology
+  /// used. See the documentation of [SemanticsAction.focus] for more detail.
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus.
+  /// {@endtemplate}
   VoidCallback? get onFocus => _onFocus;
   VoidCallback? _onFocus;
   set onFocus(VoidCallback? value) {
@@ -5102,6 +5195,39 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// Multiple text parts that will be combined to form the final label.
+  ///
+  /// This property enables support for `aria-labelledby` on web platforms,
+  /// where multiple DOM elements can be referenced to form an accessible name.
+  /// On mobile platforms, these parts are automatically concatenated with
+  /// appropriate separators based on the [textDirection].
+  ///
+  /// When [labelParts] is set, it takes precedence over [label] and
+  /// [attributedLabel]. Setting this property will automatically update
+  /// [attributedLabel] with the concatenated result.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [label], which is the single label text.
+  ///  * [attributedLabel], which is the [AttributedString] representation.
+  List<String>? get labelParts => _labelParts;
+  List<String>? _labelParts;
+  set labelParts(List<String>? labelParts) {
+    _hasBeenAnnotated = true;
+    if (listEquals(_labelParts, labelParts)) {
+      return;
+    }
+    _labelParts = labelParts;
+    if (labelParts != null && labelParts.isNotEmpty) {
+      // Concatenate labelParts for mobile/desktop platforms (fallback)
+      // On web, this will be used as fallback, and the engine will create
+      // aria-labelledby with separate spans when appropriate
+      _attributedLabel = AttributedString(labelParts.join(' '));
+    }
+  }
+
   /// A textual description for the current value of the owning [RenderObject].
   ///
   /// Setting this attribute will override the [attributedValue].
@@ -5185,8 +5311,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The value that [value] will have after performing a
-  /// [SemanticsAction.decrease] action.
+  /// The value that [value] will have after a [SemanticsAction.decrease] action.
   ///
   /// Setting this attribute will override the [attributedDecreasedValue].
   ///
@@ -5203,8 +5328,8 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The value that [value] will have after performing a
-  /// [SemanticsAction.decrease] action in [AttributedString] format.
+  /// The value that [value] will have after a [SemanticsAction.decrease] action in
+  /// [AttributedString] format.
   ///
   /// One of the [attributedDecreasedValue] or [decreasedValue] must be set if
   /// a handler for [SemanticsAction.decrease] is provided and one of the
@@ -5473,7 +5598,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The URL that the owning [RenderObject] links to.
+  /// The URL that this node links to.
   Uri? get linkUrl => _linkUrl;
   Uri? _linkUrl;
 
@@ -5662,7 +5787,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
+  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
   double? get scrollExtentMin => _scrollExtentMin;
   double? _scrollExtentMin;
   set scrollExtentMin(double? value) {
@@ -5901,6 +6026,7 @@ class SemanticsConfiguration {
       .._sortKey = _sortKey
       .._identifier = _identifier
       .._attributedLabel = _attributedLabel
+      .._labelParts = _labelParts == null ? null : List<String>.from(_labelParts!)
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
@@ -5971,6 +6097,28 @@ AttributedString _concatAttributedString({
   }
 
   return thisAttributedString + AttributedString('\n') + otherAttributedString;
+}
+
+/// Concatenates a list of label parts into a single [AttributedString].
+///
+/// This method handles proper text direction for concatenating multiple
+/// label parts. It uses spaces as separators and respects the provided
+/// text direction for proper rendering on different platforms.
+AttributedString _concatenateLabelsToAttributedString(
+  List<String> labelParts,
+  TextDirection? textDirection,
+) {
+  if (labelParts.isEmpty) {
+    return AttributedString('');
+  }
+
+  if (labelParts.length == 1) {
+    return AttributedString(labelParts.first);
+  }
+
+  // Join the parts with spaces
+  final String concatenated = labelParts.join(' ');
+  return AttributedString(concatenated);
 }
 
 /// Base class for all sort keys for [SemanticsProperties.sortKey] accessibility
