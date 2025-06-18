@@ -615,12 +615,10 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine) {
 void fl_compositor_opengl_render(FlCompositorOpenGL* self,
                                  FlutterViewId view_id,
                                  int width,
-                                 int height,
-                                 const GdkRGBA* background_color) {
+                                 int height) {
   g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
-  glClearColor(background_color->red, background_color->green,
-               background_color->blue, background_color->alpha);
+  glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
   GPtrArray* framebuffers = reinterpret_cast<GPtrArray*>((g_hash_table_lookup(
