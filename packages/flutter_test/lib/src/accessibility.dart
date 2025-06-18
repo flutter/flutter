@@ -281,6 +281,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 /// See also:
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
+///  * [MinimumTextContrastGuidelineAAA], which follows the WCAG AAA level.
 @visibleForTesting
 class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTextContrastGuideline].
