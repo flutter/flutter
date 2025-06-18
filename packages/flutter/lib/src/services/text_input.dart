@@ -2255,6 +2255,10 @@ class TextInput {
       return;
     }
 
+    if (value.composing.isValid) {
+      value = value.copyWith(selection: TextSelection.collapsed(offset: value.composing.end));
+    }
+
     for (final TextInputControl control in _instance._inputControls) {
       if (control != exclude) {
         control.setEditingState(value);
