@@ -320,12 +320,12 @@ void main() {
       () {
         final Directory sdkDir = createSdkDirectory(
           fileSystem: fileSystem,
-          directoryName: 'flutter_mock_android_sdk with spaces',
+          directoryName: 'flutter_mock_android_sdk with spaces.',
         );
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
-              '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
+              '/.tmp_rand0/flutter_mock_android_sdk with spaces.rand0/cmdline-tools/latest/bin/sdkmanager',
               '--version',
             ],
           ),
@@ -650,7 +650,7 @@ Directory createSdkDirectory({
   required FileSystem fileSystem,
   String buildProp = _buildProp,
   Platform? platform,
-  String directoryName = 'flutter_mock_android_sdk',
+  String directoryName = 'flutter_mock_android_sdk.',
 }) {
   platform ??= globals.platform;
   final Directory dir = fileSystem.systemTempDirectory.createTempSync(directoryName);
