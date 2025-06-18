@@ -770,7 +770,6 @@ void main() {
           /* Flags */
           hasCheckedState: true,
           isChecked: true,
-          isCheckStateMixed: false,
           hasSelectedState: true,
           isSelected: true,
           isButton: true,
