@@ -63,7 +63,14 @@ export class FlutterEntrypointLoader {
     onEntrypointLoaded ??= (engineInitializer) => {
       engineInitializer.initializeEngine(config).then((appRunner) => appRunner.runApp())
     };
-    const { entrypointBaseUrl } = config;
+    let { entrypointBaseUrl } = config;
+    const { entryPointBaseUrl } = config;
+    if (!entrypointBaseUrl && entryPointBaseUrl) {
+      console.warn(
+        '[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. Use `entrypointBaseUrl` instead.'
+      );
+      entrypointBaseUrl = entryPointBaseUrl;
+    }
     if (build.compileTarget === "dart2wasm") {
       return this._loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded);
     } else {
