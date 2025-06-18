@@ -11,6 +11,12 @@
 class CommentsUtil {
  public:
   static void AddTrimLine(std::string* buffer, const char* text, size_t length);
+  static void AddCTrimLine(std::string* buffer,
+                           const char* text,
+                           size_t length);
+  static void AddCEndTrimLine(std::string* buffer,
+                              const char* text,
+                              size_t length);
 };
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_COMMENTS_UTIL_H_

@@ -139,8 +139,13 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
   }
 
   fml::StatusOr<RenderTarget> render_target =
-      renderer.MakeSubpass("Directional Morphology Filter",
-                           ISize(coverage.GetSize()), command_buffer, callback);
+      renderer.MakeSubpass("Directional Morphology Filter",  //
+                           ISize(coverage.GetSize()),        //
+                           command_buffer,                   //
+                           callback,                         //
+                           /*msaa_enabled=*/false,           //
+                           /*depth_stencil_enabled=*/false   //
+      );
   if (!render_target.ok()) {
     return std::nullopt;
   }

@@ -10,6 +10,7 @@ import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import 'xcodeproj.dart';
 
 String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
@@ -240,8 +241,10 @@ Future<List<String>> _xcodeBuildSettingsLines({
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7');
+    xcodeBuildSettings.add(
+      'EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneSimulator.platformName}*]=$excludedSimulatorArchs',
+    );
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneOS.platformName}*]=armv7');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
