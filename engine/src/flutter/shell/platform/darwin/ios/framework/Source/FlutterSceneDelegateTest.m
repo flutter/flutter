@@ -42,4 +42,25 @@
                                                       performActionForShortcutItem:[OCMArg any]
                                                                  completionHandler:[OCMArg any]]);
 }
+
+- (void)testOpenURL {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  id mockAppDelegate = OCMClassMock([FlutterAppDelegate class]);
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
+  OCMStub([mockAppDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+  id windowScene = OCMClassMock([UIWindowScene class]);
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+
+  FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
+  [sceneDelegate scene:windowScene openURLContexts:[NSSet setWithArray:@[ urlContext ]]];
+
+  OCMVerify([(FlutterPluginAppLifeCycleDelegate*)mockLifecycleDelegate application:[OCMArg any]
+                                                                           openURL:url
+                                                                           options:[OCMArg any]]);
+}
+
 @end
