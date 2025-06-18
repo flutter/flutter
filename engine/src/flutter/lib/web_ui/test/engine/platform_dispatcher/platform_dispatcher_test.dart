@@ -526,11 +526,7 @@ void testMain() {
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 500,
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-              hasFocus: true,
-            ),
+            tester.updateNode(id: 500, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
           ],
         );
         final Map<int, SemanticsObject> tree = tester.apply();
@@ -560,11 +556,7 @@ void testMain() {
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 600,
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-              hasFocus: true,
-            ),
+            tester.updateNode(id: 600, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
           ],
         );
         final Map<int, SemanticsObject> tree = tester.apply();
@@ -593,11 +585,7 @@ void testMain() {
         tester.updateNode(
           id: 0,
           children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 700,
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-              hasFocus: true,
-            ),
+            tester.updateNode(id: 700, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
           ],
         );
         final Map<int, SemanticsObject> tree = tester.apply();

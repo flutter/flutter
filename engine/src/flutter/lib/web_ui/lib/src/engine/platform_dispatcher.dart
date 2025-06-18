@@ -1381,8 +1381,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
 
     // Get the semantics tree and check if the node supports focus action
-    final Map<int, SemanticsObject>? semanticsTree =
-        instance.implicitView?.semantics.semanticsTree;
+    final Map<int, SemanticsObject>? semanticsTree = instance.implicitView?.semantics.semanticsTree;
     if (semanticsTree == null) {
       return false;
     }
@@ -1392,7 +1391,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   DomElement? _findFirstSemanticsFocusableChild(DomElement element) {
-    final Iterable<DomElement> candidates = element.querySelectorAll('[id^="$kFlutterSemanticNodePrefix"]');
+    final Iterable<DomElement> candidates = element.querySelectorAll(
+      '[id^="$kFlutterSemanticNodePrefix"]',
+    );
     for (final DomElement candidate in candidates) {
       if (_supportsSemanticsFocusAction(candidate)) {
         return candidate;
