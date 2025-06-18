@@ -41,7 +41,6 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
-import '../web/web_device.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -915,9 +914,7 @@ class WebDevFS implements DevFS {
 
   /// Whether middleware should be enabled for this web development server.
   /// Middleware is enabled when using Chrome device or DDC module system.
-  bool get shouldEnableMiddleware =>
-      globals.deviceManager?.specifiedDeviceId == GoogleChromeDevice.kChromeDeviceId ||
-      ddcModuleSystem;
+  bool get shouldEnableMiddleware => chromiumLauncher != null || ddcModuleSystem;
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override

@@ -317,13 +317,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 .toSet() ??
             <String>{};
 
-        // If no web devices are connected, or the specified device does not support full debugging (ie. web-server),
-        // we should use DWDS WebSocket connection instead of Chrome-based connection.
-
+        // Use Chrome-based connection only if we have a connected ChromiumDevice
+        // Otherwise, use DWDS WebSocket connection
         final bool useDwdsWebSocketConnection =
-            nonWebServerConnectedDeviceIds.isEmpty ||
-            (globals.deviceManager?.specifiedDeviceId != null &&
-                !nonWebServerConnectedDeviceIds.contains(globals.deviceManager!.specifiedDeviceId));
+            !(device!.device is ChromiumDevice &&
+                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
