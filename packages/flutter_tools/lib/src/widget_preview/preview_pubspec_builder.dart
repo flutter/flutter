@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/deferred_component.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
@@ -34,13 +33,6 @@ class PreviewPubspecBuilder {
 
   /// Details about the current state of the widget preview scaffold project.
   final PreviewManifest previewManifest;
-
-  @visibleForTesting
-  static const Map<String, String> flutterGenPackageConfigEntry = <String, String>{
-    'name': 'flutter_gen',
-    'rootUri': '../../flutter_gen',
-    'languageVersion': '2.12',
-  };
 
   /// Adds dependencies on:
   ///   - dtd, which is used to connect to the Dart Tooling Daemon to establish communication
@@ -162,7 +154,6 @@ class PreviewPubspecBuilder {
       outputMode: outputMode,
     );
 
-    maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
     previewManifest.updatePubspecHash();
   }
 
@@ -198,46 +189,5 @@ class PreviewPubspecBuilder {
       shaders: shaders,
       deferredComponents: deferredComponents,
     );
-  }
-
-  /// Manually adds an entry for package:flutter_gen to the preview scaffold's
-  /// package_config.json if the target project makes use of localization.
-  ///
-  /// The Flutter Tool does this when running a Flutter project with
-  /// localization instead of modifying the user's pubspec.yaml to depend on it
-  /// as a path dependency. Unfortunately, the preview scaffold still needs to
-  /// add it directly to its package_config.json as the generated package name
-  /// isn't actually flutter_gen, which pub doesn't really like, and using the
-  /// actual package name will break applications which import
-  /// package:flutter_gen.
-  @visibleForTesting
-  void maybeAddFlutterGenToPackageConfig({required FlutterProject rootProject}) {
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // This is actually incorrect logic; the presence of a `generate: true`
-    // does *NOT* mean that we need to add `flutter_gen` to the package config,
-    // and never did, but the name of the manifest field was labeled and
-    // described incorrectly.
-    //
-    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
-    if (!rootProject.manifest.generateLocalizations) {
-      return;
-    }
-    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
-    final File packageConfig = widgetPreviewScaffoldProject.packageConfig;
-    final String previewPackageConfigPath = packageConfig.path;
-    if (!packageConfig.existsSync()) {
-      throw StateError(
-        "Could not find preview project's package_config.json at "
-        '$previewPackageConfigPath',
-      );
-    }
-    final Map<String, Object?> packageConfigJson =
-        json.decode(packageConfig.readAsStringSync()) as Map<String, Object?>;
-    (packageConfigJson['packages'] as List<dynamic>?)!.cast<Map<String, String>>().add(
-      flutterGenPackageConfigEntry,
-    );
-    packageConfig.writeAsStringSync(json.encode(packageConfigJson));
-    logger.printStatus('Added flutter_gen dependency to $previewPackageConfigPath');
   }
 }
