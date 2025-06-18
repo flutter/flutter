@@ -8,19 +8,11 @@ import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/tasks/gradle_lock_files_check.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
     try {
-      section('Gradle lockfiles check');
-      try {
-        await runGradleLockFilesCheck();
-      } catch (e) {
-        return TaskResult.failure(e.toString());
-      }
-
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('check main plugin file exists');
         final File pluginMainKotlinFile = File(

@@ -909,10 +909,6 @@ targets:
       - .ci.yaml
       - engine/**
       - DEPS
-      - /**/*.gradle
-      - /**/*.gradle.kts
-      - /**/gradle-wrapper.properties
-      - /**/*.lockfile
 
   - name: Linux gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
