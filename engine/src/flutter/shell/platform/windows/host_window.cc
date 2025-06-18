@@ -259,8 +259,6 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   std::unique_ptr<FlutterWindowsViewController> view_controller =
       std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
   FML_CHECK(engine->running());
-  // Must happen after engine is running.
-  view_controller->view()->SendInitialBounds();
   // The Windows embedder listens to accessibility updates using the
   // view's HWND. The embedder's accessibility features may be stale if
   // the app was in headless mode.
