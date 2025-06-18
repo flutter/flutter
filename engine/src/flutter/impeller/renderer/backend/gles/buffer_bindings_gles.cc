@@ -376,10 +376,12 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     }
 
     // The reflector/runtime stage data is confused as to whether 0 means
-    // no elements or whether it is not an array. For non-array, this
-    // value actually needs to be 1, but changing the compiler to always
-    // provide a value of zero confuses other parts of the code generation
-    // stages.
+    // no elements or whether it is not an array. Specifically:
+    //   * The built-in generated header files use std::nullopt to mean not
+    //   an array. Setting the array_elements count to 1 generates incorrect
+    //   code that tries to create 1 length arrays.
+    //   * The runtime stage flatbuffer serializes the std::nullopt as 0,
+    //     and thus needs to treat array length of 0 as a scalar element.
     size_t element_count = member.array_elements.value_or(1);
     if (element_count == 0) {
       element_count = 1;
