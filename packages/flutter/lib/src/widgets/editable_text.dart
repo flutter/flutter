@@ -5639,11 +5639,11 @@ class EditableTextState extends State<EditableText>
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
-    PasteTextIntent: _makeOverridable(
-      CallbackAction<PasteTextIntent>(
-        onInvoke: (PasteTextIntent intent) => pasteText(intent.cause),
-      ),
-    ),
+    PasteTextIntent: _makeOverridable(_PasteSelectionAction(this)),
+    //   CallbackAction<PasteTextIntent>(
+    //     onInvoke: (PasteTextIntent intent) => pasteText(intent.cause),
+    //   ),
+    // ),
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
@@ -6668,6 +6668,20 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+}
+
+class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
+  _PasteSelectionAction(this.state);
+
+  final EditableTextState state;
+
+  @override
+  void invoke(PasteTextIntent intent, [BuildContext? context]) {
+    state.pasteText(intent.cause);
+  }
+
+  @override
+  bool get isActionEnabled => state.widget.selectionEnabled;
 }
 
 /// A [ClipboardStatusNotifier] whose [value] is hardcoded to
