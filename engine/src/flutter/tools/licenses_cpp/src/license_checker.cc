@@ -325,6 +325,6 @@ int LicenseChecker::Run(std::string_view working_dir,
   if (!errors.empty()) {
     std::cout << "Error count: " << errors.size();
   }
-    
+
   return errors.empty() ? 0 : 1;
 }
