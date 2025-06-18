@@ -2,6 +2,7 @@
 # check on.
 .*/flutter/third_party/angle/third_party/.*
 .*/flutter/third_party/benchmark/.*
+.*/flutter/third_party/dart/pkg/.*
 .*/flutter/third_party/dart/third_party/binaryen/.*
 .*/flutter/third_party/dart/third_party/pkg/.*
 .*/flutter/third_party/harfbuzz/.*\.py
