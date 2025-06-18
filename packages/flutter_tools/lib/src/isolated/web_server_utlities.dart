@@ -12,7 +12,6 @@ import '../base/logger.dart';
 import '../dart/package_map.dart';
 import '../web_template.dart';
 
-
 void log(Logger logger, logging.LogRecord event) {
   final String error = event.error == null ? '' : 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
