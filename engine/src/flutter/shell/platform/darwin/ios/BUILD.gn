@@ -44,7 +44,11 @@ source_set("InternalFlutterSwift") {
   # Targets should only ever depend on the framework target.
   # This allows code in this target to use types declared in the bridging
   # header, but defined in the framework, while avoiding linking errors.
-  visibility = [ ":flutter_framework_source" ]
+  visibility = [
+    ":flutter_framework_source",
+    ":ios_test_flutter",
+    ":ios_test_flutter_swift",
+  ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
   include_dirs = [
     "//flutter/shell/platform/darwin/common/framework/Headers",
@@ -191,6 +195,7 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
+    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -207,7 +212,6 @@ source_set("flutter_framework_source") {
     "//flutter/third_party/icu",
     "//flutter/third_party/spring_animation",
   ]
-  public_deps = [ ":InternalFlutterSwift" ]
 }
 
 if (enable_ios_unittests) {
@@ -223,7 +227,10 @@ if (enable_ios_unittests) {
       "framework/Source/UITextInputEditingStateTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
-    deps = [ ":flutter_framework_source" ]
+    deps = [
+      ":InternalFlutterSwift",
+      ":flutter_framework_source",
+    ]
   }
 
   shared_library("ios_test_flutter") {
@@ -284,6 +291,7 @@ if (enable_ios_unittests) {
       "platform_message_handler_ios_test.mm",
     ]
     deps = [
+      ":InternalFlutterSwift",
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",

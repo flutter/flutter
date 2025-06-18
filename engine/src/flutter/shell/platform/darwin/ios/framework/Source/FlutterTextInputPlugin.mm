@@ -2144,7 +2144,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)insertText:(NSString*)text {
   if (self.temporarilyDeletedComposedCharacter.length > 0 && text.length == 1 && !text.UTF8String &&
-      [text characterAtIndex:0] == [self.temporarilyDeletedComposedCharacter characterAtIndex: self.temporarilyDeletedComposedCharacter.length - 1]) {
+      [text characterAtIndex:0] ==
+          [self.temporarilyDeletedComposedCharacter
+              characterAtIndex:self.temporarilyDeletedComposedCharacter.length - 1]) {
     // Workaround for https://github.com/flutter/flutter/issues/111494
     // TODO(cyanglaz): revert this workaround if when flutter supports a minimum iOS version which
     // this bug is fixed by Apple.
