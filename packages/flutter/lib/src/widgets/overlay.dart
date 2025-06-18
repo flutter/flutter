@@ -8,7 +8,6 @@
 /// @docImport 'app.dart';
 /// @docImport 'drag_target.dart';
 /// @docImport 'implicit_animations.dart';
-/// @docImport 'media_query.dart';
 /// @docImport 'navigator.dart';
 /// @docImport 'routes.dart';
 /// @docImport 'scroll_view.dart';
@@ -26,7 +25,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
 import 'lookup_boundary.dart';
+import 'media_query.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
@@ -1715,6 +1716,13 @@ class OverlayPortalController {
 /// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
 /// widget can depend on.
 ///
+/// The [MediaQueryData] for the enclosing [View] is made available to children
+/// of the [OverlayPortal]. This is because some widgets, like [Scaffold],
+/// manipulate [MediaQueryData] in order to properly layout their children.
+/// Since [Overlay] children can be places above and beyond these widgets in the
+/// tree, the enclosing [View]'s [MediaQueryData] provides accurate details for
+/// avoiding obstructions like the software keyboard and notches.
+///
 /// This widget requires an [Overlay] ancestor in the widget tree when its
 /// overlay child is showing. The overlay child is rendered by the [Overlay]
 /// ancestor, not by the widget itself. This allows the overlay child to float
@@ -1989,14 +1997,20 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
-    if (zOrderIndex == null) {
-      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child);
-    }
-    return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
-      overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
-      child: widget.child,
-    );
+    final _OverlayPortal portal =
+        zOrderIndex == null
+            ? _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child)
+            : _OverlayPortal(
+              overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
+              overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
+              child: widget.child,
+            );
+    // Some widgets like Scaffold manipulate the MediaQueryData for descendants,
+    // which means the Overlay, which can consider the whole View to 'float'
+    // over the widget tree, may not be aware of obstructions like the software
+    // keyboard. This provides the accurate MediaQueryData for the View to the
+    // Overlay.
+    return MediaQuery.fromView(view: View.of(context), child: portal);
   }
 }
 
