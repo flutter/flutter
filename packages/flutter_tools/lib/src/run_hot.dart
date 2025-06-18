@@ -1354,13 +1354,17 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 }) async {
   final String deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
   final vm_service.VM vm = await device.vmService!.service.getVM();
+  // Once you have reloaded one isolate in an isolate group - you have reloaded
+  // all of them.
+  final Set<String> alreadyReloadedGroups = <String>{};
   return <Future<vm_service.ReloadReport>>[
     for (final vm_service.IsolateRef isolateRef in vm.isolates!)
-      device.vmService!.service.reloadSources(
-        isolateRef.id!,
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-      ),
+      if (alreadyReloadedGroups.add(isolateRef.isolateGroupId!))
+        device.vmService!.service.reloadSources(
+          isolateRef.id!,
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+        ),
   ];
 }
 
