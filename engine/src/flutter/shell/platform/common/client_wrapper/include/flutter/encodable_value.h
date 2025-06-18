@@ -229,7 +229,7 @@ class EncodableValue : public internal::EncodableValueVariant {
 // The code below makes this translation unit be safe to include from both C++17
 // and C++20 translation units while also using the newest compilers.
 //
-// The correctness of the compilers gripes with this code and the subsequent
+// The correctness of the compiler's gripes with this code and the subsequent
 // need for these workarounds is not fully understood or explored. If you run
 // into issues with this code again, the following breadcrumbs may prove
 // useful. If you cannot access some or all of these links, the compiler
