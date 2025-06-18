@@ -176,7 +176,7 @@ Future<void> _rebuildApp({
   ], workingDirectory: _testAppWebDirectory);
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--no-web-resources-cdn', '--profile', '-t', target],
+    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
@@ -367,8 +367,6 @@ Future<void> runWebServiceWorkerTest({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -423,8 +421,6 @@ Future<void> runWebServiceWorkerTest({
       'flutter_bootstrap.js': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -562,8 +558,6 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
     });
@@ -693,8 +687,6 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -776,8 +768,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
     });
@@ -791,8 +781,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -812,8 +800,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},

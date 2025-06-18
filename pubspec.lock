@@ -510,10 +510,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_c
-      sha256: "02a4ce344981077ebaab9f6942b866460c03be57c47412271b6e38441773fec9"
+      sha256: "677cbc3c364121e65626853160dcb0f230399a65dbabf363155b5fdcb078c03e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.16.4"
+    version: "0.16.3"
   nested:
     dependency: "direct main"
     description:

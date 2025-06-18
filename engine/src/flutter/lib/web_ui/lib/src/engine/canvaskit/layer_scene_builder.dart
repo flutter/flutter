@@ -4,8 +4,13 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import '../vector_math.dart';
+import 'layer.dart';
+import 'layer_tree.dart';
+import 'path.dart';
+import 'picture.dart';
 
 class LayerScene implements ui.Scene {
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
@@ -109,7 +114,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as LazyPath, clipBehavior));
+    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as CkPath, clipBehavior));
   }
 
   @override
