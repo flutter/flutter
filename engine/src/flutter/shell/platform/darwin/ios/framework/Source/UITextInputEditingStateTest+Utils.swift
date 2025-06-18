@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+extension String.UTF16View {
+  subscript(index: UInt) -> Unicode.UTF16.CodeUnit {
+    self[self.index(startIndex, offsetBy: Int(index))]
+  }
+}
+
 // This should have been a tuple, but Swift tuples can't conform to Equtable (yet).
 struct TextSelection: Equatable {
   init(base: UInt, extent: UInt, markedRange: Range<UInt>?) {
