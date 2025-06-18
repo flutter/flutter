@@ -5,6 +5,7 @@
 .*/flutter/third_party/dart/pkg/.*
 .*/flutter/third_party/dart/third_party/binaryen/.*
 .*/flutter/third_party/dart/third_party/pkg/.*
+.*/flutter/third_party/depot_tools/.*
 .*/flutter/third_party/harfbuzz/.*\.py
 .*/flutter/third_party/harfbuzz/perf/.*
 .*/flutter/third_party/harfbuzz/src/harfbuzz.cc
@@ -19,6 +20,7 @@
 .*/flutter/third_party/pkg/gcloud/.*
 .*/flutter/third_party/pkg/googleapis/.*
 .*/flutter/third_party/pkg/process/.*
+.*/flutter/third_party/pkg/vector_math/.*
 .*/flutter/third_party/protobuf/.*
 .*/flutter/third_party/swiftshader/third_party/llvm-10.0/.*
 .*/flutter/third_party/swiftshader/third_party/llvm-16.0/.*
