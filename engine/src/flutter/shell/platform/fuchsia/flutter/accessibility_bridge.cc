@@ -803,7 +803,7 @@ bool AccessibilityBridge::IsFocusable(
     return false;
   }
 
-  if (node.flags.isFocused != flutter::SemanticsCheckState::kNone) {
+  if (node.flags.isFocused != flutter::SemanticsTristate::kNone) {
     return true;
   }
 
