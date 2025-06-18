@@ -293,7 +293,7 @@ public class PlatformPlugin {
       // IMMERSIVE
       // Available starting at Android SDK 4.4 (API 19).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
