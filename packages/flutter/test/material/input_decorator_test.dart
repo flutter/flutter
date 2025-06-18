@@ -7699,7 +7699,7 @@ void main() {
       ]),
     );
 
-    final Set<Object> nodeValues = Set<Object>.from(
+    final Set<Object> nodeValues = Set<Object>.of(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
     expect(nodeValues.length, 11);
@@ -13119,7 +13119,7 @@ void main() {
         ]),
       );
 
-      final Set<Object> nodeValues = Set<Object>.from(
+      final Set<Object> nodeValues = Set<Object>.of(
         renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
       );
       expect(nodeValues.length, 11);

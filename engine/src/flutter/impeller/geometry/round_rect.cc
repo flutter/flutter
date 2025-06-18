@@ -87,7 +87,7 @@ static constexpr Point kLowerRightDirection(1.0f, 1.0f);
   return true;
 }
 
-void RoundRect::Dispatch(PathReceiver& receiver, bool include_end) const {
+void RoundRect::Dispatch(PathReceiver& receiver) const {
   Scalar left = bounds_.GetLeft();
   Scalar top = bounds_.GetTop();
   Scalar right = bounds_.GetRight();
@@ -119,9 +119,6 @@ void RoundRect::Dispatch(PathReceiver& receiver, bool include_end) const {
                    kSqrt2Over2);
 
   receiver.Close();
-  if (include_end) {
-    receiver.PathEnd();
-  }
 }
 
 RoundRectPathSource::RoundRectPathSource(const RoundRect& round_rect)
@@ -142,7 +139,7 @@ bool RoundRectPathSource::IsConvex() const {
 }
 
 void RoundRectPathSource::Dispatch(PathReceiver& receiver) const {
-  round_rect_.Dispatch(receiver, true);
+  round_rect_.Dispatch(receiver);
 }
 
 DiffRoundRectPathSource::DiffRoundRectPathSource(const RoundRect& outer,
@@ -164,8 +161,8 @@ bool DiffRoundRectPathSource::IsConvex() const {
 }
 
 void DiffRoundRectPathSource::Dispatch(PathReceiver& receiver) const {
-  outer_.Dispatch(receiver, false);
-  inner_.Dispatch(receiver, true);
+  outer_.Dispatch(receiver);
+  inner_.Dispatch(receiver);
 }
 
 }  // namespace impeller
