@@ -876,6 +876,7 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.dbg
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.dbg
 ''';
 
       void createSharedGradleFiles() {
