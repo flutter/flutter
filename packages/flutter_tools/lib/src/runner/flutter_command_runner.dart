@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -21,6 +22,9 @@ import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+
+// The official docs to install Flutter.
+const String _flutterInstallDocs = 'https://flutter.dev/setup';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -475,15 +479,36 @@ class FlutterCommandRunner extends CommandRunner<void> {
           final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
             clock: globals.systemClock,
           );
-          final String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
             jsonOut['flutterRoot'] = Cache.flutterRoot!;
-            status = const JsonEncoder.withIndent('  ').convert(jsonOut);
+            globals.printStatus(const JsonEncoder.withIndent('  ').convert(jsonOut));
           } else {
-            status = version.toString();
+            globals.printStatus('$version\n');
+            // Print newer version if exists, or any errors when checking
+            final FlutterVersion? upstreamVersion = await fetchLatestVersion(localVersion: version);
+            if (upstreamVersion == null) {
+              return;
+            }
+            if (version.frameworkRevision == upstreamVersion.frameworkRevision) {
+              globals.printStatus('Flutter is already up to date on channel ${version.channel}');
+              return;
+            } else {
+              globals.printStatus(
+                'A new version of Flutter is available on channel ${version.channel}',
+              );
+              globals.printStatus(
+                'The latest version: ${upstreamVersion.frameworkVersion} (revision ${upstreamVersion.frameworkRevisionShort})',
+                emphasis: true,
+              );
+              globals.printStatus('To upgrade now, run "flutter upgrade".');
+              if (version.channel == 'stable') {
+                globals.printStatus('\nSee the announcement and release notes:');
+                globals.printStatus('https://docs.flutter.dev/release/release-notes');
+              }
+              return;
+            }
           }
-          globals.printStatus(status);
           return;
         }
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
@@ -518,6 +543,58 @@ class FlutterCommandRunner extends CommandRunner<void> {
         .expand<String>((String root) => _gatherProjectPaths(root))
         .map<Directory>((String dir) => globals.fs.directory(dir))
         .toList();
+  }
+
+  /// Returns the remote HEAD flutter version.
+  ///
+  /// Returns null if HEAD isn't pointing to a branch, or there is no upstream.
+  Future<FlutterVersion?> fetchLatestVersion({required FlutterVersion localVersion}) async {
+    final String workingDirectory = Cache.flutterRoot!;
+    String revision;
+    try {
+      // Fetch upstream branch's commits and tags
+      await globals.processUtils.run(
+        <String>['git', 'fetch', '--tags'],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+      // Get the latest commit revision of the upstream
+      final RunResult result = await globals.processUtils.run(
+        <String>['git', 'rev-parse', '--verify', kGitTrackingUpstream],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+      revision = result.stdout.trim();
+    } on Exception catch (e) {
+      final String errorString = e.toString();
+      if (errorString.contains('fatal: HEAD does not point to a branch')) {
+        globals.printStatus(
+          'Unable to check for updates: Your Flutter checkout is currently not '
+          'on a release branch.'
+        );
+      } else if (errorString.contains('fatal: no upstream configured for branch')) {
+        globals.printStatus(
+          'Unable to check for updates: The current Flutter branch/channel is '
+          'not tracking any remote repository.'
+        );
+      } else {
+        globals.printStatus(errorString);
+      }
+      return null;
+    }
+    // At this point the current checkout should be on HEAD of a branch having
+    // an upstream. Check whether this upstream is "standard".
+    final VersionCheckError? error =
+        VersionUpstreamValidator(version: localVersion, platform: globals.platform).run();
+    if (error != null) {
+      globals.printStatus('Unable to check for updates: ${error.message}');
+      return null;
+    }
+    return FlutterVersion.fromRevision(
+      flutterRoot: workingDirectory,
+      frameworkRevision: revision,
+      fs: globals.fs,
+    );
   }
 
   static List<String> _gatherProjectPaths(String rootPath) {
