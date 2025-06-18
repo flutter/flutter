@@ -51,5 +51,4 @@ void main() {
     expect(find.text('Messages'), findsNothing);
     expect(find.text('Settings'), findsNothing);
   });
-
 }
