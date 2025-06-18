@@ -258,7 +258,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
     testUsingContext(
       'retries if Gradle connection times out',
           () async {
-        const String errorMessage = '''
+        const String errorMessage = r'''
 Exception in thread "main" java.net.ConnectException: Connection timed out: connect
 	at java.base/sun.nio.ch.Net.connect0(Native Method)
 	at java.base/sun.nio.ch.Net.connect(Net.java:589)
