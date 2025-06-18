@@ -175,6 +175,12 @@ DEF_SWITCH(TraceToFile,
            "Write the timeline trace to a file at the specified path. The file "
            "will be in Perfetto's proto format; it will be possible to load "
            "the file into Perfetto's trace viewer.")
+DEF_SWITCH(ProfileMicrotasks,
+           "profile-microtasks",
+           "Enable collection of information about each microtask. Information "
+           "about completed microtasks will be written to the \"Microtask\" "
+           "timeline stream. Information about queued microtasks will be "
+           "accessible from Dart / Flutter DevTools.")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "

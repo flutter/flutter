@@ -44,6 +44,8 @@ public class FlutterShellArgs {
   public static final String ARG_TRACE_SYSTRACE = "--trace-systrace";
   public static final String ARG_KEY_TRACE_TO_FILE = "trace-to-file";
   public static final String ARG_TRACE_TO_FILE = "--trace-to-file";
+  public static final String ARG_KEY_PROFILE_MICROTASKS = "profile-microtasks";
+  public static final String ARG_PROFILE_MICROTASKS = "--profile-microtasks";
   public static final String ARG_KEY_TOGGLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller=true";
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
@@ -111,6 +113,9 @@ public class FlutterShellArgs {
     }
     if (intent.hasExtra(ARG_KEY_TRACE_TO_FILE)) {
       args.add(ARG_TRACE_TO_FILE + "=" + intent.getStringExtra(ARG_KEY_TRACE_TO_FILE));
+    }
+    if (intent.hasExtra(ARG_KEY_PROFILE_MICROTASKS)) {
+      args.add(ARG_PROFILE_MICROTASKS);
     }
     if (intent.hasExtra(ARG_KEY_TOGGLE_IMPELLER)) {
       if (intent.getBooleanExtra(ARG_KEY_TOGGLE_IMPELLER, false)) {

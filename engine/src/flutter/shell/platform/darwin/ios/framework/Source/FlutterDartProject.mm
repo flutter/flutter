@@ -183,6 +183,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.trace_systrace = enableTraceSystrace.boolValue;
   }
 
+  NSNumber* profileMicrotasks = [mainBundle objectForInfoDictionaryKey:@"FLTProfileMicrotasks"];
+  // Change the default only if the option is present.
+  if (profileMicrotasks != nil) {
+    settings.profile_microtasks = profileMicrotasks.boolValue;
+  }
+
   NSNumber* enableDartAsserts = [mainBundle objectForInfoDictionaryKey:@"FLTEnableDartAsserts"];
   if (enableDartAsserts != nil) {
     settings.dart_flags.push_back("--enable-asserts");
