@@ -131,7 +131,8 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   for forbidden_string in forbidden_output:
     if forbidden_string in output:
-      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_string}.*$', output)]
+      forbidden_escaped = re.escape(forbidden_string)
+      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_escaped}.*$', output)]
       raise RuntimeError(
           f'command "{command_string}" contained forbidden string "{forbidden_string}": {matches}'
       )
