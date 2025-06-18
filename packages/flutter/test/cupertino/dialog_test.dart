@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -2116,6 +2117,45 @@ void main() {
     yesButton = tester.getCenter(find.text('Yes'));
     noButton = tester.getCenter(find.text('No'));
     expect(yesButton.dx > noButton.dx, false);
+  });
+
+  testWidgets('CupertinoDialogAction.mouseCursor can customize the mouse cursor', (
+    WidgetTester tester,
+  ) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoAlertDialog(
+            actions: <CupertinoDialogAction>[
+              CupertinoDialogAction(
+                mouseCursor: customCursor,
+                child: const Text('Yes'),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset actionSheetAction = tester.getCenter(find.text('Yes'));
+    await gesture.moveTo(actionSheetAction);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 }
 
