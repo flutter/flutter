@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_H_
 
 #include <windows.h>
 #include <memory>
@@ -21,23 +21,23 @@ class FlutterWindowsView;
 class FlutterWindowsViewController;
 
 // A Win32 window that hosts a |FlutterWindow| in its client area.
-class FlutterHostWindow {
+class HostWindow {
  public:
-  virtual ~FlutterHostWindow();
+  virtual ~HostWindow();
 
   // Creates a native Win32 window with a child view confined to its client
   // area. |controller| is a pointer to the controller that manages the
-  // |FlutterHostWindow|. |engine| is a pointer to the engine thaat manages
+  // |HostWindow|. |engine| is a pointer to the engine thaat manages
   // the controller On success, a valid window handle can be retrieved
-  // via |FlutterHostWindow::GetWindowHandle|. |nullptr| will be returned
+  // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
-  static std::unique_ptr<FlutterHostWindow> createRegularWindow(
+  static std::unique_ptr<HostWindow> createRegularWindow(
       WindowManager* controller,
       FlutterWindowsEngine* engine,
       const FlutterWindowSizing& content_size);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
-  static FlutterHostWindow* GetThisFromHandle(HWND hwnd);
+  static HostWindow* GetThisFromHandle(HWND hwnd);
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
@@ -50,16 +50,15 @@ class FlutterHostWindow {
  private:
   friend WindowManager;
 
-  FlutterHostWindow(
-      WindowManager* controller,
-      FlutterWindowsEngine* engine,
-      WindowArchetype archetype,
-      std::unique_ptr<FlutterWindowsViewController> view_controller,
-      const BoxConstraints& constraints,
-      HWND hwnd);
+  HostWindow(WindowManager* controller,
+             FlutterWindowsEngine* engine,
+             WindowArchetype archetype,
+             std::unique_ptr<FlutterWindowsViewController> view_controller,
+             const BoxConstraints& constraints,
+             HWND hwnd);
 
   // Sets the focus to the child view window of |window|.
-  static void FocusViewOf(FlutterHostWindow* window);
+  static void FocusViewOf(HostWindow* window);
 
   // OS callback called by message pump. Handles the WM_NCCREATE message which
   // is passed when the non-client area is being created and enables automatic
@@ -92,9 +91,9 @@ class FlutterHostWindow {
   // The constraints on the window's client area.
   BoxConstraints box_constraints_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
+  FML_DISALLOW_COPY_AND_ASSIGN(HostWindow);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_HOST_WINDOW_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_H_

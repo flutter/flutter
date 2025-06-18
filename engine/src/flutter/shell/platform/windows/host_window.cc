@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window.h"
+#include "flutter/shell/platform/windows/host_window.h"
 
 #include <dwmapi.h>
 
@@ -214,7 +214,7 @@ void SetChildContent(HWND content, HWND window) {
 
 namespace flutter {
 
-std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
+std::unique_ptr<HostWindow> HostWindow::createRegularWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const FlutterWindowSizing& content_size) {
@@ -273,7 +273,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
     WNDCLASSEX window_class = {};
     window_class.cbSize = sizeof(WNDCLASSEX);
     window_class.style = CS_HREDRAW | CS_VREDRAW;
-    window_class.lpfnWndProc = FlutterHostWindow::WndProc;
+    window_class.lpfnWndProc = HostWindow::WndProc;
     window_class.hInstance = GetModuleHandle(nullptr);
     window_class.hIcon =
         LoadIcon(window_class.hInstance, MAKEINTRESOURCE(idi_app_icon));
@@ -326,12 +326,12 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
   ShowWindow(hwnd, SW_SHOWNORMAL);
-  return std::unique_ptr<FlutterHostWindow>(new FlutterHostWindow(
+  return std::unique_ptr<HostWindow>(new HostWindow(
       window_manager, engine, WindowArchetype::kRegular,
       std::move(view_controller), BoxConstraints(smallest, biggest), hwnd));
 }
 
-FlutterHostWindow::FlutterHostWindow(
+HostWindow::HostWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     WindowArchetype archetype,
@@ -347,7 +347,7 @@ FlutterHostWindow::FlutterHostWindow(
   SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
-FlutterHostWindow::~FlutterHostWindow() {
+HostWindow::~HostWindow() {
   if (view_controller_) {
     // Unregister the window class. Fail silently if other windows are still
     // using the class, as only the last window can successfully unregister it.
@@ -358,43 +358,42 @@ FlutterHostWindow::~FlutterHostWindow() {
   }
 }
 
-FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
-  return reinterpret_cast<FlutterHostWindow*>(
-      GetWindowLongPtr(hwnd, GWLP_USERDATA));
+HostWindow* HostWindow::GetThisFromHandle(HWND hwnd) {
+  return reinterpret_cast<HostWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 }
 
-HWND FlutterHostWindow::GetWindowHandle() const {
+HWND HostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
-void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
+void HostWindow::FocusViewOf(HostWindow* window) {
   auto child_content = window->view_controller_->view()->GetWindowHandle();
   if (window != nullptr && child_content != nullptr) {
     SetFocus(child_content);
   }
 };
 
-LRESULT FlutterHostWindow::WndProc(HWND hwnd,
-                                   UINT message,
-                                   WPARAM wparam,
-                                   LPARAM lparam) {
+LRESULT HostWindow::WndProc(HWND hwnd,
+                            UINT message,
+                            WPARAM wparam,
+                            LPARAM lparam) {
   if (message == WM_NCCREATE) {
     auto* const create_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
     auto* const windows_proc_table =
         static_cast<WindowsProcTable*>(create_struct->lpCreateParams);
     windows_proc_table->EnableNonClientDpiScaling(hwnd);
     EnableTransparentWindowBackground(hwnd, *windows_proc_table);
-  } else if (FlutterHostWindow* const window = GetThisFromHandle(hwnd)) {
+  } else if (HostWindow* const window = GetThisFromHandle(hwnd)) {
     return window->HandleMessage(hwnd, message, wparam, lparam);
   }
 
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
-                                         UINT message,
-                                         WPARAM wparam,
-                                         LPARAM lparam) {
+LRESULT HostWindow::HandleMessage(HWND hwnd,
+                                  UINT message,
+                                  WPARAM wparam,
+                                  LPARAM lparam) {
   auto result = engine_->window_proc_delegate_manager()->OnTopLevelWindowProc(
       window_handle_, message, wparam, lparam);
   if (result) {
@@ -488,7 +487,7 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-void FlutterHostWindow::SetContentSize(const FlutterWindowSizing& size) {
+void HostWindow::SetContentSize(const FlutterWindowSizing& size) {
   WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
   GetWindowInfo(window_handle_, &window_info);
 

@@ -30,9 +30,9 @@
 #include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
-#include "flutter/shell/platform/windows/flutter_host_window.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
@@ -460,7 +460,7 @@ class FlutterWindowsEngine {
   // Handlers for keyboard events from Windows.
   std::unique_ptr<KeyboardHandlerBase> keyboard_key_handler_;
 
-  // The manager that manages the lifecycle of |FlutterHostWindow|s, native
+  // The manager that manages the lifecycle of |HostWindow|s, native
   // Win32 windows hosting a Flutter view in their client area.
   std::unique_ptr<WindowManager> window_manager_;
 
