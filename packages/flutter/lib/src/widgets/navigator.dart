@@ -4199,7 +4199,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (unattachedPagelessRoutes.isNotEmpty) {
         pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
-          () => List<_RouteEntry>.from(unattachedPagelessRoutes),
+          () => List<_RouteEntry>.of(unattachedPagelessRoutes),
         );
         unattachedPagelessRoutes.clear();
       }

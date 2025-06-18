@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../scene_painting.dart';
+import '../lazy_path.dart';
 import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'native_memory.dart';
@@ -16,7 +16,7 @@ import 'path_metrics.dart';
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
 /// The `SkPath` is required for `CkCanvas` methods which take a path.
-class CkPath implements ScenePath {
+class CkPath implements DisposablePath {
   factory CkPath() {
     final SkPath skPath = SkPath();
     skPath.setFillType(toSkFillType(ui.PathFillType.nonZero));
@@ -43,6 +43,11 @@ class CkPath implements ScenePath {
   SkPath get skiaObject => _ref.nativeObject;
 
   ui.PathFillType _fillType;
+
+  @override
+  void dispose() {
+    _ref.dispose();
+  }
 
   @override
   ui.PathFillType get fillType => _fillType;
@@ -155,7 +160,7 @@ class CkPath implements ScenePath {
   }
 
   @override
-  ui.PathMetrics computeMetrics({bool forceClosed = false}) {
+  CkPathMetrics computeMetrics({bool forceClosed = false}) {
     return CkPathMetrics(this, forceClosed);
   }
 
@@ -308,5 +313,15 @@ class CkPath implements ScenePath {
   /// Return `true` if this path contains no segments.
   bool get isEmpty {
     return skiaObject.isEmpty();
+  }
+}
+
+class CkPathConstructors implements DisposablePathConstructors {
+  @override
+  CkPath createNew() => CkPath();
+
+  @override
+  CkPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
+    return CkPath.combine(operation, path1 as CkPath, path2 as CkPath);
   }
 }
