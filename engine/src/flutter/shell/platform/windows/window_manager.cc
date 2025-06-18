@@ -10,13 +10,13 @@
 
 #include "embedder.h"
 #include "flutter/shell/platform/common/windowing.h"
-#include "flutter/shell/platform/windows/flutter_host_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
+#include "flutter/shell/platform/windows/host_window.h"
 #include "fml/logging.h"
 #include "shell/platform/windows/client_wrapper/include/flutter/flutter_view.h"
-#include "shell/platform/windows/flutter_host_window.h"
 #include "shell/platform/windows/flutter_windows_view.h"
+#include "shell/platform/windows/host_window.h"
 
 namespace flutter {
 
@@ -40,8 +40,8 @@ bool WindowManager::HasTopLevelWindows() const {
 
 FlutterViewId WindowManager::CreateRegularWindow(
     const WindowCreationRequest* request) {
-  auto window = FlutterHostWindow::createRegularWindow(this, engine_,
-                                                       request->content_size);
+  auto window =
+      HostWindow::createRegularWindow(this, engine_, request->content_size);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return 0;
@@ -61,7 +61,7 @@ void WindowManager::OnEngineShutdown() {
   }
   for (auto hwnd : active_handles) {
     // This will destroy the window, which will in turn remove the
-    // FlutterHostWindow from map when handling WM_NCDESTROY inside
+    // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
     DestroyWindow(hwnd);
   }
@@ -165,8 +165,7 @@ FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
 void InternalFlutterWindows_WindowManager_SetWindowContentSize(
     HWND hwnd,
     const flutter::FlutterWindowSizing* size) {
-  flutter::FlutterHostWindow* window =
-      flutter::FlutterHostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   if (window) {
     window->SetContentSize(*size);
   }
