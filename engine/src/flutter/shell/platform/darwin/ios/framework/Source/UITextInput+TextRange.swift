@@ -21,7 +21,7 @@ public final class TextPosition: UITextPosition, NSCopying {
     // Affinity is only visual.
     return offset == other.offset
   }
-  
+
   public func copy(with zone: NSZone? = nil) -> Any {
     return TextPosition(index: offset, affinity: affinity)
   }
@@ -126,19 +126,17 @@ public final class TextRange: UITextRange, NSCopying {
   ///
   /// This computed property throws if the receiver is not a FlutterTextRange.
   public var index: UInt { (self as! TextPosition).offset }
-  
+
   public func compare(to other: UITextPosition) -> ComparisonResult {
     let otherIndex = other.index
     let index = self.index
-    if (otherIndex == index) {
+    if otherIndex == index {
       return .orderedSame
-    } else if (otherIndex > index) {
+    } else if otherIndex > index {
       return .orderedAscending
     }
     return .orderedDescending
   }
-
-
 
   public func offset(by offset: Int, inDocument document: UITextInput)
     -> TextPosition?

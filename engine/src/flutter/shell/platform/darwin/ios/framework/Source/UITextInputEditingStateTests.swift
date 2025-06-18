@@ -236,10 +236,12 @@ class UITextInputImplementationTests: XCTestCase {
       }
     }
   }
-  
+
   func testPositionComparisonIsAffinityAgnostic() {
     inputClient.editingState = EditingState(string: "")
     XCTAssertEqual(inputClient.beginningOfDocument, inputClient.endOfDocument)
-    XCTAssertEqual(inputClient.compare(inputClient.beginningOfDocument, to: inputClient.endOfDocument), .orderedSame)
+    XCTAssertEqual(
+      inputClient.compare(inputClient.beginningOfDocument, to: inputClient.endOfDocument),
+      .orderedSame)
   }
 }
