@@ -164,7 +164,7 @@ FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
 
 void InternalFlutterWindows_WindowManager_SetWindowContentSize(
     HWND hwnd,
-    const flutter::FlutterWindowSizing* size) {
+    const flutter::WindowSizing* size) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   if (window) {
     window->SetContentSize(*size);

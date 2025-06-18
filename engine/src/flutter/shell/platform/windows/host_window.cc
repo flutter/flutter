@@ -216,7 +216,7 @@ namespace flutter {
 std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
-    const FlutterWindowSizing& content_size) {
+    const WindowSizing& content_size) {
   DWORD window_style = WS_OVERLAPPEDWINDOW;
   DWORD extended_window_style = 0;
   std::optional<Size> smallest = std::nullopt;
@@ -484,7 +484,7 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-void HostWindow::SetContentSize(const FlutterWindowSizing& size) {
+void HostWindow::SetContentSize(const WindowSizing& size) {
   WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
   GetWindowInfo(window_handle_, &window_info);
 
