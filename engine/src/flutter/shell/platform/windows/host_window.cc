@@ -214,7 +214,7 @@ void SetChildContent(HWND content, HWND window) {
 
 namespace flutter {
 
-std::unique_ptr<HostWindow> HostWindow::createRegularWindow(
+std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const FlutterWindowSizing& content_size) {

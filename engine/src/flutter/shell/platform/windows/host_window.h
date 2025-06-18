@@ -31,7 +31,7 @@ class HostWindow {
   // the controller On success, a valid window handle can be retrieved
   // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
-  static std::unique_ptr<HostWindow> createRegularWindow(
+  static std::unique_ptr<HostWindow> CreateRegularWindow(
       WindowManager* controller,
       FlutterWindowsEngine* engine,
       const FlutterWindowSizing& content_size);

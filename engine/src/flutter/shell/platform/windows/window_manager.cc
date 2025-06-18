@@ -41,7 +41,7 @@ bool WindowManager::HasTopLevelWindows() const {
 FlutterViewId WindowManager::CreateRegularWindow(
     const WindowCreationRequest* request) {
   auto window =
-      HostWindow::createRegularWindow(this, engine_, request->content_size);
+      HostWindow::CreateRegularWindow(this, engine_, request->content_size);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return 0;
