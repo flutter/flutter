@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
 import '../dom.dart';
+import '../renderer.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'paragraph.dart';
@@ -52,10 +53,10 @@ class TextLayout {
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
-      final String text = styledBlock.textInside(paragraph.text!);
+      final String text = styledBlock.textFrom(paragraph);
       layoutContext.font =
-          '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
-      layoutContext.fillStyle = styledBlock.textStyle.color;
+          '${styledBlock.style.fontSize}px ${styledBlock.style.originalFontFamily!}';
+      layoutContext.fillStyle = styledBlock.style.color;
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final DomTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
@@ -74,7 +75,8 @@ class TextLayout {
         textClusters.add(ExtendedTextCluster(cluster, bounds, blockTextMetrics));
       }
     }
-    textToClusterMap[paragraph.text!.length] = textClusters.length;
+    textToClusterMap[paragraph.text.length] = textClusters.length;
+    // TODO: Why do we need this last empty cluster?
     textClusters.add(ExtendedTextCluster.empty());
   }
 
@@ -88,7 +90,7 @@ class TextLayout {
     final ExtendedTextCluster end =
         textClusters[math.min(clusterRange.end, textClusters.length - 1)];
     if (start.cluster != null && end.cluster != null) {
-      return paragraph.text!.substring(start.start, end.start);
+      return paragraph.text.substring(start.start, end.start);
     } else {
       return '';
     }
@@ -98,7 +100,7 @@ class TextLayout {
     bidiRuns.clear();
 
     final List<BidiRegion> regions = canvasKit.Bidi.getBidiRegions(
-      paragraph.text!,
+      paragraph.text,
       paragraph.paragraphStyle.textDirection,
     );
 
@@ -127,7 +129,7 @@ class TextLayout {
       );
       for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
+        final String clusterText = cluster.textFrom(paragraph);
         WebParagraphDebug.log(
           '$i: [${cluster.start}:${cluster.end}) ${cluster.bounds.width} * ${cluster.bounds.height} "$clusterText"',
         );
@@ -139,7 +141,7 @@ class TextLayout {
   void wrapText(double width) {
     lines.clear();
 
-    final TextWrapper wrapper = TextWrapper(paragraph.text!, this);
+    final TextWrapper wrapper = TextWrapper(paragraph.text, this);
     wrapper.breakLines(width);
   }
 
@@ -198,7 +200,7 @@ class TextLayout {
     // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
     line.fontBoundingBoxAscent = 0.0;
     line.fontBoundingBoxDescent = 0.0;
-    for (int i = line.textRange.start; i < line.textRange.end; i += 1) {
+    for (int i = line.clusters.start; i < line.clusters.end; i += 1) {
       final ExtendedTextCluster cluster = textClusters[i];
       if (cluster.textMetrics == null) {
         continue;
@@ -224,7 +226,7 @@ class TextLayout {
       );
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
+        final String clusterText = cluster.textFrom(paragraph);
         WebParagraphDebug.log(
           'cluster$i: [${cluster.bounds.left}:${cluster.bounds.right}) "$clusterText"',
         );
@@ -237,9 +239,9 @@ class TextLayout {
       line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
     );
     lines.add(line);
-    final String lineText = getTextFromClusterRange(line.textRange);
+    final String lineText = getTextFromClusterRange(line.clusters);
     WebParagraphDebug.log(
-      'Line [${line.textRange.start}:${line.textRange.end}) ${line.bounds.left},${line.bounds.top} ${line.bounds.width}x${line.bounds.height} "$lineText"',
+      'Line [${line.clusters.start}:${line.clusters.end}) ${line.bounds.left},${line.bounds.top} ${line.bounds.width}x${line.bounds.height} "$lineText"',
     );
     return line.bounds.height;
   }
@@ -286,21 +288,25 @@ class TextLayout {
 }
 
 class ExtendedTextCluster {
-  ExtendedTextCluster(this.cluster, this.bounds, this.textMetrics) {
-    start = cluster!.begin;
-    end = cluster!.end;
-  }
+  ExtendedTextCluster(this.cluster, this.bounds, this.textMetrics)
+    : start = cluster!.begin,
+      end = cluster.end;
 
-  ExtendedTextCluster.empty() : bounds = ui.Rect.zero;
+  // TODO: Remove this.
+  ExtendedTextCluster.empty() : start = 0, end = 0, bounds = ui.Rect.zero;
 
+  // TODO: Make this non-nullable.
   DomTextCluster? cluster;
-  int start = 0;
-  int end = 0;
-  ui.Rect bounds;
+  final int start;
+  final int end;
+  final ui.Rect bounds;
 
   // TODO(jlavrova): once we know everything we need we can calculate it once
   // and do not keep textMetrics longer than we have to
+  // TODO: Make this non-nullable.
   DomTextMetrics? textMetrics;
+
+  String textFrom(WebParagraph paragraph) => paragraph.text.substring(start, end);
 }
 
 class BidiRun {
@@ -314,19 +320,32 @@ class BidiRun {
 class TextLine {
   TextLine(
     this.textLayout,
-    this.textRange,
+    this.clusters,
     this.textWidth,
-    this.whitespacesRange,
+    this.whitespaces,
     this.whitespacesWidth,
-    this.hardLineBreak,
-  );
+    bool hardBreak,
+  ) : lineMetrics = renderer.createLineMetrics(
+        hardBreak: hardBreak,
+        width: textWidth,
+        ascent: 0.0,
+        descent: 0.0,
+        unscaledAscent: 0.0,
+        height: 0.0,
+        left: 0.0,
+        baseline: 0.0,
+        lineNumber: 0,
+      );
+
+  final ui.LineMetrics lineMetrics;
 
   final TextLayout textLayout;
-  final ClusterRange textRange;
-  final ClusterRange whitespacesRange;
+  final ClusterRange clusters;
+  final ClusterRange whitespaces;
   final double textWidth;
   final double whitespacesWidth;
-  final bool hardLineBreak;
+
+  bool get hardBreak => lineMetrics.hardBreak;
 
   // Calculated and extracted
   ui.Rect bounds = ui.Rect.zero;

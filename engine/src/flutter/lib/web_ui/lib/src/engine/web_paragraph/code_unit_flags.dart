@@ -10,13 +10,13 @@ class CodeUnitFlags {
   CodeUnitFlags(this._value);
 
   static List<CodeUnitFlags> extractForParagraph(WebParagraph paragraph) {
-    final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text!);
-    assert(ckFlags.length == (paragraph.text!.length + 1));
+    final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text);
+    assert(ckFlags.length == (paragraph.text.length + 1));
 
     final codeUnitFlags = ckFlags.map((info) => CodeUnitFlags(info.flags)).toList();
 
     // Get text segmentation resuls using browser APIs.
-    final SegmentationResult result = segmentText(paragraph.text!);
+    final SegmentationResult result = segmentText(paragraph.text);
 
     // Fill out grapheme flags
     for (final grapheme in result.graphemes) {

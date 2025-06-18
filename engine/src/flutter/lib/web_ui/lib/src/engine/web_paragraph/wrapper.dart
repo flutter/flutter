@@ -196,12 +196,12 @@ class TextWrapper {
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];
-        final String text = _text.substring(line.textRange.start, line.textRange.end);
-        final String whitespaces =
-            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.size}' : 'no';
-        final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
+        // TODO(jlavrova): Cluster index being used as text index.
+        final String text = _text.substring(line.clusters.start, line.clusters.end);
+        final String whitespaces = !line.whitespaces.isEmpty ? '${line.whitespaces.size}' : 'no';
+        final String hardLineBreak = line.hardBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
-          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
+          '$i: "$text" [${line.clusters.start}:${line.clusters.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
         );
       }
     }

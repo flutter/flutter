@@ -30,7 +30,7 @@ class TextPaint {
     double x,
     double y,
   ) {
-    for (int i = line.textRange.start; i < line.textRange.end; i++) {
+    for (int i = line.clusters.start; i < line.clusters.end; i++) {
       final clusterText = layout.textClusters[i];
       final DomCanvasRenderingContext2D context = canvas.context2D;
       context.font = '50px arial';
@@ -46,12 +46,6 @@ class TextPaint {
     double x,
     double y,
   ) {
-    // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
-    // (by line, then by reordered visual runs)
-    WebParagraphDebug.log(
-      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
-    );
-
     for (final BidiRun run in line.visualRuns) {
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final clusterText = layout.textClusters[i];
@@ -97,7 +91,7 @@ class TextPaint {
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {
-    final String text = paragraph.text!.substring(webTextCluster.start, webTextCluster.end);
+    final String text = webTextCluster.textFrom(paragraph);
     final ui.Rect box = webTextCluster.bounds;
     print(
       '[${webTextCluster.start}:${webTextCluster.end}) = "$text", ${box.width}, ${box.height}\n',

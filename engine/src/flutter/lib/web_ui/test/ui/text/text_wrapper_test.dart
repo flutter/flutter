@@ -9,6 +9,9 @@ import 'package:ui/ui.dart';
 
 import '../../common/test_initialization.dart';
 
+// TODO(jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
+final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -19,7 +22,6 @@ Future<void> testMain() async {
   test(
     'Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break',
     () {
-      final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
       final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
       builder.addText(
         'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
@@ -30,15 +32,14 @@ Future<void> testMain() async {
       expect(lines.length, 10);
       for (int i = 0; i < 10; i++) {
         if (i == 8) {
-          expect(lines[i].whitespacesRange.isEmpty, true);
+          expect(lines[i].whitespaces.isEmpty, true);
         } else {
-          expect(lines[i].whitespacesRange.size, 3);
+          expect(lines[i].whitespaces.size, 3);
         }
       }
     },
   );
   test('Text wrapper, 4 lines, 3 trailing whitespaces on each line', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText(
       'World domination is   such an ugly phrase   - I prefer to call it   world optimisation.   ',
@@ -48,22 +49,20 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (int i = 0; i < 4; i++) {
-      expect(lines[i].whitespacesRange.size, 3);
+      expect(lines[i].whitespaces.size, 3);
     }
   });
   test('Text wrapper, 1 line, 5 whitespaces and nothing else', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('     ');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 1);
-    expect(lines[0].whitespacesRange.size, 5);
-    expect(lines[0].textRange.size, 0);
+    expect(lines[0].whitespaces.size, 5);
+    expect(lines[0].clusters.size, 0);
   });
   test('Text wrapper, 3 lines, one very long word', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('abcdefghijklmnopqrstuvwxyz');
     final WebParagraph paragraph = builder.build();
@@ -72,14 +71,13 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 0);
-      length += lines[i].textRange.size;
+      expect(lines[i].whitespaces.size, 0);
+      length += lines[i].clusters.size;
     }
-    expect(length, paragraph.text!.length);
+    expect(length, paragraph.text.length);
   });
 
   test('Text wrapper, leading spaces', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('   abcdefghijklmnopqrstuvwxyz');
     final WebParagraph paragraph = builder.build();
@@ -89,14 +87,13 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 0);
-      length += lines[i].textRange.size;
+      expect(lines[i].whitespaces.size, 0);
+      length += lines[i].clusters.size;
     }
-    expect(length, paragraph.text!.length);
+    expect(length, paragraph.text.length);
   });
 
   test('Text wrapper, 14 hard line breaks', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText(
       'World\ndomination\nis\nsuch\nan\nugly\nphrase\n-\nI\nprefer\nto\ncall\nit\nworld\noptimisation.',
@@ -108,16 +105,15 @@ Future<void> testMain() async {
     expect(lines.length, 15);
     int length = 0;
     for (int i = 0; i < 15; i++) {
-      expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
-      expect(lines[i].hardLineBreak, i != 14);
-      length += lines[i].textRange.size;
-      length += lines[i].whitespacesRange.size;
+      expect(lines[i].whitespaces.size, i != 14 ? 1 : 0);
+      expect(lines[i].hardBreak, i != 14);
+      length += lines[i].clusters.size;
+      length += lines[i].whitespaces.size;
     }
-    expect(length, paragraph.text!.length);
+    expect(length, paragraph.text.length);
   });
 
   test('Text wrapper, 1 hard line break with 3 trailing spaces before', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('abcd   \nefghijklmnopqrstuvwxyz');
 
@@ -126,14 +122,13 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
-    expect(lines[0].whitespacesRange.size, 3 + 1);
-    expect(lines[0].hardLineBreak, true);
-    expect(lines[1].whitespacesRange.size, 0);
-    expect(lines[1].hardLineBreak, false);
+    expect(lines[0].whitespaces.size, 3 + 1);
+    expect(lines[0].hardBreak, true);
+    expect(lines[1].whitespaces.size, 0);
+    expect(lines[1].hardBreak, false);
   });
 
   test('Text wrapper, 3 hard line breaks and nothing else', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('\n\n\n');
 
@@ -143,9 +138,9 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 1);
-      expect(lines[i].textRange.size, 0);
-      expect(lines[i].hardLineBreak, i != 3);
+      expect(lines[i].whitespaces.size, 1);
+      expect(lines[i].clusters.size, 0);
+      expect(lines[i].hardBreak, i != 3);
     }
   });
 }

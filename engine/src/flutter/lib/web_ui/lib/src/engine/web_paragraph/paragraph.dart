@@ -137,50 +137,74 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
-class ClusterRange {
-  ClusterRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
+abstract class _RangeStartEnd {
+  _RangeStartEnd(int start, int end) {
+    this.start = start;
+    this.end = end;
+  }
+  _RangeStartEnd.collapsed(int offset) : this(offset, offset);
+  _RangeStartEnd.zero() : this.collapsed(0);
 
-  factory ClusterRange.collapsed(int offset) => ClusterRange(start: offset, end: offset);
+  int _start = -1;
+  int get start => _start;
+  set start(int value) {
+    assert(value >= -1, 'Start index cannot be negative: $value');
+    _start = value;
+  }
 
-  factory ClusterRange.empty() => ClusterRange.collapsed(0);
+  int _end = -1;
+  int get end => _end;
+  set end(int value) {
+    assert(value >= -1, 'End index cannot be negative: $value');
+    _end = value;
+  }
 
-  int start;
-  int end;
+  int get size => _end - _start;
 
-  int get size => end - start;
-  bool get isEmpty => start == end;
-
-  ClusterRange clone() => ClusterRange(start: start, end: end);
+  bool get isEmpty => _start == _end;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is ClusterRange && other.start == start && other.end == end;
+    return other is _RangeStartEnd && other._start == _start && other._end == _end;
   }
 
   @override
   int get hashCode {
-    return Object.hash(start, end);
+    return Object.hash(_start, _end);
   }
 }
 
-class StyledTextRange {
-  StyledTextRange(int start, int end, this.textStyle)
-    : _textRange = ui.TextRange(start: start, end: end);
+class ClusterRange extends _RangeStartEnd {
+  ClusterRange({required int start, required int end}) : super(start, end);
+  ClusterRange.collapsed(super.offset) : super.collapsed();
+  ClusterRange.zero() : super.zero();
 
-  ui.TextRange _textRange;
-  final WebTextStyle textStyle;
-
-  int get start => _textRange.start;
-  int get end => _textRange.end;
-
-  void extendRangeTo(int end) {
-    _textRange = ui.TextRange(start: _textRange.start, end: end);
+  ClusterRange clone() {
+    return ClusterRange(start: start, end: end);
   }
 
-  String textInside(String text) => _textRange.textInside(text);
+  @override
+  // No need to override hashCode, since _RangeStartEnd already does it.
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ClusterRange && super == other;
+  }
+}
+
+class StyledTextRange extends _RangeStartEnd {
+  StyledTextRange(super.start, super.end, this.style);
+  StyledTextRange.collapsed(super.offset, this.style) : super.collapsed();
+  StyledTextRange.zero(this.style) : super.zero();
+
+  final WebTextStyle style;
+
+  String textFrom(WebParagraph paragraph) => paragraph.text.substring(_start, _end);
 }
 
 class WebStrutStyle implements ui.StrutStyle {
@@ -210,8 +234,8 @@ class WebParagraph implements ui.Paragraph {
   List<StyledTextRange> get styledTextRanges => _styledTextRanges;
   final List<StyledTextRange> _styledTextRanges;
 
-  String? get text => _text;
-  final String? _text;
+  String get text => _text;
+  final String _text;
 
   @override
   double get alphabeticBaseline => _alphabeticBaseline;
@@ -398,7 +422,7 @@ class WebParagraphPlaceholder {}
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
     : paragraphStyle = paragraphStyle as WebParagraphStyle {
-    textStylesList.add(StyledTextRange(0, 0, paragraphStyle.getTextStyle()));
+    textStylesList.add(StyledTextRange.zero(paragraphStyle.getTextStyle()));
     textStylesStack.add(paragraphStyle.getTextStyle());
   }
 
@@ -431,7 +455,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     if (textStylesList.length > 1) {
       textStylesList.removeAt(0);
     } else {
-      textStylesList.first.extendRangeTo(text.length);
+      textStylesList.first.end = text.length;
     }
     finishStyledTextRange();
 
@@ -464,7 +488,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   void pushStyle(ui.TextStyle textStyle) {
     textStylesStack.add(textStyle as WebTextStyle);
     final last = textStylesList.last;
-    if (last.end == text.length && last.textStyle == textStyle) {
+    if (last.end == text.length && last.style == textStyle) {
       // Just continue with the same style
       return;
     }
@@ -473,7 +497,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void startStyledTextRange() {
     finishStyledTextRange();
-    textStylesList.add(StyledTextRange(text.length, text.length, textStylesStack.last));
+    textStylesList.add(StyledTextRange.collapsed(text.length, textStylesStack.last));
   }
 
   void finishStyledTextRange() {
@@ -482,7 +506,6 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
       textStylesList.removeLast();
     }
     // Update the first one found with text
-    textStylesList.last.extendRangeTo(text.length);
-    ;
+    textStylesList.last.end = text.length;
   }
 }

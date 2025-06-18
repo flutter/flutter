@@ -5,8 +5,13 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/ui.dart';
 
 import '../../common/test_initialization.dart';
+
+extension on StyledTextRange {
+  TextRange get textRange => TextRange(start: start, end: end);
+}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -32,10 +37,10 @@ Future<void> testMain() async {
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges.last.textStyle, paragraphStyle.getTextStyle());
+    expect(paragraph.styledTextRanges.last.style, paragraphStyle.getTextStyle());
     expect(
       paragraph.styledTextRanges.last.textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text.length),
     );
   });
 
@@ -65,10 +70,10 @@ Future<void> testMain() async {
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges.first.textStyle, textStyle1);
+    expect(paragraph.styledTextRanges.first.style, textStyle1);
     expect(
       paragraph.styledTextRanges.first.textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text.length),
     );
   });
 
@@ -87,10 +92,10 @@ Future<void> testMain() async {
     expect(paragraph.text, 'some text');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 1);
-    expect(paragraph.styledTextRanges[0].textStyle, textStyle3);
+    expect(paragraph.styledTextRanges[0].style, textStyle3);
     expect(
       paragraph.styledTextRanges[0].textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text.length),
     );
   });
 
@@ -114,12 +119,12 @@ Future<void> testMain() async {
     expect(paragraph.text, '[1][2][3]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].textStyle, textStyle1);
-    expect(paragraph.styledTextRanges[1].textStyle, textStyle2);
-    expect(paragraph.styledTextRanges[2].textStyle, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, ClusterRange(start: 0, end: 3));
-    expect(paragraph.styledTextRanges[1].textRange, ClusterRange(start: 3, end: 6));
-    expect(paragraph.styledTextRanges[2].textRange, ClusterRange(start: 6, end: 9));
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, textStyle2);
+    expect(paragraph.styledTextRanges[2].style, textStyle3);
+    expect(paragraph.styledTextRanges[0].textRange, const TextRange(start: 0, end: 3));
+    expect(paragraph.styledTextRanges[1].textRange, const TextRange(start: 3, end: 6));
+    expect(paragraph.styledTextRanges[2].textRange, const TextRange(start: 6, end: 9));
   });
 
   test('Build paragraph with nested styles [1[2[3]]]', () {
@@ -139,12 +144,12 @@ Future<void> testMain() async {
     expect(paragraph.text, '[1[2[3]]]');
     expect(paragraph.paragraphStyle, paragraphStyle);
     expect(paragraph.styledTextRanges.length, 3);
-    expect(paragraph.styledTextRanges[0].textStyle, textStyle1);
-    expect(paragraph.styledTextRanges[1].textStyle, textStyle2);
-    expect(paragraph.styledTextRanges[2].textStyle, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, ClusterRange(start: 0, end: 2));
-    expect(paragraph.styledTextRanges[1].textRange, ClusterRange(start: 2, end: 4));
-    expect(paragraph.styledTextRanges[2].textRange, ClusterRange(start: 4, end: 9));
+    expect(paragraph.styledTextRanges[0].style, textStyle1);
+    expect(paragraph.styledTextRanges[1].style, textStyle2);
+    expect(paragraph.styledTextRanges[2].style, textStyle3);
+    expect(paragraph.styledTextRanges[0].textRange, const TextRange(start: 0, end: 2));
+    expect(paragraph.styledTextRanges[1].textRange, const TextRange(start: 2, end: 4));
+    expect(paragraph.styledTextRanges[2].textRange, const TextRange(start: 4, end: 9));
   });
 
   test('Build paragraph with complex nested styles [1[11[111][112]]][2[21[221][222]]]', () {
