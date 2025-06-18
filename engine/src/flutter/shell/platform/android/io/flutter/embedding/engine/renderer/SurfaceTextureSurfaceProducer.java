@@ -93,18 +93,16 @@ final class SurfaceTextureSurfaceProducer
 
   @Override
   public Surface getSurface() {
-    return getSurface(false);
-  }
-
-  @Override
-  public Surface getSurface(boolean forceNewSurface) {
-    if (forceNewSurface) {
-      surface = null;
-    }
     if (surface == null || !surface.isValid()) {
       surface = createSurface(texture.surfaceTexture());
     }
     return surface;
+  }
+
+  @Override
+  public Surface getForcedNewSurface() {
+    surface = null;
+    return getSurface();
   }
 
   @VisibleForTesting

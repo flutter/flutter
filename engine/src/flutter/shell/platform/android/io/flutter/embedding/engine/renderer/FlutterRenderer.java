@@ -827,19 +827,17 @@ public class FlutterRenderer implements TextureRegistry {
 
     @Override
     public Surface getSurface() {
-      return getSurface(false);
-    }
-
-    @Override
-    public Surface getSurface(boolean forceNewSurface) {
-      if (forceNewSurface) {
-        createNewReader = true;
-      }
       PerImageReader pir = getActiveReader();
       if (VERBOSE_LOGS) {
         Log.i(TAG, pir.reader.hashCode() + " returning surface to render a new frame.");
       }
       return pir.reader.getSurface();
+    }
+
+    @Override
+    public Surface getForcedNewSurface() {
+      createNewReader = true;
+      return getSurface();
     }
 
     @Override

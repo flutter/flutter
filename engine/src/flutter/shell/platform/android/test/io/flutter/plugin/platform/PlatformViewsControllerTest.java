@@ -1690,7 +1690,7 @@ public class PlatformViewsControllerTest {
               }
 
               @Override
-              public Surface getSurface(boolean forceNewSurface) {
+              public Surface getForcedNewSurface() {
                 return null;
               }
 

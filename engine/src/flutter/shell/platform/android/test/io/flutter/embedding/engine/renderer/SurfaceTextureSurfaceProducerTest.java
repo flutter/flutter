@@ -135,7 +135,7 @@ public final class SurfaceTextureSurfaceProducerTest {
   }
 
   @Test
-  public void getSurfaceWithForceNewSurface_forcesGetSurfaceToReturnNewSurface() {
+  public void getForcedNewSurface_returnsNewSurface() {
     final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
     final Handler handler = new Handler(Looper.getMainLooper());
     final SurfaceTextureSurfaceProducer producer =
@@ -143,13 +143,13 @@ public final class SurfaceTextureSurfaceProducerTest {
             0, handler, fakeJNI, flutterRenderer.registerSurfaceTexture(new SurfaceTexture(0)));
 
     final Surface firstSurface = producer.getSurface();
-    final Surface secondSurface = producer.getSurface(true);
+    final Surface secondSurface = producer.getForcedNewSurface();
 
     assertNotEquals(firstSurface, secondSurface);
   }
 
   @Test
-  public void getSurfaceWithForceNewSurface_doesNotForceGetSurfaceToReturnNewSurfaceAsExpected() {
+  public void getSurface_doesNotReturnNewSurface() {
     final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
     final Handler handler = new Handler(Looper.getMainLooper());
     final SurfaceTextureSurfaceProducer producer =
@@ -157,7 +157,7 @@ public final class SurfaceTextureSurfaceProducerTest {
             0, handler, fakeJNI, flutterRenderer.registerSurfaceTexture(new SurfaceTexture(0)));
 
     Surface firstSurface = producer.getSurface();
-    Surface secondSurface = producer.getSurface(false);
+    Surface secondSurface = producer.getSurface();
 
     assertEquals(firstSurface, secondSurface);
   }

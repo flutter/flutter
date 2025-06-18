@@ -130,8 +130,6 @@ public interface TextureRegistry {
      * surface has been destroyed (such as when the application goes to the background) or a new
      * surface has been created (such as when the application is resumed back to the foreground).
      *
-     * <p>Calling this method is the same as calling {@link #getSurface(boolean)} with false.
-     *
      * <p>NOTE: You should not cache the returned surface but instead invoke {@code getSurface} each
      * time you need to draw. The surface may change when the texture is resized or has its format
      * changed.
@@ -142,8 +140,8 @@ public interface TextureRegistry {
 
     /**
      * Direct access to a surface, which will be newly created (and thus, different from any surface
-     * objects returned from previous calls to {@link #getSurface()} or {@link #getSurface(boolean)}
-     * if {@code forceNewSurface} is true.
+     * objects returned from previous calls to {@link #getSurface()} or {@link
+     * #getForcedNewSurface()}.
      *
      * <p>When using this API, you will usually need to implement {@link SurfaceProducer.Callback}
      * and provide it to {@link #setCallback(Callback)} in order to be notified when an existing
@@ -156,7 +154,7 @@ public interface TextureRegistry {
      *
      * @return a Surface to use for a drawing target for various APIs.
      */
-    Surface getSurface(boolean forceNewSurface);
+    Surface getForcedNewSurface();
 
     /**
      * Sets a callback that is notified when a previously created {@link Surface} returned by {@link

@@ -1042,23 +1042,23 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void getSurfaceWithForceNewSurface_forcesGetSurfaceToReturnNewSurfaceAsExpected() {
+  public void getForcedNewSurface_returnsNewSurface() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     Surface firstSurface = producer.getSurface();
-    Surface secondSurface = producer.getSurface(true);
+    Surface secondSurface = producer.getForcedNewSurface();
 
     assertNotEquals(firstSurface, secondSurface);
   }
 
   @Test
-  public void getSurfaceWithForceNewSurface_doesNotForceGetSurfaceToReturnNewSurfaceAsExpected() {
+  public void getSurface_doesNotReturnNewSurface() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     Surface firstSurface = producer.getSurface();
-    Surface secondSurface = producer.getSurface(false);
+    Surface secondSurface = producer.getSurface();
 
     assertEquals(firstSurface, secondSurface);
   }
