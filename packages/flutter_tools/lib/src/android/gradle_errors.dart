@@ -123,6 +123,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     'java.net.SocketException: Connection reset',
     'java.util.zip.ZipException: error in opening zip file',
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
+    'Exception in thread "main" java.net.ConnectException: Connection timed out: connect',
   ]),
   handler: ({
     required String line,
