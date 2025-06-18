@@ -5361,7 +5361,7 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// expanded/collapsed state.
-  bool? get isExpanded =>  _flags.isExpanded.toBoolOrNull();
+  bool? get isExpanded => _flags.isExpanded.toBoolOrNull();
   set isExpanded(bool? value) {
     _flags = _flags.copyWith(isExpanded: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
@@ -5451,11 +5451,14 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] can hold the input focus.
   bool get isFocusable => _flags.isFocused != Tristate.none;
   set isFocusable(bool value) {
-    if (value == false) {
+    if (value) {
+      if (_flags.isFocused == Tristate.none) {
+        _flags = _flags.copyWith(isFocused: Tristate.isFalse);
+      }
+    } else {
       _flags = _flags.copyWith(isFocused: Tristate.none);
-    } else if (_flags.isFocused == Tristate.none) {
-      _flags = _flags.copyWith(isFocused: Tristate.isFalse);
     }
+
     _hasBeenAnnotated = true;
   }
 
@@ -6116,17 +6119,16 @@ int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
   return targetLevel == 0 ? sourceLevel : targetLevel;
 }
 
-
-  Tristate _tristateFromBoolOrNull(bool? value) {
-    if (value == null) {
-      return Tristate.none;
-    }
-
-    if (value) {
-      return Tristate.isTrue;
-    }
-    return Tristate.isFalse;
+Tristate _tristateFromBoolOrNull(bool? value) {
+  if (value == null) {
+    return Tristate.none;
   }
+
+  if (value) {
+    return Tristate.isTrue;
+  }
+  return Tristate.isFalse;
+}
 
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
