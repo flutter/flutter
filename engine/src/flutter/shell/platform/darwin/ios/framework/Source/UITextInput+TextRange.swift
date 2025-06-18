@@ -5,7 +5,7 @@
 import UIKit
 
 @objc(FlutterTextPosition)
-public final class TextPosition: UITextPosition, NSCopying {
+final class TextPosition: UITextPosition, NSCopying {
   let offset: UInt
   @objc let affinity: UITextStorageDirection
 
@@ -14,7 +14,7 @@ public final class TextPosition: UITextPosition, NSCopying {
     self.affinity = affinity
   }
 
-  override public func isEqual(_ object: Any?) -> Bool {
+  override func isEqual(_ object: Any?) -> Bool {
     guard let other = object as? TextPosition else {
       return false
     }
@@ -22,17 +22,17 @@ public final class TextPosition: UITextPosition, NSCopying {
     return offset == other.offset
   }
 
-  public func copy(with zone: NSZone? = nil) -> Any {
+  func copy(with zone: NSZone? = nil) -> Any {
     return TextPosition(index: offset, affinity: affinity)
   }
 
-  override public var description: String {
+  override var description: String {
     "TextPosition(\(index))"
   }
 }
 
 @objc(FlutterTextRange)
-public final class TextRange: UITextRange, NSCopying {
+final class TextRange: UITextRange, NSCopying {
   internal let nsRange: NSRange
 
   init(NSRange range: NSRange) {
@@ -40,21 +40,21 @@ public final class TextRange: UITextRange, NSCopying {
     self.nsRange = range
   }
 
-  public func copy(with zone: NSZone? = nil) -> Any {
+  func copy(with zone: NSZone? = nil) -> Any {
     TextRange(NSRange: nsRange)
   }
 
-  override public var start: TextPosition {
+  override var start: TextPosition {
     TextPosition(index: UInt(nsRange.lowerBound))
   }
 
-  override public var end: TextPosition {
+  override var end: TextPosition {
     TextPosition(index: UInt(nsRange.upperBound))
   }
 
-  override public var isEmpty: Bool { range.length == 0 }
+  override var isEmpty: Bool { range.length == 0 }
 
-  override public func isEqual(_ object: Any?) -> Bool {
+  override func isEqual(_ object: Any?) -> Bool {
     guard let other = object as? TextRange else {
       return false
     }
@@ -69,7 +69,7 @@ public final class TextRange: UITextRange, NSCopying {
   /// On iOS 13, the default standard Korean keyboard incorrectly may delete the low surrogate and
   /// leaves the high surrogate in the string, resulting in a malformed string and subsequently a crash during
   /// UTF8 encoding. See: https://github.com/flutter/flutter/issues/111494.
-  @objc public func safeRange(in document: UITextInput) -> TextRange {
+  @objc func safeRange(in document: UITextInput) -> TextRange {
     let fullText = document.fullText
     let start = self.start.index
     let end = self.end.index
@@ -86,7 +86,7 @@ public final class TextRange: UITextRange, NSCopying {
       NSRange: NSRange(location: Int(newStart), length: newStart.distance(to: newEnd)))
   }
 
-  override public var description: String {
+  override var description: String {
     "TextRange(\(range))"
   }
 }
@@ -94,19 +94,19 @@ public final class TextRange: UITextRange, NSCopying {
 // MARK: Class methods for initializing in Objective-C
 
 @objc extension TextPosition {
-  public class func position(withIndex index: UInt, affinity: UITextStorageDirection)
+  class func position(withIndex index: UInt, affinity: UITextStorageDirection)
     -> TextPosition
   {
     TextPosition(index: index, affinity: affinity)
   }
 
-  public class func position(withIndex index: UInt) -> TextPosition {
+  class func position(withIndex index: UInt) -> TextPosition {
     TextPosition(index: index)
   }
 }
 
 @objc extension TextRange {
-  public class func range(withNSRange range: NSRange) -> TextRange {
+  class func range(withNSRange range: NSRange) -> TextRange {
     TextRange(NSRange: range)
   }
 }
@@ -118,16 +118,16 @@ public final class TextRange: UITextRange, NSCopying {
   ///
   /// This computed property throws if the receiver is not a FlutterTextRange.
   /// This is a left closed right open interval.
-  public var range: NSRange { (self as! TextRange).nsRange }
+  var range: NSRange { (self as! TextRange).nsRange }
 }
 
 @objc extension UITextPosition {
   /// The offset from the start of the document to this FlutterTextPosition, in UTF16 code units.
   ///
   /// This computed property throws if the receiver is not a FlutterTextRange.
-  public var index: UInt { (self as! TextPosition).offset }
+  var index: UInt { (self as! TextPosition).offset }
 
-  public func compare(to other: UITextPosition) -> ComparisonResult {
+  func compare(to other: UITextPosition) -> ComparisonResult {
     let otherIndex = other.index
     let index = self.index
     if otherIndex == index {
@@ -138,7 +138,7 @@ public final class TextRange: UITextRange, NSCopying {
     return .orderedDescending
   }
 
-  public func offset(by offset: Int, inDocument document: UITextInput)
+  func offset(by offset: Int, inDocument document: UITextInput)
     -> TextPosition?
   {
     let newOffset = offset + Int(index)
@@ -153,7 +153,7 @@ public final class TextRange: UITextRange, NSCopying {
 // MARK: Convenience extensions
 
 extension String.UTF16View {
-  public subscript(index: UInt) -> Unicode.UTF16.CodeUnit {
+  subscript(index: UInt) -> Unicode.UTF16.CodeUnit {
     self[self.index(startIndex, offsetBy: Int(index))]
   }
 }
@@ -164,7 +164,7 @@ extension String.UTF16View {
   //
   // The implementation tries to match the behavior of this Core Foundation function:
   // https://github.com/opensource-apple/CF/blob/3cc41a76b1491f50813e28a4ec09954ffa359e6f/CFString.c#L3658-L3833
-  @objc public func getBackspaceDeleteRange(forCaretLocation utf16Offset: UInt) -> NSRange {
+  @objc func getBackspaceDeleteRange(forCaretLocation utf16Offset: UInt) -> NSRange {
     guard utf16Offset != 0 else {
       return NSRange(location: 0, length: 0)
     }
