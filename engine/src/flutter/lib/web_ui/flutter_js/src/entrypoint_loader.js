@@ -67,7 +67,8 @@ export class FlutterEntrypointLoader {
     const { entryPointBaseUrl } = config;
     if (!entrypointBaseUrl && entryPointBaseUrl) {
       console.warn(
-        '[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. Use `entrypointBaseUrl` instead.'
+        '[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. '
+        'Use `entrypointBaseUrl` instead.'
       );
       entrypointBaseUrl = entryPointBaseUrl;
     }
