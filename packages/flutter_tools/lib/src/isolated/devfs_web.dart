@@ -49,7 +49,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
-      bool injectDebuggingSupportCode,
+      bool useDwdsWebSocketConnection,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -264,9 +264,11 @@ class WebAssetServer implements AssetReader {
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
     bool canaryFeatures = false,
+    bool useDwdsWebSocketConnection = false,
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
+    bool shouldEnableMiddleware = false,
   }) async {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -383,15 +385,6 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen((logging.LogRecord event) => log(logger, event));
 
-    // Retrieve connected web devices.
-    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-    final Set<String> connectedWebDeviceIds =
-        devices
-            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
-            .map((Device d) => d.id)
-            .toSet() ??
-        <String>{};
-
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -442,15 +435,12 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Inject the debugging support code if connected web devices are present,
-      // and user specified a device id that matches a connected web device.
-      // If the user did not specify a device id, we use chrome as the default.
-      injectDebuggingSupportCode:
-          connectedWebDeviceIds.isNotEmpty &&
-          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
+      // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
-    if (enableDwds) {
+
+    if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware);
       pipeline = pipeline.addMiddleware(dwds.middleware);
     }
@@ -877,6 +867,7 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
+    this.useDwdsWebSocketConnection = false,
     required this.fileSystem,
     required this.logger,
     required this.platform,
@@ -912,6 +903,7 @@ class WebDevFS implements DevFS {
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final bool useDwdsWebSocketConnection;
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
@@ -919,6 +911,10 @@ class WebDevFS implements DevFS {
   late WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
+
+  /// Whether middleware should be enabled for this web development server.
+  /// Middleware is enabled when using Chrome device or DDC module system.
+  bool get shouldEnableMiddleware => chromiumLauncher != null || ddcModuleSystem;
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
@@ -1017,9 +1013,11 @@ class WebDevFS implements DevFS {
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      shouldEnableMiddleware: shouldEnableMiddleware,
     );
     return baseUri!;
   }
@@ -1101,13 +1099,13 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnableMiddleware,
               isWindows: platform.isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnableMiddleware,
             ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
