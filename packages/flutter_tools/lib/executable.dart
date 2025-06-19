@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
+import 'src/base/common.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -63,6 +65,31 @@ import 'src/web/web_runner.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<void> main(List<String> args) async {
+  // The last arg can start with @ and is a file that contains a list
+  // of args that should replace the filename as if they were just provided
+  // inline.
+  //
+  // These replacements must happen first before anything else looks at args to
+  // ensure all args behave identically from the file or supplied on the command
+  // line.
+  //
+  // It is up to the calling code to clean up this file (if required) after
+  // the test process terminates.
+  if (args.isNotEmpty) {
+    args = args.toList(); // Ensure mutable
+    String lastArg = args.last;
+    if (lastArg.startsWith('@')) {
+      lastArg = lastArg.substring(1); // Strip @
+      final File argsFile = globals.localFileSystem.file(lastArg); // Path must be relative to cwd
+      try {
+        args.removeLast();
+        args.addAll(argsFile.readAsLinesSync().where((String line) => line.trim().isNotEmpty));
+      } catch (e) {
+        throwToolExit('Failed to read the file "$lastArg" for arguments: $e');
+      }
+    }
+  }
+
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
