@@ -63,8 +63,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        FlutterVersion:
-            () => FakeFlutterVersion(frameworkRevision: upstreamRevision),
+        FlutterVersion: () => FakeFlutterVersion(frameworkRevision: upstreamRevision),
         Logger: () => logger,
         ProcessManager: () => processManager,
       },
@@ -97,8 +96,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        FlutterVersion:
-            () => FakeFlutterVersion(frameworkRevision: startingRevision),
+        FlutterVersion: () => FakeFlutterVersion(frameworkRevision: startingRevision),
         Logger: () => logger,
         ProcessManager: () => processManager,
       },
@@ -126,8 +124,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        FlutterVersion:
-            () => FakeFlutterVersion(),
+        FlutterVersion: () => FakeFlutterVersion(),
         Logger: () => logger,
         ProcessManager: () => processManager,
       },
@@ -155,8 +152,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        FlutterVersion:
-            () => FakeFlutterVersion(),
+        FlutterVersion: () => FakeFlutterVersion(),
         Logger: () => logger,
         ProcessManager: () => processManager,
       },
@@ -182,13 +178,12 @@ void main() {
           'non-standard remote "$repositoryUrl".\n'
           'Set the environment variable "FLUTTER_GIT_URL" to "$repositoryUrl". '
           'If this is intentional, it is recommended to use "git" directly '
-          'to manage the SDK.\n'
+          'to manage the SDK.\n',
         );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        FlutterVersion:
-            () => FakeFlutterVersion(repositoryUrl: repositoryUrl),
+        FlutterVersion: () => FakeFlutterVersion(repositoryUrl: repositoryUrl),
         Logger: () => logger,
         ProcessManager: () => processManager,
       },

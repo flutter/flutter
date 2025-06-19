@@ -567,12 +567,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         globals.printStatus(
           'Unable to check for updates: Your Flutter checkout is currently not '
-          'on a release branch.'
+          'on a release branch.',
         );
       } else if (errorString.contains('fatal: no upstream configured for branch')) {
         globals.printStatus(
           'Unable to check for updates: The current Flutter branch/channel is '
-          'not tracking any remote repository.'
+          'not tracking any remote repository.',
         );
       } else {
         globals.printStatus(errorString);
