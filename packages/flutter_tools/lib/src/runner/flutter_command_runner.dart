@@ -23,9 +23,6 @@ import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
 
-// The official docs to install Flutter.
-const String _flutterInstallDocs = 'https://flutter.dev/setup';
-
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
   static const String kColorFlag = 'color';
