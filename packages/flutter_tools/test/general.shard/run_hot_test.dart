@@ -57,6 +57,7 @@ void main() {
       false,
       'test-reason',
       const NoOpAnalytics(),
+      addBenchmarkData: (String name, int value) {},
     );
 
     expect(fakeService._reloadedIsolates.length, equals(2));
@@ -149,10 +150,7 @@ class _FakeAnalytics extends Fake implements Analytics {
   void send(Event event) {}
 }
 
-class _FakeHotRunner extends Fake implements HotRunner {
-  @override
-  void addBenchmarkData(String name, int value) {}
-}
+class _FakeHotRunner extends Fake implements HotRunner {}
 
 class _FakeDevFS extends Fake implements DevFS {
   @override

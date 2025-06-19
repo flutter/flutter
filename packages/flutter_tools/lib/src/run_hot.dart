@@ -158,7 +158,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  void addBenchmarkData(String name, int value) {
+  void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
     benchmarkData[name]!.add(value);
   }
@@ -300,7 +300,7 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
-    addBenchmarkData(
+    _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
     );
@@ -717,7 +717,7 @@ class HotRunner extends ResidentRunner {
     globals.printTrace(
       'Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.',
     );
-    addBenchmarkData('hotRestartMillisecondsToFrame', restartTimer.elapsed.inMilliseconds);
+    _addBenchmarkData('hotRestartMillisecondsToFrame', restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
@@ -1027,7 +1027,7 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took to synchronize to DevFS.
     bool shouldReportReloadTime = true;
-    addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
+    _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
     }
@@ -1057,7 +1057,7 @@ class HotRunner extends ResidentRunner {
       }
       reloadMessage = result.message;
     } else {
-      addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
+      _addBenchmarkData('hotReloadVMReloadMilliseconds', 0);
     }
     reloadVMTimer.stop();
     extraTimings.add(OperationResultExtraTiming('reload', reloadVMTimer.elapsedMilliseconds));
@@ -1079,7 +1079,7 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for Flutter to reassemble the application.
     reassembleTimer.stop();
-    addBenchmarkData(
+    _addBenchmarkData(
       'hotReloadFlutterReassembleMilliseconds',
       reassembleTimer.elapsed.inMilliseconds,
     );
@@ -1142,7 +1142,7 @@ class HotRunner extends ResidentRunner {
     if (shouldReportReloadTime) {
       globals.printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadDuration)}.');
       // Record complete time it took for the reload.
-      addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
+      _addBenchmarkData('hotReloadMillisecondsToFrame', reloadInMs);
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleResult.reassembleViews.length == 1) &&
@@ -1253,6 +1253,8 @@ class HotRunner extends ResidentRunner {
   }
 }
 
+typedef AddBenchmarkDataCallback = void Function(String name, int value);
+
 typedef ReloadSourcesHelper =
     Future<OperationResult> Function(
       HotRunner hotRunner,
@@ -1276,8 +1278,11 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Analytics analytics,
-) async {
+  Analytics analytics, {
+  AddBenchmarkDataCallback? addBenchmarkData,
+}) async {
+  addBenchmarkData ??= hotRunner._addBenchmarkData;
+
   final Stopwatch vmReloadTimer = Stopwatch()..start();
   const String entryPath = 'main.dart.incremental.dill';
   final List<Future<DeviceReloadReport?>> allReportsFutures = <Future<DeviceReloadReport?>>[];
@@ -1340,7 +1345,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
   // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
   // Record time it took for the VM to reload the sources.
-  hotRunner.addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
+  addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
   return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
 }
 
