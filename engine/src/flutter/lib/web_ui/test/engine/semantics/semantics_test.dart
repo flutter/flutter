@@ -3226,7 +3226,10 @@ void _testTappable() {
         }),
       );
 
-      expect(capturedActions, <CapturedAction>[(0, ui.SemanticsAction.tap, null)]);
+      expect(capturedActions, <CapturedAction>[
+        (0, ui.SemanticsAction.focus, null),
+        (0, ui.SemanticsAction.tap, null),
+      ]);
     }
 
     // Tap on the inner element
@@ -3245,7 +3248,10 @@ void _testTappable() {
 
       // The click on the inner element should not propagate to the parent to
       // avoid sending a second SemanticsAction.tap action to the framework.
-      expect(capturedActions, <CapturedAction>[(1, ui.SemanticsAction.tap, null)]);
+      expect(capturedActions, <CapturedAction>[
+        (1, ui.SemanticsAction.focus, null),
+        (1, ui.SemanticsAction.tap, null),
+      ]);
     }
 
     semantics().semanticsEnabled = false;
