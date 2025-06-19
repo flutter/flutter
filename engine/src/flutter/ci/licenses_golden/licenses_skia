@@ -1,4 +1,4 @@
-Signature: 362a50f3c95387624dd85f340fd2343e
+Signature: e43c8caa051766ac4cb37afb8cc1e061
 
 ====================================================================================================
 LIBRARY: etc1
@@ -10041,9 +10041,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.h
 FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.
