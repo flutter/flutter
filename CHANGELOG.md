@@ -29,6 +29,10 @@ INTERNAL NOTE
 
 ## Flutter 3.32 Changes
 
+### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
+
+- [flutter/170880](https://github.com/flutter/flutter/pull/170880) - Fixes unhandled exception on application shutdown in the debug adapter used by IDEs.
+
 ### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
 
 - [flutter/170536](https://github.com/flutter/flutter/issues/170536) - Fixes a code-signing issue on Mac hosts when running `dart` tooling.
