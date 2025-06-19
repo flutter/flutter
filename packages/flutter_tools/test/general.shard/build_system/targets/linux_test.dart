@@ -173,6 +173,22 @@ void main() {
     );
   });
 
+  testWithoutContext('DebugBundleLinuxAssets honors unpackDesktopEmbedder flag', () async {
+    expect(
+      const DebugBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+      ).dependencies.map((Target dep) => dep.name),
+      contains('unpack_linux'),
+    );
+    expect(
+      const DebugBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+        unpackDesktopEmbedder: false,
+      ).dependencies.map((Target dep) => dep.name),
+      isNot(contains('unpack_linux')),
+    );
+  });
+
   testUsingContext(
     'ProfileBundleLinuxAssets copies artifacts to out directory',
     () async {
@@ -219,6 +235,22 @@ void main() {
     );
   });
 
+  testWithoutContext('ProfileBundleLinuxAssets honors unpackDesktopEmbedder flag', () async {
+    expect(
+      const ProfileBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+      ).dependencies.map((Target dep) => dep.name),
+      contains('unpack_linux'),
+    );
+    expect(
+      const ProfileBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+        unpackDesktopEmbedder: false,
+      ).dependencies.map((Target dep) => dep.name),
+      isNot(contains('unpack_linux')),
+    );
+  });
+
   testUsingContext(
     'ReleaseBundleLinuxAssets copies artifacts to out directory',
     () async {
@@ -262,6 +294,22 @@ void main() {
     expect(
       const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64).name,
       'release_bundle_linux-arm64_assets',
+    );
+  });
+
+  testWithoutContext('ReleaseBundleLinuxAssets honors unpackDesktopEmbedder flag', () async {
+    expect(
+      const ReleaseBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+      ).dependencies.map((Target dep) => dep.name),
+      contains('unpack_linux'),
+    );
+    expect(
+      const ReleaseBundleLinuxAssets(
+        TargetPlatform.linux_x64,
+        unpackDesktopEmbedder: false,
+      ).dependencies.map((Target dep) => dep.name),
+      isNot(contains('unpack_linux')),
     );
   });
 }
