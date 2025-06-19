@@ -147,17 +147,7 @@ class AOTSnapshotter {
 
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
-    bool shouldStrip = true;
-    if (extraGenSnapshotOptions.isNotEmpty) {
-      _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      for (final String option in extraGenSnapshotOptions) {
-        if (option == '--no-strip') {
-          shouldStrip = false;
-          continue;
-        }
-        genSnapshotArgs.add(option);
-      }
-    }
+    bool shouldStrip = _requestedStrip(extraGenSnapshotOptions) ?? true;
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
     if (targetingApplePlatform) {
@@ -174,6 +164,15 @@ class AOTSnapshotter {
       stripAfterBuild = shouldStrip;
       if (stripAfterBuild) {
         _logger.printTrace('Will strip AOT snapshot manually after build and dSYM generation.');
+      }
+    } else if (platform == TargetPlatform.android) {
+      // If the argument was explicitly passed respect it, otherwise default
+      // to false.
+      if (_requestedStrip(extraGenSnapshotOptions) ?? false) {
+        stripAfterBuild = false;
+        genSnapshotArgs.add('--strip');
+      } else {
+        genSnapshotArgs.add('--no-strip');
       }
     } else {
       stripAfterBuild = false;
@@ -241,6 +240,21 @@ class AOTSnapshotter {
     } else {
       return 0;
     }
+  }
+
+  bool? _requestedStrip(List<String> extraGenSnapshotOptions) {
+    if (extraGenSnapshotOptions.isNotEmpty) {
+      _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
+      for (final String option in extraGenSnapshotOptions) {
+        if (option == '--no-strip') {
+          return false;
+        }
+        if (option == '--strip') {
+          return true;
+        }
+      }
+    }
+    return null;
   }
 
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly

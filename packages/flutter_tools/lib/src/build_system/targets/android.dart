@@ -247,10 +247,6 @@ class AndroidAot extends AotElfBase {
       extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
-    // AGP handles stripping debug symbols from native libraries, so we default
-    // to not stripping on Android.
-    extraGenSnapshotOptions.add('--no-strip');
-
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
