@@ -1,4 +1,4 @@
-Signature: 08b274b7a1d7a44714f98bfad6cfa615
+Signature: 666ded32ef7550cacf45c021f3a7f6c8
 
 ====================================================================================================
 LIBRARY: dart
@@ -4892,7 +4892,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/4ab716b09e9df03c13502de0668324383c6b878b
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/6020126c10e84932bf15834a529acb662f6235d4
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
