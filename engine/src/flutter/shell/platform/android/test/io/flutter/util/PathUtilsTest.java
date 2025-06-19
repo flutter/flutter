@@ -12,19 +12,17 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Build;
-import io.flutter.Build.API_LEVELS;
 import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(RobolectricTestRunner.class)
 public class PathUtilsTest {
 
   private static final String APP_DATA_PATH = "/data/data/package_name";
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetFilesDir() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(new File(APP_DATA_PATH + "/files"));
@@ -32,7 +30,6 @@ public class PathUtilsTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetFilesPathWhenDiskFullAndFilesDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(null);
@@ -45,7 +42,6 @@ public class PathUtilsTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetFlutterDataDir() {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE))
@@ -54,7 +50,6 @@ public class PathUtilsTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetFlutterDataPathWhenDiskFullAndFlutterDataDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE)).thenReturn(null);
@@ -67,7 +62,6 @@ public class PathUtilsTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetCacheDir() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(new File(APP_DATA_PATH + "/cache"));
@@ -76,7 +70,6 @@ public class PathUtilsTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetCachePathWhenDiskFullAndCacheDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(null);
