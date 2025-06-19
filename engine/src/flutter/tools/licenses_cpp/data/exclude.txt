@@ -1,0 +1,9 @@
+# This file describes all the files we don't need to do a copyright header
+# check on.
+.*\/test\/.*
+.*\/testing\/.*
+.*\/tests\/.*
+.*/third_party/swiftshader/third_party/llvm-16.0/.*
+.*/third_party/swiftshader/third_party/llvm-10.0/.*
+.*/third_party/llvm-project/.*
+.*/third_party/ocmock/.*
