@@ -2615,8 +2615,6 @@ void main() {
         final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
         await tester.pumpWidget(Navigator(key: navigatorKey, onGenerateRoute: (_) => null));
         final dynamic exception = tester.takeException();
-        expect(exception, isNotNull);
-        expect(exception, isFlutterError);
         final FlutterError error = exception as FlutterError;
         expect(error, isNotNull);
         expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
@@ -2645,8 +2643,6 @@ void main() {
           Navigator(key: navigatorKey, onGenerateRoute: (_) => null, onUnknownRoute: (_) => null),
         );
         final dynamic exception = tester.takeException();
-        expect(exception, isNotNull);
-        expect(exception, isFlutterError);
         final FlutterError error = exception as FlutterError;
         expect(error, isNotNull);
         expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
