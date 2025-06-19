@@ -154,7 +154,17 @@ class AOTSnapshotter {
 
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
-    bool shouldStrip = _requestedStrip(extraGenSnapshotOptions) ?? true;
+    bool shouldStrip = true;
+    if (extraGenSnapshotOptions.isNotEmpty) {
+      _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
+      for (final String option in extraGenSnapshotOptions) {
+        if (option == '--no-strip') {
+          shouldStrip = false;
+          continue;
+        }
+        genSnapshotArgs.add(option);
+      }
+    }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
     if (targetingApplePlatform) {
@@ -174,11 +184,7 @@ class AOTSnapshotter {
       }
     } else if (targetingAndroidPlatform) {
       stripAfterBuild = false;
-      // If the argument was explicitly passed respect it, otherwise default
-      // to false.
-      if (_requestedStrip(extraGenSnapshotOptions) ?? false) {
-        genSnapshotArgs.add('--strip');
-      }
+      // When building for Android, we let AGP handle stripping of debug symbols.
     } else {
       stripAfterBuild = false;
       if (shouldStrip) {
@@ -245,21 +251,6 @@ class AOTSnapshotter {
     } else {
       return 0;
     }
-  }
-
-  bool? _requestedStrip(List<String> extraGenSnapshotOptions) {
-    if (extraGenSnapshotOptions.isNotEmpty) {
-      _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      for (final String option in extraGenSnapshotOptions) {
-        if (option == '--no-strip') {
-          return false;
-        }
-        if (option == '--strip') {
-          return true;
-        }
-      }
-    }
-    return null;
   }
 
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
