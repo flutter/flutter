@@ -12,17 +12,20 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Build;
+import io.flutter.Build.API_LEVELS;
+
 import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class PathUtilsTest {
 
   private static final String APP_DATA_PATH = "/data/data/package_name";
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetFilesDir() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(new File(APP_DATA_PATH + "/files"));
@@ -30,6 +33,7 @@ public class PathUtilsTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetFilesPathWhenDiskFullAndFilesDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(null);
@@ -42,6 +46,7 @@ public class PathUtilsTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetFlutterDataDir() {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE))
@@ -50,6 +55,7 @@ public class PathUtilsTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetFlutterDataPathWhenDiskFullAndFlutterDataDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE)).thenReturn(null);
@@ -62,27 +68,23 @@ public class PathUtilsTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canGetCacheDir() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(new File(APP_DATA_PATH + "/cache"));
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
-      when(context.getCodeCacheDir()).thenReturn(new File(APP_DATA_PATH + "/code_cache"));
-    }
+    when(context.getCodeCacheDir()).thenReturn(new File(APP_DATA_PATH + "/code_cache"));
     assertTrue(PathUtils.getCacheDirectory(context).startsWith(APP_DATA_PATH));
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void canOnlyGetCachePathWhenDiskFullAndCacheDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(null);
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
-      when(context.getCodeCacheDir()).thenReturn(null);
-    }
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
-    } else {
-      when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
-    }
+    // Requires at least api 21.
+    when(context.getCodeCacheDir()).thenReturn(null);
+    // Requires at least api 24.
+    when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
     assertEquals(PathUtils.getCacheDirectory(context), APP_DATA_PATH + "/cache");
   }
 }

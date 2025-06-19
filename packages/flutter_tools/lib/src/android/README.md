@@ -32,6 +32,7 @@ preemptively).
 Also, make sure to also update to the same version in the following places:
 - The versions for error/warn in `packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt`.
 - The version in the dependencies block in `packages/flutter_tools/gradle/build.gradle.kts`.
+- The flutter min version in `engine/src/flutter/shell/platform/android/io/flutter/Build.java`
 
 #### Gradle
 When updating the Gradle version used in project templates
