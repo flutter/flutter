@@ -33,6 +33,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'gradle_utils.dart' as gradle;
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -42,7 +43,7 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
 ///
-/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt
 ///
 /// The expected output from the task should be similar to:
 ///
@@ -52,6 +53,11 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
+@visibleForTesting
+const String failedToStripDebugSymbolsErrorMessage = r'''
+Release app bundle failed to strip debug symbols from native libraries. Please run flutter doctor and ensure that the Android toolchain does not report any issues.
+
+Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 
 typedef _OutputParser = void Function(String line);
 
@@ -85,6 +91,9 @@ Directory getBundleDirectory(FlutterProject project) {
           .childDirectory('outputs')
           .childDirectory('bundle');
 }
+
+@visibleForTesting
+final String apkAnalyzerBinaryName = globals.platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
 
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
@@ -128,7 +137,7 @@ const String androidX86DeprecationWarning =
 
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
+/// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
@@ -183,6 +192,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required Set<AndroidBuildInfo> androidBuildInfo,
     required String target,
+    required Future<void> Function(FlutterProject, {required bool releaseMode}) generateTooling,
     String? outputDirectoryPath,
     required String buildNumber,
   }) async {
@@ -194,12 +204,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       outputDirectory = outputDirectory.childDirectory('host');
     }
 
-    final bool containsX86Targets =
-        androidBuildInfo.where((AndroidBuildInfo info) => info.containsX86Target).isNotEmpty;
-    if (containsX86Targets) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
+      await generateTooling(project, releaseMode: androidBuildInfo.buildInfo.isRelease);
       await buildGradleAar(
         project: project,
         androidBuildInfo: androidBuildInfo,
@@ -276,11 +282,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
     _OutputParser? outputParser,
   }) async {
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+    final String? agpVersion = gradle.getAgpVersion(
+      project.android.hostAppGradleRoot,
+      globals.logger,
+    );
     if (usesAndroidX) {
-      _analytics.send(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: 'app-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     } else if (!usesAndroidX) {
       _analytics.send(
-        Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
+        Event.flutterBuildInfo(
+          label: 'app-not-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
       );
 
       _logger.printStatus(
@@ -384,7 +404,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
             if (exitCode == 0) {
               final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
               _analytics.send(
-                Event.flutterBuildInfo(label: successEventLabel, buildType: 'gradle'),
+                Event.flutterBuildInfo(
+                  label: successEventLabel,
+                  buildType: 'gradle',
+                  settings: 'androidGradlePluginVersion: $agpVersion',
+                ),
               );
               return exitCode;
             }
@@ -393,7 +417,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       final String usageLabel = 'gradle-${detectedGradleError!.eventLabel}-failure';
-      _analytics.send(Event.flutterBuildInfo(label: usageLabel, buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: usageLabel,
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     }
 
     return exitCode;
@@ -419,9 +449,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
-    if (androidBuildInfo.containsX86Target) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
     }
@@ -577,6 +604,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     if (isBuildingBundle) {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
+
+      if ((buildInfo.mode == BuildMode.release) &&
+          !(await _isAabStrippedOfDebugSymbols(
+            project,
+            bundleFile.path,
+            androidBuildInfo.targetArchs,
+          ))) {
+        throwToolExit(failedToStripDebugSymbolsErrorMessage);
+      }
+
       final String appSize =
           (buildInfo.mode == BuildMode.debug)
               ? '' // Don't display the size when building a debug variant.
@@ -632,6 +669,65 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
   }
 
+  // Checks whether AGP has successfully stripped debug symbols from native libraries
+  // - libflutter.so, aka the engine
+  // - lib_app.so, aka the framework dart code
+  // and moved them to the BUNDLE-METADATA directory. Block the build if this
+  // isn't successful, as it means that debug symbols are getting included in
+  // the final app that would be delivered to users.
+  Future<bool> _isAabStrippedOfDebugSymbols(
+    FlutterProject project,
+    String aabPath,
+    Iterable<AndroidArch> targetArchs,
+  ) async {
+    if (globals.androidSdk == null) {
+      _logger.printTrace(
+        'Failed to find android sdk when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+    if (!globals.androidSdk!.cmdlineToolsAvailable) {
+      _logger.printTrace(
+        'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    if (apkAnalyzerPath == null) {
+      _logger.printTrace(
+        'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+
+    final RunResult result = await _processUtils.run(
+      <String>[apkAnalyzerPath, 'files', 'list', aabPath],
+      workingDirectory: project.android.hostAppGradleRoot.path,
+      environment: _java?.environment,
+    );
+
+    if (result.exitCode != 0) {
+      _logger.printTrace(
+        'apkanalyzer finished with exit code 0 when checking final appbundle for debug symbols.\n'
+        'stderr was: ${result.stderr}\n'
+        'and stdout was: ${result.stdout}',
+      );
+      return false;
+    }
+
+    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
+    // assume AGP succeeded in stripping.
+    if (result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg')) {
+      return true;
+    }
+
+    _logger.printTrace(
+      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
+    );
+    return false;
+  }
+
   Future<void> _performCodeSizeAnalysis(
     String kind,
     File zipFile,
@@ -674,10 +770,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   /// Builds AAR and POM files.
   ///
-  /// * [project] is typically [FlutterProject.current()].
+  /// * [project] is typically [FlutterProject.current].
   /// * [androidBuildInfo] is the build configuration.
-  /// * [outputDir] is the destination of the artifacts,
-  /// * [buildNumber] is the build number of the output aar,
+  /// * [outputDirectory] is the destination of the artifacts.
+  /// * [buildNumber] is the build number of the output aar.
   Future<void> buildGradleAar({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -727,7 +823,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }
@@ -988,7 +1084,7 @@ void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) 
   );
 }
 
-/// Returns [true] if the current app uses AndroidX.
+/// Returns `true` if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
 bool isAppUsingAndroidX(Directory androidDirectory) {
@@ -1071,58 +1167,47 @@ File findBundleFile(
   Logger logger,
   Analytics analytics,
 ) {
-  final List<File> fileCandidates = <File>[
-    getBundleDirectory(project).childDirectory(camelCase(buildInfo.modeName)).childFile('app.aab'),
-    getBundleDirectory(
-      project,
-    ).childDirectory(camelCase(buildInfo.modeName)).childFile('app-${buildInfo.modeName}.aab'),
-  ];
-  if (buildInfo.flavor != null) {
-    // The Android Gradle plugin 3.0.0 adds the flavor name to the path.
-    // For example: In release mode, if the flavor name is `foo_bar`, then
-    // the directory name is `foo_barRelease`.
-    fileCandidates.add(
-      getBundleDirectory(project)
-          .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_${buildInfo.modeName}')}')
-          .childFile('app.aab'),
-    );
-
-    // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
-    // For example: In release mode, if the flavor name is `foo_bar`, then
-    // the file name is `app-foo_bar-release.aab`.
-    fileCandidates.add(
-      getBundleDirectory(project)
-          .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_${buildInfo.modeName}')}')
-          .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'),
-    );
-
-    // The Android Gradle plugin 4.1.0 does only lowercase the first character of flavor name.
-    fileCandidates.add(
-      getBundleDirectory(project)
-          .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
-          .childFile('app-${buildInfo.uncapitalizedFlavor}-${buildInfo.modeName}.aab'),
-    );
-
-    // The Android Gradle plugin uses kebab-case and lowercases the first character of the flavor name
-    // when multiple flavor dimensions are used:
-    // e.g.
-    // flavorDimensions "dimension1","dimension2"
-    // productFlavors {
-    //   foo {
-    //     dimension "dimension1"
-    //   }
-    //   bar {
-    //     dimension "dimension2"
-    //   }
-    // }
-    fileCandidates.add(
-      getBundleDirectory(project)
-          .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
-          .childFile('app-${kebabCase(buildInfo.uncapitalizedFlavor!)}-${buildInfo.modeName}.aab'),
+  final Directory bundleDir = getBundleDirectory(project);
+  if (!bundleDir.existsSync()) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.aab',
+      logger: logger,
+      analytics: analytics,
     );
   }
-  for (final File bundleFile in fileCandidates) {
-    if (bundleFile.existsSync()) {
+  final Iterable<File> allBundleFiles = bundleDir.listSync(recursive: true).whereType<File>().where(
+    (File file) {
+      return file.path.endsWith('.aab');
+    },
+  );
+
+  for (final File bundleFile in allBundleFiles) {
+    // Use lowercase bundle parent directory name to handle varying cases from Android Gradle Plugin
+    final String bundleParentDir = bundleFile.parent.basename.toLowerCase();
+
+    if (buildInfo.flavor != null) {
+      // Handle flavor builds (e.g., 'build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab')
+      if (bundleParentDir.contains(
+            '${buildInfo.lowerCasedFlavor}${buildInfo.modeName.toLowerCase()}',
+          ) &&
+          bundleFile.basename.endsWith('${buildInfo.modeName}.aab')) {
+        return bundleFile;
+      }
+
+      // Support legacy Android Gradle Plugin versions that don't include flavor in AAB filename
+      if (bundleParentDir.contains('${buildInfo.lowerCasedFlavor}${buildInfo.modeName}')) {
+        return bundleFile;
+      }
+    }
+
+    // Handle non-flavor builds (e.g., 'build/app/outputs/bundle/release/app-release.aab')
+    if (bundleParentDir == buildInfo.modeName &&
+        bundleFile.basename.endsWith('${buildInfo.modeName}.aab')) {
+      return bundleFile;
+    }
+    // Support legacy Android Gradle Plugin versions without build mode in AAB filename
+    if (bundleParentDir == buildInfo.modeName && bundleFile.basename.endsWith('aab')) {
       return bundleFile;
     }
   }
@@ -1205,9 +1290,9 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 }
 
 /// Returns the local Maven repository for a local engine build.
-/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`.
 /// This method generates symlinks in the temp directory to the engine artifacts
-/// following the convention specified on https://maven.apache.org/pom.html#Repositories
+/// following the convention specified on https://maven.apache.org/pom.html#Repositories.
 Directory _getLocalEngineRepo({
   required String engineOutPath,
   required AndroidBuildInfo androidBuildInfo,
@@ -1262,9 +1347,7 @@ Directory _getLocalEngineRepo({
 
 String _getAbiByLocalEnginePath(String engineOutPath) {
   String result = 'armeabi_v7a';
-  if (engineOutPath.contains('x86')) {
-    result = 'x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'x86_64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'arm64_v8a';
@@ -1274,9 +1357,7 @@ String _getAbiByLocalEnginePath(String engineOutPath) {
 
 String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
   String result = 'android-arm';
-  if (engineOutPath.contains('x86')) {
-    result = 'android-x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'android-x64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'android-arm64';

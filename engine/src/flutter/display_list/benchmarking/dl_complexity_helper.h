@@ -8,6 +8,7 @@
 #include "flutter/display_list/benchmarking/dl_complexity.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 
 namespace flutter {
@@ -104,7 +105,7 @@ class ComplexityCalculatorHelper
   void setInvertColors(bool invert) override {}
   void setStrokeCap(DlStrokeCap cap) override {}
   void setStrokeJoin(DlStrokeJoin join) override {}
-  void setStrokeMiter(SkScalar limit) override {}
+  void setStrokeMiter(DlScalar limit) override {}
   void setColor(DlColor color) override {}
   void setBlendMode(DlBlendMode mode) override {}
   void setColorSource(const DlColorSource* source) override {}
@@ -122,7 +123,7 @@ class ComplexityCalculatorHelper
     current_paint_.setDrawStyle(style);
   }
 
-  void setStrokeWidth(SkScalar width) override {
+  void setStrokeWidth(DlScalar width) override {
     current_paint_.setStrokeWidth(width);
   }
 
@@ -149,12 +150,13 @@ class ComplexityCalculatorHelper
       const DlRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
-      SrcRectConstraint constraint = SrcRectConstraint::kFast) override {
+      DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) override {
     if (IsComplex()) {
       return;
     }
-    ImageRect(image->dimensions(), image->isTextureBacked(),
-              render_with_attributes, constraint == SrcRectConstraint::kStrict);
+    ImageRect(image->GetBounds().GetSize(), image->isTextureBacked(),
+              render_with_attributes,
+              constraint == DlSrcRectConstraint::kStrict);
   }
 
   void drawAtlas(const sk_sp<DlImage> atlas,
@@ -172,7 +174,7 @@ class ComplexityCalculatorHelper
     // This API just does a series of drawImage calls from the atlas
     // This is equivalent to calling drawImageRect lots of times
     for (int i = 0; i < count; i++) {
-      ImageRect(SkISize::Make(tex[i].GetWidth(), tex[i].GetHeight()), true,
+      ImageRect(DlIRect::RoundOut(tex[i]).GetSize(), true,
                 render_with_attributes, true);
     }
   }
@@ -218,33 +220,9 @@ class ComplexityCalculatorHelper
                                        unsigned int line_verb_cost,
                                        unsigned int quad_verb_cost,
                                        unsigned int conic_verb_cost,
-                                       unsigned int cubic_verb_cost) {
-    const SkPath& path = dl_path.GetSkPath();
-    int verb_count = path.countVerbs();
-    std::vector<uint8_t> verbs(verb_count);
-    path.getVerbs(verbs.data(), verbs.size());
+                                       unsigned int cubic_verb_cost);
 
-    unsigned int complexity = 0;
-    for (int i = 0; i < verb_count; i++) {
-      switch (verbs[i]) {
-        case SkPath::Verb::kLine_Verb:
-          complexity += line_verb_cost;
-          break;
-        case SkPath::Verb::kQuad_Verb:
-          complexity += quad_verb_cost;
-          break;
-        case SkPath::Verb::kConic_Verb:
-          complexity += conic_verb_cost;
-          break;
-        case SkPath::Verb::kCubic_Verb:
-          complexity += cubic_verb_cost;
-          break;
-      }
-    }
-    return complexity;
-  }
-
-  virtual void ImageRect(const SkISize& size,
+  virtual void ImageRect(const DlISize& size,
                          bool texture_backed,
                          bool render_with_attributes,
                          bool enforce_src_edges) = 0;

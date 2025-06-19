@@ -617,6 +617,27 @@ void main() {
         expect(logger.errorText, contains('osascript returned unexpected JSON response'));
         expect(response, isNull);
       });
+
+      testWithoutContext('successfully removes any text before JSON', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse(
+          'start process_extensions{"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}',
+        );
+
+        expect(logger.errorText, isEmpty);
+        expect(response, isNotNull);
+      });
     });
 
     group('exit', () {
@@ -1168,7 +1189,6 @@ void main() {
         expect(schemeFile.existsSync(), isTrue);
         expect(schemeFile.readAsStringSync(), contains('FilePath = "/path/to/bundle"'));
       } catch (err) {
-        // ignore: avoid_catches_without_on_clauses
         fail(err.toString());
       } finally {
         projectDirectory.deleteSync(recursive: true);

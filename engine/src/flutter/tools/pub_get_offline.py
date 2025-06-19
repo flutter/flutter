@@ -29,7 +29,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'shell', 'vmservice'),
     os.path.join(ENGINE_DIR, 'testing', 'benchmark'),
     os.path.join(ENGINE_DIR, 'testing', 'dart'),
-    os.path.join(ENGINE_DIR, 'testing', 'scenario_app'),
+    os.path.join(ENGINE_DIR, 'testing', 'ios_scenario_app'),
     os.path.join(ENGINE_DIR, 'testing', 'skia_gold_client'),
     os.path.join(ENGINE_DIR, 'testing', 'smoke_test_failure'),
     os.path.join(ENGINE_DIR, 'testing', 'symbols'),
@@ -40,7 +40,6 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'clangd_check'),
     os.path.join(ENGINE_DIR, 'tools', 'compare_goldens'),
     os.path.join(ENGINE_DIR, 'tools', 'const_finder'),
-    os.path.join(ENGINE_DIR, 'tools', 'dir_contents_diff'),
     os.path.join(ENGINE_DIR, 'tools', 'engine_tool'),
     os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
     os.path.join(ENGINE_DIR, 'tools', 'githooks'),
@@ -166,9 +165,9 @@ def main():
 
   pub_count = 0
   for package in ALL_PACKAGES:
-    if fetch_package(pubcmd, package) != 0:
-      return 1
     if not package_uses_workspace_resolution(package):
+      if fetch_package(pubcmd, package) != 0:
+        return 1
       pub_count = pub_count + check_package_config(package)
 
   if pub_count > 0:

@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -61,7 +60,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
   });
@@ -181,7 +179,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -568,7 +565,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -598,7 +594,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -631,7 +626,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -1352,6 +1346,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+
           useMacOSConfig: true,
         );
 
@@ -1393,6 +1388,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+
           useMacOSConfig: true,
         );
 
@@ -1828,6 +1824,7 @@ flutter:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+
             configurationBuildDir: 'path/to/project/build/ios/iphoneos',
           );
 

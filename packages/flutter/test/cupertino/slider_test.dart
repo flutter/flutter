@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -253,6 +254,142 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
+  testWidgets(
+    'Slider emits haptic feedback when hitting edge',
+    (WidgetTester tester) async {
+      final List<MethodCall> hapticLog = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        hapticLog.add(methodCall);
+        return null;
+      });
+
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: CupertinoSlider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // No haptic feedback should be emitted when the slider is created.
+      expect(hapticLog, hasLength(0));
+
+      const double unit = CupertinoThumbPainter.radius;
+      final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+      Offset thumbCenter = topLeft + const Offset(unit, unit);
+      const Offset delta = Offset(50.0, 0.0);
+      await tester.dragFrom(thumbCenter, delta);
+      await tester.pump();
+
+      thumbCenter += delta;
+
+      // No haptic feedback should be emitted when the slider is moved.
+      expect(hapticLog, hasLength(0));
+
+      // Move the slider to the end quickly.
+      await tester.timedDragFrom(
+        thumbCenter,
+        const Offset(1000.0, 0.0),
+        const Duration(milliseconds: 100),
+      );
+
+      // Medium haptic feedback should be emitted when the slider is quickly moved to the end.
+      expect(hapticLog, hasLength(1));
+      expect(
+        hapticLog.last,
+        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.mediumImpact'),
+      );
+
+      // Move the slider to the start slowly.
+      thumbCenter = tester.getTopRight(find.byKey(sliderKey)) - const Offset(unit, -unit);
+      await tester.timedDragFrom(
+        thumbCenter,
+        -Offset(thumbCenter.dx - topLeft.dx - unit * 2, 0),
+        const Duration(milliseconds: 1100),
+      );
+
+      expect(value, equals(0.0));
+
+      // Selection click should be emitted when the slider is slowly moved to the start.
+      expect(hapticLog, hasLength(2));
+      expect(
+        hapticLog.last,
+        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
+      );
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'Slider does not emit haptic feedback on non-iOS platforms',
+    (WidgetTester tester) async {
+      final List<MethodCall> hapticLog = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        hapticLog.add(methodCall);
+        return null;
+      });
+
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: CupertinoSlider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      const double unit = CupertinoThumbPainter.radius;
+      final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+      final Offset thumbCenter = topLeft + const Offset(unit, unit);
+
+      // Move the slider to the end.
+      await tester.dragFrom(thumbCenter, const Offset(1000.0, 0.0));
+
+      expect(value, equals(1.0));
+      expect(hapticLog, hasLength(0));
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
+  );
+
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
@@ -432,7 +569,7 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       // First line it paints is blue.
-      paints..rrect(color: CupertinoColors.systemBlue.color),
+      paints..rsuperellipse(color: CupertinoColors.systemBlue.color),
     );
 
     await tester.pumpWidget(
@@ -444,7 +581,7 @@ void main() {
 
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.systemBlue.darkColor),
+      paints..rsuperellipse(color: CupertinoColors.systemBlue.darkColor),
     );
   });
 
@@ -463,7 +600,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.systemGreen.darkColor),
+      paints..rsuperellipse(color: CupertinoColors.systemGreen.darkColor),
     );
   });
 
@@ -505,24 +642,30 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.base, false)),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.color));
+    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.color));
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.base, false)),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkColor));
+    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.darkColor));
 
     await tester.pumpWidget(
       CupertinoApp(
         home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.elevated, false),
       ),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkElevatedColor));
+    expect(
+      find.byType(CupertinoSlider),
+      paints..rsuperellipse(color: activeColor.darkElevatedColor),
+    );
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkHighContrastColor));
+    expect(
+      find.byType(CupertinoSlider),
+      paints..rsuperellipse(color: activeColor.darkHighContrastColor),
+    );
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -531,20 +674,23 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: activeColor.darkHighContrastElevatedColor),
+      paints..rsuperellipse(color: activeColor.darkHighContrastElevatedColor),
     );
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.highContrastColor));
+    expect(
+      find.byType(CupertinoSlider),
+      paints..rsuperellipse(color: activeColor.highContrastColor),
+    );
 
     await tester.pumpWidget(
       CupertinoApp(
         home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.elevated, false),
       ),
     );
-    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.elevatedColor));
+    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.elevatedColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -553,7 +699,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: activeColor.highContrastElevatedColor),
+      paints..rsuperellipse(color: activeColor.highContrastElevatedColor),
     );
   });
 
@@ -571,9 +717,12 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoSlider), paints..rrect(color: _kSystemFill.color));
+    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: _kSystemFill.color));
 
-    expect(find.byType(CupertinoSlider), isNot(paints..rrect(color: _kSystemFill.darkColor)));
+    expect(
+      find.byType(CupertinoSlider),
+      isNot(paints..rsuperellipse(color: _kSystemFill.darkColor)),
+    );
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -588,9 +737,9 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoSlider), paints..rrect(color: _kSystemFill.darkColor));
+    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: _kSystemFill.darkColor));
 
-    expect(find.byType(CupertinoSlider), isNot(paints..rrect(color: _kSystemFill.color)));
+    expect(find.byType(CupertinoSlider), isNot(paints..rsuperellipse(color: _kSystemFill.color)));
   });
 
   testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
@@ -609,12 +758,12 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: CupertinoColors.systemPurple.color),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -632,12 +781,12 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: CupertinoColors.activeOrange.color),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: CupertinoColors.activeOrange.color),
     );
   });
 

@@ -65,6 +65,9 @@ void DlOpSpy::drawDiffRoundRect(const DlRoundRect& outer,
                                 const DlRoundRect& inner) {
   did_draw_ |= will_draw_;
 }
+void DlOpSpy::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
+  did_draw_ |= will_draw_;
+}
 void DlOpSpy::drawPath(const DlPath& path) {
   did_draw_ |= will_draw_;
 }
@@ -74,7 +77,7 @@ void DlOpSpy::drawArc(const DlRect& oval_bounds,
                       bool use_center) {
   did_draw_ |= will_draw_;
 }
-void DlOpSpy::drawPoints(PointMode mode,
+void DlOpSpy::drawPoints(DlPointMode mode,
                          uint32_t count,
                          const DlPoint points[]) {
   did_draw_ |= will_draw_;
@@ -99,7 +102,7 @@ void DlOpSpy::drawImageRect(const sk_sp<DlImage> image,
                             const DlRect& dst,
                             DlImageSampling sampling,
                             bool render_with_attributes,
-                            SrcRectConstraint constraint) {
+                            DlSrcRectConstraint constraint) {
   did_draw_ = true;
 }
 void DlOpSpy::drawImageNine(const sk_sp<DlImage> image,

@@ -32,6 +32,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.reduceMotion = false,
     this.highContrast = false,
     this.onOffSwitchLabels = false,
+    this.announce = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -43,6 +44,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     reduceMotion: true,
     highContrast: true,
     onOffSwitchLabels: true,
+    announce: true,
   );
 
   @override
@@ -67,6 +69,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool onOffSwitchLabels;
 
   @override
+  final bool announce;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -78,7 +83,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.boldText == boldText &&
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
-        other.onOffSwitchLabels == onOffSwitchLabels;
+        other.onOffSwitchLabels == onOffSwitchLabels &&
+        other.announce == announce;
   }
 
   @override
@@ -91,6 +97,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       reduceMotion,
       highContrast,
       onOffSwitchLabels,
+      announce,
     );
   }
 
@@ -321,6 +328,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  double scaleFontSize(double unscaledFontSize) => textScaleFactor * unscaledFontSize;
+
+  @override
   Brightness get platformBrightness =>
       _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
   Brightness? _platformBrightnessTestValue;
@@ -391,7 +401,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   bool get supportsShowingSystemContextMenu =>
       _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
   bool? _supportsShowingSystemContextMenu;
-  // ignore: avoid_setters_without_getters
   set supportsShowingSystemContextMenu(bool value) {
     _supportsShowingSystemContextMenu = value;
   }

@@ -91,7 +91,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
         Entity sub_entity;
-        sub_entity.SetBlendMode(BlendMode::kSourceOver);
+        sub_entity.SetBlendMode(BlendMode::kSrcOver);
         sub_entity.SetTransform(
             Matrix::MakeTranslation(Vector3(-coverage->GetOrigin())) *
             entity.GetTransform());

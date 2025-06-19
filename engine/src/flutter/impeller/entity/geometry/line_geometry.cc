@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
-LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
-    : p0_(p0), p1_(p1), width_(width), cap_(cap) {
-  FML_DCHECK(width >= 0);
+LineGeometry::LineGeometry(Point p0, Point p1, const StrokeParameters& stroke)
+    : p0_(p0), p1_(p1), width_(stroke.width), cap_(stroke.cap) {
+  FML_DCHECK(width_ >= 0);
 }
 
 LineGeometry::~LineGeometry() = default;
@@ -26,13 +27,16 @@ Scalar LineGeometry::ComputePixelHalfWidth(const Matrix& transform,
 }
 
 Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
-                                         bool allow_zero_length) const {
-  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width_);
+                                         bool allow_zero_length,
+                                         Point p0,
+                                         Point p1,
+                                         Scalar width) {
+  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width);
   if (stroke_half_width < kEhCloseEnough) {
     return {};
   }
 
-  auto along = p1_ - p0_;
+  auto along = p1 - p0;
   Scalar length = along.GetLength();
   if (length < kEhCloseEnough) {
     if (!allow_zero_length) {
@@ -47,17 +51,20 @@ Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
 
 bool LineGeometry::ComputeCorners(Point corners[4],
                                   const Matrix& transform,
-                                  bool extend_endpoints) const {
-  auto along = ComputeAlongVector(transform, extend_endpoints);
+                                  bool extend_endpoints,
+                                  Point p0,
+                                  Point p1,
+                                  Scalar width) {
+  auto along = ComputeAlongVector(transform, extend_endpoints, p0, p1, width);
   if (along.IsZero()) {
     return false;
   }
 
   auto across = Vector2(along.y, -along.x);
-  corners[0] = p0_ - across;
-  corners[1] = p1_ - across;
-  corners[2] = p0_ + across;
-  corners[3] = p1_ + across;
+  corners[0] = p0 - across;
+  corners[1] = p1 - across;
+  corners[2] = p0 + across;
+  corners[3] = p1 + across;
   if (extend_endpoints) {
     corners[0] -= along;
     corners[1] += along;
@@ -71,22 +78,53 @@ Scalar LineGeometry::ComputeAlphaCoverage(const Matrix& entity) const {
   return Geometry::ComputeStrokeAlphaCoverage(entity, width_);
 }
 
+namespace {
+/// Minimizes the err when rounding to the closest 0.5 value.
+/// If we round up, it drops down a half.  If we round down it bumps up a half.
+Scalar RoundToHalf(Scalar x) {
+  Scalar whole;
+  std::modf(x, &whole);
+  return whole + 0.5;
+}
+}  // namespace
+
 GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) const {
   using VT = SolidFillVertexShader::PerVertexData;
 
-  auto& transform = entity.GetTransform();
+  Matrix transform = entity.GetTransform();
   auto radius = ComputePixelHalfWidth(transform, width_);
+
+  Point p0 = p0_;
+  Point p1 = p1_;
+
+  // Hairline pixel alignment.
+  if (width_ == 0.f && transform.IsTranslationScaleOnly()) {
+    p0 = transform * p0_;
+    p1 = transform * p1_;
+    transform = Matrix();
+    if (std::fabs(p0.x - p1.x) < kEhCloseEnough) {
+      p0.x = RoundToHalf(p0.x);
+      p1.x = p0.x;
+    } else if (std::fabs(p0.y - p1.y) < kEhCloseEnough) {
+      p0.y = RoundToHalf(p0.y);
+      p1.y = p0.y;
+    }
+  }
+
+  Entity fixed_transform = entity.Clone();
+  fixed_transform.SetTransform(transform);
 
   if (cap_ == Cap::kRound) {
     auto generator =
-        renderer.GetTessellator().RoundCapLine(transform, p0_, p1_, radius);
-    return ComputePositionGeometry(renderer, generator, entity, pass);
+        renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
+    return ComputePositionGeometry(renderer, generator, fixed_transform, pass);
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare)) {
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0, p1,
+                      width_)) {
     return kEmptyResult;
   }
 
@@ -111,14 +149,15 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = entity.GetShaderTransform(pass),
+      .transform = fixed_transform.GetShaderTransform(pass),
   };
 }
 
 std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   Point corners[4];
   // Note: MSAA boolean doesn't matter for coverage computation.
-  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt)) {
+  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt, p0_, p1_,
+                      width_)) {
     return {};
   }
 

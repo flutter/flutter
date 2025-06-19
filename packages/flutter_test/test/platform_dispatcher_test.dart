@@ -83,6 +83,21 @@ void main() {
     );
   });
 
+  testWidgets('TestPlatformDispatcher can fake supportsShowingSystemContextMenu', (
+    WidgetTester tester,
+  ) async {
+    verifyPropertyFaked<bool>(
+      tester: tester,
+      realValue: PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      fakeValue: !PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      propertyRetriever:
+          () => WidgetsBinding.instance.platformDispatcher.supportsShowingSystemContextMenu,
+      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+        binding.platformDispatcher.supportsShowingSystemContextMenu = fakeValue;
+      },
+    );
+  });
+
   testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (WidgetTester tester) async {
     verifyPropertyFaked<bool>(
       tester: tester,
@@ -178,6 +193,20 @@ void main() {
     expect(
       WidgetsBinding.instance.platformDispatcher.view(id: tester.view.viewId),
       same(tester.view),
+    );
+  });
+
+  testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      TestPlatformDispatcher(
+        platformDispatcher: _FakePlatformDispatcher(
+          displays: <Display>[_FakeDisplay(id: 2)],
+          views: <FlutterView>[_FakeFlutterView(display: _FakeDisplay(id: 1))],
+        ),
+      ).scaleFontSize(2.0),
+      2.0,
     );
   });
 
@@ -314,4 +343,7 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   ViewFocusChangeCallback? onViewFocusChange;
+
+  @override
+  double get textScaleFactor => 1.0;
 }

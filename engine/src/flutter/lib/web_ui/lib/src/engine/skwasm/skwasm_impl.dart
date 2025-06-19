@@ -4,7 +4,6 @@
 
 @DefaultAsset('skwasm')
 // The web_sdk/sdk_rewriter.dart uses this directive.
-// ignore: unnecessary_library_directive
 library skwasm_impl;
 
 import 'dart:ffi';
@@ -20,6 +19,7 @@ export 'skwasm_impl/paragraph.dart';
 export 'skwasm_impl/path.dart';
 export 'skwasm_impl/path_metrics.dart';
 export 'skwasm_impl/picture.dart';
+export 'skwasm_impl/raw/raw_animated_image.dart';
 export 'skwasm_impl/raw/raw_canvas.dart';
 export 'skwasm_impl/raw/raw_filters.dart';
 export 'skwasm_impl/raw/raw_fonts.dart';

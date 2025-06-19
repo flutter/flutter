@@ -251,7 +251,7 @@ TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -284,7 +284,7 @@ TEST_P(GaussianBlurFilterContentsTest,
 
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -317,7 +317,7 @@ TEST_P(GaussianBlurFilterContentsTest,
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -365,7 +365,7 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithDestinationRect) {
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -402,7 +402,7 @@ TEST_P(GaussianBlurFilterContentsTest,
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -442,7 +442,7 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithEffectTransform) {
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
     EXPECT_TRUE(result_coverage.has_value());
@@ -471,7 +471,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
                                .blur_radius = 5,
                                .step_size = 1};
   KernelSamples samples = GenerateBlurInfo(parameters);
-  EXPECT_EQ(samples.sample_count, 9);
+  EXPECT_EQ(samples.sample_count, 11);
 
   // Coefficients should add up to 1.
   Scalar tally = 0;
@@ -483,7 +483,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
   // Verify the shape of the curve.
   for (int i = 0; i < 4; ++i) {
     EXPECT_FLOAT_EQ(samples.samples[i].coefficient,
-                    samples.samples[8 - i].coefficient);
+                    samples.samples[10 - i].coefficient);
     EXPECT_TRUE(samples.samples[i + 1].coefficient >
                 samples.samples[i].coefficient);
   }

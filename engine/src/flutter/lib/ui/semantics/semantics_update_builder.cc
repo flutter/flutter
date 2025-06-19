@@ -32,7 +32,7 @@ SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    int flags,
+    Dart_Handle flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -48,8 +48,6 @@ void SemanticsUpdateBuilder::updateNode(
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     std::string identifier,
     std::string label,
     const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -69,14 +67,18 @@ void SemanticsUpdateBuilder::updateNode(
     const tonic::Int32List& localContextActions,
     int headingLevel,
     std::string linkUrl,
-    int role) {
+    int role,
+    const std::vector<std::string>& controlsNodes,
+    int validationResult) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = flags;
+  auto* flags_object =
+      tonic::DartConverter<flutter::NativeSemanticsFlags*>::FromDart(flags);
+  node.flags = flags_object->GetFlags();
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;
@@ -90,8 +92,6 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
-  node.elevation = elevation;
-  node.thickness = thickness;
   node.identifier = std::move(identifier);
   node.label = std::move(label);
   pushStringAttributes(node.labelAttributes, labelAttributes);
@@ -123,6 +123,8 @@ void SemanticsUpdateBuilder::updateNode(
   node.headingLevel = headingLevel;
   node.linkUrl = std::move(linkUrl);
   node.role = static_cast<SemanticsRole>(role);
+  node.validationResult =
+      static_cast<SemanticsValidationResult>(validationResult);
 
   nodes_[id] = node;
 }

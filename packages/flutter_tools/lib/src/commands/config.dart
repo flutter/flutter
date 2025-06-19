@@ -9,7 +9,7 @@ import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../reporting/reporting.dart';
+import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
@@ -29,10 +29,17 @@ class ConfigCommand extends FlutterCommand {
           'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)',
     );
     argParser.addFlag(
-      'clear-ios-signing-cert',
+      'clear-ios-signing-settings',
+      negatable: false,
+      aliases: <String>['clear-ios-signing-cert'],
+      help:
+          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
+    );
+    argParser.addFlag(
+      'select-ios-signing-settings',
       negatable: false,
       help:
-          'Clear the saved development certificate choice used to sign apps for iOS device deployment.',
+          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption(
@@ -60,7 +67,7 @@ class ConfigCommand extends FlutterCommand {
       hide: !verboseHelp,
       help: 'Print config values as json.',
     );
-    for (final Feature feature in allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -125,7 +132,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
           globals.config.removeValue(configSetting);
@@ -137,22 +144,8 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      // The tool sends the analytics event *before* toggling the flag
-      // intentionally to be sure that opt-out events are sent correctly.
-      AnalyticsConfigEvent(enabled: value).send();
-      if (!value) {
-        // Normally, the tool waits for the analytics to all send before the
-        // tool exits, but only when analytics are enabled. When reporting that
-        // analytics have been disable, the wait must be done here instead.
-        await globals.flutterUsage.ensureAnalyticsSent();
-      }
-      globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
 
-      // TODO(eliasyishak): Set the telemetry for the unified_analytics
-      //  package as well, the above will be removed once we have
-      //  fully transitioned to using the new package,
-      //  https://github.com/flutter/flutter/issues/128251
       await globals.analytics.setTelemetry(value);
     }
 
@@ -168,8 +161,23 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('jdk-dir', stringArg('jdk-dir')!);
     }
 
-    if (argResults!.wasParsed('clear-ios-signing-cert')) {
-      _updateConfig('ios-signing-cert', '');
+    if (argResults!.wasParsed('clear-ios-signing-settings')) {
+      XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
+    }
+
+    if (argResults!.wasParsed('select-ios-signing-settings')) {
+      final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+        config: globals.config,
+        logger: globals.logger,
+        platform: globals.platform,
+        processUtils: globals.processUtils,
+        fileSystem: globals.fs,
+        fileSystemUtils: globals.fsUtils,
+        terminal: globals.terminal,
+        plistParser: globals.plistParser,
+      );
+
+      await settings.selectSettings();
     }
 
     if (argResults!.wasParsed('build-dir')) {
@@ -180,7 +188,7 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -239,14 +247,14 @@ class ConfigCommand extends FlutterCommand {
   String get settingsText {
     final Map<String, Feature> featuresByName = <String, Feature>{};
     final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting != null) {
         featuresByName[configSetting] = feature;
       }
     }
     final Set<String> keys = <String>{
-      ...allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...globals.config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
@@ -273,9 +281,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
-    final bool analyticsEnabled =
-        globals.flutterUsage.enabled && !globals.flutterUsage.suppressAnalytics;
-    return 'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
+    return 'Analytics reporting is currently ${globals.analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Raising the reload tip for setting changes.

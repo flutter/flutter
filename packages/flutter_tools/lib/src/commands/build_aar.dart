@@ -14,7 +14,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -49,13 +48,12 @@ class BuildAarCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-      allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
+      allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
       help: 'The target platform for which the project is compiled.',
     );
   }
@@ -66,32 +64,12 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
-  bool get reportNullSafety => false;
-
-  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
   };
 
   @override
   late final FlutterProject project = _getProject();
-
-  @override
-  Future<CustomDimensions> get usageValues async {
-    final String projectType;
-    if (project.manifest.isModule) {
-      projectType = 'module';
-    } else if (project.manifest.isPlugin) {
-      projectType = 'plugin';
-    } else {
-      projectType = 'app';
-    }
-
-    return CustomDimensions(
-      commandBuildAarProjectType: projectType,
-      commandBuildAarTargetPlatform: stringsArg('target-platform').join(','),
-    );
-  }
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
@@ -130,6 +108,9 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (_androidSdk == null) {
       exitWithNoSdkMessage();
@@ -166,11 +147,11 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder?.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
+      generateTooling: regeneratePlatformSpecificToolingIfApplicable,
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );

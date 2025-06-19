@@ -13,7 +13,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
-/// Fake [_WindowsUtils] to use for testing
+/// Fake Windows version of [OperatingSystemUtils] to use for testing.
 class FakeValidOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeValidOperatingSystemUtils([this.name = 'Microsoft Windows [Version 11.0.22621.963]']);
 
@@ -291,7 +291,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     try {
       final ProcessResult result = await processLister.getProcessesWithPath();
       expect(result.stdout, ProcessLister.powershell);
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       fail('Unexpected exception: $e');
     }
@@ -312,7 +311,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
       try {
         final ProcessResult result = await processLister.getProcessesWithPath();
         expect(result.stdout, ProcessLister.pwsh);
-        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         fail('Unexpected exception: $e');
       }
@@ -332,7 +330,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         fail('Should have thrown, but successfully ran ${result.stdout}');
       } on StateError {
         // Expected
-        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         fail('Unexpected exception: $e');
       }

@@ -9,6 +9,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 
 namespace impeller {
@@ -41,14 +42,14 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
 
   // Cut away eyes/mouth using difference clips.
   builder.ClipPath(DlPath::MakeCircle(DlPoint(-100, -50), 30),
-                   DlCanvas::ClipOp::kDifference);
+                   DlClipOp::kDifference);
   builder.ClipPath(DlPath::MakeCircle(DlPoint(100, -50), 30),
-                   DlCanvas::ClipOp::kDifference);
+                   DlClipOp::kDifference);
 
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(-100, 50));
   path_builder.QuadraticCurveTo(DlPoint(0, 150), DlPoint(100, 50));
-  builder.ClipPath(DlPath(path_builder), DlCanvas::ClipOp::kDifference);
+  builder.ClipPath(path_builder.TakePath(), DlClipOp::kDifference);
 
   // Draw a huge yellow rectangle to prove the clipping works.
   DlPaint paint;
@@ -65,7 +66,7 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   path_builder_2.CubicCurveTo(DlPoint(0, -40), DlPoint(0, -80),
                               DlPoint(200, -80));
 
-  builder.DrawPath(DlPath(path_builder_2), paint);
+  builder.DrawPath(path_builder_2.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -123,7 +124,7 @@ TEST_P(AiksTest, FramebufferBlendsRespectClips) {
   builder.DrawPaint(paint);
 
   builder.ClipPath(DlPath::MakeCircle(DlPoint(150, 150), 50),
-                   DlCanvas::ClipOp::kIntersect);
+                   DlClipOp::kIntersect);
 
   // Draw a red rectangle that should not show through the circle clip.
   paint.setColor(DlColor::kRed());

@@ -8,6 +8,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_builder.h"
@@ -685,9 +686,14 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
     builder.Save();
     builder.Translate((i % 3) * size, i / 3 * size);
     paint.setColorSource(DlColorSource::MakeConical(
-        std::get<2>(array[i]), std::get<3>(array[i]), std::get<0>(array[i]),
-        std::get<1>(array[i]), stops.size(), colors.data(), stops.data(),
-        DlTileMode::kClamp));
+        /*start_center=*/std::get<2>(array[i]),
+        /*start_radius=*/std::get<3>(array[i]),
+        /*end_center=*/std::get<0>(array[i]),
+        /*end_radius=*/std::get<1>(array[i]),
+        /*stop_count=*/stops.size(),
+        /*colors=*/colors.data(),
+        /*stops=*/stops.data(),
+        /*tile_mode=*/DlTileMode::kClamp));
     builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
     builder.Restore();
   }
@@ -772,7 +778,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     path_builder.Close();
     path_builder.MoveTo(DlPoint(60, 20));
     path_builder.QuadraticCurveTo(DlPoint(60, 60), DlPoint(20, 60));
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     builder.Scale(scale, scale);
 

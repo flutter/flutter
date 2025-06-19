@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
@@ -196,10 +197,16 @@ class TestCase {
     }
 
     // Copy the pubspec to the right place.
-    makeAbsolute(
-      pubspec,
-      workingDirectory: privateTestsDir,
-    ).copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
+    final String pubspecPath = path.join(tmpdir.absolute.path, 'pubspec.yaml');
+    makeAbsolute(pubspec, workingDirectory: privateTestsDir).copySync(pubspecPath);
+
+    final File pubspecCopy = File(pubspecPath);
+    pubspecCopy.writeAsStringSync(
+      pubspecCopy
+          .readAsLinesSync()
+          .whereNot((String line) => line.startsWith('resolution: workspace'))
+          .join('\n'),
+    );
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
     File(path.join(tmpdir.absolute.path, 'analysis_options.yaml')).writeAsStringSync(

@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/testing/android/native_activity/native_activity.gni")
 import("//flutter/vulkan/config.gni")
 import("../../../tools/impeller.gni")
 
@@ -19,7 +20,9 @@ impeller_component("vulkan_unittests") {
     "pipeline_cache_data_vk_unittests.cc",
     "render_pass_builder_vk_unittests.cc",
     "render_pass_cache_unittests.cc",
+    "render_pass_vk_unittests.cc",
     "resource_manager_vk_unittests.cc",
+    "surface_context_vk_unittests.cc",
     "test/gpu_tracer_unittests.cc",
     "test/mock_vulkan.cc",
     "test/mock_vulkan.h",
@@ -158,5 +161,52 @@ impeller_component("vulkan") {
 
   if (is_android) {
     public_deps += [ "../../../toolkit/android" ]
+  }
+}
+
+if (is_android) {
+  config("public_android_config") {
+    defines = [ "__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__" ]
+  }
+
+  test_fixtures("unittests_fixtures") {
+    fixtures = []
+  }
+
+  source_set("unittests_lib") {
+    visibility = [ ":*" ]
+
+    testonly = true
+
+    sources = [ "android/ahb_texture_source_vk_unittests.cc" ]
+
+    deps = [
+      ":unittests_fixtures",
+      ":vulkan",
+      "//flutter/testing",
+    ]
+
+    defines = [ "TESTING" ]
+  }
+
+  executable("vulkan_android_unittests") {
+    assert(is_android)
+
+    testonly = true
+
+    output_name = "impeller_vulkan_android_unittests"
+
+    deps = [ ":unittests_lib" ]
+  }
+
+  native_activity_apk("vulkan_android_apk_unittests") {
+    apk_name = "impeller_vulkan_android_unittests"
+
+    testonly = true
+
+    deps = [
+      ":unittests_lib",
+      "//flutter/testing/android/native_activity:gtest_activity",
+    ]
   }
 }

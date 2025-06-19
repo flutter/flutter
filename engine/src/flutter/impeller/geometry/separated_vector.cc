@@ -18,12 +18,20 @@ Vector2 SeparatedVector2::GetVector() const {
   return direction * magnitude;
 }
 
+Vector2 SeparatedVector2::GetDirection() const {
+  return direction;
+}
+
 Scalar SeparatedVector2::GetAlignment(const SeparatedVector2& other) const {
   return direction.Dot(other.direction);
 }
 
 Radians SeparatedVector2::AngleTo(const SeparatedVector2& other) const {
   return direction.AngleTo(other.direction);
+}
+
+Scalar SeparatedVector2::Cross(const SeparatedVector2& other) const {
+  return direction.Cross(other.direction);
 }
 
 }  // namespace impeller

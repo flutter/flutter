@@ -13,7 +13,7 @@ namespace {
 // X and Y directions.
 constexpr static Scalar kPrecision = 4;
 
-constexpr Scalar length(Point n) {
+inline Scalar length(Point n) {
   Point nn = n * n;
   return std::sqrt(nn.x + nn.y);
 }
@@ -39,15 +39,47 @@ Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
   return std::sqrt(k * length(p0 - p1 * 2 + p2));
 }
 
-Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
-                                    const QuadraticPathComponent& quad) {
-  return ComputeQuadradicSubdivisions(scale_factor, quad.p1, quad.cp, quad.p2);
-}
+// Returns Wang's formula specialized for a conic curve.
+//
+// This is not actually due to Wang, but is an analogue from:
+//   (Theorem 3, corollary 1):
+//   J. Zheng, T. Sederberg. "Estimating Tessellation Parameter Intervals for
+//   Rational Curves and Surfaces." ACM Transactions on Graphics 19(1). 2000.
+Scalar ComputeConicSubdivisions(Scalar scale_factor,
+                                Point p0,
+                                Point p1,
+                                Point p2,
+                                Scalar w) {
+  // Compute center of bounding box in projected space
+  const Point C = 0.5f * (p0.Min(p1).Min(p2) + p0.Max(p1).Max(p2));
 
-Scalar ComputeCubicSubdivisions(float scale_factor,
-                                const CubicPathComponent& cub) {
-  return ComputeCubicSubdivisions(scale_factor, cub.p1, cub.cp1, cub.cp2,
-                                  cub.p2);
+  // Translate by -C. This improves translation-invariance of the formula,
+  // see Sec. 3.3 of cited paper
+  p0 -= C;
+  p1 -= C;
+  p2 -= C;
+
+  // Compute max length
+  const Scalar max_len =
+      std::sqrt(std::max(p0.Dot(p0), std::max(p1.Dot(p1), p2.Dot(p2))));
+
+  // Compute forward differences
+  const Point dp = -2 * w * p1 + p0 + p2;
+  const Scalar dw = std::abs(-2 * w + 2);
+
+  // Compute numerator and denominator for parametric step size of
+  // linearization. Here, the epsilon referenced from the cited paper
+  // is 1/precision.
+  Scalar k = scale_factor * kPrecision;
+  const Scalar rp_minus_1 = std::max(0.0f, max_len * k - 1);
+  const Scalar numer = std::sqrt(dp.Dot(dp)) * k + rp_minus_1 * dw;
+  const Scalar denom = 4 * std::min(w, 1.0f);
+
+  // Number of segments = sqrt(numer / denom).
+  // This assumes parametric interval of curve being linearized is
+  //   [t0,t1] = [0, 1].
+  // If not, the number of segments is (tmax - tmin) / sqrt(denom / numer).
+  return std::sqrt(numer / denom);
 }
 
 }  // namespace impeller

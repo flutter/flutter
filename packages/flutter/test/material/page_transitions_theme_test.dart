@@ -22,14 +22,14 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNotNull,
             reason: 'theme builder for $platform is null',
           );
         case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNull,
@@ -228,6 +228,98 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
+
+  group('FadeForwardsPageTransitionsBuilder transitions', () {
+    testWidgets(
+      'opacity fades out during forward secondary animation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 1, end: 0).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is forward, transition will be reverse between duration 0 to 0.25.
+        controller.value = 0.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+
+        controller.value = 0.25;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'opacity fades in during reverse secondary animaation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0, end: 1).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 1,
+          end: 0,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is reverse, transition will be forward between duration 0.75 to 1.0.
+        controller.value = 0.75;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  });
 
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
@@ -635,7 +727,6 @@ void main() {
   }) {
     return MaterialApp(
       theme: ThemeData(
-        useMaterial3: true,
         pageTransitionsTheme: PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.android: ZoomPageTransitionsBuilder(
@@ -1135,5 +1226,81 @@ void main() {
       expect(find.text('Back to home route...'), findsOneWidget);
     },
     variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets(
+    'Can interact with incoming route during FadeForwards back navigation',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/b');
+                },
+              ),
+            ),
+        '/b':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('go back'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+            colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
+          ),
+          routes: routes,
+        ),
+      );
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsNothing);
+
+      // Go to the second route. The duration of the FadeForwardsPageTransition
+      // is 800ms.
+      await tester.tap(find.text('push'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 801));
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('go back'), findsOneWidget);
+
+      // Tap to go back to the first route.
+      await tester.tap(find.text('go back'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsOneWidget);
+
+      // In the middle of the transition, tap to go back to the second route.
+      await tester.tap(find.text('push'));
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 401));
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsOneWidget);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('go back'), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 }

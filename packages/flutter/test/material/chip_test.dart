@@ -213,7 +213,7 @@ Finder findTooltipContainer(String tooltipText) {
 void main() {
   testWidgets('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
 
     Widget buildFrame(ThemeData theme) {
@@ -2503,7 +2503,7 @@ void main() {
     Widget buildChip() {
       return wrapForChip(
         child: Theme(
-          data: ThemeData.light().copyWith(
+          data: ThemeData(
             chipTheme: const ChipThemeData(
               labelStyle: TextStyle(height: 4), // inherit: true
             ),
@@ -3953,7 +3953,7 @@ void main() {
           body: Focus(
             focusNode: focusNode,
             child: ChipTheme(
-              data: ThemeData.light().chipTheme.copyWith(side: defaultBorderSide),
+              data: ThemeData().chipTheme.copyWith(side: defaultBorderSide),
               child: ChoiceChip(
                 label: const Text('Chip'),
                 selected: selected,
@@ -4068,7 +4068,7 @@ void main() {
           body: Focus(
             focusNode: focusNode,
             child: ChipTheme(
-              data: ThemeData.light().chipTheme.copyWith(side: defaultBorderSide),
+              data: ThemeData().chipTheme.copyWith(side: defaultBorderSide),
               child: ChoiceChip(
                 label: const Text('Chip'),
                 selected: selected,
@@ -4283,7 +4283,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          chipTheme: ThemeData.light().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
+          chipTheme: ThemeData().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
         ),
         home: Scaffold(
           body: ChoiceChip(
@@ -4343,7 +4343,7 @@ void main() {
     Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
-          chipTheme: ThemeData.light().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
+          chipTheme: ThemeData().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
         ),
         home: Scaffold(
           body: ChoiceChip(
@@ -6167,6 +6167,96 @@ void main() {
       SystemMouseCursors.forbidden,
     );
   });
+
+  testWidgets('Delete button semantic tap target complies with Material guideline', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey deleteKey = UniqueKey();
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const Text('Label'),
+              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              onDeleted: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+    final Finder deleteIcon = find.byKey(deleteKey);
+    final Size iconSize = tester.getSize(deleteIcon);
+    final Rect semanticRect = tester.getSemantics(deleteIcon).rect;
+
+    // Semantic rect is centered around the icon.
+    expect(semanticRect.center, Offset(iconSize.width / 2, iconSize.height / 2));
+
+    handle.dispose();
+  });
+
+  testWidgets('Delete button semantic tap target is 32x32 on desktop', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey deleteKey = UniqueKey();
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const Text('Label'),
+              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              onDeleted: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Finder deleteIcon = find.byKey(deleteKey);
+    final Size iconSize = tester.getSize(deleteIcon);
+    final Rect semanticRect = tester.getSemantics(deleteIcon).rect;
+
+    expect(semanticRect.size, const Size(32.0, 32.0));
+
+    // Semantic rect is centered around the icon.
+    expect(semanticRect.center, Offset(iconSize.width / 2, iconSize.height / 2));
+
+    handle.dispose();
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets(
+    'Delete button semantic tap target can be larger than the minimum interactive dimension',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final UniqueKey deleteKey = UniqueKey();
+      const double iconHeight = 60;
+      await tester.pumpWidget(
+        wrapForChip(
+          child: Column(
+            children: <Widget>[
+              Chip(
+                label: const Text('Label', style: TextStyle(fontSize: iconHeight)),
+                deleteIcon: Icon(Icons.delete, key: deleteKey, size: iconHeight),
+                onDeleted: () {},
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Finder deleteIcon = find.byKey(deleteKey);
+      final Size iconSize = tester.getSize(deleteIcon);
+      final Rect semanticRect = tester.getSemantics(deleteIcon).rect;
+
+      expect(semanticRect.size, iconSize);
+
+      handle.dispose();
+    },
+  );
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

@@ -11,7 +11,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -30,10 +29,8 @@ class BuildApkCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
@@ -53,7 +50,7 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addMultiOption(
         'target-platform',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -75,7 +72,6 @@ class BuildApkCommand extends BuildSubCommand {
   static const List<String> _kDefaultJitArchs = <String>[
     'android-arm',
     'android-arm64',
-    'android-x86',
     'android-x64',
   ];
   static const List<String> _kDefaultAotArchs = <String>[
@@ -116,15 +112,6 @@ class BuildApkCommand extends BuildSubCommand {
       ' * https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split';
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    return CustomDimensions(
-      commandBuildApkTargetPlatform: _targetArchs.join(','),
-      commandBuildApkBuildMode: _buildMode.cliName,
-      commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
-    );
-  }
-
-  @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
     return Event.commandUsageValues(
       workflow: commandPath,
@@ -148,7 +135,6 @@ class BuildApkCommand extends BuildSubCommand {
       targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
     );
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     final FlutterProject project = FlutterProject.current();
     await androidBuilder?.buildApk(

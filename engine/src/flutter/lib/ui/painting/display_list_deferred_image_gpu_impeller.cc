@@ -69,11 +69,8 @@ bool DlDeferredImageGPUImpeller::isUIThreadSafe() const {
 }
 
 // |DlImage|
-SkISize DlDeferredImageGPUImpeller::dimensions() const {
-  if (!wrapper_) {
-    return SkISize::MakeEmpty();
-  }
-  return wrapper_->size();
+DlISize DlDeferredImageGPUImpeller::GetSize() const {
+  return wrapper_ ? ToDlISize(wrapper_->size()) : DlISize();
 }
 
 // |DlImage|

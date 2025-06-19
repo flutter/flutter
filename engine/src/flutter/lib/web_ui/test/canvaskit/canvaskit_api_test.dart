@@ -206,23 +206,21 @@ void _pathOpTests() {
   });
 
   test('Path.combine test', () {
-    final ui.Path path1 = ui.Path();
-    expect(path1, isA<CkPath>());
+    final CkPath path1 = CkPath();
     path1.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
     path1.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
 
-    final ui.Path path2 = ui.Path();
-    expect(path2, isA<CkPath>());
+    final CkPath path2 = CkPath();
     path2.addRect(const ui.Rect.fromLTRB(5, 5, 15, 15));
     path2.addOval(const ui.Rect.fromLTRB(15, 15, 105, 105));
 
-    final ui.Path union = ui.Path.combine(ui.PathOperation.union, path1, path2);
+    final ui.Path union = CkPath.combine(ui.PathOperation.union, path1, path2);
     expect(union, isA<CkPath>());
     expect(union.getBounds(), const ui.Rect.fromLTRB(0, 0, 105, 105));
 
     // Smoke-test other operations.
     for (final ui.PathOperation operation in ui.PathOperation.values) {
-      final ui.Path combined = ui.Path.combine(operation, path1, path2);
+      final ui.Path combined = CkPath.combine(operation, path1, path2);
       expect(combined, isA<CkPath>());
     }
   });
@@ -1573,7 +1571,7 @@ void _paragraphTests() {
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
-    final DomCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
     domDocument.body!.append(canvas);
 
     // TODO(yjbanov): WebGL screenshot tests do not work on Firefox - https://github.com/flutter/flutter/issues/109265
@@ -1721,7 +1719,7 @@ void _paragraphTests() {
   test(
     'MakeOnScreenGLSurface test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
       final WebGLContext gl = canvas.getGlContext(webGLVersion);
       final int sampleCount = gl.getParameter(gl.samples);
       final int stencilBits = gl.getParameter(gl.stencilBits);
@@ -1730,9 +1728,9 @@ void _paragraphTests() {
         canvas,
         SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
       );
-      final SkGrContext grContext = canvasKit.MakeGrContext(glContext);
+      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
-        grContext,
+        grContext!,
         100,
         100,
         SkColorSpaceSRGB,
@@ -1748,15 +1746,15 @@ void _paragraphTests() {
   test(
     'MakeRenderTarget test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
       final int glContext =
           canvasKit.GetWebGLContext(
             canvas,
             SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
           ).toInt();
-      final SkGrContext grContext = canvasKit.MakeGrContext(glContext.toDouble());
-      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext, 1, 1);
+      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
+      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 
       expect(surface, isNotNull);
     },

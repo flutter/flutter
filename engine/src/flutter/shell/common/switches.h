@@ -75,45 +75,18 @@ DEF_SWITCH(DeviceVMServiceHost,
            "The hostname/IP address on which the Dart VM Service should "
            "be served. If not set, defaults to 127.0.0.1 or ::1 depending on "
            "whether --ipv6 is specified.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(
-    DeviceObservatoryHost,
-    "observatory-host",
-    "(deprecated) The hostname/IP address on which the Dart VM Service should "
-    "be served. If not set, defaults to 127.0.0.1 or ::1 depending on "
-    "whether --ipv6 is specified.")
 DEF_SWITCH(DeviceVMServicePort,
            "vm-service-port",
            "A custom Dart VM Service port. The default is to pick a randomly "
-           "available open port.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DeviceObservatoryPort,
-           "observatory-port",
-           "(deprecated) A custom Dart VM Service port. The default is to pick "
-           "a randomly "
            "available open port.")
 DEF_SWITCH(
     DisableVMService,
     "disable-vm-service",
     "Disable the Dart VM Service. The Dart VM Service is never available "
     "in release mode.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DisableObservatory,
-           "disable-observatory",
-           "(deprecated) Disable the Dart VM Service. The Dart VM Service is "
-           "never available "
-           "in release mode.")
 DEF_SWITCH(DisableVMServicePublication,
            "disable-vm-service-publication",
            "Disable mDNS Dart VM Service publication.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DisableObservatoryPublication,
-           "disable-observatory-publication",
-           "(deprecated) Disable mDNS Dart VM Service publication.")
 DEF_SWITCH(IPv6,
            "ipv6",
            "Bind to the IPv6 localhost address for the Dart VM Service. "
@@ -202,6 +175,12 @@ DEF_SWITCH(TraceToFile,
            "Write the timeline trace to a file at the specified path. The file "
            "will be in Perfetto's proto format; it will be possible to load "
            "the file into Perfetto's trace viewer.")
+DEF_SWITCH(ProfileMicrotasks,
+           "profile-microtasks",
+           "Enable collection of information about each microtask. Information "
+           "about completed microtasks will be written to the \"Microtask\" "
+           "timeline stream. Information about queued microtasks will be "
+           "accessible from Dart / Flutter DevTools.")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "
@@ -294,12 +273,27 @@ DEF_SWITCH(EnableEmbedderAPI,
 DEF_SWITCH(EnablePlatformIsolates,
            "enable-platform-isolates",
            "Enable support for isolates that run on the platform thread.")
+DEF_SWITCH(MergedPlatformUIThread,
+           "merged-platform-ui-thread",
+           "Sets whether the ui thread and platform thread should be merged.")
+// This is a legacy flag that has been superseded by merged-platform-ui-thread.
+// TODO(163064): remove this when users have been migrated.
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Merge the ui thread and platform thread.")
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
+DEF_SWITCH(EnableFlutterGPU,
+           "enable-flutter-gpu",
+           "Whether Flutter GPU is enabled.")
+DEF_SWITCH(ImpellerLazyShaderMode,
+           "impeller-lazy-shader-mode",
+           "Whether to defer initialization of all required PSOs for the "
+           "Impeller backend. Defaults to false.")
+DEF_SWITCH(ImpellerAntialiasLines,
+           "impeller-antialias-lines",
+           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

@@ -87,7 +87,6 @@ void main() {
             fileSystem: globals.fs,
             logger: globals.logger,
             processManager: globals.processManager,
-            usage: globals.flutterUsage,
             botDetector: globals.botDetector,
             platform: globals.platform,
             stdio: globals.stdio,
@@ -145,7 +144,6 @@ void main() {
             fileSystem: globals.fs,
             logger: globals.logger,
             processManager: globals.processManager,
-            usage: globals.flutterUsage,
             botDetector: globals.botDetector,
             platform: globals.platform,
             stdio: globals.stdio,
@@ -183,7 +181,6 @@ void main() {
             fileSystem: globals.fs,
             logger: globals.logger,
             processManager: globals.processManager,
-            usage: globals.flutterUsage,
             botDetector: globals.botDetector,
             platform: globals.platform,
             stdio: globals.stdio,
@@ -221,7 +218,6 @@ void main() {
             fileSystem: globals.fs,
             logger: globals.logger,
             processManager: globals.processManager,
-            usage: globals.flutterUsage,
             botDetector: globals.botDetector,
             platform: globals.platform,
             stdio: globals.stdio,
@@ -272,7 +268,6 @@ void main() {
             fileSystem: globals.fs,
             logger: globals.logger,
             processManager: globals.processManager,
-            usage: globals.flutterUsage,
             botDetector: globals.botDetector,
             platform: globals.platform,
             stdio: globals.stdio,
@@ -314,8 +309,11 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
     for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('dependencies:')) {
-        lines.insert(i + 1, '  $packageToAdd: ${version ?? '\n'
-                '   path: $path'}');
+        lines.insert(
+          i + 1,
+          '  $packageToAdd: ${version ?? '\n'
+                  '   path: $path'}',
+        );
         break;
       }
     }

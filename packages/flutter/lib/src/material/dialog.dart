@@ -10,7 +10,7 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show clampDouble, lerpDouble;
+import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 
@@ -23,7 +23,6 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
@@ -42,6 +41,20 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// This sample shows the creation of [Dialog] and [Dialog.fullscreen] widgets.
 ///
 /// ** See code in examples/api/lib/material/dialog/dialog.0.dart **
+/// {@end-tool}
+///
+/// ## Contraints
+/// The Material 3 guideline recommends that a dialog should have a maximal width of 560dp.
+/// For historical reasons, Flutter's [Dialog] widget does not come with this constraint by default.
+/// For applications targeting large screens such as desktop or Web, it is recommended to
+/// set the [constraints] property.
+///
+/// {@tool snippet}
+/// This sample shows a [Dialog] using [BoxConstraints] defined by the Material 3 specification.
+///
+/// ```dart
+/// const Dialog(constraints: BoxConstraints(maxWidth: 560, minHeight: 280));
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -67,6 +80,8 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
+    this.semanticsRole = SemanticsRole.dialog,
+    this.constraints,
   }) : assert(elevation == null || elevation >= 0.0),
        _fullscreen = false;
 
@@ -79,6 +94,7 @@ class Dialog extends StatelessWidget {
     this.insetAnimationDuration = Duration.zero,
     this.insetAnimationCurve = Curves.decelerate,
     this.child,
+    this.semanticsRole = SemanticsRole.dialog,
   }) : elevation = 0,
        shadowColor = null,
        surfaceTintColor = null,
@@ -86,6 +102,7 @@ class Dialog extends StatelessWidget {
        clipBehavior = Clip.none,
        shape = null,
        alignment = null,
+       constraints = null,
        _fullscreen = true;
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -229,6 +246,19 @@ class Dialog extends StatelessWidget {
   /// This value is used to determine if this is a fullscreen dialog.
   final bool _fullscreen;
 
+  /// The role this dialog represent in assist technologies.
+  ///
+  /// Defaults to [SemanticsRole.dialog].
+  final SemanticsRole semanticsRole;
+
+  /// Constrains the size of the [Dialog].
+  ///
+  /// By default it is
+  /// ```dart
+  /// const BoxConstraints(minWidth: 280.0)
+  /// ```
+  final BoxConstraints? constraints;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -241,6 +271,9 @@ class Dialog extends StatelessWidget {
             ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
             : _DialogDefaultsM2(context);
 
+    final BoxConstraints boxConstraints =
+        constraints ?? dialogTheme.constraints ?? const BoxConstraints(minWidth: 280.0);
+
     Widget dialogChild;
 
     if (_fullscreen) {
@@ -252,7 +285,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
+          constraints: boxConstraints,
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -268,17 +301,20 @@ class Dialog extends StatelessWidget {
       );
     }
 
-    return AnimatedPadding(
-      padding: effectivePadding,
-      duration: insetAnimationDuration,
-      curve: insetAnimationCurve,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: dialogChild,
+    return Semantics(
+      role: semanticsRole,
+      child: AnimatedPadding(
+        padding: effectivePadding,
+        duration: insetAnimationDuration,
+        curve: insetAnimationCurve,
+        child: MediaQuery.removeViewInsets(
+          removeLeft: true,
+          removeTop: true,
+          removeRight: true,
+          removeBottom: true,
+          context: context,
+          child: dialogChild,
+        ),
       ),
     );
   }
@@ -918,6 +954,7 @@ class AlertDialog extends StatelessWidget {
       clipBehavior: clipBehavior,
       shape: shape,
       alignment: alignment,
+      semanticsRole: SemanticsRole.alertDialog,
       child: dialogChild,
     );
   }
@@ -1384,6 +1421,12 @@ Widget _buildMaterialDialogTransitions(
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
 ///
+/// {@template flutter.material.dialog.requestFocus}
+/// The `requestFocus` argument is used to specify whether the dialog should
+/// request focus when shown.
+/// {@endtemplate}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1448,6 +1491,9 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool fullscreenDialog = false,
+  bool? requestFocus,
+  AnimationStyle? animationStyle,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1473,6 +1519,9 @@ Future<T?> showDialog<T>({
       themes: themes,
       anchorPoint: anchorPoint,
       traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+      requestFocus: requestFocus,
+      animationStyle: animationStyle,
+      fullscreenDialog: fullscreenDialog,
     ),
   );
 }
@@ -1496,6 +1545,8 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool? requestFocus,
+  AnimationStyle? animationStyle,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1514,6 +1565,8 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
+        requestFocus: requestFocus,
+        animationStyle: animationStyle,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1525,6 +1578,7 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
+        requestFocus: requestFocus,
       );
   }
 }
@@ -1606,7 +1660,10 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
-  }) : super(
+    super.fullscreenDialog,
+    AnimationStyle? animationStyle,
+  }) : _animationStyle = animationStyle,
+       super(
          pageBuilder: (
            BuildContext buildContext,
            Animation<double> animation,
@@ -1620,16 +1677,21 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            return dialog;
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
+         transitionDuration: animationStyle?.duration ?? const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
 
   CurvedAnimation? _curvedAnimation;
+  final AnimationStyle? _animationStyle;
 
   void _setAnimation(Animation<double> animation) {
     if (_curvedAnimation?.parent != animation) {
       _curvedAnimation?.dispose();
-      _curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      _curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: _animationStyle?.curve ?? Curves.easeOut,
+        reverseCurve: _animationStyle?.reverseCurve ?? Curves.easeOut,
+      );
     }
   }
 
@@ -1696,6 +1758,26 @@ class _DialogDefaultsM2 extends DialogThemeData {
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
+// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _DialogFullscreenDefaultsM3 extends DialogThemeData {
+  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - DialogFullscreen
+
 // BEGIN GENERATED TOKEN PROPERTIES - Dialog
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -1741,23 +1823,3 @@ class _DialogDefaultsM3 extends DialogThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - Dialog
-
-// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
-
-// Do not edit by hand. The code between the "BEGIN GENERATED" and
-// "END GENERATED" comments are generated from data in the Material
-// Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// dart format off
-class _DialogFullscreenDefaultsM3 extends DialogThemeData {
-  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
-
-  final BuildContext context;
-
-  @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
-}
-// dart format on
-
-// END GENERATED TOKEN PROPERTIES - DialogFullscreen

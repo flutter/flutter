@@ -65,14 +65,14 @@ foreach(test, tests) {
       "-DkFlutterBuildDirectory=$flutter_build_dir",
       "-DkSkiaGoldWorkDirectory=$skia_gold_work_dir",
     ]
-    deps = [ "//flutter/third_party/txt:txt_fixtures" ]
+    deps = [ "//flutter/txt:txt_fixtures" ]
     testonly = true
   }
 }
 
 group("dart") {
   testonly = true
-  deps = [ "//flutter/testing/dart/observatory" ]
+  deps = [ "//flutter/testing/dart/vm_service" ]
   foreach(test, tests) {
     deps += [ ":compile_$test" ]
   }

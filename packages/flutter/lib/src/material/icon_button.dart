@@ -350,6 +350,12 @@ class IconButton extends StatelessWidget {
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
   ///
+  /// If [ThemeData.useMaterial3] is set to false, apply padding in the square
+  /// proportion to the button's splash/highlight shape. For example, if the
+  /// button is a circle, use padding on all sides to center the icon inside the
+  /// splash/highlight circle. Otherwise, wrap the [IconButton] with a [Padding]
+  /// widget to apply padding in the desired direction.
+  ///
   /// This property can be null. If null, it defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry? padding;
 
@@ -686,10 +692,13 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
-        WidgetState.disabled: disabledMouseCursor,
-        WidgetState.any: enabledMouseCursor,
-      }),
+      mouseCursor:
+          disabledMouseCursor == null && enabledMouseCursor == null
+              ? null
+              : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+                WidgetState.disabled: disabledMouseCursor,
+                WidgetState.any: enabledMouseCursor,
+              }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -996,7 +1005,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   ButtonStyle? themeStyleOf(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
-    final bool isDefaultColor = identical(iconTheme.color, switch (Theme.of(context).brightness) {
+    final bool isDefaultColor = identical(iconTheme.color, switch (Theme.brightnessOf(context)) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
     });

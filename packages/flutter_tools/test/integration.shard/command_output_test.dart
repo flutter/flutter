@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import 'test_utils.dart';
 
 // This test file does not use [getLocalEngineArguments] because it is testing
@@ -58,7 +59,7 @@ void main() {
     expect(result.stdout, contains('Shutdown hooks complete'));
   });
 
-  testWithoutContext('flutter config --list contains all features', () async {
+  testUsingContext('flutter config --list contains all features', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'config', '--list']);
 
     // contains all of the experiments in features.dart
@@ -190,24 +191,6 @@ void main() {
     } finally {
       bootstrap.deleteSync();
     }
-  });
-
-  testWithoutContext('Providing sksl bundle with missing file with tool exit', () async {
-    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      'build',
-      'apk',
-      '--bundle-sksl-path=foo/bar/baz.json', // This file does not exist.
-    ], workingDirectory: helloWorld);
-
-    expect(
-      result,
-      const ProcessResultMatcher(
-        exitCode: 1,
-        stderrPattern: 'No SkSL shader bundle found at foo/bar/baz.json',
-      ),
-    );
   });
 
   testWithoutContext('flutter attach does not support --release', () async {

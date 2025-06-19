@@ -7,10 +7,12 @@
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/test/mock_gles.h"
 
 namespace impeller::testing {
 
@@ -63,6 +65,55 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
 
   sync_fence = TextureGLES::Cast(*texture).GetSyncFence();
   ASSERT_FALSE(sync_fence.has_value());
+}
+
+TEST_P(TextureGLESTest, Binds2DTexture) {
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2DMultisample;
+  desc.sample_count = SampleCount::kCount4;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  ASSERT_TRUE(texture);
+
+  if (GetContext()->GetCapabilities()->SupportsImplicitResolvingMSAA()) {
+    EXPECT_EQ(
+        TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_READ_FRAMEBUFFER),
+        TextureGLES::Type::kTexture);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
+              TextureGLES::Type::kTextureMultisampled);
+  } else {
+    EXPECT_EQ(
+        TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_READ_FRAMEBUFFER),
+        TextureGLES::Type::kRenderBufferMultisampled);
+    EXPECT_EQ(TextureGLES::Cast(*texture).ComputeTypeForBinding(GL_FRAMEBUFFER),
+              TextureGLES::Type::kRenderBufferMultisampled);
+  }
+}
+
+TEST_P(TextureGLESTest, Leak) {
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2D;
+  desc.sample_count = SampleCount::kCount1;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  ASSERT_TRUE(texture);
+
+  std::optional<GLuint> handle = TextureGLES::Cast(*texture).GetGLHandle();
+  EXPECT_TRUE(handle.has_value());
+
+  TextureGLES::Cast(*texture).Leak();
+
+  ScopedValidationDisable disable_validation;
+  handle = TextureGLES::Cast(*texture).GetGLHandle();
+  EXPECT_FALSE(handle.has_value());
 }
 
 }  // namespace impeller::testing

@@ -74,7 +74,7 @@ class SemanticsController {
       SemanticsAction.scrollRight.index |
       SemanticsAction.scrollToOffset.index;
 
-  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
   static final int _importantFlagsForAccessibility =
       SemanticsFlag.hasCheckedState.index |
       SemanticsFlag.hasToggledState.index |
@@ -342,8 +342,8 @@ class SemanticsController {
   ///
   /// Based on:
   ///
-  /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
-  /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+  /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+  /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor
@@ -2312,6 +2312,10 @@ abstract class WidgetController {
   /// If `scrollable` is `null`, a [Finder] that looks for a [Scrollable] is
   /// used instead.
   ///
+  /// If `continuous` is `true`, the gesture will be reused to simulate the effect
+  /// of actual finger scrolling, which is useful when used alongside listeners
+  /// like [GestureDetector.onTap]. The default is `false`.
+  ///
   /// Throws a [StateError] if `finder` is not found after `maxScrolls` scrolls.
   ///
   /// This is different from [ensureVisible] in that this allows looking for
@@ -2328,6 +2332,7 @@ abstract class WidgetController {
     finders.FinderBase<Element>? scrollable,
     int maxScrolls = 50,
     Duration duration = const Duration(milliseconds: 50),
+    bool continuous = false,
   }) {
     assert(maxScrolls > 0);
     scrollable ??= finders.find.byType(Scrollable);
@@ -2349,6 +2354,7 @@ abstract class WidgetController {
         moveStep,
         maxIteration: maxScrolls,
         duration: duration,
+        continuous: continuous,
       );
     });
   }
@@ -2370,13 +2376,21 @@ abstract class WidgetController {
     Offset moveStep, {
     int maxIteration = 50,
     Duration duration = const Duration(milliseconds: 50),
+    bool continuous = false,
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
-        await drag(view, moveStep);
+        if (continuous) {
+          gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
+          await gesture.moveBy(moveStep);
+        } else {
+          await drag(view, moveStep);
+        }
         await pump(duration);
         maxIteration -= 1;
       }
+      await gesture?.up();
       await Scrollable.ensureVisible(element(finder));
     });
   }

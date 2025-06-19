@@ -23,13 +23,12 @@ import 'package:skia_gold_client/skia_gold_client.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import 'package:test_core/backend.dart' hide Compiler;
-// TODO(ditman): Fix ignores when https://github.com/flutter/flutter/issues/143599 is resolved.
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/util/io.dart'; // ignore: implementation_imports
-import 'package:test_core/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart';
+import 'package:test_core/src/runner/platform.dart';
+import 'package:test_core/src/runner/plugin/platform_helpers.dart';
+import 'package:test_core/src/runner/runner_suite.dart';
+import 'package:test_core/src/util/io.dart';
+import 'package:test_core/src/util/stack_trace_mapper.dart';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_test_utils/image_compare.dart';
@@ -477,14 +476,12 @@ class BrowserPlatform extends PlatformPlugin {
   }
 
   String getCanvasKitVariant() {
-    switch (suite.runConfig.variant) {
-      case CanvasKitVariant.full:
-        return 'full';
-      case CanvasKitVariant.chromium:
-        return 'chromium';
-      case null:
-        return 'auto';
-    }
+    return switch (suite.runConfig.variant) {
+      CanvasKitVariant.full => 'full',
+      CanvasKitVariant.chromium => 'chromium',
+      CanvasKitVariant.experimentalWebParagraph => 'experimentalWebParagraph',
+      null => 'auto',
+    };
   }
 
   String _makeBuildConfigString(String scriptBase, CompileConfiguration config) {
@@ -539,6 +536,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
+      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
     },
   });
 </script>

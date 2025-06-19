@@ -72,11 +72,13 @@ Future<void> testMain() async {
       children: <SemanticsNodeUpdate>[
         tester1.updateNode(
           id: 1,
-          isFocusable: true,
+          flags: const ui.SemanticsFlags(
+            isFocusable: true,
+            hasEnabledState: true,
+            isEnabled: true,
+            isButton: true,
+          ),
           hasTap: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isButton: true,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],
@@ -99,15 +101,11 @@ Future<void> testMain() async {
     // Test that each view renders its own semantics tree.
     expectSemanticsTree(view1.semantics, '''
 <sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
-  <sem-c>
     <sem flt-tappable="" role="button"></sem>
-  </sem-c>
 </sem>''');
     expectSemanticsTree(view2.semantics, '''
 <sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
-  <sem-c>
     <sem aria-label="d"><input aria-valuemax="1" aria-valuemin="1" aria-valuenow="1" aria-valuetext="" role="slider"></sem>
-  </sem-c>
 </sem>
 ''');
 

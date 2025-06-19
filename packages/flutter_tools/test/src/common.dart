@@ -150,7 +150,6 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     expect(e.message, messageMatcher);
     // Catch all exceptions to give a better test failure message.
   } catch (e, trace) {
-    // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
   }
 }
@@ -160,7 +159,6 @@ Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
     await future;
     // Catch all exceptions to give a better test failure message.
   } catch (e, trace) {
-    // ignore: avoid_catches_without_on_clauses
     fail('Expected to run with no exceptions, got $e\n$trace');
   }
 }
@@ -207,9 +205,9 @@ void test(
 /// Executes a test body in zone that does not allow context-based injection.
 ///
 /// For classes which have been refactored to exclude context-based injection
-/// or globals like [fs] or [platform], prefer using this test method as it
-/// will prevent accidentally including these context getters in future code
-/// changes.
+/// or globals like [globals.fs] or [globals.platform], prefer using
+/// this test method as it will prevent accidentally including these
+/// context getters in future code changes.
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest

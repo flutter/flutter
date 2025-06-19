@@ -12,7 +12,7 @@ source_set("test_font") {
   ]
   deps = [
     "//flutter/skia",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
   public_configs = [ "//flutter:config" ]
   defines = []
@@ -116,14 +116,8 @@ source_set("runtime") {
     "//flutter/shell/common:display",
     "//flutter/skia",
     "//flutter/third_party/tonic",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
-
-  if (flutter_runtime_mode != "release" && !is_fuchsia) {
-    # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
-    # instead puts Observatory into the runner's package.
-    deps += [ "$dart_src/runtime/observatory:embedded_observatory_archive" ]
-  }
 }
 
 if (enable_unittests) {

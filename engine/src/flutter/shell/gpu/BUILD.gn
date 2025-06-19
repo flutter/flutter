@@ -30,9 +30,14 @@ source_set("gpu_surface_gl") {
   sources = [
     "gpu_surface_gl_delegate.cc",
     "gpu_surface_gl_delegate.h",
-    "gpu_surface_gl_skia.cc",
-    "gpu_surface_gl_skia.h",
   ]
+
+  if (!slimpeller) {
+    sources += [
+      "gpu_surface_gl_skia.cc",
+      "gpu_surface_gl_skia.h",
+    ]
+  }
 
   public_deps = gpu_common_deps
 
@@ -114,10 +119,9 @@ if (is_mac) {
     ]
 
     deps = [
-             "//flutter/testing",
              ":gpu_surface_metal",
-             "//flutter/impeller/fixtures",
              "//flutter/fml",
+             "//flutter/impeller/fixtures",
              "//flutter/runtime",
              "//flutter/runtime:libdart",
              "//flutter/testing",

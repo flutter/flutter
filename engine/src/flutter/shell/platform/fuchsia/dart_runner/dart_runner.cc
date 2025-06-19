@@ -228,9 +228,6 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
   params.shutdown_isolate = IsolateShutdownCallback;
   params.cleanup_group = IsolateGroupCleanupCallback;
   params.entropy_source = EntropySource;
-#if !defined(DART_PRODUCT)
-  params.get_service_assets = GetVMServiceAssetsArchiveCallback;
-#endif
   error = Dart_Initialize(&params);
   if (error)
     FML_LOG(FATAL) << "Dart_Initialize failed: " << error;
@@ -274,6 +271,12 @@ void DartRunner::Start(
                        context_->svc(), std::move(controller));
     thread.detach();
   }
+}
+
+void DartRunner::handle_unknown_method(uint64_t ordinal,
+                                       bool method_has_response) {
+  FML_LOG(ERROR) << "Unknown method called on DartRunner. Ordinal: "
+                 << ordinal;
 }
 
 }  // namespace dart_runner

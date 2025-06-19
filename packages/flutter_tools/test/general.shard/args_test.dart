@@ -26,7 +26,7 @@ void main() {
 
   test(
     'Help for command line arguments is consistently styled and complete',
-    () => Testbed().run(() {
+    () => TestBed().run(() {
       final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
       executable.generateCommands(verboseHelp: true, verbose: true).forEach(runner.addCommand);
       verifyCommandRunner(runner);
@@ -258,10 +258,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     );
 
     // Deprecated options and flags should be hidden but still have help text.
-    const List<String> deprecatedOptions = <String>[
-      FlutterOptions.kNullSafety,
-      FlutterOptions.kNullAssertions,
-    ];
+    const List<String> deprecatedOptions = <String>[];
     final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
     if (!isOptionDeprecated) {
       expect(

@@ -179,7 +179,7 @@ class SelectionControls {
     );
 
     // Creates a disabled radio button.
-    const Radio<int>(value: 0, groupValue: 0, onChanged: null);
+    const Radio<int>(value: 0, groupValue: 0);
     // END
 
     // START selectioncontrols_switch

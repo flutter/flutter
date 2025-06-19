@@ -30,7 +30,7 @@ namespace flutter {
  * The shell provides and requests for UI related data and this PlatformView subclass fulfills
  * it with iOS specific capabilities. As an example, the iOS embedding (the `FlutterEngine` and the
  * `FlutterViewController`) sends pointer data to the shell and receives the shell's request for a
- * Skia GrDirectContext and supplies it.
+ * Impeller AiksContext and supplies it.
  *
  * Despite the name "view", this class is unrelated to UIViews on iOS and doesn't have the same
  * lifecycle. It's a long lived bridge owned by the `FlutterEngine` and can be attached and
@@ -97,16 +97,14 @@ class PlatformViewIOS final : public PlatformView {
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
 
   // |PlatformView|
-  sk_sp<GrDirectContext> CreateResourceContext() const override;
-
-  // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
   // |PlatformView|
   void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       flutter::SemanticsNodeUpdates update,
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|

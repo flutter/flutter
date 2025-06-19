@@ -11,13 +11,31 @@ import 'interface_level.dart';
 import 'route.dart';
 import 'theme.dart';
 
+// Smoothing factor applied to the device's top padding (which approximates the corner radius)
+// to achieve a smoother end to the corner radius animation.  A value of 1.0 would use
+// the full top padding. Values less than 1.0 reduce the effective corner radius, improving
+// the animation's appearance.  Determined through empirical testing.
+const double _kDeviceCornerRadiusSmoothingFactor = 0.9;
+
+// Threshold in logical pixels. If the calculated device corner radius (after applying
+// the smoothing factor) is below this value, the corner radius transition animation will
+// start from zero. This prevents abrupt transitions for devices with small or negligible
+// corner radii.  This value, combined with the smoothing factor, corresponds roughly
+// to double the targeted radius of 12.  Determined through testing and visual inspection.
+const double _kRoundedDeviceCornersThreshold = 20.0;
+
+// The distance from the top of the open sheet to the top of the screen, as a ratio
+// of the total height of the screen. Found from eyeballing a simulator running
+// iOS 18.0.
+const double _kTopGapRatio = 0.08;
+
 // Tween for animating a Cupertino sheet onto the screen.
 //
 // Begins fully offscreen below the screen and ends onscreen with a small gap at
 // the top of the screen. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, 0.08),
+  end: Offset.zero,
 );
 
 // Offset change for when a new sheet covers another sheet. '0.0' represents the
@@ -67,6 +85,8 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// Shows a Cupertino-style sheet widget that slides up from the bottom of the
 /// screen and stacks the previous route behind the new sheet.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
+///
 /// This is a convenience method for displaying [CupertinoSheetRoute] for common,
 /// straightforward use cases. The Widget returned from `pageBuilder` will be
 /// used to display the content on the [CupertinoSheetRoute].
@@ -76,7 +96,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 /// When `useNestedNavigation` is set to `true`, any route pushed to the stack
 /// from within the context of the [CupertinoSheetRoute] will display within that
-/// sheet. System back gestures and programatic pops on the initial route in a
+/// sheet. System back gestures and programmatic pops on the initial route in a
 /// sheet will also be intercepted to pop the whole [CupertinoSheetRoute]. If
 /// a custom [Navigator] setup is needed, like for example to enable named routes
 /// or the pages API, then it is recommended to directly push a [CupertinoSheetRoute]
@@ -85,6 +105,11 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 /// The whole sheet can be popped at once by either dragging down on the sheet,
 /// or calling [CupertinoSheetRoute.popSheet].
+///
+/// When `enableDrag` is set to `true` (the default), users can dismiss the sheet
+/// by dragging it down or by calling [CupertinoSheetRoute.popSheet]. When
+/// `enableDrag` is `false`, users cannot dismiss the sheet by dragging, and it
+/// can only be closed by calling [CupertinoSheetRoute.popSheet].
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
@@ -117,6 +142,7 @@ Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   required WidgetBuilder pageBuilder,
   bool useNestedNavigation = false,
+  bool enableDrag = true,
 }) {
   final WidgetBuilder builder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
@@ -157,7 +183,7 @@ Future<T?> showCupertinoSheet<T>({
   return Navigator.of(
     context,
     rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: builder));
+  ).push<T>(CupertinoSheetRoute<T>(builder: builder, enableDrag: enableDrag));
 }
 
 /// Provides an iOS-style sheet transition.
@@ -216,10 +242,15 @@ class CupertinoSheetTransition extends StatefulWidget {
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
     );
-    final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
+
+    final double deviceCornerRadius =
+        (MediaQuery.maybeViewPaddingOf(context)?.top ?? 0) * _kDeviceCornerRadiusSmoothingFactor;
+    final bool roundedDeviceCorners = deviceCornerRadius > _kRoundedDeviceCornersThreshold;
 
     final Animatable<BorderRadiusGeometry> decorationTween = Tween<BorderRadiusGeometry>(
-      begin: BorderRadius.circular(deviceCornerRadius),
+      begin: BorderRadius.vertical(
+        top: Radius.circular(roundedDeviceCorners ? deviceCornerRadius : 0),
+      ),
       end: BorderRadius.circular(12),
     );
 
@@ -228,8 +259,6 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<Offset> slideAnimation = curvedAnimation.drive(_kTopDownTween);
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
-
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
@@ -247,20 +276,39 @@ class CupertinoSheetTransition extends StatefulWidget {
             )
             : child;
 
-    return SlideTransition(
-      position: slideAnimation,
-      child: ScaleTransition(
-        scale: scaleAnimation,
-        filterQuality: FilterQuality.medium,
-        alignment: Alignment.topCenter,
-        child: AnimatedBuilder(
-          animation: radiusAnimation,
-          child: child,
-          builder: (BuildContext context, Widget? child) {
-            return ClipRRect(borderRadius: radiusAnimation.value, child: contrastedChild);
-          },
+    final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+
+    return Stack(
+      children: <Widget>[
+        AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: SizedBox(height: topGapHeight, width: double.infinity),
         ),
-      ),
+        SlideTransition(
+          position: slideAnimation,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            filterQuality: FilterQuality.medium,
+            alignment: Alignment.topCenter,
+            child: AnimatedBuilder(
+              animation: radiusAnimation,
+              child: child,
+              builder: (BuildContext context, Widget? child) {
+                return ClipRSuperellipse(
+                  borderRadius:
+                      !secondaryAnimation.isDismissed
+                          ? radiusAnimation.value
+                          : BorderRadius.circular(0),
+                  child: contrastedChild,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -287,7 +335,7 @@ class CupertinoSheetTransition extends StatefulWidget {
         scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: child,
         ),
@@ -388,10 +436,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
         scale: _secondaryScaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: child,
-        ),
+        child: child,
       ),
     );
   }
@@ -405,10 +450,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
           context,
           widget.primaryRouteAnimation,
           widget.linearTransition,
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: widget.child,
-          ),
+          widget.child,
         ),
       ),
     );
@@ -416,6 +458,8 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 }
 
 /// Route for displaying an iOS sheet styled page.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
 ///
 /// The `CupertinoSheetRoute` will slide up from the bottom of the screen and stop
 /// below the top of the screen. If the previous route is a non-sheet route, then
@@ -449,16 +493,30 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({super.settings, required this.builder});
+  CupertinoSheetRoute({super.settings, required this.builder, this.enableDrag = true});
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder builder;
 
   @override
+  final bool enableDrag;
+
+  @override
   Widget buildContent(BuildContext context) {
-    return CupertinoUserInterfaceLevel(
-      data: CupertinoUserInterfaceLevelData.elevated,
-      child: _CupertinoSheetScope(child: builder(context)),
+    final double topPadding = MediaQuery.heightOf(context) * _kTopGapRatio;
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: ClipRSuperellipse(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: _CupertinoSheetScope(child: builder(context)),
+          ),
+        ),
+      ),
     );
   }
 
@@ -470,7 +528,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   /// Pops the entire [CupertinoSheetRoute], if a sheet route exists in the stack.
   ///
-  /// Used if to pop an entire sheet at once, if there is nested navigtion within
+  /// Used if to pop an entire sheet at once, if there is nested navigation within
   /// that sheet.
   static void popSheet(BuildContext context) {
     if (hasParentSheet(context)) {
@@ -524,6 +582,11 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   DelegatedTransitionBuilder? get delegatedTransition =>
       CupertinoSheetTransition.delegateTransition;
 
+  /// Determines whether the content can be dragged.
+  ///
+  /// If `true`, dragging is enabled; otherwise, it remains fixed.
+  bool get enableDrag;
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -549,6 +612,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
+    bool enableDrag,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -556,7 +620,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       child: _CupertinoDownGestureDetector<T>(
-        enabledCallback: () => true,
+        enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route),
         child: child,
       ),
@@ -575,7 +639,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child, enableDrag);
   }
 }
 
@@ -638,11 +702,9 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_downGestureController != null);
-    final double topGapRatio = (_kBottomUpTween as Tween<Offset>).end?.dy ?? 0.08;
     _downGestureController!.dragUpdate(
-      // Devide by size of the sheet. The gap between the top of the sheet and
-      // top of the screen is 0.08.
-      details.primaryDelta! / (context.size!.height - (context.size!.height * topGapRatio)),
+      // Divide by size of the sheet.
+      details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio)),
     );
   }
 

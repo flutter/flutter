@@ -237,14 +237,6 @@ void main() {
 
     testWithoutContext('Precompiled web AMD module system artifact paths are correct', () {
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
-      );
-      expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
       );
@@ -252,50 +244,20 @@ void main() {
         artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
       );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map',
-      );
     });
 
     testWithoutContext(
       'Precompiled web DDC library bundle module system artifact paths are correct',
       () {
         expect(
-          artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdk).path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-sound/dart_sdk.js',
+          artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk).path,
+          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js',
         );
         expect(
           artifacts
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleSoundSdkSourcemaps)
+              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
               .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-sound/dart_sdk.js.map',
-        );
-        expect(
-          artifacts
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdk)
-              .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit-sound/dart_sdk.js',
-        );
-        expect(
-          artifacts
-              .getHostArtifact(
-                HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSoundSdkSourcemaps,
-              )
-              .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit-sound/dart_sdk.js.map',
+          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js.map',
         );
       },
     );
@@ -326,6 +288,7 @@ void main() {
     late Cache cache;
     late FileSystem fileSystem;
     late Platform platform;
+    late FakeProcessManager processManager;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -339,6 +302,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         artifacts: <ArtifactSet>[],
       );
+      processManager = FakeProcessManager.any();
       artifacts = CachedLocalWebSdkArtifacts(
         parent: CachedLocalEngineArtifacts(
           fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
@@ -350,7 +314,7 @@ void main() {
           cache: cache,
           fileSystem: fileSystem,
           platform: platform,
-          processManager: FakeProcessManager.any(),
+          processManager: processManager,
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
@@ -534,21 +498,6 @@ void main() {
         ),
       );
 
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterPreviewDevice,
-          platform: TargetPlatform.windows_x64,
-        ),
-        fileSystem.path.join(
-          'root',
-          'bin',
-          'cache',
-          'artifacts',
-          'flutter_preview',
-          'flutter_preview.exe',
-        ),
-      );
-
       fileSystem
           .file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
           .createSync(recursive: true);
@@ -563,6 +512,12 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
+
+      processManager.excludedExecutables.add('/out/android_debug_unopt/./gen_snapshot');
+      expect(
+        artifacts.getArtifactPath(Artifact.genSnapshot),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'universal', 'gen_snapshot'),
       );
     });
 
@@ -597,26 +552,39 @@ void main() {
     );
 
     testWithoutContext('uses prebuilt dart sdk for web platform', () {
+      final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+        parent: CachedArtifacts(
+          fileSystem: fileSystem,
+          cache: cache,
+          platform: platform,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        ),
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+
       final String failureMessage =
           'Unable to find a prebuilt dart sdk at:'
           ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
 
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
           platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
           platform: TargetPlatform.web_javascript,
         ),
@@ -632,7 +600,7 @@ void main() {
           .createSync(recursive: true);
 
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript,
         ),
@@ -647,21 +615,21 @@ void main() {
         ),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
           platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk'),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
           platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dart'),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartAotRuntime,
           platform: TargetPlatform.web_javascript,
         ),
@@ -673,6 +641,37 @@ void main() {
           'bin',
           'dartaotruntime',
         ),
+      );
+    });
+
+    testWithoutContext('uses local dart sdk for web platform wrapping a local engine', () {
+      final String failureMessage =
+          'Unable to find a built dart sdk at:'
+          ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
+          ' or a prebuilt dart sdk at:'
+          ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
+
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        throwsToolExit(message: failureMessage),
+      );
+
+      fileSystem
+          .directory('out')
+          .childDirectory('host_debug_unopt')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
     });
 

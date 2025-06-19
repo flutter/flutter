@@ -14,10 +14,10 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -586,6 +586,55 @@ void main() {
     final FormState form = formKey.currentState!;
     form.save();
     expect(value, equals('three'));
+  });
+
+  testWidgets('Dropdown form field only uses value parameter when first built and when reset', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                key: fieldKey,
+                value: 'one',
+                hint: const Text('Select Value'),
+                items:
+                    menuItems.map((String val) {
+                      return DropdownMenuItem<String>(value: val, child: Text(val));
+                    }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    // Do nothing, just to trigger a rebuild.
+                  });
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    expect(fieldKey.currentState!.value, 'one');
+
+    // Open the dropdown menu.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    // The value should update to selected, not the initial value.
+    expect(find.text('three'), findsOneWidget);
+    expect(fieldKey.currentState!.value, 'three');
+
+    fieldKey.currentState!.reset();
+    await tester.pump();
+
+    // Reset to the initial value.
+    expect(find.text('one'), findsOneWidget);
+    expect(fieldKey.currentState!.value, 'one');
   });
 
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
@@ -1347,6 +1396,7 @@ void main() {
       tester.getSemantics(find.text('test')),
       matchesSemantics(
         isButton: true,
+        hasExpandedState: true,
         label: 'test',
         hasTapAction: true,
         hasFocusAction: true,
@@ -1363,6 +1413,7 @@ void main() {
       tester.getSemantics(find.text('three')),
       matchesSemantics(
         isButton: true,
+        hasExpandedState: true,
         label: 'three',
         hasTapAction: true,
         hasFocusAction: true,
@@ -1390,6 +1441,7 @@ void main() {
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
+                  role: SemanticsRole.menu,
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                   label: 'Popup menu',
                   children: <TestSemantics>[
@@ -1399,6 +1451,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'one',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1413,6 +1466,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'two',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1426,6 +1480,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'three',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1439,6 +1494,7 @@ void main() {
                               ],
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               label: 'four',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -4381,4 +4437,128 @@ void main() {
     expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
+
+  testWidgets('Dropdown closes when barrier is tapped by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'first',
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should be closed, i.e., there should be no widget with 'second' text.
+    expect(find.text('second'), findsNothing);
+  });
+
+  testWidgets('Dropdown does not close when barrier dismissible set to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'first',
+            barrierDismissible: false,
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second'), findsOneWidget);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/70294.
+  testWidgets(
+    'The previous selected item should be highlighted when reopening dropdown on mobile',
+    (WidgetTester tester) async {
+      final Color selectedColor = Colors.black.withValues(alpha: 0.12);
+      String currentValue = 'one';
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(focusColor: selectedColor),
+          home: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return DropdownButton<String>(
+                    value: currentValue,
+                    items:
+                        menuItems
+                            .map(
+                              (String item) =>
+                                  DropdownMenuItem<String>(value: item, child: Text(item)),
+                            )
+                            .toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        currentValue = newValue!;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Make sure the current value of dropdown is the first one of items list menuItems.
+      expect(find.text('one'), findsOne);
+
+      // Tap to open the dropdown.
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+
+      // Select the second item from the dropdown list.
+      await tester.tap(find.text('two'));
+      await tester.pumpAndSettle();
+
+      // Make sure the current item of dropdown is the second item of items list menuItems.
+      expect(find.text('two'), findsOneWidget);
+
+      // Tap to reopen the dropdown.
+      await tester.tap(find.text('two'));
+      await tester.pumpAndSettle();
+
+      // Make sure the current selected item is highlighted with selectedColor.
+      final Ink selectedItemInk = tester.widget<Ink>(
+        find.ancestor(of: find.text('two'), matching: find.byType(Ink)).first,
+      );
+      final BoxDecoration decoration = selectedItemInk.decoration! as BoxDecoration;
+      expect(decoration.color, selectedColor);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 }

@@ -7,6 +7,7 @@
 #include "display_list/dl_vertices.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/skia_conversions.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/geometry/point.h"
 
 namespace impeller {
@@ -87,7 +88,7 @@ bool DlVerticesGeometry::HasTextureCoordinates() const {
   return vertices_->texture_coordinate_data() != nullptr;
 }
 
-std::optional<Rect> DlVerticesGeometry::GetTextureCoordinateCoverge() const {
+std::optional<Rect> DlVerticesGeometry::GetTextureCoordinateCoverage() const {
   if (!HasTextureCoordinates()) {
     return std::nullopt;
   }
@@ -217,6 +218,10 @@ bool DlVerticesGeometry::MaybePerformIndexNormalization(
                               vertices_->index_count(), vertices_->indices());
     return true;
   }
+  return false;
+}
+
+bool DlVerticesGeometry::CanApplyMaskFilter() const {
   return false;
 }
 

@@ -5,10 +5,10 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_STYLE_H_
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PARAGRAPH_STYLE_H_
 
+#include "flutter/txt/src/txt/paragraph_style.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
-#include "third_party/txt/src/txt/paragraph_style.h"
 
 namespace impeller::interop {
 
@@ -42,9 +42,13 @@ class ParagraphStyle final
 
   void SetTextDirection(txt::TextDirection direction);
 
+  void SetTextDecoration(const ImpellerTextDecoration& decoration);
+
   void SetMaxLines(size_t max_lines);
 
   void SetLocale(std::string locale);
+
+  void SetEllipsis(const std::string& string);
 
   txt::TextStyle CreateTextStyle() const;
 
@@ -54,6 +58,7 @@ class ParagraphStyle final
   txt::ParagraphStyle style_;
   ScopedObject<Paint> foreground_;
   ScopedObject<Paint> background_;
+  std::optional<ImpellerTextDecoration> decoration_;
 };
 
 }  // namespace impeller::interop

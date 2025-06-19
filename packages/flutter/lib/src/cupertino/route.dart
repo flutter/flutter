@@ -182,7 +182,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    // Suppress previous route from transitioning if this is a fullscreenDialog route.
     return previousRoute is PageRoute && !fullscreenDialog;
   }
 
@@ -345,7 +345,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition =>
-      this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
+      fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -1277,6 +1277,10 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.
 ///
+/// The [requestFocus] parameter is used to specify whether the popup should
+/// request focus when shown.
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a `Future` that resolves to the value that was passed to
@@ -1318,6 +1322,7 @@ Future<T?> showCupertinoModalPopup<T>({
   bool semanticsDismissible = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  bool? requestFocus,
 }) {
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     CupertinoModalPopupRoute<T>(
@@ -1328,6 +1333,7 @@ Future<T?> showCupertinoModalPopup<T>({
       semanticsDismissible: semanticsDismissible,
       settings: routeSettings,
       anchorPoint: anchorPoint,
+      requestFocus: requestFocus,
     ),
   );
 }
@@ -1360,6 +1366,9 @@ Widget _buildCupertinoDialogTransitions(
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
+///
+/// {@macro flutter.material.dialog.requestFocus}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
@@ -1401,10 +1410,12 @@ Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   String? barrierLabel,
+  Color? barrierColor,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  bool? requestFocus,
 }) {
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
     CupertinoDialogRoute<T>(
@@ -1412,9 +1423,10 @@ Future<T?> showCupertinoDialog<T>({
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: barrierLabel,
-      barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
+      barrierColor: barrierColor,
       settings: routeSettings,
       anchorPoint: anchorPoint,
+      requestFocus: requestFocus,
     ),
   );
 }

@@ -10,7 +10,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -103,25 +102,22 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     return Container(
       width: _kToolbarWidth,
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
-        boxShadow: _kToolbarShadow,
-        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
+      decoration: const ShapeDecoration(
+        shadows: _kToolbarShadow,
+        shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kToolbarBorderRadius)),
       ),
       child: BackdropFilter(
-        // Flutter web doesn't support ImageFilter.compose on CanvasKit yet
-        // (https://github.com/flutter/flutter/issues/120123).
-        filter:
-            kIsWeb
-                ? ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma)
-                : ImageFilter.compose(
-                  outer: ColorFilter.matrix(_matrixWithSaturation(_kToolbarSaturationBoost)),
-                  inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
-                ),
+        filter: ImageFilter.compose(
+          outer: ColorFilter.matrix(_matrixWithSaturation(_kToolbarSaturationBoost)),
+          inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
+        ),
         child: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: ShapeDecoration(
             color: _kToolbarBackgroundColor.resolveFrom(context),
-            border: Border.all(color: _kToolbarBorderColor.resolveFrom(context)),
-            borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+            shape: RoundedSuperellipseBorder(
+              side: BorderSide(color: _kToolbarBorderColor.resolveFrom(context)),
+              borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+            ),
           ),
           child: Padding(padding: _kToolbarPadding, child: child),
         ),

@@ -116,7 +116,7 @@ int? _cachedWebGLVersion;
 ///
 /// Our CanvasKit backend is affected due to: https://github.com/emscripten-core/emscripten/issues/11819
 int _detectWebGLVersion() {
-  final DomCanvasElement canvas = createDomCanvasElement(width: 1, height: 1);
+  final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 1, height: 1);
   if (canvas.getContext('webgl2') != null) {
     if (_workAroundBug91333) {
       return WebGLVersion.webgl1;
@@ -138,3 +138,36 @@ bool get _workAroundBug91333 => _isIOS;
 /// Whether the current browser supports the Chromium variant of CanvasKit.
 bool get browserSupportsCanvaskitChromium =>
     domIntl.v8BreakIterator != null && domIntl.Segmenter != null;
+
+/// Whether the current browser is Safari 17.4 or newer.
+///
+/// Safari 17.4 introduced support for aria-description.
+bool get isSafari174OrNewer {
+  if (!isSafari) {
+    return false;
+  }
+  final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
+  final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
+  if (match != null) {
+    final int majorVersion = int.parse(match.group(1)!);
+    final int minorVersion = int.parse(match.group(2)!);
+    return majorVersion > 17 || (majorVersion == 17 && minorVersion >= 4);
+  }
+  return false;
+}
+
+/// Whether the current browser is Firefox 119 or newer.
+///
+/// Firefox 119 introduced support for aria-description.
+bool get isFirefox119OrNewer {
+  if (!isFirefox) {
+    return false;
+  }
+  final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
+  final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
+  if (match != null) {
+    final int version = int.parse(match.group(1)!);
+    return version >= 119;
+  }
+  return false;
+}

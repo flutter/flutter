@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
@@ -2277,11 +2277,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
         ),
       );
       await tester.pumpAndSettle();
+
+      // Rectangle for the track of scrollbar.
+      // The default thickness of thumb is 6.0, hence topLeft = 800.0 - 6.0 = 794.0
+      const Rect trackRect = Rect.fromLTRB(794.0, 0.0, 800.0, 600.0);
+
       expect(scrollController.offset, 0.0);
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect)
           ..rect(
             rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
             color: const Color(0x66BCBCBC),
@@ -2305,9 +2310,45 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect) // Scrollbar track
           ..rect(
-            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0),
+            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0), // Scrollbar thumb
+            color: const Color(0x66BCBCBC),
+          ),
+      );
+
+      // Regression test for issue: https://github.com/flutter/flutter/issues/170246
+      // First scroll to the top, then drag the thumb to scroll down.
+      final double minScrollExtent = scrollController.position.minScrollExtent; // -600
+      scrollController.jumpTo(minScrollExtent);
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, minScrollExtent);
+      const Rect thumbRectBefore = Rect.fromLTRB(794.0, 0.0, 800.0, 200.0); // Scrollbar thumb
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(rect: thumbRectBefore, color: const Color(0x66BCBCBC)),
+      );
+
+      // Drag the thumb to scroll down.
+      const double scrollDownAmount = 20.0;
+      final Offset thumbCenter = thumbRectBefore.center;
+      final TestGesture dragGesture = await tester.startGesture(thumbCenter);
+      await tester.pumpAndSettle();
+      await dragGesture.moveBy(const Offset(0.0, scrollDownAmount));
+      await tester.pumpAndSettle();
+      await dragGesture.up();
+      await tester.pumpAndSettle();
+
+      // The view should have scrolled by the amount dragged.
+      expect(scrollController.offset - minScrollExtent, 1800 * scrollDownAmount / 600);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(
+            rect: thumbRectBefore.shift(const Offset(0.0, scrollDownAmount)),
             color: const Color(0x66BCBCBC),
           ),
       );
@@ -3484,4 +3525,46 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(verticalScrollController.offset, greaterThan(0.0));
     expect(horizontalScrollController.offset, greaterThan(0.0));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/141348.
+  testWidgets(
+    'Scrollbar should not shown due to precision error on desktop',
+    (WidgetTester tester) async {
+      Widget buildFrame(Size size) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        return MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: DatePickerDialog(
+                initialDate: DateTime(2020, DateTime.may), // Month with six rows.
+                firstDate: DateTime(2010),
+                lastDate: DateTime(2030),
+              ),
+            ),
+          ),
+        );
+      }
+
+      const Size screenSizePortrait = Size(400, 600);
+      await tester.pumpWidget(buildFrame(screenSizePortrait));
+      await tester.pumpAndSettle();
+
+      // Scrollbar is not shown.
+      expect(find.byType(Scrollbar), findsOneWidget);
+      expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+      // Scroll on the Scrollbar.
+      final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      pointer.hover(tester.getCenter(find.byType(Scrollbar)));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 10.0)));
+      await tester.pumpAndSettle();
+
+      // Scrollbar is still not shown.
+      expect(find.byType(Scrollbar), findsOneWidget);
+      expect(find.byType(Scrollbar), isNot(paints..rect()));
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
 }

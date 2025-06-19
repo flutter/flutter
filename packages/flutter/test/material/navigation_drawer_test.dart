@@ -166,7 +166,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
@@ -258,7 +258,6 @@ void main() {
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
         child: MaterialApp(
           useInheritedMediaQuery: true,
-          theme: ThemeData.light(),
           home: Scaffold(
             key: scaffoldKey,
             drawer: NavigationDrawer(
@@ -327,6 +326,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -337,6 +337,7 @@ void main() {
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -350,6 +351,7 @@ void main() {
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -361,6 +363,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -371,7 +374,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 
@@ -482,6 +485,46 @@ void main() {
     expect(selectedIndex, 1);
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('NavigationDrawer can display header and footer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        header: const DrawerHeader(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 8,
+              children: <Widget>[FlutterLogo(), Text('Header')],
+            ),
+          ),
+        ),
+        footer: ListTile(
+          leading: const FlutterLogo(),
+          title: const Text('Footer'),
+          trailing: const Icon(Icons.settings),
+          onTap: () {},
+        ),
+        children: <Widget>[
+          for (int i = 0; i < 10; i++)
+            NavigationDrawerDestination(icon: const Icon(Icons.home), label: Text('Item $i')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(DrawerHeader), findsOneWidget);
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.byType(FlutterLogo), findsNWidgets(2));
+    expect(find.byType(ListTile), findsOneWidget);
+    expect(find.text('Footer'), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
   });
 }
 

@@ -106,7 +106,6 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 void main() {
   runApp(
     MaterialApp(
-      theme: ThemeData.light(),
       home: Scaffold(
         appBar: AppBar(title: const Text('Hal and Dave')),
         body: Material(color: Colors.grey.shade50, child: const StyledTextDemo()),

@@ -38,6 +38,10 @@ class PlaygroundImpl {
 
   virtual Playground::GLProcAddressResolver CreateGLProcAddressResolver() const;
 
+  virtual Playground::VKProcAddressResolver CreateVKProcAddressResolver() const;
+
+  virtual void SetGPUDisabled(bool disabled) const {}
+
  protected:
   const PlaygroundSwitches switches_;
 

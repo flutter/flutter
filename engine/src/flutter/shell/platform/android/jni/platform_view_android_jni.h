@@ -7,17 +7,17 @@
 
 #include <utility>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
-#include "third_party/skia/include/core/SkMatrix.h"
 
 #if FML_OS_ANDROID
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #endif
+
+struct ASurfaceTransaction;
 
 namespace flutter {
 
@@ -213,6 +213,33 @@ class PlatformViewAndroidJNI {
   /// @note       Must be called from the platform thread.
   ///
   virtual void FlutterViewDestroyOverlaySurfaces() = 0;
+
+  // New Platform View Support.
+  virtual ASurfaceTransaction* createTransaction() = 0;
+
+  virtual void swapTransaction() = 0;
+
+  virtual void applyTransaction() = 0;
+
+  virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
+  createOverlaySurface2() = 0;
+
+  virtual void destroyOverlaySurface2() = 0;
+
+  virtual void onEndFrame2() = 0;
+
+  virtual void onDisplayPlatformView2(int32_t view_id,
+                                      int32_t x,
+                                      int32_t y,
+                                      int32_t width,
+                                      int32_t height,
+                                      int32_t viewWidth,
+                                      int32_t viewHeight,
+                                      MutatorsStack mutators_stack) = 0;
+
+  virtual void showOverlaySurface2() = 0;
+
+  virtual void hideOverlaySurface2() = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Computes the locale Android would select.

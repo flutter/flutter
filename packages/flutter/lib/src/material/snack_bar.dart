@@ -464,6 +464,13 @@ class SnackBar extends StatefulWidget {
   final Animation<double>? animation;
 
   /// Called the first time that the snackbar is visible within a [Scaffold].
+  ///
+  /// When multiple [Scaffold]s are registered to the same [ScaffoldMessengerState],
+  /// [onVisible] is called once for each scaffold.
+  ///
+  /// See also:
+  ///
+  ///  * [ScaffoldMessenger], which manages [SnackBar]s for [Scaffold] descendants.
   final VoidCallback? onVisible;
 
   /// The direction in which the SnackBar can be dismissed.
@@ -716,7 +723,7 @@ class _SnackBarState extends State<SnackBar> {
         defaults.insetPadding!;
 
     final double snackBarWidth =
-        widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
+        widget.width ?? MediaQuery.widthOf(context) - (margin.left + margin.right);
     final double actionOverflowThreshold =
         widget.actionOverflowThreshold ??
         snackBarTheme.actionOverflowThreshold ??

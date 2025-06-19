@@ -16,15 +16,14 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
+import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
-import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
@@ -71,7 +70,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
       help:
-          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy). '
+          'Only supported for "--template=plugin".',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -154,15 +154,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   @override
   String get invocation => '${runner?.executableName} $name <output directory>';
-
-  @override
-  Future<CustomDimensions> get usageValues async {
-    return CustomDimensions(
-      commandCreateProjectType: stringArg('template'),
-      commandCreateAndroidLanguage: stringArg('android-language'),
-      commandCreateIosLanguage: stringArg('ios-language'),
-    );
-  }
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
@@ -334,12 +325,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
         argResults!.wasParsed('platforms') &&
         platforms.contains('web')) {
       throwToolExit('The web platform is not supported in plugin_ffi template.', exitCode: 2);
-    } else if (generateFfi && argResults!.wasParsed('ios-language')) {
-      throwToolExit(
-        'The "ios-language" option is not supported with the ${template.cliName} '
-        'template: the language will always be C or C++.',
-        exitCode: 2,
-      );
     } else if (generateFfi && argResults!.wasParsed('android-language')) {
       throwToolExit(
         'The "android-language" option is not supported with the ${template.cliName} '
@@ -347,12 +332,19 @@ class CreateCommand extends FlutterCommand with CreateBase {
         exitCode: 2,
       );
     } else if (argResults!.wasParsed('ios-language')) {
-      globals.printWarning(
-        'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
-      );
-      if (stringArg('ios-language') == 'objc') {
+      if (generateMethodChannelsPlugin) {
         globals.printWarning(
-          'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.',
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
+        );
+        if (stringArg('ios-language') == 'objc') {
+          globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/169683 describing your use-case for using Objective-C instead of Swift.',
+          );
+        }
+      } else {
+        throwToolExit(
+          'The "ios-language" option is only supported for "--template=plugin".',
+          exitCode: 2,
         );
       }
     }
@@ -410,6 +402,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
         logger: globals.logger,
         config: globals.config,
         terminal: globals.terminal,
+        fileSystem: globals.fs,
+        fileSystemUtils: globals.fsUtils,
+        plistParser: globals.plistParser,
       );
     }
 
@@ -532,7 +527,16 @@ class CreateCommand extends FlutterCommand with CreateBase {
       // TODO(dacoharkes): Uncouple the app and parent project platforms. https://github.com/flutter/flutter/issues/133874
       // Then this if can be removed.
       if (!generateFfiPackage) {
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+        //
+        // `flutter packages get` inherently is neither a debug or release build,
+        // and since a future build (`flutter build apk`) will regenerate tooling
+        // anyway, we assume this is fine.
+        //
+        // It won't be if they do `flutter build --no-pub`, though.
+        const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos,
           linuxPlatform: includeLinux,
@@ -708,9 +712,9 @@ Your $application code is in $relativeAppMain.
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] =
-          SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
+          FlutterDarwinPlatform.ios.supportedPackagePlatform.format();
       templateContext['macosSupportedPlatform'] =
-          SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
+          FlutterDarwinPlatform.macos.supportedPackagePlatform.format();
     } else {
       templates.add('plugin_cocoapods');
     }
@@ -1039,8 +1043,8 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaAndGradle(
     globals.logger,
-    javaV: javaVersion,
-    gradleV: templateGradleVersion,
+    javaVersion: javaVersion,
+    gradleVersion: templateGradleVersion,
   );
   bool javaAgpVersionsCompatible = gradle.validateJavaAndAgp(
     globals.logger,

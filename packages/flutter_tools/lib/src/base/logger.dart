@@ -77,12 +77,12 @@ abstract class Logger {
   /// doesn't support them.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -109,12 +109,12 @@ abstract class Logger {
   /// doesn't support them.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -147,12 +147,12 @@ abstract class Logger {
   /// status. Defaults to true.
   ///
   /// The `indent` argument specifies the number of spaces to indent the overall
-  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// message. If wrapping is enabled in [OutputPreferences], then the wrapped
   /// lines will be indented as well.
   ///
   /// If `hangingIndent` is specified, then any wrapped lines will be indented
   /// by this much more than the first line, if wrapping is enabled in
-  /// [outputPreferences].
+  /// [OutputPreferences].
   ///
   /// If `wrap` is specified, then it overrides the
   /// `outputPreferences.wrapText` setting.
@@ -1216,9 +1216,12 @@ class SilentStatus extends Status {
 
 const int _kTimePadding = 8; // should fit "99,999ms"
 
-/// Constructor writes [message] to [stdout]. On [cancel] or [stop], will call
-/// [onFinish]. On [stop], will additionally print out summary information.
+/// A version of [Status] that just outputs a summary.
 class SummaryStatus extends Status {
+  /// Writes [message] to [stdio].
+  ///
+  /// On [cancel] or [stop], will call [onFinish].
+  /// On [stop], will additionally print out summary information.
   SummaryStatus({
     String message = '',
     required super.stopwatch,
@@ -1435,15 +1438,14 @@ class AnonymousSpinnerStatus extends Status {
 }
 
 /// An animated version of [Status].
-///
-/// The constructor writes [message] to [stdout] with padding, then starts an
-/// indeterminate progress indicator animation.
-///
-/// On [cancel] or [stop], will call [onFinish]. On [stop], will
-/// additionally print out summary information.
-///
-/// Call [pause] before outputting any text while this is running.
 class SpinnerStatus extends AnonymousSpinnerStatus {
+  /// Writes [message] to [stdio] with padding, then starts an
+  /// indeterminate progress indicator animation.
+  ///
+  /// On [cancel] or [stop], will call [onFinish].
+  /// On [stop], will additionally print out summary information.
+  ///
+  /// Call [pause] before outputting any text while this is running.
   SpinnerStatus({
     required String message,
     int padding = kDefaultStatusPadding,

@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -17,9 +16,10 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -28,16 +28,6 @@ void main() {
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
   late FlutterProject flutterProject;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      isExplicitPackageDependenciesEnabled: true,
-      // Assumed to be true below.
-      isWebEnabled: true,
-    );
-  }
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -48,10 +38,16 @@ void main() {
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
     );
+    fileSystem.currentDirectory.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: my_app
+environement:
+  sdk: '^3.5.0'
+''');
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
   });
 
   testUsingContext(
@@ -80,7 +76,6 @@ void main() {
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        usage: testUsage,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
@@ -104,22 +99,6 @@ void main() {
       // Runs ScrubGeneratedPluginRegistrant migrator.
       expect(logger.traceText, contains('generated_plugin_registrant.dart not found. Skipping.'));
 
-      // Sends build config event
-      expect(
-        testUsage.events,
-        unorderedEquals(<TestUsageEvent>[
-          const TestUsageEvent(
-            'build',
-            'web',
-            label: 'web-compile',
-            parameters: CustomDimensions(
-              buildEventSettings:
-                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
-            ),
-          ),
-        ]),
-      );
-
       expect(
         fakeAnalytics.sentEvents,
         containsAll(<Event>[
@@ -131,10 +110,6 @@ void main() {
         ]),
       );
 
-      // Sends timing event.
-      final TestTimingEvent timingEvent = testUsage.timings.single;
-      expect(timingEvent.category, 'build');
-      expect(timingEvent.variableName, 'dual-compile');
       expect(
         analyticsTimingEventExists(
           sentEvents: fakeAnalytics.sentEvents,
@@ -146,8 +121,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -171,7 +145,6 @@ void main() {
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        usage: testUsage,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
@@ -201,8 +174,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 

@@ -11,11 +11,7 @@ class GenL10nProject extends Project {
   GenL10nProject({required this.useNamedParameters});
 
   @override
-  Future<void> setUpIn(
-    Directory dir, {
-    bool useDeferredLoading = false,
-    bool useSyntheticPackage = false,
-  }) {
+  Future<void> setUpIn(Directory dir, {bool useDeferredLoading = false}) {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
@@ -28,11 +24,7 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     writeFile(
       fileSystem.path.join(dir.path, 'l10n.yaml'),
-      l10nYaml(
-        useDeferredLoading: useDeferredLoading,
-        useSyntheticPackage: useSyntheticPackage,
-        useNamedParameters: useNamedParameters,
-      ),
+      l10nYaml(useDeferredLoading: useDeferredLoading, useNamedParameters: useNamedParameters),
     );
     return super.setUpIn(dir);
   }
@@ -49,6 +41,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any # Pick up the pinned version from flutter_localizations
+
+flutter:
+  generate: true
 ''';
 
   String? _main;
@@ -1089,19 +1084,11 @@ void main() {
   );
 }''';
 
-  String l10nYaml({
-    required bool useDeferredLoading,
-    required bool useSyntheticPackage,
-    required bool useNamedParameters,
-  }) {
+  String l10nYaml({required bool useDeferredLoading, required bool useNamedParameters}) {
     String l10nYamlString = '';
 
     if (useDeferredLoading) {
       l10nYamlString += 'use-deferred-loading: true\n';
-    }
-
-    if (!useSyntheticPackage) {
-      l10nYamlString += 'synthetic-package: false\n';
     }
 
     if (useNamedParameters) {

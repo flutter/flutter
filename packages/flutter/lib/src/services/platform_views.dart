@@ -128,9 +128,9 @@ class PlatformViewsService {
   /// null.
   /// {@endtemplate}
   ///
-  /// This attempts to use the newest and most efficient platform view
-  /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Virtual Display.
+  /// This attempts to use the TLHC implementation when possible.
+  /// In cases where that is not supported, it falls back to using
+  /// Virtual Display.
   static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
@@ -155,10 +155,12 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// This attempts to use the newest and most efficient platform view
+  /// This attempts to use the "Texture Layer Hybrid Composition (TLHC)" platform view
   /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Hybrid Composition, which is the mode used by
+  /// falls back to using "Hybrid Composition", which is the mode used by
   /// [initExpensiveAndroidView].
+  // Fallback logic for TLHC or HC lives in
+  // engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
   static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
@@ -185,9 +187,10 @@ class PlatformViewsService {
   /// When this factory is used, the Android view and Flutter widgets are
   /// composed at the Android view hierarchy level.
   ///
-  /// Using this method has a performance cost on devices running Android 9 or
-  /// earlier, or on underpowered devices. In most situations, you should use
+  /// Using this method has a performance cost on devices running Android 9 (api 28)
+  /// or earlier, or on underpowered devices. In most situations, you should use
   /// [initAndroidView] or [initSurfaceAndroidView] instead.
+  /// Always creates a "Hybrid Composition (HC)" view.
   static ExpensiveAndroidViewController initExpensiveAndroidView({
     required int id,
     required String viewType,
@@ -197,6 +200,34 @@ class PlatformViewsService {
     VoidCallback? onFocus,
   }) {
     final ExpensiveAndroidViewController controller = ExpensiveAndroidViewController._(
+      viewId: id,
+      viewType: viewType,
+      layoutDirection: layoutDirection,
+      creationParams: creationParams,
+      creationParamsCodec: creationParamsCodec,
+    );
+
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
+  }
+
+  /// {@macro flutter.services.PlatformViewsService.initAndroidView}
+  ///
+  /// When this factory is used, the Android view and Flutter widgets are
+  /// composed at the Android view hierarchy level.
+  ///
+  /// This functionality is only supported on Android devices running Vulkan on
+  /// API 34 or newer.
+  /// Always creates a "Hybrid Composition++ (HCPP)" view.
+  static HybridAndroidViewController initHybridAndroidView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) {
+    final HybridAndroidViewController controller = HybridAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -1065,6 +1096,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
 
 /// Controls an Android view that is composed using the Android view hierarchy.
 /// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
+// "Hybrid Composition" controller.
 class ExpensiveAndroidViewController extends AndroidViewController {
   ExpensiveAndroidViewController._({
     required super.viewId,
@@ -1117,12 +1149,79 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 }
 
+/// Controls an Android view that is composed using the Android view hierarchy.
+/// This controller is created from the [PlatformViewsService.initHybridAndroidView] factory.
+// "HCPP"
+class HybridAndroidViewController extends AndroidViewController {
+  HybridAndroidViewController._({
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  }) : super._();
+
+  final _AndroidViewControllerInternals _internals = _Hybrid2AndroidViewControllerInternals();
+
+  /// Perform a runtime check to determine if HCPP mode is supported on the
+  /// current device.
+  static Future<bool> checkIfSupported() =>
+      _Hybrid2AndroidViewControllerInternals.checkIfSurfaceControlEnabled();
+
+  @override
+  bool get _createRequiresSize => false;
+
+  @override
+  Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
+    await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: true,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      position: position,
+      useNewController: true,
+    );
+  }
+
+  @override
+  int? get textureId {
+    return _internals.textureId;
+  }
+
+  @override
+  bool get requiresViewComposition {
+    return _internals.requiresViewComposition;
+  }
+
+  @override
+  Future<void> _sendDisposeMessage() {
+    return _internals.sendDisposeMessage(viewId: viewId);
+  }
+
+  @override
+  Future<Size> _sendResizeMessage(Size size) {
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+    await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
+  }
+}
+
 /// Controls an Android view that is rendered as a texture.
 /// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
 ///
 /// The platform view is created by calling [create] with an initial size.
 ///
 /// The controller is typically created with [PlatformViewsService.initAndroidView].
+// "TLHC" or "VD"
 class TextureAndroidViewController extends AndroidViewController {
   TextureAndroidViewController._({
     required super.viewId,
@@ -1201,6 +1300,7 @@ abstract class _AndroidViewControllerInternals {
     required TextDirection layoutDirection,
     required bool hybrid,
     bool hybridFallback = false,
+    bool useNewController = false,
     _CreationParams? creationParams,
     Size? size,
     Offset? position,
@@ -1219,6 +1319,9 @@ abstract class _AndroidViewControllerInternals {
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
       args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
+    }
+    if (useNewController) {
+      return SystemChannels.platform_views_2.invokeMethod<dynamic>('create', args);
     }
     return SystemChannels.platform_views.invokeMethod<dynamic>('create', args);
   }
@@ -1241,7 +1344,7 @@ abstract class _AndroidViewControllerInternals {
 // An AndroidViewController implementation for views whose contents are
 // displayed via a texture rather than directly in a native view.
 //
-// This is used for both Virtual Display and Texture Layer Hybrid Composition.
+// This is used for both Virtual Display (VD) and Texture Layer Hybrid Composition (TLHC).
 class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInternals {
   _TextureAndroidViewControllerInternals();
 
@@ -1343,6 +1446,49 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   @override
   Future<void> sendDisposeMessage({required int viewId}) {
     return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': true,
+    });
+  }
+}
+
+// The HCPP platform view controller.
+//
+// This is only supported via an opt in on Impeller Android.
+class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  // Determine if HCPP can be used.
+  static Future<bool> checkIfSurfaceControlEnabled() async {
+    return (await SystemChannels.platform_views_2.invokeMethod<bool>(
+      'isSurfaceControlEnabled',
+      <String, Object?>{},
+    ))!;
+  }
+
+  @override
+  int get textureId {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  bool get requiresViewComposition => true;
+
+  @override
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> setOffset(
+    Offset offset, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> sendDisposeMessage({required int viewId}) {
+    return SystemChannels.platform_views_2.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
     });
