@@ -9,6 +9,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -246,6 +247,8 @@ class AndroidAot extends AotElfBase {
       extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
       extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
+
+    printError("hi gray, target platform is ");
 
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(

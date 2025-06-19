@@ -165,15 +165,10 @@ class AOTSnapshotter {
       if (stripAfterBuild) {
         _logger.printTrace('Will strip AOT snapshot manually after build and dSYM generation.');
       }
-    } else if (platform == TargetPlatform.android) {
+    } else if (platform == TargetPlatform.android || platform == TargetPlatform.android_arm || platform == TargetPlatform.android_arm64 || platform == TargetPlatform.android_x64) {
       stripAfterBuild = false;
       // If the argument was explicitly passed respect it, otherwise default
       // to false.
-      if (_requestedStrip(extraGenSnapshotOptions) ?? false) {
-        genSnapshotArgs.add('--strip');
-      } else {
-        genSnapshotArgs.add('--no-strip');
-      }
     } else {
       stripAfterBuild = false;
       if (shouldStrip) {
