@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Build;
 import io.flutter.Build.API_LEVELS;
-
 import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
