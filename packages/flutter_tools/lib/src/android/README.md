@@ -19,7 +19,7 @@ All of the Android SDK/NDK versions noted in `gradle_utils.dart`
 (`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`)
 versions should match the values in Flutter Gradle Plugin (`FlutterExtension`),
 so updating any of these versions also requires an update in
-[flutter.groovy](../../../gradle/src/main/groovy/flutter.groovy).
+[FlutterExtension](../../../gradle/src/main/kotlin/FlutterExtention.kt).
 
 When updating the Android `compileSdkVersion`, `minSdkVersion`, or
 `targetSdkVersion`, make sure that:
@@ -30,8 +30,7 @@ SDK versions are updated (you should see these fail if you do not fix them
 preemptively).
 
 Also, make sure to also update to the same version in the following places:
-- The version in the buildscript block in `packages/flutter_tools/gradle/src/main/groovy/flutter.groovy`.
-- The version in the buildscript block in `packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts`.
+- The versions for error/warn in `packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt`.
 - The version in the dependencies block in `packages/flutter_tools/gradle/build.gradle.kts`.
 
 #### Gradle
