@@ -9,7 +9,6 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
-import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
