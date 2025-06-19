@@ -248,8 +248,6 @@ class AndroidAot extends AotElfBase {
       extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
-    printError("hi gray, target platform is ");
-
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
