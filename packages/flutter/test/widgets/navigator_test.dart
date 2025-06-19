@@ -478,13 +478,7 @@ void main() {
     };
     await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
     expect(find.text('/'), findsOneWidget);
-    Error? error;
-    try {
-      nav.currentState!.pushNamed<Object>('/second');
-    } on Error catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    nav.currentState!.pushNamed<Object>('/second');
     await tester.pumpAndSettle();
     expect(find.text('/'), findsNothing);
     expect(find.text('/second'), findsOneWidget);
