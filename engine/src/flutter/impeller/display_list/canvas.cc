@@ -14,7 +14,6 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -603,6 +602,32 @@ void Canvas::DrawLine(const Point& p0,
   }
 }
 
+void Canvas::DrawDashedLine(const Point& p0,
+                            const Point& p1,
+                            Scalar on_length,
+                            Scalar off_length,
+                            const Paint& paint) {
+  // Reasons to defer to regular DrawLine:
+  // - performance for degenerate and "regular line" cases
+  // - length is non-positive - DrawLine will draw appropriate "dot"
+  // - off_length is non-positive - no gaps, DrawLine will draw it solid
+  // - on_length is negative - invalid dashing
+  //
+  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
+  // apart so we proceed with the dashing process in that case.
+  Scalar length = p0.GetDistance(p1);
+  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    StrokeDashedLineGeometry geom(p0, p1, on_length, off_length, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    DrawLine(p0, p1, paint);
+  }
+}
+
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, {}, paint)) {
     return;
@@ -650,41 +675,39 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   }
 }
 
-void Canvas::DrawArc(const Rect& oval_bounds,
-                     Degrees start,
-                     Degrees sweep,
-                     bool use_center,
-                     const Paint& paint) {
+void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.style == Paint::Style::kFill) {
-    ArcGeometry geom(oval_bounds, start, sweep, use_center);
+    ArcGeometry geom(arc);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
     return;
   }
 
+  const Rect& oval_bounds = arc.GetOvalBounds();
   if (paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
     // This is a special case for rendering arcs whose stroke width is so large
     // you are effectively drawing a sector of a circle.
     // https://github.com/flutter/flutter/issues/158567
-    Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
+    Arc expanded_arc(oval_bounds.Expand(Size(paint.stroke.width * 0.5f)),
+                     arc.GetStart(), arc.GetSweep(), true);
 
-    ArcGeometry geom(expanded_rect, start, sweep, /*include_center=*/true);
+    ArcGeometry geom(expanded_arc);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
     return;
   }
 
-  // Use_center incurs lots of extra work for stroking an arc, including:
+  // IncludeCenter incurs lots of extra work for stroking an arc, including:
   // - It introduces segments to/from the center point (not too hard).
   // - It introduces joins on those segments (a bit more complicated).
   // - Even if the sweep is >=360 degrees, we still draw the segment to
   //   the center and it basically looks like a pie cut into the complete
   //   boundary circle, as if the slice were cut, but not extracted
   //   (hard to express as a continuous kTriangleStrip).
-  if (!use_center) {
-    if (std::abs(sweep.degrees) >= 360.0f) {
+  if (!arc.IncludeCenter()) {
+    if (arc.IsFullCircle()) {
       return DrawOval(oval_bounds, paint);
     }
 
@@ -697,16 +720,13 @@ void Canvas::DrawArc(const Rect& oval_bounds,
     // TODO(flar): It also only supports Butt and Square caps for now.
     // See https://github.com/flutter/flutter/issues/169400
     if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
-      ArcGeometry geom(oval_bounds, start, sweep, paint.stroke);
+      ArcGeometry geom(arc, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
       return;
     }
   }
 
-  flutter::DlPathBuilder builder;
-  builder.AddArc(oval_bounds, start, sweep, use_center);
-
-  ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
+  ArcStrokeGeometry geom(arc, paint.stroke);
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 

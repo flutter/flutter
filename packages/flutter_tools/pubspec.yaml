@@ -13,7 +13,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.2
-  dwds: 24.3.10
+  dwds: 24.3.11
   code_builder: 4.10.1
   completion: 1.0.1
   coverage: 1.14.1
@@ -57,8 +57,8 @@ dependencies:
 
   graphs: 2.3.2
   hooks_runner: 0.21.0
-  hooks: 0.19.3
-  code_assets: 0.19.3
+  hooks: 0.19.5
+  code_assets: 0.19.4
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -108,7 +108,7 @@ dependencies:
   term_glyph: 1.2.2
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
-  watcher: 1.1.1
+  watcher: 1.1.2
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.2
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: npsc0d
+# PUBSPEC CHECKSUM: 8r3ct9
