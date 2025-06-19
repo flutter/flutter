@@ -2568,15 +2568,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       inverseTransformDirty = true;
       globalGeometryDirty = true;
 
-      final int childCount = buffer.getInt();
+      final int traversalOrderChildCount = buffer.getInt();
       childrenInTraversalOrder.clear();
-      childrenInHitTestOrder.clear();
-      for (int i = 0; i < childCount; ++i) {
+      for (int i = 0; i < traversalOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInTraversalOrder.add(child);
       }
-      for (int i = 0; i < childCount; ++i) {
+
+      final int hitTestOrderChildCount = buffer.getInt();
+      childrenInHitTestOrder.clear();
+      for (int i = 0; i < hitTestOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInHitTestOrder.add(child);

@@ -279,6 +279,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
         buffer_int32[position++] = child;
       }
 
+      buffer_int32[position++] = node.childrenInHitTestOrder.size();
       for (int32_t child : node.childrenInHitTestOrder) {
         buffer_int32[position++] = child;
       }
