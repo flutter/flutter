@@ -9281,10 +9281,10 @@ void main() {
         });
 
         await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            'flutter/platform',
-            messageBytes,
-            (ByteData? data) {},
-          );
+          'flutter/platform',
+          messageBytes,
+          (ByteData? data) {},
+        );
 
         await tester.pumpAndSettle();
 

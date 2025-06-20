@@ -16683,7 +16683,7 @@ void main() {
           'method': 'ContextMenu.onDismissSystemContextMenu',
         });
 
-         await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/platform',
           messageBytes,
           (ByteData? data) {},
