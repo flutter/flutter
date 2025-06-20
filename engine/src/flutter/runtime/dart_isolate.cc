@@ -1253,13 +1253,6 @@ static char* NativeAssetsAvailableAssets() {
 static void InitDartFFIForIsolateGroup() {
   NativeAssetsApi native_assets;
   memset(&native_assets, 0, sizeof(native_assets));
-  // TODO(dacoharkes): Remove after flutter_tools stops kernel embedding.
-  native_assets.dlopen_absolute = &dart::bin::NativeAssets::DlopenAbsolute;
-  native_assets.dlopen_relative = &NativeAssetsDlopenRelative;
-  native_assets.dlopen_system = &dart::bin::NativeAssets::DlopenSystem;
-  native_assets.dlopen_executable = &dart::bin::NativeAssets::DlopenExecutable;
-  native_assets.dlopen_process = &dart::bin::NativeAssets::DlopenProcess;
-  // TODO(dacoharkes): End todo.
   native_assets.dlsym = &dart::bin::NativeAssets::Dlsym;
   native_assets.dlopen = &NativeAssetsDlopen;
   native_assets.available_assets = &NativeAssetsAvailableAssets;
