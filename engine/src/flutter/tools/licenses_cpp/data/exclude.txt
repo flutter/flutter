@@ -13,6 +13,7 @@
 .*/flutter/third_party/harfbuzz/.*\.py
 .*/flutter/third_party/harfbuzz/perf/.*
 .*/flutter/third_party/harfbuzz/src/harfbuzz.cc
+.*/flutter/third_party/imgui/.*
 .*/flutter/third_party/inja/third_party/amalgamate/.*
 .*/flutter/third_party/inja/third_party/include/doctest/.*
 .*/flutter/third_party/libpng/contrib/.*
