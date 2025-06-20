@@ -378,7 +378,7 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Use DWDS WebSocket-based connection instead of Chrome-based connection for debuggingAdd commentMore actions
+      // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
