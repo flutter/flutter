@@ -997,3 +997,30 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   @override
   bool get allowImplicitScrolling => false;
 }
+
+/// Scroll physics that smooth discrete scroll inputs.
+///
+/// See also:
+///
+///  * [ScrollConfiguration], which uses this class to provide the default scroll behavior on most
+///    platforms.
+///  * [SmoothScrollActivity], which is returned by the [createScrollActivity] method of this
+///    class and is used to interpolate the discrete scroll inputs using animation curves.
+class SmoothScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that smooth discrete scroll inputs.
+  const SmoothScrollPhysics({super.parent});
+
+  @override
+  SmoothScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return SmoothScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  ScrollActivity? createScrollActivity(
+    ScrollActivityDelegate delegate,
+    ScrollDetails details,
+    TickerProvider vsync,
+  ) {
+    return SmoothScrollActivity(delegate: delegate, details: details, vsync: vsync);
+  }
+}

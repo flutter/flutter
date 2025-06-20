@@ -13,6 +13,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -23,6 +24,8 @@ import 'framework.dart';
 import 'scroll_details.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_simulation.dart';
+import 'scrollable_helpers.dart';
 
 /// A backend for a [ScrollActivity].
 ///
@@ -827,5 +830,84 @@ class DrivenScrollActivity extends ScrollActivity {
   @override
   String toString() {
     return '${describeIdentity(this)}($_controller)';
+  }
+}
+
+/// An activity that smooths discrete scroll inputs.
+///
+/// See also:
+///
+///  * [SmoothScrollPhysics], which use this class as the default scroll activity.
+///  * [SmoothScrollSimulation], which is used by this activity to drive the animation.
+class SmoothScrollActivity extends DrivenScrollActivity implements RetargetableScrollActivity {
+  /// Creates an activity that smooths discrete scroll inputs.
+  factory SmoothScrollActivity({
+    required ScrollActivityDelegate delegate,
+    required ScrollDetails details,
+    required TickerProvider vsync,
+  }) {
+    final SmoothScrollSimulation simulation = SmoothScrollSimulation(
+      targetValue: switch (details) {
+        ProgrammaticScrollDetails() => details.target,
+        KeyboardScrollDetails() => details.metrics.pixels + details.delta,
+        PointerScrollDetails() => details.metrics.pixels + details.delta,
+      },
+      scrollDetails: details,
+    );
+
+    return SmoothScrollActivity._(simulation, vsync: vsync, delegate: delegate);
+  }
+
+  SmoothScrollActivity._(
+    this._simulation, {
+    required ScrollActivityDelegate delegate,
+    required TickerProvider vsync,
+  }) : super.simulation(delegate, _simulation, vsync: vsync);
+
+  SmoothScrollSimulation _simulation;
+
+  @override
+  bool applyMoveTo(double value) {
+    delegate.setPixels(value);
+
+    // TODO(kszczek): send notification if scroll direction changes
+
+    // Always return true, regardless of whether the new position was applied fully or not.
+    // Returning false would immiediately stop and destroy this activity, while the simulation
+    // has not yet completed.
+    return true;
+  }
+
+  @override
+  void retarget(ScrollDetails details) {
+    final Duration? lastElapsedDuration = _controller.lastElapsedDuration;
+    assert(() {
+      if (lastElapsedDuration != null) {
+        return true;
+      }
+
+      if (!_isDisposed) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('AnimationController is not running, but $runtimeType was not disposed.'),
+          ErrorDescription(
+            'AnimationController.lastElapsedDuration returned null, meaning the controller either '
+            'never started or was stopped implicitly or explicitly. In either case, the parent '
+            '$runtimeType should have been disposed and replaced with another ScrollActivity.',
+          ),
+        ]);
+      }
+
+      throw FlutterError('$runtimeType.retarget() was called on a disposed activity.');
+    }());
+
+    _simulation.retarget(
+      timeInSeconds: lastElapsedDuration!.inMicroseconds / Duration.microsecondsPerSecond,
+      newTargetValue: switch (details) {
+        ProgrammaticScrollDetails() => details.target,
+        KeyboardScrollDetails() => _simulation.targetValue + details.delta,
+        PointerScrollDetails() => _simulation.targetValue + details.delta,
+      },
+      scrollDetails: details,
+    );
   }
 }
