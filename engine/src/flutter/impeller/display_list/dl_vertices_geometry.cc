@@ -221,4 +221,8 @@ bool DlVerticesGeometry::MaybePerformIndexNormalization(
   return false;
 }
 
+bool DlVerticesGeometry::CanApplyMaskFilter() const {
+  return false;
+}
+
 }  // namespace impeller
