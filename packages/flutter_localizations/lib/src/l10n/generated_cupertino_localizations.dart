@@ -5387,6 +5387,178 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   String get timerPickerMinuteLabelOther => 'min';
 }
 
+/// The translations for Irish (`ga`).
+class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Irish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationGa({
+    super.localeName = 'ga',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'Foláireamh';
+
+  @override
+  String get anteMeridiemAbbreviation => 'R.N.';
+
+  @override
+  String get backButtonLabel => 'Siar';
+
+  @override
+  String get cancelButtonLabel => 'Cealaigh';
+
+  @override
+  String get clearButtonLabel => 'Glan';
+
+  @override
+  String get copyButtonLabel => 'Cóipeáil';
+
+  @override
+  String get cutButtonLabel => 'Gearr';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'$hour a chlog';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => 'Aon nóiméad amháin';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Cuardaigh';
+
+  @override
+  String get menuDismissLabel => 'Ruaig an roghchlár';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ruaig';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'Níor Aimsíodh Aon Fhocal Oiriúnach le Cur ina Áit';
+
+  @override
+  String get pasteButtonLabel => 'Greamaigh';
+
+  @override
+  String get postMeridiemAbbreviation => 'I.N.';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Cuardaigh';
+
+  @override
+  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
+
+  @override
+  String get selectAllButtonLabel => 'Roghnaigh Gach Rud';
+
+  @override
+  String get shareButtonLabel => 'Comhroinn...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'Cluaisín $tabIndex de $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelMany => 'n-uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelOne => 'uair an chloig';
+
+  @override
+  String get timerPickerHourLabelOther => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelTwo => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelMany => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'nóim.';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelMany => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelOne => 'soic.';
+
+  @override
+  String get timerPickerSecondLabelOther => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelTwo => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'Inniu';
+}
+
 /// The translations for Galician (`gl`).
 class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Galician.
@@ -9884,7 +10056,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Back';
+  String get backButtonLabel => 'နောက်သို့';
 
   @override
   String get cancelButtonLabel => 'မလုပ်တော့';
@@ -15419,6 +15591,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -15511,6 +15684,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -15704,6 +15878,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       }
       return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
+    case 'ga':
+      return CupertinoLocalizationGa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gl':
       return CupertinoLocalizationGl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gsw':

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -12,15 +13,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:hooks/hooks.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -83,7 +82,6 @@ void main() {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager:
               () => FakeProcessManager.list(<FakeCommand>[
                 if (flutterTester) ...<FakeCommand>[
@@ -267,16 +265,12 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
             ),
             CodeAsset(
               package: 'buz',
               name: 'buz.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
@@ -284,7 +278,10 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
             onBuild:
                 (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  codeAssets:
+                      buildMode == BuildMode.debug
+                          ? codeAssets(input.config.code.targetOS, input.config.code)
+                          : <CodeAsset>[],
                 ),
             onLink:
                 (LinkInput input) =>
@@ -371,7 +368,6 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(
@@ -389,7 +385,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final File packageConfigFile = writePackageConfigFile(
+      final File packageConfigFile = writePackageConfigFiles(
         directory: fileSystem.directory(projectUri),
         mainLibName: 'my_app',
       );
@@ -397,12 +393,18 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        includeDevDependencies: false,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(

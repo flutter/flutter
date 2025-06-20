@@ -247,6 +247,19 @@ struct Matrix {
     // clang-format on
   }
 
+  // Converts the second row/col to identity to make this an equivalent
+  // to a Skia 3x3 Matrix.
+  constexpr Matrix To3x3() const {
+    // clang-format off
+    return Matrix(
+      m[0], m[1], 0,  m[3],
+      m[4], m[5], 0,  m[7],
+      0, 0, 1, 0,
+      m[12], m[13], 0, m[15]
+    );
+    // clang-format on
+  }
+
   constexpr Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],
@@ -307,7 +320,7 @@ struct Matrix {
 
   bool IsInvertible() const { return GetDeterminant() != 0; }
 
-  constexpr Scalar GetMaxBasisLengthXY() const {
+  inline Scalar GetMaxBasisLengthXY() const {
     // The full basis computation requires computing the squared scaling factor
     // for translate/scale only matrices. This substantially limits the range of
     // precision for small and large scales. Instead, check for the common cases
@@ -325,17 +338,17 @@ struct Matrix {
 
   constexpr Vector3 GetBasisZ() const { return Vector3(m[8], m[9], m[10]); }
 
-  constexpr Vector3 GetScale() const {
+  inline Vector3 GetScale() const {
     return Vector3(GetBasisX().GetLength(), GetBasisY().GetLength(),
                    GetBasisZ().GetLength());
   }
 
-  constexpr Scalar GetDirectionScale(Vector3 direction) const {
+  inline Scalar GetDirectionScale(Vector3 direction) const {
     return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
            direction.GetLength();
   }
 
-  constexpr bool IsFinite() const {
+  inline bool IsFinite() const {
     return vec[0].IsFinite() && vec[1].IsFinite() && vec[2].IsFinite() &&
            vec[3].IsFinite();
   }
@@ -559,10 +572,10 @@ struct Matrix {
     return translate * scale;
   }
 
-  static constexpr Matrix MakePerspective(Radians fov_y,
-                                          Scalar aspect_ratio,
-                                          Scalar z_near,
-                                          Scalar z_far) {
+  static inline Matrix MakePerspective(Radians fov_y,
+                                       Scalar aspect_ratio,
+                                       Scalar z_near,
+                                       Scalar z_far) {
     Scalar height = std::tan(fov_y.radians * 0.5f);
     Scalar width = height * aspect_ratio;
 
@@ -585,9 +598,9 @@ struct Matrix {
                            z_near, z_far);
   }
 
-  static constexpr Matrix MakeLookAt(Vector3 position,
-                                     Vector3 target,
-                                     Vector3 up) {
+  static inline Matrix MakeLookAt(Vector3 position,
+                                  Vector3 target,
+                                  Vector3 up) {
     Vector3 forward = (target - position).Normalize();
     Vector3 right = up.Cross(forward);
     up = forward.Cross(right);
@@ -602,7 +615,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static constexpr Vector2 CosSin(Radians radians) {
+  static inline Vector2 CosSin(Radians radians) {
     // The precision of a float around 1.0 is much lower than it is
     // around 0.0, so we end up with cases on quadrant rotations where
     // we get a +/-1.0 for one of the values and a non-zero value for

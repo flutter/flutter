@@ -8,6 +8,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
@@ -271,12 +272,14 @@ TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
   bool enableLazyShaderMode = false,
+  bool enableHCPP = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
     enableLazyShaderMode: enableLazyShaderMode,
+    enableHCPP: enableHCPP,
   ).run;
 }
 
@@ -699,6 +702,28 @@ TaskFunction createPathTessellationDynamicPerfTest() {
   ).run;
 }
 
+TaskFunction createPathStrokeTessellationStaticPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_static',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_static_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createPathStrokeTessellationDynamicPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_dynamic',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_dynamic_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -895,11 +920,13 @@ class StartupTest {
     this.target = 'lib/main.dart',
     this.runEnvironment,
     this.enableLazyShaderMode = false,
+    this.enableHCPP = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
+  final bool enableHCPP;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -912,6 +939,9 @@ class StartupTest {
 
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
+      }
+      if (enableHCPP) {
+        _addSurfaceControlSupportToManifest(testDirectory);
       }
 
       try {
@@ -1724,15 +1754,113 @@ class CompileTest {
     });
   }
 
+  Future<List<double>> getMetricsFromXCResults(String xcResultsBundleName) async {
+    return inDirectory<List<double>>(testDirectory, () async {
+      List<dynamic> resultsJson = <dynamic>[];
+
+      // First, grab the id from the info.plist.
+      final ProcessResult plistIDResult = await Process.run(
+        workingDirectory: testDirectory,
+        'plutil',
+        <String>['-extract', 'rootId.hash', 'raw', '-o', '-', '$xcResultsBundleName/Info.plist'],
+      );
+
+      final String plistID = plistIDResult.stdout.toString().trim();
+
+      // Next, get the ActionsInvocationRecord and Extract the testsRef ID
+      String testRefID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        plistID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
+        print(result.stdout);
+
+        testRefID =
+            // ignore: avoid_dynamic_calls
+            actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value']
+                .toString();
+      });
+
+      // Next, grab the ActionTestSummary using our testRefID.
+      String actionTestSummaryID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        testRefID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
+
+        actionTestSummaryID =
+            // ignore: avoid_dynamic_calls
+            actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
+                .toString();
+      });
+
+      dynamic resultMetricsJSON = '';
+
+      // Finally, grab the metrics.
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        xcResultsBundleName,
+        '--id',
+        actionTestSummaryID,
+        '--format',
+        'json',
+        '--legacy',
+      ]).then((ProcessResult result) {
+        resultMetricsJSON = json.decode(result.stdout.toString());
+
+        resultsJson =
+            // ignore: avoid_dynamic_calls
+            resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values']
+                as List<dynamic>;
+      });
+      final List<double> extractedLaunchTimes = <double>[];
+      resultsJson
+          .map(
+            (dynamic item) => extractedLaunchTimes.add(
+              double.parse((item as Map<String, dynamic>)['_value'] as String),
+            ),
+          )
+          .toList();
+
+      return extractedLaunchTimes;
+    });
+  }
+
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
+      final Map<String, String> environment = Platform.environment;
+      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      final String? provisioningProfile =
+          environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
+      /* Compile Time */
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-allowProvisioningUpdates',
         '-scheme',
         'hello_world_swiftui',
         '-target',
@@ -1744,6 +1872,9 @@ class CompileTest {
         '-archivePath',
         '$testDirectory/hello_world_swiftui',
         'archive',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
@@ -1752,6 +1883,7 @@ class CompileTest {
         }
       });
 
+      /* App Size */
       final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
@@ -1759,10 +1891,40 @@ class CompileTest {
       await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
+      /* Time to First Frame */
+      const String resultBundleName = 'benchmarkResults.xcresult';
+      await Process.run(workingDirectory: testDirectory, 'rm', <String>[
+        '-rf',
+        '$testDirectory/$resultBundleName',
+      ]).then((ProcessResult results) {
+        print(results.stdout);
+      });
+
+      // Run the benchmarking tests, and create the xcResults file.
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        'test',
+        '-project',
+        'hello_world_swiftui.xcodeproj',
+        '-scheme',
+        'hello_world_swiftui',
+        '-destination',
+        'platform=iOS',
+        '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
+        '-resultBundlePath',
+        '$testDirectory/$resultBundleName',
+        '-verbose',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      ]);
+
+      final List<double> extractedLaunchTimes = await getMetricsFromXCResults(resultBundleName);
+
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
+        'time_to_first_frame': extractedLaunchTimes.average,
       });
       return TaskResult.success(metrics);
     });
@@ -1796,17 +1958,7 @@ class CompileTest {
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
-        await flutter(
-          'build',
-          options: options,
-          environment: <String, String>{
-            // iOS 12.1 and lower did not have Swift ABI compatibility so Swift apps embedded the Swift runtime.
-            // https://developer.apple.com/documentation/xcode-release-notes/swift-5-release-notes-for-xcode-10_2#App-Thinning
-            // The gallery pulls in Swift plugins. Set lowest version to 12.2 to avoid benchmark noise.
-            // This should be removed when when Flutter's minimum supported version is >12.2.
-            'FLUTTER_XCODE_IPHONEOS_DEPLOYMENT_TARGET': '12.2',
-          },
-        );
+        await flutter('build', options: options);
         watch.stop();
         final Directory buildDirectory = dir(path.join(cwd, 'build'));
         final String? appPath = _findDarwinAppInBuildDirectory(buildDirectory.path);

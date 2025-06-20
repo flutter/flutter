@@ -640,7 +640,7 @@ typedef RunOrAttach =
       Completer<void>? appStartedCompleter,
     });
 
-/// This domain responds to methods like [start] and [stop].
+/// This domain responds to methods like [startApp] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
@@ -678,7 +678,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${sentenceCase(options.buildInfo.friendlyModeName)} '
+        '${options.buildInfo.mode.uppercaseFriendlyName} '
         'mode is not supported for ${device.displayName}.',
       );
     }
@@ -880,7 +880,7 @@ class AppDomain extends Domain {
   /// Debounce and queue reload actions.
   ///
   /// Only one reload action will run at a time. Actions requested in quick
-  /// succession (within [_hotReloadDebounceDuration]) will be merged together
+  /// succession (within [_hotReloadDebounceDurationMs]) will be merged together
   /// and all return the same result. If an action is requested after an identical
   /// action has already started, it will be queued and run again once the first
   /// action completes.
@@ -1215,8 +1215,6 @@ class DeviceDomain extends Domain {
     return <String, Object?>{
       'started': result.started,
       'vmServiceUri': result.vmServiceUri?.toString(),
-      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
-      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 

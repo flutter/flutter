@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -622,7 +624,7 @@ void main() {
 
       final Finder textField = find.byType(TextField);
       final double anchorWidth = tester.getSize(textField).width;
-      expect(anchorWidth, closeTo(180.5, 0.1));
+      expect(anchorWidth, closeTo(184.5, 0.1));
 
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
@@ -632,7 +634,7 @@ void main() {
               .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
               .first;
       final double menuWidth = tester.getSize(menuMaterial).width;
-      expect(menuWidth, closeTo(180.5, 0.1));
+      expect(menuWidth, closeTo(184.5, 0.1));
 
       // The text field should have same width as the menu
       // when the width property is not null.
@@ -739,10 +741,14 @@ void main() {
 
     final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
     const double menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
+    const double decorationStartGap = 4.0; // See _kInputStartGap.
     const double leadingWidth = 16.0;
     const double trailingWidth = 56.0;
 
-    expect(width, entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding);
+    expect(
+      width,
+      entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding + decorationStartGap,
+    );
   });
 
   testWidgets('The width is determined by the label when it is longer than menu entries', (
@@ -992,7 +998,6 @@ void main() {
               .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
               .first;
       final Size menuViewSize = tester.getSize(menuView);
-      expect(menuViewSize.width, closeTo(180.6, 0.1));
       expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
       // Constrains the menu height.
@@ -1009,7 +1014,6 @@ void main() {
               .first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
-      expect(updatedMenuSize.width, closeTo(180.6, 0.1));
       expect(updatedMenuSize.height, equals(100.0));
     },
   );
@@ -1701,6 +1705,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/165867.
+  testWidgets('Keyboard navigation only traverses filtered entries', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            enableFilter: true,
+            controller: controller,
+            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Good Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Bad Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Good Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Bad Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu4, label: 'Good Match 3'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu5, label: 'Bad Match 3'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Filter the entries to only show the ones with 'Good Match'.
+    await tester.enterText(find.byType(TextField), 'Good Match');
+    await tester.pump();
+
+    // Since the first entry is already highlighted, navigate to the second item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 2');
+
+    // Navigate to the third item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 3');
+
+    // Navigate back to the first item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 1');
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -2386,6 +2439,178 @@ void main() {
       );
 
       expect(controller.text, 'Flutter');
+    },
+  );
+
+  testWidgets('Rematch selection against the first entry with the same value', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    String selectionLabel = 'Initial label';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu0,
+                dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                  DropdownMenuEntry<TestMenu>(
+                    value: TestMenu.mainMenu0,
+                    label: '$selectionLabel 0',
+                  ),
+                  DropdownMenuEntry<TestMenu>(
+                    value: TestMenu.mainMenu1,
+                    label: '$selectionLabel 1',
+                  ),
+                ],
+                controller: controller,
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => setState(() => selectionLabel = 'Updated label'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Select the second item
+    await tester.tap(findMenuItemButton('$selectionLabel 1'));
+    await tester.pump();
+
+    // Update dropdownMenuEntries labels
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(controller.text, 'Updated label 1');
+  });
+
+  testWidgets('Forget selection if its value does not map to any entry', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    String selectionLabel = 'Initial label';
+    bool selectionInEntries = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  DropdownMenu<TestMenu>(
+                    initialSelection: TestMenu.mainMenu0,
+                    dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                      DropdownMenuEntry<TestMenu>(
+                        value: TestMenu.mainMenu0,
+                        label: '$selectionLabel 0',
+                      ),
+                      if (selectionInEntries)
+                        DropdownMenuEntry<TestMenu>(
+                          value: TestMenu.mainMenu1,
+                          label: '$selectionLabel 1',
+                        ),
+                    ],
+                    controller: controller,
+                  ),
+                  ElevatedButton(
+                    onPressed: () => setState(() => selectionInEntries = !selectionInEntries),
+                    child: null,
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => setState(() => selectionLabel = 'Updated label'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Select the second item
+    await tester.tap(findMenuItemButton('$selectionLabel 1'));
+    await tester.pump();
+
+    // Update dropdownMenuEntries labels
+    await tester.tap(find.byType(FloatingActionButton));
+    // Remove second item from entires
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(controller.text, 'Initial label 1');
+
+    // Put second item back into entries
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(controller.text, 'Initial label 1');
+  });
+
+  testWidgets(
+    'Do not rematch selection if the text field was edited progrmaticlly via controller',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      String selectionLabel = 'Initial label';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: Column(
+                  children: <Widget>[
+                    DropdownMenu<TestMenu>(
+                      initialSelection: TestMenu.mainMenu0,
+                      dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                        DropdownMenuEntry<TestMenu>(
+                          value: TestMenu.mainMenu0,
+                          label: '$selectionLabel 0',
+                        ),
+                      ],
+                      controller: controller,
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() => controller.text = 'Controller Value'),
+                      child: null,
+                    ),
+                  ],
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () => setState(() => selectionLabel = 'Updated label'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Change the text field value via controller
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pump();
+
+      // Update dropdownMenuEntries labels
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+
+      expect(controller.text, 'Controller Value');
     },
   );
 
@@ -4085,6 +4310,168 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164905.
+  testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          inputType: SemanticsInputType.text,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isReadOnly,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
+                          textDirection: TextDirection.ltr,
+                          currentValueLength: 0,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 6,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasSelectedState,
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('restorationId is passed to inner TextField', (WidgetTester tester) async {
+    const String restorationId = 'dropdown_menu';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            requestFocusOnTap: true,
+            restorationId: restorationId,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOne);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.restorationId, restorationId);
+  });
+
+  testWidgets(
+    'DropdownMenu does not include the default trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+      expect(iconButton, findsNothing);
+    },
+  );
+
+  testWidgets(
+    'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              trailingIcon: const Icon(Icons.ac_unit),
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.ac_unit);
+      expect(iconButton, findsNothing);
+    },
+  );
+
+  testWidgets('Explicitly provided controllers should not be disposed when switched out.', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    Future<void> pumpDropdownMenu(TextEditingController? controller) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(controller: controller, dropdownMenuEntries: menuChildren),
+          ),
+        ),
+      );
+    }
+
+    await pumpDropdownMenu(controller1);
+    await pumpDropdownMenu(controller2);
+    controller1.dispose();
+    controller2.dispose();
+    expect(tester.takeException(), isNull);
   });
 }
 

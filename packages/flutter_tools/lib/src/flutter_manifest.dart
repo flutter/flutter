@@ -140,6 +140,10 @@ class FlutterManifest {
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
 
+  /// List of all the entries in the workspace field of the `pubspec.yaml` file.
+  List<String> get workspace =>
+      (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
+
   // Flag to avoid printing multiple invalid version messages.
   bool _hasShowInvalidVersionMsg = false;
 
@@ -190,12 +194,6 @@ class FlutterManifest {
 
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] as bool? ?? false;
-  }
-
-  /// If true, does not use Swift Package Manager as a dependency manager.
-  /// CocoaPods will be used instead.
-  bool get disabledSwiftPackageManager {
-    return _flutterDescriptor['disable-swift-package-manager'] as bool? ?? false;
   }
 
   /// True if this Flutter module should use AndroidX dependencies.
@@ -423,16 +421,6 @@ class FlutterManifest {
   }
 
   /// Whether localization Dart files should be generated.
-  ///
-  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
-  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
-  /// does _not_ imply a synthetic package (and never did); additional
-  /// introspection is required to determine whether a synthetic package is
-  /// required.
-  ///
-  /// See also:
-  ///
-  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
@@ -604,14 +592,23 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         errors.addAll(pluginErrors);
       case 'generate':
         break;
+      case 'config':
+        // Futher validation is defined in FlutterFeaturesConfig.
+        break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
       case 'disable-swift-package-manager':
-        if (yamlValue is! bool) {
-          errors.add(
-            'Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
+        errors.add(
+          'The "disable-swift-package-manager" configuration has moved. In your pubspec.yaml:\n'
+          '# Before\n'
+          'flutter:\n'
+          '  disable-swift-package-manager: true\n'
+          '\n'
+          '# After\n'
+          'flutter:\n'
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
+        );
       case 'default-flavor':
         if (yamlValue is! String) {
           errors.add(
@@ -958,10 +955,10 @@ final class AssetTransformerEntry {
     : args = args ?? const <String>[];
 
   final String package;
-  final List<String>? args;
+  final List<String> args;
 
   Map<String, Object?> get descriptor {
-    return <String, Object?>{_kPackage: package, if (args != null) _kArgs: args};
+    return <String, Object?>{_kPackage: package, _kArgs: args};
   }
 
   static const String _kPackage = 'package';
@@ -1011,30 +1008,22 @@ final class AssetTransformerEntry {
     if (other is! AssetTransformerEntry) {
       return false;
     }
-
-    final bool argsAreEqual =
-        (() {
-          if (args == null && other.args == null) {
-            return true;
-          }
-          if (args?.length != other.args?.length) {
-            return false;
-          }
-
-          for (int index = 0; index < args!.length; index += 1) {
-            if (args![index] != other.args![index]) {
-              return false;
-            }
-          }
-          return true;
-        })();
-
-    return package == other.package && argsAreEqual;
+    if (package != other.package) {
+      return false;
+    }
+    if (args.length != other.args.length) {
+      return false;
+    }
+    for (int index = 0; index < args.length; index += 1) {
+      if (args[index] != other.args[index]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object?>[package.hashCode, args?.map((String e) => e.hashCode)]);
+  int get hashCode => Object.hash(package, Object.hashAll(args));
 
   @override
   String toString() {

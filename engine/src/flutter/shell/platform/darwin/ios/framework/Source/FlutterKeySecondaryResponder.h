@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERKEYSECONDARYRESPONDER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERKEYSECONDARYRESPONDER_H_
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 /**
  * An interface for a responder that can process a key event and synchronously

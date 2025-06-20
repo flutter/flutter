@@ -121,7 +121,8 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   std::shared_ptr<GlyphAtlas> atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
@@ -156,7 +157,8 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(2, 1);
   std::shared_ptr<GlyphAtlas> atlas =
@@ -187,7 +189,8 @@ TEST_P(TextContentsTest, MaintainsShape) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
 
   for (int i = 0; i <= 1000; ++i) {
@@ -236,7 +239,8 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.5, 0);
   std::shared_ptr<GlyphAtlas> atlas =
@@ -273,7 +277,8 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(3, 1);
   Point offset = {0.16667, 0};
@@ -317,7 +322,8 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.26, 0);
   std::shared_ptr<GlyphAtlas> atlas =
@@ -354,7 +360,8 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
   std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
   std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
-      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.80, 0);
   std::shared_ptr<GlyphAtlas> atlas =

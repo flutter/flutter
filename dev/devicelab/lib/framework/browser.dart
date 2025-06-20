@@ -74,7 +74,7 @@ class Chrome {
     });
   }
 
-  /// Launches Chrome with the give [options].
+  /// Launches Chrome with the given [options].
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
@@ -125,7 +125,28 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(chromeProcess, options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
+    }
+
+    return Chrome._(chromeProcess, onError, debugConnection);
+  }
+
+  /// Connects to an existing Chrome process with the given [options].
+  ///
+  /// The [onError] callback is called with an error message when the Chrome
+  /// process encounters an error. In particular, [onError] is called when the
+  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  static Future<Chrome> connect(
+    io.Process chromeProcess,
+    ChromeOptions options, {
+    String? workingDirectory,
+    required ChromeErrorCallback onError,
+  }) async {
+    final bool withDebugging = options.debugPort != null;
+
+    WipConnection? debugConnection;
+    if (withDebugging) {
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -260,7 +281,7 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int port) async {
+Future<WipConnection> _connectToChromeDebugPort(int port) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
   final ChromeConnection chromeConnection = ChromeConnection('localhost', port);

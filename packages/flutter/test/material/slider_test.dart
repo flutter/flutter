@@ -2854,7 +2854,7 @@ void main() {
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
-    SliderThemeData theme = baseTheme.sliderTheme;
+    SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
     double value = 0.45;
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
@@ -2886,15 +2886,20 @@ void main() {
       required SliderThemeData theme,
       int? divisions,
       bool enabled = true,
+      bool dragged = true,
     }) async {
       // Discrete enabled widget.
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
       final Offset center = tester.getCenter(find.byType(Slider));
-      final TestGesture gesture = await tester.startGesture(center);
+      TestGesture? gesture;
+      if (dragged) {
+        gesture = await tester.startGesture(center);
+      }
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
 
-      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+      // _RenderValueIndicator is the last render object in the tree.
+      final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
       expect(
         valueIndicatorBox,
         isVisible
@@ -2907,7 +2912,9 @@ void main() {
                 ..paragraph(),
             ),
       );
-      await gesture.up();
+      if (dragged) {
+        await gesture!.up();
+      }
     }
 
     // Default (showValueIndicator set to onlyForDiscrete).
@@ -2915,6 +2922,16 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
     await expectValueIndicator(isVisible: false, theme: theme);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
 
     // With showValueIndicator set to onlyForContinuous.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
@@ -2922,13 +2939,33 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
     await expectValueIndicator(isVisible: true, theme: theme);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
 
-    // discrete enabled widget with showValueIndicator set to always.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.always);
+    // discrete enabled widget with showValueIndicator set to onDrag.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
     await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
     await expectValueIndicator(isVisible: true, theme: theme);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
 
     // discrete enabled widget with showValueIndicator set to never.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
@@ -2936,6 +2973,33 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
     await expectValueIndicator(isVisible: false, theme: theme);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+
+    // discrete enabled widget with showValueIndicator set to alwaysVisible.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: true,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: true, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: false, dragged: false);
   });
 
   testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
@@ -3376,8 +3440,10 @@ void main() {
       ),
     );
 
-    // _RenderSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject =
+        tester.allRenderObjects
+            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+            .first;
 
     // The active track rect should start at 24.0 pixels,
     // and there should not have a gap between active and inactive track.
@@ -3418,8 +3484,10 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeMode.light));
 
-    // _RenderSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject =
+        tester.allRenderObjects
+            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+            .first;
     expect(renderObject.debugNeedsLayout, false);
 
     await tester.pumpWidget(buildFrame(ThemeMode.dark));
@@ -3452,8 +3520,10 @@ void main() {
       ),
     );
 
-    // _RenderSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject =
+        tester.allRenderObjects
+            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+            .first;
 
     expect(
       renderObject,
@@ -3488,8 +3558,10 @@ void main() {
 
     await tester.pumpWidget(buildFrame(10));
 
-    // _RenderSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject =
+        tester.allRenderObjects
+            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+            .first;
 
     // Update the divisions from 10 to 15, the thumb should be paint at the correct position.
     await tester.pumpWidget(buildFrame(15));
@@ -3572,12 +3644,12 @@ void main() {
     expect(
       material,
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: CupertinoColors.white),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: CupertinoColors.white),
     );
   });
 
@@ -3600,12 +3672,12 @@ void main() {
     expect(
       material,
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: color),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: color),
     );
   });
 
@@ -4486,16 +4558,28 @@ void main() {
     });
 
     testWidgets('SliderInteraction.slideOnly', (WidgetTester tester) async {
+      const double overlayRadius = 23;
+      const Color overlayColor = Colors.red;
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
-      const Offset startOfTheSliderTrack = Offset(24, 300);
-      const Offset centerOfTheSlideTrack = Offset(400, 300);
-      const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+      const Offset startOfTheSliderTrack = Offset(overlayRadius, 300);
+      const Offset centerOfTheSliderTrack = Offset(400, 300);
+      const Offset endOfTheSliderTrack = Offset(800 - overlayRadius, 300);
+      final Tween<double> xPosThumb = Tween<double>(
+        begin: startOfTheSliderTrack.dx,
+        end: endOfTheSliderTrack.dx,
+      );
       final List<String> logs = <String>[];
 
       Widget buildApp() {
         return MaterialApp(
+          theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              overlayColor: overlayColor,
+              overlayShape: RoundSliderOverlayShape(overlayRadius: overlayRadius),
+            ),
+          ),
           home: Material(
             child: Center(
               child: StatefulBuilder(
@@ -4526,28 +4610,76 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
+      final Element sliderContext = tester.element(find.byType(Slider));
+      final MaterialInkController material = Material.of(sliderContext);
+
       expect(logs, isEmpty);
 
-      // test tap
-      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      // Test tap.
+      final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
+      // Start animation.
       await tester.pump();
-      // has no effect as tap is disabled, remains 1.0
+      // Go to mid-animation frame.
+      await tester.pump(kRadialReactionDuration * 0.5);
+      expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
+      // We have a non-linear asymmetric curve, so just verify the radius is not full.
+      expect(
+        material,
+        isNot(
+          paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+        ),
+      );
+
+      // Finish animation.
+      await tester.pumpAndSettle();
+      // Overlay drawn.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
+      // Has no other effect as tap is disabled, remains 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart']);
 
-      // test slide
+      // Test slide.
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pump();
-      // changes from 1.0 -> 0.5
+      // Changes from 1.0 -> 0.5.
       expect(value, 0.5);
+      // Overlay still there.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
       await gesture.moveTo(endOfTheSliderTrack);
       await tester.pump();
-      // changes from 0.0 -> 1.0
+      // Changes from 0.0 -> 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged']);
+      // Overlay still there.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
 
       await gesture.up();
+
+      // Start release animation.
       await tester.pump();
+      // Go to mid-animation frame.
+      await tester.pump(kRadialReactionDuration * 0.5);
+      expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
+      // Verify the radius is not full.
+      expect(
+        material,
+        isNot(
+          paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      // No overlay drawn.
+      expect(material, isNot(paints..circle(color: overlayColor, radius: overlayRadius)));
 
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
@@ -5267,5 +5399,47 @@ void main() {
     await tester.pumpWidget(buildSlider(0.5));
     await tester.pumpAndSettle();
     expect(log.last, const Offset(400.0, 300.0));
+  });
+
+  // Regression test for hhttps://github.com/flutter/flutter/issues/161805
+  testWidgets('Discrete Slider does not apply thumb padding in a non-rounded track shape', (
+    WidgetTester tester,
+  ) async {
+    // The default track left and right padding.
+    const double sliderPadding = 24.0;
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        // Thumb padding is applied based on the track height.
+        trackHeight: 100,
+        trackShape: RectangularSliderTrackShape(),
+      ),
+    );
+
+    Widget buildSlider({required double value}) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: SizedBox(
+            width: 300,
+            child: Slider(value: value, max: 100, divisions: 100, onChanged: (double value) {}),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(value: 0));
+
+    MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    expect(material, paints..circle(x: sliderPadding, y: 300.0, color: theme.colorScheme.primary));
+
+    await tester.pumpWidget(buildSlider(value: 100));
+    await tester.pumpAndSettle();
+
+    material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
+    );
   });
 }

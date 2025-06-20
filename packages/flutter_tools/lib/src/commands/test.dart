@@ -294,7 +294,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
@@ -461,7 +460,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      serveObservatory: boolArg('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
@@ -473,7 +471,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
-    final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
+    final Uri? nativeAssetsJson =
+        _isIntegrationTest
+            ? null // Don't build for host when running integration tests.
+            : await nativeAssetsBuilder?.build(buildInfo);
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
@@ -717,7 +718,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     testTimeRecorder?.print();
 
     if (result != 0) {
-      throwToolExit(null);
+      throwToolExit(null, exitCode: result);
     }
     return FlutterCommandResult.success();
   }
@@ -727,8 +728,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final String projectName = flutterProject.manifest.appName;
-    final Set<String> packagesToInclude = <String>{if (packagesRegExps.isEmpty) projectName};
+    final Set<String> packagesToInclude = <String>{};
+    if (packagesRegExps.isEmpty) {
+      void addProject(FlutterProject project) {
+        packagesToInclude.add(project.manifest.appName);
+        project.workspaceProjects.forEach(addProject);
+      }
+
+      addProject(flutterProject);
+    }
     try {
       for (final String regExpStr in packagesRegExps) {
         final RegExp regExp = RegExp(regExpStr);
@@ -743,7 +751,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
-  /// as an absolute file:/// [URI] with optional querystring for name/line/col.
+  /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
   Uri _parseTestArgument(String arg) {
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
@@ -764,7 +772,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String packageConfigPath,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build(packageConfigPath: packageConfigPath, flavor: flavor);
+    final int build = await assetBundle.build(
+      packageConfigPath: packageConfigPath,
+      flavor: flavor,
+      includeAssetsFromDevDependencies: true,
+    );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

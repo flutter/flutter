@@ -393,7 +393,7 @@ class ListTile extends StatelessWidget {
     this.title,
     this.subtitle,
     this.trailing,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.visualDensity,
     this.shape,
@@ -425,7 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
-  }) : assert(!isThreeLine || subtitle != null);
+  }) : assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -482,7 +482,12 @@ class ListTile extends StatelessWidget {
   ///
   /// When using a [Text] widget for [title] and [subtitle], you can enforce
   /// line limits using [Text.maxLines].
-  final bool isThreeLine;
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final bool? isThreeLine;
 
   /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
@@ -810,6 +815,7 @@ class ListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
     final ListTileStyle listTileStyle =
         style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list;
@@ -836,20 +842,29 @@ class ListTile extends StatelessWidget {
       ).resolve(states);
     }
 
-    final Color? effectiveIconColor =
+    Color? effectiveIconColor =
         resolveColor(iconColor, selectedColor, iconColor) ??
         resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor) ??
         resolveColor(
           theme.listTileTheme.iconColor,
           theme.listTileTheme.selectedColor,
           theme.listTileTheme.iconColor,
-        ) ??
-        resolveColor(
-          defaults.iconColor,
-          defaults.selectedColor,
-          defaults.iconColor,
-          theme.disabledColor,
         );
+
+    final Color? defaultEffectiveIconColor = resolveColor(
+      defaults.iconColor,
+      defaults.selectedColor,
+      defaults.iconColor,
+      theme.disabledColor,
+    );
+
+    final Color? effectiveIconButtonColor =
+        effectiveIconColor ??
+        iconButtonTheme.style?.foregroundColor?.resolve(states) ??
+        defaultEffectiveIconColor;
+
+    effectiveIconColor ??= defaultEffectiveIconColor;
+
     final Color? effectiveColor =
         resolveColor(textColor, selectedColor, textColor) ??
         resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor) ??
@@ -866,7 +881,11 @@ class ListTile extends StatelessWidget {
         );
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
     final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
-      style: IconButton.styleFrom(foregroundColor: effectiveIconColor),
+      style:
+          IconButtonTheme.of(context).style?.copyWith(
+            foregroundColor: WidgetStatePropertyAll<Color?>(effectiveIconButtonColor),
+          ) ??
+          IconButton.styleFrom(foregroundColor: effectiveIconButtonColor),
     );
 
     TextStyle? leadingAndTrailingStyle;
@@ -987,7 +1006,11 @@ class ListTile extends StatelessWidget {
                   trailing: trailingIcon,
                   isDense: _isDenseLayout(theme, tileTheme),
                   visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                  isThreeLine: isThreeLine,
+                  isThreeLine:
+                      isThreeLine ??
+                      tileTheme.isThreeLine ??
+                      theme.listTileTheme.isThreeLine ??
+                      false,
                   textDirection: textDirection,
                   titleBaselineType:
                       titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
@@ -1021,7 +1044,6 @@ class ListTile extends StatelessWidget {
         ifTrue: 'THREE_LINE',
         ifFalse: 'TWO_LINE',
         showName: true,
-        defaultValue: false,
       ),
     );
     properties.add(

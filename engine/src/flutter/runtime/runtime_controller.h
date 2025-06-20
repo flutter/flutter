@@ -121,8 +121,9 @@ class RuntimeController : public PlatformConfigurationClient,
       const fml::closure& isolate_shutdown_callback,
       const std::shared_ptr<const fml::Mapping>& persistent_isolate_data,
       fml::WeakPtr<IOManager> io_manager,
-      fml::WeakPtr<ImageDecoder> image_decoder,
-      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+      fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+      fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+          image_generator_registry,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   // |PlatformConfigurationClient|
@@ -444,17 +445,6 @@ class RuntimeController : public PlatformConfigurationClient,
   virtual bool NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notify the Dart VM that the attached flutter view has been
-  ///             destroyed. This gives the Dart VM to perform some cleanup
-  ///             activities e.g: perform garbage collection to free up any
-  ///             unused memory.
-  ///
-  /// NotifyDestroyed is advisory. The VM may or may not perform any clean up
-  /// activities.
-  ///
-  virtual bool NotifyDestroyed();
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be
   ///             transitioned to the running phase manually. The isolate can
   ///             stop running if it terminates execution on its own.
@@ -677,6 +667,8 @@ class RuntimeController : public PlatformConfigurationClient,
   std::shared_ptr<PlatformIsolateManager> GetPlatformIsolateManager() override {
     return platform_isolate_manager_;
   }
+
+  void SetRootIsolateOwnerToCurrentThread();
 
   //--------------------------------------------------------------------------
   /// @brief      Shuts down all registered platform isolates. Must be called

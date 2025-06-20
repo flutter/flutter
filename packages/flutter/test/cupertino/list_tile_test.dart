@@ -89,9 +89,10 @@ void main() {
       ),
     );
 
-    // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
-    expect(container.color, backgroundColor);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(
+      find.descendant(of: find.byType(CupertinoListTile), matching: find.byType(ColoredBox)),
+    );
+    expect(coloredBox.color, backgroundColor);
   });
 
   testWidgets('does not change backgroundColor when tapped if onTap is not provided', (
@@ -121,9 +122,10 @@ void main() {
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
-    // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
-    expect(container.color, backgroundColor);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(
+      find.descendant(of: find.byType(CupertinoListTile), matching: find.byType(ColoredBox)),
+    );
+    expect(coloredBox.color, backgroundColor);
   });
 
   testWidgets('changes backgroundColor when tapped if onTap is provided', (
@@ -153,17 +155,19 @@ void main() {
       ),
     );
 
-    // Container inside CupertinoListTile is the second one in row.
-    Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
-    expect(container.color, backgroundColor);
+    ColoredBox coloredBox = tester.widget<ColoredBox>(
+      find.descendant(of: find.byType(CupertinoListTile), matching: find.byType(ColoredBox)),
+    );
+    expect(coloredBox.color, backgroundColor);
 
     // Pump only one frame so the color change persists.
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
-    // Container inside CupertinoListTile is the second one in row.
-    container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
-    expect(container.color, backgroundColorActivated);
+    coloredBox = tester.widget<ColoredBox>(
+      find.descendant(of: find.byType(CupertinoListTile), matching: find.byType(ColoredBox)),
+    );
+    expect(coloredBox.color, backgroundColorActivated);
 
     // Pump the rest of the frames to complete the test.
     await tester.pumpAndSettle();
@@ -184,7 +188,6 @@ void main() {
       ),
     );
 
-    // Container inside CupertinoListTile is the second one in row.
     expect(find.byType(GestureDetector), findsNothing);
   });
 
@@ -203,7 +206,6 @@ void main() {
       ),
     );
 
-    // Container inside CupertinoListTile is the second one in row.
     expect(find.byType(GestureDetector), findsOneWidget);
   });
 
@@ -251,9 +253,10 @@ void main() {
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();
 
-    // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widget<Container>(find.byType(Container));
-    expect(container.color, backgroundColor);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(
+      find.descendant(of: find.byType(CupertinoListTile), matching: find.byType(ColoredBox)),
+    );
+    expect(coloredBox.color, backgroundColor);
   });
 
   group('alignment of widgets for left-to-right', () {
@@ -493,5 +496,50 @@ void main() {
     );
 
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('Leading and trailing animate on listtile long press', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListTile(
+                title: const Text(''),
+                onTap:
+                    () => setState(() {
+                      value = !value;
+                    }),
+                leading: CupertinoSwitch(value: value, onChanged: (_) {}),
+                trailing: CupertinoSwitch(value: value, onChanged: (_) {}),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final CurvedAnimation firstPosition =
+        (tester.state(find.byType(CupertinoSwitch).first) as dynamic).position as CurvedAnimation;
+    final CurvedAnimation lastPosition =
+        (tester.state(find.byType(CupertinoSwitch).last) as dynamic).position as CurvedAnimation;
+
+    expect(firstPosition.value, 0.0);
+    expect(lastPosition.value, 0.0);
+
+    await tester.longPress(find.byType(CupertinoListTile));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 65));
+
+    expect(firstPosition.value, greaterThan(0.0));
+    expect(lastPosition.value, greaterThan(0.0));
+
+    expect(firstPosition.value, lessThan(1.0));
+    expect(lastPosition.value, lessThan(1.0));
+
+    await tester.pumpAndSettle();
+    expect(firstPosition.value, 1.0);
+    expect(lastPosition.value, 1.0);
   });
 }

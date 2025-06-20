@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/build_system.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -13,7 +16,9 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -29,6 +34,7 @@ class BuildInfo {
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
     this.androidProjectArgs = const <String>[],
+    this.androidGradleProjectCacheDir,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -47,6 +53,7 @@ class BuildInfo {
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
+    this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -153,6 +160,9 @@ class BuildInfo {
   /// flag.
   final List<String> androidProjectArgs;
 
+  /// Specifies Gradle's project-specific cache directory.
+  final String? androidGradleProjectCacheDir;
+
   /// The package configuration for the loaded application.
   ///
   /// This is captured once during startup, but the actual package configuration
@@ -173,6 +183,9 @@ class BuildInfo {
 
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
+
+  /// If set, web builds with DDC will run with support for hot reload.
+  final bool webEnableHotReload;
 
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
@@ -243,7 +256,6 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => mode.cliName;
-  String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see Flutter Gradle Plugin),
   /// so the lower cased flavor name is used to compute the output file name
@@ -256,13 +268,36 @@ class BuildInfo {
   /// The module system DDC is targeting, or null if not using DDC or the
   /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat? get ddcModuleFormat =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+  DdcModuleFormat get ddcModuleFormat {
+    final DdcModuleFormat moduleFormat =
+        webEnableHotReload ? DdcModuleFormat.ddc : DdcModuleFormat.amd;
+    final DdcModuleFormat? parsedFormat =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+    if (parsedFormat != null && moduleFormat != parsedFormat) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
+      );
+    }
+    return moduleFormat;
+  }
 
   /// Whether to enable canary features when using DDC, or null if not using
   /// DDC or the associated flag isn't present.
-  bool? get canaryFeatures =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+  bool get canaryFeatures {
+    final bool canaryEnabled = webEnableHotReload;
+    final bool? parsedCanary =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+    if (parsedCanary != null && canaryEnabled != parsedCanary) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
+      );
+    }
+    return canaryEnabled;
+  }
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -336,6 +371,7 @@ class BuildInfo {
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
+      if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
     ];
   }
 }
@@ -365,8 +401,6 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
-
-  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
 
   /// Whether to bootstrap an empty application.
   final bool fastStart;
@@ -406,7 +440,25 @@ enum BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
+  /// [name] formatted in snake case.
+  ///
+  /// (e.g. debug, profile, release, jit_release)
   String get cliName => snakeCase(name);
+
+  /// [cliName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit_release)
+  String get uppercaseName => sentenceCase(cliName);
+
+  /// [cliName] with `_` replaced with a space.
+  ///
+  /// (e.g. debug, profile, release, jit release)
+  String get friendlyName => cliName.replaceAll('_', ' ');
+
+  /// [friendlyName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit release)
+  String get uppercaseFriendlyName => sentenceCase(friendlyName);
 
   @override
   String toString() => cliName;
@@ -446,8 +498,7 @@ String? validatedBuildNumberForPlatform(
   }
   if (targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64 ||
-      targetPlatform == TargetPlatform.android_x86) {
+      targetPlatform == TargetPlatform.android_x64) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final RegExp disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -499,16 +550,11 @@ String? validatedBuildNameForPlatform(
   if (targetPlatform == TargetPlatform.android ||
       targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64 ||
-      targetPlatform == TargetPlatform.android_x86) {
+      targetPlatform == TargetPlatform.android_x64) {
     // See versionName at https://developer.android.com/studio/publish/versioning
     return buildName;
   }
   return buildName;
-}
-
-String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
@@ -539,8 +585,7 @@ enum TargetPlatform {
   // and [AndroidArch].
   android_arm,
   android_arm64,
-  android_x64,
-  android_x86;
+  android_x64;
 
   String get fuchsiaArchForTargetPlatform {
     switch (this) {
@@ -552,7 +597,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.darwin:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
@@ -578,7 +622,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
@@ -616,21 +659,18 @@ enum DarwinArch {
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
-  x86,
   x86_64;
 
   String get archName => switch (this) {
     AndroidArch.armeabi_v7a => 'armeabi-v7a',
     AndroidArch.arm64_v8a => 'arm64-v8a',
     AndroidArch.x86_64 => 'x86_64',
-    AndroidArch.x86 => 'x86',
   };
 
   String get platformName => switch (this) {
     AndroidArch.armeabi_v7a => 'android-arm',
     AndroidArch.arm64_v8a => 'android-arm64',
     AndroidArch.x86_64 => 'android-x64',
-    AndroidArch.x86 => 'android-x86',
   };
 }
 
@@ -700,7 +740,6 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
     TargetPlatform.android_arm => 'android-arm',
     TargetPlatform.android_arm64 => 'android-arm64',
     TargetPlatform.android_x64 => 'android-x64',
-    TargetPlatform.android_x86 => 'android-x86',
     TargetPlatform.linux_x64 => 'linux-x64',
     TargetPlatform.linux_arm64 => 'linux-arm64',
     TargetPlatform.windows_x64 => 'windows-x64',
@@ -719,7 +758,6 @@ TargetPlatform getTargetPlatformForName(String platform) {
     'android-arm' => TargetPlatform.android_arm,
     'android-arm64' => TargetPlatform.android_arm64,
     'android-x64' => TargetPlatform.android_x64,
-    'android-x86' => TargetPlatform.android_x86,
     'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
     'fuchsia-x64' => TargetPlatform.fuchsia_x64,
     'ios' => TargetPlatform.ios,
@@ -741,7 +779,6 @@ AndroidArch getAndroidArchForName(String platform) {
     'android-arm' => AndroidArch.armeabi_v7a,
     'android-arm64' => AndroidArch.arm64_v8a,
     'android-x64' => AndroidArch.x86_64,
-    'android-x86' => AndroidArch.x86,
     _ => throw Exception('Unsupported Android arch name "$platform"'),
   };
 }
@@ -812,12 +849,12 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
 }
 
 /// Returns the web build output directory.
@@ -917,7 +954,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
@@ -967,7 +1004,7 @@ const String kBuildName = 'BuildName';
 const String kFlavor = 'Flavor';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
-/// by the [appFlavor] service.
+/// by the `appFlavor` service.
 const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
 
 /// The Xcode configuration used to build the project.

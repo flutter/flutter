@@ -105,8 +105,11 @@ ImageDecoderImpeller::ImageDecoderImpeller(
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [promise = std::move(context_promise), io_manager]() mutable {
-        promise.set_value(io_manager ? io_manager->GetImpellerContext()
-                                     : nullptr);
+        if (io_manager) {
+          promise.set_value(io_manager->GetImpellerContext());
+        } else {
+          promise.set_value(nullptr);
+        }
       }));
 }
 
@@ -176,7 +179,8 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(
                 ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type);
+            .makeAlphaType(alpha_type)
+            .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
   const auto pixel_format = ToPixelFormat(image_info.colorType());
@@ -317,7 +321,6 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
   texture_descriptor.mip_count = texture_descriptor.size.MipCount();
-  texture_descriptor.compression_type = impeller::CompressionType::kLossy;
   if (context->GetBackendType() == impeller::Context::BackendType::kMetal &&
       resize_info.has_value()) {
     // The MPS used to resize images on iOS does not require mip generation.
@@ -366,7 +369,6 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     resize_desc.format = pixel_format.value();
     resize_desc.size = {resize_info->width(), resize_info->height()};
     resize_desc.mip_count = resize_desc.size.MipCount();
-    resize_desc.compression_type = impeller::CompressionType::kLossy;
     resize_desc.usage = impeller::TextureUsage::kShaderRead;
     if (context->GetBackendType() == impeller::Context::BackendType::kMetal) {
       // Resizing requires a MPS on Metal platforms.
@@ -390,8 +392,17 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
-
-  if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+  if (!context->GetCommandQueue()
+           ->Submit(
+               {command_buffer},
+               [](impeller::CommandBuffer::Status status) {
+                 if (status == impeller::CommandBuffer::Status::kError) {
+                   FML_LOG(ERROR)
+                       << "GPU Error submitting image decoding command buffer.";
+                 }
+               },
+               /*block_on_schedule=*/true)
+           .ok()) {
     std::string decode_error("Failed to submit image decoding command buffer.");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);

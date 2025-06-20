@@ -4,9 +4,10 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
@@ -89,6 +90,10 @@ class FlutterCodeAsset {
 
   final CodeAsset codeAsset;
   final Target target;
+
+  @override
+  String toString() =>
+      'FlutterCodeAsset(codeAsset: ${codeAsset.id} ${codeAsset.file}, target: $target)';
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -174,7 +179,7 @@ Future<void> installCodeAssets({
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 ///
-/// It enables mocking `package:native_assets_builder` package.
+/// It enables mocking `package:hooks_runner` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
   /// All packages in the transitive dependencies that have a `build.dart`.
@@ -199,7 +204,7 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<CCompilerConfig?> get ndkCCompilerConfig;
 }
 
-/// Uses `package:native_assets_builder` for its implementation.
+/// Uses `package:hooks_runner` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
     this.packageConfigPath,
@@ -207,13 +212,19 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
-  );
+    this.pubspecPath, {
+    required this.includeDevDependencies,
+  });
 
+  final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
   final String runPackageName;
+
+  /// Include the dev dependencies of [runPackageName].
+  final bool includeDevDependencies;
 
   late final logging.Logger _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -245,6 +256,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     packageConfig,
     Uri.file(packageConfigPath),
     runPackageName,
+    includeDevDependencies: includeDevDependencies,
   );
 
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
@@ -252,6 +264,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
+    userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
   );
 
   @override
@@ -266,16 +279,32 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   Future<BuildResult?> build({
     required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
-  }) {
-    return _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
+  }) async {
+    final Result<BuildResult, HooksRunnerFailure> result = await _buildRunner.build(
+      linkingEnabled: linkingEnabled,
+      extensions: extensions,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
-  }) {
-    return _buildRunner.link(extensions: extensions, buildResult: buildResult);
+  }) async {
+    final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
+      extensions: extensions,
+      buildResult: buildResult,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -610,9 +639,8 @@ Future<DartBuildResult> _runDartBuild({
       _throwNativeAssetsBuildFailed();
     }
     dependencies.addAll(buildResult.dependencies);
-    if (!linkingEnabled) {
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
-    } else {
+    codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+    if (linkingEnabled) {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
           CodeAssetExtension(
@@ -634,7 +662,13 @@ Future<DartBuildResult> _runDartBuild({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-
+  if (codeAssets.isNotEmpty) {
+    globals.logger.printTrace(
+      'Note: You are using the dart build hooks feature which is currently '
+      'in preview. Please see '
+      'https://dart.dev/interop/c-interop#native-assets for more details.',
+    );
+  }
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }
@@ -699,7 +733,6 @@ Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       throw Exception('Unknown targetPlatform: $targetPlatform.');
   }
 }
@@ -752,7 +785,6 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return OS.android;
     case TargetPlatform.tester:
       if (const LocalPlatform().isMacOS) {
@@ -777,8 +809,6 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
       return <AndroidArch>[AndroidArch.arm64_v8a];
     case TargetPlatform.android_x64:
       return <AndroidArch>[AndroidArch.x86_64];
-    case TargetPlatform.android_x86:
-      return <AndroidArch>[AndroidArch.x86];
     case TargetPlatform.android:
       if (androidArchsEnvironment == null) {
         throw MissingDefineException(kAndroidArchs, 'native_assets');
