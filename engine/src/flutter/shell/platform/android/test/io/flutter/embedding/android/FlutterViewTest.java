@@ -494,44 +494,6 @@ public class FlutterViewTest {
     validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 0, 0);
   }
 
-  @SuppressWarnings("deprecation")
-  // getSystemUiVisibility, getWindowSystemUiVisibility required to test pre api 30 behavior.
-  @Test
-  @Config(minSdk = 20, maxSdk = 22, qualifiers = "land")
-  public void systemInsetHandlesFullscreenNavbarRightBelowSDK23() {
-    FlutterView flutterView = spy(new FlutterView(ctx));
-    setExpectedDisplayRotation(Surface.ROTATION_270);
-    assertEquals(0, flutterView.getSystemUiVisibility());
-    when(flutterView.getWindowSystemUiVisibility())
-        .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-    when(flutterView.getContext()).thenReturn(ctx);
-
-    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
-    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
-    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
-
-    // When we attach a new FlutterView to the engine without any system insets,
-    // the viewport metrics default to 0.
-    flutterView.attachToFlutterEngine(flutterEngine);
-    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
-        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
-    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-
-    // Then we simulate the system applying a window inset.
-    WindowInsets windowInsets = mock(WindowInsets.class);
-    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
-    mockSystemGestureInsetsIfNeed(windowInsets);
-
-    flutterView.onApplyWindowInsets(windowInsets);
-
-    verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    // Top padding is removed due to full screen.
-    // Right padding is zero because the rotation is 270deg under SDK 23
-    // Bottom padding is removed due to hide navigation.
-    validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 0, 0);
-  }
-
   @Test
   @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "port")
   public void calculateShouldZeroSidesInPortrait() {
@@ -555,14 +517,6 @@ public class FlutterViewTest {
   public void calculateShouldZeroSidesInLandscapeRotation90() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_90);
-    assertEquals(FlutterView.ZeroSides.RIGHT, flutterView.calculateShouldZeroSides());
-  }
-
-  @Test
-  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_22, qualifiers = "land")
-  public void calculateShouldZeroSidesInLandscapeRotation270API22() {
-    FlutterView flutterView = spy(new FlutterView(ctx));
-    setExpectedDisplayRotation(Surface.ROTATION_270);
     assertEquals(FlutterView.ZeroSides.RIGHT, flutterView.calculateShouldZeroSides());
   }
 
