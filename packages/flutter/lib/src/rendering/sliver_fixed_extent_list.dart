@@ -113,8 +113,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
+      if (itemExtent > 0.0 && scrollOffset.isFinite && itemExtent.isFinite) {
         final double actual = scrollOffset / itemExtent;
+        if (!actual.isFinite) {
+          return 0;
+        }
         final int round = actual.round();
         if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
           return round;
@@ -146,8 +149,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ) {
     if (itemExtentBuilder == null) {
       itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
+      if (itemExtent > 0.0 && scrollOffset.isFinite && itemExtent.isFinite) {
         final double actual = scrollOffset / itemExtent - 1;
+        if (!actual.isFinite) {
+          return 0;
+        }
         final int round = actual.round();
         if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
           return math.max(0, round);
