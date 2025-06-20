@@ -33,6 +33,8 @@ final String _targetPath = path.join(_testAppDirectory, _target);
 // Some paths are not guaranteed to actually be requested by the time we finish the test, so we just
 // ignore them and not make them part of the tracked requests or expectations.
 final Set<String> _ignoreRequestPaths = <String>{
+  'canvaskit/canvaskit.js',
+  'canvaskit/canvaskit.wasm',
   'canvaskit/chromium/canvaskit.js',
   'canvaskit/chromium/canvaskit.wasm',
 };
