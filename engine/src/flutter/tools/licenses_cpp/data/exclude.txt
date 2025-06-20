@@ -1,5 +1,6 @@
 # This file describes all the files we don't need to do a copyright header
 # check on.
+.*/flutter/build/.*
 .*/flutter/sky/packages/sky_engine/LICENSE
 .*/flutter/third_party/angle/third_party/.*
 .*/flutter/third_party/angle/tools/.*
@@ -8,15 +9,19 @@
 .*/flutter/third_party/dart/pkg/.*
 .*/flutter/third_party/dart/third_party/binary_size/.*
 .*/flutter/third_party/dart/third_party/binaryen/.*
+.*/flutter/third_party/dart/third_party/d3/.*
 .*/flutter/third_party/dart/third_party/pkg/.*
+.*/flutter/third_party/dart/third_party/requirejs/.*
 .*/flutter/third_party/depot_tools/.*
 .*/flutter/third_party/harfbuzz/.*\.py
 .*/flutter/third_party/harfbuzz/perf/.*
 .*/flutter/third_party/harfbuzz/src/harfbuzz.cc
+.*/flutter/third_party/icu/scripts/.*
 .*/flutter/third_party/imgui/.*
 .*/flutter/third_party/inja/third_party/amalgamate/.*
 .*/flutter/third_party/inja/third_party/include/doctest/.*
 .*/flutter/third_party/libpng/contrib/.*
+.*/flutter/third_party/libwebp/.*\.py
 .*/flutter/third_party/libwebp/examples/.*
 .*/flutter/third_party/libwebp/swig/.*
 .*/flutter/third_party/llvm-project/.*
