@@ -68,10 +68,11 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
   return files;
 }
 
-std::optional<fs::path> FindLicense(const fs::path& path) {
+std::optional<fs::path> FindLicense(const Data& data, const fs::path& path) {
   for (std::string_view license_name : kLicenseFileNames) {
     fs::path license_path = path / license_name;
-    if (fs::exists(license_path)) {
+    if (fs::exists(license_path) &&
+        !data.exclude_filter.Matches(license_path.string())) {
       return license_path;
     }
   }
@@ -129,17 +130,19 @@ struct Package {
   std::optional<fs::path> license_file;
 };
 
-Package GetPackage(const fs::path& working_dir, const fs::path& full_path) {
+Package GetPackage(const Data& data,
+                   const fs::path& working_dir,
+                   const fs::path& full_path) {
   Package result = {
       .name = working_dir.filename(),
-      .license_file = FindLicense(working_dir),
+      .license_file = FindLicense(data, working_dir),
   };
   fs::path relative = fs::relative(full_path, working_dir);
   bool after_third_party = false;
   fs::path current = working_dir;
   for (const fs::path& component : relative) {
     current /= component;
-    std::optional<fs::path> current_license = FindLicense(current);
+    std::optional<fs::path> current_license = FindLicense(data, current);
     if (current_license.has_value()) {
       result.license_file = current_license;
     }
@@ -247,7 +250,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
         continue;
       }
 
-      Package package = GetPackage(working_dir_path, full_path);
+      Package package = GetPackage(data, working_dir_path, full_path);
       if (package.license_file.has_value()) {
         auto [_, is_new_item] =
             seen_license_files.insert(package.license_file.value());

@@ -1,5 +1,6 @@
 # This file describes all the files we don't need to do a copyright header
 # check on.
+.*/flutter/sky/packages/sky_engine/LICENSE
 .*/flutter/third_party/angle/third_party/.*
 .*/flutter/third_party/benchmark/.*
 .*/flutter/third_party/dart/pkg/.*
