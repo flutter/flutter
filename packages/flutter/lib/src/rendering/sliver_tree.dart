@@ -396,7 +396,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       );
       // We use the same animation key to keep track of the clip layer, unless
       // this is the odd man out segment.
-      final UniqueKey key = _animationLeadingIndices[parentIndex]!;
+      final UniqueKey key = _animationLeadingIndices[parentIndex] ?? UniqueKey();
       _clipHandles[key] ??= LayerHandle<ClipRectLayer>();
       _clipHandles[key]!.layer = context.pushClipRect(needsCompositing, offset, rect, (
         PaintingContext context,

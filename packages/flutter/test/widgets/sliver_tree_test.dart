@@ -978,4 +978,61 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.scrolling.1.png'));
     expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, -5));
   });
+
+  testWidgets('TreeSliver does not crash on rapid toggle operations', (WidgetTester tester) async {
+    final TreeSliverController controller = TreeSliverController();
+    final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('First'),
+      TreeSliverNode<String>(
+        'Second',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('alpha'),
+          TreeSliverNode<String>('beta'),
+        ],
+      ),
+      TreeSliverNode<String>('Third'),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              TreeSliver<String>(
+                tree: tree,
+                controller: controller,
+                treeNodeBuilder: (
+                  BuildContext context,
+                  TreeSliverNode<Object?> node,
+                  AnimationStyle animationStyle,
+                ) {
+                  return TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    // Simulate rapid toggling that caused the null pointer exception
+    final TreeSliverNode<String> secondNode = tree[1];
+    
+    // Toggle expand
+    controller.toggleNode(secondNode);
+    await tester.pump();
+    
+    // Toggle collapse
+    controller.toggleNode(secondNode);
+    await tester.pump();
+    
+    // Toggle expand again rapidly
+    controller.toggleNode(secondNode);
+    await tester.pump();
+
+    // Should not crash - if we get here without exceptions, the test passes
+    expect(find.text('Second'), findsOneWidget);
+  });
 }
