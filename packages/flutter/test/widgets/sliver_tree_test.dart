@@ -1019,15 +1019,15 @@ void main() {
 
     // Simulate rapid toggling that caused the null pointer exception
     final TreeSliverNode<String> secondNode = tree[1];
-    
+
     // Toggle expand
     controller.toggleNode(secondNode);
     await tester.pump();
-    
+
     // Toggle collapse
     controller.toggleNode(secondNode);
     await tester.pump();
-    
+
     // Toggle expand again rapidly
     controller.toggleNode(secondNode);
     await tester.pump();
