@@ -54,6 +54,38 @@ abstract class ParametricCurve<T> {
   String toString() => objectRuntimeType(this, 'ParametricCurve');
 }
 
+/// A mixin that provides an interface for evaluating the slope of a parametric curve.
+///
+/// See also:
+///
+///  * [ParametricCurve], which is the base class onto which this interface can be mixed in.
+///  * [Cubic], which contains a sample implementation for third-order Bézier curves.
+mixin DifferentiableCurve<T> on ParametricCurve<T> {
+  /// Returns the slope of the curve at point [t].
+  ///
+  /// This method asserts that [t] is between 0 and 1 before delegating to [slopeInternal].
+  ///
+  /// Subclasses may return [double.infinity] or [double.negativeInfinity] in case of a vertical
+  /// tangent, and may also return [double.nan] in case of an indeterminate slope, for example
+  /// at a cusp.
+  ///
+  /// It is recommended that subclasses override [slopeInternal] instead of this function,
+  /// as the above case is already handled in the default implementation of [slope], which
+  /// delegates the remaining logic to [slopeInternal].
+  T slope(double t) {
+    assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
+    return slopeInternal(t);
+  }
+
+  /// Returns the slope of the curve at point [t].
+  ///
+  /// The given parametric value [t] will be between 0.0 and 1.0, inclusive.
+  @protected
+  T slopeInternal(double t) {
+    throw UnimplementedError();
+  }
+}
+
 /// An parametric animation easing curve, i.e. a mapping of the unit interval to
 /// the unit interval.
 ///
@@ -362,7 +394,7 @@ class Threshold extends Curve {
 ///
 ///  * [Curves], where many more predefined curves are available.
 ///  * [CatmullRomCurve], a curve which passes through specific values.
-class Cubic extends Curve {
+class Cubic extends Curve with DifferentiableCurve<double> {
   /// Creates a cubic curve.
   ///
   /// Rather than creating a new instance, consider using one of the common
@@ -399,15 +431,32 @@ class Cubic extends Curve {
     return 3 * a * (1 - m) * (1 - m) * m + 3 * b * (1 - m) * m * m + m * m * m;
   }
 
+  double _evaluateCubicDerivative(double a, double b, double m) {
+    return 3 * a * (1 - m) * (1 - m) + 6 * (b - a) * (1 - m) * m + 3 * (1 - b) * m * m;
+  }
+
   @override
   double transformInternal(double t) {
+    final double m = _solveForParameter(t);
+    return _evaluateCubic(b, d, m);
+  }
+
+  @override
+  double slopeInternal(double t) {
+    final double m = _solveForParameter(t);
+    final double dx = _evaluateCubicDerivative(a, c, m);
+    final double dy = _evaluateCubicDerivative(b, d, m);
+    return dy / dx;
+  }
+
+  double _solveForParameter(double t) {
     double start = 0.0;
     double end = 1.0;
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
       if ((t - estimate).abs() < _cubicErrorBound) {
-        return _evaluateCubic(b, d, midpoint);
+        return midpoint;
       }
       if (estimate < t) {
         start = midpoint;
