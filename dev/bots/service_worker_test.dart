@@ -31,7 +31,6 @@ Future<void> main() async {
   reportSuccessAndExit('${bold}Cleanup test PASSED successfully.$reset');
 }
 
-
 /// test verifies the cleanup service worker correctly removes an old,
 /// cached service worker by observing network request patterns.
 Future<void> runCleanupVerificationTest({required bool headless}) async {
@@ -39,7 +38,9 @@ Future<void> runCleanupVerificationTest({required bool headless}) async {
 
   // This test creates the cleanup worker file itself, so we don't depend on it existing.
   final String cleanupWorkerSourcePath = path.join(
-    _testAppDirectory, 'web', 'flutter_service_worker.js'
+    _testAppDirectory,
+    'web',
+    'flutter_service_worker.js',
   );
   final File cleanupWorkerFile = File(cleanupWorkerSourcePath);
 
@@ -108,7 +109,9 @@ self.addEventListener('fetch', (event) => {
 });
 ''';
 
-  final File serviceWorkerBuildFile = File(path.join(_appBuildDirectory, 'flutter_service_worker.js'));
+  final File serviceWorkerBuildFile = File(
+    path.join(_appBuildDirectory, 'flutter_service_worker.js'),
+  );
 
   try {
     // Write the cleanup worker to the file system so it can be read if needed,
@@ -116,11 +119,13 @@ self.addEventListener('fetch', (event) => {
     await cleanupWorkerFile.writeAsString(cleanupWorkerContent);
 
     // Build the app once at the beginning.
-    await runCommand(
-      'flutter',
-      <String>['build', 'web', '--profile', '-t', _target],
-      workingDirectory: _testAppDirectory,
-    );
+    await runCommand('flutter', <String>[
+      'build',
+      'web',
+      '--profile',
+      '-t',
+      _target,
+    ], workingDirectory: _testAppDirectory);
 
     // Install the "old" caching worker and verify it works
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
@@ -138,7 +143,8 @@ self.addEventListener('fetch', (event) => {
     expect(
       _requestedPathCounts.containsKey('main.dart.js'),
       false,
-      reason: 'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
+      reason:
+          'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
     );
     print('${green}Verification successful: Old caching worker is active.$reset');
     await server.stop();
@@ -164,10 +170,12 @@ self.addEventListener('fetch', (event) => {
     expect(
       _requestedPathCounts.containsKey('main.dart.js'),
       true,
-      reason: 'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
+      reason:
+          'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
     );
-    print('${green}Verification successful: Cleanup worker has removed the old caching behavior.$reset');
-
+    print(
+      '${green}Verification successful: Cleanup worker has removed the old caching behavior.$reset',
+    );
   } finally {
     await server?.stop();
     if (await cleanupWorkerFile.exists()) {
