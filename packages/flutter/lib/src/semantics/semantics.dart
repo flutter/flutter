@@ -1435,9 +1435,14 @@ class SemanticsProperties extends DiagnosticableTree {
     this.controlsNodes,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType,
-  }) : assert(
-         labelParts != null || (label == null || attributedLabel == null),
-         'label and attributedLabel cannot both be set, unless labelParts is provided which takes precedence',
+  }) :        assert(
+         labelParts == null || attributedLabel == null,
+         'Only one of labelParts or attributedLabel should be provided',
+       ),
+
+       assert(
+         label == null || attributedLabel == null,
+         'Only one of label or attributedLabel should be provided',
        ),
 
        assert(
@@ -2987,17 +2992,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// proper implementation of WAI-ARIA aria-labelledby functionality.
   ///
   /// On mobile platforms (iOS VoiceOver, Android TalkBack), the parts are
-  /// automatically concatenated into a single accessible string, respecting
-  /// text direction and internationalization.
+  /// automatically concatenated into a single accessible string.
   ///
   /// This field is mutually exclusive with [attributedLabel] - only one should
   /// be provided.
-  List<String>? get labelParts {
-    if (_labelParts != null && _labelParts!.isNotEmpty) {
-
-    }
-    return _labelParts;
-  }
+  List<String>? get labelParts => _labelParts;
   List<String>? _labelParts = _kEmptyConfig.labelParts;
 
   /// A textual description for the current value of the node.
