@@ -29,6 +29,10 @@ INTERNAL NOTE
 
 ## Flutter 3.32 Changes
 
+### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
+
+- [flutter/170924](https://github.com/flutter/flutter/pull/170924) - Fix Flutter Windows on devices that only support OpenGL ES 2, like computers with Intel graphics cards.
+
 ### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
 
 - [flutter/170536](https://github.com/flutter/flutter/issues/170536) - Fixes a code-signing issue on Mac hosts when running `dart` tooling.
