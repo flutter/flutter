@@ -1,5 +1,5 @@
 MIT
-(?s)^(?:MIT License)?\s*Copyright.*Permission is hereby granted.*\n.*following conditions:
+(?s)^(?:MIT License)?\s*Copyright.*Permission is hereby granted.*\n.*following conditions:.*THE SOFTWARE IS PROVIDED
 (?s)^(?:MIT License)?\s*Copyright \(c\) .*
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
