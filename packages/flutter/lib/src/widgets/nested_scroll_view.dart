@@ -699,6 +699,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     ScrollActivity newOuterActivity,
     _NestedScrollActivityGetter innerActivityGetter,
   ) {
+    // TODO(kszczek): execute a single scroll activity on nested scroll view as a whole
     _outerPosition!.beginActivity(newOuterActivity);
     bool scrolling = newOuterActivity.isScrolling;
     for (final _NestedScrollPosition position in _innerPositions) {
@@ -1442,6 +1443,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void pointerScroll(double delta, PointerSignalEvent event) {
+    // TODO(kszczek): wire this up with ScrollPhysics.createScrollActivity
     return coordinator.pointerScroll(delta);
   }
 
