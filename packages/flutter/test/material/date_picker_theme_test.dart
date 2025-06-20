@@ -529,7 +529,7 @@ void main() {
         'rangeSelectionBackgroundColor: ${const Color(0xffffff2f)}',
         'rangeSelectionOverlayColor: WidgetStatePropertyAll(${const Color(0xffffff3f)})',
         'dividerColor: ${const Color(0xffffff4f)}',
-        'inputDecorationTheme.data: InputDecorationThemeData#00000(fillColor: ${const Color(0xffffff5f)}, border: UnderlineInputBorder())',
+        'inputDecorationTheme: InputDecorationThemeData#00000(fillColor: ${const Color(0xffffff5f)}, border: UnderlineInputBorder())',
         'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
         'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
         'locale: en',
