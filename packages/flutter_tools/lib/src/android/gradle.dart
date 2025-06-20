@@ -715,14 +715,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym is present for at least one architecture,
+    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
     // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym')) {
+    if (result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg')) {
       return true;
     }
 
     _logger.printTrace(
-      'libflutter.so.sym not present when checking final appbundle for debug symbols.',
+      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
     );
     return false;
   }
@@ -822,7 +823,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }

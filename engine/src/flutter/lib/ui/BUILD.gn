@@ -114,6 +114,8 @@ source_set("ui") {
     "plugins/callback_cache.h",
     "semantics/custom_accessibility_action.cc",
     "semantics/custom_accessibility_action.h",
+    "semantics/semantics_flags.cc",
+    "semantics/semantics_flags.h",
     "semantics/semantics_node.cc",
     "semantics/semantics_node.h",
     "semantics/semantics_update.cc",

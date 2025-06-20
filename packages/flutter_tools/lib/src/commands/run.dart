@@ -12,7 +12,6 @@ import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
@@ -786,7 +785,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${sentenceCase(getFriendlyModeName(buildMode))} '
+          '${buildMode.uppercaseFriendlyName}'
           'mode is not supported by ${device.displayName}.',
         );
       }
