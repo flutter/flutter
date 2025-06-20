@@ -72,7 +72,10 @@ void main() {
 
     testUsingContext('Warning with filePath/lineNumber', () {
       printXcodeWarning('warning message', filePath: '/path/to', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('/path/to:123: warning: warning message\n'));
+      expect(
+        fakeStdio.stderrBuffer.toString(),
+        startsWith('/path/to:123: warning: warning message\n'),
+      );
     }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
 
     testUsingContext('Warning with lineNumber but no filePath', () {
