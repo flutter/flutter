@@ -393,11 +393,28 @@ void main() {
     expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
 
     paragraph.textAlign = TextAlign.right;
-    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsLayout, isTrue);
     expect(paragraph.debugNeedsPaint, isTrue);
+  });
 
-    paragraph.paint(MockPaintingContext(), Offset.zero);
-    expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  test('textAlign triggers markNeedsLayout for parent layout updates', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello, World!', style: TextStyle(fontSize: 20.0)),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 200.0));
+
+    // Verify initial state - layout should be clean after layout
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // Change textAlign - this should trigger layout invalidation
+    paragraph.textAlign = TextAlign.right;
+
+    // After the fix, changing textAlign should mark layout as dirty
+    // This ensures that parent LayoutBuilder widgets will rebuild
+    expect(paragraph.debugNeedsLayout, isTrue);
   });
 
   group('didExceedMaxLines', () {
