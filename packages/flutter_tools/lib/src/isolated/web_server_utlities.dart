@@ -22,9 +22,7 @@ void log(Logger logger, logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     logger.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    if (!event.message.contains('No module for')) {
-      logger.printWarning('${event.loggerName}: ${event.message}$error');
-    }
+    logger.printWarning('${event.loggerName}: ${event.message}$error');
   } else {
     logger.printTrace('${event.loggerName}: ${event.message}$error');
   }

@@ -24,7 +24,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
