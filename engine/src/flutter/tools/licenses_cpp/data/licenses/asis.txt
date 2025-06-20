@@ -1,5 +1,5 @@
 as is
-This software is provided 'as-is'
+(?s)This software is provided 'as-is'.*buy them a beer
 (?s)Copyright \(c\).*
 
 This software is provided 'as-is', without any express or implied
