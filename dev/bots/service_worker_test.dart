@@ -16,17 +16,13 @@ import 'run_command.dart';
 import 'test/common.dart';
 import 'utils.dart';
 
-// --- Test Configuration ---
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _testAppDirectory = path.join(_flutterRoot, 'dev', 'integration_tests', 'web');
 final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
-// Use a simple, minimal target for the build.
 final String _target = path.join('lib', 'main.dart');
 final Map<String, int> _requestedPathCounts = <String, int>{};
 
-// --- Main execution ---
 Future<void> main() async {
-  // We will now only run our single, focused cleanup test.
   await runCleanupVerificationTest(headless: false);
 
   if (hasError) {
@@ -35,20 +31,18 @@ Future<void> main() async {
   reportSuccessAndExit('${bold}Cleanup test PASSED successfully.$reset');
 }
 
-// --- Test Implementation ---
 
-/// A test that verifies the cleanup service worker correctly removes an old,
+/// test verifies the cleanup service worker correctly removes an old,
 /// cached service worker by observing network request patterns.
 Future<void> runCleanupVerificationTest({required bool headless}) async {
   print('${bold}BEGIN: Service Worker Cleanup Verification Test$reset');
 
-  // This test now creates the cleanup worker file itself, so we don't depend on it existing.
+  // This test creates the cleanup worker file itself, so we don't depend on it existing.
   final String cleanupWorkerSourcePath = path.join(
     _testAppDirectory, 'web', 'flutter_service_worker.js'
   );
   final File cleanupWorkerFile = File(cleanupWorkerSourcePath);
 
-  // The full content of the cleanup service worker.
   const String cleanupWorkerContent = '''
 'use strict';
 const OLD_CACHE_PREFIX = 'flutter-';
@@ -118,7 +112,6 @@ self.addEventListener('fetch', (event) => {
 
   try {
     // Write the cleanup worker to the file system so it can be read if needed,
-    // although this test now injects the content directly.
     print('Creating temporary cleanup worker file at: $cleanupWorkerSourcePath');
     await cleanupWorkerFile.writeAsString(cleanupWorkerContent);
 
@@ -129,12 +122,12 @@ self.addEventListener('fetch', (event) => {
       workingDirectory: _testAppDirectory,
     );
 
-    // --- Phase 1: Setup - Install the "old" caching worker and verify it works ---
+    // Install the "old" caching worker and verify it works
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
     await serviceWorkerBuildFile.writeAsString(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
-    // First load to install the worker.
+    // Load to install the worker.
     await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
 
     print('Reloading page to test cache...');
@@ -150,7 +143,7 @@ self.addEventListener('fetch', (event) => {
     print('${green}Verification successful: Old caching worker is active.$reset');
     await server.stop();
 
-    // --- Phase 2: Execution & Verification - Deploy the cleanup worker ---
+    // Deploy the cleanup worker
     print('\n${yellow}Phase 2: Deploying cleanup worker and verifying cache is removed...$reset');
     await serviceWorkerBuildFile.writeAsString(cleanupWorkerContent);
 
@@ -176,7 +169,6 @@ self.addEventListener('fetch', (event) => {
     print('${green}Verification successful: Cleanup worker has removed the old caching behavior.$reset');
 
   } finally {
-    // Ensure the server is always stopped and our created file is deleted.
     await server?.stop();
     if (await cleanupWorkerFile.exists()) {
       await cleanupWorkerFile.delete();
@@ -185,8 +177,6 @@ self.addEventListener('fetch', (event) => {
     print('\n${bold}END: Service Worker Cleanup Verification Test$reset');
   }
 }
-
-// --- Helper Functions ---
 
 Future<AppServer> _startServer({required bool headless}) async {
   final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();

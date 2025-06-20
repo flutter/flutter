@@ -94,9 +94,6 @@ export class FlutterServiceWorkerLoader {
     }
   }
 
-  /**
-   * This method is no longer called by loadServiceWorker.
-   */
   async _waitForServiceWorkerActivation(serviceWorker) {
     if (!serviceWorker || serviceWorker.state === "activated") {
       if (!serviceWorker) {
