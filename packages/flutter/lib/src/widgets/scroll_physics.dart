@@ -19,10 +19,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart' show AxisDirection;
 import 'package:flutter/physics.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'binding.dart' show WidgetsBinding;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
+import 'scroll_activity.dart';
+import 'scroll_details.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 import 'view.dart';
@@ -498,6 +501,18 @@ class ScrollPhysics {
 
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
+
+  /// Returns an activity used to drive a scroll view's position according to [details].
+  ///
+  /// This method is called when a discrete scroll input is received by the framework, for example
+  /// a mouse wheel turn or a keyboard arrow press.
+  ScrollActivity? createScrollActivity(
+    ScrollActivityDelegate delegate,
+    ScrollDetails details,
+    TickerProvider vsync,
+  ) {
+    return parent?.createScrollActivity(delegate, details, vsync);
+  }
 
   @override
   String toString() {
