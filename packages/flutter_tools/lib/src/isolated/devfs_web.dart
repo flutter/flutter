@@ -83,6 +83,7 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
+    this.useDwdsWebSocketConnection = false,
     required this.fileSystem,
     required this.logger,
     required this.platform,
@@ -118,6 +119,7 @@ class WebDevFS implements DevFS {
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final bool useDwdsWebSocketConnection;
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
@@ -125,6 +127,10 @@ class WebDevFS implements DevFS {
   late WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
+
+  /// Whether middleware should be enabled for this web development server.
+  /// Middleware is enabled when using Chrome device or DDC module system.
+  bool get shouldEnableMiddleware => chromiumLauncher != null || ddcModuleSystem;
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
@@ -223,9 +229,11 @@ class WebDevFS implements DevFS {
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      shouldEnableMiddleware: shouldEnableMiddleware,
     );
     return baseUri!;
   }
@@ -307,13 +315,13 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnableMiddleware,
               isWindows: platform.isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',
               mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
+              generateLoadingIndicator: shouldEnableMiddleware,
             ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
