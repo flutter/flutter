@@ -1323,7 +1323,7 @@ class RawScrollbar extends StatefulWidget {
   /// When null, the inherited [MediaQueryData.padding] is used.
   ///
   /// Defaults to null.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
@@ -1555,7 +1555,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = widget.padding ?? MediaQuery.paddingOf(context)
+      ..padding = (widget.padding ?? MediaQuery.paddingOf(context)).resolve(Directionality.of(context))
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
