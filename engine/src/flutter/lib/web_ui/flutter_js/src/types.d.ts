@@ -57,7 +57,9 @@ export interface FlutterConfiguration {
   renderer?: WebRenderer;
   hostElement?: HTMLElement;
   fontFallbackBaseUrl?: string;
+  /** @deprecated use `entrypointBaseUrl` instead*/
   entryPointBaseUrl?: string;
+  entrypointBaseUrl?: string;
   forceSingleThreadedSkwasm?: boolean;
   wasmAllowList?: WasmAllowList;
 }
