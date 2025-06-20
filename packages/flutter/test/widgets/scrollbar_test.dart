@@ -2693,7 +2693,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(734.0, 40.0, 740.0, 520.0)) // track  
+        ..rect(rect: const Rect.fromLTRB(734.0, 40.0, 740.0, 520.0)) // track
         ..rect(rect: const Rect.fromLTRB(734.0, 40.0, 740.0, 61.0)), // thumb
     );
 
