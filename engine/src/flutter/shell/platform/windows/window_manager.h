@@ -19,7 +19,7 @@
 namespace flutter {
 
 class FlutterWindowsEngine;
-class FlutterHostWindow;
+class HostWindow;
 struct WindowingInitRequest;
 
 struct WindowsMessage {
@@ -32,7 +32,7 @@ struct WindowsMessage {
   bool handled;
 };
 
-struct FlutterWindowSizing {
+struct WindowSizing {
   bool has_size;
   double width;
   double height;
@@ -48,10 +48,10 @@ struct WindowingInitRequest {
 };
 
 struct WindowCreationRequest {
-  FlutterWindowSizing content_size;
+  WindowSizing content_size;
 };
 
-// A manager class for managing |FlutterHostWindow| instances.
+// A manager class for managing |HostWindow| instances.
 // A unique instance of this class is owned by |FlutterWindowsEngine|.
 class WindowManager {
  public:
@@ -64,7 +64,7 @@ class WindowManager {
 
   FlutterViewId CreateRegularWindow(const WindowCreationRequest* request);
 
-  // Message handler called by |FlutterHostWindow::WndProc| to process window
+  // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
   // controller to process messages that affect the state of other host windows.
   std::optional<LRESULT> HandleMessage(HWND hwnd,
@@ -91,7 +91,7 @@ class WindowManager {
 
   // A map of active windows. Used to destroy remaining windows on engine
   // shutdown.
-  std::unordered_map<HWND, std::unique_ptr<FlutterHostWindow>> active_windows_;
+  std::unordered_map<HWND, std::unique_ptr<HostWindow>> active_windows_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowManager);
 };
@@ -132,7 +132,7 @@ FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_SetWindowContentSize(
     HWND hwnd,
-    const flutter::FlutterWindowSizing* size);
+    const flutter::WindowSizing* size);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/flutter_host_window.h"
+#include "flutter/shell/platform/windows/host_window.h"
 
 #include <dwmapi.h>
 
@@ -25,9 +25,8 @@ flutter::Size ClampToVirtualScreen(flutter::Size size) {
                        std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
-void EnableTransparentWindowBackground(
-    HWND hwnd,
-    flutter::WindowsProcTable const& proc_table) {
+void EnableTransparentWindowBackground(HWND hwnd,
+                                       flutter::WindowsProcTable const& win32) {
   enum ACCENT_STATE { ACCENT_DISABLED = 0 };
 
   struct ACCENT_POLICY {
@@ -44,15 +43,15 @@ void EnableTransparentWindowBackground(
           flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIB::WCA_ACCENT_POLICY,
       .pvData = &accent,
       .cbData = sizeof(accent)};
-  proc_table.SetWindowCompositionAttribute(hwnd, &data);
+  win32.SetWindowCompositionAttribute(hwnd, &data);
 
   // Extend the frame into the client area and set the window's system
   // backdrop type for visual effects.
   MARGINS const margins = {-1};
-  proc_table.DwmExtendFrameIntoClientArea(hwnd, &margins);
+  win32.DwmExtendFrameIntoClientArea(hwnd, &margins);
   INT effect_value = 1;
-  proc_table.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE,
-                                   &effect_value, sizeof(BOOL));
+  win32.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &effect_value,
+                              sizeof(BOOL));
 }
 
 // Retrieves the calling thread's last-error code message as a string,
@@ -97,7 +96,7 @@ std::string GetLastErrorAsString() {
 // resulting size includes window borders, non-client areas, and drop shadows.
 // On error, returns std::nullopt and logs an error message.
 std::optional<flutter::Size> GetWindowSizeForClientSize(
-    flutter::WindowsProcTable const& proc_table,
+    flutter::WindowsProcTable const& win32,
     flutter::Size const& client_size,
     std::optional<flutter::Size> smallest,
     std::optional<flutter::Size> biggest,
@@ -111,8 +110,8 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
       .right = static_cast<LONG>(client_size.width() * scale_factor),
       .bottom = static_cast<LONG>(client_size.height() * scale_factor)};
 
-  if (!proc_table.AdjustWindowRectExForDpi(&rect, window_style, FALSE,
-                                           extended_window_style, dpi)) {
+  if (!win32.AdjustWindowRectExForDpi(&rect, window_style, FALSE,
+                                      extended_window_style, dpi)) {
     FML_LOG(ERROR) << "Failed to run AdjustWindowRectExForDpi: "
                    << GetLastErrorAsString();
     return std::nullopt;
@@ -214,10 +213,10 @@ void SetChildContent(HWND content, HWND window) {
 
 namespace flutter {
 
-std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
+std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
-    const FlutterWindowSizing& content_size) {
+    const WindowSizing& content_size) {
   DWORD window_style = WS_OVERLAPPEDWINDOW;
   DWORD extended_window_style = 0;
   std::optional<Size> smallest = std::nullopt;
@@ -260,8 +259,6 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   std::unique_ptr<FlutterWindowsViewController> view_controller =
       std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
   FML_CHECK(engine->running());
-  // Must happen after engine is running.
-  view_controller->view()->SendInitialBounds();
   // The Windows embedder listens to accessibility updates using the
   // view's HWND. The embedder's accessibility features may be stale if
   // the app was in headless mode.
@@ -273,7 +270,7 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
     WNDCLASSEX window_class = {};
     window_class.cbSize = sizeof(WNDCLASSEX);
     window_class.style = CS_HREDRAW | CS_VREDRAW;
-    window_class.lpfnWndProc = FlutterHostWindow::WndProc;
+    window_class.lpfnWndProc = HostWindow::WndProc;
     window_class.hInstance = GetModuleHandle(nullptr);
     window_class.hIcon =
         LoadIcon(window_class.hInstance, MAKEINTRESOURCE(idi_app_icon));
@@ -326,12 +323,12 @@ std::unique_ptr<FlutterHostWindow> FlutterHostWindow::createRegularWindow(
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
   ShowWindow(hwnd, SW_SHOWNORMAL);
-  return std::unique_ptr<FlutterHostWindow>(new FlutterHostWindow(
+  return std::unique_ptr<HostWindow>(new HostWindow(
       window_manager, engine, WindowArchetype::kRegular,
       std::move(view_controller), BoxConstraints(smallest, biggest), hwnd));
 }
 
-FlutterHostWindow::FlutterHostWindow(
+HostWindow::HostWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     WindowArchetype archetype,
@@ -347,7 +344,7 @@ FlutterHostWindow::FlutterHostWindow(
   SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
-FlutterHostWindow::~FlutterHostWindow() {
+HostWindow::~HostWindow() {
   if (view_controller_) {
     // Unregister the window class. Fail silently if other windows are still
     // using the class, as only the last window can successfully unregister it.
@@ -358,43 +355,42 @@ FlutterHostWindow::~FlutterHostWindow() {
   }
 }
 
-FlutterHostWindow* FlutterHostWindow::GetThisFromHandle(HWND hwnd) {
-  return reinterpret_cast<FlutterHostWindow*>(
-      GetWindowLongPtr(hwnd, GWLP_USERDATA));
+HostWindow* HostWindow::GetThisFromHandle(HWND hwnd) {
+  return reinterpret_cast<HostWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 }
 
-HWND FlutterHostWindow::GetWindowHandle() const {
+HWND HostWindow::GetWindowHandle() const {
   return window_handle_;
 }
 
-void FlutterHostWindow::FocusViewOf(FlutterHostWindow* window) {
+void HostWindow::FocusViewOf(HostWindow* window) {
   auto child_content = window->view_controller_->view()->GetWindowHandle();
   if (window != nullptr && child_content != nullptr) {
     SetFocus(child_content);
   }
 };
 
-LRESULT FlutterHostWindow::WndProc(HWND hwnd,
-                                   UINT message,
-                                   WPARAM wparam,
-                                   LPARAM lparam) {
+LRESULT HostWindow::WndProc(HWND hwnd,
+                            UINT message,
+                            WPARAM wparam,
+                            LPARAM lparam) {
   if (message == WM_NCCREATE) {
     auto* const create_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
     auto* const windows_proc_table =
         static_cast<WindowsProcTable*>(create_struct->lpCreateParams);
     windows_proc_table->EnableNonClientDpiScaling(hwnd);
     EnableTransparentWindowBackground(hwnd, *windows_proc_table);
-  } else if (FlutterHostWindow* const window = GetThisFromHandle(hwnd)) {
+  } else if (HostWindow* const window = GetThisFromHandle(hwnd)) {
     return window->HandleMessage(hwnd, message, wparam, lparam);
   }
 
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
-                                         UINT message,
-                                         WPARAM wparam,
-                                         LPARAM lparam) {
+LRESULT HostWindow::HandleMessage(HWND hwnd,
+                                  UINT message,
+                                  WPARAM wparam,
+                                  LPARAM lparam) {
   auto result = engine_->window_proc_delegate_manager()->OnTopLevelWindowProc(
       window_handle_, message, wparam, lparam);
   if (result) {
@@ -429,26 +425,20 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
           static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
 
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
-      if (box_constraints_.smallest()) {
-        Size const min_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.smallest()->width() * scale_factor +
-                     non_client_width,
-                 box_constraints_.smallest()->height() * scale_factor +
-                     non_client_height));
+      Size const min_physical_size = ClampToVirtualScreen(Size(
+          box_constraints_.smallest().width() * scale_factor + non_client_width,
+          box_constraints_.smallest().height() * scale_factor +
+              non_client_height));
 
-        info->ptMinTrackSize.x = min_physical_size.width();
-        info->ptMinTrackSize.y = min_physical_size.height();
-      }
-      if (box_constraints_.biggest()) {
-        Size const max_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.biggest()->width() * scale_factor +
-                     non_client_width,
-                 box_constraints_.biggest()->height() * scale_factor +
-                     non_client_height));
+      info->ptMinTrackSize.x = min_physical_size.width();
+      info->ptMinTrackSize.y = min_physical_size.height();
+      Size const max_physical_size = ClampToVirtualScreen(Size(
+          box_constraints_.biggest().width() * scale_factor + non_client_width,
+          box_constraints_.biggest().height() * scale_factor +
+              non_client_height));
 
-        info->ptMaxTrackSize.x = max_physical_size.width();
-        info->ptMaxTrackSize.y = max_physical_size.height();
-      }
+      info->ptMaxTrackSize.x = max_physical_size.width();
+      info->ptMaxTrackSize.y = max_physical_size.height();
       return 0;
     }
 
@@ -488,7 +478,7 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-void FlutterHostWindow::SetContentSize(const FlutterWindowSizing& size) {
+void HostWindow::SetContentSize(const WindowSizing& size) {
   WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
   GetWindowInfo(window_handle_, &window_info);
 
