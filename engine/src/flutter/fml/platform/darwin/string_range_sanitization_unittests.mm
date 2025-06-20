@@ -14,11 +14,11 @@ TEST(StringRangeSanitizationTest, CanHandleUnicode) {
 }
 
 TEST(StringRangeSanitizationTest, HandlesInvalidRanges) {
-  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"😠", 3).location,  0UL);
-  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"😠", -1).location,  0UL);
+  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"😠", 3).location, 0UL);
+  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"😠", -1).location, 0UL);
   EXPECT_EQ(fml::RangeForCharacterAtIndex(nil, 0).location, 0UL);
-  EXPECT_EQ(fml::RangeForCharactersInRange(@"😠", NSMakeRange(1, 2)).location,  0UL);
-  EXPECT_EQ(fml::RangeForCharactersInRange(@"😠", NSMakeRange(3, 0)).location,  2UL);
+  EXPECT_EQ(fml::RangeForCharactersInRange(@"😠", NSMakeRange(1, 2)).location, 0UL);
+  EXPECT_EQ(fml::RangeForCharactersInRange(@"😠", NSMakeRange(3, 0)).location, 2UL);
   EXPECT_EQ(fml::RangeForCharactersInRange(nil, NSMakeRange(0, 0)).location, 0UL);
 }
 

@@ -662,11 +662,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   // Tries to delete the last code unit which is a low surrogate like the
   // iOS 16 keyboard does.
-  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange: NSMakeRange(inputView.text.length - 1, 1)];
+  inputView.selectedTextRange =
+      [FlutterTextRange rangeWithNSRange:NSMakeRange(inputView.text.length - 1, 1)];
   [inputView deleteBackward];
 
   // Insert the first unichar in the emoji.
-  [inputView insertText:[@"👨‍👩‍👧‍👦" substringWithRange:NSMakeRange(@"👨‍👩‍👧‍👦".length - 1, 1)]];
+  [inputView
+      insertText:[@"👨‍👩‍👧‍👦"
+                     substringWithRange:NSMakeRange(@"👨‍👩‍👧‍👦".length - 1, 1)]];
   [inputView insertText:@"아"];
 
   XCTAssertEqualObjects(inputView.text, @"👨‍👩‍👧‍👦아");
@@ -676,7 +679,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   // 👨‍👩‍👧‍👦 should be the current string.
 
   [inputView insertText:@"😀"];
-  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange: NSMakeRange(inputView.text.length - 1, 1)];
+  inputView.selectedTextRange =
+      [FlutterTextRange rangeWithNSRange:NSMakeRange(inputView.text.length - 1, 1)];
   [inputView deleteBackward];
   // Insert the first unichar in the emoji.
   [inputView insertText:[@"😀" substringWithRange:NSMakeRange(1, 1)]];
@@ -687,7 +691,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [inputView deleteBackward];
   // 👨‍👩‍👧‍👦😀 should be the current string.
 
-  inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange: NSMakeRange(inputView.text.length - 1, 1)];
+  inputView.selectedTextRange =
+      [FlutterTextRange rangeWithNSRange:NSMakeRange(inputView.text.length - 1, 1)];
   [inputView deleteBackward];
   // Insert the first unichar in the emoji.
   [inputView insertText:[@"😀" substringWithRange:NSMakeRange(1, 1)]];
