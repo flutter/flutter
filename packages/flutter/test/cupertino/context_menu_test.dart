@@ -753,6 +753,8 @@ void main() {
     });
 
     testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
       final Widget child = getChild();
 
       // Pump a CupertinoContextMenu on the top-left of the screen and open it.
@@ -788,7 +790,7 @@ void main() {
 
       // Open and then close the CupertinoContextMenu.
       await tester.pumpAndSettle();
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(599.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
@@ -933,7 +935,7 @@ void main() {
       expect(left.dx, lessThan(center.dx));
 
       // Close the CupertinoContextMenu.
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(559.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
