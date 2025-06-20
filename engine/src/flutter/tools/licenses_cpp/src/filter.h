@@ -25,6 +25,7 @@ class Filter {
   Filter(const Filter&) = delete;
   Filter& operator=(const Filter&) = delete;
   Filter(Filter&&) = default;
+  Filter& operator=(Filter&&) = default;
 
  private:
   explicit Filter(std::string_view regex);

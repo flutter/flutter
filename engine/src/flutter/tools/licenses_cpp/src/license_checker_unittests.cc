@@ -38,7 +38,13 @@ class LicenseCheckerTest : public testing::Test {
       return absl::InternalError("can't make temp dir");
     }
 
-    return temp_dir_;
+    fs::path engine_path = temp_dir_ / "engine";
+    fs::create_directory(engine_path, err);
+    if (err) {
+      return absl::InternalError("can't make temp engine dir");
+    }
+
+    return engine_path;
   }
 
  private:
