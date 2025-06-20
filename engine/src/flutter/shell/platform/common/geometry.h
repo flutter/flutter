@@ -93,8 +93,8 @@ class BoxConstraints {
             biggest.value_or(Size(std::numeric_limits<double>::infinity(),
                                   std::numeric_limits<double>::infinity()))) {}
   BoxConstraints(const BoxConstraints& other) = default;
-  std::optional<Size> biggest() const { return biggest_; }
-  std::optional<Size> smallest() const { return smallest_; }
+  Size biggest() const { return biggest_; }
+  Size smallest() const { return smallest_; }
 
  private:
   Size smallest_ = Size(0, 0);
