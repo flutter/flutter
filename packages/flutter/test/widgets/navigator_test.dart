@@ -246,6 +246,42 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
   });
 
+  testWidgets('Navigator should call observer.didPop when pops page-based routes', (
+    WidgetTester tester,
+  ) async {
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    const MaterialPage<void> page1 = MaterialPage<void>(child: Text('page1'));
+    final List<Page<void>> pages = <Page<void>>[page, page1];
+    final _MockNavigatorObserver observer = _MockNavigatorObserver();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: nav,
+            pages: pages,
+            observers: <NavigatorObserver>[observer],
+            onPopPage: (Route<dynamic> route, dynamic result) {
+              route.didPop(result);
+              pages.remove(route.settings);
+              return true;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('page1'), findsOneWidget);
+
+    observer._invocations.clear();
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
+    observer._checkInvocations(const <Symbol>[#didPop, #didChangeTop]);
+  });
+
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (
     WidgetTester tester,
   ) async {

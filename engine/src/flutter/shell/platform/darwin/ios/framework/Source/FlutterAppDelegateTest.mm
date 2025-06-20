@@ -8,6 +8,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 
@@ -152,6 +153,20 @@ FLUTTER_ASSERT_ARC
   }
   // App delegate has released the window.
   XCTAssertNil(weakWindow);
+}
+
+- (void)testGrabLaunchEngine {
+  // Clear out the mocking of the root view controller.
+  [self.mockMainBundle stopMocking];
+  self.appDelegate.rootFlutterViewControllerGetter = nil;
+  // Working with plugins forces the creation of an engine.
+  XCTAssertFalse([self.appDelegate hasPlugin:@"hello"]);
+  XCTAssertNotNil([self.appDelegate takeLaunchEngine]);
+  XCTAssertNil([self.appDelegate takeLaunchEngine]);
+}
+
+- (void)testGrabLaunchEngineWithoutPlugins {
+  XCTAssertNil([self.appDelegate takeLaunchEngine]);
 }
 
 #pragma mark - Deep linking

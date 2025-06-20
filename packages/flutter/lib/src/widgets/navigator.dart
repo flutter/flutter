@@ -4251,7 +4251,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (unattachedPagelessRoutes.isNotEmpty) {
         pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
-          () => List<_RouteEntry>.from(unattachedPagelessRoutes),
+          () => List<_RouteEntry>.of(unattachedPagelessRoutes),
         );
         unattachedPagelessRoutes.clear();
       }
@@ -5633,7 +5633,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         if (entry.currentState.index <= _RouteLifecycle.idle.index) {
           // The entry may have been disposed if the pop finishes synchronously.
           assert(entry.route._popCompleter.isCompleted);
-          entry.currentState = _RouteLifecycle.popping;
+          entry.currentState = _RouteLifecycle.pop;
         }
         entry.route.onPopInvokedWithResult(true, result);
       }
