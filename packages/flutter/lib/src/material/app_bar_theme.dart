@@ -465,9 +465,8 @@ class AppBarThemeData with Diagnosticable {
     EdgeInsetsGeometry? actionsPadding,
   }) {
     return AppBarThemeData(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
-      color: color,
       elevation: elevation ?? this.elevation,
       scrolledUnderElevation: scrolledUnderElevation ?? this.scrolledUnderElevation,
       shadowColor: shadowColor ?? this.shadowColor,
