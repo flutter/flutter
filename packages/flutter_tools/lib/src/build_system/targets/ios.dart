@@ -487,8 +487,15 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   List<Source> get outputs => <Source>[];
 }
 
-abstract class IosLLDBInit extends Target {
-  const IosLLDBInit();
+/// This target verifies that the Xcode project has an LLDB Init File set within
+/// at least one scheme.
+///
+/// LLDB Init File is needed for debugging on physical iOS 26+ devices.
+class DebugIosLLDBInit extends Target {
+  const DebugIosLLDBInit();
+
+  @override
+  String get name => 'debug_ios_lldb_init';
 
   @override
   List<Source> get inputs => <Source>[
@@ -508,9 +515,6 @@ abstract class IosLLDBInit extends Target {
   @override
   List<Target> get dependencies => <Target>[];
 
-  @visibleForOverriding
-  BuildMode get buildMode;
-
   @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
@@ -523,7 +527,7 @@ abstract class IosLLDBInit extends Target {
     );
 
     // LLDB Init File is only required for physical devices in debug mode.
-    if (!buildMode.isJit || environmentType != EnvironmentType.physical) {
+    if (environmentType != EnvironmentType.physical) {
       return;
     }
 
@@ -549,11 +553,6 @@ abstract class IosLLDBInit extends Target {
       return;
     }
 
-    // The scheme name is not available in Xcode Build Phases Run Scripts.
-    // Instead, find all xcscheme files in the Xcode project (this may be the
-    // Flutter Xcode project or an Add to App native Xcode project) and check
-    // if any of them contain "customLLDBInitFile". If none have it set, print
-    // a warning.
     final String? srcRoot = environment.defines[kSrcRoot];
     if (srcRoot == null) {
       environment.logger.printError('Failed to find $srcRoot');
@@ -566,6 +565,14 @@ abstract class IosLLDBInit extends Target {
       return;
     }
 
+    // The scheme name is not available in Xcode Build Phases Run Scripts.
+    // Instead, find all xcscheme files in the Xcode project (this may be the
+    // Flutter Xcode project or an Add to App native Xcode project) and check
+    // if any of them contain "customLLDBInitFile". If none have it set, print
+    // a warning.
+    // Also, this cannot check for a specific path/name for the LLDB Init File
+    // since Flutter's LLDB Init file may be imported from within a user's
+    // custom LLDB Init File.
     bool anyLLDBInitFound = false;
     await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
       if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
@@ -587,16 +594,6 @@ abstract class IosLLDBInit extends Target {
     }
     return;
   }
-}
-
-class DebugIosLLDBInit extends IosLLDBInit {
-  const DebugIosLLDBInit();
-
-  @override
-  String get name => 'debug_ios_lldb_init';
-
-  @override
-  BuildMode get buildMode => BuildMode.debug;
 }
 
 /// The base class for all iOS bundle targets.
