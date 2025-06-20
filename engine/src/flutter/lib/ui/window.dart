@@ -969,14 +969,16 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
-  /// Whether the platform supports accessibility  announcement API.
-  /// i.e. [SemanticsService.announce]. Some platforms do not
-  /// support or discourage the use of announcement. Using
-  /// [SemanticsService.announce] on those platform may be ignored.
-  /// Consider using other way to convey message to the user. For
-  /// example, Android discourages the uses of direct message announcement,
-  /// and rather encourages using other semantic properties such as
-  /// [SemanticsProperties.liveRegion] to convey message to the user.
+  /// Whether the platform supports accessibility  announcement API,
+  /// i.e. [SemanticsService.announce].
+  ///
+  /// Some platforms do not support or discourage the use of
+  /// announcement. Using [SemanticsService.announce] on those platform
+  /// may be ignored. Consider using other way to convey message to the
+  /// user. For example, Android discourages the uses of direct message
+  /// announcement, and rather encourages using other semantic
+  /// properties such as [SemanticsProperties.liveRegion] to convey
+  /// message to the user.
   ///
   /// Returns `false` on platforms where announcements are deprecated or
   /// unsupported by the underlying platform.
