@@ -20,6 +20,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'scroll_details.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 
@@ -170,6 +171,26 @@ abstract class ScrollActivity {
 
   @override
   String toString() => describeIdentity(this);
+}
+
+/// Base class for scrolling activities capable of dynamically changing their targets.
+///
+/// See also:
+///
+///  * [SmoothScrollActivity], which implements a generic algorithm for smoothing out discrete
+///    scroll inputs, inspired by Chromium's `ScrollOffsetAnimationCurve`.
+///  * [ScrollPositionWithSingleContext], which supports retargeting ongoing scroll activities
+///    for scroll events triggered by a pointer device, such as a mouse or trackpad.
+///  * [ScrollAction], which supports retargeting ongoing scroll activities for scroll events
+///    triggered by keyboard input, typically arrow keys.
+///  * [The scroll_animator package](https://pub.dev/packages/scroll_animator), which provides
+///    a catalogue of scroll smoothing algorithms ported from various browsers and platforms.
+abstract class RetargetableScrollActivity extends ScrollActivity {
+  /// Initializes [delegate] for subclasses.
+  RetargetableScrollActivity(super._delegate);
+
+  /// Updates the target scroll position based on provided [details].
+  void retarget(ScrollDetails details);
 }
 
 /// A scroll activity that does nothing.
