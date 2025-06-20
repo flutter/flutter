@@ -2,6 +2,8 @@
 # check on.
 .*/flutter/sky/packages/sky_engine/LICENSE
 .*/flutter/third_party/angle/third_party/.*
+.*/flutter/third_party/angle/tools/.*
+.*/flutter/third_party/angle/util/.*
 .*/flutter/third_party/benchmark/.*
 .*/flutter/third_party/dart/pkg/.*
 .*/flutter/third_party/dart/third_party/binaryen/.*
@@ -23,6 +25,8 @@
 .*/flutter/third_party/pkg/process/.*
 .*/flutter/third_party/pkg/vector_math/.*
 .*/flutter/third_party/protobuf/.*
+.*/flutter/third_party/pyyaml/.*
+.*/flutter/third_party/swiftshader/third_party/.*
 .*/flutter/third_party/swiftshader/third_party/llvm-10.0/.*
 .*/flutter/third_party/swiftshader/third_party/llvm-16.0/.*
 .*/flutter/third_party/vulkan-deps/spirv-headers/.*
