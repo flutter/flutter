@@ -225,21 +225,20 @@ class ScrollBehavior {
   }
 
   static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(
-    parent: RangeMaintainingScrollPhysics(),
+    parent: RangeMaintainingScrollPhysics(parent: SmoothScrollPhysics()),
   );
   static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
     decelerationRate: ScrollDecelerationRate.fast,
-    parent: RangeMaintainingScrollPhysics(),
+    parent: RangeMaintainingScrollPhysics(parent: SmoothScrollPhysics()),
   );
   static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(
-    parent: RangeMaintainingScrollPhysics(),
+    parent: RangeMaintainingScrollPhysics(parent: SmoothScrollPhysics()),
   );
 
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
-  /// Defaults to [RangeMaintainingScrollPhysics] mixed with
-  /// [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
-  /// Android.
+  /// Defaults to [SmoothScrollPhysics] mixed with [RangeMaintainingScrollPhysics] and
+  /// [BouncingScrollPhysics] on iOS/macOS or [ClampingScrollPhysics] otherwise.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
