@@ -777,7 +777,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Whether the color should be animated.
   final bool animateColor;
 
-  bool _getEffectiveCenterTitle(ThemeData theme) {
+  bool _getEffectiveCenterTitle(ThemeData theme, AppBarThemeData appbarTheme) {
     bool platformCenter() {
       switch (theme.platform) {
         case TargetPlatform.android:
@@ -791,7 +791,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
       }
     }
 
-    return centerTitle ?? theme.appBarTheme.centerTitle ?? platformCenter();
+    return centerTitle ?? appbarTheme.centerTitle ?? platformCenter();
   }
 
   @override
@@ -882,8 +882,8 @@ class _AppBarState extends State<AppBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
-    final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final AppBarTheme defaults =
+    final AppBarThemeData appBarTheme = AppBarTheme.of(context);
+    final AppBarThemeData defaults =
         theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
@@ -1119,7 +1119,7 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(theme),
+      centerMiddle: widget._getEffectiveCenterTitle(theme, appBarTheme),
       middleSpacing:
           widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
@@ -2223,8 +2223,8 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    late final AppBarTheme defaults =
+    late final AppBarThemeData appBarTheme = AppBarTheme.of(context);
+    late final AppBarThemeData defaults =
         Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final FlexibleSpaceBarSettings settings =
         context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
@@ -2442,7 +2442,7 @@ mixin _ScrollUnderFlexibleConfig {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _AppBarDefaultsM2 extends AppBarTheme {
+class _AppBarDefaultsM2 extends AppBarThemeData {
   _AppBarDefaultsM2(this.context)
     : super(
         elevation: 4.0,
@@ -2484,7 +2484,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-class _AppBarDefaultsM3 extends AppBarTheme {
+class _AppBarDefaultsM3 extends AppBarThemeData {
   _AppBarDefaultsM3(this.context)
     : super(
       elevation: 0.0,

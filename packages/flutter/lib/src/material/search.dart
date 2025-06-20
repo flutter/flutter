@@ -262,7 +262,7 @@ abstract class SearchDelegate<T> {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
-      appBarTheme: AppBarTheme(
+      appBarTheme: AppBarThemeData(
         systemOverlayStyle:
             colorScheme.brightness == Brightness.dark
                 ? SystemUiOverlayStyle.light
