@@ -72,11 +72,10 @@ class ReleaseAssetServer {
     } else {
       for (final Uri uri in _searchPaths()) {
         final Uri potential = uri.resolve(requestPath);
-        if (!_fileSystem.isFileSync(potential.toFilePath(windows: _platform.isWindows))) {
-          continue;
+        if (_fileSystem.isFileSync(potential.toFilePath(windows: _platform.isWindows))) {
+          fileUri = potential;
+          break;
         }
-        fileUri = potential;
-        break;
       }
     }
     if (fileUri != null) {

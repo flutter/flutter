@@ -125,10 +125,9 @@ class WebAssetServer implements AssetReader {
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
     if (writeRestartScripts) {
-      final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
-      for (final String src in modules) {
-        srcIdsList.add(<String, String>{'src': src, 'id': src});
-      }
+      final List<Map<String, String>> srcIdsList = <Map<String, String>>[
+        for (final String src in modules) <String, String>{'src': src, 'id': src},
+      ];
       writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
   }
@@ -330,12 +329,12 @@ class WebAssetServer implements AssetReader {
 
     // Retrieve connected web devices.
     final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-    final Set<String> connectedWebDeviceIds =
-        devices
-            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
-            .map((Device d) => d.id)
-            .toSet() ??
-        <String>{};
+    final Set<String> connectedWebDeviceIds = <String>{
+      for (final Device d
+          in devices?.where((Device d) => d.platformType == PlatformType.web && d.isConnected) ??
+              const <Device>[])
+        d.id,
+    };
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -391,13 +390,11 @@ class WebAssetServer implements AssetReader {
       // and user specified a device id that matches a connected web device.
       // If the user did not specify a device id, we use chrome as the default.
       injectDebuggingSupportCode:
-          connectedWebDeviceIds.isNotEmpty &&
           connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
-      pipeline = pipeline.addMiddleware(middleware);
-      pipeline = pipeline.addMiddleware(dwds.middleware);
+      pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
@@ -608,10 +605,10 @@ class WebAssetServer implements AssetReader {
   final FileSystem fileSystem;
 
   String get _buildConfigString {
-    final Map<String, dynamic> buildConfig = <String, dynamic>{
+    final Map<String, Object> buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
-      'builds': <dynamic>[
-        <String, dynamic>{
+      'builds': <Object>[
+        <String, Object>{
           'compileTarget': 'dartdevc',
           'renderer': webRenderer.name,
           'mainJsPath': 'main.dart.js',
