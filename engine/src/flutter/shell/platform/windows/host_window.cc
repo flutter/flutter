@@ -425,26 +425,20 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
           static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
 
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
-      if (box_constraints_.smallest()) {
-        Size const min_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.smallest()->width() * scale_factor +
-                     non_client_width,
-                 box_constraints_.smallest()->height() * scale_factor +
-                     non_client_height));
+      Size const min_physical_size = ClampToVirtualScreen(Size(
+          box_constraints_.smallest().width() * scale_factor + non_client_width,
+          box_constraints_.smallest().height() * scale_factor +
+              non_client_height));
 
-        info->ptMinTrackSize.x = min_physical_size.width();
-        info->ptMinTrackSize.y = min_physical_size.height();
-      }
-      if (box_constraints_.biggest()) {
-        Size const max_physical_size = ClampToVirtualScreen(
-            Size(box_constraints_.biggest()->width() * scale_factor +
-                     non_client_width,
-                 box_constraints_.biggest()->height() * scale_factor +
-                     non_client_height));
+      info->ptMinTrackSize.x = min_physical_size.width();
+      info->ptMinTrackSize.y = min_physical_size.height();
+      Size const max_physical_size = ClampToVirtualScreen(Size(
+          box_constraints_.biggest().width() * scale_factor + non_client_width,
+          box_constraints_.biggest().height() * scale_factor +
+              non_client_height));
 
-        info->ptMaxTrackSize.x = max_physical_size.width();
-        info->ptMaxTrackSize.y = max_physical_size.height();
-      }
+      info->ptMaxTrackSize.x = max_physical_size.width();
+      info->ptMaxTrackSize.y = max_physical_size.height();
       return 0;
     }
 
