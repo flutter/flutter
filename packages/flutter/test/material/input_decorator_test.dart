@@ -5243,6 +5243,39 @@ void main() {
       // The hintText replaced with SizeBox.
       expect(find.text(hintText), findsNothing);
     });
+
+    testWidgets('Hint uses topLeft alignment when maintainHintSize is false', (
+      WidgetTester tester,
+    ) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        maintainHintSize: false,
+      );
+
+      await tester.pumpWidget(buildInputDecorator(isEmpty: true, decoration: decoration));
+
+      final Finder animatedSwitcherFinder = find.byType(AnimatedSwitcher);
+      expect(animatedSwitcherFinder, findsOneWidget);
+
+      final Finder stackFinder = find.descendant(
+        of: animatedSwitcherFinder,
+        matching: find.byType(Stack),
+      );
+      expect(stackFinder, findsOneWidget);
+
+      final Stack stack = tester.widget<Stack>(stackFinder);
+      expect(stack.alignment, Alignment.topLeft);
+
+      final Finder hintTextFinder = find.text(hintText);
+      expect(hintTextFinder, findsOneWidget);
+
+      // Get the hint text box and stack box to calculate the position of the hint text.
+      final RenderBox hintTextBox = tester.renderObject<RenderBox>(hintTextFinder);
+      final RenderBox stackBox = tester.renderObject<RenderBox>(stackFinder);
+      final Offset hintTextPosition = hintTextBox.localToGlobal(Offset.zero, ancestor: stackBox);
+      expect(hintTextPosition.dx, 0.0);
+      expect(hintTextPosition.dy, 0.0);
+    });
   });
 
   group('Material3 - InputDecoration helper/counter/error', () {
