@@ -36,6 +36,8 @@ import '../web_template.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
+// A minimal index for projects that do not yet support web. A meta tag is used
+// to ensure loaded scripts are always parsed as UTF-8.
 const String _kDefaultIndex = '''
 <html>
     <head>
