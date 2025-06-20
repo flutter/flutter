@@ -21,19 +21,17 @@ class SkwasmRenderer implements Renderer {
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
-  SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
-
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
-    return LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
+    return SkwasmPath.combine(op, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 
   @override
   ui.Path copyPath(ui.Path src) {
-    return LazyPath.fromLazyPath(src as LazyPath);
+    return SkwasmPath.from(src as SkwasmPath);
   }
 
   @override
@@ -155,7 +153,7 @@ class SkwasmRenderer implements Renderer {
   );
 
   @override
-  ui.Path createPath() => LazyPath(pathConstructors);
+  ui.Path createPath() => SkwasmPath();
 
   @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();

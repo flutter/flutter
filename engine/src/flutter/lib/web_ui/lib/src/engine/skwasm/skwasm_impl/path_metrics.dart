@@ -5,22 +5,21 @@
 import 'dart:collection';
 import 'dart:ffi';
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePathMetrics {
+class SkwasmPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
   SkwasmPathMetrics({required this.path, required this.forceClosed});
 
   SkwasmPath path;
   bool forceClosed;
 
   @override
-  late DisposablePathMetricIterator iterator = SkwasmPathMetricIterator(path, forceClosed);
+  late Iterator<ui.PathMetric> iterator = SkwasmPathMetricIterator(path, forceClosed);
 }
 
 class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter>
-    implements DisposablePathMetricIterator {
+    implements Iterator<ui.PathMetric> {
   SkwasmPathMetricIterator(SkwasmPath path, bool forceClosed)
     : super(contourMeasureIterCreate(path.handle, forceClosed, 1.0), _registry);
 
@@ -33,7 +32,7 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
   int _nextIndex = 0;
 
   @override
-  DisposablePathMetric get current {
+  ui.PathMetric get current {
     if (_current == null) {
       throw RangeError(
         'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
@@ -58,8 +57,7 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
   }
 }
 
-class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
-    implements DisposablePathMetric {
+class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure> implements ui.PathMetric {
   SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawContourMeasure> _registry =
@@ -71,7 +69,7 @@ class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
   final int contourIndex;
 
   @override
-  DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return SkwasmPath.fromHandle(contourMeasureGetSegment(handle, start, end, startWithMoveTo));
   }
 

@@ -328,17 +328,15 @@ class CanvasKitRenderer implements Renderer {
     ui.FilterQuality? filterQuality,
   ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
 
-  CkPathConstructors pathConstructors = CkPathConstructors();
+  @override
+  ui.Path createPath() => CkPath();
 
   @override
-  ui.Path createPath() => LazyPath(pathConstructors);
-
-  @override
-  ui.Path copyPath(ui.Path src) => LazyPath.fromLazyPath(src as LazyPath);
+  ui.Path copyPath(ui.Path src) => CkPath.from(src as CkPath);
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) =>
-      LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
+      CkPath.combine(op, path1, path2);
 
   @override
   ui.TextStyle createTextStyle({
