@@ -16,7 +16,9 @@
 
 #include "third_party/skia/include/core/SkTextBlob.h"
 
-#include "impeller/typographer/text_frame.h"
+namespace impeller {
+  class TextFrame;
+}
 
 namespace flutter {
 

@@ -1,0 +1,36 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#pragma once
+
+#include "flutter/display_list/effects/dl_runtime_effect.h"
+
+namespace flutter {
+
+class DlRuntimeEffectSkia final : public DlRuntimeEffect {
+ public:
+  static sk_sp<DlRuntimeEffect> Make(
+      const sk_sp<SkRuntimeEffect>& runtime_effect);
+
+  explicit DlRuntimeEffectSkia(const sk_sp<SkRuntimeEffect>& runtime_effect);
+
+  // |DlRuntimeEffect|
+  sk_sp<SkRuntimeEffect> skia_runtime_effect() const override;
+
+  // |DlRuntimeEffect|
+  std::shared_ptr<impeller::RuntimeStage> runtime_stage() const override;
+
+ private:
+  DlRuntimeEffectSkia() = delete;
+  // |DlRuntimeEffect|
+  ~DlRuntimeEffectSkia() override;
+
+  sk_sp<SkRuntimeEffect> skia_runtime_effect_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DlRuntimeEffectSkia);
+
+  friend DlRuntimeEffect;
+};
+
+}  // namespace flutter

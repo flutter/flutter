@@ -1737,30 +1737,30 @@ void DisplayListBuilder::drawTextFrame(
     const std::shared_ptr<impeller::TextFrame>& text_frame,
     DlScalar x,
     DlScalar y) {
-  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
-  OpResult result = PaintResult(current_, flags);
-  if (result == OpResult::kNoEffect) {
-    return;
-  }
-  DlRect bounds = text_frame->GetBounds().Shift(x, y);
-  bool unclipped = AccumulateOpBounds(bounds, flags);
-  // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
-  // unit tests can use Fuchsia's font manager instead of the empty default.
-  // Until then we might encounter empty bounds for otherwise valid text and
-  // thus we ignore the results from AccumulateOpBounds.
-#if defined(OS_FUCHSIA)
-  unclipped = true;
-#endif  // OS_FUCHSIA
-  if (unclipped) {
-    Push<DrawTextFrameOp>(0, text_frame, x, y);
-    // There is no way to query if the glyphs of a text blob overlap and
-    // there are no current guarantees from either Skia or Impeller that
-    // they will protect overlapping glyphs from the effects of overdraw
-    // so we must make the conservative assessment that this DL layer is
-    // not compatible with group opacity inheritance.
-    UpdateLayerOpacityCompatibility(false);
-    UpdateLayerResult(result);
-  }
+//   DisplayListAttributeFlags flags = kDrawTextBlobFlags;
+//   OpResult result = PaintResult(current_, flags);
+//   if (result == OpResult::kNoEffect) {
+//     return;
+//   }
+//   DlRect bounds = text_frame->GetBounds().Shift(x, y);
+//   bool unclipped = AccumulateOpBounds(bounds, flags);
+//   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
+//   // unit tests can use Fuchsia's font manager instead of the empty default.
+//   // Until then we might encounter empty bounds for otherwise valid text and
+//   // thus we ignore the results from AccumulateOpBounds.
+// #if defined(OS_FUCHSIA)
+//   unclipped = true;
+// #endif  // OS_FUCHSIA
+//   if (unclipped) {
+//     Push<DrawTextFrameOp>(0, text_frame, x, y);
+//     // There is no way to query if the glyphs of a text blob overlap and
+//     // there are no current guarantees from either Skia or Impeller that
+//     // they will protect overlapping glyphs from the effects of overdraw
+//     // so we must make the conservative assessment that this DL layer is
+//     // not compatible with group opacity inheritance.
+//     UpdateLayerOpacityCompatibility(false);
+//     UpdateLayerResult(result);
+//   }
 }
 
 void DisplayListBuilder::DrawTextFrame(

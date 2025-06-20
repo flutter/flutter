@@ -6,14 +6,13 @@
 #include "helpers.h"
 #include "wrappers.h"
 
-#include "third_party/skia/include/core/SkPoint3.h"
-#include "third_party/skia/include/core/SkVertices.h"
-#include "third_party/skia/include/utils/SkShadowUtils.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
-using namespace skia::textlayout;
+#include "flutter/display_list/display_list_builder.h"
 
+using namespace skia::textlayout;
 using namespace Skwasm;
+using namespace flutter;
 
 namespace {
 // These numbers have been chosen empirically to give a result closest to the
@@ -30,58 +29,58 @@ constexpr SkScalar kShadowLightXOffset = 0;
 constexpr SkScalar kShadowLightYOffset = -450;
 }  // namespace
 
-SKWASM_EXPORT void canvas_saveLayer(SkCanvas* canvas,
-                                    SkRect* rect,
-                                    SkPaint* paint,
-                                    SkImageFilter* backdrop,
-                                    SkTileMode backdropTileMode) {
-  canvas->saveLayer(SkCanvas::SaveLayerRec(rect, paint, backdrop,
-                                           backdropTileMode, nullptr, 0));
+SKWASM_EXPORT void canvas_saveLayer(DisplayListBuilder* canvas,
+                                    DlRect* rect,
+                                    DlPaint* paint,
+                                    DlImageFilter* backdrop,
+                                    DlTileMode backdropTileMode) {
+  // TODO(jacksongardner): make sure the tile mode is handled properly
+  canvas->SaveLayer(rect, paint, backdrop);
 }
 
-SKWASM_EXPORT void canvas_save(SkCanvas* canvas) {
-  canvas->save();
+SKWASM_EXPORT void canvas_save(DisplayListBuilder* canvas) {
+  canvas->Save();
 }
 
-SKWASM_EXPORT void canvas_restore(SkCanvas* canvas) {
-  canvas->restore();
+SKWASM_EXPORT void canvas_restore(DisplayListBuilder* canvas) {
+  canvas->Restore();
 }
 
-SKWASM_EXPORT void canvas_restoreToCount(SkCanvas* canvas, int count) {
-  canvas->restoreToCount(count);
+SKWASM_EXPORT void canvas_restoreToCount(DisplayListBuilder* canvas, int count) {
+  canvas->RestoreToCount(count);
 }
 
-SKWASM_EXPORT int canvas_getSaveCount(SkCanvas* canvas) {
-  return canvas->getSaveCount();
+SKWASM_EXPORT int canvas_getSaveCount(DisplayListBuilder* canvas) {
+  return canvas->GetSaveCount();
 }
 
-SKWASM_EXPORT void canvas_translate(SkCanvas* canvas,
-                                    SkScalar dx,
-                                    SkScalar dy) {
-  canvas->translate(dx, dy);
+SKWASM_EXPORT void canvas_translate(DisplayListBuilder* canvas,
+                                    float dx,
+                                    float dy) {
+  canvas->Translate(dx, dy);
 }
 
-SKWASM_EXPORT void canvas_scale(SkCanvas* canvas, SkScalar sx, SkScalar sy) {
-  canvas->scale(sx, sy);
+SKWASM_EXPORT void canvas_scale(DisplayListBuilder* canvas, float sx, float sy) {
+  canvas->Scale(sx, sy);
 }
 
-SKWASM_EXPORT void canvas_rotate(SkCanvas* canvas, SkScalar degrees) {
-  canvas->rotate(degrees);
+SKWASM_EXPORT void canvas_rotate(DisplayListBuilder* canvas, float degrees) {
+  canvas->Rotate(degrees);
 }
 
-SKWASM_EXPORT void canvas_skew(SkCanvas* canvas, SkScalar sx, SkScalar sy) {
-  canvas->skew(sx, sy);
+SKWASM_EXPORT void canvas_skew(DisplayListBuilder* canvas, float sx, float sy) {
+  canvas->Skew(sx, sy);
 }
 
-SKWASM_EXPORT void canvas_transform(SkCanvas* canvas, const SkM44* matrix44) {
-  canvas->concat(*matrix44);
+SKWASM_EXPORT void canvas_transform(DisplayListBuilder* canvas, const DlMatrix* matrix44) {
+  canvas->Transform(*matrix44);
 }
 
-SKWASM_EXPORT void canvas_clipRect(SkCanvas* canvas,
-                                   const SkRect* rect,
-                                   SkClipOp op,
+SKWASM_EXPORT void canvas_clipRect(DisplayListBuilder* canvas,
+                                   const DlRect* rect,
+                                   DlClipOp op,
                                    bool antialias) {
-  canvas->clipRect(*rect, op, antialias);
+  canvas->ClipRect(*rect, op);
 }
 
 SKWASM_EXPORT void canvas_clipRRect(SkCanvas* canvas,

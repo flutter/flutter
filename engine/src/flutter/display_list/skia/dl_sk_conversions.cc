@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace flutter {
 
