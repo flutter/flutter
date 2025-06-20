@@ -306,17 +306,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
         // Retrieve connected web devices, excluding the web server device.
         final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-        final Set<String> nonWebServerConnectedDeviceIds =
-            devices
-                ?.where(
-                  (Device d) =>
-                      d.platformType == PlatformType.web &&
-                      d.isConnected &&
-                      d.id != WebServerDevice.kWebServerDeviceId,
-                )
-                .map((Device d) => d.id)
-                .toSet() ??
-            <String>{};
+        final Set<String> nonWebServerConnectedDeviceIds = <String>{
+        for (final Device d in devices?.where(
+          (Device d) => d.platformType == PlatformType.web && d.isConnected && d.id != WebServerDevice.kWebServerDeviceId,
+        ))
+          d.id,
+      };
 
         // Use Chrome-based connection only if we have a connected ChromiumDevice
         // Otherwise, use DWDS WebSocket connection

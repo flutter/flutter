@@ -56,7 +56,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
-      bool injectDebuggingSupportCode,
+      bool useDwdsWebSocketConnection,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -208,9 +208,11 @@ class WebAssetServer implements AssetReader {
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
     bool canaryFeatures = false,
+    bool useDwdsWebSocketConnection = false,
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
+    bool shouldEnableMiddleware = true,
   }) async {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -327,15 +329,6 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen((logging.LogRecord event) => log(logger, event));
 
-    // Retrieve connected web devices.
-    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-    final Set<String> connectedWebDeviceIds = <String>{
-      for (final Device d
-          in devices?.where((Device d) => d.platformType == PlatformType.web && d.isConnected) ??
-              const <Device>[])
-        d.id,
-    };
-
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -386,14 +379,11 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Inject the debugging support code if connected web devices are present,
-      // and user specified a device id that matches a connected web device.
-      // If the user did not specify a device id, we use chrome as the default.
-      injectDebuggingSupportCode:
-          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
+      // Use DWDS WebSocket-based connection instead of Chrome-based connection for debuggingAdd commentMore actions
+      useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
-    if (enableDwds) {
+    if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
