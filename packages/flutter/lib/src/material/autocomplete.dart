@@ -63,10 +63,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
+    this.focusNode,
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
+    this.textEditingController,
     this.initialValue,
   });
 
@@ -78,6 +80,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// If not provided, will build a standard Material-style text field by
   /// default.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
+
+  /// {@macro flutter.widgets.RawAutocomplete.focusNode}
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
   final AutocompleteOnSelected<T>? onSelected;
@@ -102,6 +107,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
+  /// {@macro flutter.widgets.RawAutocomplete.textEditingController}
+  final TextEditingController? textEditingController;
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
@@ -123,6 +131,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      focusNode: focusNode,
+      textEditingController: textEditingController,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewOpenDirection: optionsViewOpenDirection,
