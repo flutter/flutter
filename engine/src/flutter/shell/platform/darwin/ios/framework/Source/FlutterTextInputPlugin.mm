@@ -1881,9 +1881,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
              @"Expected a FlutterTextPosition for position (got %@).",
              [_selectedTextRange.start class]);
-    NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-    UITextStorageDirection currentAffinity =
-        ((FlutterTextPosition*)_selectedTextRange.start).affinity;
+    NSUInteger currentIndex = _selectedTextRange.start.index;
+    UITextStorageDirection currentAffinity = _selectedTextRange.start.affinity;
     return [FlutterTextPosition positionWithIndex:currentIndex affinity:currentAffinity];
   }
 
@@ -2061,15 +2060,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 #pragma mark - UIKeyInput Overrides
 
 - (void)updateEditingState {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
   NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
-    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
-    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    composingBase = self.markedTextRange.start.index;
+    composingExtent = self.markedTextRange.end.index;
   }
   NSDictionary* state = @{
     @"selectionBase" : @(selectionBase),
@@ -2094,8 +2093,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)updateEditingStateWithDelta:(flutter::TextEditingDelta)delta {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
@@ -2159,7 +2158,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for position (got %@).",
            [_selectedTextRange.start class]);
-  NSUInteger insertPosition = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger insertPosition = _selectedTextRange.start.index;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
