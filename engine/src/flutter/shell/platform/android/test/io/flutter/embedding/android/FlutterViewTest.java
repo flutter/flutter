@@ -459,7 +459,7 @@ public class FlutterViewTest {
   @SuppressWarnings("deprecation")
   // getSystemUiVisibility, getWindowSystemUiVisibility, required to test pre api 30 behavior.
   @Test
-  @Config(minSdk = 23, maxSdk = 29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = 29, qualifiers = "land")
   public void systemInsetHandlesFullscreenNavbarRight() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_90);
@@ -567,7 +567,7 @@ public class FlutterViewTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.API_23, maxSdk = API_LEVELS.API_29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
   public void calculateShouldZeroSidesInLandscapeRotation270API23Plus() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
@@ -577,7 +577,7 @@ public class FlutterViewTest {
   @SuppressWarnings("deprecation")
   // getSystemUiVisibility, getWindowSystemUiVisibility required to test pre api 30 behavior.
   @Test
-  @Config(minSdk = 23, maxSdk = 29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = 29, qualifiers = "land")
   public void systemInsetHandlesFullscreenNavbarLeft() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
