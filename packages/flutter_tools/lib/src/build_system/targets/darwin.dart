@@ -167,7 +167,7 @@ void _printXcodeLog(XcodeLogType logType, String message, {String? filePath, int
     linePath = '$linePath ';
   }
 
-  // Must be printed to stderr to be streamed to the Flutter tool.
+  // Must be printed to stderr to be streamed to the Flutter tool in xcode_backend.dart.
   globals.stdio.stderrWrite('$linePath${logType.name}: $message\n');
 }
 
