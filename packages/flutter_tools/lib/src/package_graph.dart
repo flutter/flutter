@@ -169,17 +169,14 @@ Try running `flutter pub get`''');
   final Map<String, List<String>> devDependencies;
 
   static List<String> _parseList(Map<String, Object?> map, String section) {
-    switch (map[section]) {
-      case null:
-        return <String>[];
-      case final List<Object?> list:
-        try {
-          return list.cast<String>();
-        } on TypeError {
-          throw FormatException('Expected `$section` to be a list of Strings');
-        }
-      default:
-        throw FormatException('Expected `$section` to be a list');
+      final Object? result = map[section];
+      try {
+        return (result as List<Object?>?)?.cast<String>() ?? <String>[];
+      } on TypeError {
+        throw FormatException(
+          'Expected `$section` to be a list of strings',
+        );
+      }
     }
   }
 }
