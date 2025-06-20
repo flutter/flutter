@@ -935,6 +935,30 @@ void main() {
       await chrome.close();
     },
   );
+
+  testWithoutContext('respects custom user data directory flag', () async {
+    const String customUserDataDir = '/custom/chrome/data/dir';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=$customUserDataDir',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+      ),
+    );
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
