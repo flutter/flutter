@@ -42,6 +42,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
+  root.identifier = "";
   root.label = "accessibility";
   root.hint = "";
   root.value = "";
@@ -78,6 +79,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = 1;
   root.text_selection_extent = 3;
+  root.identifier = "";
   root.label = "";
   root.hint = "";
   // Selectable text store its text in value
@@ -119,6 +121,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
+  root.identifier = "";
   root.label = "";
   root.hint = "";
   // Selectable text store its text in value
@@ -162,6 +165,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
   root.flags2 = &flags;
   root.id = 0;
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
@@ -178,6 +182,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{};
   child1.flags2 = &child_flags;
   child1.id = 1;
+  child1.identifier = "";
   child1.label = "child 1";
   child1.hint = "";
   child1.value = "";
@@ -243,6 +248,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   root.id = 0;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
@@ -264,6 +270,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   child1.id = 1;
   child1.flags2 = &child_flags;
   child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.identifier = "";
   child1.label = "";
   child1.hint = "";
   child1.value = "textfield";
@@ -320,6 +327,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.identifier = "";
   root.label = "root";
   root.hint = "";
   root.value = "";
@@ -342,6 +350,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   child1.flags2 = &child_flags;
   child1.id = 1;
   child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.identifier = "";
   child1.label = "";
   child1.hint = "";
   child1.value = "textfield";
