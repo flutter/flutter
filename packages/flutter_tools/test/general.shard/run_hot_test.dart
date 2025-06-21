@@ -35,6 +35,41 @@ void main() {
     );
   });
 
+  testUsingContext('defaultReloadSourcesHelper() reloads each isolate group once)', () async {
+    final _FakeVmService fakeService = _FakeVmService();
+    final _FakeFlutterDevice fakeDevice = _FakeFlutterDevice(
+      vmService: _FakeFlutterVmService(service: fakeService),
+    );
+
+    fakeService._vm._isolates.addAll(<_FakeIsolateRef>[
+      _FakeIsolateRef(isolateGroupId: 'Group A', id: 'Isolate A.1'),
+      _FakeIsolateRef(isolateGroupId: 'Group B', id: 'Isolate B.1'),
+      _FakeIsolateRef(isolateGroupId: 'Group B', id: 'Isolate B.2'),
+    ]);
+
+    await defaultReloadSourcesHelper(
+      _FakeHotRunner(),
+      <FlutterDevice?>[fakeDevice],
+      false,
+      <String, dynamic>{},
+      'android',
+      'flutter-sdk',
+      false,
+      'test-reason',
+      const NoOpAnalytics(),
+      addBenchmarkData: (String name, int value) {},
+    );
+
+    expect(fakeService._reloadedIsolates.length, equals(2));
+    expect(fakeService._reloadedIsolates, contains('Isolate A.1'));
+    expect(
+      fakeService._reloadedIsolates,
+      predicate((List<String> ids) {
+        return ids.contains('Isolate B.1') || ids.contains('Isolate B.2');
+      }),
+    );
+  });
+
   group('signal handling', () {
     late _FakeHotCompatibleFlutterDevice flutterDevice;
     late MemoryFileSystem fileSystem;
@@ -129,11 +164,17 @@ class _FakeDevFS extends Fake implements DevFS {
 }
 
 class _FakeFlutterDevice extends Fake implements FlutterDevice {
+  _FakeFlutterDevice({FlutterVmService? vmService})
+    : vmService = vmService ?? _FakeFlutterVmService();
+
   @override
   final DevFS? devFS = _FakeDevFS();
 
   @override
-  final FlutterVmService? vmService = _FakeFlutterVmService();
+  final FlutterVmService? vmService;
+
+  @override
+  Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
 }
 
 class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
@@ -165,13 +206,32 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService({vm_service.VmService? service}) : service = service ?? _FakeVmService();
   @override
-  final vm_service.VmService service = _FakeVmService();
+  final vm_service.VmService service;
 }
 
 class _FakeVmService extends Fake implements vm_service.VmService {
+  final _FakeVm _vm = _FakeVm();
+  final List<String> _reloadedIsolates = <String>[];
+
   @override
-  Future<_FakeVm> getVM() async => _FakeVm();
+  Future<_FakeVm> getVM() async => _vm;
+
+  @override
+  Future<vm_service.ReloadReport> reloadSources(
+    String isolateId, {
+    bool? force,
+    bool? pause,
+    String? rootLibUri,
+    String? packagesUri,
+  }) async {
+    _reloadedIsolates.add(isolateId);
+    return vm_service.ReloadReport.parse(<String, Object?>{
+      'success': true,
+      'details': <String, Object?>{},
+    })!;
+  }
 }
 
 class _FakeVm extends Fake implements vm_service.VM {
@@ -179,4 +239,12 @@ class _FakeVm extends Fake implements vm_service.VM {
 
   @override
   List<vm_service.IsolateRef>? get isolates => _isolates;
+}
+
+class _FakeIsolateRef extends Fake implements vm_service.IsolateRef {
+  _FakeIsolateRef({this.isolateGroupId, this.id});
+  @override
+  String? isolateGroupId;
+  @override
+  String? id;
 }
