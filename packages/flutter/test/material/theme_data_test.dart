@@ -2007,6 +2007,32 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'ThemeData.inputDecorationTheme accepts only a InputDecorationTheme or a InputDecorationThemeData',
+    (WidgetTester tester) async {
+      ThemeData(inputDecorationTheme: const InputDecorationTheme());
+      expect(tester.takeException(), isNull);
+
+      ThemeData(inputDecorationTheme: const InputDecorationThemeData());
+      expect(tester.takeException(), isNull);
+
+      expect(
+        () {
+          ThemeData(inputDecorationTheme: Object());
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError error) => error.message,
+            'message',
+            equals(
+              'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 @immutable
