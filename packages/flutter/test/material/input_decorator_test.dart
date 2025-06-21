@@ -2944,6 +2944,7 @@ void main() {
       },
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/71813.
     testWidgets('Ambient theme floatingLabelBehavior is used', (WidgetTester tester) async {
       const FloatingLabelBehavior floatingLabelBehavior = FloatingLabelBehavior.never;
       await tester.pumpWidget(
