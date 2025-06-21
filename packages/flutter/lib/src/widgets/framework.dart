@@ -3054,6 +3054,7 @@ class BuildOwner {
           }());
         }
       }
+      context.cleanupRemovedDependencies();
       buildScope._flushDirtyElements(debugBuildRoot: context);
     } finally {
       buildScope._building = false;
@@ -4938,6 +4939,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   PersistentHashMap<Type, InheritedElement>? _inheritedElements;
   Set<InheritedElement>? _dependencies;
+  Set<InheritedElement>? _currentBuildDependencies;
   bool _hadUnsatisfiedDependencies = false;
 
   bool _debugCheckStateIsActiveForAncestorLookup() {
@@ -4971,6 +4973,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
     _dependencies ??= HashSet<InheritedElement>();
     _dependencies!.add(ancestor);
+
+    _currentBuildDependencies ??= HashSet<InheritedElement>();
+    _currentBuildDependencies!.add(ancestor);
+
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
@@ -4995,6 +5001,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     return _inheritedElements?[T];
+  }
+
+  /// Called by [BuildOwner] on every build.
+  void cleanupRemovedDependencies() {
+    if (_dependencies != null && _currentBuildDependencies != null) {
+      final Set<InheritedElement> removedDependencies = _dependencies!.difference(
+        _currentBuildDependencies!,
+      );
+      for (final InheritedElement dependency in removedDependencies) {
+        dependency.removeDependent(this);
+        _dependencies!.remove(dependency);
+      }
+      _currentBuildDependencies!.clear();
+    }
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
