@@ -39,6 +39,10 @@ base class Shader extends NativeFieldWrapperClass1 {
     return UniformSlot._(this, uniformName);
   }
 
+  bool removeShader(GpuContext context) {
+    return _removeShader(context);
+  }
+
   @Native<Int Function(Pointer<Void>, Handle)>(
     symbol: 'InternalFlutterGpu_Shader_GetUniformStructSize',
   )
@@ -51,4 +55,9 @@ base class Shader extends NativeFieldWrapperClass1 {
     String uniformStructName,
     String memberName,
   );
+
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Shader_Remove',
+  )
+  external bool _removeShader(GpuContext context);
 }
