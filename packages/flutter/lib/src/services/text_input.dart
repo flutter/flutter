@@ -3044,5 +3044,30 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
   }
 }
 
+/// A [IOSSystemContextMenuItemData] for the system's built-in Live Text
+/// (OCR) button.
+///
+/// This button is only available on iOS 15.0+ devices with camera support.
+///
+/// The title and action are both handled by the platform. The default title
+/// is "Scan Text" and is localized by the platform.
+///
+/// See https://github.com/flutter/flutter/issues/169781
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData {
+  /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
+  const IOSSystemContextMenuItemDataLiveText({required this.title});
+
+  @override
+  final String title;
+
+  @override
+  String get _jsonType => 'captureTextFromCamera';
+
+  @override
+  String toString() {
+    return 'IOSSystemContextMenuItemDataLiveText(title: $title)';
+  }
+}
+
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
