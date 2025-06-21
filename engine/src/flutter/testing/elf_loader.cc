@@ -11,6 +11,15 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 
+#if OS_FUCHSIA
+#include <dlfcn.h>
+#include <fuchsia/io/cpp/fidl.h>
+#include <lib/fdio/directory.h>
+#include <lib/fdio/io.h>
+#include <zircon/dlfcn.h>
+#include <zircon/status.h>
+#endif
+
 namespace flutter::testing {
 
 ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
@@ -30,10 +39,49 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   ELFAOTSymbols symbols;
 
 #if OS_FUCHSIA
-  // TODO(gw280): https://github.com/flutter/flutter/issues/50285
-  // Dart doesn't implement Dart_LoadELF on Fuchsia
-  FML_LOG(ERROR) << "Dart doesn't implement Dart_LoadELF on Fuchsia";
-  return {};
+  fuchsia::io::Flags flags =
+      fuchsia::io::PERM_READABLE | fuchsia::io::PERM_EXECUTABLE;
+  int fd_out = -1;
+  zx_status_t status =
+      fdio_open3_fd(elf_path.c_str(), uint64_t{flags}, &fd_out);
+  fml::UniqueFD fd(fd_out);
+  if (status != ZX_OK) {
+    FML_LOG(ERROR) << "Failed to load " << elf_filename << " "
+                   << zx_status_get_string(status);
+    return {};
+  }
+  zx_handle_t vmo = ZX_HANDLE_INVALID;
+  status = fdio_get_vmo_exec(fd.get(), &vmo);
+  if (status != ZX_OK) {
+    FML_LOG(ERROR) << "Failed to load " << elf_filename << " "
+                   << zx_status_get_string(status);
+    return {};
+  }
+  void* handle = dlopen_vmo(vmo, RTLD_LAZY);
+  if (handle == nullptr) {
+    FML_LOG(ERROR) << "Failed to load " << elf_filename << " " << dlerror();
+    return {};
+  }
+  symbols.vm_snapshot_data =
+      reinterpret_cast<const uint8_t*>(dlsym(handle, kVmSnapshotDataCSymbol));
+  symbols.vm_snapshot_instrs = reinterpret_cast<const uint8_t*>(
+      dlsym(handle, kVmSnapshotInstructionsCSymbol));
+  symbols.vm_isolate_data = reinterpret_cast<const uint8_t*>(
+      dlsym(handle, kIsolateSnapshotDataCSymbol));
+  symbols.vm_isolate_instrs = reinterpret_cast<const uint8_t*>(
+      dlsym(handle, kIsolateSnapshotInstructionsCSymbol));
+  if (symbols.vm_snapshot_data == nullptr ||
+      symbols.vm_snapshot_instrs == nullptr ||
+      symbols.vm_isolate_data == nullptr ||
+      symbols.vm_isolate_instrs == nullptr) {
+    dlclose(handle);
+    FML_LOG(ERROR) << "Failed to load " << elf_filename;
+    return {};
+  }
+
+  symbols.handle.reset(handle);
+
+  return symbols;
 #else
   // Must not be freed.
   const char* error = nullptr;
