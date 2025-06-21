@@ -1672,7 +1672,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         }
       }
       result = Focus(
-        key: const Key('dropdown-focus'),
         canRequestFocus: _enabled,
         focusNode: focusNode,
         autofocus: widget.autofocus,
