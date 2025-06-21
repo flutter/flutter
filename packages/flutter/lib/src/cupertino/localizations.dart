@@ -283,6 +283,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get searchWebButtonLabel;
 
+  /// The term used for presenting a translation menu for a selection.
+  // The global version uses the translated string from the arb file.
+  String get translateButtonLabel;
+
   /// The term used for launching a web search on a selection.
   // The global version uses the translated string from the arb file.
   String get shareButtonLabel;
@@ -513,6 +517,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get shareButtonLabel => 'Share...';

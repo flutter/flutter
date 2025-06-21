@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели",
   "pasteButtonLabel": "Налепи",
-  "selectAllButtonLabel": "Изабери све"
+  "selectAllButtonLabel": "Изабери све",
+  "translateButtonLabel": "Translate"
 }

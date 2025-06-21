@@ -34,5 +34,6 @@
   "searchWebButtonLabel": "Pretraži Web",
   "shareButtonLabel": "Dijeli...",
   "cancelButtonLabel": "Otkaži",
-  "backButtonLabel": "Nazad"
+  "backButtonLabel": "Nazad",
+  "translateButtonLabel": "Translate"
 }

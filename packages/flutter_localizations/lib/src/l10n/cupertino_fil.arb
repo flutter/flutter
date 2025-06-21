@@ -29,5 +29,6 @@
   "shareButtonLabel": "Ibahagi...",
   "clearButtonLabel": "I-clear",
   "cancelButtonLabel": "Kanselahin",
-  "backButtonLabel": "Bumalik"
+  "backButtonLabel": "Bumalik",
+  "translateButtonLabel": "Translate"
 }

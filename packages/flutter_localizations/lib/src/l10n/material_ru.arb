@@ -153,5 +153,6 @@
   "searchWebButtonLabel": "Искать в интернете",
   "shareButtonLabel": "Поделиться",
   "clearButtonTooltip": "Удалить текст",
-  "selectedDateLabel": "Выбрано"
+  "selectedDateLabel": "Выбрано",
+  "translateButtonLabel": "Translate"
 }

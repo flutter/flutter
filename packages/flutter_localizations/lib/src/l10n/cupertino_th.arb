@@ -29,5 +29,6 @@
   "shareButtonLabel": "แชร์...",
   "clearButtonLabel": "ล้าง",
   "cancelButtonLabel": "ยกเลิก",
-  "backButtonLabel": "กลับ"
+  "backButtonLabel": "กลับ",
+  "translateButtonLabel": "Translate"
 }
