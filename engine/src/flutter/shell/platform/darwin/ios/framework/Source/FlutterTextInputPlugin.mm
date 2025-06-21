@@ -996,8 +996,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                         type:type
                                     selector:@selector(handleLookUpAction)
                                  encodedItem:encodedItem];
+    } else if ([type isEqualToString:@"captureTextFromCamera"]) {
+      if (@available(iOS 15.0, *)) {
+        [self addBasicEditingCommandToItems:items
+                                       type:type
+                                   selector:@selector(captureTextFromCamera:)
+                              suggestedMenu:suggestedMenu];
+      }
     }
   }
+
   return [UIMenu menuWithChildren:items];
 }
 
@@ -1314,6 +1322,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     return [self textInRange:_selectedTextRange].length > 0;
   } else if (action == @selector(selectAll:)) {
     return self.hasText;
+  } else if (action == @selector(captureTextFromCamera:)) {
+    if (@available(iOS 15.0, *)) {
+      BOOL isSecure = self.isSecureTextEntry;
+      BOOL hasSelection = _selectedTextRange.empty;
+      BOOL isFocused = self.isFirstResponder;
+      return !isSecure && isFocused && hasSelection;
+    }
+    return NO;
   }
   return [super canPerformAction:action withSender:sender];
 }
@@ -1343,6 +1359,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)selectAll:(id)sender {
   [self setSelectedTextRange:[self textRangeFromPosition:[self beginningOfDocument]
                                               toPosition:[self endOfDocument]]];
+}
+
+- (void)captureTextFromCamera:(id)sender {
+  if (@available(iOS 15.0, *)) {
+    if ([super respondsToSelector:@selector(captureTextFromCamera:)]) {
+      [super captureTextFromCamera:sender];
+    }
+  }
 }
 
 #pragma mark - UITextInput Overrides
