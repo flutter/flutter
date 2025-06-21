@@ -9279,19 +9279,15 @@ void main() {
         final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'ContextMenu.onDismissSystemContextMenu',
         });
-        Object? error;
-        try {
-          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            'flutter/platform',
-            messageBytes,
-            (ByteData? data) {},
-          );
-        } catch (e) {
-          error = e;
-        }
+
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/platform',
+          messageBytes,
+          (ByteData? data) {},
+        );
+
         await tester.pumpAndSettle();
 
-        expect(error, isNull);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Selection handles are not hidden.
