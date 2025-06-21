@@ -212,7 +212,7 @@ void main() {
 
     testUsingContext(
       'Apple TV is unsupported',
-      () {
+      () async {
         final IOSSimulator simulator = IOSSimulator(
           'x',
           name: 'Apple TV',
@@ -220,7 +220,7 @@ void main() {
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
           logger: logger,
         );
-        expect(simulator.isSupported(), false);
+        expect(await simulator.isSupported(), false);
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
@@ -231,9 +231,9 @@ void main() {
 
     testUsingContext(
       'Apple Watch is unsupported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'Apple Watch',
             simControl: simControl,
@@ -252,9 +252,9 @@ void main() {
 
     testUsingContext(
       'iPad 2 is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPad 2',
             simControl: simControl,
@@ -273,9 +273,9 @@ void main() {
 
     testUsingContext(
       'iPad Retina is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPad Retina',
             simControl: simControl,
@@ -294,9 +294,9 @@ void main() {
 
     testUsingContext(
       'iPhone 5 is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone 5',
             simControl: simControl,
@@ -315,9 +315,9 @@ void main() {
 
     testUsingContext(
       'iPhone 5s is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone 5s',
             simControl: simControl,
@@ -336,9 +336,9 @@ void main() {
 
     testUsingContext(
       'iPhone SE is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone SE',
             simControl: simControl,
@@ -357,9 +357,9 @@ void main() {
 
     testUsingContext(
       'iPhone 7 Plus is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone 7 Plus',
             simControl: simControl,
@@ -378,9 +378,9 @@ void main() {
 
     testUsingContext(
       'iPhone X is supported',
-      () {
+      () async {
         expect(
-          IOSSimulator(
+          await IOSSimulator(
             'x',
             name: 'iPhone X',
             simControl: simControl,
