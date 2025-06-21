@@ -56,16 +56,13 @@ stateDiagram-v2
 On Cocoon (Flutter's internal CI/CD) we _often_ set
 `FLUTTER_PREBUILT_ENGINE_VERSION` to the following:
 
-| Branch                    | Presubmit    | Merge Queue        | Postsubmit                        |
-| ------------------------- | ------------ | ------------------ | --------------------------------- |
-| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_                |
-| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`                      |
-| `stable` or `beta`        | N/A[^3]      | N/A[^1]            | N/A[^3]                           |
+| Branch                    | Presubmit    | Merge Queue        | Postsubmit                         |
+| ------------------------- | ------------ | ------------------ | ---------------------------------- |
+| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_                 |
+| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | _Uses normal flow_                 |
+| `stable` or `beta`        | N/A[^3]      | N/A[^1]            | N/A[^3]                            |
 | _anything else_[^2]       | `commit.sha` | _Uses normal flow_ | _Uses postsubmit engine artifacts_ |
 
-> IMPORTANT: `engine.version` is intentionally ignored in release candidate
-> post-submit builds.
->
 > To generate a new `engine.version`:
 >
 > ```sh

@@ -317,7 +317,8 @@ class ThemeData with Diagnosticable {
     Typography? typography,
     // COMPONENT THEMES
     ActionIconThemeData? actionIconTheme,
-    AppBarTheme? appBarTheme,
+    // TODO(huycozy): Change the parameter type to AppBarThemeData
+    Object? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
     BottomAppBarThemeData? bottomAppBarTheme,
@@ -523,7 +524,14 @@ class ThemeData with Diagnosticable {
             : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
-    appBarTheme ??= const AppBarTheme();
+    // TODO(huycozy): Clean this up once the type of `appBarTheme` is changed to `appBarThemeData`
+    if (appBarTheme != null) {
+      if (appBarTheme is AppBarTheme) {
+        appBarTheme = appBarTheme.data;
+      } else if (appBarTheme is! AppBarThemeData) {
+        throw ArgumentError('appBarTheme must be either a AppBarThemeData or a AppBarTheme');
+      }
+    }
     badgeTheme ??= const BadgeThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
     bottomAppBarTheme ??= const BottomAppBarThemeData();
@@ -617,7 +625,8 @@ class ThemeData with Diagnosticable {
       primaryIconTheme: primaryIconTheme,
       // COMPONENT THEMES
       actionIconTheme: actionIconTheme,
-      appBarTheme: appBarTheme,
+      // TODO(huycozy): Remove this type cast when appBarTheme is explicitly set to appBarThemeData
+      appBarTheme: (appBarTheme as AppBarThemeData?) ?? const AppBarThemeData(),
       badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
       bottomAppBarTheme: bottomAppBarTheme,
@@ -1283,7 +1292,7 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
-  final AppBarTheme appBarTheme;
+  final AppBarThemeData appBarTheme;
 
   /// A theme for customizing the color of [Badge]s.
   final BadgeThemeData badgeTheme;
@@ -1516,7 +1525,8 @@ class ThemeData with Diagnosticable {
     Typography? typography,
     // COMPONENT THEMES
     ActionIconThemeData? actionIconTheme,
-    AppBarTheme? appBarTheme,
+    // TODO(huycozy): Change the parameter type to AppBarThemeData
+    Object? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
     BottomAppBarThemeData? bottomAppBarTheme,
@@ -1635,7 +1645,17 @@ class ThemeData with Diagnosticable {
       typography: typography ?? this.typography,
       // COMPONENT THEMES
       actionIconTheme: actionIconTheme ?? this.actionIconTheme,
-      appBarTheme: appBarTheme ?? this.appBarTheme,
+      // TODO(huycozy): Remove this check when appBarTheme is a AppBarThemeData
+      appBarTheme: () {
+        if (appBarTheme != null) {
+          if (appBarTheme is AppBarTheme) {
+            return appBarTheme.data;
+          } else if (appBarTheme is! AppBarThemeData) {
+            throw ArgumentError('appBarTheme must be either a AppBarThemeData or a AppBarTheme');
+          }
+        }
+        return appBarTheme as AppBarThemeData? ?? this.appBarTheme;
+      }(),
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
@@ -1952,7 +1972,7 @@ class ThemeData with Diagnosticable {
       typography: Typography.lerp(a.typography, b.typography, t),
       // COMPONENT THEMES
       actionIconTheme: ActionIconThemeData.lerp(a.actionIconTheme, b.actionIconTheme, t),
-      appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
+      appBarTheme: AppBarThemeData.lerp(a.appBarTheme, b.appBarTheme, t),
       badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
       bottomAppBarTheme: BottomAppBarThemeData.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
@@ -2504,7 +2524,7 @@ class ThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<AppBarTheme>(
+      DiagnosticsProperty<AppBarThemeData>(
         'appBarTheme',
         appBarTheme,
         defaultValue: defaultData.appBarTheme,

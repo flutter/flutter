@@ -42,18 +42,19 @@ COMMENT_START (\/\/|#)
   BEGIN(BLOCK);
   CommentsUtil::AddTrimLine(&yyextra->buffer, yytext, yyleng);
 }
-^[ \t]*\/\*[\n]? {
+^[ \t]*\/\*[\*]*[\n]? {
   BEGIN(C_COMMENT);
 }
 
 <C_COMMENT>{
-  \*\/ {
+  .*\*\/.*\n {
     BEGIN(INITIAL);
+    CommentsUtil::AddCEndTrimLine(&yyextra->buffer, yytext, yyleng - 2);
     yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
-  \n|. {
-    yyextra->buffer.append(yytext, yyleng);
+  .*\n {
+    CommentsUtil::AddCTrimLine(&yyextra->buffer, yytext, yyleng);
   }
 }
 
