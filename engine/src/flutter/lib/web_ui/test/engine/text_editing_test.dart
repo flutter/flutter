@@ -2952,6 +2952,77 @@ Future<void> testMain() async {
       //                https://github.com/flutter/flutter/issues/145101
     }, skip: true);
 
+    test('throttles selectionchange events on iOS', () async {
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+
+      /// During initialization [HybridTextEditing] will pick the correct
+      /// text editing strategy for [OperatingSystem.iOS].
+      textEditing = HybridTextEditing();
+
+      final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        flutterMultilineConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      // Editing shouldn't have started yet.
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, domDocument.body);
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final List<double> transform = Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        transform,
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DomHTMLTextAreaElement textarea =
+          textEditing!.strategy.domElement! as DomHTMLTextAreaElement;
+      checkTextAreaEditingState(textarea, '', 0, 0);
+
+      const MethodCall setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': '12345678',
+        'selectionBase': 8,
+        'selectionExtent': 8,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      checkTextAreaEditingState(textarea, '12345678', 8, 8);
+
+      final DomEvent event1 = createDomEvent('Event', 'selectionchange');
+      textarea.setSelectionRange(1, 1);
+      domDocument.dispatchEvent(event1);
+      // First `selectionchange` event is not prevented.
+      expect(event1.defaultPrevented, isFalse);
+      checkTextAreaEditingState(textarea, '12345678', 1, 1);
+
+      final DomEvent event2 = createDomEvent('Event', 'selectionchange');
+      textarea.setSelectionRange(2, 2);
+      domDocument.dispatchEvent(event2);
+      // Second immediate `selectionchange` event is prevented and editing state
+      // is reverted.
+      expect(event2.defaultPrevented, isTrue);
+      checkTextAreaEditingState(textarea, '12345678', 1, 1);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      final DomEvent event3 = createDomEvent('Event', 'selectionchange');
+      textarea.setSelectionRange(3, 3);
+      domDocument.dispatchEvent(event3);
+      // Third delayed `selectionchange` event is not prevented.
+      expect(event3.defaultPrevented, isFalse);
+      checkTextAreaEditingState(textarea, '12345678', 3, 3);
+
+      hideKeyboard();
+    });
+
     tearDown(() {
       clearForms();
     });
