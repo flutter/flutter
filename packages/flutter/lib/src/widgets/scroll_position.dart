@@ -1046,7 +1046,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called by [setPixels] to report a change to the [pixels] position.
   void didUpdateScrollPositionBy(double delta) {
-    activity!.dispatchScrollUpdateNotification(copyWith(), context.notificationContext!, delta);
+    activity!.dispatchScrollUpdateNotification(
+      copyWith(),
+      context.notificationContext!,
+      delta,
+      programmatic: isProgrammaticScroll,
+    );
   }
 
   /// Called by [beginActivity] to report when an activity has ended.

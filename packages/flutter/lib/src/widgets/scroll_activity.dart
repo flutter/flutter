@@ -104,12 +104,14 @@ abstract class ScrollActivity {
   void dispatchScrollUpdateNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double scrollDelta,
-  ) {
+    double scrollDelta, {
+    bool programmatic = false,
+  }) {
     ScrollUpdateNotification(
       metrics: metrics,
       context: context,
       scrollDelta: scrollDelta,
+      programmatic: programmatic,
     ).dispatch(context);
   }
 
@@ -495,8 +497,9 @@ class DragScrollActivity extends ScrollActivity {
   void dispatchScrollUpdateNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double scrollDelta,
-  ) {
+    double scrollDelta, {
+    bool programmatic = false,
+  }) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
     ScrollUpdateNotification(
@@ -504,6 +507,7 @@ class DragScrollActivity extends ScrollActivity {
       context: context,
       scrollDelta: scrollDelta,
       dragDetails: lastDetails as DragUpdateDetails,
+      programmatic: programmatic,
     ).dispatch(context);
   }
 
