@@ -30,7 +30,7 @@ import 'theme.dart';
 ///
 ///  * [TextSelectionTheme], an [InheritedWidget] that propagates the theme down its
 ///    subtree.
-///  * [InputDecorationTheme], which defines most other visual properties of
+///  * [InputDecorationThemeData], which defines most other visual properties of
 ///    text fields.
 @immutable
 class TextSelectionThemeData with Diagnosticable {
