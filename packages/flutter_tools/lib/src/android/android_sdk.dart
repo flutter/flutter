@@ -239,6 +239,12 @@ class AndroidSdk {
       return <String>[msg.toString()];
     }
 
+    if (directory.absolute.path.contains(' ')) {
+      return <String>[
+        'Android SDK location currently contains spaces, which is not allowed as it causes problems with NDK tools. Try moving it from ${directory.absolute.path} to a path without spaces.',
+      ];
+    }
+
     return latestVersion!.validateSdkWellFormed();
   }
 
