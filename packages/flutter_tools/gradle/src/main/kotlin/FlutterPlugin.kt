@@ -20,6 +20,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -97,6 +98,13 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
+            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
+                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+            }
         }
 
         project.apply {
@@ -140,6 +148,39 @@ class FlutterPlugin : Plugin<Project> {
                 isEnable = true
                 reset()
                 isUniversalApk = false
+            }
+        } else {
+            // When splits-per-abi is NOT enabled, configure abiFilters to control which
+            // native libraries are included in the APK.
+            //
+            // This is crucial: If a project includes third-party dependencies with x86 native libraries,
+            // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
+            // When users with x86 devices install the app, it would crash at runtime because Flutter's
+            // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
+            // correctly excludes x86 devices from the compatible device list.
+            //
+            // NOTE: This code does NOT affect "add-to-app" scenarios because:
+            // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
+            //    are not packaged into AAR artifacts - they are only added as dependencies
+            //    in pom files.
+            // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
+            //    Gradle Plugin is not applied to the main app subproject, so this apply()
+            //    method is never called.
+            //
+            // abiFilters cannot be added to templates because it would break builds when
+            // --splits-per-abi is used due to conflicting configuration. This approach
+            // adds them programmatically only when splits are not configured.
+            //
+            // If the user has specified abiFilters in their build.gradle file, those
+            // settings will take precedence over these defaults.
+            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                buildType.ndk.abiFilters.clear()
+                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                    val abiValue: String =
+                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                            ?: throw GradleException("Invalid platform: $platform")
+                    buildType.ndk.abiFilters.add(abiValue)
+                })
             }
         }
         val propDeferredComponentNames = "deferred-component-names"
@@ -292,19 +333,23 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        rootProject.tasks.register("generateLockfiles") {
-            doLast {
-                rootProject.subprojects.forEach { subproject ->
-                    val gradlew: String =
-                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    val execOps = rootProject.serviceOf<ExecOperations>()
-                    execOps.exec {
-                        workingDir(rootProject.projectDir)
-                        executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+        try {
+            rootProject.tasks.register("generateLockfiles") {
+                doLast {
+                    rootProject.subprojects.forEach { subproject ->
+                        val gradlew: String =
+                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                        val execOps = rootProject.serviceOf<ExecOperations>()
+                        execOps.exec {
+                            workingDir(rootProject.projectDir)
+                            executable(gradlew)
+                            args(":${subproject.name}:dependencies", "--write-locks")
+                        }
                     }
                 }
             }
+        } catch (e: TaskInstantiationException) {
+            // ignored
         }
     }
 
@@ -583,11 +628,11 @@ class FlutterPlugin : Plugin<Project> {
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
-                    val filterIdentifier: String =
+                    val filterIdentifier: String? =
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
-                        output.versionCodeOverride
+                        output.versionCodeOverride = abiVersionCode * 1000 + variant.mergedFlavor.versionCode as Int
                     }
                 }
             }
@@ -773,4 +818,12 @@ class FlutterPlugin : Plugin<Project> {
             return copyFlutterAssetsTask
         }
     }
+
+    /**
+     * Returns true if the Gradle task is invoked by Android Studio.
+     *
+     * This is true when the property `android.injected.invoked.from.ide` is passed to Gradle.
+     * This property is set by Android Studio when it invokes a Gradle task.
+     */
+    private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
 }

@@ -2277,11 +2277,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
         ),
       );
       await tester.pumpAndSettle();
+
+      // Rectangle for the track of scrollbar.
+      // The default thickness of thumb is 6.0, hence topLeft = 800.0 - 6.0 = 794.0
+      const Rect trackRect = Rect.fromLTRB(794.0, 0.0, 800.0, 600.0);
+
       expect(scrollController.offset, 0.0);
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect)
           ..rect(
             rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
             color: const Color(0x66BCBCBC),
@@ -2305,9 +2310,45 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect) // Scrollbar track
           ..rect(
-            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0),
+            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0), // Scrollbar thumb
+            color: const Color(0x66BCBCBC),
+          ),
+      );
+
+      // Regression test for issue: https://github.com/flutter/flutter/issues/170246
+      // First scroll to the top, then drag the thumb to scroll down.
+      final double minScrollExtent = scrollController.position.minScrollExtent; // -600
+      scrollController.jumpTo(minScrollExtent);
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, minScrollExtent);
+      const Rect thumbRectBefore = Rect.fromLTRB(794.0, 0.0, 800.0, 200.0); // Scrollbar thumb
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(rect: thumbRectBefore, color: const Color(0x66BCBCBC)),
+      );
+
+      // Drag the thumb to scroll down.
+      const double scrollDownAmount = 20.0;
+      final Offset thumbCenter = thumbRectBefore.center;
+      final TestGesture dragGesture = await tester.startGesture(thumbCenter);
+      await tester.pumpAndSettle();
+      await dragGesture.moveBy(const Offset(0.0, scrollDownAmount));
+      await tester.pumpAndSettle();
+      await dragGesture.up();
+      await tester.pumpAndSettle();
+
+      // The view should have scrolled by the amount dragged.
+      expect(scrollController.offset - minScrollExtent, 1800 * scrollDownAmount / 600);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(
+            rect: thumbRectBefore.shift(const Offset(0.0, scrollDownAmount)),
             color: const Color(0x66BCBCBC),
           ),
       );

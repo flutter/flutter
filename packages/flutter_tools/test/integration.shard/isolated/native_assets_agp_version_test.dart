@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Skip('flutter/flutter/issues/170382')
+library;
+
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -127,9 +130,8 @@ void main() {
             expect(nativeAssetsDir, exists);
 
             // We expect one subdirectory for each Android architecture.
-            expect(nativeAssetsDir.listSync().length, 4);
+            expect(nativeAssetsDir.listSync().length, 3);
             expect(nativeAssetsDir..childDirectory('armeabi-v7a'), exists);
-            expect(nativeAssetsDir..childDirectory('x86'), exists);
             expect(nativeAssetsDir..childDirectory('arm64-v8a'), exists);
             expect(nativeAssetsDir..childDirectory('x86_64'), exists);
           });

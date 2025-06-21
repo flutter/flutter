@@ -1011,11 +1011,11 @@ void main() {
     expect(flying(tester, find.text('custom')), findsOneWidget);
 
     checkOpacity(tester, flying(tester, find.text('custom')), 0.8948725312948227);
-    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 0.0));
+    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 13.5));
 
     await tester.pump(const Duration(milliseconds: 150));
     checkOpacity(tester, flying(tester, find.text('custom')), 0.0);
-    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 0.0));
+    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 13.5));
   });
 
   testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
@@ -1848,6 +1848,33 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
     // Back to page 2.
     expect(find.text('Page 2'), findsOneWidget);
+  });
+
+  testWidgets('Bottom large title is shown mid-transition when top has no leading', (
+    WidgetTester tester,
+  ) async {
+    setWindowToPortrait(tester);
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoSliverNavigationBar(largeTitle: Text('Page 1')),
+      to: const CupertinoSliverNavigationBar(
+        largeTitle: Text('Page 2'),
+        automaticallyImplyLeading: false,
+      ),
+    );
+
+    // Go to the next page.
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // Start the gesture at the edge of the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    // Trigger the swipe.
+    await gesture.moveBy(const Offset(200.0, 0.0));
+
+    // Back gestures should trigger and draw the hero transition in the very same
+    // frame (since the "from" route has already moved to reveal the "to" route).
+    await tester.pump();
+    expect(flying(tester, find.text('Page 1')), findsOneWidget);
   });
 
   testWidgets('Back label is not clipped mid-transition', (WidgetTester tester) async {
