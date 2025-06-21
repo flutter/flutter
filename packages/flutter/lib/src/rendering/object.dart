@@ -13,7 +13,7 @@
 /// @docImport 'viewport.dart';
 library;
 
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show PictureRecorder, RSuperellipseCache;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -655,6 +655,7 @@ class PaintingContext extends ClipContext {
     PaintingContextCallback painter, {
     Clip clipBehavior = Clip.antiAlias,
     ClipRSuperellipseLayer? oldLayer,
+    ui.RSuperellipseCache? cache,
   }) {
     if (clipBehavior == Clip.none) {
       painter(this, offset);
@@ -675,6 +676,7 @@ class PaintingContext extends ClipContext {
         clipBehavior,
         offsetBounds,
         () => painter(this, offset),
+        cache: cache,
       );
       return null;
     }
