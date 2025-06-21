@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -1232,6 +1233,108 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  group('DebugIosLLDBInit', () {
+    late FakeStdio fakeStdio;
+
+    setUp(() {
+      fakeStdio = FakeStdio();
+    });
+
+    testUsingContext(
+      'prints warning if missing LLDB Init File in all schemes',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+
+        await const DebugIosLLDBInit().build(environment);
+
+        expect(
+          fakeStdio.buffer.toString(),
+          contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'skips if targetting simulator',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'skips if iOS version is less than 26.0',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.3.1';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'does not throw error if there is an LLDB Init File in any scheme',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        fileSystem
+            .directory(projectPath)
+            .childDirectory('MyProject.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('MyProject.xcscheme')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -1245,5 +1348,14 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   @override
   Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
+}
+
+class FakeStdio extends Fake implements Stdio {
+  final StringBuffer buffer = StringBuffer();
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    buffer.writeln(message);
   }
 }
