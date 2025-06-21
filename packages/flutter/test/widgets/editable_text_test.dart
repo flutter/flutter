@@ -4036,7 +4036,12 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocusable],
+      ),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
@@ -4044,7 +4049,13 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused]),
+      includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isFocused,
+          SemanticsFlag.isFocusable,
+        ],
+      ),
     );
 
     semantics.dispose();
@@ -4073,7 +4084,12 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocusable],
+      ),
+    );
 
     await tester.pumpWidget(
       MediaQuery(
@@ -4099,7 +4115,11 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isMultiline,
+          SemanticsFlag.isFocusable,
+        ],
       ),
     );
 
@@ -4133,7 +4153,10 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField], value: value1),
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocusable],
+        value: value1,
+      ),
     );
 
     const String value2 = 'Changed the EditableText content';
@@ -4143,7 +4166,10 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField], value: value2),
+      includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocusable],
+        value: value2,
+      ),
     );
 
     semantics.dispose();
@@ -4715,6 +4741,7 @@ void main() {
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isObscured,
+                            SemanticsFlag.isFocusable,
                           ],
                           value: expectedValue,
                           inputType: SemanticsInputType.text,
@@ -4772,7 +4799,10 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
+                          ],
                           value: originalText,
                           inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
@@ -4826,6 +4856,7 @@ void main() {
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isObscured,
                             SemanticsFlag.isFocused,
+                            SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[
                             SemanticsAction.moveCursorBackwardByCharacter,
@@ -5079,6 +5110,7 @@ void main() {
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.isFocused,
+                              SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.moveCursorBackwardByCharacter,
@@ -5206,6 +5238,7 @@ void main() {
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isFocused,
+                            SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[
                             SemanticsAction.setSelection,

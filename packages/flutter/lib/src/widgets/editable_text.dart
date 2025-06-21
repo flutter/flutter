@@ -5773,6 +5773,7 @@ class EditableTextState extends State<EditableText>
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),
+                              focusable: widget.focusNode.canRequestFocus,
                               child: _ScribbleFocusable(
                                 editableKey: _editableKey,
                                 enabled: _stylusHandwritingEnabled,

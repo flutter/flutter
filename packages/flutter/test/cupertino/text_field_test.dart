@@ -571,6 +571,7 @@ void main() {
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.tap,
@@ -7691,6 +7692,7 @@ void main() {
         hasEnabledState: true,
         hasTapAction: true,
         hasFocusAction: true,
+        isFocusable: true,
       ),
     );
   });
@@ -10414,6 +10416,7 @@ void main() {
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
