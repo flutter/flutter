@@ -1,0 +1,65 @@
+# This workflow will build a Java project and deploy it to an Azure Functions App on Windows or Linux when a commit is pushed to your default branch.
+#
+# This workflow assumes you have already created the target Azure Functions app.
+# For instructions see https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-java
+#
+# To configure this workflow:
+# 1. Set up the following secrets in your repository:
+#   - AZURE_FUNCTIONAPP_PUBLISH_PROFILE
+# 2. Change env variables for your configuration.
+#
+# For more information on:
+#   - GitHub Actions for Azure: https://github.com/Azure/Actions
+#   - Azure Functions Action: https://github.com/Azure/functions-action
+#   - Publish Profile: https://github.com/Azure/functions-action#using-publish-profile-as-deployment-credential-recommended
+#   - Azure Service Principal for RBAC: https://github.com/Azure/functions-action#using-azure-service-principal-for-rbac-as-deployment-credential
+#
+# For more samples to get started with GitHub Action workflows to deploy to Azure: https://github.com/Azure/actions-workflow-samples/tree/master/FunctionApp
+
+name: Deploy Java project to Azure Function App
+
+on:
+  push:
+    branches: ["master"]
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'your-app-name'   # set this to your function app name on Azure
+  POM_XML_DIRECTORY: '.'                    # set this to the directory which contains pom.xml file
+  DISTRIBUTION: 'zulu'                      # set this to the java version to use (e.g. 'zulu', 'temurin', 'microsoft')
+  JAVA_VERSION: '8'                         # set this to the java version to use (e.g. '8', '11', '17')
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest # For Linux, use ubuntu-latest
+    environment: dev
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+
+    # If you want to use Azure RBAC instead of Publish Profile, then uncomment the task below
+    # - name: 'Login via Azure CLI'
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }} # set up AZURE_RBAC_CREDENTIALS secrets in your repository
+
+    - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ env.DISTRIBUTION }}
+        java-version: ${{ env.JAVA_VERSION }}
+
+    - name: 'Restore Project Dependencies Using Mvn'
+      shell: pwsh # For Linux, use bash
+      run: |
+        pushd './${{ env.POM_XML_DIRECTORY }}'
+        mvn clean package
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: '${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }} # Remove publish-profile to use Azure RBAC
+        respect-pom-xml: true
