@@ -208,6 +208,7 @@ class IconButton extends StatelessWidget {
     this.style,
     this.isSelected,
     this.selectedIcon,
+    this.statesController,
     required this.icon,
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.standard;
@@ -241,6 +242,7 @@ class IconButton extends StatelessWidget {
     this.style,
     this.isSelected,
     this.selectedIcon,
+    this.statesController,
     required this.icon,
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.filled;
@@ -276,6 +278,7 @@ class IconButton extends StatelessWidget {
     this.style,
     this.isSelected,
     this.selectedIcon,
+    this.statesController,
     required this.icon,
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.filledTonal;
@@ -310,6 +313,7 @@ class IconButton extends StatelessWidget {
     this.style,
     this.isSelected,
     this.selectedIcon,
+    this.statesController,
     required this.icon,
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.outlined;
@@ -594,6 +598,27 @@ class IconButton extends StatelessWidget {
   /// * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
   final Widget? selectedIcon;
 
+  /// Represents the interactive "state" of this widget in terms of a set of
+  /// [WidgetState]s, including [WidgetState.pressed], [WidgetState.hovered],
+  /// [WidgetState.focused], and [WidgetState.disabled].
+  ///
+  /// Classes based on this one can provide their own
+  /// [WidgetStatesController] to which they've added listeners.
+  /// They can also update the controller's [WidgetStatesController.value]
+  /// however, this may only be done when it's safe to call
+  /// [State.setState], like in an event handler.
+  ///
+  /// The controller's [WidgetStatesController.value] represents the set of
+  /// states that a widget's visual properties, typically [WidgetStateProperty]
+  /// values, are resolved against. It is _not_ the intrinsic state of the widget.
+  /// The widget is responsible for ensuring that the controller's
+  /// [WidgetStatesController.value] tracks its intrinsic state. For example
+  /// one cannot request the keyboard focus for a widget by adding [WidgetState.focused]
+  /// to its controller. When the widget gains the or loses the focus it will
+  /// [WidgetStatesController.update] its controller's [WidgetStatesController.value]
+  /// and notify listeners of the change.
+  final MaterialStatesController? statesController;
+
   final _IconButtonVariant _variant;
 
   /// A static convenience method that constructs an icon button
@@ -753,6 +778,7 @@ class IconButton extends StatelessWidget {
         isSelected: isSelected,
         variant: _variant,
         tooltip: tooltip,
+        statesController: statesController,
         child: effectiveIcon,
       );
     }
@@ -855,6 +881,7 @@ class _SelectableIconButton extends StatefulWidget {
     this.focusNode,
     this.onLongPress,
     this.onHover,
+    this.statesController,
     required this.variant,
     required this.autofocus,
     required this.onPressed,
@@ -872,21 +899,25 @@ class _SelectableIconButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onLongPress;
   final ValueChanged<bool>? onHover;
+  final MaterialStatesController? statesController;
 
   @override
   State<_SelectableIconButton> createState() => _SelectableIconButtonState();
 }
 
 class _SelectableIconButtonState extends State<_SelectableIconButton> {
-  late final MaterialStatesController statesController;
+  late final MaterialStatesController _internalStatesController;
+
+  MaterialStatesController get statesController =>
+      widget.statesController ?? _internalStatesController;
 
   @override
   void initState() {
     super.initState();
     if (widget.isSelected == null) {
-      statesController = MaterialStatesController();
+      _internalStatesController = MaterialStatesController();
     } else {
-      statesController = MaterialStatesController(<MaterialState>{
+      _internalStatesController = MaterialStatesController(<MaterialState>{
         if (widget.isSelected!) MaterialState.selected,
       });
     }
@@ -896,13 +927,13 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
   void didUpdateWidget(_SelectableIconButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected == null) {
-      if (statesController.value.contains(MaterialState.selected)) {
-        statesController.update(MaterialState.selected, false);
+      if (_internalStatesController.value.contains(MaterialState.selected)) {
+        _internalStatesController.update(MaterialState.selected, false);
       }
       return;
     }
     if (widget.isSelected != oldWidget.isSelected) {
-      statesController.update(MaterialState.selected, widget.isSelected!);
+      _internalStatesController.update(MaterialState.selected, widget.isSelected!);
     }
   }
 
@@ -927,7 +958,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
 
   @override
   void dispose() {
-    statesController.dispose();
+    _internalStatesController.dispose();
     super.dispose();
   }
 }
