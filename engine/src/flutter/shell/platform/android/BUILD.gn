@@ -694,7 +694,6 @@ generated_file("android_entitlement_config") {
   deps = []
 }
 
-if (target_cpu != "x86") {
   zip_bundle("gen_snapshot") {
     gen_snapshot_out_dir =
         get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
@@ -740,7 +739,6 @@ if (target_cpu != "x86") {
       ]
     }
   }
-}
 
 if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
   zip_bundle("analyze_snapshot") {
@@ -779,9 +777,7 @@ group("android") {
     ":android_symbols",
     ":flutter_jar_zip",
   ]
-  if (target_cpu != "x86") {
     deps += [ ":gen_snapshot" ]
-  }
 }
 
 # Renames embedding android artifacts and places them in the final
