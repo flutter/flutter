@@ -151,6 +151,9 @@ void runSemanticsTests() {
   group('landmarks', () {
     _testLandmarks();
   });
+  group('forms', () {
+    _testForms();
+  });
 }
 
 void _testSemanticRole() {
@@ -5396,6 +5399,30 @@ void _testLandmarks() {
     expect(object.element.getAttribute('aria-label'), 'Header 1');
   });
 
+  semantics().semanticsEnabled = false;
+}
+
+void _testForms() {
+  test('nodes with form role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.form,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.form);
+    expect(object.element.getAttribute('role'), 'form');
+  });
   semantics().semanticsEnabled = false;
 }
 
