@@ -488,7 +488,7 @@ static void secondary_realize_cb(FlView* self) {
 }
 
 static void paint_background(FlView* self, cairo_t* cr) {
-  // Don't both drawing if fully transparent - the widget above this will
+  // Don't bother drawing if fully transparent - the widget above this will
   // already be drawn by GTK.
   if (self->background_color->red == 0 && self->background_color->green == 0 &&
       self->background_color->blue == 0 && self->background_color->alpha == 0) {
