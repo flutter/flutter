@@ -16,59 +16,6 @@
 
 #include <epoxy/egl.h>
 
-TEST(FlCompositorOpenGLTest, BackgroundColor) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
-  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
-  ON_CALL(epoxy, glGetString(GL_VENDOR))
-      .WillByDefault(
-          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
-  EXPECT_CALL(epoxy, glClearColor(0.2, 0.3, 0.4, 0.5));
-
-  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_setup(FL_COMPOSITOR(compositor));
-  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
-  FlutterBackingStoreConfig config = {
-      .struct_size = sizeof(FlutterBackingStoreConfig),
-      .size = {.width = 1024, .height = 1024}};
-  FlutterBackingStore backing_store;
-  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
-                                     &backing_store);
-
-  fml::AutoResetWaitableEvent latch;
-
-  // Simulate raster thread.
-  std::thread([&]() {
-    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                                 .type = kFlutterLayerContentTypeBackingStore,
-                                 .backing_store = &backing_store,
-                                 .size = {.width = 1024, .height = 1024}};
-    const FlutterLayer* layers[] = {&layer0};
-
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
-                                 flutter::kFlutterImplicitViewId, layers, 1);
-    latch.Signal();
-  }).detach();
-
-  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
-    g_main_context_iteration(nullptr, true);
-  }
-
-  GdkRGBA background_color = {
-      .red = 0.2, .green = 0.3, .blue = 0.4, .alpha = 0.5};
-  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
-                              1024, &background_color);
-
-  // Wait until the raster thread has finished before letting
-  // the engine go out of scope.
-  latch.Wait();
-}
-
 TEST(FlCompositorOpenGLTest, RestoresGLState) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
@@ -114,10 +61,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
     g_main_context_iteration(nullptr, true);
   }
 
-  GdkRGBA background_color = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId,
-                              kWidth, kHeight, &background_color);
+                              kWidth, kHeight);
 
   GLuint texture_2d_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
@@ -173,10 +118,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
     g_main_context_iteration(nullptr, true);
   }
 
-  GdkRGBA background_color = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
-                              1024, &background_color);
+                              1024);
 
   latch.Wait();
 }
@@ -229,10 +172,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
     g_main_context_iteration(nullptr, true);
   }
-  GdkRGBA background_color = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
-                              1024, &background_color);
+                              1024);
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
@@ -280,10 +221,8 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
     g_main_context_iteration(nullptr, true);
   }
 
-  GdkRGBA background_color = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
-                              1024, &background_color);
+                              1024);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
@@ -333,10 +272,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
     g_main_context_iteration(nullptr, true);
   }
 
-  GdkRGBA background_color = {
-      .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
-                              1024, &background_color);
+                              1024);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
