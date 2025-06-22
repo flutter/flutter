@@ -45,7 +45,7 @@ void main() {
     const CircleBorder c10 = CircleBorder(side: BorderSide(width: 10.0));
     const CircleBorder c15 = CircleBorder(side: BorderSide(width: 15.0));
     const CircleBorder c20 = CircleBorder(side: BorderSide(width: 20.0));
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -60,5 +60,20 @@ void main() {
       (Canvas canvas) => c10.paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0)),
       paints..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
+  });
+
+  test('CircleBorder.dimensions', () {
+    const CircleBorder inside = CircleBorder(side: BorderSide(width: 10.0));
+    expect(inside.dimensions, EdgeInsets.zero);
+
+    const CircleBorder center = CircleBorder(
+      side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter),
+    );
+    expect(center.dimensions, const EdgeInsets.all(5.0));
+
+    const CircleBorder outside = CircleBorder(
+      side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside),
+    );
+    expect(outside.dimensions, const EdgeInsets.all(10.0));
   });
 }

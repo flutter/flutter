@@ -50,7 +50,7 @@ void main() {
       side: BorderSide(width: 20.0),
       borderRadius: BorderRadius.all(Radius.circular(200.0)),
     );
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -167,7 +167,7 @@ void main() {
     const RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10),
     );
-    expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
+    expect(insideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
     const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
@@ -177,10 +177,10 @@ void main() {
     const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
-    expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
+    expect(outsideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
     const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
-    expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
+    expect(insideCircleBorder.dimensions, EdgeInsets.zero);
 
     const CircleBorder centerCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
@@ -190,7 +190,7 @@ void main() {
     const CircleBorder outsideCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
-    expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
+    expect(outsideCircleBorder.dimensions, const EdgeInsets.all(10));
   });
 
   test('RoundedRectangleBorder.lerp with different StrokeAlign', () {
