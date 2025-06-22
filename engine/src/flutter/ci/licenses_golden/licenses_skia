@@ -1,4 +1,4 @@
-Signature: e43c8caa051766ac4cb37afb8cc1e061
+Signature: 162490da91170e8d20fc21440c5430b3
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9972,6 +9972,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Serializat
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLNativeShader.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
@@ -10006,6 +10007,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Serializatio
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp
+FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLNativeShader.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC
 
