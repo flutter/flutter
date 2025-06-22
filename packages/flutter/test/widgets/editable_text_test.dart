@@ -1439,7 +1439,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.idle();
 
-    List<RenderBox> handles = List<RenderBox>.from(
+    List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -1455,7 +1455,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Handles should be updated with bigger font size.
-    handles = List<RenderBox>.from(
+    handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -6262,7 +6262,7 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
@@ -6407,7 +6407,7 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    final List<RenderBox> handles = List<RenderBox>.from(
+    final List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -8758,7 +8758,7 @@ void main() {
 
         // Check that the handles' positions are correct.
 
-        final List<RenderBox> handles = List<RenderBox>.from(
+        final List<RenderBox> handles = List<RenderBox>.of(
           tester.renderObjectList<RenderBox>(
             find.descendant(
               of: find.byType(CompositedTransformFollower),
@@ -16059,7 +16059,7 @@ void main() {
 
       await tester.tapAt(textOffsetToPosition(tester, 3));
       await tester.pumpAndSettle();
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
