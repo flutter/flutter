@@ -156,7 +156,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     // too close to the horizontal edges of the screen.
     final double leftMargin = _kArrowScreenPadding + mediaQueryPadding.left;
     final double rightMargin =
-        MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding;
+        MediaQuery.widthOf(context) - mediaQueryPadding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
       clampDouble(anchorAbove.dx, leftMargin, rightMargin),
@@ -273,8 +273,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  bool _isAbove(double childHeight) =>
-      anchorAbove.dy >= childHeight - _kToolbarArrowSize.height * 2;
+  bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height;
 
   BoxConstraints _constraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(

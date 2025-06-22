@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/code_assets.dart';
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
 
 void main(List<String> args) async {
   await link(args, (LinkInput input, LinkOutputBuilder output) async {
@@ -17,8 +18,6 @@ void main(List<String> args) async {
         // Change the asset id to something that is used.
         name: '${packageName}_bindings_generated.dart',
         linkMode: asset.linkMode,
-        os: input.config.code.targetOS,
-        architecture: input.config.code.targetArchitecture,
         file: asset.file,
       ),
     );

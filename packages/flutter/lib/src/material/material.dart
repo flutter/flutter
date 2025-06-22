@@ -204,6 +204,7 @@ class Material extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
+    this.animateColor = false,
   }) : assert(elevation >= 0.0),
        assert(!(shape != null && borderRadius != null)),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null)));
@@ -217,6 +218,9 @@ class Material extends StatefulWidget {
   /// affects the shape of the widget, the roundness of its corners if
   /// the shape is rectangular, and the default color.
   final MaterialType type;
+
+  /// Whether the color should be animated.
+  final bool animateColor;
 
   /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material relative to its parent.
@@ -522,7 +526,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         elevation: widget.elevation,
         color: color,
         shadowColor: modelShadowColor,
-        animateColor: false,
+        animateColor: widget.animateColor,
         child: contents,
       );
     }

@@ -34,7 +34,6 @@ import 'search_view_theme.dart';
 import 'text_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 const int _kOpenViewMilliseconds = 600;
 const Duration _kOpenViewDuration = Duration(milliseconds: _kOpenViewMilliseconds);
@@ -1146,6 +1145,9 @@ class _ViewContentState extends State<_ViewContent> {
                                       context: context,
                                       removeTop: true,
                                       child: ListView(
+                                        padding: EdgeInsets.only(
+                                          bottom: MediaQuery.viewInsetsOf(context).bottom,
+                                        ),
                                         shrinkWrap: effectiveShrinkWrap,
                                         children: result.toList(),
                                       ),
@@ -1713,10 +1715,10 @@ class _SearchBarState extends State<SearchBar> {
                             style: effectiveTextStyle,
                             enabled: widget.enabled,
                             decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
-                              InputDecorationTheme(
+                              InputDecorationThemeData(
                                 hintStyle: effectiveHintStyle,
                                 // The configuration below is to make sure that the text field
-                                // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                                // in `SearchBar` will not be overridden by the overall `InputDecorationThemeData`
                                 enabledBorder: InputBorder.none,
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,

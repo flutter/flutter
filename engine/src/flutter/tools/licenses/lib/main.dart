@@ -920,12 +920,11 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     r'(' // 2
     r' *Licenses for support code\n'
     r' *-------------------------\n+)'
-    r'(.+?)\n+' // 3
-    r'(BoringSSL uses the Chromium test infrastructure to run a continuous build,\n' // 4
-    r'trybots etc\. The scripts which manage this, and the script for generating build\n'
-    r'metadata, are under the Chromium license\. Distributing code linked against\n'
-    r'BoringSSL does not trigger this license\.)\n+'
-    r'(.+?)\n+$', // 5
+    r'\n'
+    r'Parts of the TLS test suite are under the Go license. This code is not included\n'
+    r'in BoringSSL \(i.e. libcrypto and libssl\) when compiled, however, so\n'
+    r'distributing code linked against BoringSSL does not trigger this license:\n'
+    r'(.+?)\n+$', // 3
     dotAll: true,
   );
 
@@ -934,7 +933,7 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     if (match == null) {
       throw 'Failed to match BoringSSL license pattern.';
     }
-    assert(match.groupCount == 5);
+    assert(match.groupCount == 3);
     return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
   }
 }

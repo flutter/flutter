@@ -13,7 +13,7 @@ namespace {
 // X and Y directions.
 constexpr static Scalar kPrecision = 4;
 
-constexpr Scalar length(Point n) {
+inline Scalar length(Point n) {
   Point nn = n * n;
   return std::sqrt(nn.x + nn.y);
 }
@@ -80,23 +80,6 @@ Scalar ComputeConicSubdivisions(Scalar scale_factor,
   //   [t0,t1] = [0, 1].
   // If not, the number of segments is (tmax - tmin) / sqrt(denom / numer).
   return std::sqrt(numer / denom);
-}
-
-Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
-                                    const QuadraticPathComponent& quad) {
-  return ComputeQuadradicSubdivisions(scale_factor, quad.p1, quad.cp, quad.p2);
-}
-
-Scalar ComputeCubicSubdivisions(float scale_factor,
-                                const CubicPathComponent& cub) {
-  return ComputeCubicSubdivisions(scale_factor, cub.p1, cub.cp1, cub.cp2,
-                                  cub.p2);
-}
-
-Scalar ComputeConicSubdivisions(float scale_factor,
-                                const ConicPathComponent& conic) {
-  return ComputeConicSubdivisions(scale_factor, conic.p1, conic.cp, conic.p2,
-                                  conic.weight.x);
 }
 
 }  // namespace impeller

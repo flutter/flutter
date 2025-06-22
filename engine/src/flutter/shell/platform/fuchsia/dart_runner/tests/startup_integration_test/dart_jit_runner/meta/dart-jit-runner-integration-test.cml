@@ -10,6 +10,7 @@
         // This test needs both the vulkan facet and the hermetic-tier-2 facet,
         // so we are forced to make it a system test.
         "sys/testing/system-test.shard.cml",
+        "syslog/client.shard.cml",
     ],
     program: {
         binary: "bin/app",

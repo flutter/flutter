@@ -2,7 +2,6 @@ package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.os.Build;
@@ -12,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
@@ -465,7 +465,7 @@ public class AndroidTouchProcessor {
     }
   }
 
-  @TargetApi(API_LEVELS.API_26)
+  @RequiresApi(API_LEVELS.API_26)
   private float getVerticalScrollFactorAbove26(@NonNull Context context) {
     return ViewConfiguration.get(context).getScaledVerticalScrollFactor();
   }

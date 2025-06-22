@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
@@ -100,9 +98,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
-  LinkedHashMap<Locale, DisplayOption> _getLocaleOptions() {
-    final LinkedHashMap<Locale, DisplayOption> localeOptions =
-        LinkedHashMap<Locale, DisplayOption>.of(<Locale, DisplayOption>{
+  Map<Locale, DisplayOption> _getLocaleOptions() {
+    final Map<Locale, DisplayOption> localeOptions =
+        Map<Locale, DisplayOption>.of(<Locale, DisplayOption>{
           systemLocaleOption: DisplayOption(
             GalleryLocalizations.of(context)!.settingsSystemDefault +
                 (deviceLocale != null
@@ -123,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 compareAsciiUpperCase(l1.value.title, l2.value.title),
           );
 
-    localeOptions.addAll(LinkedHashMap<Locale, DisplayOption>.fromEntries(displayLocales));
+    localeOptions.addAll(Map<Locale, DisplayOption>.fromEntries(displayLocales));
     return localeOptions;
   }
 
@@ -138,7 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<double?>(
         title: localizations.settingsTextScaling,
         selectedOption: options.textScaleFactor(context, useSentinel: true),
-        optionsMap: LinkedHashMap<double?, DisplayOption>.of(<double?, DisplayOption>{
+        optionsMap: Map<double?, DisplayOption>.of(<double?, DisplayOption>{
           systemTextScaleFactorOption: DisplayOption(localizations.settingsSystemDefault),
           0.8: DisplayOption(localizations.settingsTextScalingSmall),
           1.0: DisplayOption(localizations.settingsTextScalingNormal),
@@ -154,15 +152,14 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<CustomTextDirection?>(
         title: localizations.settingsTextDirection,
         selectedOption: options.customTextDirection,
-        optionsMap: LinkedHashMap<CustomTextDirection?, DisplayOption>.of(
-          <CustomTextDirection?, DisplayOption>{
-            CustomTextDirection.localeBased: DisplayOption(
-              localizations.settingsTextDirectionLocaleBased,
-            ),
-            CustomTextDirection.ltr: DisplayOption(localizations.settingsTextDirectionLTR),
-            CustomTextDirection.rtl: DisplayOption(localizations.settingsTextDirectionRTL),
-          },
-        ),
+        optionsMap:
+            Map<CustomTextDirection?, DisplayOption>.of(<CustomTextDirection?, DisplayOption>{
+              CustomTextDirection.localeBased: DisplayOption(
+                localizations.settingsTextDirectionLocaleBased,
+              ),
+              CustomTextDirection.ltr: DisplayOption(localizations.settingsTextDirectionLTR),
+              CustomTextDirection.rtl: DisplayOption(localizations.settingsTextDirectionRTL),
+            }),
         onOptionChanged:
             (CustomTextDirection? newTextDirection) => GalleryOptions.update(
               context,
@@ -187,14 +184,13 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<TargetPlatform?>(
         title: localizations.settingsPlatformMechanics,
         selectedOption: options.platform,
-        optionsMap:
-            LinkedHashMap<TargetPlatform?, DisplayOption>.of(<TargetPlatform?, DisplayOption>{
-              TargetPlatform.android: DisplayOption('Android'),
-              TargetPlatform.iOS: DisplayOption('iOS'),
-              TargetPlatform.macOS: DisplayOption('macOS'),
-              TargetPlatform.linux: DisplayOption('Linux'),
-              TargetPlatform.windows: DisplayOption('Windows'),
-            }),
+        optionsMap: Map<TargetPlatform?, DisplayOption>.of(<TargetPlatform?, DisplayOption>{
+          TargetPlatform.android: DisplayOption('Android'),
+          TargetPlatform.iOS: DisplayOption('iOS'),
+          TargetPlatform.macOS: DisplayOption('macOS'),
+          TargetPlatform.linux: DisplayOption('Linux'),
+          TargetPlatform.windows: DisplayOption('Windows'),
+        }),
         onOptionChanged:
             (TargetPlatform? newPlatform) =>
                 GalleryOptions.update(context, options.copyWith(platform: newPlatform)),
@@ -204,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<ThemeMode?>(
         title: localizations.settingsTheme,
         selectedOption: options.themeMode,
-        optionsMap: LinkedHashMap<ThemeMode?, DisplayOption>.of(<ThemeMode?, DisplayOption>{
+        optionsMap: Map<ThemeMode?, DisplayOption>.of(<ThemeMode?, DisplayOption>{
           ThemeMode.system: DisplayOption(localizations.settingsSystemDefault),
           ThemeMode.dark: DisplayOption(localizations.settingsDarkTheme),
           ThemeMode.light: DisplayOption(localizations.settingsLightTheme),

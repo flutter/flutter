@@ -264,6 +264,7 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
       // bootstrap main module has correct defined module.
       expect(result, contains('let appName = "org-dartlang-app:/main.js";'));
@@ -275,6 +276,7 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
 
       expect(result, contains('nativeNonNullAsserts: true'));
@@ -285,9 +287,30 @@ void main() {
         entrypoint: 'main.js',
         nativeNullAssertions: false,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
       );
 
       expect(result, contains('nativeNonNullAsserts: false'));
+    });
+
+    test('generateDDCLibraryBundleMainModule sets max requests when isCi only', () {
+      String result = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.js',
+        nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
+      );
+
+      expect(result, contains('maxRequestPoolSize ='));
+
+      result = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.js',
+        nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: false,
+      );
+
+      expect(result, isNot(contains('maxRequestPoolSize =')));
     });
 
     test('generateTestBootstrapFileContents embeds urls correctly', () {

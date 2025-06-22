@@ -31,7 +31,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   float* buffer_float32 = reinterpret_cast<float*>(&expected_buffer[0]);
   std::vector<std::string> expected_strings;
   buffer_int32[position++] = node0.id;
-  buffer_int32[position++] = node0.flags;
+  std::memcpy(&buffer_int32[position], &node0.flags, 2);
+  position += 2;
   buffer_int32[position++] = node0.actions;
   buffer_int32[position++] = node0.maxValueLength;
   buffer_int32[position++] = node0.currentValueLength;
@@ -96,7 +97,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdatelinkUrl) {
   float* buffer_float32 = reinterpret_cast<float*>(&expected_buffer[0]);
   std::vector<std::string> expected_strings;
   buffer_int32[position++] = node0.id;
-  buffer_int32[position++] = node0.flags;
+  std::memcpy(&buffer_int32[position], &node0.flags, 2);
+  position += 2;
   buffer_int32[position++] = node0.actions;
   buffer_int32[position++] = node0.maxValueLength;
   buffer_int32[position++] = node0.currentValueLength;
@@ -177,7 +179,8 @@ TEST(PlatformViewShell,
   float* buffer_float32 = reinterpret_cast<float*>(&expected_buffer[0]);
   std::vector<std::string> expected_strings;
   buffer_int32[position++] = node0.id;
-  buffer_int32[position++] = node0.flags;
+  std::memcpy(&buffer_int32[position], &node0.flags, 2);
+  position += 2;
   buffer_int32[position++] = node0.actions;
   buffer_int32[position++] = node0.maxValueLength;
   buffer_int32[position++] = node0.currentValueLength;

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
 import '../test_driver.dart';
@@ -12,7 +14,6 @@ import 'hot_reload_const_project.dart';
 void testAll({
   bool chrome = false,
   List<String> additionalCommandArgs = const <String>[],
-  String constClassFieldRemovalErrorMessage = 'Try performing a hot restart instead.',
   Object? skip = false,
 }) {
   group('chrome: $chrome'
@@ -35,16 +36,20 @@ void testAll({
     testWithoutContext(
       'hot reload displays a formatted error message when removing a field from a const class',
       () async {
-        await flutter.run();
-        project.removeFieldFromConstClass();
+        await flutter.run(
+          device:
+              chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+          additionalCommandArgs: additionalCommandArgs,
+        );
 
-        expect(
+        project.removeFieldFromConstClass();
+        await expectLater(
           flutter.hotReload(),
           throwsA(
             isA<Exception>().having(
               (Exception e) => e.toString(),
               'message',
-              contains(constClassFieldRemovalErrorMessage),
+              contains('Try performing a hot restart instead.'),
             ),
           ),
         );
@@ -52,9 +57,12 @@ void testAll({
     );
 
     testWithoutContext('hot restart succeeds when removing a field from a const class', () async {
-      await flutter.run(chrome: true, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       project.removeFieldFromConstClass();
-      await flutter.hotRestart();
+      await expectLater(flutter.hotRestart(), completes);
     });
   });
 }

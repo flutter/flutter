@@ -119,16 +119,12 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
 
   @override
   String toString() {
-    switch (type) {
-      case ColorFilterType.mode:
-        return 'ColorFilter.mode($color, $blendMode)';
-      case ColorFilterType.matrix:
-        return 'ColorFilter.matrix($matrix)';
-      case ColorFilterType.linearToSrgbGamma:
-        return 'ColorFilter.linearToSrgbGamma()';
-      case ColorFilterType.srgbToLinearGamma:
-        return 'ColorFilter.srgbToLinearGamma()';
-    }
+    return switch (type) {
+      ColorFilterType.mode => 'ColorFilter.mode($color, $blendMode)',
+      ColorFilterType.matrix => 'ColorFilter.matrix($matrix)',
+      ColorFilterType.linearToSrgbGamma => 'ColorFilter.linearToSrgbGamma()',
+      ColorFilterType.srgbToLinearGamma => 'ColorFilter.srgbToLinearGamma()',
+    };
   }
 
   @override

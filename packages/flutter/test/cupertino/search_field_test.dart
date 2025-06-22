@@ -129,7 +129,7 @@ void main() {
     );
 
     Text placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.darkColor.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.darkColor.value);
 
     await tester.pumpAndSettle();
 
@@ -141,7 +141,7 @@ void main() {
     );
 
     placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.color.value);
   });
 
   testWidgets("placeholderStyle modifies placeholder's style and doesn't affect text's style", (
@@ -623,7 +623,7 @@ void main() {
     expect(suffixIconFinder, findsOneWidget);
     expect(placeholderFinder, findsOneWidget);
 
-    // Initially, the icons and placeholder text are fully opaque.
+    // Initially, the icons are fully opaque.
     expect(
       tester
           .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
@@ -636,7 +636,8 @@ void main() {
           .opacity,
       equals(1.0),
     );
-    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(1.0));
+    // The default placeholder color is semi-transparent.
+    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(0.6));
 
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
@@ -747,6 +748,69 @@ void main() {
           .resolve(direction)
           .top,
       lessThan(initialPadding),
+    );
+  });
+
+  testWidgets('Fades and animates insets on scroll if search field starts out collapsed', (
+    WidgetTester tester,
+  ) async {
+    const TextDirection direction = TextDirection.ltr;
+    const double scrollOffset = 200;
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: direction,
+        child: CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar.search(
+                  largeTitle: Text('Large title'),
+                  searchField: CupertinoSearchTextField(),
+                ),
+                SliverToBoxAdapter(child: SizedBox(height: 1000)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchTextFieldFinder, findsOneWidget);
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
+    await tester.tap(find.widgetWithText(CupertinoSearchTextField, 'Search'), warnIfMissed: false);
+
+    final TestGesture scrollGesture1 = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    await scrollGesture1.moveBy(const Offset(0, -scrollOffset));
+    await scrollGesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cancel'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    final TestGesture scrollGesture2 = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    await scrollGesture2.moveBy(Offset(0, scrollOffset - searchTextFieldHeight / 2));
+    await scrollGesture2.up();
+    await tester.pump();
+
+    final Finder prefixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byIcon(CupertinoIcons.search),
+    );
+
+    // The prefix icon has faded.
+    expect(prefixIconFinder, findsOneWidget);
+    expect(
+      tester
+          .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
+          .opacity,
+      lessThan(1.0),
     );
   });
 }

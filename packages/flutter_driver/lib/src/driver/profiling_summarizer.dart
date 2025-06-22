@@ -12,7 +12,7 @@ import 'timeline.dart';
 const Set<String> kProfilingEvents = <String>{_kCpuProfile, _kGpuProfile, _kMemoryProfile};
 
 // These field names need to be in-sync with:
-// https://github.com/flutter/engine/blob/main/shell/profiling/sampling_profiler.cc
+// https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/profiling/sampling_profiler.cc
 const String _kCpuProfile = 'CpuUsage';
 const String _kGpuProfile = 'GpuUsage';
 const String _kMemoryProfile = 'MemoryUsage';

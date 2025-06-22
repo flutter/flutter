@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:convert' show jsonDecode;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -495,6 +502,7 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
+    expect(editableText.hintLocales, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -1273,6 +1281,39 @@ void main() {
     );
   });
 
+  testWidgets('hintLocales is sent to the engine', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              hintLocales: hintLocales,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+
+    // hintLocales is sent to the engine as a list of language tags.
+    final List<String> localesLanguageTags =
+        hintLocales.map((Locale locale) => locale.toLanguageTag()).toList();
+    expect(tester.testTextInput.setClientArgs!['hintLocales'], localesLanguageTags);
+  });
+
   group('smartDashesType and smartQuotesType', () {
     testWidgets('sent to the engine properly', (WidgetTester tester) async {
       const SmartDashesType smartDashesType = SmartDashesType.disabled;
@@ -1398,7 +1439,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.idle();
 
-    List<RenderBox> handles = List<RenderBox>.from(
+    List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -1414,7 +1455,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Handles should be updated with bigger font size.
-    handles = List<RenderBox>.from(
+    handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -3803,6 +3844,87 @@ void main() {
     },
   );
 
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - username',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.username],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - password',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.password],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - newPassword',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.newPassword],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController(text: 'Wibble');
     addTearDown(controller1.dispose);
@@ -4595,6 +4717,7 @@ void main() {
                             SemanticsFlag.isObscured,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4651,6 +4774,7 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isTextField],
                           value: originalText,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4710,6 +4834,7 @@ void main() {
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                           // Focusing a single-line field on web selects it.
                           textSelection:
@@ -4965,6 +5090,7 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
+                            inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
@@ -5085,6 +5211,7 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
+                          inputType: SemanticsInputType.text,
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
@@ -6135,7 +6262,7 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
@@ -6280,7 +6407,7 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    final List<RenderBox> handles = List<RenderBox>.from(
+    final List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -7274,9 +7401,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7285,6 +7410,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7302,9 +7429,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7313,6 +7438,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7390,9 +7517,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7401,6 +7526,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7418,9 +7545,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7436,7 +7561,9 @@ void main() {
             reason: 'on $platform',
           );
 
-        // Windows jumps to the previous wordwrapped line.
+        // Windows, Android, and Fuchsia jump to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -7512,9 +7639,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7523,6 +7648,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7539,9 +7666,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7557,7 +7682,9 @@ void main() {
             reason: 'on $platform',
           );
 
-        // Windows jumps to the next wordwrapped line.
+        // Windows, Android, and Fuchsia jump to the next wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -7650,20 +7777,6 @@ void main() {
       final TextSelection selectionAfterEnd = selection;
 
       switch (defaultTargetPlatform) {
-        // These platforms don't handle shift + home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selectionAfterHome,
-            equals(const TextSelection(baseOffset: 23, extentOffset: 23)),
-            reason: 'on $platform',
-          );
-          expect(
-            selectionAfterEnd,
-            equals(const TextSelection(baseOffset: 23, extentOffset: 23)),
-            reason: 'on $platform',
-          );
-
         // Linux extends to the line start/end.
         case TargetPlatform.linux:
           expect(
@@ -7684,6 +7797,8 @@ void main() {
           );
 
         // Windows expands to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selectionAfterHome,
@@ -7926,15 +8041,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with shift + home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the start of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -7945,6 +8051,8 @@ void main() {
           );
 
         // These platforms select to the line start.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7964,15 +8072,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the start of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -7991,6 +8090,8 @@ void main() {
           );
 
         // Windows jumps to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -8068,15 +8169,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the end of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8087,6 +8179,8 @@ void main() {
           );
 
         // These platforms select to the line end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -8111,15 +8205,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS stay at the end of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8144,6 +8229,8 @@ void main() {
           );
 
         // Windows jumps to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -8241,7 +8328,7 @@ void main() {
   );
 
   testWidgets(
-    'control + home/end keys (Windows only)',
+    'control + home/end keys',
     (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
@@ -8282,7 +8369,22 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: testText.length)));
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: testText.length)),
+          );
+      }
 
       await sendKeys(
         tester,
@@ -8291,14 +8393,26 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: 0)));
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection, equals(const TextSelection.collapsed(offset: 0)));
+      }
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    variant: TargetPlatformVariant.all(),
   );
 
   testWidgets(
-    'control + shift + home/end keys (Windows only)',
+    'control + shift + home/end keys',
     (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
@@ -8340,17 +8454,29 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(
-        controller.selection,
-        equals(const TextSelection(baseOffset: 0, extentOffset: testText.length)),
-      );
+      switch (defaultTargetPlatform) {
+        // Apple platforms don't handle this shortcut and do nothing.
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
 
-      // Collapse the selection at the end.
-      await sendKeys(tester, <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-      ], targetPlatform: defaultTargetPlatform);
+        // These platforms select to the endof the text.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection(baseOffset: 0, extentOffset: testText.length)),
+          );
+      }
+
+      // Set the selection to collapsed at the end to test the home key.
+      controller.selection = const TextSelection.collapsed(offset: testText.length);
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: testText.length)));
 
       await sendKeys(
         tester,
@@ -8360,13 +8486,28 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(
-        controller.selection,
-        equals(const TextSelection(baseOffset: testText.length, extentOffset: 0)),
-      );
+      switch (defaultTargetPlatform) {
+        // Apple platforms don't handle this shortcut and do nothing.
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: testText.length)),
+          );
+
+        // These platforms select to the beginning of the text.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection(baseOffset: testText.length, extentOffset: 0)),
+          );
+      }
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    variant: TargetPlatformVariant.all(),
   );
 
   testWidgets(
@@ -8617,7 +8758,7 @@ void main() {
 
         // Check that the handles' positions are correct.
 
-        final List<RenderBox> handles = List<RenderBox>.from(
+        final List<RenderBox> handles = List<RenderBox>.of(
           tester.renderObjectList<RenderBox>(
             find.descendant(
               of: find.byType(CompositedTransformFollower),
@@ -8733,6 +8874,121 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
+  );
+
+  testWidgets(
+    'single-line field cannot be scrolled with touch on iOS',
+    (WidgetTester tester) async {
+      controller.text = 'This is a long string that should overflow the TextField.';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, initialScrollOffset);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets('default text selection height style', (WidgetTester tester) async {
+    controller.text = 'a b c d e f g';
+
+    final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
+      fontFamily: 'Roboto',
+      fontSize: 14.0, // default.
+      height: 3.0, // Slightly increase height from default so style is noticeable.
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: style,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            selectionColor: Colors.deepPurpleAccent.withOpacity(0.40),
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    );
+
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 13,
+    ); // select the entire text.
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionStyle.1.png'),
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets(
+    'multi-line field can scroll with touch on iOS',
+    (WidgetTester tester) async {
+      // 3 lines of text, where the last line overflows and requires scrolling.
+      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                maxLines: 2,
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
@@ -15803,7 +16059,7 @@ void main() {
 
       await tester.tapAt(textOffsetToPosition(tester, 3));
       await tester.pumpAndSettle();
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
@@ -16211,6 +16467,67 @@ void main() {
       },
       skip: !kIsWeb, // [intended]
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned off', (WidgetTester tester) async {
+      controller.text = 'Text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectAllOnFocus: false,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      const TextSelection initialSelection = TextSelection.collapsed(offset: 1);
+      controller.selection = initialSelection;
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(controller.selection, initialSelection);
+    }, variant: TargetPlatformVariant.all());
+
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned on', (WidgetTester tester) async {
+      controller.text = 'Text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectAllOnFocus: true,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      const TextSelection initialSelection = TextSelection.collapsed(offset: 1);
+      controller.selection = initialSelection;
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(
+        controller.selection,
+        TextSelection(baseOffset: 0, extentOffset: controller.text.length),
+      );
+    }, variant: TargetPlatformVariant.all());
 
     // Regression test for https://github.com/flutter/flutter/issues/156078.
     testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {

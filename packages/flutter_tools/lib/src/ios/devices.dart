@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
@@ -488,7 +489,7 @@ class IOSDevice extends Device {
           analytics: globals.analytics,
           fileSystem: globals.fs,
           logger: globals.logger,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
         );
         _logger.printError('');
@@ -768,18 +769,22 @@ class IOSDevice extends Device {
       debuggingOptions: debuggingOptions,
     );
 
+    final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
+
+    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
+      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
-      if (vmServiceDiscovery != null && !isWirelesslyConnected) vmServiceDiscovery.uri,
+      if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
     Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
@@ -1455,7 +1460,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  /// Log reader will listen to [IOSDeployDebugger.logLines] and
+  /// will detach debugger on dispose.
   IOSDeployDebugger? get debuggerStream => _iosDeployDebugger;
 
   /// Send messages from ios-deploy debugger stream to device log reader stream.
@@ -1486,8 +1492,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
   String _debuggerLineHandler(String line) =>
       _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  /// Start and listen to idevicesyslog to get device logs for iOS versions
-  /// prior to 13 or if [useBothLogDeviceReaders] is true.
+  /// Start and listen to `idevicesyslog` to get device logs for iOS versions
+  /// prior to 13 or if [useSyslogLogging] and [useIOSDeployLogging] are `true`.
   void _listenToSysLog() {
     if (!useSyslogLogging) {
       return;

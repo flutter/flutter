@@ -33,7 +33,8 @@ constexpr char kFloatType = 1;
 BufferView RuntimeEffectContents::EmplaceVulkanUniform(
     const std::shared_ptr<const std::vector<uint8_t>>& input_data,
     HostBuffer& host_buffer,
-    const RuntimeUniformDescription& uniform) {
+    const RuntimeUniformDescription& uniform,
+    size_t minimum_uniform_alignment) {
   // TODO(jonahwilliams): rewrite this to emplace directly into
   // HostBuffer.
   std::vector<float> uniform_buffer;
@@ -49,7 +50,7 @@ BufferView RuntimeEffectContents::EmplaceVulkanUniform(
     }
   }
   size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
-                              DefaultUniformAlignment());
+                              minimum_uniform_alignment);
 
   return host_buffer.Emplace(
       reinterpret_cast<const void*>(uniform_buffer.data()),
@@ -87,9 +88,12 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
   std::unique_ptr<ShaderMetadata> metadata = std::make_unique<ShaderMetadata>();
   metadata->name = uniform.name;
   metadata->members.emplace_back(ShaderStructMemberMetadata{
-      .type = GetShaderType(uniform.type),
-      .size = uniform.GetSize(),
-      .byte_length = uniform.bit_width / 8,
+      .type = GetShaderType(uniform.type),  //
+      .size = uniform.dimensions.rows * uniform.dimensions.cols *
+              (uniform.bit_width / 8u),  //
+      .byte_length =
+          (uniform.bit_width / 8u) * uniform.array_elements.value_or(1),  //
+      .array_elements = uniform.array_elements                            //
   });
 
   return metadata;
@@ -246,6 +250,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     // after 4 float uniforms may have a location of 4. Since we know that
     // the declarations are already ordered, we can track the uniform location
     // ourselves.
+    auto& host_buffer = renderer.GetTransientsBuffer();
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
       std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
       switch (uniform.type) {
@@ -273,11 +278,11 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               << "Uniform " << uniform.name
               << " had unexpected type kFloat for Vulkan backend.";
 
-          size_t alignment =
-              std::max(uniform.bit_width / 8, DefaultUniformAlignment());
-          BufferView buffer_view = renderer.GetTransientsBuffer().Emplace(
-              uniform_data_->data() + buffer_offset, uniform.GetSize(),
-              alignment);
+          size_t alignment = std::max(uniform.bit_width / 8,
+                                      host_buffer.GetMinimumUniformAlignment());
+          BufferView buffer_view =
+              host_buffer.Emplace(uniform_data_->data() + buffer_offset,
+                                  uniform.GetSize(), alignment);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
@@ -300,8 +305,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           pass.BindResource(
               ShaderStage::kFragment, DescriptorType::kUniformBuffer,
               uniform_slot, nullptr,
-              EmplaceVulkanUniform(uniform_data_,
-                                   renderer.GetTransientsBuffer(), uniform));
+              EmplaceVulkanUniform(uniform_data_, host_buffer, uniform,
+                                   host_buffer.GetMinimumUniformAlignment()));
         }
       }
     }

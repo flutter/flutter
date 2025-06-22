@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 import '../cache.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
@@ -304,12 +303,7 @@ class PackagesGetCommand extends FlutterCommand {
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
-      if (rootProject.manifest.generateLocalizations &&
-          !await generateLocalizationsSyntheticPackage(
-            environment: environment,
-            buildSystem: globals.buildSystem,
-            buildTargets: globals.buildTargets,
-          )) {
+      if (rootProject.manifest.generateLocalizations) {
         // If localizations were enabled, but we are not using synthetic packages.
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),

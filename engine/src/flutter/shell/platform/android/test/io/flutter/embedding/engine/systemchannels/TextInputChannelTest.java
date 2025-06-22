@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -13,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,9 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-@Config(
-    manifest = Config.NONE,
-    shadows = {})
+@Config(shadows = {})
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24)
 public class TextInputChannelTest {
@@ -38,5 +38,30 @@ public class TextInputChannelTest {
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     textInputChannel.parsingMethodHandler.onMethodCall(call, result);
     verify(result).success(null);
+  }
+
+  @Test
+  @TargetApi(API_LEVELS.API_24)
+  @Config(sdk = API_LEVELS.API_24)
+  public void configurationFromJsonParsesHintLocales() throws JSONException, NoSuchFieldException {
+    JSONObject arguments = new JSONObject();
+
+    // Mandatory parameters.
+    arguments.put("inputAction", "TextInputAction.done");
+    arguments.put("textCapitalization", "TextCapitalization.none");
+    JSONObject inputType = new JSONObject();
+    inputType.put("name", "TextInputType.text");
+    arguments.put("inputType", inputType);
+
+    arguments.put("hintLocales", new JSONArray(new String[] {"en", "fr"}));
+    final TextInputChannel.Configuration configuration =
+        TextInputChannel.Configuration.fromJson(arguments);
+
+    final Locale[] hintLocales = {
+      new Locale.Builder().setLanguage("en").build(), new Locale.Builder().setLanguage("fr").build()
+    };
+    assertEquals(configuration.hintLocales.length, hintLocales.length);
+    assertEquals(configuration.hintLocales[0], hintLocales[0]);
+    assertEquals(configuration.hintLocales[1], hintLocales[1]);
   }
 }

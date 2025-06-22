@@ -24,9 +24,11 @@ import 'edge_insets.dart';
 /// interpolated or animated. The [Border] class cannot interpolate between
 /// different shapes.
 enum BoxShape {
-  /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
-  /// [BorderRadius]). The edges of the rectangle will match the edges of the box
-  /// into which the [Border] or [BoxDecoration] is painted.
+  /// An axis-aligned rectangle, optionally with rounded corners.
+  ///
+  /// The amount of corner rounding, if any, is determined by the border radius
+  /// specified by classes such as [BoxDecoration] or [Border]. The rectangle's
+  /// edges match those of the box in which it is painted.
   ///
   /// See also:
   ///
@@ -323,7 +325,7 @@ abstract class BoxBorder extends ShapeBorder {
       case BoxShape.circle:
         assert(
           borderRadius == null,
-          'A borderRadius cannot be given when shape is a BoxShape.circle.',
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
         );
         borderRect = RRect.fromRectAndRadius(
           Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0),
@@ -703,7 +705,7 @@ class Border extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:
@@ -1081,7 +1083,7 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:

@@ -258,12 +258,14 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         platform: globals.platform,
         shutdownHooks: globals.shutdownHooks,
         os: globals.os,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
       ),
       UpgradeCommand(verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),
-      UpdatePackagesCommand(),
+      UpdatePackagesCommand(verboseHelp: verboseHelp),
     ];
 
 /// An abstraction for instantiation of the correct logger type.

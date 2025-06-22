@@ -1329,16 +1329,17 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         type: BottomNavigationBarType.fixed,
       ),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       cardTheme: const CardThemeData(color: Colors.black),
+      carouselViewTheme: const CarouselViewThemeData(),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
@@ -1457,16 +1458,17 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
-      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
+      bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         type: BottomNavigationBarType.shifting,
       ),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.light()),
       cardTheme: const CardThemeData(color: Colors.white),
+      carouselViewTheme: const CarouselViewThemeData(),
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
@@ -1807,6 +1809,7 @@ void main() {
       'bottomSheetTheme',
       'buttonTheme',
       'cardTheme',
+      'carouselViewTheme',
       'checkboxTheme',
       'chipTheme',
       'dataTableTheme',
@@ -2002,6 +2005,32 @@ void main() {
           ),
         );
       }
+    },
+  );
+
+  testWidgets(
+    'ThemeData.inputDecorationTheme accepts only a InputDecorationTheme or a InputDecorationThemeData',
+    (WidgetTester tester) async {
+      ThemeData(inputDecorationTheme: const InputDecorationTheme());
+      expect(tester.takeException(), isNull);
+
+      ThemeData(inputDecorationTheme: const InputDecorationThemeData());
+      expect(tester.takeException(), isNull);
+
+      expect(
+        () {
+          ThemeData(inputDecorationTheme: Object());
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError error) => error.message,
+            'message',
+            equals(
+              'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+            ),
+          ),
+        ),
+      );
     },
   );
 }

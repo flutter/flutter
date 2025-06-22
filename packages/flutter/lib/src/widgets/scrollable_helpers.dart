@@ -402,7 +402,7 @@ class ScrollAction extends ContextAction<ScrollIntent> {
       return true;
     }
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
-    return (primaryScrollController != null) && (primaryScrollController.hasClients);
+    return (primaryScrollController != null) && primaryScrollController.hasClients;
   }
 
   /// Returns the scroll increment for a single scroll request, for use when

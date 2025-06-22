@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "flutter/common/constants.h"
@@ -14,7 +15,9 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
@@ -24,7 +27,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
@@ -673,15 +675,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   flutterArguments.root_isolate_create_callback = _project.rootIsolateCreateCallback;
   flutterArguments.log_message_callback = [](const char* tag, const char* message,
                                              void* user_data) {
+    std::stringstream stream;
     if (tag && tag[0]) {
-      std::cout << tag << ": ";
+      stream << tag << ": ";
     }
-    std::cout << message << std::endl;
+    stream << message;
+    std::string log = stream.str();
+    [FlutterLogger logDirect:[NSString stringWithUTF8String:log.c_str()]];
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
 
-  BOOL mergedPlatformUIThread = NO;
+  BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
@@ -1565,16 +1570,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
   [FlutterRunLoop.mainRunLoop
-      performBlock:^{
-        FlutterEngine* self = weakSelf;
-        if (self != nil && self->_engine != nil) {
-          auto result = _embedderAPI.RunTask(self->_engine, &task);
-          if (result != kSuccess) {
-            NSLog(@"Could not post a task to the Flutter engine.");
-          }
-        }
-      }
-        afterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC];
+      performAfterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC
+                  block:^{
+                    FlutterEngine* self = weakSelf;
+                    if (self != nil && self->_engine != nil) {
+                      auto result = _embedderAPI.RunTask(self->_engine, &task);
+                      if (result != kSuccess) {
+                        NSLog(@"Could not post a task to the Flutter engine.");
+                      }
+                    }
+                  }];
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category

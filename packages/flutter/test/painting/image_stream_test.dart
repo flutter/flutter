@@ -1109,4 +1109,25 @@ void main() {
     await tester.idle();
     expect(mockCodec.disposed, true);
   });
+
+  testWidgets('ImageStream that has never had any listeners can be disposed', (
+    WidgetTester tester,
+  ) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = -1;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(mockCodec.disposed, false);
+    imageStream.maybeDispose();
+    expect(mockCodec.disposed, true);
+  });
 }

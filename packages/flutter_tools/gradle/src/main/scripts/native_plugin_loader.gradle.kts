@@ -59,7 +59,10 @@ class NativePluginLoader {
             // of a federated plugin).
             val needsBuild = androidPlugin[NATIVE_BUILD_KEY] as? Boolean ?: true
             if (needsBuild) {
-                nativePlugins.add(androidPlugin as Map<String, Any>) // Safe cast when adding, assuming type is now validated
+                // Suppress the unchecked cast warning as we define the structure of the JSON in
+                // the tool and we have already mostly validated the structure.
+                @Suppress("UNCHECKED_CAST")
+                nativePlugins.add(androidPlugin as Map<String, Any>)
             }
         }
         return nativePlugins.toList() // Return immutable list
@@ -136,6 +139,9 @@ class NativePluginLoader {
         if (pluginsDependencyFile.exists()) {
             val slurper = JsonSlurper()
             val readText = slurper.parseText(pluginsDependencyFile.readText())
+
+            // Suppress the unchecked cast warning as we define the structure of the JSON in the tool.
+            @Suppress("UNCHECKED_CAST")
             val parsedText =
                 readText as? Map<String, Any>
                     ?: error("Parsed JSON is not a Map<String, Any>: $readText")

@@ -58,9 +58,23 @@ void main() {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,
       <String>['build'],
+      environment: <String, String>{
+        'CONFIGURATION': 'Debug',
+        'ACTION': 'install',
+        'FLUTTER_CLI_BUILD_MODE': 'debug',
+      },
+    );
+    expect(result.stderr, contains('warning: Flutter archive not built in Release mode.'));
+    expect(result.exitCode, isNot(0));
+  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
+
+  test('Xcode backend warns when unable to determine platform', () async {
+    final ProcessResult result = await Process.run(
+      xcodeBackendPath,
+      <String>['build', 'asdf'],
       environment: <String, String>{'CONFIGURATION': 'Debug', 'ACTION': 'install'},
     );
-    expect(result.stdout, contains('warning: Flutter archive not built in Release mode.'));
+    expect(result.stderr, contains('warning: Unrecognized platform: asdf. Defaulting to iOS.'));
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 

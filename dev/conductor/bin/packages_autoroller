@@ -39,8 +39,9 @@ PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 REPO_DIR="$BIN_DIR/../../.."
 DART_BIN="$REPO_DIR/bin/dart"
+FLUTTER_BIN="$REPO_DIR/bin/flutter"
 
 # Ensure pub get has been run in the repo before running the conductor
-(cd "$REPO_DIR/dev/conductor/core"; "$DART_BIN" pub get 1>&2)
+(cd "$REPO_DIR/dev/conductor/core"; "$FLUTTER_BIN" pub get 1>&2)
 
 exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/packages_autoroller.dart" "$@"

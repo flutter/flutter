@@ -83,6 +83,50 @@ FLUTTER_ASSERT_ARC
 
 @end
 
+namespace flutter {
+namespace {
+class MockPlatformViewDelegate : public PlatformView::Delegate {
+ public:
+  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
+  void OnPlatformViewDestroyed() override {}
+  void OnPlatformViewScheduleFrame() override {}
+  void OnPlatformViewAddView(int64_t view_id,
+                             const ViewportMetrics& viewport_metrics,
+                             AddViewCallback callback) override {}
+  void OnPlatformViewRemoveView(int64_t view_id, RemoveViewCallback callback) override {}
+  void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {};
+  void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override {}
+  void OnPlatformViewSetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics) override {}
+  const flutter::Settings& OnPlatformViewGetSettings() const override { return settings_; }
+  void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
+  void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
+  }
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
+                                             SemanticsAction action,
+                                             fml::MallocMapping args) override {}
+  void OnPlatformViewSetSemanticsEnabled(bool enabled) override {}
+  void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override {}
+  void OnPlatformViewRegisterTexture(std::shared_ptr<Texture> texture) override {}
+  void OnPlatformViewUnregisterTexture(int64_t texture_id) override {}
+  void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override {}
+
+  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
+                               std::unique_ptr<const fml::Mapping> snapshot_data,
+                               std::unique_ptr<const fml::Mapping> snapshot_instructions) override {
+  }
+  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string error_message,
+                                    bool transient) override {}
+  void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
+                                 flutter::AssetResolver::AssetResolverType type) override {}
+
+  flutter::Settings settings_;
+};
+
+}  // namespace
+}  // namespace flutter
+
 @interface FlutterTextInputPluginTest : XCTestCase
 @end
 
@@ -794,6 +838,44 @@ FLUTTER_ASSERT_ARC
                                              withEvent:[OCMArg isNotNil]]);
   OCMVerify(times(1), [mockViewController pressesEnded:[OCMArg isNotNil]
                                              withEvent:[OCMArg isNotNil]]);
+}
+
+- (void)testHotRestart {
+  flutter::MockPlatformViewDelegate mock_platform_view_delegate;
+  auto thread = std::make_unique<fml::Thread>("TextInputHotRestart");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterTextInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
+  OCMStub([mockFlutterViewController textInputPlugin]).andReturn(mockFlutterTextInputPlugin);
+
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+        /*delegate=*/mock_platform_view_delegate,
+        /*rendering_api=*/mock_platform_view_delegate.settings_.enable_impeller
+            ? flutter::IOSRenderingAPI::kMetal
+            : flutter::IOSRenderingAPI::kSoftware,
+        /*platform_views_controller=*/nil,
+        /*task_runners=*/runners,
+        /*worker_task_runner=*/nil,
+        /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    platform_view->SetOwnerViewController(mockFlutterViewController);
+
+    OCMExpect([mockFlutterTextInputPlugin reset]);
+    platform_view->OnPreEngineRestart();
+    OCMVerifyAll(mockFlutterView);
+
+    latch.Signal();
+  });
+  latch.Wait();
 }
 
 - (void)testUpdateSecureTextEntry {
@@ -1522,39 +1604,32 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testInputViewsHasNonNilInputDelegate {
-  if (@available(iOS 13.0, *)) {
-    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-    [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-    [inputView setTextInputClient:123];
-    [inputView reloadInputViews];
-    [inputView becomeFirstResponder];
-    NSAssert(inputView.isFirstResponder, @"inputView is not first responder");
-    inputView.inputDelegate = nil;
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+  NSAssert(inputView.isFirstResponder, @"inputView is not first responder");
+  inputView.inputDelegate = nil;
 
-    FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
-    [mockInputView setTextInputState:@{
-      @"text" : @"COMPOSING",
-      @"composingBase" : @1,
-      @"composingExtent" : @3
-    }];
-    OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
-    [inputView removeFromSuperview];
-  }
+  FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
+  [mockInputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
+  OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
+  [inputView removeFromSuperview];
 }
 
 - (void)testInputViewsDoNotHaveUITextInteractions {
-  if (@available(iOS 13.0, *)) {
-    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-    BOOL hasTextInteraction = NO;
-    for (id interaction in inputView.interactions) {
-      hasTextInteraction = [interaction isKindOfClass:[UITextInteraction class]];
-      if (hasTextInteraction) {
-        break;
-      }
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  BOOL hasTextInteraction = NO;
+  for (id interaction in inputView.interactions) {
+    hasTextInteraction = [interaction isKindOfClass:[UITextInteraction class]];
+    if (hasTextInteraction) {
+      break;
     }
-    XCTAssertFalse(hasTextInteraction);
   }
+  XCTAssertFalse(hasTextInteraction);
 }
 
 #pragma mark - UITextInput methods - Tests

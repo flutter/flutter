@@ -5,8 +5,9 @@
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
-import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/packages_autoroller.dart';
+import 'package:conductor_core/src/repository.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
@@ -99,7 +100,6 @@ String _parseOrgName(String remoteUrl) {
 }
 
 Checkouts _localCheckouts(String token) {
-  const FileSystem fileSystem = LocalFileSystem();
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();
   final Stdio stdio = VerboseStdio(
@@ -109,7 +109,6 @@ Checkouts _localCheckouts(String token) {
     filter: (String message) => message.replaceAll(token, '[GitHub TOKEN]'),
   );
   return Checkouts(
-    fileSystem: fileSystem,
     parentDirectory: _localFlutterRoot.parent,
     platform: platform,
     processManager: processManager,

@@ -43,5 +43,31 @@ TEST(DisplayListStorage, PostMove) {
   EXPECT_EQ(moved.capacity(), DisplayListStorage::kDLPageSize);
 }
 
+TEST(DisplayListStorage, NextPowerOfTwoSize) {
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(0), 1u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(1), 1u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(2), 2u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(3), 4u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(4), 4u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(5), 8u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(7), 8u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(15), 16u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(31), 32u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(63), 64u);
+
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(127), 128u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(255), 256u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(511), 512u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(1023), 1024u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(2047), 2048u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(4095), 4096u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(8191), 8192u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(16383), 16384u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(32767), 32768u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(65535), 65536u);
+  EXPECT_EQ(DisplayListStorage::NextPowerOfTwoSize(131071), 131072u);
+  // It probably works...
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -406,8 +406,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-         impeller::RuntimeStageBackend runtime_stage_type =
-             impeller::RuntimeStageBackend::kSkSL);
+         const std::shared_future<impeller::RuntimeStageBackend>&
+             runtime_stage_backend);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a Engine that shares as many resources as
@@ -441,7 +441,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @return     The pointer to this instance of the engine. The engine may
   ///             only be accessed safely on the UI task runner.
   ///
-  fml::WeakPtr<Engine> GetWeakPtr() const;
+  fml::TaskRunnerAffineWeakPtr<Engine> GetWeakPtr() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Moves the root isolate to the `DartIsolate::Phase::Running`
@@ -597,13 +597,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                       deadline.
   ///
   void NotifyIdle(fml::TimeDelta deadline);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Notifies the engine that the attached flutter view has been
-  ///             destroyed.
-  ///             This enables the engine to notify the Dart VM so it can do
-  ///             some cleanp activities.
-  void NotifyDestroyed();
 
   //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a
@@ -877,7 +870,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::shared_ptr<AssetManager> GetAssetManager() override;
 
   // Return the weak_ptr of ImageDecoder.
-  fml::WeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
+  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
 
   //----------------------------------------------------------------------------
   /// @brief      Get the `ImageGeneratorRegistry` associated with the current
@@ -885,7 +878,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   /// @return     The engine's `ImageGeneratorRegistry`.
   ///
-  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry();
+  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+  GetImageGeneratorRegistry();
 
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
@@ -1084,7 +1078,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
-  fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
+  fml::TaskRunnerAffineWeakPtrFactory<Engine>
+      weak_factory_;  // Must be the last member.
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 

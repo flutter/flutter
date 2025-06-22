@@ -79,6 +79,15 @@ abstract class SemanticsEnabler {
   /// Or if the received [DomEvent] is suitable/enough for enabling the
   /// semantics. See [tryEnableSemantics].
   bool shouldEnableSemantics(DomEvent event) {
+    // Simply tabbing into the placeholder element should not cause semantics
+    // to be enabled. The user should actually click on the placeholder.
+    if (event.isA<DomKeyboardEvent>()) {
+      event as DomKeyboardEvent;
+      if (event.key == 'Tab') {
+        return true;
+      }
+    }
+
     if (!isWaitingToEnableSemantics) {
       // Forward to framework as normal.
       return true;

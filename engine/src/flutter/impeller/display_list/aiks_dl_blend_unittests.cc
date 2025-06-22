@@ -338,6 +338,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
   FLT_FORWARD(mock_capabilities, old_capabilities,
               SupportsDecalSamplerAddressMode);
   FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
   ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
 
   bool has_color_filter = true;
@@ -920,6 +921,26 @@ TEST_P(AiksTest, AdvancedBlendColorFilterWithDestinationOpacity) {
   builder.Restore();
 
   // Should be solid red as the destructive color filter floods the clip.
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
+  DisplayListBuilder builder;
+
+  builder.DrawPaint(DlPaint(DlColor::kWhite()));
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(100, 100, 400, 300));
+
+  // Draw should apply the clip, even though it is an advanced blend.
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 300),
+                   DlPaint()
+                       .setColor(DlColor::kRed())
+                       .setBlendMode(DlBlendMode::kDifference));
+  // This color should not show if clip is still functional.
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 100, 100),
+                   DlPaint().setColor(DlColor::kBlue()));
+  builder.Restore();
+
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 

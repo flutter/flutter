@@ -19,16 +19,6 @@ tasks.validatePlugins {
     enableStricterValidation.set(true)
 }
 
-// We need to compile Kotlin first so we can call it from Groovy. See https://stackoverflow.com/q/36214437/7009800
-tasks.withType<GroovyCompile> {
-    dependsOn(tasks.compileKotlin)
-    classpath += files(tasks.compileKotlin.get().destinationDirectory)
-}
-
-tasks.classes {
-    dependsOn(tasks.compileGroovy)
-}
-
 gradlePlugin {
     plugins {
         // The "flutterPlugin" name isn't used anywhere.
@@ -69,13 +59,13 @@ dependencies {
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     // When bumping, also update:
-    //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
-    //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin_scripts/dependency_version_checker.gradle.kts
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
-    compileOnly("com.android.tools.build:gradle:8.7.3")
+    //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
+    //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+    compileOnly("com.android.tools.build:gradle:8.9.1")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.android.tools.build:gradle:8.7.3")
+    testImplementation("com.android.tools.build:gradle:8.9.1")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
 }
