@@ -1,10 +1,10 @@
 dart
 Copyright \d+, the Dart project authors.
-Copyright \d+, the Dart project authors.
+Copyright \d+, the Dart project authors.\s*
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
-met:
+met:\s*
     \* Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     \* Redistributions in binary form must reproduce the above

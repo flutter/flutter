@@ -1,5 +1,5 @@
 flutter
-^Copyright \d+ The Flutter Authors
+(?s)^Copyright \d+ The Flutter Authors.*?Redistribution
 Copyright \d+ The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
