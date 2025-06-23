@@ -27,8 +27,8 @@ class HostWindow {
 
   // Creates a native Win32 window with a child view confined to its client
   // area. |controller| is a pointer to the controller that manages the
-  // |HostWindow|. |engine| is a pointer to the engine thaat manages
-  // the controller On success, a valid window handle can be retrieved
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the controller. On success, a valid window handle can be retrieved
   // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
   // on failure.
   static std::unique_ptr<HostWindow> CreateRegularWindow(
