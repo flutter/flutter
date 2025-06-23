@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -765,7 +766,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _lerp(double value) {
     assert(value >= 0.0);
     assert(value <= 1.0);
-    return value * (widget.max - widget.min) + widget.min;
+
+    double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.divisions != null) {
+      final double stepSize = (widget.max - widget.min) / widget.divisions!;
+      lerpValue = (lerpValue / stepSize).round() * stepSize;
+    }
+    return lerpValue;
   }
 
   double _discretize(double value) {
