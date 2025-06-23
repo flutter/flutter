@@ -32,6 +32,7 @@ INTERNAL NOTE
 ### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
 
 - [flutter/170924](https://github.com/flutter/flutter/pull/170924) - Fix Flutter Windows on devices that only support OpenGL ES 2, like computers with Intel graphics cards.
+- [flutter/170880](https://github.com/flutter/flutter/pull/170880) - Fixes unhandled exception on application shutdown in the debug adapter used by IDEs.
 
 ### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
 
