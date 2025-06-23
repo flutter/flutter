@@ -307,7 +307,7 @@ Future<void> runWebServiceWorkerTest({
         (Request request) {
           final String requestedPath = request.url.path;
           if (_ignoreRequestPaths.contains(requestedPath)) {
-            return Response.ok('OK');
+            return Response.notFound('');
           }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
@@ -522,7 +522,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
         (Request request) {
           final String requestedPath = request.url.path;
           if (_ignoreRequestPaths.contains(requestedPath)) {
-            return Response.ok('OK');
+            return Response.notFound('');
           }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
@@ -669,7 +669,7 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
         (Request request) {
           final String requestedPath = request.url.path;
           if (_ignoreRequestPaths.contains(requestedPath)) {
-            return Response.ok('OK');
+            return Response.notFound('');
           }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
@@ -745,7 +745,7 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
         (Request request) {
           final String requestedPath = request.url.path;
           if (_ignoreRequestPaths.contains(requestedPath)) {
-            return Response.ok('OK');
+            return Response.notFound('');
           }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
