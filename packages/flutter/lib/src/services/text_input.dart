@@ -2607,7 +2607,7 @@ class _PlatformTextInputControl with TextInputControl {
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
-class SystemContextMenuController with SystemContextMenuClient {
+class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.
@@ -2819,8 +2819,18 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 
   @override
-  String toString() {
-    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$isVisible, _isDisposed=$_isDisposed)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('isVisible', isVisible));
+    properties.add(FlagProperty(
+      'onSystemHide',
+      value: onSystemHide != null,
+      ifTrue: 'callback set',
+      ifFalse: 'callback null',
+      showName: true,
+    ));
+    properties.add(DiagnosticsProperty<bool>('_hiddenBySystem', _hiddenBySystem));
+    properties.add(DiagnosticsProperty<bool>('_isDisposed', _isDisposed));
   }
 
   /// Used to release resources when this instance will never be used again.
