@@ -5160,7 +5160,7 @@ void main() {
                         icon: const Icon(Icons.add),
                         onPressed: () {
                           setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
+                            tabTextContent = List<String>.of(tabTextContent)
                               ..add('Tab ${tabTextContent.length + 1}');
                           });
                         },
@@ -5170,7 +5170,7 @@ void main() {
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)..removeLast();
+                            tabTextContent = List<String>.of(tabTextContent)..removeLast();
                           });
                         },
                       ),
@@ -6383,7 +6383,7 @@ void main() {
                           icon: const Icon(Icons.add),
                           onPressed: () {
                             setState(() {
-                              tabTextContent = List<String>.from(tabTextContent)
+                              tabTextContent = List<String>.of(tabTextContent)
                                 ..add('Tab ${tabTextContent.length + 1}');
                             });
                           },
@@ -6393,7 +6393,7 @@ void main() {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             setState(() {
-                              tabTextContent = List<String>.from(tabTextContent)..removeLast();
+                              tabTextContent = List<String>.of(tabTextContent)..removeLast();
                             });
                           },
                         ),

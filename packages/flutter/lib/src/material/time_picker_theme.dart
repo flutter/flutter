@@ -528,9 +528,9 @@ class TimePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
-        'inputDecorationTheme',
-        inputDecorationTheme,
+      DiagnosticsProperty<InputDecorationThemeData>(
+        'inputDecorationTheme.data',
+        inputDecorationTheme?.data,
         defaultValue: null,
       ),
     );
