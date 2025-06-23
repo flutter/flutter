@@ -1034,43 +1034,50 @@ label''');
   test('computeDomSemanticsLabel handles labelParts correctly', () {
     // Test basic labelParts functionality
     expect(computeDomSemanticsLabel(labelParts: <String>['Part1', 'Part2']), 'Part1 Part2');
-    expect(computeDomSemanticsLabel(labelParts: <String>['Customer', 'Name', 'Required']), 'Customer Name Required');
+    expect(
+      computeDomSemanticsLabel(labelParts: <String>['Customer', 'Name', 'Required']),
+      'Customer Name Required',
+    );
 
     // Test labelParts with tooltip
-    expect(computeDomSemanticsLabel(
-      tooltip: 'Field tooltip',
-      labelParts: <String>['Customer', 'Name'],
-    ), 'Field tooltip\nCustomer Name');
+    expect(
+      computeDomSemanticsLabel(tooltip: 'Field tooltip', labelParts: <String>['Customer', 'Name']),
+      'Field tooltip\nCustomer Name',
+    );
 
     // Test labelParts with value
-    expect(computeDomSemanticsLabel(
-      labelParts: <String>['Customer', 'Name'],
-      value: 'John Doe',
-    ), 'Customer Name John Doe');
+    expect(
+      computeDomSemanticsLabel(labelParts: <String>['Customer', 'Name'], value: 'John Doe'),
+      'Customer Name John Doe',
+    );
 
     // Test labelParts with both tooltip and value
-    expect(computeDomSemanticsLabel(
-      tooltip: 'Field tooltip',
-      labelParts: <String>['Customer', 'Name'],
-      value: 'John Doe',
-    ), 'Field tooltip\nCustomer Name John Doe');
+    expect(
+      computeDomSemanticsLabel(
+        tooltip: 'Field tooltip',
+        labelParts: <String>['Customer', 'Name'],
+        value: 'John Doe',
+      ),
+      'Field tooltip\nCustomer Name John Doe',
+    );
 
     // Test that labelParts takes precedence over regular label
-    expect(computeDomSemanticsLabel(
-      label: 'Regular Label',
-      labelParts: <String>['Priority', 'Parts'],
-    ), 'Priority Parts');
+    expect(
+      computeDomSemanticsLabel(label: 'Regular Label', labelParts: <String>['Priority', 'Parts']),
+      'Priority Parts',
+    );
 
     // Test filtering of empty labelParts
-    expect(computeDomSemanticsLabel(
-      labelParts: <String>['Valid', '', '  ', 'Parts'],
-    ), 'Valid Parts');
+    expect(
+      computeDomSemanticsLabel(labelParts: <String>['Valid', '', '  ', 'Parts']),
+      'Valid Parts',
+    );
 
     // Test fallback to regular label when labelParts are all empty
-    expect(computeDomSemanticsLabel(
-      label: 'Fallback Label',
-      labelParts: <String>['', '  ', ''],
-    ), 'Fallback Label');
+    expect(
+      computeDomSemanticsLabel(label: 'Fallback Label', labelParts: <String>['', '  ', '']),
+      'Fallback Label',
+    );
   });
 
   test('LabelAndValue splits label and hint for all representations', () async {
@@ -1185,59 +1192,56 @@ label''');
     },
   );
 
-  test('AriaLabelHelper uses aria-labelledby for multi-part labels and aria-label for single labels', () {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+  test(
+    'AriaLabelHelper uses aria-labelledby for multi-part labels and aria-label for single labels',
+    () {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
 
-    final SemanticsTester tester = SemanticsTester(owner());
+      final SemanticsTester tester = SemanticsTester(owner());
 
-    tester.updateNode(
-      id: 0,
-      labelParts: <String>['Customer', 'Name', 'Required'],
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 50, 25),
-        ),
-      ],
-    );
-    tester.apply();
+      tester.updateNode(
+        id: 0,
+        labelParts: <String>['Customer', 'Name', 'Required'],
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(id: 1, rect: const ui.Rect.fromLTRB(0, 0, 50, 25)),
+        ],
+      );
+      tester.apply();
 
-    final SemanticsObject object = tester.getSemanticsObject(0);
-    expect(object.element.getAttribute('aria-label'), isNull);
-    expect(object.element.getAttribute('aria-labelledby'), 'label-0-0 label-0-1 label-0-2');
+      final SemanticsObject object = tester.getSemanticsObject(0);
+      expect(object.element.getAttribute('aria-label'), isNull);
+      expect(object.element.getAttribute('aria-labelledby'), 'label-0-0 label-0-1 label-0-2');
 
-    final DomElement? label0 = object.element.querySelector('#label-0-0');
-    final DomElement? label1 = object.element.querySelector('#label-0-1');
-    final DomElement? label2 = object.element.querySelector('#label-0-2');
+      final DomElement? label0 = object.element.querySelector('#label-0-0');
+      final DomElement? label1 = object.element.querySelector('#label-0-1');
+      final DomElement? label2 = object.element.querySelector('#label-0-2');
 
-    expect(label0?.text, 'Customer');
-    expect(label1?.text, 'Name');
-    expect(label2?.text, 'Required');
-    expect(label0?.style.display, 'none');
-    expect(label0?.getAttribute('aria-hidden'), 'true');
+      expect(label0?.text, 'Customer');
+      expect(label1?.text, 'Name');
+      expect(label2?.text, 'Required');
+      expect(label0?.style.display, 'none');
+      expect(label0?.getAttribute('aria-hidden'), 'true');
 
-    tester.updateNode(
-      id: 0,
-      label: 'Single Label',
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 50, 25),
-        ),
-      ],
-    );
-    tester.apply();
+      tester.updateNode(
+        id: 0,
+        label: 'Single Label',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(id: 1, rect: const ui.Rect.fromLTRB(0, 0, 50, 25)),
+        ],
+      );
+      tester.apply();
 
-    expect(object.element.getAttribute('aria-label'), 'Single Label');
-    expect(object.element.getAttribute('aria-labelledby'), isNull);
-    expect(object.element.querySelector('#label-0-0'), isNull);
+      expect(object.element.getAttribute('aria-label'), 'Single Label');
+      expect(object.element.getAttribute('aria-labelledby'), isNull);
+      expect(object.element.querySelector('#label-0-0'), isNull);
 
-    semantics().semanticsEnabled = false;
-  });
+      semantics().semanticsEnabled = false;
+    },
+  );
 
   test('AriaLabelHelper filters empty label parts and falls back to aria-label', () {
     semantics()
@@ -1251,10 +1255,7 @@ label''');
       labelParts: <String>['Valid', '', '  ', 'Also Valid'],
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 50, 25),
-        ),
+        tester.updateNode(id: 1, rect: const ui.Rect.fromLTRB(0, 0, 50, 25)),
       ],
     );
     tester.apply();
@@ -1271,10 +1272,7 @@ label''');
       labelParts: <String>['', '  ', ''],
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 50, 25),
-        ),
+        tester.updateNode(id: 1, rect: const ui.Rect.fromLTRB(0, 0, 50, 25)),
       ],
     );
     tester.apply();

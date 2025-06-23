@@ -616,11 +616,7 @@ String? computeDomSemanticsLabel({
   String? value,
   List<String>? labelParts,
 }) {
-  final String? labelValue = _computeLabelValue(
-    label: label,
-    value: value,
-    labelParts: labelParts,
-  );
+  final String? labelValue = _computeLabelValue(label: label, value: value, labelParts: labelParts);
 
   if (tooltip == null && labelValue == null) {
     return null;
@@ -643,11 +639,7 @@ String? computeDomSemanticsLabel({
   return combinedValue.isNotEmpty ? combinedValue.toString() : null;
 }
 
-String? _computeLabelValue({
-  String? label,
-  String? value,
-  List<String>? labelParts,
-}) {
+String? _computeLabelValue({String? label, String? value, List<String>? labelParts}) {
   // If labelParts are provided, use them instead of the regular label
   if (labelParts != null && labelParts.isNotEmpty) {
     final String labelPartsValue = labelParts
@@ -655,10 +647,10 @@ String? _computeLabelValue({
         .join(' ');
     if (labelPartsValue.isNotEmpty) {
       // Combine labelParts with value if both exist
-      final String combinedValue = <String?>[labelPartsValue, value]
-          .whereType<String>()
-          .where((String element) => element.trim().isNotEmpty)
-          .join(' ');
+      final String combinedValue = <String?>[
+        labelPartsValue,
+        value,
+      ].whereType<String>().where((String element) => element.trim().isNotEmpty).join(' ');
       return combinedValue.isNotEmpty ? combinedValue : null;
     }
   }
@@ -698,9 +690,8 @@ class AriaLabelHelper {
     final List<String>? labelParts = semanticsObject.labelParts;
 
     // Filter out empty or whitespace-only label parts
-    final List<String>? validParts = labelParts
-        ?.where((String part) => part.trim().isNotEmpty)
-        .toList();
+    final List<String>? validParts =
+        labelParts?.where((String part) => part.trim().isNotEmpty).toList();
 
     // Use aria-labelledby if valid labelParts are provided, otherwise use aria-label
     if (validParts != null && validParts.isNotEmpty) {
