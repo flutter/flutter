@@ -12,8 +12,8 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
   args: 2.7.0
-  dds: 5.0.2
-  dwds: 24.3.10
+  dds: 5.0.4
+  dwds: 24.3.11
   code_builder: 4.10.1
   completion: 1.0.1
   coverage: 1.14.1
@@ -57,8 +57,8 @@ dependencies:
 
   graphs: 2.3.2
   hooks_runner: 0.21.0
-  hooks: 0.19.3
-  code_assets: 0.19.3
+  hooks: 0.19.5
+  code_assets: 0.19.4
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -84,8 +84,8 @@ dependencies:
   csslib: 1.0.2
   dap: 1.4.0
   dds_service_extensions: 2.0.2
-  devtools_shared: 11.2.1
-  dtd: 2.5.1
+  devtools_shared: 12.0.0
+  dtd: 4.0.0
   extension_discovery: 2.1.0
   fixnum: 1.1.1
   frontend_server_client: 4.0.0
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: untvjo
+# PUBSPEC CHECKSUM: oka5k6
