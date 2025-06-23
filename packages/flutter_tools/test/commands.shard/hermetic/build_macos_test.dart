@@ -1068,6 +1068,7 @@ STDERR STUFF
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     },
   );
 }
