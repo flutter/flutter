@@ -21,23 +21,9 @@ import 'project.dart';
 List<Dependency> computeTransitiveDependencies(
   FlutterProject project,
   PackageConfig packageConfig,
-  FileSystem fileSystem,
 ) {
-  final _PackageGraph packageGraph;
-  final File packageGraphFile = fileSystem.file(
-    project.packageConfig.uri.resolve('package_graph.json'),
-  );
-  try {
-    packageGraph = _PackageGraph.fromJson(jsonDecode(packageGraphFile.readAsStringSync()));
-  } on IOException catch (e) {
-    throwToolExit('''
-Failed to load ${packageGraphFile.path}: $e
-Try running `flutter pub get`''');
-  } on FormatException catch (e) {
-    throwToolExit('''
-Failed to parse ${packageGraphFile.path}: $e
-Try running `flutter pub get`''');
-  }
+  final PackageGraph packageGraph = PackageGraph.load(project);
+
   final String rootName = project.manifest.appName;
 
   final Map<String, Dependency> result = <String, Dependency>{};
@@ -53,13 +39,13 @@ Try running `flutter pub get`''');
   final List<String>? dependencies = packageGraph.dependencies[project.manifest.appName];
   if (dependencies == null) {
     throwToolExit('''
-Failed to parse ${packageGraphFile.path}: dependencies for `${project.manifest.appName}` missing.
+Failed to parse ${packageGraph.file.path}: dependencies for `${project.manifest.appName}` missing.
 Try running `flutter pub get`''');
   }
   final List<String>? devDependencies = packageGraph.devDependencies[project.manifest.appName];
   if (devDependencies == null) {
     throwToolExit('''
-Failed to parse ${packageGraphFile.path}: devDependencies for `${project.manifest.appName}` missing.
+Failed to parse ${packageGraph.file.path}: devDependencies for `${project.manifest.appName}` missing.
 Try running `flutter pub get`''');
   }
   final List<String> packageNamesToVisit = <String>[...dependencies, ...devDependencies];
@@ -73,7 +59,7 @@ Try running `flutter pub get`''');
 
     if (dependencies == null) {
       throwToolExit('''
-Failed to parse ${packageGraphFile.path}: dependencies for `$current` missing.
+Failed to parse ${packageGraph.file.path}: dependencies for `$current` missing.
 Try running `flutter pub get`''');
     }
     packageNamesToVisit.addAll(dependencies);
@@ -124,11 +110,11 @@ class Dependency {
   final Uri rootUri;
 }
 
-class _PackageGraph {
-  _PackageGraph(this.dependencies, this.devDependencies);
+class PackageGraph {
+  PackageGraph(this.file, this.roots, this.dependencies, this.devDependencies);
 
   /// Parses the .dart_tool/package_graph.json file.
-  factory _PackageGraph.fromJson(Object? json) {
+  factory PackageGraph.fromJson(File file, Object? json) {
     if (json is! Map<String, Object?>) {
       throw const FormatException('Expected top level to be a map');
     }
@@ -139,6 +125,7 @@ class _PackageGraph {
     if (packages is! List<Object?>) {
       throw FormatException('expected `packages` to be a list, got $packages');
     }
+    final List<String> roots = _parseList(json, 'roots');
     final Map<String, List<String>> dependencies = <String, List<String>>{};
     final Map<String, List<String>> devDependencies = <String, List<String>>{};
     for (final Object? package in packages) {
@@ -149,27 +136,44 @@ class _PackageGraph {
       if (name is! String) {
         throw const FormatException('Expected `name` to be a string');
       }
-      List<String> parseList(String section) {
-        final Object? list = package[section];
-        if (list == null) {
-          return <String>[];
-        }
-        if (list is! List<Object?>) {
-          throw FormatException('Expected `$section` to be a list got a $list');
-        }
-        for (final Object? i in list) {
-          if (i is! String) {
-            throw FormatException('Expected `$section` to be a list of strings');
-          }
-        }
-        return list.cast<String>();
-      }
 
-      dependencies[name] = parseList('dependencies');
-      devDependencies[name] = parseList('devDependencies');
+      dependencies[name] = _parseList(package, 'dependencies');
+      devDependencies[name] = _parseList(package, 'devDependencies');
     }
-    return _PackageGraph(dependencies, devDependencies);
+    return PackageGraph(file, roots, dependencies, devDependencies);
   }
+
+  static PackageGraph load(FlutterProject project) {
+    final File file = project.packageConfig.fileSystem.file(
+      project.packageConfig.uri.resolve('package_graph.json'),
+    );
+    try {
+      return PackageGraph.fromJson(file, jsonDecode(file.readAsStringSync()));
+    } on IOException catch (e) {
+      throwToolExit('''
+Failed to load ${file.path}: $e
+Try running `flutter pub get`''');
+    } on FormatException catch (e) {
+      throwToolExit('''
+Failed to parse ${file.path}: $e
+Try running `flutter pub get`''');
+    }
+  }
+
+  /// The file this was parsed from.
+  final File file;
+
+  /// Names of all root packages in the workspace of this package graph.
+  final List<String> roots;
   final Map<String, List<String>> dependencies;
   final Map<String, List<String>> devDependencies;
+
+  static List<String> _parseList(Map<String, Object?> map, String section) {
+    final Object? result = map[section];
+    try {
+      return (result as List<Object?>?)?.cast<String>() ?? <String>[];
+    } on TypeError {
+      throw FormatException('Expected `$section` to be a list of strings');
+    }
+  }
 }
