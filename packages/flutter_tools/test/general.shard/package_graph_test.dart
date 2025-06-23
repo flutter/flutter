@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/compute_dev_dependencies.dart';
+import 'package:flutter_tools/src/package_graph.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
 
@@ -100,11 +100,7 @@ ${package.devDependencies.map((String d) => '  $d: {path: ../$d}').join('\n')}
 
     final PackageConfig packageConfig = await loadPackageConfig(project.packageConfig);
 
-    final List<Dependency> dependencies = computeTransitiveDependencies(
-      project,
-      packageConfig,
-      fileSystem,
-    );
+    final List<Dependency> dependencies = computeTransitiveDependencies(project, packageConfig);
     expect(dependencies.map((Dependency d) => d.name), graph.map((Package p) => p.name).toSet());
     for (final Package p in graph) {
       expect(
