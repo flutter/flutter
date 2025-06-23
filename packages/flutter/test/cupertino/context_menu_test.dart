@@ -1145,4 +1145,100 @@ void main() {
     expect(find.text('Item 0'), findsOneWidget);
     expect(find.text('Item 1'), findsOneWidget);
   });
+
+  testWidgets('Pushing a new route removes overlay', (WidgetTester tester) async {
+    final Widget child = getChild();
+    const String page = 'Page 2';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: CupertinoContextMenu(
+                actions: const <Widget>[CupertinoContextMenuAction(child: Text('Test'))],
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute<Widget>(
+                        builder:
+                            (BuildContext context) =>
+                                const CupertinoPageScaffold(child: Text(page)),
+                      ),
+                    );
+                  },
+                  child: child,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+    expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(page), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+
+    // Kickstart the route transition.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // As the transition starts, the overlay has been removed.
+    // Only the child transitioning out is shown.
+    expect(find.text(page), findsOneWidget);
+    expect(find.byWidget(child), findsOneWidget);
+  });
+
+  testWidgets('Removing context menu from widget tree removes overlay', (
+    WidgetTester tester,
+  ) async {
+    final Widget child = getChild();
+    bool ctxMenuRemoved = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Center(
+              child:
+                  ctxMenuRemoved
+                      ? const SizedBox()
+                      : CupertinoContextMenu(
+                        actions: <Widget>[
+                          CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+                        ],
+                        child: child,
+                      ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    setState(() {
+      ctxMenuRemoved = true;
+    });
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(child), findsNothing);
+  });
 }
