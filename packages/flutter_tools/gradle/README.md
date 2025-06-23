@@ -27,6 +27,12 @@ Tests can be run in Android Studio, or directly with Gradle: `./gradlew test`
 the engines `third_party` directory at 
 `<flutter_root>/engine/src/flutter/third_party/gradle/bin/gradle`).
 
+If you can not run the test task try running `./gradlew tasks` if that does not work then there is
+a configuration error. The most common one is using the wrong version of java. Java can be
+overridden by setting the `JAVA_HOME` environment variable.
+This example sets the java version to 17 downloaded with brew and then runs the tests:
+`JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/ ./gradlew test`
+
 Alternatively, you can run all the tests in one file by passing in the fully qualified class name, 
 e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in 
 one file by passing in the fully qualified class name followed by the method name, 
