@@ -98,3 +98,18 @@ world*/
   ASSERT_EQ(comments.size(), 1u);
   EXPECT_EQ(comments[0], "hello\nworld");
 }
+
+TEST(CommentsTest, HashComments) {
+  std::string test = R"test(
+# Hello
+# World
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "Hello\nWorld");
+}
