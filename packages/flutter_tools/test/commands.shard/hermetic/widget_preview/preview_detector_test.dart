@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
-import '../../../integration.shard/gen_l10n_test.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import 'utils/preview_details_matcher.dart';
@@ -19,9 +17,6 @@ import 'utils/preview_project.dart';
 // have a 2000ms time out and these tests write to the real file system and watch
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
-
-String platformPath(List<String> pathSegments) =>
-    pathSegments.join(const LocalPlatform().pathSeparator);
 
 void populatePubspec(Directory projectRoot, String contents) {
   projectRoot.childFile('pubspec.yaml')

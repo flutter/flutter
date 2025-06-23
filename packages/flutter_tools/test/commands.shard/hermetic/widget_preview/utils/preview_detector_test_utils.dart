@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
@@ -183,3 +184,6 @@ void expectPreviewDependencyGraphIsWellFormed(
         .toSet(),
   );
 }
+
+String platformPath(List<String> pathSegments) =>
+    pathSegments.join(const LocalPlatform().pathSeparator);

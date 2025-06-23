@@ -8,7 +8,8 @@ library;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart';
+
+import '../../../../src/common.dart';
 
 typedef WidgetPreviewSourceFile = ({String path, String source});
 

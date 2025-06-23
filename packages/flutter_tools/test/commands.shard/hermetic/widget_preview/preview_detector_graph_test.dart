@@ -60,21 +60,21 @@ import 'src/lib.dart';
 void main() {}
 ''',
       );
-      const WidgetPreviewSourceFile lib = (
-        path: 'src/lib.dart',
+      final WidgetPreviewSourceFile lib = (
+        path: platformPath(<String>['src', 'lib.dart']),
         source: '''
 library lib;
 part 'lib_part1.dart';
 part 'lib_part2.dart';''',
       );
-      const WidgetPreviewSourceFile libPart1 = (
-        path: 'src/lib_part1.dart',
+      final WidgetPreviewSourceFile libPart1 = (
+        path: platformPath(<String>['src', 'lib_part1.dart']),
         source: '''
 part of 'lib.dart';
 ''',
       );
-      const WidgetPreviewSourceFile libPart2 = (
-        path: 'src/lib_part2.dart',
+      final WidgetPreviewSourceFile libPart2 = (
+        path: platformPath(<String>['src', 'lib_part2.dart']),
         source: '''
 part of 'lib.dart';
 ''',
