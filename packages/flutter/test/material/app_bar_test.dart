@@ -1515,7 +1515,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
-        theme: ThemeData(appBarTheme: const AppBarTheme()),
+        theme: ThemeData(appBarTheme: const AppBarThemeData()),
         home: Scaffold(appBar: AppBar(title: const Text('title'))),
       ),
     );
@@ -2770,7 +2770,7 @@ void main() {
     Widget buildFrame({double? themeToolbarHeight, double? appBarToolbarHeight}) {
       final AppBar appBar = AppBar(toolbarHeight: appBarToolbarHeight);
       return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(toolbarHeight: themeToolbarHeight)),
+        theme: ThemeData(appBarTheme: AppBarThemeData(toolbarHeight: themeToolbarHeight)),
         home: Builder(
           builder: (BuildContext context) {
             preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
@@ -3432,7 +3432,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           key: GlobalKey(),
-          theme: ThemeData(useMaterial3: false, appBarTheme: const AppBarTheme()),
+          theme: ThemeData(useMaterial3: false, appBarTheme: const AppBarThemeData()),
           home: Scaffold(appBar: AppBar(title: const Text('title'))),
         ),
       );

@@ -16,6 +16,7 @@ source_set("licenses") {
     "src/mmap_file.h",
   ]
   public_deps = [
+    "//flutter/third_party/abseil-cpp/absl/log:initialize",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
   ]

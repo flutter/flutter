@@ -18,7 +18,6 @@ import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
@@ -27,6 +26,7 @@ import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
 import 'macos/swift_package_manager.dart';
+import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -114,7 +114,6 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
   final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
     project,
     packageConfig,
-    fs,
   );
   for (final Dependency dependency in transitiveDependencies) {
     final String packageName = dependency.name;

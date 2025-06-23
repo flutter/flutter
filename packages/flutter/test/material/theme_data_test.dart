@@ -1329,7 +1329,7 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.black),
@@ -1458,7 +1458,7 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
       bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.white),
@@ -2005,6 +2005,32 @@ void main() {
           ),
         );
       }
+    },
+  );
+
+  testWidgets(
+    'ThemeData.inputDecorationTheme accepts only a InputDecorationTheme or a InputDecorationThemeData',
+    (WidgetTester tester) async {
+      ThemeData(inputDecorationTheme: const InputDecorationTheme());
+      expect(tester.takeException(), isNull);
+
+      ThemeData(inputDecorationTheme: const InputDecorationThemeData());
+      expect(tester.takeException(), isNull);
+
+      expect(
+        () {
+          ThemeData(inputDecorationTheme: Object());
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError error) => error.message,
+            'message',
+            equals(
+              'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+            ),
+          ),
+        ),
+      );
     },
   );
 }
