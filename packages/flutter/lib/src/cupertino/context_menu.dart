@@ -1450,11 +1450,13 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
     final double initialChildTop = targetRect.center.dy - childSize.height;
 
     // Clamp the child's position to ensure it stays within screen bounds.
-    final double clampedLeft = initialChildLeft.clamp(
+    final double clampedLeft = clampDouble(
+      initialChildLeft,
       screenBounds.left + _ContextMenuRouteStaticState._kPadding,
       screenBounds.right - childSize.width - _ContextMenuRouteStaticState._kPadding,
     );
-    final double clampedTop = initialChildTop.clamp(
+    final double clampedTop = clampDouble(
+      initialChildTop,
       screenBounds.top,
       screenBounds.bottom -
           childSize.height -
