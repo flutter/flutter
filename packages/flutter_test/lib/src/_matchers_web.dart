@@ -70,7 +70,9 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
       assert(!renderObject.debugNeedsPaint);
       final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+      print('GETTING IMAGE FROM LAYER AT PAINTBOUNDS: ${renderObject.paintBounds}');
       final ui.Image image = await layer.toImage(renderObject.paintBounds);
+      print('GOT IMAGE FROM LAYER AT PAINTBOUNDS: ${renderObject.paintBounds}');
       try {
         final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
         if (bytes == null) {
