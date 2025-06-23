@@ -210,6 +210,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
+    required List<String> labelParts,
     required String value,
     List<StringAttribute>? valueAttributes,
     required String increasedValue,

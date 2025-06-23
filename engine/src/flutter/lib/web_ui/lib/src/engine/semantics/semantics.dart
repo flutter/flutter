@@ -321,10 +321,6 @@ class SemanticsNodeUpdate {
   final List<ui.StringAttribute> labelAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  ///
-  /// When provided, this should be used for aria-labelledby instead of the
-  /// single label string. This allows proper implementation of WAI-ARIA
-  /// aria-labelledby for web accessibility compliance.
   final List<String>? labelParts;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -1169,10 +1165,6 @@ class SemanticsObject {
   List<ui.StringAttribute>? _labelAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode]
-  ///
-  /// When provided, this should be used for aria-labelledby instead of the
-  /// single label string. This allows proper implementation of WAI-ARIA
-  /// aria-labelledby for web accessibility compliance.
   List<String>? get labelParts => _labelParts;
   List<String>? _labelParts;
 
