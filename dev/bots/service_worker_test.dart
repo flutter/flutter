@@ -88,26 +88,26 @@ self.addEventListener('activate', (event) => {
 
   // A simple caching service worker to act as the "old" worker.
   const String oldCachingWorkerContent = '''
-'use strict';
-const CACHE_NAME = 'flutter-test-cache-v1';
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(['/', 'index.html', 'main.dart.js']);
-    }).then(() => self.skipWaiting())
-  );
-});
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
-''';
+  'use strict';
+  const CACHE_NAME = 'flutter-test-cache-v1';
+  self.addEventListener('install', (event) => {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.addAll(['/', 'index.html', 'main.dart.js']);
+      }).then(() => self.skipWaiting())
+    );
+  });
+  self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+  });
+  self.addEventListener('fetch', (event) => {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request);
+      })
+    );
+  });
+  ''';
 
   final File serviceWorkerBuildFile = File(
     path.join(_appBuildDirectory, 'flutter_service_worker.js'),
@@ -116,7 +116,7 @@ self.addEventListener('fetch', (event) => {
   try {
     // Write the cleanup worker to the file system so it can be read if needed,
     print('Creating temporary cleanup worker file at: $cleanupWorkerSourcePath');
-    await cleanupWorkerFile.writeAsString(cleanupWorkerContent);
+    cleanupWorkerFile.writeAsStringSync(cleanupWorkerContent);
 
     // Build the app once at the beginning.
     await runCommand('flutter', <String>[
@@ -129,9 +129,10 @@ self.addEventListener('fetch', (event) => {
 
     // Install the "old" caching worker and verify it works
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
-    await serviceWorkerBuildFile.writeAsString(oldCachingWorkerContent);
+    serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
+
     // Load to install the worker.
     await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
 
@@ -151,15 +152,15 @@ self.addEventListener('fetch', (event) => {
 
     // Deploy the cleanup worker
     print('\n${yellow}Phase 2: Deploying cleanup worker and verifying cache is removed...$reset');
-    await serviceWorkerBuildFile.writeAsString(cleanupWorkerContent);
+    serviceWorkerBuildFile.writeAsStringSync(cleanupWorkerContent);
 
     server = await _startServer(headless: headless);
     // Hard refresh to force the browser to check for a new service worker version.
     await server.chrome.reloadPage(ignoreCache: true);
 
-    print('Waiting for cleanup worker to execute...');
-    // The cleanup worker will force another reload. We wait for it to settle.
-    await Future<void>.delayed(const Duration(seconds: 5));
+    print('Waiting for cleanup worker to execute and reload the page...');
+    await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
+
 
     print('Reloading page to check if cache is gone...');
     _requestedPathCounts.clear();
@@ -178,8 +179,8 @@ self.addEventListener('fetch', (event) => {
     );
   } finally {
     await server?.stop();
-    if (await cleanupWorkerFile.exists()) {
-      await cleanupWorkerFile.delete();
+    if (cleanupWorkerFile.existsSync()) {
+      cleanupWorkerFile.deleteSync();
       print('\nDeleted temporary cleanup worker file.');
     }
     print('\n${bold}END: Service Worker Cleanup Verification Test$reset');
@@ -226,6 +227,8 @@ Future<void> _waitForAppToLoad(AppServer server, {required Map<String, int> wait
   ]);
 }
 
+/// A drop-in replacement for `package:test`'s `expect` that can run
+/// outside the standard test runner environment.
 void expect(Object? actual, Object? expected, {String? reason}) {
   final Matcher matcher = wrapMatcher(expected);
   final Map<Object?, Object?> matchState = <Object?, Object?>{};
@@ -248,8 +251,10 @@ void expect(Object? actual, Object? expected, {String? reason}) {
   foundError(<String>[buffer.toString(), StackTrace.current.toString()]);
 }
 
+/// Returns a pretty-printed representation of [value].
 String _prettyPrint(Object? value) => StringDescription().addDescriptionOf(value).toString();
 
+/// Indents each line of a [text] string.
 String _indent(String text, {required String first}) {
   final String prefix = ' ' * first.length;
   final List<String> lines = text.split('\n');
