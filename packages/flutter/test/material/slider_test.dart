@@ -5442,4 +5442,42 @@ void main() {
       paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39510.
+  testWidgets('Discrete Slider not interpolate correctly', (WidgetTester tester) async {
+    double value = 0.0;
+    const Offset startOfTheSliderTrack = Offset(24, 300);
+    const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                max: 35,
+                divisions: 35,
+                integralDivisions: true,
+                value: value,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    const double targetRatio = 29.0 / 35.0;
+    final double trackWidth = endOfTheSliderTrack.dx - startOfTheSliderTrack.dx;
+    final double tapX = startOfTheSliderTrack.dx + (trackWidth * targetRatio);
+    final Offset target = Offset(tapX, startOfTheSliderTrack.dy);
+
+    await tester.tapAt(target);
+    await tester.pumpAndSettle();
+
+    expect(value, closeTo(29.0, 1e-15));
+  });
 }

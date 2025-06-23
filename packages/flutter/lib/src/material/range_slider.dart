@@ -161,6 +161,7 @@ class RangeSlider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.labels,
     this.activeColor,
     this.inactiveColor,
@@ -309,7 +310,23 @@ class RangeSlider extends StatefulWidget {
   /// Typically used with [labels] to show the current discrete values.
   ///
   /// If null, the slider is continuous.
+  ///
+  /// See also:
+  ///
+  ///   * [integralDivisions], which controls whether to automatically align
+  ///     all division points to integer values.
   final int? divisions;
+
+  /// Whether to automatically align all division points to integer values.
+  ///
+  /// When [divisions] is non-null, setting this to true ensures that each
+  /// division point corresponds exactly to an integer value. This is useful
+  /// when the divisions are intended to correspond to whole numbers, as
+  /// standard floating-point math can sometimes produce imprecise values (e.g.,
+  /// 4.999... instead of 5.0), leading to unexpected behavior.
+  ///
+  /// This property has no effect if [divisions] is null.
+  final bool integralDivisions;
 
   /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
   /// when the slider is active and [SliderThemeData.showValueIndicator]
@@ -573,7 +590,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   // Returns a number between min and max, proportional to value, which must
   // be between 0.0 and 1.0.
-  double _lerp(double value) => ui.lerpDouble(widget.min, widget.max, value)!;
+  double _lerp(double value) {
+    final double lerpValue = ui.lerpDouble(widget.min, widget.max, value)!;
+    if (widget.integralDivisions && widget.divisions != null) {
+      return lerpValue.roundToDouble();
+    }
+    return lerpValue;
+  }
 
   // Returns a new range value with the start and end lerped.
   RangeValues _lerpRangeValues(RangeValues values) {

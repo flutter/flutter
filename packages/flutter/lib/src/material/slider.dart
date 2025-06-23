@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -178,6 +179,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.label,
     this.activeColor,
     this.inactiveColor,
@@ -230,6 +232,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.label,
     this.mouseCursor,
     this.activeColor,
@@ -403,7 +406,23 @@ class Slider extends StatefulWidget {
   /// Typically used with [label] to show the current discrete value.
   ///
   /// If null, the slider is continuous.
+  ///
+  /// See also:
+  ///
+  ///   * [integralDivisions], which controls whether to automatically align
+  ///     all division points to integer values.
   final int? divisions;
+
+  /// Whether to automatically align all division points to integer values.
+  ///
+  /// When [divisions] is non-null, setting this to true ensures that each
+  /// division point corresponds exactly to an integer value. This is useful
+  /// when the divisions are intended to correspond to whole numbers, as
+  /// standard floating-point math can sometimes produce imprecise values (e.g.,
+  /// 4.999... instead of 5.0), leading to unexpected behavior.
+  ///
+  /// This property has no effect if [divisions] is null.
+  final bool integralDivisions;
 
   /// A label to show above the slider when the slider is active and
   /// [SliderThemeData.showValueIndicator] is satisfied.
@@ -765,7 +784,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _lerp(double value) {
     assert(value >= 0.0);
     assert(value <= 1.0);
-    return value * (widget.max - widget.min) + widget.min;
+
+    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.integralDivisions && widget.divisions != null) {
+      return lerpValue.roundToDouble();
+    }
+    return lerpValue;
   }
 
   double _discretize(double value) {
