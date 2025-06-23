@@ -31,7 +31,7 @@ INTERNAL NOTE
 
 ### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
 
-- [flutter/170880](https://github.com/flutter/flutter/pull/170880) - Fixes unhandled exception on application shutdown in the debug adapter used by IDEs.
+- [flutter/170880](https://github.com/flutter/flutter/pull/170880) - Fixes unhandled exception on application shutdown in the debug adapter used by IDEs. 
 
 ### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
 
