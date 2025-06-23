@@ -969,19 +969,25 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
-  /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are supported on the current platform.
+  /// Whether the platform supports accessibility  announcement API,
+  /// i.e. [SemanticsService.announce].
+  ///
+  /// Some platforms do not support or discourage the use of
+  /// announcement. Using [SemanticsService.announce] on those platform
+  /// may be ignored. Consider using other way to convey message to the
+  /// user. For example, Android discourages the uses of direct message
+  /// announcement, and rather encourages using other semantic
+  /// properties such as [SemanticsProperties.liveRegion] to convey
+  /// message to the user.
   ///
   /// Returns `false` on platforms where announcements are deprecated or
   /// unsupported by the underlying platform.
   ///
   /// Returns `true` on platforms where such announcements are
   /// generally supported without discouragement. (iOS, web etc)
-  ///
-  /// Use this flag to conditionally avoid making announcements on Android.
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // "announce" than discourage it.
-  bool get announce => _kNoAnnounceIndex & _index == 0;
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -1007,8 +1013,8 @@ class AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (announce) {
-      features.add('announce');
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
     }
     return 'AccessibilityFeatures$features';
   }
