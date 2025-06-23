@@ -215,7 +215,7 @@ if (enable_ios_unittests) {
     testonly = true
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
-    bridge_header = "framework/Source/Source-Bridging-Header.h"
+    bridge_header = "framework/Source/SwiftTests-Bridging-Header.h"
 
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
