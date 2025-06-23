@@ -1026,7 +1026,7 @@ STDERR STUFF
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
         fileSystem: fileSystem,
-        osUtils: FakeOperatingSystemUtils(),
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
