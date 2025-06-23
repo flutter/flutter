@@ -143,7 +143,7 @@ Package GetPackage(const Data& data,
   };
   bool after_third_party = false;
   fs::path current = ".";
-  for (const fs::path& component : relative_path) {
+  for (const fs::path& component : relative_path.parent_path()) {
     current /= component;
     std::optional<fs::path> current_license =
         FindLicense(data, working_dir, current);
