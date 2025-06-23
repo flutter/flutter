@@ -514,7 +514,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 /// meet **WCAG AAA** contrast levels.
 ///
 /// The AAA level is defined by the Web Content Accessibility Guidelines:
-/// https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+/// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
 ///
 /// This guideline enforces a stricter contrast ratio:
 ///  * Normal text must have a contrast ratio of at least 7.0
