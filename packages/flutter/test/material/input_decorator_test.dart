@@ -2944,10 +2944,31 @@ void main() {
         );
 
         expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        // Label line height is forced to 1.0 and font size is 16.0,
+        // the label should be vertically centered (20 pixels above and below).
         expect(getLabelRect(tester).top, 20.0);
         expect(getLabelRect(tester).bottom, 36.0);
       },
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/71813.
+    testWidgets('Ambient theme floatingLabelBehavior is used', (WidgetTester tester) async {
+      const FloatingLabelBehavior floatingLabelBehavior = FloatingLabelBehavior.never;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          inputDecorationTheme: const InputDecorationThemeData(
+            floatingLabelBehavior: floatingLabelBehavior,
+          ),
+          decoration: const InputDecoration(label: customLabel),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+      // Label line height is forced to 1.0 and font size is 16.0,
+      // the label should be vertically centered (20 pixels above and below).
+      expect(getCustomLabelRect(tester).top, 20.0);
+      expect(getCustomLabelRect(tester).bottom, 36.0);
+    });
 
     testWidgets('Floating label animation duration and curve', (WidgetTester tester) async {
       Future<void> pumpInputDecorator({required bool isFocused}) async {
