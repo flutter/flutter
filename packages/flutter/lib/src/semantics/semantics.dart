@@ -239,16 +239,14 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
-      if (!data.flagsCollection.hasCheckedState) {
-        node.visitChildren(validateRadioGroupChildren);
+      if (data.role == SemanticsRole.radioGroup) {
+        // Children under sub radio groups don't belong to this radio group.
         return error == null;
       }
 
       if (!data.flagsCollection.isInMutuallyExclusiveGroup) {
-        error = FlutterError(
-          'Radio buttons in a radio group must be in a mutually exclusive group',
-        );
-        return false;
+        node.visitChildren(validateRadioGroupChildren);
+        return error == null;
       }
 
       if (data.flagsCollection.isChecked) {
