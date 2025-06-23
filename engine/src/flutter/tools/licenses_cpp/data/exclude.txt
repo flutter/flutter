@@ -1,5 +1,7 @@
+################################################################################
 # This file describes all the files we don't need to do a copyright header
 # check on.
+################################################################################
 .*/test/.*
 .*/testing/.*
 .*/tests/.*
@@ -48,3 +50,26 @@
 ^third_party/swiftshader/third_party/llvm-16.0/.*
 ^third_party/vulkan-deps/spirv-headers/.*
 ^third_party/vulkan-deps/vulkan-loader/.*
+################################################################################
+# Instances that don't have a clear resolution yet.
+################################################################################
+# This isn't in the sky license, nor excluded.
+^third_party/expat/expat/lib/siphash.h
+# This directory isn't excluded explicitly but probably should be.
+^third_party/harfbuzz/.ci/.*
+# These files don't have headers and aren't explicitly excluded.
+^third_party/harfbuzz/src/test-use-table.cc
+^third_party/harfbuzz/src/wasm/graphite/shape.cc
+^third_party/harfbuzz/src/wasm/sample/c/shape-fallback.cc
+^third_party/harfbuzz/src/wasm/sample/c/shape-ot.cc
+# These files don't have headers and aren't explicitly excluded (but they're scripts).
+^third_party/libwebp/autogen.sh
+^third_party/libwebp/iosbuild.sh
+^third_party/libwebp/xcframeworkbuild.sh
+# This file doesn't have a header and isn't excluded.
+^third_party/harfbuzz/src/OT/Var/VARC/VARC.cc
+# This file has no header, but it only includes other files.
+^third_party/harfbuzz/src/harfbuzz-subset.cc
+# These files have no header, but they are generated files.
+^third_party/harfbuzz/src/hb-ot-shaper-indic-table.cc
+^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
