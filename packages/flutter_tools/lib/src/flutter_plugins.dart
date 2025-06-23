@@ -1254,6 +1254,8 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
+
+  // Filter out dev dependencies for release builds.
   final List<Plugin> filteredPlugins;
   if (releaseMode) {
     filteredPlugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
