@@ -1,11 +1,8 @@
-#!/usr/bin/env bash
-
-# A script to run the C++ license checker for the Flutter engine.
+#!/bin/bash
 #
-# This script makes the command easier to run by:
-# 1. Accepting the host profile directory (e.g., host_profile_arm64) as an argument.
-# 2. Guessing the host profile directory based on the CPU architecture if not provided.
-# 3. Automatically resolving all paths relative to the script's location.
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -46,22 +43,6 @@ fi
 
 # --- Define Paths Relative to the Script ---
 
-# Based on the original command, we can infer the project's directory structure
-# relative to this script's location.
-#
-# Assumed structure:
-# .../engine/
-# ├── out/
-# │   └── [host_profile_arm64]/
-# │       └── licenses_cpp      <-- The executable
-# └── src/
-#     └── flutter/
-#         ├── ...
-#         └── tools/
-#             └── licenses_cpp/
-#                 ├── data/     <-- The data directory
-#                 └── run.sh    <-- This script
-
 # Path to the executable to run.
 EXECUTABLE="$SCRIPT_DIR/../../out/$HOST_PROFILE_DIR/licenses_cpp"
 
@@ -73,8 +54,9 @@ DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
 
 # The output path for the generated licenses file. This will be created
 # in the directory where you *run* the script from (your current working directory).
-LICENSES_OUTPUT_PATH="licenses.txt"
+LICENSES_OUTPUT_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP.new"
 
+LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP"
 
 # --- Validation ---
 
@@ -87,20 +69,10 @@ fi
 
 # --- Run Command ---
 
-echo "--------------------------------------------------"
-echo "Host Profile:   $HOST_PROFILE_DIR"
-echo "Executable:     $EXECUTABLE"
-echo "Working Dir:    $WORKING_DIR"
-echo "Data Dir:       $DATA_DIR"
-echo "Output File:    $(pwd)/$LICENSES_OUTPUT_PATH"
-echo "--------------------------------------------------"
-echo "Running license check..."
-
-# Use "exec" to replace the shell process with the command. This is slightly
-# more efficient as it avoids creating an unnecessary child process.
-exec "$EXECUTABLE" \
+"$EXECUTABLE" \
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
   --licenses_path "$LICENSES_OUTPUT_PATH"
 
-echo "License check complete. Output written to $LICENSES_OUTPUT_PATH"
+diff -u "$LICENSES_OUTPUT_PATH" "$LICENSES_PATH"
+rm "$LICENSES_OUTPUT_PATH"
