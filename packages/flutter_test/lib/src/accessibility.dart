@@ -530,12 +530,12 @@ class MinimumTextContrastGuidelineAAA extends MinimumTextContrastGuideline {
 
   /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
   ///
-  /// Defined by WCAG AAA standard.
+  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kAAAMinimumRatioLargeText = 4.5;
 
   /// The minimum contrast ratio for normal text.
   ///
-  /// Defined by WCAG AAA standard.
+  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kAAAMinimumRatioNormalText = 7.0;
 
   @override
