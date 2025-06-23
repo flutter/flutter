@@ -311,8 +311,8 @@
 /dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
 
 ## Host only framework tests
-# Linux docs_deploy_beta
 # Linux docs_deploy_stable
+# Linux docs_generate_release
 # Linux docs_publish
 /dev/bots/docs.sh @Piinks @flutter/framework
 # Linux packages_autoroller
@@ -354,6 +354,7 @@
 # android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @bkonyi @flutter/tool
 # verify_binaries_codesigned @cbracken @flutter/releases
+# verify_binaries_pre_codesigned @vashworth @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web
 # web_integration_tests @yjbanov @flutter/web
 # web_long_running_tests @yjbanov @flutter/web

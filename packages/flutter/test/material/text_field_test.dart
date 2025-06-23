@@ -663,6 +663,42 @@ void main() {
     },
   );
 
+  testWidgets('suffix has correct semantics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169499.
+    final UniqueKey suffix = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: Center(
+              child: TextField(
+                autofocus: true,
+                decoration: InputDecoration(
+                  suffix: Semantics(
+                    key: suffix,
+                    identifier: 'myId',
+                    container: true,
+                    child: const SizedBox(width: 50, height: 50, child: Text('suffix')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Wait for autofocus and suffix animation.
+    expect(find.text('suffix'), findsOneWidget);
+    expect(
+      tester.semantics.find(find.byKey(suffix)),
+      containsSemantics(
+        label: 'suffix',
+        identifier: 'myId',
+        rect: const Rect.fromLTWH(0, 0, 50, 50),
+      ),
+    );
+  });
+
   testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
     // True
 
@@ -1270,7 +1306,6 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
                     ),
                   ],
@@ -1317,6 +1352,7 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
@@ -15062,7 +15098,7 @@ void main() {
   );
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
-  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from input decoration theme', (
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = _focusNode();
@@ -15070,7 +15106,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          inputDecorationTheme: InputDecorationTheme(floatingLabelBehavior: behavior),
+          inputDecorationTheme: InputDecorationThemeData(floatingLabelBehavior: behavior),
         ),
         home: Scaffold(
           body: TextField(
@@ -15115,13 +15151,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/140607.
-  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData.', (
     WidgetTester tester,
   ) async {
     Widget textFieldBuilder() {
       return MaterialApp(
         theme: ThemeData(
-          inputDecorationTheme: const InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationThemeData(
             errorStyle: TextStyle(color: Colors.green),
           ),
         ),

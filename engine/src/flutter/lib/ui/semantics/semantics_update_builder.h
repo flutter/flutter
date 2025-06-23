@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      Dart_Handle flags,
       int actions,
       int maxValueLength,
       int currentValueLength,
@@ -47,8 +47,6 @@ class SemanticsUpdateBuilder
       double top,
       double right,
       double bottom,
-      double elevation,
-      double thickness,
       std::string identifier,
       std::string label,
       const std::vector<NativeStringAttribute*>& labelAttributes,
