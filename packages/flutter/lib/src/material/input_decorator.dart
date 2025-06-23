@@ -1924,8 +1924,12 @@ class InputDecorator extends StatefulWidget {
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
   ///
-  /// Will withdraw when not empty or when focused while enabled.
-  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
+  /// Will withdraw when not empty, when focused while enabled, or when
+  /// floating behavior is [FloatingLabelBehavior.always].
+  bool get _labelShouldWithdraw =>
+      !isEmpty ||
+      (isFocused && decoration.enabled) ||
+      decoration.floatingLabelBehavior == FloatingLabelBehavior.always;
 
   @override
   State<InputDecorator> createState() => _InputDecoratorState();
@@ -1976,7 +1980,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void initState() {
     super.initState();
 
-    _floatingLabelController = AnimationController(duration: _kTransitionDuration, vsync: this);
+    final bool labelIsInitiallyFloating =
+        widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
+        widget._labelShouldWithdraw;
+
+    _floatingLabelController = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      value: labelIsInitiallyFloating ? 1.0 : 0.0,
+    );
     _floatingLabelController.addListener(_handleChange);
     _floatingLabelAnimation = CurvedAnimation(
       parent: _floatingLabelController,
@@ -1991,10 +2003,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void didChangeDependencies() {
     super.didChangeDependencies();
     _effectiveDecoration = null;
-
-    final bool labelIsInitiallyFloating =
-        decoration.floatingLabelBehavior != FloatingLabelBehavior.never && labelShouldWithdraw;
-    _floatingLabelController.value = labelIsInitiallyFloating ? 1.0 : 0.0;
   }
 
   @override
@@ -2026,10 +2034,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return decoration.floatingLabelBehavior != FloatingLabelBehavior.never;
   }
 
-  bool get labelShouldWithdraw =>
-      widget._labelShouldWithdraw ||
-      decoration.floatingLabelBehavior == FloatingLabelBehavior.always;
-
   @override
   void didUpdateWidget(InputDecorator old) {
     super.didUpdateWidget(old);
@@ -2041,7 +2045,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
-      if (_floatingLabelEnabled && labelShouldWithdraw) {
+      if (_floatingLabelEnabled && widget._labelShouldWithdraw) {
         _floatingLabelController.forward();
       } else {
         _floatingLabelController.reverse();
@@ -2127,7 +2131,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // floatingLabelBehavior isn't set to always, then the label appears where the
   // hint would.
   bool get _hasInlineLabel {
-    return !labelShouldWithdraw && (decoration.labelText != null || decoration.label != null);
+    return !widget._labelShouldWithdraw &&
+        (decoration.labelText != null || decoration.label != null);
   }
 
   // If the label is a floating placeholder, it's always shown.
@@ -2352,7 +2357,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           child: AnimatedDefaultTextStyle(
             duration: _kTransitionDuration,
             curve: _kTransitionCurve,
-            style: labelShouldWithdraw ? _getFloatingLabelStyle(themeData, defaults) : labelStyle,
+            style:
+                widget._labelShouldWithdraw
+                    ? _getFloatingLabelStyle(themeData, defaults)
+                    : labelStyle,
             child:
                 decoration.label ??
                 Text(decoration.labelText!, overflow: TextOverflow.ellipsis, textAlign: textAlign),
@@ -2368,13 +2376,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // If at least two out of the three are visible, it needs semantics sort
     // order.
     final bool needsSemanticsSortOrder =
-        labelShouldWithdraw &&
+        widget._labelShouldWithdraw &&
         (input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix));
 
     final Widget? prefix =
         hasPrefix
             ? _AffixText(
-              labelIsFloating: labelShouldWithdraw,
+              labelIsFloating: widget._labelShouldWithdraw,
               text: decoration.prefixText,
               style:
                   MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ??
@@ -2388,7 +2396,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget? suffix =
         hasSuffix
             ? _AffixText(
-              labelIsFloating: labelShouldWithdraw,
+              labelIsFloating: widget._labelShouldWithdraw,
               text: decoration.suffixText,
               style:
                   MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ??
