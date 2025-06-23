@@ -1246,11 +1246,12 @@ void main() {
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
         await const DebugIosLLDBInit().build(environment);
 
@@ -1272,11 +1273,12 @@ void main() {
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneSimulator.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
         await const DebugIosLLDBInit().build(environment);
       },
@@ -1292,11 +1294,12 @@ void main() {
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '18.3.1';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '18.3.1';
 
         await const DebugIosLLDBInit().build(environment);
       },
@@ -1320,11 +1323,12 @@ void main() {
             .childFile('MyProject.xcscheme')
           ..createSync(recursive: true)
           ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '26.0.0';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
         await const DebugIosLLDBInit().build(environment);
       },

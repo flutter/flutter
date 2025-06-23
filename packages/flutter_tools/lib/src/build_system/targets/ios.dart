@@ -498,11 +498,9 @@ class DebugIosLLDBInit extends Target {
   String get name => 'debug_ios_lldb_init';
 
   @override
-  List<Source> get inputs => <Source>[
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-    ),
-    const Source.pattern(
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+    Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
     ),
   ];
