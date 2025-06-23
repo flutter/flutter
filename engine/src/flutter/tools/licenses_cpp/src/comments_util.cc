@@ -8,7 +8,7 @@
 void CommentsUtil::AddTrimLine(std::string* buffer,
                                const char* text,
                                size_t length) {
-  RE2 regex(R"regex(^(?:\s*//\s?)(.*))regex");
+  RE2 regex(R"regex(^(?:\s*(?://|#)\s?)(.*))regex");
   re2::StringPiece captured_content;
   RE2::FullMatch(re2::StringPiece(text), regex, &captured_content);
   buffer->append(captured_content);
