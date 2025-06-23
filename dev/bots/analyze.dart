@@ -566,7 +566,6 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
       continue;
     }
 
-    print(callsTestFunctionPattern.allMatches(file.readAsStringSync()).map((e) => e.group(0)));
     violations.add(file.path);
   }
   if (violations.isNotEmpty) {
