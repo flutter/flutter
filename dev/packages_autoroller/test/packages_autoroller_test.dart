@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:conductor_core/packages_autoroller.dart';
-import 'package:conductor_core/src/repository.dart';
-import 'package:conductor_core/src/stdio.dart';
-import 'package:conductor_core/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:file/memory.dart';
+import 'package:packages_autoroller/packages_autoroller.dart';
+import 'package:packages_autoroller/src/repository.dart';
+import 'package:packages_autoroller/src/stdio.dart';
+import 'package:packages_autoroller/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:path/path.dart' show Context, Style;
 import 'package:platform/platform.dart';
 

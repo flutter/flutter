@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor_core/src/repository.dart';
 import 'package:file/memory.dart';
+import 'package:packages_autoroller/src/repository.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
+import 'common.dart';
 
 void main() {
   group('repository', () {
