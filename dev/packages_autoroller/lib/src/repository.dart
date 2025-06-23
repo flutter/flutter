@@ -11,8 +11,8 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import './git.dart';
-import './stdio.dart';
+import 'git.dart';
+import 'stdio.dart';
 
 /// Allowed git remote names.
 enum RemoteName { upstream, mirror }
