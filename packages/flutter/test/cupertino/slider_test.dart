@@ -841,4 +841,53 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39510.
+  testWidgets('Discrete Slider not interpolate correctly', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSlider(
+                key: sliderKey,
+                max: 35,
+                divisions: 35,
+                integralDivisions: true,
+                value: value,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Size size = tester.getSize(find.byKey(sliderKey));
+
+    const double trackStart = 16.0;
+    final double trackEnd = size.width - trackStart;
+    final double trackWidth = trackEnd - trackStart;
+    const double targetRatio = 29.0 / 35.0;
+    final double tapX = trackStart + trackWidth * targetRatio;
+    final double tapY = size.height / 2;
+
+    const double thumbRadius = CupertinoThumbPainter.radius;
+
+    final Offset dragStart = Offset(trackStart + thumbRadius, tapY);
+    final Offset dragEnd = Offset(tapX, tapY);
+
+    await tester.dragFrom(dragStart, dragEnd - dragStart);
+
+    await tester.pumpAndSettle();
+
+    expect(value, closeTo(29.0, 1e-15));
+  });
 }
