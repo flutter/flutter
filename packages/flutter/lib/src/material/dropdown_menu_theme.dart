@@ -32,7 +32,17 @@ import 'theme.dart';
 class DropdownMenuThemeData with Diagnosticable {
   /// Creates a [DropdownMenuThemeData] that can be used to override default properties
   /// in a [DropdownMenuTheme] widget.
-  const DropdownMenuThemeData({this.textStyle, this.inputDecorationTheme, this.menuStyle});
+  const DropdownMenuThemeData({
+    this.textStyle,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
+    this.menuStyle,
+  }) : assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// Overrides the default value for [DropdownMenu.textStyle].
   final TextStyle? textStyle;
@@ -40,7 +50,17 @@ class DropdownMenuThemeData with Diagnosticable {
   /// The input decoration theme for the [TextField]s in a [DropdownMenu].
   ///
   /// If this is null, the [DropdownMenu] provides its own defaults.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// Overrides the menu's default style in a [DropdownMenu].
   ///
@@ -52,7 +72,8 @@ class DropdownMenuThemeData with Diagnosticable {
   /// new values.
   DropdownMenuThemeData copyWith({
     TextStyle? textStyle,
-    InputDecorationTheme? inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     MenuStyle? menuStyle,
   }) {
     return DropdownMenuThemeData(
@@ -96,8 +117,8 @@ class DropdownMenuThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
-        'inputDecorationTheme',
+      DiagnosticsProperty<InputDecorationThemeData>(
+        'inputDecorationThemeData',
         inputDecorationTheme,
         defaultValue: null,
       ),
