@@ -47,6 +47,7 @@ final class HttpProxyGoldenComparator extends GoldenFileComparator {
   @override
   Future<bool> compare(Uint8List bytes, Uri golden) async {
     final String key = golden.toString();
+    print('RUNNING GOLDEN CHECK FOR KEY: $key !!!!!!!!!!!!!!!!');
     final String bytesEncoded = base64.encode(bytes);
     final web.Response response =
         await web.window
@@ -64,6 +65,7 @@ final class HttpProxyGoldenComparator extends GoldenFileComparator {
             )
             .toDart;
     final String responseText = (await response.text().toDart).toDart;
+    print('GOT RESPONSE TO flutter_goldens REQUEST: $responseText');
     if (responseText == 'true') {
       return true;
     }
