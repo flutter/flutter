@@ -42,4 +42,42 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
+    UISceneOpenURLOptions* options) {
+  if (@available(iOS 14.5, *)) {
+    return @{
+      UIApplicationOpenURLOptionsSourceApplicationKey : options.sourceApplication
+          ? options.sourceApplication
+          : [NSNull null],
+      UIApplicationOpenURLOptionsAnnotationKey : options.annotation ? options.annotation
+                                                                    : [NSNull null],
+      UIApplicationOpenURLOptionsOpenInPlaceKey : @(options.openInPlace),
+      UIApplicationOpenURLOptionsEventAttributionKey : options.eventAttribution
+          ? options.eventAttribution
+          : [NSNull null],
+    };
+  } else {
+    return @{
+      UIApplicationOpenURLOptionsSourceApplicationKey : options.sourceApplication
+          ? options.sourceApplication
+          : [NSNull null],
+      UIApplicationOpenURLOptionsAnnotationKey : options.annotation ? options.annotation
+                                                                    : [NSNull null],
+      UIApplicationOpenURLOptionsOpenInPlaceKey : @(options.openInPlace),
+    };
+  }
+}
+
+- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
+  id appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate respondsToSelector:@selector(lifeCycleDelegate)]) {
+    FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate = [appDelegate lifeCycleDelegate];
+    for (UIOpenURLContext* context in URLContexts) {
+      [lifeCycleDelegate application:FlutterSharedApplication.application
+                             openURL:context.URL
+                             options:ConvertOptions(context.options)];
+    };
+  }
+}
+
 @end
