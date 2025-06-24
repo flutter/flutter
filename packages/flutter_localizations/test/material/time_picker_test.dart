@@ -745,9 +745,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      dialCustomPaintFinder,
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -775,9 +773,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      dialCustomPaintFinder,
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -805,9 +801,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      dialCustomPaintFinder,
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -835,9 +829,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      dialCustomPaintFinder,
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
