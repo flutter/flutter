@@ -165,7 +165,7 @@ To allow the tool to be used with a locally-built engine, the `flutter` tool acc
 global parameters:
 
 * `local-engine`, which specifies which build of the engine to run
-* `local-engine-host`, which specifies which build of the engine to do... something with
+* `local-engine-host`, which specifies which build of the engine to use for host artifacts like the dart compiler
 * `local-engine-src-path` (optional), which specifies the path to your engine sources
 
 A typical invocation would be: `--local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
