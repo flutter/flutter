@@ -957,8 +957,6 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(dismissedItems, equals(<int>[1]));
     final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(

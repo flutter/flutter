@@ -144,13 +144,7 @@ void main() {
 
     for (final Typography fromTypography in all) {
       for (final Typography toTypography in all) {
-        Object? error;
-        try {
-          Typography.lerp(fromTypography, toTypography, 0.5);
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+        Typography.lerp(fromTypography, toTypography, 0.5);
       }
     }
   });

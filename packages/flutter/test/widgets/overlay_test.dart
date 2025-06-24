@@ -1574,14 +1574,7 @@ void main() {
       final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => Container());
 
       entry.dispose();
-
-      Object? error;
-      try {
-        entry.addListener(() {});
-      } catch (e) {
-        error = e;
-      }
-      expect(error, isAssertionError);
+      expect(() => entry.addListener(() {}), throwsAssertionError);
     });
 
     testWidgets('delayed dispose', (WidgetTester tester) async {
@@ -1606,14 +1599,7 @@ void main() {
       expect(mountedLog, <bool>[true, false]);
       expect(tester.takeException(), isNull);
 
-      // The entry is no longer usable.
-      Object? error;
-      try {
-        entry.addListener(() {});
-      } catch (e) {
-        error = e;
-      }
-      expect(error, isAssertionError);
+      expect(() => entry.addListener(() {}), throwsAssertionError);
     });
   });
 

@@ -5494,16 +5494,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
         final String id = service.toId(diagnostic, group)!;
 
-        Object? error;
-        try {
-          await service.testExtension(
-            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
-            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
-          );
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+        await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        );
       });
 
       testWidgets(
@@ -5537,16 +5531,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           final String id = service.toId(elevatedButton, group)!;
 
-          Object? error;
-          try {
-            await service.testExtension(
-              WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
-              <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
-            );
-          } catch (e) {
-            error = e;
-          }
-          expect(error, isNull);
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
         },
       );
     });

@@ -68,8 +68,6 @@ void main() {
         const Widget widget = _SingleTickerCreateMultipleTicker();
         await tester.pumpWidget(widget);
         final dynamic exception = tester.takeException();
-        expect(exception, isNotNull);
-        expect(exception, isFlutterError);
         final FlutterError error = exception as FlutterError;
         expect(error.diagnostics.length, 3);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
