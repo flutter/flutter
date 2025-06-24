@@ -1748,7 +1748,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
     super.key,
     required List<DropdownMenuItem<T>>? items,
     DropdownButtonBuilder? selectedItemBuilder,
+    @Deprecated(
+      'Use initialValue instead. '
+      'This will set the initial value for the form field. '
+      'This feature was deprecated after v3.33.0-1.0.pre.',
+    )
     T? value,
+    T? initialValue,
     Widget? hint,
     Widget? disabledHint,
     required this.onChanged,
@@ -1783,17 +1789,20 @@ class DropdownButtonFormField<T> extends FormField<T> {
   }) : assert(
          items == null ||
              items.isEmpty ||
-             value == null ||
-             items.where((DropdownMenuItem<T> item) => item.value == value).length == 1,
+             (initialValue == null && value == null) ||
+             items
+                     .where((DropdownMenuItem<T> item) => item.value == (initialValue ?? value))
+                     .length ==
+                 1,
          "There should be exactly one item with [DropdownButton]'s value: "
-         '$value. \n'
+         '${initialValue ?? value}. \n'
          'Either zero or 2 or more [DropdownMenuItem]s were detected '
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        decoration = decoration ?? const InputDecoration(),
        super(
-         initialValue: value,
+         initialValue: initialValue ?? value,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
