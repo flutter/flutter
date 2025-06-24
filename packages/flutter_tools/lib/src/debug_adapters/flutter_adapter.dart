@@ -333,7 +333,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   ///
   /// [sendFlutterMessage] will replace this value each time it writes a
   /// message.
-  Future<void> _currentFlutterProcessStdinWrite = Future.value();
+  Future<void> _currentFlutterProcessStdinWrite = Future<void>.value();
 
   /// Sends a message to the Flutter run daemon.
   ///
