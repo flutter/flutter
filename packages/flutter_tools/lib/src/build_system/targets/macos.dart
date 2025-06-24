@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -66,10 +67,10 @@ abstract class UnpackMacOS extends UnpackDarwin {
     _removeDenylistedFiles(environment.outputDir);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('FlutterMacOS.framework')
+        .childDirectory(FlutterDarwinPlatform.macos.frameworkName)
         .childDirectory('Versions')
         .childDirectory('A')
-        .childFile('FlutterMacOS');
+        .childFile(FlutterDarwinPlatform.macos.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
