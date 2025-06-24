@@ -173,17 +173,11 @@ void main() {
       ],
     );
     layout(root);
-    dynamic error;
     final PaintingContext context = PaintingContext(
       ContainerLayer(),
       const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
     );
-    try {
-      s.debugPaint(context, const Offset(0.0, 500));
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    s.debugPaint(context, const Offset(0.0, 500));
     debugPaintSizeEnabled = false;
   });
 
@@ -204,17 +198,11 @@ void main() {
       ],
     );
     layout(root);
-    dynamic error;
     final PaintingContext context = PaintingContext(
       ContainerLayer(),
       const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
     );
-    try {
-      s.debugPaint(context, const Offset(0.0, 500));
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    s.debugPaint(context, const Offset(0.0, 500));
     debugPaintSizeEnabled = false;
   });
 
