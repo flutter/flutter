@@ -69,7 +69,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 
 - If it's about the flutter/news_toolkit repository, add `team-news`.
 - If it's about a codelab, add `team-codelab`.
-- If it's about the release process or tooling (e.g., `conductor`), add `team-infra` and `infra: release`.
+- If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
