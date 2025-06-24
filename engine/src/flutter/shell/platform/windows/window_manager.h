@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
 
 #include <windows.h>
+#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -80,7 +81,7 @@ class WindowManager {
 
   // Callback that relays windows messages to the isolate. Set
   // during Initialize().
-  void (*on_message_)(WindowsMessage*) = nullptr;
+  std::function<void(WindowsMessage*)> on_message_;
 
   // Isolate that runs the Dart code. Set during Initialize().
   std::optional<Isolate> isolate_;
