@@ -5640,10 +5640,6 @@ class EditableTextState extends State<EditableText>
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
     PasteTextIntent: _makeOverridable(_PasteSelectionAction(this)),
-    //   CallbackAction<PasteTextIntent>(
-    //     onInvoke: (PasteTextIntent intent) => pasteText(intent.cause),
-    //   ),
-    // ),
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
