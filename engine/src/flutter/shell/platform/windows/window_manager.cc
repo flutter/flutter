@@ -44,7 +44,7 @@ FlutterViewId WindowManager::CreateRegularWindow(
       HostWindow::CreateRegularWindow(this, engine_, request->content_size);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
-    return 0;
+    return -1;
   }
   FlutterViewId const view_id = window->view_controller_->view()->view_id();
   active_windows_[window->GetWindowHandle()] = std::move(window);
