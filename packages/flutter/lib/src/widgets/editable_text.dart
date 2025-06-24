@@ -6638,6 +6638,10 @@ class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
 
   @override
   Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    if (!state.widget.selectionEnabled) {
+      return null;
+    }
+
     return Actions.invoke(
       context!,
       UpdateSelectionIntent(
@@ -6647,9 +6651,6 @@ class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
       ),
     );
   }
-
-  @override
-  bool get isActionEnabled => state.widget.selectionEnabled;
 }
 
 class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
@@ -6659,15 +6660,20 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    if (!state._value.selection.isValid || state._value.selection.isCollapsed) {
+      return;
+    }
+
+    if (!state.widget.selectionEnabled) {
+      return;
+    }
+
     if (intent.collapseSelection) {
       state.cutSelection(intent.cause);
     } else {
       state.copySelection(intent.cause);
     }
   }
-
-  @override
-  bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
 }
 
 class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
@@ -6677,11 +6683,12 @@ class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
 
   @override
   void invoke(PasteTextIntent intent, [BuildContext? context]) {
+    if (!state.widget.selectionEnabled) {
+      return;
+    }
+
     state.pasteText(intent.cause);
   }
-
-  @override
-  bool get isActionEnabled => state.widget.selectionEnabled;
 }
 
 /// A [ClipboardStatusNotifier] whose [value] is hardcoded to
