@@ -2863,46 +2863,70 @@ void main() {
     expect(mediaQueryPadding, EdgeInsets.zero);
   });
 
-  testWidgets("PopupMenu doesn't try to update position when unmounted", (
+  // Regression test for https://github.com/flutter/flutter/issues/163477
+  testWidgets("PopupMenu's overlay can be rebuilt even when the button is unmounted", (
     WidgetTester tester,
   ) async {
     final GlobalKey buttonKey = GlobalKey();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              const TextField(autofocus: true),
-              PopupMenuButton<int>(
-                key: buttonKey,
-                popUpAnimationStyle: const AnimationStyle(reverseDuration: Duration(milliseconds: 400)),
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<int>>[
-                    PopupMenuItem<int>(
-                      value: 1,
-                      child: const Text('ACTION'),
-                      onTap: () {},
-                    ),
-                  ];
-                },
+    late StateSetter setState;
+    bool showButton = true;
+
+    Widget widget({required Size viewSize}) {
+      return Center(
+        child: SizedBox(
+          width: viewSize.width,
+          height: viewSize.height,
+          child: MaterialApp(
+            home: Material(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter innerSetState) {
+                setState = innerSetState;
+                return showButton
+                        ? PopupMenuButton<int>(
+                          key: buttonKey,
+                          popUpAnimationStyle: const AnimationStyle(
+                            reverseDuration: Duration(milliseconds: 400),
+                          ),
+                          itemBuilder: (BuildContext context) {
+                            return <PopupMenuEntry<int>>[
+                              PopupMenuItem<int>(
+                                value: 1,
+                                child: const Text('ACTION'),
+                                onTap: () {},
+                              ),
+                            ];
+                          },
+                        )
+                        : Container();
+                }),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+      );
+    }
 
-    await tester.showKeyboard(find.byType(TextField));
+    // Pump a button
+    await tester.pumpWidget(widget(viewSize: const Size(500, 500)));
 
+    // Tap the button to show the menu
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
+    expect(find.text('ACTION'), findsOne);
+    expect(find.byKey(buttonKey), findsOne);
 
-    // TODO(sstasi95): here we should trigger a layout change to test the fix
-    await tester.tap(find.text('ACTION'));
-    await tester.pumpAndSettle();
+    // Hide the button. The menu still shows since it's placed on a separate route.
+    setState(() {
+      showButton = false;
+    });
+    await tester.pump();
+    expect(find.text('ACTION'), findsOne);
+    expect(find.byKey(buttonKey), findsNothing);
 
-    expect(find.text('ACTION'), findsNothing);
+    // Resize the view, causing the menu to rebuild. Before the fix, this
+    // rebuild would lead to a crash, because it relies on context of the button,
+    // which has been unmounted.
+    await tester.pumpWidget(widget(viewSize: const Size(300, 300)));
+
     expect(tester.takeException(), isNull);
   });
 

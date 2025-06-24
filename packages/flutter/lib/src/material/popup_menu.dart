@@ -1572,6 +1572,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     if (!mounted) {
+      // When the route is displayed, the `_positionBuilder` closure is stored.
+      // Even after the button has been unmounted and the context becomes invalid,
+      // the route might keep displaying, and `_positionBuilder` must continue to
+      // work in that case.
       return _lastPosition ?? RelativeRect.fromSize(Rect.zero, constraints.biggest);
     }
 
