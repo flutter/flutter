@@ -150,22 +150,6 @@ bool IsClassRegistered(LPCWSTR class_name) {
          0;
 }
 
-// Converts std::string to std::wstring.
-std::wstring StringToWstring(std::string_view str) {
-  if (str.empty()) {
-    return {};
-  }
-  if (int buffer_size =
-          MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), nullptr, 0)) {
-    std::wstring wide_str(buffer_size, L'\0');
-    if (MultiByteToWideChar(CP_UTF8, 0, str.data(), str.size(), &wide_str[0],
-                            buffer_size)) {
-      return wide_str;
-    }
-  }
-  return {};
-}
-
 // Window attribute that enables dark mode window decorations.
 //
 // Redefined in case the developer's machine has a Windows SDK older than
