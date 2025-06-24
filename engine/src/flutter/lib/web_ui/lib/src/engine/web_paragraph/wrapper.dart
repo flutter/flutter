@@ -70,7 +70,6 @@ class TextWrapper {
 
     _top = 0.0;
     startNewLine(0, 0.0);
-
     bool hardLineBreak = false;
     for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
@@ -198,7 +197,7 @@ class TextWrapper {
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
-    
+
     _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),

@@ -522,12 +522,22 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    return null;
+    throw UnimplementedError('getGlyphInfoAt not supported by WebParagraph');
   }
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    return ui.TextRange.empty;
+    final int codepointPosition = switch (position.affinity) {
+      ui.TextAffinity.upstream => position.offset - 1,
+      ui.TextAffinity.downstream => position.offset,
+    };
+    if (codepointPosition < 0) {
+      return ui.TextRange(start: 0, end: 0);
+    }
+    if (codepointPosition >= text!.length) {
+      return ui.TextRange(start: text!.length, end: text!.length);
+    }
+    return _layout.getWordBoundary(codepointPosition);
   }
 
   @override
@@ -610,6 +620,11 @@ class WebParagraph implements ui.Paragraph {
   }
 
   String getText(TextRange textRange) {
+    if (text!.isEmpty) {
+      return text!;
+    }
+    assert(textRange.start >= 0);
+    assert(textRange.end <= text!.length);
     return text!.substring(textRange.start, textRange.end);
   }
 

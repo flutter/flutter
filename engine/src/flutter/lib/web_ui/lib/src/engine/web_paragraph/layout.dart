@@ -48,11 +48,15 @@ class TextLayout {
   bool get isDefaultRtl => paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
 
   void performLayout(double width) {
+    extractUnicodeInfo();
+
     extractClusterTexts();
 
     extractBidiRuns();
 
-    extractUnicodeInfo();
+    if (paragraph.text!.isEmpty) {
+      return;
+    }
 
     wrapText(width);
 
@@ -148,6 +152,9 @@ class TextLayout {
     layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
       final String text = paragraph.getText(styledBlock.textRange);
+      if (text.isEmpty) {
+        continue;
+      }
 
       // Setup all the font affecting attributes
       layoutContext.font = styledBlock.textStyle.buildCssFontString();
@@ -155,6 +162,7 @@ class TextLayout {
       layoutContext.wordSpacing = styledBlock.textStyle.buildWordSpacingString();
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
+
       styledTextBlocks.add(
         StyledTextBlock(
           styledBlock.textRange.start,
@@ -163,7 +171,9 @@ class TextLayout {
           blockTextMetrics,
         ),
       );
+
       printTextMetrics(text, blockTextMetrics);
+
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final ui.Rect advance = getAdvance(
           blockTextMetrics,
@@ -199,18 +209,22 @@ class TextLayout {
       blockStart += blockAdvance.width;
     }
 
-    textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
-    for (int i = 0; i < textClusters.length; ++i) {
-      final ExtendedTextCluster textCluster = textClusters[i];
-      for (int j = textCluster.textRange.start; j < textCluster.textRange.end; j += 1) {
-        textToClusterMap[j] = i;
+    if (paragraph.text!.isNotEmpty) {
+      textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
+      for (int i = 0; i < textClusters.length; ++i) {
+        final ExtendedTextCluster textCluster = textClusters[i];
+        for (int j = textCluster.textRange.start; j < textCluster.textRange.end; j += 1) {
+          textToClusterMap[j] = i;
+        }
       }
+
+      textToClusterMap[paragraph.text!.length] = textClusters.length;
+      textClusters.add(ExtendedTextCluster.fromLast(textClusters.last));
+      printClusters('Full text');
+    } else {
+      textToClusterMap[paragraph.text!.length] = 0;
+      textClusters.add(ExtendedTextCluster.empty());
     }
-
-    textToClusterMap[paragraph.text!.length] = textClusters.length;
-    textClusters.add(ExtendedTextCluster.fromLast(textClusters.last));
-
-    printClusters('Full text');
   }
 
   ClusterRange convertTextToClusterRange(TextRange textRange) {
@@ -221,6 +235,9 @@ class TextLayout {
 
   TextRange convertSequentialClusterRangeToText(ClusterRange clusterRange) {
     final ExtendedTextCluster start = textClusters[clusterRange.start];
+    if (clusterRange.isEmpty) {
+      return TextRange(start: start.textRange.start, end: start.textRange.start);
+    }
     final ExtendedTextCluster end = textClusters[clusterRange.end - 1];
     return TextRange(
       start: math.min(start.textRange.start, end.textRange.end),
@@ -738,6 +755,24 @@ class TextLayout {
     // we didn't find the line that is down from the offset
     // So all the line are above the offset
     return ui.TextPosition(offset: paragraph.text!.length - 1, affinity: ui.TextAffinity.upstream);
+  }
+
+  ui.TextRange getWordBoundary(int position) {
+    int start = position + 1;
+    while (start > 0) {
+      start -= 1;
+      if (codeUnitFlags[start].hasFlag(CodeUnitFlags.kWordBreak)) {
+        break;
+      }
+    }
+    int end = position + 1;
+    while (end < codeUnitFlags.length) {
+      if (codeUnitFlags[end].hasFlag(CodeUnitFlags.kWordBreak)) {
+        break;
+      }
+      end += 1;
+    }
+    return ui.TextRange(start: start, end: end);
   }
 }
 

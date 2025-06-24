@@ -19,7 +19,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-  /*
+
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -661,7 +661,6 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_letter_word_spacing.png', region: region);
   });
-*/
 
   test('Query WebParagraph.GetBoxesForRange LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
@@ -704,7 +703,6 @@ Future<void> testMain() async {
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
       for (final rect in rects) {
-        print('$rect');
         canvas.drawRect(rect.toRect(), bluePaint);
       }
     }
@@ -716,7 +714,6 @@ Future<void> testMain() async {
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
       for (final rect in rects) {
-        print('$rect');
         canvas.drawRect(rect.toRect(), redPaint);
       }
     }
@@ -728,7 +725,6 @@ Future<void> testMain() async {
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
       for (final rect in rects) {
-        print('$rect');
         canvas.drawRect(rect.toRect(), greenPaint);
       }
     }
