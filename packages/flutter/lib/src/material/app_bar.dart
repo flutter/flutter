@@ -112,6 +112,11 @@ class _PreferredAppBarSize extends Size {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
+/// If the [actions] widget list is omitted or empty, but the [AppBar] is in a [Scaffold] with
+/// an end [Drawer], then a button will be inserted to open the end drawer.
+/// This behavior can be turned off by setting the [automaticallyImplyActions]
+/// to false.
+///
 /// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
 /// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
 /// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
@@ -194,6 +199,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -345,6 +351,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// To avoid having the last action covered by the debug banner, you may want
   /// to set the [MaterialApp.debugShowCheckedModeBanner] to false.
+  ///
+  /// If this is null or empty and [automaticallyImplyActions] is set to true, the
+  /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
+  /// in a [Scaffold] that also has an end [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the end drawer (using [Icons.menu]).
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -373,6 +384,15 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```
   /// {@end-tool}
   final List<Widget>? actions;
+
+  /// {@template flutter.material.appbar.automaticallyImplyActions}
+  /// Controls whether we should try to imply the actions widget if null.
+  ///
+  /// If true and [AppBar.actions] is null or empty, automatically try to deduce what the actions
+  /// widget should be. If false and [AppBar.actions] is null or empty, the actions widget list is kept empty.
+  /// If leading widget is not null, this parameter has no effect.
+  /// {@endtemplate}
+  final bool automaticallyImplyActions;
 
   /// {@template flutter.material.appbar.flexibleSpace}
   /// This widget is stacked behind the toolbar and the tab bar. Its height will
@@ -1085,7 +1105,7 @@ class _AppBarState extends State<AppBar> {
           children: widget.actions!,
         ),
       );
-    } else if (hasEndDrawer) {
+    } else if (hasEndDrawer && widget.automaticallyImplyActions) {
       actions = EndDrawerButton(style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24));
     }
 
@@ -1231,6 +1251,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.automaticallyImplyLeading,
     required this.title,
     required this.actions,
+    required this.automaticallyImplyActions,
     required this.flexibleSpace,
     required this.bottom,
     required this.elevation,
@@ -1274,6 +1295,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool automaticallyImplyLeading;
   final Widget? title;
   final List<Widget>? actions;
+  final bool automaticallyImplyActions;
   final Widget? flexibleSpace;
   final PreferredSizeWidget? bottom;
   final double? elevation;
@@ -1369,6 +1391,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: effectiveTitle,
         actions: actions,
+        automaticallyImplyActions: automaticallyImplyActions,
         flexibleSpace:
             (title == null && flexibleSpace != null && !excludeHeaderSemantics)
                 ? Semantics(header: true, child: flexibleSpace)
@@ -1408,6 +1431,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading ||
         title != oldDelegate.title ||
         actions != oldDelegate.actions ||
+        automaticallyImplyActions != oldDelegate.automaticallyImplyActions ||
         flexibleSpace != oldDelegate.flexibleSpace ||
         bottom != oldDelegate.bottom ||
         _bottomHeight != oldDelegate._bottomHeight ||
@@ -1546,6 +1570,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1616,6 +1641,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1686,6 +1712,7 @@ class SliverAppBar extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
+    this.automaticallyImplyActions = true,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
@@ -1746,6 +1773,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This property is used to configure an [AppBar].
   final List<Widget>? actions;
+
+  /// {@macro flutter.material.appbar.automaticallyImplyActions}
+  ///
+  /// This property is used to configure an [AppBar].
+  final bool automaticallyImplyActions;
 
   /// {@macro flutter.material.appbar.flexibleSpace}
   ///
@@ -2113,6 +2145,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
           title: widget.title,
           actions: widget.actions,
+          automaticallyImplyActions: widget.automaticallyImplyActions,
           flexibleSpace: effectiveFlexibleSpace,
           bottom: widget.bottom,
           elevation: widget.elevation,
