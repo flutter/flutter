@@ -66,7 +66,7 @@ class WindowManager {
 
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
-  // controller to process messages that affect the state of other host windows.
+  // manager to process messages that affect the state of other host windows.
   std::optional<LRESULT> HandleMessage(HWND hwnd,
                                        UINT message,
                                        WPARAM wparam,
