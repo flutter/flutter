@@ -843,6 +843,84 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 }
 
+/// A widget that mimics a box with a certain intrinsic width and height.
+///
+/// This widget is useful when trying to size a [Flex] widget with either
+/// [IntrinsicWidth] or [IntrinsicHeight] based on only a subset of the provided
+/// child widgets. Wrapping a child widget in an [IntrinsicBox] with either
+/// width or height set to zero will essentially ignore the element when
+/// calculating the [Flex] widget's intrinsic size along that dimension.
+///
+/// Using a non-zero value will cause the parent widget to expand accordingly,
+/// even if the child's actual intrinsic size is smaller.
+///
+/// See also:
+///
+///  * [IntrinsicWidth], a widget that sizes its child depending on its
+///    intrinsic width, which may be overridden by this component.
+///  * [IntrinsicHeight], a widget that does the same for height.
+class RenderIntrinsicBox extends RenderProxyBox {
+  /// Creates a widget that mimics a box with intrinsic size but does not affect
+  /// the layout of the child otherwise.
+  RenderIntrinsicBox({double? width, double? height, RenderBox? child})
+    : assert(width == null || width >= 0.0),
+      assert(height == null || height >= 0.0),
+      _width = width,
+      _height = height,
+      super(child);
+
+  /// If non-null, force the child's intrinsic width to be this value.
+  ///
+  /// This value must not be negative.
+  double? get width => _width;
+  double? _width;
+  set width(double? value) {
+    assert(value == null || value >= 0.0);
+    if (value == _width) {
+      return;
+    }
+    _width = value;
+    markNeedsLayout();
+  }
+
+  /// If non-null, force the child's intrinsic height to be this value.
+  ///
+  /// This value must not be negative.
+  double? get height => _height;
+  double? _height;
+  set height(double? value) {
+    assert(value == null || value >= 0.0);
+    if (value == _height) {
+      return;
+    }
+    _height = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) =>
+      _width ?? super.computeMinIntrinsicWidth(height);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      _width ?? super.computeMaxIntrinsicWidth(height);
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      _height ?? super.computeMinIntrinsicHeight(width);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      _height ?? super.computeMaxIntrinsicHeight(width);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('width', width));
+    properties.add(DoubleProperty('height', height));
+  }
+}
+
 /// Excludes the child from baseline computations in the parent.
 class RenderIgnoreBaseline extends RenderProxyBox {
   /// Create a render object that causes the parent to ignore the child for baseline computations.
