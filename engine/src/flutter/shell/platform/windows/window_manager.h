@@ -75,7 +75,7 @@ class WindowManager {
   void OnEngineShutdown();
 
  private:
-  // The Flutter engine that owns this controller.
+  // The Flutter engine that owns this manager.
   FlutterWindowsEngine* const engine_;
 
   // Callback that relays windows messages to the isolate. Set
