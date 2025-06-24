@@ -14,6 +14,8 @@ namespace flutter {
 /// as argument to IsolateScope constructor to enter and exit the isolate.
 class Isolate {
  public:
+  /// Retrieve the current Dart Isolate. If no isolate is current, this
+  /// results in a crash.
   static Isolate Current();
 
   ~Isolate() = default;
