@@ -293,15 +293,19 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
                   license_map.Add(package.name, match->matched_text);
-                  VLOG(1) << "OK: " << full_path << " : " << match->matcher;
+                  VLOG(1) << "OK: " << full_path.lexically_normal() << " : "
+                          << match->matcher;
                 } else {
                   errors.emplace_back(absl::NotFoundError(
                       absl::StrCat("Unknown license in ",
-                                   full_path.lexically_normal().string(), " : ",
-                                   match.status().message())));
+                                   relative_path.lexically_normal().string(),
+                                   " : ", match.status().message())));
                 }
               } else {
-                VLOG(1) << "OK: " << full_path << " : dir license";
+                fs::path relative_license_path =
+                    fs::relative(package.license_file.value(), working_dir);
+                VLOG(1) << "OK: " << relative_path.lexically_normal()
+                        << " : dir license(" << relative_license_path << ")";
               }
             }
           });
