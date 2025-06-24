@@ -1619,6 +1619,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
+    //TODO(camsim99): need to make sure this resolves as desired.
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       MaterialStateMouseCursor.clickable,
       <MaterialState>{if (!_enabled) MaterialState.disabled},

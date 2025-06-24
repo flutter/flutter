@@ -433,6 +433,7 @@ class ElevatedButton extends ButtonStyleButton {
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+          // TODO(camsim99): Try changing below:
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
@@ -681,6 +682,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
+  // TODO(camsim99): Might need to change how this is resolved as well.
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {

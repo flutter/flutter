@@ -708,6 +708,7 @@ class IconButton extends StatelessWidget {
     );
   }
 
+  // TODO(camsim99): Can change the default mouse cursor for the various branches here.
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);

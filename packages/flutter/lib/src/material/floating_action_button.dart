@@ -641,6 +641,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final MouseCursor? widgetCursor;
   final MaterialStateProperty<MouseCursor?>? themeCursor;
 
+  //TODO(camsim99): Possibly change how cursor is resolved here.
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
