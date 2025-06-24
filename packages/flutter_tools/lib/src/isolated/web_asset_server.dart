@@ -58,9 +58,6 @@ typedef DwdsLauncher =
       bool useDwdsWebSocketConnection,
     });
 
-// A minimal index for projects that do not yet support web. A meta tag is used
-// to ensure loaded scripts are always parsed as UTF-8.
-
 const String kLuciEnvName = 'LUCI_CONTEXT';
 
 /// A web server which handles serving JavaScript and assets.
