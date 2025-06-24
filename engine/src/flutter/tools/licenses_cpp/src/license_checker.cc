@@ -132,6 +132,7 @@ class LicensesWriter {
 struct Package {
   std::string name;
   std::optional<fs::path> license_file;
+  bool is_root_package;
 };
 
 Package GetPackage(const Data& data,
@@ -140,6 +141,7 @@ Package GetPackage(const Data& data,
   Package result = {
       .name = working_dir.filename(),
       .license_file = FindLicense(data, working_dir, "."),
+      .is_root_package = true,
   };
   bool after_third_party = false;
   fs::path current = ".";
@@ -156,6 +158,7 @@ Package GetPackage(const Data& data,
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
+      result.is_root_package = false;
     }
   }
 
