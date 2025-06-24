@@ -1824,14 +1824,7 @@ void main() {
     await tester.pumpAndSettle();
 
     EdgeInsetsGeometry paddingFor(String text) {
-      return tester
-          .widget<Padding>(
-            find.ancestor(
-              of: find.widgetWithText(Align, 'Item 0'),
-              matching: find.byKey(const Key('menu item padding')),
-            ),
-          )
-          .padding;
+      return tester.widget<Padding>(find.widgetWithText(Padding, 'Item 0').first).padding;
     }
 
     expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 16.0));
