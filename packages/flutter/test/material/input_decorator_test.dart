@@ -5271,6 +5271,45 @@ void main() {
       // The hintText replaced with SizeBox.
       expect(find.text(hintText), findsNothing);
     });
+
+    testWidgets('Hint does not change position when maintainHintSize is false - LTR', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(isEmpty: true, decoration: const InputDecoration(hintText: hintText)),
+      );
+      final double expectedHintLeft = getHintRect(tester).left;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+        ),
+      );
+      expect(getHintRect(tester).left, expectedHintLeft);
+    });
+
+    testWidgets('Hint does not change position when maintainHintSize is false - RTL', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      final double expectedHintRight = getHintRect(tester).right;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      expect(getHintRect(tester).right, expectedHintRight);
+    });
   });
 
   group('Material3 - InputDecoration helper/counter/error', () {
