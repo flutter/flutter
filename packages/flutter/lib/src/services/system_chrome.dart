@@ -46,18 +46,30 @@ enum DeviceOrientation {
   /// in [portraitUp]. Otherwise, the device shows its boot logo in landscape
   /// and this orientation is obtained by rotating the device 90 degrees
   /// clockwise from its boot orientation.
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then [portraitUp] is ignored.
   portraitUp,
 
   /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then [landscapeLeft] is ignored.
   landscapeLeft,
 
   /// The orientation that is 180 degrees from [portraitUp].
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then [portraitDown] is ignored.
   portraitDown,
 
   /// The orientation that is 90 degrees clockwise from [portraitUp].
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then [landscapeRight] is ignored.
   landscapeRight,
 }
 
@@ -488,6 +500,10 @@ abstract final class SystemChrome {
   ///   }
   /// }
   /// ```
+  ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then you cannot set the device
+  /// orientation.
   ///
   /// ### iOS
   ///
