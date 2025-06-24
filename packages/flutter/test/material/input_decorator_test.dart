@@ -5244,37 +5244,43 @@ void main() {
       expect(find.text(hintText), findsNothing);
     });
 
-    testWidgets('Hint uses topLeft alignment when maintainHintSize is false', (
+    testWidgets('Hint does not change position when maintainHintSize is false - LTR', (
       WidgetTester tester,
     ) async {
-      const InputDecoration decoration = InputDecoration(
-        hintText: hintText,
-        maintainHintSize: false,
+      await tester.pumpWidget(
+        buildInputDecorator(isEmpty: true, decoration: const InputDecoration(hintText: hintText)),
       );
+      final double expectedHintLeft = getHintRect(tester).left;
 
-      await tester.pumpWidget(buildInputDecorator(isEmpty: true, decoration: decoration));
-
-      final Finder animatedSwitcherFinder = find.byType(AnimatedSwitcher);
-      expect(animatedSwitcherFinder, findsOneWidget);
-
-      final Finder stackFinder = find.descendant(
-        of: animatedSwitcherFinder,
-        matching: find.byType(Stack),
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+        ),
       );
-      expect(stackFinder, findsOneWidget);
+      expect(getHintRect(tester).left, expectedHintLeft);
+    });
 
-      final Stack stack = tester.widget<Stack>(stackFinder);
-      expect(stack.alignment, Alignment.topLeft);
+    testWidgets('Hint does not change position when maintainHintSize is false - RTL', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      final double expectedHintRight = getHintRect(tester).right;
 
-      final Finder hintTextFinder = find.text(hintText);
-      expect(hintTextFinder, findsOneWidget);
-
-      // Get the hint text box and stack box to calculate the position of the hint text.
-      final RenderBox hintTextBox = tester.renderObject<RenderBox>(hintTextFinder);
-      final RenderBox stackBox = tester.renderObject<RenderBox>(stackFinder);
-      final Offset hintTextPosition = hintTextBox.localToGlobal(Offset.zero, ancestor: stackBox);
-      expect(hintTextPosition.dx, 0.0);
-      expect(hintTextPosition.dy, 0.0);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      expect(getHintRect(tester).right, expectedHintRight);
     });
   });
 

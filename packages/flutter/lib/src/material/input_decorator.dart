@@ -2289,11 +2289,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return FadeTransition(opacity: _curvedAnimation!, child: child);
   }
 
-  static Widget _topLeftLayout(Widget? currentChild, List<Widget> previousChildren) {
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
-    );
+  static Widget _topStartLayout(Widget? currentChild, List<Widget> previousChildren) {
+    return Stack(children: <Widget>[...previousChildren, if (currentChild != null) currentChild]);
   }
 
   @override
@@ -2338,7 +2335,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               : AnimatedSwitcher(
                 duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
                 transitionBuilder: _buildTransition,
-                layoutBuilder: _topLeftLayout,
+                layoutBuilder: _topStartLayout,
                 child: showHint ? hintWidget : const SizedBox.shrink(),
               );
     }
