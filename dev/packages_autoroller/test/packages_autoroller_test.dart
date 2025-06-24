@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:conductor_core/packages_autoroller.dart';
-import 'package:conductor_core/src/repository.dart';
-import 'package:conductor_core/src/stdio.dart';
-import 'package:conductor_core/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:file/memory.dart';
+import 'package:packages_autoroller/packages_autoroller.dart';
+import 'package:packages_autoroller/src/repository.dart';
+import 'package:packages_autoroller/src/stdio.dart';
+import 'package:packages_autoroller/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:path/path.dart' show Context, Style;
 import 'package:platform/platform.dart';
 
@@ -19,7 +19,7 @@ import 'common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
-  const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
+  const String checkoutsParentDirectory = '$flutterRoot/dev/packages_autoroller';
   const String githubClient = 'gh';
   const String token = '0123456789abcdef';
   const String orgName = 'flutter-roller';
@@ -86,7 +86,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework',
         ],
       ),
       const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', mirrorUrl]),
@@ -97,13 +97,13 @@ void main() {
       const FakeCommand(command: <String>['git', 'checkout', '-b', 'packages-autoroller-branch-1']),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           'help',
         ],
       ),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           '--verbose',
           'update-packages',
           '--force-upgrade',
@@ -243,7 +243,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework',
         ],
       ),
       const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', mirrorUrl]),
@@ -252,19 +252,19 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],
         workingDirectory:
-            '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+            '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools',
       ),
       FakeCommand(
         command: const <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/dart',
           'compile',
           'exe',
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
           '-o',
           '/.tmp_rand0/rand0/generate_gradle_lockfiles',
         ],
@@ -277,7 +277,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'checkout', '-b', 'packages-autoroller-branch-1']),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           '--verbose',
           'update-packages',
           '--force-upgrade',
@@ -335,7 +335,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework',
         ],
       ),
       const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', mirrorUrl]),
@@ -344,19 +344,19 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],
         workingDirectory:
-            '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+            '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools',
       ),
       FakeCommand(
         command: const <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/dart',
           'compile',
           'exe',
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
           '-o',
           '/.tmp_rand0/rand0/generate_gradle_lockfiles',
         ],
@@ -369,7 +369,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'checkout', '-b', 'packages-autoroller-branch-1']),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
+          '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/flutter',
           '--verbose',
           'update-packages',
           '--force-upgrade',
