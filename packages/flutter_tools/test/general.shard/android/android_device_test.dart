@@ -179,8 +179,8 @@ void main() {
   });
 
   testWithoutContext('isSupported is false for x86 devices', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(const <FakeCommand>[
-      FakeCommand(
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
         stdout: '[ro.product.cpu.abi]: [x86]',
       ),
