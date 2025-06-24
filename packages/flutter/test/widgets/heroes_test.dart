@@ -273,7 +273,7 @@ class DeepLinkAppState extends State<DeepLinkApp> {
           onDidRemovePage: (Page<Object?> page) {
             setState(() {
               if (_pages.length > 1) {
-                _pages = List<Page<dynamic>>.from(_pages)..removeLast();
+                _pages = List<Page<dynamic>>.of(_pages)..removeLast();
               }
             });
           },

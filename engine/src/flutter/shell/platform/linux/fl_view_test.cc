@@ -73,10 +73,9 @@ TEST(FlViewTest, SemanticsUpdate) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
 
+  FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
-      .id = 0,
-      .label = "root",
-  };
+      .id = 0, .label = "root", .flags2 = &flags};
   FlutterSemanticsNode2* nodes[1] = {&root_node};
   FlutterSemanticsUpdate2 update = {
       .node_count = 1, .nodes = nodes, .view_id = 0};
@@ -100,10 +99,9 @@ TEST(FlViewTest, SemanticsUpdateOtherView) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
 
+  FlutterSemanticsFlags flags = {};
   FlutterSemanticsNode2 root_node = {
-      .id = 0,
-      .label = "root",
-  };
+      .id = 0, .label = "root", .flags2 = &flags};
   FlutterSemanticsNode2* nodes[1] = {&root_node};
   FlutterSemanticsUpdate2 update = {
       .node_count = 1, .nodes = nodes, .view_id = 99};
