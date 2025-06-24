@@ -8,6 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/fake_asset_manager.dart';
 import '../common/test_initialization.dart';
@@ -18,7 +19,7 @@ void main() {
 
 void testMain() {
   group('$SkiaFontCollection', () {
-    setUpUnitTests();
+    setUpUnitTests(testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true));
 
     final List<String> warnings = <String>[];
     late void Function(String) oldPrintWarning;

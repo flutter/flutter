@@ -37,7 +37,7 @@ String get testSelector {
 
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
-  ui_web.debugEmulateFlutterTesterEnvironment = true;
+  ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;

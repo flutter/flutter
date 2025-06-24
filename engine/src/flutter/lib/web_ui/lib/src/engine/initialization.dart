@@ -212,7 +212,7 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
 Future<void> _downloadAssetFonts() async {
   renderer.fontCollection.clear();
 
-  if (ui_web.debugEmulateFlutterTesterEnvironment) {
+  if (ui_web.TestEnvironment.instance.forceTestFonts) {
     // Load the embedded test font before loading fonts from the assets so that
     // the embedded test font is the default (first) font.
     await renderer.fontCollection.loadFontFromList(
@@ -225,17 +225,3 @@ Future<void> _downloadAssetFonts() async {
     await renderer.fontCollection.loadAssetFonts(await fetchFontManifest(ui_web.assetManager));
   }
 }
-
-/// Whether to disable the font fallback system.
-///
-/// We need to disable font fallbacks for some framework tests because
-/// Flutter error messages may contain an arrow symbol which is not
-/// covered by ASCII fonts. This causes us to try to download the
-/// Noto Sans Symbols font, which kicks off a `Timer` which doesn't
-/// complete before the Widget tree is disposed (this is by design).
-bool get debugDisableFontFallbacks => _debugDisableFontFallbacks;
-set debugDisableFontFallbacks(bool value) {
-  _debugDisableFontFallbacks = value;
-}
-
-bool _debugDisableFontFallbacks = false;
