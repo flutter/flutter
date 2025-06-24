@@ -591,7 +591,7 @@ class MediaQueryData {
   ///    originates.
   final bool boldText;
 
-  /// Whether accessibility announcements (like [SemanticsService.supportsAnnounce])
+  /// Whether accessibility announcements (like [SemanticsService.announce])
   /// are supported on the current platform.
   ///
   /// Returns `false` on platforms where announcements are deprecated or
