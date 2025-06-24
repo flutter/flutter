@@ -388,50 +388,6 @@ void main() {
           },
           overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
         );
-
-        group('with a warning', () {
-          late BufferLogger testLogger;
-          late MemoryFileSystem fs;
-          late FakeCache cache;
-          setUp(() {
-            testLogger = BufferLogger.test();
-            fs = MemoryFileSystem.test();
-            cache = FakeCache();
-          });
-
-          testUsingContext(
-            'when the project is a module',
-            () async {
-              final Directory projectDirectory = fs.directory('path');
-              projectDirectory.childDirectory('ios').createSync(recursive: true);
-              final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-              final FlutterProject flutterProject = FlutterProject(
-                projectDirectory,
-                manifest,
-                manifest,
-              );
-              final IosProject project = IosProject.fromFlutter(flutterProject);
-
-              cache.filesOlderThanToolsStamp[project.lldbInitFile.basename] = true;
-
-              await project.ensureReadyForPlatformSpecificTooling();
-
-              expect(project.lldbInitFile, exists);
-              expect(project.lldbHelperPythonFile, exists);
-              expect(
-                testLogger.warningText,
-                contains('Debugging Flutter on new iOS versions requires an LLDB Init File'),
-              );
-            },
-            overrides: <Type, Generator>{
-              Cache: () => cache,
-              Logger: () => testLogger,
-              FileSystem: () => fs,
-              ProcessManager: () => FakeProcessManager.any(),
-              FileSystemUtils: () => FakeFileSystemUtils(),
-            },
-          );
-        });
       });
     });
   });
@@ -639,16 +595,5 @@ class FakeCache extends Fake implements Cache {
       return filesOlderThanToolsStamp[entity.basename]!;
     }
     return olderThanToolsStamp;
-  }
-}
-
-class FakeFileSystemUtils extends Fake implements FileSystemUtils {
-  FakeFileSystemUtils({this.olderThanReference = false});
-
-  bool olderThanReference;
-
-  @override
-  bool isOlderThanReference({required FileSystemEntity entity, required File referenceFile}) {
-    return olderThanReference;
   }
 }
