@@ -21,6 +21,7 @@ import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
+import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
@@ -138,13 +139,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// The Flutter generated directory for the Swift Package handling plugin
-  /// dependencies.
-  Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+  /// The Flutter generated directory for generated Swift packages.
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
-  /// The Flutter generated Swift Package manifest (Package.swift) for plugin
+  /// Flutter plugins that support SwiftPM will be symlinked in this directory to keep all
+  /// Swift packages relative to each other.
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  /// The Flutter generated directory for the Swift package handling plugin
+  /// dependencies.
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+
+  /// The Flutter generated Swift package manifest (Package.swift) for plugin
   /// dependencies.
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
@@ -153,7 +161,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+        xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
   /// True if this project doesn't have Swift Package Manager disabled in the
@@ -434,6 +442,10 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
   File get appDelegateSwift =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+
+  /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjc =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
@@ -754,7 +766,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -763,20 +774,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   Future<void> _updateLLDBIfNeeded() async {
     if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
         globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
-      if (isModule) {
-        // When building a module project for Add-to-App, provide instructions
-        // to manually add the LLDB Init File to their native Xcode project.
-        globals.logger.printWarning(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
-          'To ensure debug mode works, please complete one of the following in '
-          'your native Xcode project:\n'
-          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
-          '    ${lldbInitFile.path}\n\n'
-          '  * If you are already using an LLDB Init File, please append the '
-          'following to your LLDB Init File:\n\n'
-          '    command source ${lldbInitFile.path}\n',
-        );
-      }
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
       await _renderTemplateToFile(
         _lldbPythonHelperTemplate,
@@ -971,7 +968,6 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }

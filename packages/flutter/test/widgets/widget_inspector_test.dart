@@ -89,6 +89,20 @@ class _ClockTextState extends State<ClockText> {
   }
 }
 
+class TestHiddenWidget extends StatelessWidget {
+  const TestHiddenWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class TestVisibleWidget extends StatelessWidget {
+  const TestVisibleWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
 // End of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
 
@@ -296,10 +310,43 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
+              DisableWidgetInspectorScope(
+                child: Column(
+                  children: <Widget>[
+                    TestHiddenWidget(),
+                    EnableWidgetInspectorScope(child: TestVisibleWidget()),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       );
+    }
+
+    /// Returns the first [DiagnosticsNode] that isn't in a [DisableWidgetInspectorScope] and isn't
+    /// an [EnableWidgetInspectorScope].
+    DiagnosticsNode? getFirstVisibleNode(
+      DiagnosticsNode node, [
+      bool inDisableInspectorWidgetScope = false,
+    ]) {
+      final Object? value = node.value;
+      if (value is Element) {
+        if (value.widget is DisableWidgetInspectorScope || inDisableInspectorWidgetScope) {
+          final List<DiagnosticsNode> children = node.getChildren();
+          for (final DiagnosticsNode child in children) {
+            final DiagnosticsNode? result = getFirstVisibleNode(
+              child,
+              value.widget is! EnableWidgetInspectorScope,
+            );
+            if (result != null) {
+              return result;
+            }
+          }
+          return null;
+        }
+      }
+      return node;
     }
 
     Element findElementABC(String letter) {
@@ -949,11 +996,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     );
 
     testWidgets(
-      'WidgetInspector Move Exit Selection Mode button to the right / left',
+      '[LTR] WidgetInspector Move Exit Selection Mode button to the right then left',
       (WidgetTester tester) async {
-        // Enable widget selection mode.
         WidgetInspectorService.instance.isSelectMode = true;
-
         final GlobalKey inspectorKey = GlobalKey();
         setupDefaultPubRootDirectory(service);
 
@@ -976,12 +1021,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           BuildContext context, {
           required VoidCallback onPressed,
           required String semanticsLabel,
-          bool isLeftAligned = true,
+          bool usesDefaultAlignment = true,
         }) {
           return Material(
             child: ElevatedButton(
               onPressed: onPressed,
-              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
             ),
           );
         }
@@ -1003,33 +1048,104 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
 
-        // Initially the exit select button is on the left.
         final Finder exitButton = buttonFinder('EXIT SELECT MODE');
         expect(exitButton, findsOneWidget);
         final Finder moveRightButton = buttonFinder('MOVE RIGHT');
         expect(moveRightButton, findsOneWidget);
         final double initialExitButtonX = tester.getCenter(exitButton).dx;
 
-        // Move the button to the right.
         await tester.tap(moveRightButton);
         await tester.pump();
 
-        // Verify the button is now on the right.
-        expect(moveRightButton, findsNothing);
         final Finder moveLeftButton = buttonFinder('MOVE LEFT');
         expect(moveLeftButton, findsOneWidget);
-        final double exitButtonXAfterMovingRight = tester.getCenter(exitButton).dx;
-        expect(initialExitButtonX, lessThan(exitButtonXAfterMovingRight));
+        final double movedExitButtonX = tester.getCenter(exitButton).dx;
 
-        // Move the button to the left again.
+        expect(initialExitButtonX, lessThan(movedExitButtonX), reason: 'LTR: should move right');
+
         await tester.tap(moveLeftButton);
         await tester.pump();
 
-        // Verify the button is in its original position.
-        expect(moveLeftButton, findsNothing);
+        final double finalExitButtonX = tester.getCenter(exitButton).dx;
+        expect(finalExitButtonX, equals(initialExitButtonX));
+      },
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+    );
+
+    testWidgets(
+      '[RTL] WidgetInspector Move Exit Selection Mode button to the left then right',
+      (WidgetTester tester) async {
+        WidgetInspectorService.instance.isSelectMode = true;
+        final GlobalKey inspectorKey = GlobalKey();
+        setupDefaultPubRootDirectory(service);
+
+        Widget exitWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          required GlobalKey key,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              key: key,
+              child: const Text('EXIT SELECT MODE'),
+            ),
+          );
+        }
+
+        Widget moveWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          bool usesDefaultAlignment = true,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
+            ),
+          );
+        }
+
+        Finder buttonFinder(String buttonText) {
+          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
+        }
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: WidgetInspector(
+              key: inspectorKey,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
+              tapBehaviorButtonBuilder: null,
+              child: const Text('APP'),
+            ),
+          ),
+        );
+
+        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+        expect(exitButton, findsOneWidget);
+        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
         expect(moveRightButton, findsOneWidget);
-        final double exitButtonXAfterMovingLeft = tester.getCenter(exitButton).dx;
-        expect(exitButtonXAfterMovingLeft, equals(initialExitButtonX));
+        final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+        await tester.tap(moveRightButton);
+        await tester.pump();
+
+        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+        expect(moveLeftButton, findsOneWidget);
+        final double movedExitButtonX = tester.getCenter(exitButton).dx;
+
+        expect(initialExitButtonX, greaterThan(movedExitButtonX), reason: 'RTL: should move left');
+
+        await tester.tap(moveLeftButton);
+        await tester.pump();
+
+        final double finalExitButtonX = tester.getCenter(exitButton).dx;
+        expect(finalExitButtonX, equals(initialExitButtonX));
       },
       // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
@@ -1188,7 +1304,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       builder.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', null));
       builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
 
-      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.of(
         debugTransformDebugCreator(builder.properties),
       );
       expect(nodes.length, 5);
@@ -1258,7 +1374,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           DiagnosticsStackTrace('When the exception was thrown, this was the stack', null),
         );
 
-        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(
+        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.of(
           debugTransformDebugCreator(builder.properties),
         );
         expect(nodes.length, 5);
@@ -1316,7 +1432,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
         builder.add(StringProperty('dummy2', 'value'));
 
-        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(
+        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.of(
           debugTransformDebugCreator(builder.properties),
         );
         expect(nodes.length, 6);
@@ -1357,7 +1473,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
         builder.add(StringProperty('dummy2', 'value'));
 
-        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(
+        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.of(
           debugTransformDebugCreator(builder.properties),
         );
         expect(nodes.length, 4);
@@ -1396,7 +1512,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
         builder.add(StringProperty('dummy2', 'value'));
 
-        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(
+        final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.of(
           debugTransformDebugCreator(builder.properties),
         );
         expect(nodes.length, 4);
@@ -1744,11 +1860,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final List<Object?> propertiesJson =
               json.decode(service.getChildren(id, group)) as List<Object?>;
           final List<DiagnosticsNode> children = diagnostic.getChildren();
-          expect(children.length, equals(3));
+          expect(children.length, equals(4));
           expect(propertiesJson.length, equals(children.length));
+
           for (int i = 0; i < propertiesJson.length; ++i) {
             final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-            expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
+            expect(
+              service.toObject(propertyJson['valueId']! as String),
+              equals(getFirstVisibleNode(children[i])?.value),
+            );
           }
         });
       });
@@ -2394,7 +2514,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               // Verify the first child's first child's children are the same
               // length.
-              expect(children.length, equals(3));
+              expect(children.length, equals(4));
               expect(children.length, equals(childrenFromOtherApi.length));
 
               // Get the first child's first child's third child.
@@ -2491,6 +2611,29 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               } else {
                 return <String, String>{'objectGroup': groupName};
               }
+            }
+
+            void testWidgetInspectorScopes(Map<String, Object?> rootJson) {
+              expect(
+                oneChildSatisfiesCondition(
+                  rootJson,
+                  condition: (Map<String, Object?> child) {
+                    return hasDescription(child, description: 'TestVisibleWidget') &&
+                        wasCreatedByLocalProject(child);
+                  },
+                ),
+                isTrue,
+              );
+              expect(
+                oneChildSatisfiesCondition(
+                  rootJson,
+                  condition: (Map<String, Object?> child) {
+                    return hasDescription(child, description: 'TestHiddenWidget') &&
+                        wasCreatedByLocalProject(child);
+                  },
+                ),
+                isFalse,
+              );
             }
 
             for (final bool useGetRootWidgetTreeApi in <bool>[true, false]) {
@@ -2656,6 +2799,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 ),
                 isTrue,
               );
+              testWidgetInspectorScopes(rootJson);
             });
 
             testWidgets('tree without full details using ext.flutter.inspector.getRootWidgetTree', (
@@ -2721,6 +2865,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 ),
                 isTrue,
               );
+              testWidgetInspectorScopes(rootJson);
             });
 
             testWidgets('full tree with previews using ext.flutter.inspector.getRootWidgetTree', (
@@ -2785,6 +2930,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 ),
                 isTrue,
               );
+              testWidgetInspectorScopes(rootJson);
             });
 
             testWidgets(
@@ -2852,6 +2998,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   ),
                   isTrue,
                 );
+                testWidgetInspectorScopes(rootJson);
               },
             );
           });
@@ -3179,11 +3326,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ))!
               as List<Object?>;
       final List<DiagnosticsNode> children = diagnostic.getChildren();
-      expect(children.length, equals(3));
+      expect(children.length, equals(4));
       expect(propertiesJson.length, equals(children.length));
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-        expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
+        expect(
+          service.toObject(propertyJson['valueId']! as String),
+          equals(getFirstVisibleNode(children[i])?.value),
+        );
       }
     });
 
@@ -3199,11 +3349,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ))!
               as List<Object?>;
       final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
-      expect(children.length, equals(3));
+      expect(children.length, equals(4));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
-        expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
+        expect(
+          service.toObject(childJson['valueId']! as String),
+          equals(getFirstVisibleNode(children[i])?.value),
+        );
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         final Element element = service.toObject(childJson['valueId']! as String)! as Element;
         final List<DiagnosticsNode> expectedProperties =
@@ -3235,11 +3388,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(subtreeJson['valueId'], equals(id));
       final List<Object?> childrenJson = subtreeJson['children']! as List<Object?>;
       final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
-      expect(children.length, equals(3));
+      expect(children.length, equals(4));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
-        expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
+        expect(
+          service.toObject(childJson['valueId']! as String),
+          equals(getFirstVisibleNode(children[i])?.value),
+        );
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         for (final Map<String, Object?> propertyJson
             in propertiesJson.cast<Map<String, Object?>>()) {
@@ -5050,6 +5206,44 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         },
       );
 
+      testWidgets('getLayoutExplorerNode omits flexFactor when flex is null', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox(width: 14, height: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        final Element boxElement = tester.element(find.byType(ColoredBox).first);
+        service.setSelection(boxElement, group);
+
+        final String id = service.toId(boxElement, group)!;
+        final Map<String, Object?> result =
+            (await service.testExtension(
+                  WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+                  <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+                ))!
+                as Map<String, Object?>;
+
+        final Map<String, Object?>? parentData = result['parentData'] as Map<String, Object?>?;
+        expect(parentData, isNotNull);
+        expect(parentData!['flexFactor'], isNull);
+        expect(parentData['flexFit'], isNull);
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (
         WidgetTester tester,
       ) async {
@@ -5093,8 +5287,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         expect(result['flexFactor'], equals(1));
         expect(result['flexFit'], equals('loose'));
-
-        expect(result['parentData'], isNull);
       });
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderView', (
@@ -5302,16 +5494,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
         final String id = service.toId(diagnostic, group)!;
 
-        Object? error;
-        try {
-          await service.testExtension(
-            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
-            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
-          );
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+        await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        );
       });
 
       testWidgets(
@@ -5345,16 +5531,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           final String id = service.toId(elevatedButton, group)!;
 
-          Object? error;
-          try {
-            await service.testExtension(
-              WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
-              <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
-            );
-          } catch (e) {
-            error = e;
-          }
-          expect(error, isNull);
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
         },
       );
     });

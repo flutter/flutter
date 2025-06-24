@@ -4,10 +4,11 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-
 #import <QuartzCore/QuartzCore.h>
+
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 
 @interface FlutterView () <FlutterSurfaceManagerDelegate> {
   FlutterViewIdentifier _viewIdentifier;
@@ -42,7 +43,7 @@
 }
 
 - (void)onPresent:(CGSize)frameSize withBlock:(dispatch_block_t)block delay:(NSTimeInterval)delay {
-  [_resizeSynchronizer performCommitForSize:frameSize notify:block delay:delay];
+  [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:block];
 }
 
 - (FlutterSurfaceManager*)surfaceManager {
@@ -63,9 +64,12 @@
   [super setFrameSize:newSize];
   CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
   [_resizeSynchronizer beginResizeForSize:scaledSize
-                                   notify:^{
-                                     [_viewDelegate viewDidReshape:self];
-                                   }];
+      notify:^{
+        [_viewDelegate viewDidReshape:self];
+      }
+      onTimeout:^{
+        [FlutterLogger logError:@"Resize timed out"];
+      }];
 }
 
 /**

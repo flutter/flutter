@@ -18,12 +18,16 @@
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/round_rect.h"
@@ -196,15 +200,17 @@ class Canvas {
                 const Paint& paint,
                 bool reuse_depth = false);
 
+  void DrawDashedLine(const Point& p0,
+                      const Point& p1,
+                      Scalar on_length,
+                      Scalar off_length,
+                      const Paint& paint);
+
   void DrawRect(const Rect& rect, const Paint& paint);
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
-  void DrawArc(const Rect& oval_bounds,
-               Scalar start_degrees,
-               Scalar sweep_degrees,
-               bool use_center,
-               const Paint& paint);
+  void DrawArc(const Arc& arc, const Paint& paint);
 
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
@@ -279,6 +285,32 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
+  class RRectLikeBlurShape {
+   public:
+    virtual ~RRectLikeBlurShape() = default;
+    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
+    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+  };
+
+  class RRectBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
+  };
+
+  class RSuperellipseBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundSuperellipseGeometry>
+        geom_;  // optional stack allocation
+  };
+
   ContentContext& renderer_;
   RenderTarget render_target_;
   const bool is_onscreen_;
@@ -368,6 +400,15 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                       Size corner_radii,
+                                       const Paint& paint);
+
+  bool AttemptDrawBlurredRRectLike(const Rect& rect,
+                                   Size corner_radii,
+                                   const Paint& paint,
+                                   RRectLikeBlurShape& shape);
 
   /// For simple DrawImageRect calls, optimize any draws with a color filter
   /// into the corresponding atlas draw.

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
@@ -31,21 +32,18 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload works without error', () async {
+    testWithoutContext('single and multiple hot reloads', () async {
       await runFlutterWithDevice(
         flutter,
         chrome: chrome,
         additionalCommandArgs: additionalCommandArgs,
       );
-      await flutter.hotReload();
-    });
 
-    testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      await runFlutterWithDevice(
-        flutter,
-        chrome: chrome,
-        additionalCommandArgs: additionalCommandArgs,
-      );
+      // Hot reload works without error.
+      await flutter.hotReload();
+
+      // Multiple overlapping hot reloads are debounced and queued.
+
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
@@ -275,21 +273,10 @@ Future<void> runFlutterWithDevice(
   bool withDebugger = false,
   bool startPaused = false,
   List<String> additionalCommandArgs = const <String>[],
-}) async {
-  if (chrome) {
-    await flutter.run(
-      verbose: verbose,
-      withDebugger: withDebugger,
-      startPaused: startPaused,
-      device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: additionalCommandArgs,
-    );
-  } else {
-    await flutter.run(
-      verbose: verbose,
-      withDebugger: withDebugger,
-      startPaused: startPaused,
-      additionalCommandArgs: additionalCommandArgs,
-    );
-  }
-}
+}) => flutter.run(
+  verbose: verbose,
+  withDebugger: withDebugger,
+  startPaused: startPaused,
+  device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+  additionalCommandArgs: additionalCommandArgs,
+);

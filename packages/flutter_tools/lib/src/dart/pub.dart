@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -22,7 +21,6 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../features.dart';
 import '../project.dart';
 import '../version.dart';
 
@@ -153,17 +151,9 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   });
-
-  /// Runs, parses, and returns `pub deps --json` for [project].
-  ///
-  /// While it is guaranteed that, if successful, that the result are a valid
-  /// JSON object, the exact contents returned are _not_ validated, and are left
-  /// as a responsibility of the caller.
-  ///
-  /// If `null` is returned, it should be assumed deps could not be determined.
-  Future<Map<String, Object?>?> deps(FlutterProject project);
 
   /// Runs pub in 'batch' mode.
   ///
@@ -201,7 +191,6 @@ abstract class Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   });
 }
@@ -251,11 +240,10 @@ class _DefaultPub implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     final String directory = project.directory.path;
@@ -345,6 +333,7 @@ class _DefaultPub implements Pub {
       ...<String>[command],
       if (offline) '--offline',
       '--example',
+      if (enforceLockfile) '--enforce-lockfile',
     ];
     await _runWithStdioInherited(
       args,
@@ -356,48 +345,6 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
-  }
-
-  @override
-  Future<Map<String, Object?>?> deps(FlutterProject project) async {
-    final List<String> pubCommand = <String>[..._pubCommand, 'deps', '--json'];
-    final RunResult runResult;
-
-    // Don't treat this command as terminal if it fails.
-    // See https://github.com/flutter/flutter/issues/166648
-    try {
-      runResult = await _processUtils.run(
-        pubCommand,
-        workingDirectory: project.directory.path,
-        throwOnError: true,
-      );
-    } on io.ProcessException catch (e) {
-      _logger.printWarning('${pubCommand.join(' ')} ${e.message}');
-      return null;
-    }
-
-    Never fail([String? reason]) {
-      final String stdout = runResult.stdout;
-      if (stdout.isNotEmpty) {
-        _logger.printTrace(stdout);
-      }
-      final String stderr = runResult.stderr;
-      throw StateError(
-        '${pubCommand.join(' ')} ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
-        '${stderr.isNotEmpty ? '\n$stderr' : ''}',
-      );
-    }
-
-    // Guard against dart pub deps having explicitly invalid output.
-    try {
-      final Object? result = json.decode(runResult.stdout);
-      if (result is! Map<String, Object?>) {
-        fail('Not a JSON object');
-      }
-      return result;
-    } on FormatException catch (e) {
-      fail('$e');
-    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -715,9 +662,6 @@ class _DefaultPub implements Pub {
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
   ///
-  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
-  /// (if it exists).
-  ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
   Future<void> _updateVersionAndPackageConfig(FlutterProject project) async {
@@ -735,7 +679,6 @@ class _DefaultPub implements Pub {
     );
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
 
-    await _updatePackageConfig(project, packageConfig);
     if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final File? examplePackageConfig = findPackageConfigFile(project.example.directory);
       if (examplePackageConfig == null) {
@@ -743,86 +686,6 @@ class _DefaultPub implements Pub {
           '${project.directory}: pub did not create example/.dart_tools/package_config.json file.',
         );
       }
-      await _updatePackageConfig(project.example, examplePackageConfig);
     }
-  }
-
-  /// Update the package configuration file in [project].
-  ///
-  /// Creates a corresponding `package_config_subset` file that is used by the
-  /// build system to avoid rebuilds caused by an updated pub timestamp.
-  ///
-  /// if `project.generateSyntheticPackage` is `true` then insert flutter_gen
-  /// synthetic package into the package configuration. This is used by the l10n
-  /// localization tooling to insert a new reference into the package_config
-  /// file, allowing the import of a package URI that is not specified in the
-  /// pubspec.yaml
-  ///
-  /// For more information, see:
-  ///   * [generateLocalizations]
-  Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: _logger,
-    );
-
-    packageConfigFile.parent
-        .childFile('package_config_subset')
-        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
-
-    // If we aren't generating localizations, short-circuit.
-    if (!project.manifest.generateLocalizations) {
-      return;
-    }
-
-    // Workaround for https://github.com/flutter/flutter/issues/164864.
-    // If this flag is set, synthetic packages cannot be used, so we short-circut.
-    if (featureFlags.isExplicitPackageDependenciesEnabled) {
-      return;
-    }
-
-    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit(
-        '`generate: true` is not supported within workspaces unless flutter config '
-        '--explicit-package-dependencies is set.',
-      );
-    }
-
-    if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
-      return;
-    }
-
-    // TODO(jonahwillams): Using raw json manipulation here because
-    // savePackageConfig always writes to local io, and it changes absolute
-    // paths to relative on round trip.
-    // See: https://github.com/dart-lang/package_config/issues/99,
-    // and: https://github.com/dart-lang/package_config/issues/100.
-
-    // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
-    // we can rely on the file to exist and be correctly formatted.
-    final Map<String, dynamic> jsonContents =
-        json.decode(packageConfigFile.readAsStringSync()) as Map<String, dynamic>;
-
-    (jsonContents['packages'] as List<dynamic>).add(<String, dynamic>{
-      'name': 'flutter_gen',
-      'rootUri': 'flutter_gen',
-      'languageVersion': '2.12',
-    });
-
-    packageConfigFile.writeAsStringSync(json.encode(jsonContents));
-  }
-
-  // Subset the package config file to only the parts that are relevant for
-  // rerunning the dart compiler.
-  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
-    final StringBuffer buffer = StringBuffer();
-    for (final Package package in packageConfig.packages) {
-      buffer.writeln(package.name);
-      buffer.writeln(package.languageVersion);
-      buffer.writeln(package.root);
-      buffer.writeln(package.packageUriRoot);
-    }
-    buffer.writeln(packageConfig.version);
-    return buffer.toString();
   }
 }
