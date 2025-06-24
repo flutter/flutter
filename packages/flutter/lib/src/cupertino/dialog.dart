@@ -2115,6 +2115,7 @@ class CupertinoDialogAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.textStyle,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -2148,6 +2149,12 @@ class CupertinoDialogAction extends StatefulWidget {
   /// must be used if a text size is desired other than that specified in
   /// [_kCupertinoDialogActionStyle].
   final TextStyle? textStyle;
+
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -2269,7 +2276,8 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
             );
 
     return MouseRegion(
-      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor:
+          widget.mouseCursor ?? (enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,

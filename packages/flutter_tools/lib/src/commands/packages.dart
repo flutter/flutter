@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
@@ -16,6 +17,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../package_graph.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -287,36 +289,6 @@ class PackagesGetCommand extends FlutterCommand {
 
       rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
       _rootProject = rootProject;
-
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: analytics,
-        projectDir: rootProject.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-      if (rootProject.manifest.generateLocalizations) {
-        // If localizations were enabled, but we are not using synthetic packages.
-        final BuildResult result = await globals.buildSystem.build(
-          const GenerateLocalizationsTarget(),
-          environment,
-        );
-        if (result.hasException) {
-          throwToolExit(
-            'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
-            '\n\n'
-            '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
-          );
-        }
-      }
     }
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
@@ -363,25 +335,72 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     if (rootProject != null) {
-      // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
-      //
-      // `flutter packages get` inherently is neither a debug or release build,
-      // and since a future build (`flutter build apk`) will regenerate tooling
-      // anyway, we assume this is fine.
-      //
-      // It won't be if they do `flutter build --no-pub`, though.
-      const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-
-      // We need to regenerate the platform specific tooling for both the project
-      // itself and example(if present).
-      await rootProject.regeneratePlatformSpecificTooling(
-        releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+      // Walk through all workspace projects,and generate platform specific
+      // tooling if needed.
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        rootProject.packageConfig,
+        logger: globals.logger,
       );
-      if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-        final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling(
+      final PackageGraph graph = PackageGraph.load(rootProject);
+      // Iterate all root packages in the pub workspace to do Flutter specific
+      // generation.
+      for (final String workspaceRootName in graph.roots) {
+        final Package? rootPackage = packageConfig[workspaceRootName];
+        assert(rootPackage != null);
+        final Uri rootUri = rootPackage!.root;
+
+        final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
+
+        final Environment environment = Environment(
+          artifacts: globals.artifacts!,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          platform: globals.platform,
+          analytics: analytics,
+          projectDir: project.directory,
+          packageConfigPath: packageConfigPath(),
+          generateDartPluginRegistry: true,
+        );
+        if (project.manifest.generateLocalizations) {
+          // If localizations were enabled, but we are not using synthetic packages.
+          final BuildResult result = await globals.buildSystem.build(
+            const GenerateLocalizationsTarget(),
+            environment,
+          );
+          if (result.hasException) {
+            throwToolExit(
+              'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+              '\n\n'
+              '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+            );
+          }
+        }
+
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+        //
+        // `flutter packages get` inherently is neither a debug or release build,
+        // and since a future build (`flutter build apk`) will regenerate tooling
+        // anyway, we assume this is fine.
+        //
+        // It won't be if they do `flutter build --no-pub`, though.
+        const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+
+        // We need to regenerate the platform specific tooling for both the project
+        // itself and example(if present).
+        await project.regeneratePlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
         );
+        if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+          final FlutterProject exampleProject = project.example;
+          await exampleProject.regeneratePlatformSpecificTooling(
+            releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          );
+        }
       }
     }
 

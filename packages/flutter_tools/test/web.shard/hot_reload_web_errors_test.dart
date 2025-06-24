@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('linux') // https://github.com/flutter/flutter/issues/169304
 @Tags(<String>['flutter-test-driver'])
 library;
 
@@ -12,9 +11,6 @@ import '../src/common.dart';
 void main() {
   testAll(
     chrome: true,
-    additionalCommandArgs: <String>['--web-experimental-hot-reload'],
-    // TODO(srujzs): Remove this custom message once we have the delta inspector emitting the same
-    // string as the VM.
-    constClassFieldRemovalErrorMessage: 'Const class cannot remove fields',
+    additionalCommandArgs: <String>['--web-experimental-hot-reload', '--no-web-resources-cdn'],
   );
 }
