@@ -994,11 +994,13 @@ class ScrollableState extends State<Scrollable>
     return false;
   }
 
-  Widget _buildChrome(BuildContext context, Widget child) {
+  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? scrollingDeviceKind) {
+    print('CAMILLE: _buildChrome called, _scrollingDeviceKind is currently $scrollingDeviceKind');
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
       decorationClipBehavior: widget.clipBehavior,
+      scrollingDeviceKind: scrollingDeviceKind,
     );
 
     return _configuration.buildScrollbar(
@@ -1009,6 +1011,19 @@ class ScrollableState extends State<Scrollable>
   }
 
   // DESCRIPTION
+  PointerDeviceKind? _scrollingDeviceKind;
+
+  void _updateDevice(PointerEvent event) {
+    final PointerDeviceKind newKind = event.kind;
+    print('CAMILLE: _update device called; new kind: $newKind');
+    if (newKind != _scrollingDeviceKind) {
+      // Using setState to rebuild the widget with the new color and text.
+      setState(() {
+        print('CAMILLE: _update device called; setting state!');
+        _scrollingDeviceKind = newKind;
+      });
+    }
+  }
 
   @protected
   @override
@@ -1027,6 +1042,9 @@ class ScrollableState extends State<Scrollable>
       position: position,
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
+        onPointerDown: _updateDevice,
+        onPointerHover: _updateDevice,
+        onPointerMove: _updateDevice,
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
@@ -1058,7 +1076,7 @@ class ScrollableState extends State<Scrollable>
       );
     }
 
-    result = _buildChrome(context, result);
+    result = _buildChrome(context, result, _scrollingDeviceKind);
 
     // Selection is only enabled when there is a parent registrar.
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
@@ -2429,7 +2447,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
   }
 
   @override
-  Widget _buildChrome(BuildContext context, Widget child) {
+  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? whatever) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
@@ -2547,7 +2565,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
   }
 
   @override
-  Widget _buildChrome(BuildContext context, Widget child) {
+  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? whatever) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,

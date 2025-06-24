@@ -10,6 +10,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -33,6 +34,7 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
 @immutable
+// TODO(camsim99): Update ScrollableDetails to include input device as needed.
 class ScrollableDetails {
   /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({
@@ -47,6 +49,7 @@ class ScrollableDetails {
     )
     Clip? clipBehavior,
     Clip? decorationClipBehavior,
+    this.scrollingDeviceKind,
   }) : decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
 
   /// A constructor specific to a [Scrollable] with an [Axis.vertical].
@@ -55,6 +58,7 @@ class ScrollableDetails {
     this.controller,
     this.physics,
     this.decorationClipBehavior,
+    this.scrollingDeviceKind,
   }) : direction = reverse ? AxisDirection.up : AxisDirection.down;
 
   /// A constructor specific to a [Scrollable] with an [Axis.horizontal].
@@ -63,6 +67,7 @@ class ScrollableDetails {
     this.controller,
     this.physics,
     this.decorationClipBehavior,
+    this.scrollingDeviceKind,
   }) : direction = reverse ? AxisDirection.left : AxisDirection.right;
 
   /// {@macro flutter.widgets.Scrollable.axisDirection}
@@ -86,6 +91,8 @@ class ScrollableDetails {
   /// Defaults to null.
   final Clip? decorationClipBehavior;
 
+  final PointerDeviceKind? scrollingDeviceKind;
+
   /// Deprecated getter for [decorationClipBehavior].
   @Deprecated(
     'Migrate to decorationClipBehavior. '
@@ -102,12 +109,14 @@ class ScrollableDetails {
     ScrollController? controller,
     ScrollPhysics? physics,
     Clip? decorationClipBehavior,
+    PointerDeviceKind? scrollingDeviceKind,
   }) {
     return ScrollableDetails(
       direction: direction ?? this.direction,
       controller: controller ?? this.controller,
       physics: physics ?? this.physics,
       decorationClipBehavior: decorationClipBehavior ?? this.decorationClipBehavior,
+      scrollingDeviceKind: scrollingDeviceKind ?? this.scrollingDeviceKind,
     );
   }
 
@@ -125,6 +134,7 @@ class ScrollableDetails {
     addIfNonNull('scroll controller: ', controller);
     addIfNonNull('scroll physics: ', physics);
     addIfNonNull('decorationClipBehavior: ', decorationClipBehavior);
+    addIfNonNull('scrollingDeviceKind', scrollingDeviceKind);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }
 

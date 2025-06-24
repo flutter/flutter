@@ -14,6 +14,7 @@
 library;
 
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -846,6 +847,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    print('CAMILLE: material buildScrollbar has been called with details $details');
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     switch (axisDirectionToAxis(details.direction)) {
@@ -859,6 +861,11 @@ class MaterialScrollBehavior extends ScrollBehavior {
             assert(details.controller != null);
             return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.android:
+            if (details.scrollingDeviceKind == PointerDeviceKind.trackpad ||
+                details.scrollingDeviceKind == PointerDeviceKind.mouse) {
+              return Scrollbar(controller: details.controller, child: child);
+            }
+            return child;
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
             return child;
