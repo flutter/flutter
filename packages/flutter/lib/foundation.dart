@@ -13,6 +13,7 @@ export 'package:meta/meta.dart'
     show
         factory,
         immutable,
+        internal,
         mustCallSuper,
         nonVirtual,
         optionalTypeArgs,
