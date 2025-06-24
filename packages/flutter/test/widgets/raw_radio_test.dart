@@ -94,14 +94,7 @@ void main() {
       );
     }
 
-    Object? error;
-    try {
-      await tester.pumpWidget(buildWidget());
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error, isA<AssertionError>());
+    await expectLater(() => tester.pumpWidget(buildWidget()), throwsAssertionError);
   });
 }
 

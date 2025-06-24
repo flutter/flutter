@@ -13,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(emulateTesterEnvironment: false, setUpTestViewDimensions: false);
+  setUpUnitTests(setUpTestViewDimensions: false);
 
   test('default field values are as documented on api.flutter.dev', () {
     final paint = ui.Paint();
