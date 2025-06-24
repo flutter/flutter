@@ -242,9 +242,9 @@ class AndroidSdk {
     if (directory.absolute.path.contains(' ')) {
       final String androidSdkSpaceWarning =
           'Android SDK location currently '
-          'contains spaces, which is not allowed as it causes problems with NDK '
-          'tools. Try moving it from ${directory.absolute.path} to a path '
-          'without spaces.';
+          'contains spaces, which is not supported by the Android SDK as it '
+          'causes problems with NDK tools. Try moving it from '
+          '${directory.absolute.path} to a path without spaces.';
       return <String>[androidSdkSpaceWarning];
     }
 

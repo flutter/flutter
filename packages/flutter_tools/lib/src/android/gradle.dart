@@ -58,8 +58,6 @@ const String failedToStripDebugSymbolsErrorMessage = r'''
 Release app bundle failed to strip debug symbols from native libraries.
 Please run flutter doctor and ensure that the Android toolchain does not
 report any issues.
-In particular, ensure that your Android SDK installation path does not contain
-spaces, as this is not supported by Android.
 
 Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 
