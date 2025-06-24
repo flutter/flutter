@@ -534,9 +534,6 @@ class FormField<T> extends StatefulWidget {
 
   /// An optional value to initialize the form field to, or null otherwise.
   ///
-  /// This is called `value` in the [DropdownButtonFormField] constructor to be
-  /// consistent with [DropdownButton].
-  ///
   /// The `initialValue` affects the form field's state in two cases:
   /// 1. When the form field is first built, `initialValue` determines the field's initial state.
   /// 2. When [FormFieldState.reset] is called (either directly or by calling
