@@ -609,7 +609,7 @@ def run_engine_benchmarks(build_dir, executable_filter):
 
 class FlutterTesterOptions():
 
-  def __init__(
+  def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded=False,
       enable_impeller=False,
