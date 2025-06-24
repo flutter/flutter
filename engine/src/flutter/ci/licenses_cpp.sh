@@ -83,5 +83,5 @@ fi
   --licenses_path "$LICENSES_OUTPUT_PATH" \
   --v $VERBOSITY
 
-diff -u "$LICENSES_OUTPUT_PATH" "$LICENSES_PATH"
+git diff --ignore-cr-at-eol "$LICENSES_OUTPUT_PATH" "$LICENSES_PATH"
 rm "$LICENSES_OUTPUT_PATH"
