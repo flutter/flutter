@@ -523,7 +523,7 @@ class _TimeSelectorSeparator extends StatelessWidget {
             style: effectiveStyle,
             textScaler: TextScaler.noScaling,
           ),
-        )
+        ),
       ),
     );
   }
