@@ -316,7 +316,7 @@ void main() {
     );
 
     testUsingContext(
-      'detects spaces in android sdk path',
+      'detects spaces in Android SDK path',
       () {
         final Directory sdkDir = createSdkDirectory(
           fileSystem: fileSystem,
