@@ -2564,18 +2564,12 @@ final String _kTemplateRelativePath = path.join(
 final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
-final String _kLicensePath = path.join(
-  'dev',
-  'conductor',
-  'core',
-  'lib',
-  'src',
-  'proto',
-  'license_header.txt',
-);
 
-String _getFlutterLicense(String flutterRoot) {
-  return '${File(path.join(flutterRoot, _kLicensePath)).readAsLinesSync().join("\n")}\n\n';
+String _getFlutterLicense() {
+  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+      '// Use of this source code is governed by a BSD-style license that can be\n'
+      '// found in the LICENSE file.\n'
+      '\n';
 }
 
 String _removeLicenseIfPresent(String fileContents, String license) {
@@ -2587,7 +2581,7 @@ String _removeLicenseIfPresent(String fileContents, String license) {
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final List<String> errors = <String>[];
-  final String license = _getFlutterLicense(flutterRoot);
+  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs =
@@ -2678,9 +2672,6 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/docs.sh',
 
   'dev/checks',
-  'dev/conductor/bin/conductor',
-  'dev/conductor/bin/packages_autoroller',
-  'dev/conductor/core/lib/src/proto/compile_proto.sh',
 
   'dev/customer_testing/ci.sh',
 
