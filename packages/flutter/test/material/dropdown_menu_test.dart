@@ -4330,7 +4330,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 200.0);
-
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
