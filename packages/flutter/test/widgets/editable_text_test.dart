@@ -17469,9 +17469,7 @@ void main() {
     expect(tapOutsideCount, 0);
   });
 
-  testWidgets('Disabling interactive selection disables shortcuts', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Disabling interactive selection disables shortcuts', (WidgetTester tester) async {
     controller.text = 'Hello world';
 
     TextSelection? selection;
@@ -17509,10 +17507,7 @@ void main() {
     expect(selection?.end, 11);
 
     // Select all programatically
-    controller.selection = TextSelection(
-      baseOffset: 0,
-      extentOffset: controller.text.length,
-    );
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
 
     // Set the clipboard
     await Clipboard.setData(const ClipboardData(text: 'foo'));
