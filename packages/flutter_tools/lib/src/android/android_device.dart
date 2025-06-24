@@ -211,7 +211,7 @@ class AndroidDevice extends Device {
       case 'x86_64':
         return TargetPlatform.android_x64;
       default:
-        throw UnsupportedError('Unsupported Android architecture: $abi');
+        return TargetPlatform.unsupported;
     }
   }();
 
@@ -233,6 +233,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -555,6 +556,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.unsupported:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -855,12 +857,14 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isSupported() async {
-    try {
-      await targetPlatform;
-      return true;
-    } on UnsupportedError {
-      return false;
-    }
+    final TargetPlatform platform = await targetPlatform;
+    return switch (platform) {
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 => true,
+      _ => false,
+    };
   }
 
   @override
