@@ -411,6 +411,37 @@ void runTests() {
     expect(imageCache.currentSize, 0);
     // The test passes if there are no crashes.
   });
+
+  testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
+    final TestImgElement testImg = TestImgElement();
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    final Key containerKey = UniqueKey();
+    int taps = 0;
+
+    await tester.pumpWidget(
+      GestureDetector(
+        onTap: () => taps++,
+        child: Container(
+          key: containerKey,
+          width: 200,
+          height: 200,
+          // Add a color to make it a visible container. This ensures that
+          // GestureDetector's default hit test behavior works.
+          color: const Color(0xFF00FF00),
+          child: Image(image: imageProvider),
+        ),
+      ),
+    );
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    expect(taps, isZero);
+    await tester.tap(find.byKey(containerKey), warnIfMissed: false);
+    expect(taps, 1);
+  });
 }
 
 // Generates a unique URL based on the provided key, preventing unintended caching.
