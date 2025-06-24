@@ -86,10 +86,6 @@ class WindowManager {
   // Isolate that runs the Dart code. Set during Initialize().
   std::optional<Isolate> isolate_;
 
-  // Messages received before the controller is initialized from dart
-  // code. Buffered until Initialize() is called.
-  std::vector<WindowsMessage> pending_messages_;
-
   // A map of active windows. Used to destroy remaining windows on engine
   // shutdown.
   std::unordered_map<HWND, std::unique_ptr<HostWindow>> active_windows_;

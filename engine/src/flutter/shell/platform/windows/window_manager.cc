@@ -25,13 +25,6 @@ WindowManager::WindowManager(FlutterWindowsEngine* engine) : engine_(engine) {}
 void WindowManager::Initialize(const WindowingInitRequest* request) {
   on_message_ = request->on_message;
   isolate_ = Isolate::Current();
-
-  // Send messages accumulated before isolate called this method.
-  for (WindowsMessage& message : pending_messages_) {
-    IsolateScope scope(*isolate_);
-    on_message_(&message);
-  }
-  pending_messages_.clear();
 }
 
 bool WindowManager::HasTopLevelWindows() const {
@@ -91,13 +84,6 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
 
   // Not initialized yet.
   if (!isolate_) {
-    if (pending_messages_.size() > 1024) {
-      FML_LOG(ERROR) << "The pending message cache has been maxed out, "
-                        "something must be going wrong.";
-      return std::nullopt;
-    }
-
-    pending_messages_.push_back(message_struct);
     return std::nullopt;
   }
 
