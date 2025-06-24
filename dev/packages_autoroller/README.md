@@ -4,6 +4,7 @@ This script is executed [by a LUCI bot][LUCI] to generate PRs updating package
 dependencies.
 
 To run locally:
+
 ```sh
 ./dev/packages_autoroller/run
 ```

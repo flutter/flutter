@@ -11,8 +11,8 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import './git.dart';
-import './stdio.dart';
+import 'git.dart';
+import 'stdio.dart';
 
 /// Allowed git remote names.
 enum RemoteName { upstream, mirror }
@@ -404,7 +404,7 @@ final class Checkouts {
     required this.processManager,
     required this.stdio,
     required Directory parentDirectory,
-    String directoryName = 'flutter_conductor_checkouts',
+    String directoryName = 'package_autoroller_checkouts',
   }) : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor_core/src/repository.dart';
 import 'package:file/memory.dart';
+import 'package:packages_autoroller/src/repository.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
+import 'common.dart';
 
 void main() {
   group('repository', () {
@@ -43,7 +43,7 @@ void main() {
             'upstream',
             '--',
             FrameworkRepository.defaultUpstream,
-            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+            fileSystem.path.join(rootDir, 'package_autoroller_checkouts', 'framework'),
           ],
         ),
         const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
@@ -85,7 +85,7 @@ void main() {
             'upstream',
             '--',
             FrameworkRepository.defaultUpstream,
-            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+            fileSystem.path.join(rootDir, 'package_autoroller_checkouts', 'framework'),
           ],
         ),
         const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
@@ -133,7 +133,7 @@ Extraneous debug information that should be ignored.
             'upstream',
             '--',
             FrameworkRepository.defaultUpstream,
-            '${rootDir}flutter_conductor_checkouts/framework',
+            '${rootDir}package_autoroller_checkouts/framework',
           ],
         ),
         FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),

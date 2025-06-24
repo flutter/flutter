@@ -5,12 +5,12 @@
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
-import 'package:conductor_core/packages_autoroller.dart';
-import 'package:conductor_core/src/repository.dart';
-import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:packages_autoroller/packages_autoroller.dart';
+import 'package:packages_autoroller/src/repository.dart';
+import 'package:packages_autoroller/src/stdio.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -124,9 +124,8 @@ Directory get _localFlutterRoot {
   filePath = platform.script.toFilePath();
   final String checkoutsDirname = fileSystem.path.normalize(
     fileSystem.path.join(
-      fileSystem.path.dirname(filePath), // flutter/dev/conductor/core/bin
-      '..', // flutter/dev/conductor/core
-      '..', // flutter/dev/conductor
+      fileSystem.path.dirname(filePath), // flutter/dev/packages_autoroller/bin
+      '..', // flutter/dev/packages_autoroller
       '..', // flutter/dev
       '..', // flutter
     ),
