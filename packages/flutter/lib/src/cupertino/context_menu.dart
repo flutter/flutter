@@ -488,6 +488,25 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _route!.animation!.addStatusListener(_routeAnimationStatusListener);
   }
 
+  void _removeContextMenuDecoy() {
+    // Keep the decoy on the screen for one extra frame. We have to do this
+    // because _ContextMenuRoute renders its first frame offscreen.
+    // Otherwise there would be a visible flash when nothing is rendered for
+    // one frame.
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      if (mounted) {
+        _closeContextMenu();
+        _openController.reset();
+      }
+    }, debugLabel: 'removeContextMenuDecoy');
+  }
+
+  void _closeContextMenu() {
+    _lastOverlayEntry?.remove();
+    _lastOverlayEntry?.dispose();
+    _lastOverlayEntry = null;
+  }
+
   void _onDecoyAnimationStatusChange(AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
@@ -496,28 +515,15 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
             _childHidden = false;
           });
         }
-        _lastOverlayEntry?.remove();
-        _lastOverlayEntry?.dispose();
-        _lastOverlayEntry = null;
-
+        _closeContextMenu();
       case AnimationStatus.completed:
-        setState(() {
-          _childHidden = true;
-        });
         _openContextMenu();
-        // Keep the decoy on the screen for one extra frame. We have to do this
-        // because _ContextMenuRoute renders its first frame offscreen.
-        // Otherwise there would be a visible flash when nothing is rendered for
-        // one frame.
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-          _lastOverlayEntry?.remove();
-          _lastOverlayEntry?.dispose();
-          _lastOverlayEntry = null;
-          _openController.reset();
-        }, debugLabel: 'removeContextMenuDecoy');
-
+        _removeContextMenuDecoy();
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
+        if (!ModalRoute.of(context)!.isCurrent) {
+          _removeContextMenuDecoy();
+        }
         return;
     }
   }
@@ -617,6 +623,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   void dispose() {
+    _closeContextMenu();
     _tapGestureRecognizer.dispose();
     _openController.dispose();
     super.dispose();
