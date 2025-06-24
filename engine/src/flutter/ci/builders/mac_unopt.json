@@ -201,7 +201,7 @@
                     "name": "Run license_cpp",
                     "script": "flutter/ci/licenses_cpp.sh",
                     "parameters": [
-                        "host_release_arm64_licenses"
+                        "ci/host_release_arm64_licenses"
                     ]
                 }
             ]
