@@ -319,7 +319,7 @@ class FlutterWindowsEngine {
   WindowManager* window_manager() { return window_manager_.get(); }
 
   // Returns the root view associated with the top-level window with |hwnd| as
-  // the window handle.
+  // the window handle or nullptr if no such view could be found.
   FlutterWindowsView* GetViewFromTopLevelWindow(HWND hwnd) const;
 
  protected:
