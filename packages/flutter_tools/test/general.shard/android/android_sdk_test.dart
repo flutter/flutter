@@ -331,9 +331,9 @@ void main() {
           ),
         );
         config.setValue('android-sdk', sdkDir.path);
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-        final List<String> validationIssues = sdk.validateSdkWellFormed();
+        final List<String> validationIssues =
+            AndroidSdk.locateAndroidSdk()!.validateSdkWellFormed();
         expect(validationIssues.first, contains('Android SDK location currently contains spaces'));
       },
       overrides: <Type, Generator>{
