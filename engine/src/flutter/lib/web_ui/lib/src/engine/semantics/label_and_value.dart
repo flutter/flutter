@@ -7,6 +7,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../dom.dart';
+import '../util.dart' show listEquals;
 import 'semantics.dart';
 
 /// The method used to represend a label of a leaf node in the DOM.
@@ -656,10 +657,10 @@ String? _computeLabelValue({String? label, String? value, List<String>? labelPar
   }
 
   // Fallback to regular label + value logic
-  final String combinedValue = <String?>[label, value]
-      .whereType<String>() // poor man's null filter
-      .where((String element) => element.trim().isNotEmpty)
-      .join(' ');
+  final String combinedValue = <String?>[
+    label,
+    value,
+  ].whereType<String>().where((String element) => element.trim().isNotEmpty).join(' ');
   return combinedValue.isNotEmpty ? combinedValue : null;
 }
 
@@ -689,11 +690,9 @@ class AriaLabelHelper {
   void updateLabel(String? fallbackLabel) {
     final List<String>? labelParts = semanticsObject.labelParts;
 
-    // Filter out empty or whitespace-only label parts
     final List<String>? validParts =
         labelParts?.where((String part) => part.trim().isNotEmpty).toList();
 
-    // Use aria-labelledby if valid labelParts are provided, otherwise use aria-label
     if (validParts != null && validParts.isNotEmpty) {
       _updateAriaLabelledBy(validParts);
     } else {
@@ -722,7 +721,7 @@ class AriaLabelHelper {
   }
 
   void _updateAriaLabelledBy(List<String> labelParts) {
-    if (_areListsEqual(labelParts, _previousLabelParts)) {
+    if (listEquals(labelParts, _previousLabelParts)) {
       return;
     }
 
@@ -771,24 +770,5 @@ class AriaLabelHelper {
       containerElement.querySelector('#$labelId')?.remove();
     }
     _previousLabelParts = null;
-  }
-
-  /// Helper function to compare two nullable lists for equality.
-  static bool _areListsEqual<T>(List<T>? a, List<T>? b) {
-    if (a == null && b == null) {
-      return true;
-    }
-    if (a == null || b == null) {
-      return false;
-    }
-    if (a.length != b.length) {
-      return false;
-    }
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) {
-        return false;
-      }
-    }
-    return true;
   }
 }

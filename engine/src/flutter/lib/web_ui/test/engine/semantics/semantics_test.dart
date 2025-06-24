@@ -1032,26 +1032,22 @@ label''');
   });
 
   test('computeDomSemanticsLabel handles labelParts correctly', () {
-    // Test basic labelParts functionality
     expect(computeDomSemanticsLabel(labelParts: <String>['Part1', 'Part2']), 'Part1 Part2');
     expect(
       computeDomSemanticsLabel(labelParts: <String>['Customer', 'Name', 'Required']),
       'Customer Name Required',
     );
 
-    // Test labelParts with tooltip
     expect(
       computeDomSemanticsLabel(tooltip: 'Field tooltip', labelParts: <String>['Customer', 'Name']),
       'Field tooltip\nCustomer Name',
     );
 
-    // Test labelParts with value
     expect(
       computeDomSemanticsLabel(labelParts: <String>['Customer', 'Name'], value: 'John Doe'),
       'Customer Name John Doe',
     );
 
-    // Test labelParts with both tooltip and value
     expect(
       computeDomSemanticsLabel(
         tooltip: 'Field tooltip',
@@ -1061,19 +1057,16 @@ label''');
       'Field tooltip\nCustomer Name John Doe',
     );
 
-    // Test that labelParts takes precedence over regular label
     expect(
       computeDomSemanticsLabel(label: 'Regular Label', labelParts: <String>['Priority', 'Parts']),
       'Priority Parts',
     );
 
-    // Test filtering of empty labelParts
     expect(
       computeDomSemanticsLabel(labelParts: <String>['Valid', '', '  ', 'Parts']),
       'Valid Parts',
     );
 
-    // Test fallback to regular label when labelParts are all empty
     expect(
       computeDomSemanticsLabel(label: 'Fallback Label', labelParts: <String>['', '  ', '']),
       'Fallback Label',

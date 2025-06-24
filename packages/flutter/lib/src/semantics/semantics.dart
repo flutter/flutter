@@ -5125,8 +5125,8 @@ class SemanticsConfiguration {
   String get label => _attributedLabel.string;
   set label(String label) {
     _attributedLabel = AttributedString(label);
-    _attributedLabelSetExplicitly = false; // This was set via label, not attributedLabel
-    _labelParts = null; // Clear labelParts when setting regular label
+    _attributedLabelSetExplicitly = false;
+    _labelParts = null;
     _hasBeenAnnotated = true;
   }
 
@@ -5150,7 +5150,7 @@ class SemanticsConfiguration {
   set attributedLabel(AttributedString attributedLabel) {
     _attributedLabel = attributedLabel;
     _attributedLabelSetExplicitly = true;
-    _labelParts = null; // Clear labelParts when setting attributedLabel
+    _labelParts = null;
     _hasBeenAnnotated = true;
   }
 
@@ -5177,7 +5177,7 @@ class SemanticsConfiguration {
     _labelParts = labelParts;
     if (labelParts != null && labelParts.isNotEmpty) {
       _attributedLabel = AttributedString(labelParts.join(' '));
-      _attributedLabelSetExplicitly = false; // This was set via labelParts, not explicitly
+      _attributedLabelSetExplicitly = false;
     }
   }
 
