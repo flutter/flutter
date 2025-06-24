@@ -305,7 +305,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
               }
             }
           });
-      if (!did_find_copyright && !package.license_file.has_value()) {
+      if (!did_find_copyright &&
+          (!package.license_file.has_value() || package.is_root_package)) {
         errors.push_back(absl::NotFoundError(
             "Expected copyright in " + full_path.lexically_normal().string()));
       }
