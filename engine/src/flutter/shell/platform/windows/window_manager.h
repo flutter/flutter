@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_
 
 #include <windows.h>
+#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -66,7 +67,7 @@ class WindowManager {
 
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
-  // controller to process messages that affect the state of other host windows.
+  // manager to process messages that affect the state of other host windows.
   std::optional<LRESULT> HandleMessage(HWND hwnd,
                                        UINT message,
                                        WPARAM wparam,
@@ -75,19 +76,15 @@ class WindowManager {
   void OnEngineShutdown();
 
  private:
-  // The Flutter engine that owns this controller.
+  // The Flutter engine that owns this manager.
   FlutterWindowsEngine* const engine_;
 
   // Callback that relays windows messages to the isolate. Set
   // during Initialize().
-  void (*on_message_)(WindowsMessage*) = nullptr;
+  std::function<void(WindowsMessage*)> on_message_;
 
   // Isolate that runs the Dart code. Set during Initialize().
   std::optional<Isolate> isolate_;
-
-  // Messages received before the controller is initialized from dart
-  // code. Buffered until Initialize() is called.
-  std::vector<WindowsMessage> pending_messages_;
 
   // A map of active windows. Used to destroy remaining windows on engine
   // shutdown.
