@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include <cstring>
-#include "flutter/shell/platform/windows/flutter_windows_display_monitor.h"
+#include "flutter/shell/platform/windows/display_monitor.h"
 
 #include <string>
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
@@ -28,10 +28,10 @@ using ::testing::Return;
 using ::testing::SetArgPointee;
 using ::testing::StrEq;
 
-class FlutterWindowsDisplayMonitorTest : public WindowsTest {};
+class DisplayMonitorTest : public WindowsTest {};
 
 // Test that the display monitor correctly handles multiple monitors
-TEST_F(FlutterWindowsDisplayMonitorTest, MultipleMonitors) {
+TEST_F(DisplayMonitorTest, MultipleMonitors) {
   FlutterWindowsEngineBuilder builder(GetContext());
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
 
@@ -120,14 +120,14 @@ TEST_F(FlutterWindowsDisplayMonitorTest, MultipleMonitors) {
       .WillRepeatedly(Return(144));  // High DPI
 
   // Create the display monitor with the mock engine and proc table
-  auto display_monitor = std::make_unique<FlutterWindowsDisplayMonitor>(
-      engine.get(), mock_windows_proc_table);
+  auto display_monitor =
+      std::make_unique<DisplayMonitor>(engine.get(), mock_windows_proc_table);
 
   display_monitor->UpdateDisplays();
 }
 
 // Test that the display monitor correctly handles a display change message
-TEST_F(FlutterWindowsDisplayMonitorTest, HandleDisplayChangeMessage) {
+TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
   // Create a mock engine
   FlutterWindowsEngineBuilder builder(GetContext());
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
@@ -141,8 +141,8 @@ TEST_F(FlutterWindowsDisplayMonitorTest, HandleDisplayChangeMessage) {
       .WillRepeatedly(Return(1));  // Return 1 monitor
 
   // Create the display monitor with the mock engine and proc table
-  auto display_monitor = std::make_unique<FlutterWindowsDisplayMonitor>(
-      engine.get(), mock_windows_proc_table);
+  auto display_monitor =
+      std::make_unique<DisplayMonitor>(engine.get(), mock_windows_proc_table);
 
   // Test handling a display change message
   HWND dummy_hwnd = reinterpret_cast<HWND>(1);

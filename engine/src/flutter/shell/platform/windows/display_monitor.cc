@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter_windows_display_monitor.h"
+#include "display_monitor.h"
 
 #include <utility>
 #include <vector>
@@ -12,27 +12,26 @@
 
 namespace flutter {
 
-FlutterWindowsDisplayMonitor::FlutterWindowsDisplayMonitor(
+DisplayMonitor::DisplayMonitor(
     FlutterWindowsEngine* engine,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
-    : engine_(engine), windows_proc_table_(std::move(windows_proc_table)) {
-  if (windows_proc_table_ == nullptr) {
-    windows_proc_table_ = std::make_shared<WindowsProcTable>();
+    : engine_(engine), win32_(std::move(windows_proc_table)) {
+  if (win32_ == nullptr) {
+    win32_ = std::make_shared<WindowsProcTable>();
   }
 }
 
-FlutterWindowsDisplayMonitor::~FlutterWindowsDisplayMonitor() {}
+DisplayMonitor::~DisplayMonitor() {}
 
-void FlutterWindowsDisplayMonitor::UpdateDisplays() {
+void DisplayMonitor::UpdateDisplays() {
   std::vector<FlutterEngineDisplay> displays;
 
-  int display_count = windows_proc_table_->GetSystemMetrics(SM_CMONITORS);
+  int display_count = win32_->GetSystemMetrics(SM_CMONITORS);
 
   DISPLAY_DEVICE display_device = {0};
   display_device.cb = sizeof(DISPLAY_DEVICE);
 
-  for (int i = 0;
-       windows_proc_table_->EnumDisplayDevices(nullptr, i, &display_device, 0);
+  for (int i = 0; win32_->EnumDisplayDevices(nullptr, i, &display_device, 0);
        i++) {
     // Skip displays that are not attached to the desktop
     if ((display_device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) == 0) {
@@ -42,8 +41,8 @@ void FlutterWindowsDisplayMonitor::UpdateDisplays() {
     DEVMODE device_mode = {0};
     device_mode.dmSize = sizeof(DEVMODE);
 
-    if (windows_proc_table_->EnumDisplaySettings(
-            display_device.DeviceName, ENUM_CURRENT_SETTINGS, &device_mode)) {
+    if (win32_->EnumDisplaySettings(display_device.DeviceName,
+                                    ENUM_CURRENT_SETTINGS, &device_mode)) {
       FlutterEngineDisplay display = {};
       display.struct_size = sizeof(FlutterEngineDisplay);
       display.display_id = i;
@@ -65,13 +64,12 @@ void FlutterWindowsDisplayMonitor::UpdateDisplays() {
                                               (device_mode.dmPelsWidth / 2)),
                             static_cast<LONG>(device_mode.dmPosition.y +
                                               (device_mode.dmPelsHeight / 2))};
-      HMONITOR monitor = windows_proc_table_->MonitorFromPoint(
-          center_point, MONITOR_DEFAULTTONULL);
+      HMONITOR monitor =
+          win32_->MonitorFromPoint(center_point, MONITOR_DEFAULTTONULL);
 
       // If we couldn't get a monitor, fall back to primary
       if (!monitor) {
-        monitor = windows_proc_table_->MonitorFromPoint(
-            {0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        monitor = win32_->MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
       }
 
       // Calculate device pixel ratio
@@ -87,11 +85,11 @@ void FlutterWindowsDisplayMonitor::UpdateDisplays() {
   engine_->UpdateDisplay(displays);
 }
 
-bool FlutterWindowsDisplayMonitor::HandleWindowMessage(HWND hwnd,
-                                                       UINT message,
-                                                       WPARAM wparam,
-                                                       LPARAM lparam,
-                                                       LRESULT* result) {
+bool DisplayMonitor::HandleWindowMessage(HWND hwnd,
+                                         UINT message,
+                                         WPARAM wparam,
+                                         LPARAM lparam,
+                                         LRESULT* result) {
   switch (message) {
     case WM_DISPLAYCHANGE:
     case WM_DPICHANGED:

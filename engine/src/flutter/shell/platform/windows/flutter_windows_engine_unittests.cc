@@ -43,6 +43,7 @@ void PumpMessage() {
 namespace flutter {
 namespace testing {
 
+using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 
