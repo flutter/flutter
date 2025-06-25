@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -18,42 +19,15 @@ import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
-    SupportedPlatform.ios,
-    SupportedPlatform.macos,
+  const List<FlutterDarwinPlatform> supportedPlatforms = <FlutterDarwinPlatform>[
+    FlutterDarwinPlatform.ios,
+    FlutterDarwinPlatform.macos,
   ];
 
   group('DarwinDependencyManagement', () {
-    for (final SupportedPlatform platform in supportedPlatforms) {
+    for (final FlutterDarwinPlatform platform in supportedPlatforms) {
       group('for ${platform.name}', () {
         group('generatePluginsSwiftPackage', () {
-          testWithoutContext('throw if invalid platform', () async {
-            final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
-            final BufferLogger testLogger = BufferLogger.test();
-            final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
-              fs: testFileSystem,
-              fakeFlutterVersion: FakeFlutterVersion(),
-            );
-
-            final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
-              project: FakeFlutterProject(fileSystem: testFileSystem),
-              plugins: <Plugin>[],
-              cocoapods: FakeCocoaPods(),
-              swiftPackageManager: FakeSwiftPackageManager(),
-              fileSystem: testFileSystem,
-              featureFlags: TestFeatureFlags(),
-              logger: testLogger,
-              analytics: testAnalytics,
-            );
-
-            await expectLater(
-              () => dependencyManagement.setUp(platform: SupportedPlatform.android),
-              throwsToolExit(
-                message:
-                    'The platform android is incompatible with Darwin Dependency Managers. Only iOS and macOS are allowed.',
-              ),
-            );
-          });
           group('when using Swift Package Manager', () {
             testWithoutContext('with only CocoaPod plugins', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
@@ -141,7 +115,7 @@ void main() {
                   fileSystem: testFileSystem,
                 );
                 final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                    platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                   'FlutterGeneratedPluginSwiftPackage',
@@ -212,7 +186,7 @@ void main() {
                   fileSystem: testFileSystem,
                 );
                 final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                    platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Standard Podfile template');
 
@@ -281,7 +255,7 @@ void main() {
                   fileSystem: testFileSystem,
                 );
                 final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                    platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
@@ -300,7 +274,8 @@ void main() {
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
-                final String xcconfigPrefix = platform == SupportedPlatform.macos ? 'Flutter-' : '';
+                final String xcconfigPrefix =
+                    platform == FlutterDarwinPlatform.macos ? 'Flutter-' : '';
                 expect(
                   testLogger.warningText,
                   contains(
@@ -368,7 +343,7 @@ void main() {
                   fileSystem: testFileSystem,
                 );
                 final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                    platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Non-Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
@@ -388,7 +363,8 @@ void main() {
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
-                final String xcconfigPrefix = platform == SupportedPlatform.macos ? 'Flutter-' : '';
+                final String xcconfigPrefix =
+                    platform == FlutterDarwinPlatform.macos ? 'Flutter-' : '';
                 expect(
                   testLogger.warningText,
                   contains(
@@ -467,7 +443,7 @@ void main() {
                 fileSystem: testFileSystem,
               );
               final XcodeBasedProject xcodeProject =
-                  platform == SupportedPlatform.ios ? project.ios : project.macos;
+                  platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
               xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
               xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                 'FlutterGeneratedPluginSwiftPackage',
@@ -534,7 +510,7 @@ void main() {
                 fileSystem: testFileSystem,
               );
               final XcodeBasedProject xcodeProject =
-                  platform == SupportedPlatform.ios ? project.ios : project.macos;
+                  platform == FlutterDarwinPlatform.ios ? project.ios : project.macos;
               xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
               xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                 'FlutterGeneratedPluginSwiftPackage',
@@ -826,7 +802,7 @@ class FakeSwiftPackageManager extends Fake implements SwiftPackageManager {
   @override
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
-    SupportedPlatform platform,
+    FlutterDarwinPlatform platform,
     XcodeBasedProject project,
   ) async {
     generated = true;

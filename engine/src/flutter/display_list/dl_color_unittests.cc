@@ -264,6 +264,16 @@ TEST(DisplayListColor, ColorSpaceExtendedSRGBtoExtendedSRGB) {
             xsrgb.withColorSpace(DlColorSpace::kExtendedSRGB));
 }
 
+TEST(DisplayListColor, ColorSpaceExtendedSRGBtoSRGB) {
+  DlColor xsrgb1(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB);
+  EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB),
+            xsrgb1.withColorSpace(DlColorSpace::kSRGB));
+
+  DlColor xsrgb2(0.9, 1.1, -0.1, 0.6, DlColorSpace::kExtendedSRGB);
+  EXPECT_EQ(DlColor(0.9, 1.0, 0.0, 0.6, DlColorSpace::kSRGB),
+            xsrgb2.withColorSpace(DlColorSpace::kSRGB));
+}
+
 TEST(DisplayListColor, ColorSpaceP3ToP3) {
   DlColor p3(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3);
   EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3),
@@ -287,6 +297,23 @@ TEST(DisplayListColor, ColorSpaceP3ToExtendedSRGB) {
   EXPECT_TRUE(DlColor(0.9, -0.0004, 0.0003, 1.0420, DlColorSpace::kExtendedSRGB)
                   .isClose(blue.withColorSpace(DlColorSpace::kExtendedSRGB)))
       << blue.withColorSpace(DlColorSpace::kExtendedSRGB);
+}
+
+TEST(DisplayListColor, ColorSpaceP3ToSRGB) {
+  DlColor red(0.9, 1.0, 0.0, 0.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 1.0, 0.0, 0.0, DlColorSpace::kSRGB)
+                  .isClose(red.withColorSpace(DlColorSpace::kSRGB)))
+      << red.withColorSpace(DlColorSpace::kSRGB);
+
+  DlColor green(0.9, 0.0, 1.0, 0.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 0.0, 1.0, 0.0, DlColorSpace::kSRGB)
+                  .isClose(green.withColorSpace(DlColorSpace::kSRGB)))
+      << green.withColorSpace(DlColorSpace::kSRGB);
+
+  DlColor blue(0.9, 0.0, 0.0, 1.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 0.0, 0.0003, 1.0, DlColorSpace::kSRGB)
+                  .isClose(blue.withColorSpace(DlColorSpace::kSRGB)))
+      << blue.withColorSpace(DlColorSpace::kSRGB);
 }
 
 TEST(DisplayListColor, isClose) {

@@ -59,6 +59,23 @@ TEST(SwitchesTest, TraceToFile) {
   EXPECT_EQ(settings.trace_to_file, "trace.binpb");
 }
 
+TEST(SwitchesTest, ProfileMicrotasks) {
+  {
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--profile-microtasks"});
+    EXPECT_TRUE(command_line.HasOption("profile-microtasks"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_microtasks, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_microtasks, false);
+  }
+}
+
 TEST(SwitchesTest, RouteParsedFlag) {
   fml::CommandLine command_line =
       fml::CommandLineFromInitializerList({"command", "--route=/animation"});

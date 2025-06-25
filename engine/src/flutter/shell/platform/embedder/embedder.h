@@ -174,6 +174,10 @@ typedef enum {
 /// The set of properties that may be associated with a semantics node.
 ///
 /// Must match the `SemanticsFlag` enum in semantics.dart.
+///
+/// @deprecated     Use `FlutterSemanticsFlags` instead. No new flags will
+///                 be added to `FlutterSemanticsFlag`. New flags will
+///                 continue to be added to `FlutterSemanticsFlags`.
 typedef enum {
   /// The semantics node has the quality of either being "checked" or
   /// "unchecked".
@@ -259,6 +263,92 @@ typedef enum {
   /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
   kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
+
+typedef enum {
+  /// The property is not applicable to this semantics node.
+  kFlutterTristateNone,
+  /// The property is applicable and its state is "true" or "on".
+  kFlutterTristateTrue,
+  /// The property is applicable and its state is "false" or "off".
+  kFlutterTristateFalse,
+} FlutterTristate;
+
+typedef enum {
+  /// The semantics node does not have check state.
+  kFlutterCheckStateNone,
+  /// The semantics node is checked.
+  kFlutterCheckStateTrue,
+  /// The semantics node is not checked.
+  kFlutterCheckStateFalse,
+  /// The semantics node represents a checkbox in mixed state.
+  kFlutterCheckStateMixed,
+} FlutterCheckState;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterSemanticsFlags).
+  size_t struct_size;
+  /// Whether a semantics node is checked.
+  FlutterCheckState is_checked;
+  /// Whether a semantics node is selected.
+  FlutterTristate is_selected;
+  /// Whether a semantic node is currently enabled.
+  FlutterTristate is_enabled;
+  /// If true, the semantics node is "on". If false, the semantics node is
+  /// "off".
+  FlutterTristate is_toggled;
+  /// Whether a semantic node that is currently expanded.
+  FlutterTristate is_expanded;
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  FlutterTristate is_required;
+  /// Whether the semantic node currently holds the user's focus.
+  FlutterTristate is_focused;
+  /// Whether the semantic node represents a button.
+  bool is_button;
+  /// Whether the semantic node represents a text field.
+  bool is_text_field;
+  /// Whether a semantic node is in a mutually exclusive group.
+  bool is_in_mutually_exclusive_group;
+  /// Whether a semantic node is a header that divides content into sections.
+  bool is_header;
+  /// Whether the value of the semantics node is obscured.
+  bool is_obscured;
+  /// Whether the semantics node is the root of a subtree for which a route name
+  /// should be announced.
+  bool scopes_route;
+  /// Whether the semantics node label is the name of a visually distinct route.
+  bool names_route;
+  /// Whether the semantics node is considered hidden.
+  bool is_hidden;
+  /// Whether the semantics node represents an image.
+  bool is_image;
+  /// Whether the semantics node is a live region.
+  bool is_live_region;
+  /// Whether the platform can scroll the semantics node when the user attempts
+  /// to move the accessibility focus to an offscreen child.
+  ///
+  /// For example, a `ListView` widget has implicit scrolling so that users can
+  /// easily move the accessibility focus to the next set of children. A
+  /// `PageView` widget does not have implicit scrolling, so that users don't
+  /// navigate to the next page when reaching the end of the current one.
+  bool has_implicit_scrolling;
+  /// Whether the value of the semantics node is coming from a multi-line text
+  /// field.
+  ///
+  /// This is used for text fields to distinguish single-line text fields from
+  /// multi-line ones.
+  bool is_multiline;
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
+  bool is_read_only;
+  /// Whether the semantics node represents a link.
+  bool is_link;
+  /// Whether the semantics node represents a slider.
+  bool is_slider;
+  /// Whether the semantics node represents a keyboard key.
+  bool is_keyboard_key;
+} FlutterSemanticsFlags;
 
 typedef enum {
   /// Text has unknown text direction.
@@ -1512,7 +1602,11 @@ typedef struct {
   /// The unique identifier for this node.
   int32_t id;
   /// The set of semantics flags associated with this node.
-  FlutterSemanticsFlag flags;
+  ///
+  /// @deprecated     Use `flags2` instead. No new flags will
+  ///                 be added to `FlutterSemanticsFlag`. New flags will
+  ///                 continue to be added to `FlutterSemanticsFlags`.
+  FlutterSemanticsFlag flags__deprecated__;
   /// The set of semantics actions applicable to this node.
   FlutterSemanticsAction actions;
   /// The position at which the text selection originates.
@@ -1596,6 +1690,9 @@ typedef struct {
   // Array of string attributes associated with the `decreased_value`.
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
+  // The set of semantics flags associated with this node. Prefer to use this
+  // over `flags__deprecated__`.
+  FlutterSemanticsFlags* flags2;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a

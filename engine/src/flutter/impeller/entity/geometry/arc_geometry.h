@@ -7,6 +7,7 @@
 
 #include "impeller/entity/geometry/geometry.h"
 
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
@@ -15,15 +16,9 @@ namespace impeller {
 // coordinates) for either filled or stroked circles
 class ArcGeometry final : public Geometry {
  public:
-  explicit ArcGeometry(const Rect& oval_bounds,
-                       Degrees start,
-                       Degrees sweep,
-                       bool include_center);
+  explicit ArcGeometry(const Arc& arc);
 
-  explicit ArcGeometry(const Rect& oval_bounds,
-                       Degrees start,
-                       Degrees sweep,
-                       const StrokeParameters& stroke);
+  explicit ArcGeometry(const Arc& arc, const StrokeParameters& stroke);
 
   ~ArcGeometry() override;
 
@@ -45,10 +40,7 @@ class ArcGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
-  Rect oval_bounds_;
-  Degrees start_;
-  Degrees sweep_;
-  bool include_center_;
+  Arc arc_;
   Scalar stroke_width_;
   Cap cap_;
 

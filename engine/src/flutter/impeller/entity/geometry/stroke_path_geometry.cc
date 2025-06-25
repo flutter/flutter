@@ -50,6 +50,8 @@ class PositionWriter {
   size_t offset_ = 0u;
 };
 
+}  // namespace
+
 /// StrokePathSegmentReceiver converts path segments (fed by PathTessellator)
 /// into a vertex strip that covers the outline of the stroked version of the
 /// path and feeds those vertices, expressed in the form of a vertex strip
@@ -126,22 +128,28 @@ class PositionWriter {
 /// segments - also the angle by which the path turned at a given path point.
 ///
 /// @see PathTessellator::PathToStrokedSegments
-class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
+class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
  public:
-  static void GenerateStrokeVertices(PositionWriter& vtx_builder,
-                                     const PathSource& source,
-                                     const StrokeParameters& parameters,
-                                     const Scalar scale,
-                                     const Tessellator::Trigs& trigs) {
+  StrokePathSegmentReceiver(Tessellator& tessellator,
+                            PositionWriter& vtx_builder,
+                            const StrokeParameters& stroke,
+                            const Scalar scale)
+      : tessellator_(tessellator),
+        vtx_builder_(vtx_builder),
+        half_stroke_width_(stroke.width * 0.5f),
+        maximum_join_cosine_(
+            ComputeMaximumJoinCosine(scale, half_stroke_width_)),
+        minimum_miter_cosine_(ComputeMinimumMiterCosine(stroke.miter_limit)),
+        join_(stroke.join),
+        cap_(stroke.cap),
+        scale_(scale),
+        trigs_(MakeTrigs(tessellator, scale, half_stroke_width_)) {
     // Trigs ensures that it always contains at least 2 entries.
-    FML_DCHECK(trigs.size() >= 2);
-    FML_DCHECK(trigs[0].cos == 1.0f);  // Angle == 0 degrees
-    FML_DCHECK(trigs[0].sin == 0.0f);
-    FML_DCHECK(trigs.end()[-1].cos == 0.0f);  // Angle == 90 degrees
-    FML_DCHECK(trigs.end()[-1].sin == 1.0f);
-
-    StrokePathSegmentReceiver receiver(vtx_builder, parameters, scale, trigs);
-    PathTessellator::PathToStrokedSegments(source, receiver);
+    FML_DCHECK(trigs_.size() >= 2);
+    FML_DCHECK(trigs_[0].cos == 1.0f);  // Angle == 0 degrees
+    FML_DCHECK(trigs_[0].sin == 0.0f);
+    FML_DCHECK(trigs_.end()[-1].cos == 0.0f);  // Angle == 90 degrees
+    FML_DCHECK(trigs_.end()[-1].sin == 1.0f);
   }
 
  protected:
@@ -222,29 +230,28 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       for (int i = 1; i < count; i++) {
         Point cur = curve.Solve(i / count);
         SeparatedVector2 cur_perpendicular = PerpendicularFromPoints(prev, cur);
-        if (prev_perpendicular.GetAlignment(cur_perpendicular) <
-            trigs_[1].cos) {
-          // We only connect 2 curved segments if their change in direction
-          // is faster than a single sample of a round join.
-          AppendVertices(cur, prev_perpendicular);
-          AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
-        }
-        AppendVertices(cur, cur_perpendicular);
+        RecordCurveSegment(prev_perpendicular, cur, cur_perpendicular);
         prev = cur;
         prev_perpendicular = cur_perpendicular;
       }
 
-      if (prev_perpendicular.GetAlignment(end_perpendicular) < trigs_[1].cos) {
-        // We only connect 2 curved segments if their change in direction
-        // is faster than a single sample of a round join.
-        AppendVertices(curve.p2, prev_perpendicular);
-        AddJoin(Join::kRound, curve.p2, prev_perpendicular, end_perpendicular);
-      }
-      AppendVertices(curve.p2, end_perpendicular);
+      RecordCurveSegment(prev_perpendicular, curve.p2, end_perpendicular);
 
       last_perpendicular_ = end_perpendicular;
       last_point_ = curve.p2;
     }
+  }
+
+  void RecordCurveSegment(const SeparatedVector2& prev_perpendicular,
+                          const Point cur,
+                          const SeparatedVector2& cur_perpendicular) {
+    if (prev_perpendicular.GetAlignment(cur_perpendicular) < trigs_[1].cos) {
+      // We only connect 2 curved segments if their change in direction
+      // is faster than a single sample of a round join.
+      AppendVertices(cur, prev_perpendicular);
+      AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
+    }
+    AppendVertices(cur, cur_perpendicular);
   }
 
   // |SegmentReceiver|
@@ -276,7 +283,41 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     has_prior_segment_ = false;
   }
 
+  // |PathAndArcSegmentReceiver|
+  void RecordArc(const Arc& arc,
+                 const Point center,
+                 const Size radii) override {
+    Tessellator::Trigs trigs =
+        tessellator_.GetTrigsForDeviceRadius(scale_ * radii.MaxDimension());
+    Arc::Iteration iterator = arc.ComputeIterations(trigs.GetSteps(), false);
+
+    SeparatedVector2 prev_perpendicular =
+        PerpendicularFromUnitDirection({-iterator.start.y, iterator.start.x});
+    HandlePreviousJoin(prev_perpendicular);
+
+    for (size_t i = 0u; i < iterator.quadrant_count; i++) {
+      Arc::Iteration::Quadrant quadrant = iterator.quadrants[i];
+      for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
+        Vector2 direction = trigs[j] * quadrant.axis;
+        Point cur = center + direction * radii;
+        SeparatedVector2 cur_perpendicular =
+            PerpendicularFromUnitDirection({-direction.y, direction.x});
+        RecordCurveSegment(prev_perpendicular, cur, cur_perpendicular);
+        prev_perpendicular = cur_perpendicular;
+      }
+    }
+
+    SeparatedVector2 end_perpendicular =
+        PerpendicularFromUnitDirection({-iterator.end.y, iterator.end.x});
+    Point end = center + iterator.end * radii;
+    RecordCurveSegment(prev_perpendicular, end, end_perpendicular);
+
+    last_perpendicular_ = end_perpendicular;
+    last_point_ = end;
+  }
+
  private:
+  Tessellator& tessellator_;
   PositionWriter& vtx_builder_;
   const Scalar half_stroke_width_;
   const Scalar maximum_join_cosine_;
@@ -284,7 +325,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   const Join join_;
   const Cap cap_;
   const Scalar scale_;
-  const Tessellator::Trigs& trigs_;
+  const Tessellator::Trigs trigs_;
 
   SeparatedVector2 origin_perpendicular_;
   Point origin_point_;
@@ -294,19 +335,11 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   bool has_prior_segment_ = false;
   bool contour_needs_cap_ = false;
 
-  StrokePathSegmentReceiver(PositionWriter& vtx_builder,
-                            const StrokeParameters& stroke,
-                            const Scalar scale,
-                            const Tessellator::Trigs& trigs)
-      : vtx_builder_(vtx_builder),
-        half_stroke_width_(stroke.width * 0.5f),
-        maximum_join_cosine_(
-            ComputeMaximumJoinCosine(scale, half_stroke_width_)),
-        minimum_miter_cosine_(ComputeMinimumMiterCosine(stroke.miter_limit)),
-        join_(stroke.join),
-        cap_(stroke.cap),
-        scale_(scale),
-        trigs_(trigs) {}
+  static Tessellator::Trigs MakeTrigs(Tessellator& tessellator,
+                                      Scalar scale,
+                                      Scalar half_stroke_width) {
+    return tessellator.GetTrigsForDeviceRadius(scale * half_stroke_width);
+  }
 
   // Half of the allowed distance between the ends of the perpendiculars.
   static constexpr Scalar kJoinPixelThreshold = 0.25f;
@@ -661,52 +694,50 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     AppendVertices(path_point, new_perpendicular);
   }
 };
-}  // namespace
 
 // Private for benchmarking and debugging
-std::vector<Point> StrokePathSourceGeometry::GenerateSolidStrokeVertices(
+std::vector<Point> StrokeSegmentsGeometry::GenerateSolidStrokeVertices(
+    Tessellator& tessellator,
     const PathSource& source,
     const StrokeParameters& stroke,
     Scalar scale) {
   std::vector<Point> points(4096);
   PositionWriter vtx_builder(points);
-  Tessellator::Trigs trigs(scale * stroke.width * 0.5f);
-  StrokePathSegmentReceiver::GenerateStrokeVertices(vtx_builder, source, stroke,
-                                                    scale, trigs);
+  StrokePathSegmentReceiver receiver(tessellator, vtx_builder, stroke, scale);
+  PathTessellator::PathToStrokedSegments(source, receiver);
   auto [arena, extra] = vtx_builder.GetUsedSize();
   FML_DCHECK(extra == 0u);
   points.resize(arena);
   return points;
 }
 
-StrokePathSourceGeometry::StrokePathSourceGeometry(
-    const StrokeParameters& stroke)
+StrokeSegmentsGeometry::StrokeSegmentsGeometry(const StrokeParameters& stroke)
     : stroke_(stroke) {}
 
-StrokePathSourceGeometry::~StrokePathSourceGeometry() = default;
+StrokeSegmentsGeometry::~StrokeSegmentsGeometry() = default;
 
-Scalar StrokePathSourceGeometry::GetStrokeWidth() const {
+Scalar StrokeSegmentsGeometry::GetStrokeWidth() const {
   return stroke_.width;
 }
 
-Scalar StrokePathSourceGeometry::GetMiterLimit() const {
+Scalar StrokeSegmentsGeometry::GetMiterLimit() const {
   return stroke_.miter_limit;
 }
 
-Cap StrokePathSourceGeometry::GetStrokeCap() const {
+Cap StrokeSegmentsGeometry::GetStrokeCap() const {
   return stroke_.cap;
 }
 
-Join StrokePathSourceGeometry::GetStrokeJoin() const {
+Join StrokeSegmentsGeometry::GetStrokeJoin() const {
   return stroke_.join;
 }
 
-Scalar StrokePathSourceGeometry::ComputeAlphaCoverage(
+Scalar StrokeSegmentsGeometry::ComputeAlphaCoverage(
     const Matrix& transform) const {
   return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_.width);
 }
 
-GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
+GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
@@ -724,19 +755,18 @@ GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
 
   auto& host_buffer = renderer.GetTransientsBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
+  auto& tessellator = renderer.GetTessellator();
 
-  PositionWriter position_writer(
-      renderer.GetTessellator().GetStrokePointCache());
-  Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
-      scale * adjusted_stroke.width * 0.5f);
-  StrokePathSegmentReceiver::GenerateStrokeVertices(
-      position_writer, GetSource(), adjusted_stroke, scale, trigs);
+  PositionWriter position_writer(tessellator.GetStrokePointCache());
+  StrokePathSegmentReceiver receiver(tessellator, position_writer,
+                                     adjusted_stroke, scale);
+  Dispatch(receiver, tessellator, scale);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
-    BufferView buffer_view = host_buffer.Emplace(
-        renderer.GetTessellator().GetStrokePointCache().data(),
-        arena_length * sizeof(Point), alignof(Point));
+    BufferView buffer_view =
+        host_buffer.Emplace(tessellator.GetStrokePointCache().data(),
+                            arena_length * sizeof(Point), alignof(Point));
 
     return GeometryResult{.type = PrimitiveType::kTriangleStrip,
                           .vertex_buffer =
@@ -756,9 +786,9 @@ GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
       alignof(Point)                                      //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
-             buffer_view.GetRange().offset,                       //
-         renderer.GetTessellator().GetStrokePointCache().data(),  //
-         arena_length * sizeof(Point)                             //
+             buffer_view.GetRange().offset,         //
+         tessellator.GetStrokePointCache().data(),  //
+         arena_length * sizeof(Point)               //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
              buffer_view.GetRange().offset + arena_length * sizeof(Point),  //
@@ -778,16 +808,11 @@ GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
                         .mode = GeometryResult::Mode::kPreventOverdraw};
 }
 
-GeometryResult::Mode StrokePathSourceGeometry::GetResultMode() const {
+GeometryResult::Mode StrokeSegmentsGeometry::GetResultMode() const {
   return GeometryResult::Mode::kPreventOverdraw;
 }
 
-std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
-    const Matrix& transform) const {
-  return GetStrokeCoverage(transform, GetSource().GetBounds());
-}
-
-std::optional<Rect> StrokePathSourceGeometry::GetStrokeCoverage(
+std::optional<Rect> StrokeSegmentsGeometry::GetStrokeCoverage(
     const Matrix& transform,
     const Rect& path_bounds) const {
   if (path_bounds.IsEmpty()) {
@@ -811,6 +836,21 @@ std::optional<Rect> StrokePathSourceGeometry::GetStrokeCoverage(
   return path_bounds.Expand(max_radius).TransformBounds(transform);
 }
 
+StrokePathSourceGeometry::StrokePathSourceGeometry(
+    const StrokeParameters& parameters)
+    : StrokeSegmentsGeometry(parameters) {}
+
+std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetStrokeCoverage(transform, GetSource().GetBounds());
+}
+
+void StrokePathSourceGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
+                                        Tessellator& tessellator,
+                                        Scalar scale) const {
+  PathTessellator::PathToStrokedSegments(GetSource(), receiver);
+}
+
 StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
                                        const StrokeParameters& parameters)
     : StrokePathSourceGeometry(parameters), path_(path) {}
@@ -819,21 +859,36 @@ const PathSource& StrokePathGeometry::GetSource() const {
   return path_;
 }
 
-ArcStrokePathGeometry::ArcStrokePathGeometry(const flutter::DlPath& path,
-                                             const Rect& oval_bounds,
-                                             const StrokeParameters& parameters)
-    : StrokePathSourceGeometry(parameters),
-      path_(path),
-      oval_bounds_(oval_bounds) {}
+ArcStrokeGeometry::ArcStrokeGeometry(const Arc& arc,
+                                     const StrokeParameters& parameters)
+    : StrokeSegmentsGeometry(parameters), arc_(arc) {}
 
-const PathSource& ArcStrokePathGeometry::GetSource() const {
-  return path_;
+std::optional<Rect> ArcStrokeGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetStrokeCoverage(transform, arc_.GetTightArcBounds());
 }
 
-std::optional<Rect> ArcStrokePathGeometry::GetCoverage(
-    const Matrix& transform) const {
-  return GetStrokeCoverage(transform,
-                           path_.GetBounds().IntersectionOrEmpty(oval_bounds_));
+void ArcStrokeGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
+                                 Tessellator& tessellator,
+                                 Scalar scale) const {
+  Point center = arc_.GetOvalCenter();
+  Size radii = arc_.GetOvalSize() * 0.5f;
+
+  auto trigs =
+      tessellator.GetTrigsForDeviceRadius(scale * radii.MaxDimension());
+  Arc::Iteration iterator =
+      arc_.ComputeIterations(trigs.GetSteps(), /*simplify_360=*/false);
+  Point start = center + iterator.start * radii;
+  bool include_center = arc_.IncludeCenter();
+
+  receiver.BeginContour(start, include_center);
+  receiver.RecordArc(arc_, center, radii);
+  if (include_center) {
+    Point end = center + iterator.end * radii;
+    receiver.RecordLine(end, center);
+    receiver.RecordLine(center, start);
+  }
+  receiver.EndContour(start, include_center);
 }
 
 StrokeDiffRoundRectGeometry::StrokeDiffRoundRectGeometry(
@@ -843,6 +898,19 @@ StrokeDiffRoundRectGeometry::StrokeDiffRoundRectGeometry(
     : StrokePathSourceGeometry(parameters), source_(outer, inner) {}
 
 const PathSource& StrokeDiffRoundRectGeometry::GetSource() const {
+  return source_;
+}
+
+StrokeDashedLineGeometry::StrokeDashedLineGeometry(
+    Point p0,
+    Point p1,
+    Scalar on_length,
+    Scalar off_length,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      source_(p0, p1, on_length, off_length) {}
+
+const PathSource& StrokeDashedLineGeometry::GetSource() const {
   return source_;
 }
 

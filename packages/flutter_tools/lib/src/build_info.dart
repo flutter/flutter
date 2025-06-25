@@ -16,6 +16,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
 import 'runner/flutter_command.dart' show FlutterOptions;
 
@@ -255,7 +256,6 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => mode.cliName;
-  String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see Flutter Gradle Plugin),
   /// so the lower cased flavor name is used to compute the output file name
@@ -440,7 +440,25 @@ enum BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
+  /// [name] formatted in snake case.
+  ///
+  /// (e.g. debug, profile, release, jit_release)
   String get cliName => snakeCase(name);
+
+  /// [cliName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit_release)
+  String get uppercaseName => sentenceCase(cliName);
+
+  /// [cliName] with `_` replaced with a space.
+  ///
+  /// (e.g. debug, profile, release, jit release)
+  String get friendlyName => cliName.replaceAll('_', ' ');
+
+  /// [friendlyName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit release)
+  String get uppercaseFriendlyName => sentenceCase(friendlyName);
 
   @override
   String toString() => cliName;
@@ -537,10 +555,6 @@ String? validatedBuildNameForPlatform(
     return buildName;
   }
   return buildName;
-}
-
-String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
@@ -835,12 +849,12 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
 }
 
 /// Returns the web build output directory.

@@ -8,6 +8,7 @@
 
 #include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
 #include "flutter/testing/testing.h"
+#include "impeller/geometry/dashed_line_path_source.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/round_superellipse.h"
@@ -36,7 +37,6 @@ TEST(PathSourceTest, RectSourceTest) {
     EXPECT_CALL(receiver, LineTo(Point(10, 30)));
     EXPECT_CALL(receiver, LineTo(Point(10, 15)));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -61,7 +61,6 @@ TEST(PathSourceTest, EllipseSourceTest) {
     EXPECT_CALL(receiver, ConicTo(Point(20, 30), Point(15, 30), kSqrt2Over2));
     EXPECT_CALL(receiver, ConicTo(Point(10, 30), Point(10, 22.5), kSqrt2Over2));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -97,7 +96,6 @@ TEST(PathSourceTest, RoundRectSourceTest) {
     EXPECT_CALL(receiver, LineTo(Point(10, 26)));
     EXPECT_CALL(receiver, ConicTo(Point(10, 15), Point(11, 15), kSqrt2Over2));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -151,8 +149,103 @@ TEST(PathSourceTest, DiffRoundRectSourceTest) {
     EXPECT_CALL(receiver, ConicTo(Point(50, 60), Point(51, 60), kSqrt2Over2));
     // RetiresOnSaturation keeps identical calls from matching each other
     EXPECT_CALL(receiver, Close()).RetiresOnSaturation();
+  }
 
-    EXPECT_CALL(receiver, PathEnd());
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, DashedLinePathSource) {
+  DashedLinePathSource source(Point(10, 10), Point(30, 10), 5, 5);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 10, 30, 10));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(15, 10)));
+    EXPECT_CALL(receiver, MoveTo(Point(20, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(25, 10)));
+  }
+
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, EmptyDashedLinePathSource) {
+  DashedLinePathSource source(Point(10, 10), Point(10, 10), 5, 5);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 10, 10, 10));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(10, 10)));
+  }
+
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, DashedLinePathSourceZeroOffGaps) {
+  DashedLinePathSource source(Point(10, 10), Point(30, 10), 5, 0);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 10, 30, 10));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(30, 10)));
+  }
+
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, DashedLinePathSourceInvalidOffGaps) {
+  DashedLinePathSource source(Point(10, 10), Point(30, 10), 5, -1);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 10, 30, 10));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(30, 10)));
+  }
+
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, DashedLinePathSourceInvalidOnRegion) {
+  DashedLinePathSource source(Point(10, 10), Point(30, 10), -1, 5);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 10, 30, 10));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
+    EXPECT_CALL(receiver, LineTo(Point(30, 10)));
   }
 
   source.Dispatch(receiver);

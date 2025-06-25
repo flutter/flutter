@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
@@ -488,7 +489,7 @@ class IOSDevice extends Device {
           analytics: globals.analytics,
           fileSystem: globals.fs,
           logger: globals.logger,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
         );
         _logger.printError('');

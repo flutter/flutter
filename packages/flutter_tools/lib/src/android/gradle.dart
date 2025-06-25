@@ -55,7 +55,9 @@ const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
 @visibleForTesting
 const String failedToStripDebugSymbolsErrorMessage = r'''
-Release app bundle failed to strip debug symbols from native libraries. Please run flutter doctor and ensure that the Android toolchain does not report any issues.
+Release app bundle failed to strip debug symbols from native libraries.
+Please run flutter doctor and ensure that the Android toolchain does not
+report any issues.
 
 Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 
@@ -823,7 +825,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }

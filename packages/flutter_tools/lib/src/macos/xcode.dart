@@ -38,7 +38,9 @@ Version get xcodeRecommendedVersion => Version(15, null, null);
 /// --sdk <sdk name>            find the tool for the given SDK name.
 /// ```
 String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
-  return (environmentType == EnvironmentType.simulator) ? 'iphonesimulator' : 'iphoneos';
+  return (environmentType == EnvironmentType.simulator)
+      ? XcodeSdk.IPhoneSimulator.platformName
+      : XcodeSdk.IPhoneOS.platformName;
 }
 
 /// A utility class for interacting with Xcode command line tools.

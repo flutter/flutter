@@ -959,6 +959,7 @@ extension type SkPaint._(JSObject _) implements JSObject {
   external void setAntiAlias(bool isAntiAlias);
   external void setColorInt(int color);
   external void setShader(SkShader? shader);
+  external void setDither(bool isDither);
   external void setMaskFilter(SkMaskFilter? maskFilter);
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);

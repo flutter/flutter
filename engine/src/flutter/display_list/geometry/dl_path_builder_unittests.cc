@@ -88,7 +88,6 @@ TEST(DisplayListPathBuilder, LineToInsertsMoveTo) {
 
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(0, 0), false));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 10)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -106,7 +105,6 @@ TEST(DisplayListPathBuilder, QuadToInsertsMoveTo) {
 
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(0, 0), false));
     EXPECT_CALL(mock_receiver, QuadTo(DlPoint(10, 10), DlPoint(10, 0)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -125,7 +123,6 @@ TEST(DisplayListPathBuilder, ConicToInsertsMoveTo) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(0, 0), false));
     EXPECT_CALL(mock_receiver, ConicTo(DlPoint(10, 10), DlPoint(10, 0), 0.5f))
         .WillOnce(Return(true));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -144,7 +141,6 @@ TEST(DisplayListPathBuilder, CubicToInsertsMoveTo) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(0, 0), false));
     EXPECT_CALL(mock_receiver,
                 CubicTo(DlPoint(10, 10), DlPoint(10, 0), DlPoint(0, 10)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -168,7 +164,6 @@ TEST(DisplayListPathBuilder, ConicWithNonPositiveWeightsInsertLineTo) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 20)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 30)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 40)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -187,7 +182,6 @@ TEST(DisplayListPathBuilder, ConicWithWeight1InsertsQuadTo) {
 
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10), false));
     EXPECT_CALL(mock_receiver, QuadTo(DlPoint(20, 10), DlPoint(10, 20)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -209,7 +203,6 @@ TEST(DisplayListPathBuilder, AddRect) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 20)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 10)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -236,7 +229,6 @@ TEST(DisplayListPathBuilder, AddOval) {
     EXPECT_CALL(mock_receiver, ConicTo(DlPoint(30, 10), DlPoint(30, 15), wt))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -263,7 +255,6 @@ TEST(DisplayListPathBuilder, AddCircle) {
     EXPECT_CALL(mock_receiver, ConicTo(DlPoint(20, 10), DlPoint(20, 15), wt))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -301,7 +292,6 @@ TEST(DisplayListPathBuilder, AddRoundRect) {
     EXPECT_CALL(mock_receiver, ConicTo(DlPoint(10, 100), DlPoint(10, 86), wt))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -376,7 +366,6 @@ TEST(DisplayListPathBuilder, AddRoundSuperellipse) {
                                        PointEq(DlPoint(46.0f, 10.0f))));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(46, 10)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -397,7 +386,6 @@ TEST(DisplayListPathBuilder, AddArcNoCenter) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(20, 20), false));
     EXPECT_CALL(mock_receiver, ConicTo(DlPoint(10, 20), DlPoint(10, 15), wt))
         .WillOnce(Return(true));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -421,7 +409,6 @@ TEST(DisplayListPathBuilder, AddArcWithCenter) {
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(20, 15)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -449,7 +436,6 @@ TEST(DisplayListPathBuilder, SimpleUnclosedPath) {
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(400, 400),
                                        DlPoint(500, 500)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -480,7 +466,6 @@ TEST(DisplayListPathBuilder, SimpleClosedPath) {
                                        DlPoint(500, 500)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(0, 0)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);

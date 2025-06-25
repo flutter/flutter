@@ -249,9 +249,6 @@ typedef struct MouseState {
   if (!self.engine) {
     [self sharedSetupWithProject:nil initialRoute:nil];
   }
-  if (self.pluginRegistrant) {
-    [self.pluginRegistrant registerWithRegistry:self];
-  }
 }
 
 - (instancetype)init {

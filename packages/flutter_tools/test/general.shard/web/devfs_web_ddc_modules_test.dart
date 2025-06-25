@@ -18,6 +18,9 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/release_asset_server.dart';
+import 'package:flutter_tools/src/isolated/web_asset_server.dart';
+import 'package:flutter_tools/src/isolated/web_server_utlities.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:logging/logging.dart' as logging;
@@ -76,6 +79,7 @@ void main() {
           canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
+          fileSystem: globals.fs,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -108,7 +112,8 @@ void main() {
       logging.LogRecord(logging.Level.WARNING, otherMessage, 'DartUri'),
     ];
 
-    events.forEach(log);
+    void logWithLogger(logging.LogRecord event) => log(logger, event);
+    events.forEach(logWithLogger);
     expect(logger.warningText, contains(unresolvedUriMessage));
     expect(logger.warningText, contains(otherMessage));
   });
@@ -321,6 +326,7 @@ void main() {
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
+      fileSystem: globals.fs,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -341,6 +347,7 @@ void main() {
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
+      fileSystem: globals.fs,
     );
 
     // Defaults to "/" when there's no base element.
@@ -364,6 +371,7 @@ void main() {
         canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
+        fileSystem: globals.fs,
       ),
       throwsToolExit(),
     );
@@ -386,6 +394,7 @@ void main() {
         canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
+        fileSystem: globals.fs,
       ),
       throwsToolExit(),
     );
@@ -810,7 +819,9 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
-        isWindows: false,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -920,7 +931,9 @@ void main() {
           isWasm: false,
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
-          isWindows: false,
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform,
         );
         webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -994,7 +1007,9 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      isWindows: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1043,7 +1058,9 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      isWindows: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1093,7 +1110,9 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      isWindows: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1106,72 +1125,84 @@ void main() {
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  test('allows frame embedding', () async {
-    final WebAssetServer webAssetServer = await WebAssetServer.start(
-      null,
-      'localhost',
-      0,
-      null,
-      null,
-      null,
-      true,
-      true,
-      true,
-      const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      ),
-      false,
-      false,
-      Uri.base,
-      null,
-      const <String, String>{},
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
-      useLocalCanvasKit: false,
-      testMode: true,
-    );
+  test(
+    'allows frame embedding',
+    () => testbed.run(() async {
+      final WebAssetServer webAssetServer = await WebAssetServer.start(
+        null,
+        'localhost',
+        0,
+        null,
+        null,
+        null,
+        true,
+        true,
+        true,
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        false,
+        false,
+        Uri.base,
+        null,
+        const <String, String>{},
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
 
-    expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
-    await webAssetServer.dispose();
-  });
+      expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
+      await webAssetServer.dispose();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
 
-  test('passes on extra headers', () async {
-    const String extraHeaderKey = 'hurray';
-    const String extraHeaderValue = 'flutter';
-    final WebAssetServer webAssetServer = await WebAssetServer.start(
-      null,
-      'localhost',
-      0,
-      null,
-      null,
-      null,
-      true,
-      true,
-      true,
-      const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      ),
-      false,
-      false,
-      Uri.base,
-      null,
-      const <String, String>{extraHeaderKey: extraHeaderValue},
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
-      useLocalCanvasKit: false,
-      testMode: true,
-    );
+  test(
+    'passes on extra headers',
+    () => testbed.run(() async {
+      const String extraHeaderKey = 'hurray';
+      const String extraHeaderValue = 'flutter';
+      final WebAssetServer webAssetServer = await WebAssetServer.start(
+        null,
+        'localhost',
+        0,
+        null,
+        null,
+        null,
+        true,
+        true,
+        true,
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        false,
+        false,
+        Uri.base,
+        null,
+        const <String, String>{extraHeaderKey: extraHeaderValue},
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
 
-    expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
+      expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
-    await webAssetServer.dispose();
-  });
+      await webAssetServer.dispose();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
 
   runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
@@ -1203,6 +1234,7 @@ void main() {
       canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
+      fileSystem: globals.fs,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1253,7 +1285,9 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
-        isWindows: false,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);

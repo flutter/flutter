@@ -86,17 +86,27 @@ static std::string DartFileRecorderArgs(const std::string& path) {
   return oss.str();
 }
 
+// "Microtask" is included in all argument strings below, but "Microtask" stream
+// events will only be recorded by the VM's timeline recorders when
+// |Switch::ProfileMicrotasks| is set.
+
 [[maybe_unused]]
 static const char* kDartDefaultTraceStreamsArgs[]{
-    "--timeline_streams=Dart,Embedder,GC",
+    "--timeline_streams=Dart,Embedder,GC,Microtask",
 };
 
 static const char* kDartStartupTraceStreamsArgs[]{
-    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM,API",
+    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,Microtask,"
+    "VM,API",
 };
 
 static const char* kDartSystraceTraceStreamsArgs[] = {
-    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM,API",
+    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,Microtask,"
+    "VM,API",
+};
+
+static const char* kDartProfileMicrotasksArgs[]{
+    "--profile_microtasks",
 };
 
 static std::string DartOldGenHeapSizeArgs(uint64_t heap_size) {
@@ -390,6 +400,11 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
                 std::size(kDartDefaultTraceStreamsArgs));
   }
 #endif  // defined(OS_FUCHSIA)
+
+  if (settings_.profile_microtasks) {
+    PushBackAll(&args, kDartProfileMicrotasksArgs,
+                std::size(kDartProfileMicrotasksArgs));
+  }
 
   std::string old_gen_heap_size_args;
   if (settings_.old_gen_heap_size >= 0) {

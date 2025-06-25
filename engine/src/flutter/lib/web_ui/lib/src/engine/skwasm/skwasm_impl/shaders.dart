@@ -10,9 +10,12 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-// A shared interface for shaders for which you can acquire a native handle
+// A shared interface for shaders for which you can acquire a native handle.
 abstract class SkwasmShader implements ui.Shader {
   ShaderHandle get handle;
+
+  /// Whether the shader represents a gradient.
+  bool get isGradient;
 }
 
 // An implementation that handles the storage, disposal, and finalization of
@@ -22,6 +25,9 @@ class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements Skwas
 
   static final SkwasmFinalizationRegistry<RawShader> _registry =
       SkwasmFinalizationRegistry<RawShader>((ShaderHandle handle) => shaderDispose(handle));
+
+  @override
+  bool get isGradient => false;
 }
 
 class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
@@ -156,6 +162,9 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
   SkwasmGradient._(super.handle);
 
   @override
+  bool get isGradient => true;
+
+  @override
   String toString() => 'Gradient()';
 }
 
@@ -279,6 +288,9 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     }
     return _nativeShader!.handle;
   }
+
+  @override
+  bool get isGradient => false;
 
   SkwasmShader? _nativeShader;
   final SkwasmFragmentProgram _program;
