@@ -2027,6 +2027,51 @@ static const FlutterViewIdentifier kViewId = 1;
   return true;
 }
 
+- (bool)testInsertTextWithCollapsedSelectionInsideComposing {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub([engineMock binaryMessenger]).andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"text"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id result){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"今日は家に帰ります",
+                                                                @"selectionBase" : @(0),
+                                                                @"selectionExtent" : @(3),
+                                                                @"composingBase" : @(0),
+                                                                @"composingExtent" : @(9),
+                                                              }];
+  [plugin handleMethodCall:call
+                    result:^(id result){
+                    }];
+
+  [plugin insertText:@"今日は家に帰ります" replacementRange:NSMakeRange(NSNotFound, 0)];
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "今日は家に帰ります");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 9);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 9);
+
+  return true;
+}
+
 @end
 
 namespace flutter::testing {
@@ -2433,6 +2478,11 @@ TEST(FlutterTextInputPluginTest, WorksWithoutViewId) {
                     }];
 
   ASSERT_TRUE(plugin.currentViewController == viewController);
+}
+
+TEST(FlutterTextInputPluginTest, InsertTextWithCollapsedSelectionInsideComposing) {
+  ASSERT_TRUE(
+      [[FlutterInputPluginTestObjc alloc] testInsertTextWithCollapsedSelectionInsideComposing]);
 }
 
 }  // namespace flutter::testing
