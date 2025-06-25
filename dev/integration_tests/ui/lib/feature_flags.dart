@@ -13,7 +13,7 @@ void main() {
   runApp(
     Center(
       child: Text(
-        // ignore: invalid_use_of_visible_for_testing_member
+        // ignore: invalid_use_of_internal_member
         'Feature flags: "$debugEnabledFeatureFlags"',
         textDirection: TextDirection.ltr,
       ),
