@@ -38,7 +38,6 @@ void runTests() {
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
-      print('IMG ELEMENT VIEW FACTORY WAS CALLED!!!');
       img.src = paramsMap['src']! as String;
       return img;
     });
