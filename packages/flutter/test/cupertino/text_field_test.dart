@@ -7850,7 +7850,6 @@ void main() {
                       style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                       toolbarOptions: const ToolbarOptions(selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
                     ),
                   ],
@@ -7905,6 +7904,7 @@ void main() {
                       style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                       toolbarOptions: const ToolbarOptions(selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
@@ -9279,19 +9279,15 @@ void main() {
         final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'ContextMenu.onDismissSystemContextMenu',
         });
-        Object? error;
-        try {
-          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            'flutter/platform',
-            messageBytes,
-            (ByteData? data) {},
-          );
-        } catch (e) {
-          error = e;
-        }
+
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/platform',
+          messageBytes,
+          (ByteData? data) {},
+        );
+
         await tester.pumpAndSettle();
 
-        expect(error, isNull);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Selection handles are not hidden.
