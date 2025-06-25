@@ -728,4 +728,25 @@ void main() {
     expect(diagnosticsNodes.first.name, 'title');
     expect(diagnosticsNodes.first.value, title);
   });
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
+    () {
+      const IOSSystemContextMenuItemLiveText item = IOSSystemContextMenuItemLiveText();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final IOSSystemContextMenuItemData data = item.getData(localizations);
+      expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
+      expect((data as IOSSystemContextMenuItemDataLiveText).title, isNull);
+    },
+  );
+
+  test('IOSSystemContextMenuItemDataLiveText debugFillProperties', () {
+    const String? title = null;
+    const IOSSystemContextMenuItemDataLiveText item = IOSSystemContextMenuItemDataLiveText(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
 }

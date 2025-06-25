@@ -3869,4 +3869,20 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [self waitForExpectations:@[ expectation ] timeout:10.0];
 }
 
+- (void)testCanPerformActionCaptureTextFromCamera {
+  if (@available(iOS 15.0, *)) {
+    NSDictionary* config = self.mutableTemplateCopy;
+    [self setClientId:123 configuration:config];
+    NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+    FlutterTextInputView* inputView = inputFields[0];
+    
+    [inputView becomeFirstResponder];
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+    
+    [inputView insertText:@"test"];
+    [inputView selectAll:nil];
+    XCTAssertFalse([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+  }
+}
+
 @end
