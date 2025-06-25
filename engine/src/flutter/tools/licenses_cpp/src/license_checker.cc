@@ -132,6 +132,7 @@ class LicensesWriter {
 struct Package {
   std::string name;
   std::optional<fs::path> license_file;
+  bool is_root_package;
 };
 
 Package GetPackage(const Data& data,
@@ -140,6 +141,7 @@ Package GetPackage(const Data& data,
   Package result = {
       .name = working_dir.filename(),
       .license_file = FindLicense(data, working_dir, "."),
+      .is_root_package = true,
   };
   bool after_third_party = false;
   fs::path current = ".";
@@ -156,6 +158,7 @@ Package GetPackage(const Data& data,
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
+      result.is_root_package = false;
     }
   }
 
@@ -290,19 +293,24 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
                   license_map.Add(package.name, match->matched_text);
-                  VLOG(1) << "OK: " << full_path << " : " << match->matcher;
+                  VLOG(1) << "OK: " << full_path.lexically_normal() << " : "
+                          << match->matcher;
                 } else {
                   errors.emplace_back(absl::NotFoundError(
                       absl::StrCat("Unknown license in ",
-                                   full_path.lexically_normal().string(), " : ",
-                                   match.status().message())));
+                                   relative_path.lexically_normal().string(),
+                                   " : ", match.status().message())));
                 }
               } else {
-                VLOG(1) << "OK: " << full_path << " : dir license";
+                fs::path relative_license_path =
+                    fs::relative(package.license_file.value(), working_dir);
+                VLOG(1) << "OK: " << relative_path.lexically_normal()
+                        << " : dir license(" << relative_license_path << ")";
               }
             }
           });
-      if (!did_find_copyright && !package.license_file.has_value()) {
+      if (!did_find_copyright &&
+          (!package.license_file.has_value() || package.is_root_package)) {
         errors.push_back(absl::NotFoundError(
             "Expected copyright in " + full_path.lexically_normal().string()));
       }

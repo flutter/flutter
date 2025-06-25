@@ -135,6 +135,8 @@ class BuildBundleCommand extends BuildSubCommand {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         break;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
