@@ -27,11 +27,11 @@
 #include "flutter/shell/platform/windows/accessibility_plugin.h"
 #include "flutter/shell/platform/windows/compositor.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
+#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
-#include "flutter/shell/platform/windows/flutter_windows_display_monitor.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
@@ -160,9 +160,7 @@ class FlutterWindowsEngine {
     return message_dispatcher_.get();
   }
 
-  FlutterWindowsDisplayMonitor* display_monitor() {
-    return display_monitor_.get();
-  }
+  DisplayMonitor* display_monitor() { return display_monitor_.get(); }
 
   // Notifies the engine about a display update.
   void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
@@ -427,7 +425,7 @@ class FlutterWindowsEngine {
   mutable std::shared_mutex views_mutex_;
 
   // The display monitor.
-  std::unique_ptr<FlutterWindowsDisplayMonitor> display_monitor_;
+  std::unique_ptr<DisplayMonitor> display_monitor_;
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;

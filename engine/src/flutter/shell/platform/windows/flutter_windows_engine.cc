@@ -201,7 +201,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_monitor_ =
-      std::make_unique<FlutterWindowsDisplayMonitor>(this, windows_proc_table_);
+      std::make_unique<DisplayMonitor>(this, windows_proc_table_);
 
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
