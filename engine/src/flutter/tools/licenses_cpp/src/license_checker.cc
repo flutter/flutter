@@ -298,8 +298,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                 VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
                         << match->matcher;
               } else {
-                VLOG(2) << relative_path.lexically_normal() << " : "
-                        << match.status();
+                VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
+                        << " : " << match.status().message();
               }
             }
           });
