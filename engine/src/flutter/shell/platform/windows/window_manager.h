@@ -34,14 +34,14 @@ struct WindowsMessage {
 };
 
 struct WindowSizing {
-  bool has_size;
-  double width;
-  double height;
-  bool has_constraints;
-  double min_width;
-  double min_height;
-  double max_width;
-  double max_height;
+  bool has_preferred_view_size;
+  double preferred_view_width;
+  double preferred_view_height;
+  bool has_view_constraints;
+  double view_min_width;
+  double view_min_height;
+  double view_max_width;
+  double view_max_height;
 };
 
 struct WindowingInitRequest {

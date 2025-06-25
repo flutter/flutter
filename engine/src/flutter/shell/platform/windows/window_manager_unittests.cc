@@ -51,9 +51,9 @@ class WindowManagerTest : public WindowsTest {
   WindowCreationRequest creation_request_{
       .content_size =
           {
-              .has_size = true,
-              .width = 800,
-              .height = 600,
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
           },
   };
 
@@ -127,8 +127,9 @@ TEST_F(WindowManagerTest, GetWindowSize) {
   FlutterWindowSize size =
       InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
 
-  EXPECT_EQ(size.width, creation_request()->content_size.width);
-  EXPECT_EQ(size.height, creation_request()->content_size.height);
+  EXPECT_EQ(size.width, creation_request()->content_size.preferred_view_width);
+  EXPECT_EQ(size.height,
+            creation_request()->content_size.preferred_view_height);
 }
 
 TEST_F(WindowManagerTest, SetWindowSize) {
@@ -142,9 +143,9 @@ TEST_F(WindowManagerTest, SetWindowSize) {
                                                                    view_id);
 
   WindowSizing requestedSize{
-      .has_size = true,
-      .width = 640,
-      .height = 480,
+      .has_preferred_view_size = true,
+      .preferred_view_width = 640,
+      .preferred_view_height = 480,
   };
   InternalFlutterWindows_WindowManager_SetWindowContentSize(window_handle,
                                                             &requestedSize);

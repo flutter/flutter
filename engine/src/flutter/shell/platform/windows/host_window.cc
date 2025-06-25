@@ -206,15 +206,15 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   std::optional<Size> smallest = std::nullopt;
   std::optional<Size> biggest = std::nullopt;
 
-  if (content_size.has_constraints) {
-    smallest = Size(content_size.min_width, content_size.min_height);
-    if (content_size.max_width > 0 && content_size.max_height > 0) {
-      biggest = Size(content_size.max_width, content_size.max_height);
+  if (content_size.has_view_constraints) {
+    smallest = Size(content_size.view_min_width, content_size.view_min_height);
+    if (content_size.view_max_width > 0 && content_size.view_max_height > 0) {
+      biggest = Size(content_size.view_max_width, content_size.view_max_height);
     }
   }
 
   // TODO(knopp): What about windows sized to content?
-  FML_CHECK(content_size.has_size);
+  FML_CHECK(content_size.has_preferred_view_size);
 
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
@@ -222,8 +222,9 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   Rect const initial_window_rect = [&]() -> Rect {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine->windows_proc_table(),
-        Size(content_size.width, content_size.height), smallest, biggest,
-        window_style, extended_window_style, nullptr);
+        Size(content_size.preferred_view_width,
+             content_size.preferred_view_height),
+        smallest, biggest, window_style, extended_window_style, nullptr);
     return {{CW_USEDEFAULT, CW_USEDEFAULT},
             window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
   }();
@@ -467,18 +468,19 @@ void HostWindow::SetContentSize(const WindowSizing& size) {
   GetWindowInfo(window_handle_, &window_info);
 
   std::optional<Size> smallest, biggest;
-  if (size.has_constraints) {
-    smallest = Size(size.min_width, size.min_height);
-    if (size.max_width > 0 && size.max_height > 0) {
-      biggest = Size(size.max_width, size.max_height);
+  if (size.has_view_constraints) {
+    smallest = Size(size.view_min_width, size.view_min_height);
+    if (size.view_max_width > 0 && size.view_max_height > 0) {
+      biggest = Size(size.view_max_width, size.view_max_height);
     }
   }
 
   box_constraints_ = BoxConstraints(smallest, biggest);
 
-  if (size.has_size) {
+  if (size.has_preferred_view_size) {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        *engine_->windows_proc_table(), Size(size.width, size.height),
+        *engine_->windows_proc_table(),
+        Size(size.preferred_view_width, size.preferred_view_height),
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
