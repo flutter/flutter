@@ -7,6 +7,8 @@ validate the engine repository.  There are 3 main divisions of this data:
 - exclude.txt -- A list of all the files that will be excluded.
 - data/ -- A catalog of all the accepted and known licenses.
 
+All regex are in the [re2 format](https://github.com/google/re2/wiki/syntax).
+
 ## include.txt
 
 The file format for the include.txt is a list of regular expressions that
