@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:conductor_core/src/stdio.dart';
+import 'package:packages_autoroller/src/stdio.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
 export 'package:test/fake.dart';
 export 'package:test/test.dart' hide isInstanceOf;
-export '../../../../packages/flutter_tools/test/src/fake_process_manager.dart';
+export '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 Matcher throwsAssertionWith(String messageSubString) {
   return throwsA(

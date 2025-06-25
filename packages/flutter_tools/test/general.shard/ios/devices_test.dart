@@ -69,7 +69,7 @@ void main() {
       xcodeDebug = FakeXcodeDebug();
     });
 
-    testWithoutContext('successfully instantiates on Mac OS', () {
+    testWithoutContext('successfully instantiates on Mac OS', () async {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -89,10 +89,10 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
       );
-      expect(device.isSupported(), isTrue);
+      expect(await device.isSupported(), isTrue);
     });
 
-    testWithoutContext('32-bit devices are unsupported', () {
+    testWithoutContext('32-bit devices are unsupported', () async {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -111,7 +111,7 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
       );
-      expect(device.isSupported(), isFalse);
+      expect(await device.isSupported(), isFalse);
     });
 
     testWithoutContext('parses major version', () {
