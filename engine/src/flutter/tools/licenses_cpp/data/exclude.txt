@@ -10,6 +10,7 @@
 ^impeller/fixtures/.*
 ^shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
 ^sky/packages/sky_engine/LICENSE
+^testing/.*
 ^third_party/angle/third_party/.*
 ^third_party/angle/tools/.*
 ^third_party/angle/util/.*
