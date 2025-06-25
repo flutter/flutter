@@ -935,6 +935,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: activeEnabledFillColor)
         ..circle(color: activeEnabledFillColor),
     );
@@ -947,6 +948,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -958,6 +960,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: activeDisabledFillColor)
         ..circle(color: activeDisabledFillColor),
     );
@@ -970,6 +973,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -1021,6 +1025,7 @@ void main() {
       paints
         ..rect()
         ..circle()
+        ..circle(color: Colors.transparent)
         ..circle(color: hoveredFillColor),
     );
   });
@@ -1063,6 +1068,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..circle(color: theme.colorScheme.primary),
     );
@@ -1080,7 +1086,8 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
-        ..circle(color: hoverColor),
+        ..circle(color: hoverColor)
+        ..circle(color: Colors.transparent),
     );
 
     // Check when the radio is selected, but disabled.
@@ -1092,6 +1099,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
+        ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
@@ -1522,6 +1530,7 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
+          ..circle(color: Colors.transparent)
           ..circle(color: const Color(0xff2196f3))
           ..circle(color: const Color(0xff2196f3)),
       );
@@ -1539,7 +1548,8 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
-          ..circle(color: hoverColor),
+          ..circle(color: hoverColor)
+          ..circle(color: Colors.transparent),
       );
 
       // Check when the radio is selected, but disabled.
@@ -1551,6 +1561,7 @@ void main() {
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
           ..rect()
+          ..circle(color: Colors.transparent)
           ..circle(color: const Color(0x61000000))
           ..circle(color: const Color(0x61000000)),
       );

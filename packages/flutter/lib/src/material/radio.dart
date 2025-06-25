@@ -564,7 +564,7 @@ class _RadioPaint extends StatefulWidget {
   final double? splashRadius;
   final VisualDensity? visualDensity;
   final MaterialTapTargetSize? materialTapTargetSize;
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   @override
   State<StatefulWidget> createState() => _RadioPaintState();
@@ -614,7 +614,7 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.fillColor?.resolve(inactiveStates);
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
-    // TODO(ValentinVignal): ADd backgroundColor to RadioThemeData.
+    // TODO(ValentinVignal): Add backgroundColor to RadioThemeData.
     final Color activeBackgroundColor =
         widget.backgroundColor?.resolve(activeStates) ?? Colors.transparent;
     final Color inactiveBackgroundColor =
@@ -731,23 +731,27 @@ class _RadioPainter extends ToggleablePainter {
     final Offset center = (Offset.zero & size).center;
 
     // Background
-    final Paint paint =
+    final Paint backgroundPaint =
         Paint()
           ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)!
           ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, _kOuterRadius, paint);
+    canvas.drawCircle(center, _kOuterRadius, backgroundPaint);
 
     // Outer circle
-    paint
-      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    canvas.drawCircle(center, _kOuterRadius, paint);
+    final Paint outerCirclePaint =
+        Paint()
+          ..color = Color.lerp(inactiveColor, activeColor, position.value)!
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0;
+    canvas.drawCircle(center, _kOuterRadius, outerCirclePaint);
 
     // Inner circle
     if (!position.isDismissed) {
-      paint.style = PaintingStyle.fill;
-      canvas.drawCircle(center, _kInnerRadius * position.value, paint);
+      final Paint innerCirclePaint =
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = Color.lerp(inactiveColor, activeColor, position.value)!;
+      canvas.drawCircle(center, _kInnerRadius * position.value, innerCirclePaint);
     }
   }
 }
