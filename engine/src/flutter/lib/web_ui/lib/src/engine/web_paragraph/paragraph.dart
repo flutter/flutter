@@ -341,8 +341,11 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
-class TextRange {
-  TextRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
+class TextRange extends ui.TextRange {
+  TextRange({required this.start, required this.end})
+    : assert(start >= -1),
+      assert(end >= -1),
+      super(start: 0, end: 0);
 
   @override
   bool operator ==(Object other) {
@@ -372,7 +375,9 @@ class TextRange {
 
   static TextRange empty = TextRange(start: 0, end: 0);
 
+  @override
   int start;
+  @override
   int end;
 }
 
@@ -517,7 +522,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
-    return null;
+    throw UnimplementedError('getClosestGlyphInfoForOffset not supported by WebParagraph');
   }
 
   @override
@@ -569,26 +574,49 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    return const ui.TextRange(start: 0, end: 0);
+    final int codepointPosition = switch (position.affinity) {
+      ui.TextAffinity.upstream => position.offset - 1,
+      ui.TextAffinity.downstream => position.offset,
+    };
+    for (final line in _layout.lines) {
+      if (line.allLineTextRange.start <= codepointPosition &&
+          line.allLineTextRange.end > codepointPosition) {
+        return line.allLineTextRange;
+      }
+    }
+    return ui.TextRange.empty;
   }
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    return <ui.LineMetrics>[];
+    final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
+    for (final line in _layout.lines) {
+      metrics.add(line.getMetrics());
+    }
+    return metrics;
   }
 
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
-    return null;
+    if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
+      return null;
+    }
+    return _layout.lines[lineNumber].getMetrics();
   }
 
   @override
   int get numberOfLines {
-    return 0;
+    return _layout.lines.length;
   }
 
   @override
   int? getLineNumberAt(int codeUnitOffset) {
+    for (final line in _layout.lines) {
+      if (line.allLineTextRange.start <= codeUnitOffset &&
+          line.allLineTextRange.end > codeUnitOffset) {
+        return line.lineNumber;
+      }
+    }
     return null;
   }
 
@@ -636,32 +664,96 @@ class WebParagraph implements ui.Paragraph {
 }
 
 class WebLineMetrics implements ui.LineMetrics {
-  @override
-  double get ascent => 0.0;
+  const WebLineMetrics({
+    required this.hardBreak,
+    required this.ascent,
+    required this.descent,
+    required this.unscaledAscent,
+    required this.height,
+    required this.width,
+    required this.left,
+    required this.baseline,
+    required this.lineNumber,
+  });
 
   @override
-  double get descent => 0.0;
+  final bool hardBreak;
 
   @override
-  double get unscaledAscent => 0.0;
+  final double ascent;
 
   @override
-  bool get hardBreak => false;
+  final double descent;
 
   @override
-  double get baseline => 0.0;
+  final double unscaledAscent;
 
   @override
-  double get height => 0.0;
+  final double height;
 
   @override
-  double get left => 0.0;
+  final double width;
 
   @override
-  double get width => 0.0;
+  final double left;
 
   @override
-  int get lineNumber => 0;
+  final double baseline;
+
+  @override
+  final int lineNumber;
+
+  @override
+  int get hashCode => Object.hash(
+    hardBreak,
+    ascent,
+    descent,
+    unscaledAscent,
+    height,
+    width,
+    left,
+    baseline,
+    lineNumber,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is WebLineMetrics &&
+        other.hardBreak == hardBreak &&
+        other.ascent == ascent &&
+        other.descent == descent &&
+        other.unscaledAscent == unscaledAscent &&
+        other.height == height &&
+        other.width == width &&
+        other.left == left &&
+        other.baseline == baseline &&
+        other.lineNumber == lineNumber;
+  }
+
+  @override
+  String toString() {
+    String result = super.toString();
+    assert(() {
+      result =
+          'LineMetrics(hardBreak: $hardBreak, '
+          'ascent: $ascent, '
+          'descent: $descent, '
+          'unscaledAscent: $unscaledAscent, '
+          'height: $height, '
+          'width: $width, '
+          'left: $left, '
+          'baseline: $baseline, '
+          'lineNumber: $lineNumber)';
+      return true;
+    }());
+    return result;
+  }
 }
 
 class WebParagraphPlaceholder {}

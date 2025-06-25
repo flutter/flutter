@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../common/test_initialization.dart';
@@ -59,12 +58,16 @@ Future<void> testMain() async {
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     expect(
-      paragraph.getWordBoundary(ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream)),
-      ui.TextRange(start: 0, end: 0),
+      paragraph.getWordBoundary(
+        const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 0),
     );
     expect(
-      paragraph.getWordBoundary(ui.TextPosition(offset: -1, affinity: ui.TextAffinity.downstream)),
-      ui.TextRange(start: 0, end: 0),
+      paragraph.getWordBoundary(
+        const ui.TextPosition(offset: -1 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 0, end: 0),
     );
     expect(
       paragraph.getWordBoundary(
@@ -74,7 +77,7 @@ Future<void> testMain() async {
     );
     expect(
       paragraph.getWordBoundary(
-        ui.TextPosition(offset: paragraph.text!.length, affinity: ui.TextAffinity.downstream),
+        ui.TextPosition(offset: paragraph.text!.length /* affinity: ui.TextAffinity.downstream */),
       ),
       ui.TextRange(start: paragraph.text!.length, end: paragraph.text!.length),
     );
@@ -119,5 +122,74 @@ Future<void> testMain() async {
       ),
       ui.TextRange(start: 0, end: paragraph.text!.length),
     );
+  });
+
+  test('Paragraph getLineBoundary', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Line1\nLine2\nLine3');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 0, end: 6),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 6 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 6, end: 12),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 12 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 12, end: 17),
+    );
+
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: -1 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      ui.TextRange.empty,
+    );
+
+    expect(
+      paragraph.getLineBoundary(
+        ui.TextPosition(offset: paragraph.text!.length + 1, affinity: ui.TextAffinity.upstream),
+      ),
+      ui.TextRange.empty,
+    );
+  });
+
+  test('Paragraph computeLineMetrics/getLineMetricsAt', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Line1\nLine2\nLine3');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    final lineMetrics = paragraph.computeLineMetrics();
+    expect(lineMetrics.length, 3);
+    expect(lineMetrics[0].lineNumber, 0);
+    expect(lineMetrics[1].lineNumber, 1);
+    expect(lineMetrics[2].lineNumber, 2);
+    expect(lineMetrics[1], paragraph.getLineMetricsAt(1));
+  });
+
+  test('Paragraph numberOfLines/getLineNumberAt', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Line1\nLine2\nLine3');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(paragraph.numberOfLines, 3);
+    expect(paragraph.getLineNumberAt(3), 0);
+    expect(paragraph.getLineNumberAt(9), 1);
+    expect(paragraph.getLineNumberAt(15), 2);
   });
 }

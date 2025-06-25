@@ -360,9 +360,11 @@ class TextLayout {
     double top,
   ) {
     // Arrange line vertically, calculate metrics and bounds
-    final String allText = getTextFromClusterRange(
-      mergeSequentialClusterRanges(lineClusterRange, whitespacesClusterRange),
+    final allLineClusterRange = mergeSequentialClusterRanges(
+      lineClusterRange,
+      whitespacesClusterRange,
     );
+    final String allText = getTextFromClusterRange(allLineClusterRange);
     WebParagraphDebug.log('LINE "$allText" clusters:$lineClusterRange+$whitespacesClusterRange');
 
     final TextRange lineTextRange = convertSequentialClusterRangeToText(lineClusterRange);
@@ -372,8 +374,17 @@ class TextLayout {
     WebParagraphDebug.log('LINE "$allText" text:$lineTextRange+$whitespacesTextRange');
 
     assert(lineTextRange.end == whitespacesTextRange.start);
+    final TextRange allLineTextRange = convertSequentialClusterRangeToText(allLineClusterRange);
 
-    final TextLine line = TextLine(lineClusterRange, whitespacesClusterRange, hardLineBreak);
+    final TextLine line = TextLine(
+      lineClusterRange,
+      whitespacesClusterRange,
+      hardLineBreak,
+      lines.length,
+      lineTextRange,
+      whitespacesTextRange,
+      allLineTextRange,
+    );
 
     // Get logical runs belonging th the line
     final List<int> logicalLevels = <int>[];
@@ -506,7 +517,7 @@ class TextLayout {
     );
     lines.add(line);
     WebParagraphDebug.log(
-      'Line [${line.textRange.start}:${line.textRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height}',
+      'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height}',
     );
 
     return line.advance.height;
@@ -516,20 +527,22 @@ class TextLayout {
     // TODO(jlavrova): there is a special case in cpp SkParagraph; we need to decide if we keep it
     // Special case: clean all text in case of maxWidth == INF & align != left
     // We had to go through shaping though because we need all the measurement numbers
-    final effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
-    paragraph.requiredWidth = width;
-    for (final TextLine line in lines) {
-      if (width == double.infinity) {
-        line.formattingShift = 0;
-        paragraph.longestLine = line.advance.width;
-        paragraph.width = line.advance.width;
-        paragraph.height = line.advance.height;
-        assert(lines.length == 1);
-        return;
+    final ui.TextAlign effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
+    if (width == double.infinity && effectiveAlign != ui.TextAlign.left) {
+      // If we have to format the text we find the max line length and use it as a width
+      double maxLength = 0.0;
+      for (final TextLine line in lines) {
+        maxLength = math.max(maxLength, line.advance.width);
       }
-      final double delta = width - line.advance.width;
+      paragraph.requiredWidth = maxLength;
+    } else {
+      paragraph.requiredWidth = width;
+    }
+
+    for (final TextLine line in lines) {
+      final double delta = paragraph.requiredWidth - line.advance.width;
       if (delta <= 0) {
-        return;
+        continue;
       }
       // We do nothing for left align
       if (effectiveAlign == ui.TextAlign.justify) {
@@ -546,7 +559,7 @@ class TextLayout {
       paragraph.width = paragraph.longestLine;
       paragraph.height += line.advance.height;
       WebParagraphDebug.log(
-        'formatLines($width): $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine}',
+        'formatLines($width): ${line.advance} $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine}',
       );
     }
   }
@@ -563,13 +576,13 @@ class TextLayout {
     final List<ui.TextBox> result = <ui.TextBox>[];
     for (final line in lines) {
       WebParagraphDebug.log(
-        'Line: ${line.textRange} & $textRange '
+        'Line: ${line.textClusterRange} & $textRange '
         '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom} '
         '${line.fontBoundingBoxAscent}+${line.fontBoundingBoxDescent}',
       );
       // We take whitespaces in account
       final TextRange lineTextRange = convertSequentialClusterRangeToText(
-        mergeSequentialClusterRanges(line.textRange, line.whitespacesRange),
+        mergeSequentialClusterRanges(line.textClusterRange, line.whitespacesClusterRange),
       );
       if (end <= lineTextRange.start || start > lineTextRange.end) {
         continue;
@@ -691,12 +704,15 @@ class TextLayout {
         // We didn't find a line that contains the offset. All previous lines are placed above it and this one - below.
         // Actually, it's only possible for the first line (no lines before) because lines cover all vertical space.
         assert(lineNum == 1);
-        return ui.TextPosition(offset: line.textRange.start, affinity: ui.TextAffinity.downstream);
+        return ui.TextPosition(
+          offset: line.textClusterRange.start,
+          affinity: ui.TextAffinity.downstream,
+        );
       } else if (line.advance.bottom < offset.dy) {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
-      WebParagraphDebug.log('Found line: ${line.textRange} ${line.advance} ');
+      WebParagraphDebug.log('Found line: ${line.textClusterRange} ${line.advance} ');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       int blockNum = 0;
@@ -706,7 +722,10 @@ class TextLayout {
           // We didn't find any block and we already on the right side of our offset
           // It's only possible for the first block in the line
           assert(blockNum == 1);
-          return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+          return ui.TextPosition(
+            offset: line.textClusterRange.end,
+            affinity: ui.TextAffinity.downstream,
+          );
         } else if (block.advance.right < offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
           continue;
@@ -749,7 +768,10 @@ class TextLayout {
       // We didn't find the block containing our offset and
       // we didn't find the block that is on the right of the offset
       // So all the blocks are on the left
-      return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+      return ui.TextPosition(
+        offset: line.textClusterRange.end,
+        affinity: ui.TextAffinity.downstream,
+      );
     }
     // We didn't find the line containing our offset and
     // we didn't find the line that is down from the offset
@@ -886,13 +908,40 @@ class LineBlock {
 }
 
 class TextLine {
-  TextLine(this.textRange, this.whitespacesRange, this.hardLineBreak);
+  TextLine(
+    this.textClusterRange,
+    this.whitespacesClusterRange,
+    this.hardLineBreak,
+    this.lineNumber,
+    this.textRange,
+    this.whitespacesRange,
+    this.allLineTextRange,
+  );
+
+  WebLineMetrics getMetrics() {
+    return WebLineMetrics(
+      hardBreak: hardLineBreak,
+      ascent: fontBoundingBoxAscent,
+      descent: fontBoundingBoxDescent,
+      // TODO(jlavrova): it was not implemented in SkParagraph either; kept it as is
+      unscaledAscent: fontBoundingBoxAscent,
+      height: advance.height,
+      width: advance.width,
+      left: advance.left,
+      baseline: 0.0,
+      lineNumber: lineNumber,
+    );
+  }
 
   double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
 
-  final ClusterRange textRange;
-  final ClusterRange whitespacesRange;
+  final ClusterRange textClusterRange;
+  final ClusterRange whitespacesClusterRange;
+  final TextRange textRange;
+  final TextRange whitespacesRange;
+  final TextRange allLineTextRange;
   final bool hardLineBreak;
+  final int lineNumber;
 
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
