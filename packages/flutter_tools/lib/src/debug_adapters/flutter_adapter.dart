@@ -323,6 +323,18 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     return completer.future;
   }
 
+  /// A future that completes when the last-queued write to the Flutter process
+  /// completes and is flushed. This prevents multiple attempts to write to the
+  /// processes stdin stream that can cause exceptions.
+  ///
+  /// See:
+  ///   - https://github.com/Dart-Code/Dart-Code/issues/5554
+  ///   - https://github.com/flutter/flutter/issues/137184
+  ///
+  /// [sendFlutterMessage] will replace this value each time it writes a
+  /// message.
+  Future<void> _currentFlutterProcessStdinWrite = Future<void>.value();
+
   /// Sends a message to the Flutter run daemon.
   ///
   /// Throws `DebugAdapterException` if a Flutter process is not yet running.
@@ -336,7 +348,21 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
     _logTraffic('==> [Flutter] $payload');
-    await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: payload);
+
+    _currentFlutterProcessStdinWrite = _currentFlutterProcessStdinWrite.then((_) {
+      return ProcessUtils.writelnToStdinGuarded(
+        stdin: process.stdin,
+        line: payload,
+        onError: (Object e, _) {
+          // Ignore failures to write to the stream, it means the process has
+          // terminated and will be handled by the exit handler.
+          logger?.call(
+            'Error writing to "flutter run" stdin. '
+            'It is likely the process has terminated: $e',
+          );
+        },
+      );
+    });
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).

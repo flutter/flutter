@@ -17,12 +17,12 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'license_collector.dart';
+import 'package_graph.dart';
 import 'project.dart';
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -342,7 +342,6 @@ class ManifestAssetBundle implements AssetBundle {
     final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
       flutterProject,
       packageConfig,
-      _fileSystem,
     );
     final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Dependency dependency in transitiveDependencies) {
