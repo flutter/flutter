@@ -20,8 +20,7 @@ class SemanticForm extends SemanticRole {
 
   @override
   DomElement createElement() {
-    final DomElement element = domDocument.createElement('form');
-    return element;
+    return domDocument.createElement('form');
   }
 
   @override
