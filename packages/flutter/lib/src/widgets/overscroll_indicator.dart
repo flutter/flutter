@@ -806,16 +806,12 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double overscrollX = 0.0;
-          double overscrollY = 0.0;
           final double mainAxisSize;
 
           switch (widget.axis) {
             case Axis.horizontal:
-              overscrollX += stretch;
               mainAxisSize = MediaQuery.widthOf(context);
             case Axis.vertical:
-              overscrollY += stretch;
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
@@ -824,14 +820,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final Widget transform;
 
           if (ui.ImageFilter.isShaderFilterSupported) {
+            double overscroll = stretch;
+
             if (_stretchController.stretchDirection == _StretchDirection.trailing) {
-              overscrollX = -overscrollX;
-              overscrollY = -overscrollY;
+              overscroll = -overscroll;
             }
 
             transform = StretchOverscrollEffect(
-              stretchStrengthX: overscrollX,
-              stretchStrengthY: overscrollY,
+              stretchStrength: overscroll,
+              axis: widget.axis,
               child: widget.child!,
             );
           } else {
@@ -839,8 +836,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               _stretchController.stretchDirection,
             );
 
-            final double x = 1.0 + overscrollX;
-            final double y = 1.0 + overscrollY;
+            double x = 1.0;
+            double y = 1.0;
+
+            switch (widget.axis) {
+              case Axis.horizontal:
+                x += stretch;
+              case Axis.vertical:
+                y += stretch;
+            }
 
             transform = Transform(
               alignment: alignment,
