@@ -297,6 +297,9 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                 license_map.Add(package.name, match->matched_text);
                 VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
                         << match->matcher;
+              } else {
+                VLOG(2) << relative_path.lexically_normal() << " : "
+                        << match.status();
               }
             }
           });
