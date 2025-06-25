@@ -1,5 +1,4 @@
 bsd header
 (?s)Copyright.*governed by a BSD-style license.*in the LICENSE file
-Copyright .*\. All rights reserved.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
+(?s)Copyright .*\. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be\s+found\s+in the LICENSE file.
