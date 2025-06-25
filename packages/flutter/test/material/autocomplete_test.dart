@@ -711,16 +711,23 @@ void main() {
       ),
     );
 
+    /// Select an option.
     await tester.tap(find.byType(TextField));
     await tester.pump();
     const String textSelection = 'chameleon';
     await tester.tap(find.text(textSelection));
+
+    // Unfocus and scroll to deconstruct the widge
     final TextField field = find.byType(TextField).evaluate().first.widget as TextField;
     field.focusNode?.unfocus();
     scrollController.jumpTo(2000.0);
     await tester.pumpAndSettle();
+
+    /// Scroll to go back to the widget.
     scrollController.jumpTo(0.0);
     await tester.pumpAndSettle();
+
+    /// Checks that the option selected is still present.
     final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
     expect(field2.controller!.text, textSelection);
   });
