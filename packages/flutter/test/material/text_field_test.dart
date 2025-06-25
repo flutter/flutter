@@ -750,6 +750,7 @@ void main() {
                             id: 4,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -1987,6 +1988,7 @@ void main() {
               id: 1,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -5622,6 +5624,7 @@ void main() {
               currentValueLength: 9,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -6884,6 +6887,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -7294,6 +7298,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -7318,6 +7323,7 @@ void main() {
         inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocused,
@@ -7348,6 +7354,7 @@ void main() {
         currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isReadOnly,
@@ -8313,6 +8320,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8341,6 +8349,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8378,6 +8387,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8418,6 +8428,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8457,6 +8468,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8488,6 +8500,7 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -8507,6 +8520,7 @@ void main() {
         inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
           SemanticsFlag.isObscured,
@@ -8524,6 +8538,7 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
@@ -8573,6 +8588,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8609,6 +8625,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8647,6 +8664,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8689,6 +8707,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8745,6 +8764,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8805,6 +8825,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8845,6 +8866,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8873,6 +8895,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -8929,6 +8952,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -8957,6 +8981,7 @@ void main() {
               id: inputFieldId,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -9122,6 +9147,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -9166,6 +9192,7 @@ void main() {
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocused,
@@ -9228,6 +9255,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
@@ -9283,6 +9311,7 @@ void main() {
                 actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isTextField,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                 ],
@@ -18073,6 +18102,7 @@ void main() {
                           currentValueLength: 0,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -18143,6 +18173,7 @@ void main() {
                             currentValueLength: 0,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],

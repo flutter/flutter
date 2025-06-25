@@ -1198,6 +1198,7 @@ void main() {
         final SemanticsFinder finder = find.semantics.byAnyFlag(<SemanticsFlag>[
           SemanticsFlag.isHeader,
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
         ]);
 
         expect(finder, findsExactly(2));
@@ -1210,6 +1211,7 @@ void main() {
         final SemanticsFinder finder = find.semantics.byAnyFlag(<SemanticsFlag>[
           SemanticsFlag.isHeader,
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
         ]);
 
         try {
@@ -1221,7 +1223,9 @@ void main() {
         expect(
           failure.message,
           contains(
-            'Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:',
+            'Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader,
+          SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable]:',
           ),
         );
       });
