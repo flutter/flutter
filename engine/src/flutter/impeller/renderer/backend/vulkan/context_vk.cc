@@ -121,7 +121,7 @@ size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
 namespace {
 std::atomic_uint64_t context_count = 0;
 uint64_t CalculateHash(void* ptr) {
-  return ++context_count;
+  return context_count.fetch_add(1);
 }
 }  // namespace
 
