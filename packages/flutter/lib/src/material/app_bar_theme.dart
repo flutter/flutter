@@ -378,6 +378,10 @@ class AppBarThemeData with Diagnosticable {
   const AppBarThemeData({
     this.backgroundColor,
     this.foregroundColor,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     this.elevation,
     this.scrolledUnderElevation,
@@ -455,6 +459,10 @@ class AppBarThemeData with Diagnosticable {
   AppBarThemeData copyWith({
     Color? backgroundColor,
     Color? foregroundColor,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     double? elevation,
     double? scrolledUnderElevation,
