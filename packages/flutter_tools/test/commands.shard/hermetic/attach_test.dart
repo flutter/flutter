@@ -1854,7 +1854,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool get isConnected => true;
@@ -1963,7 +1963,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final PlatformType platformType = PlatformType.ios;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
@@ -2022,7 +2022,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   String get displayName => name;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

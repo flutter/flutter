@@ -1072,7 +1072,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
   bool? isAlwaysSupportedForProjectOverride;
 
   @override
-  bool isDeviceSupportedForProject(Device device) {
+  Future<bool> isDeviceSupportedForProject(Device device) async {
     return isAlwaysSupportedForProjectOverride ?? super.isDeviceSupportedForProject(device);
   }
 }

@@ -225,7 +225,7 @@ class _ScreenshotDevice extends Fake implements Device {
   bool get isConnected => true;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool ephemeral = true;

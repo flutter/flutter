@@ -263,7 +263,7 @@ class ProxiedDevice extends Device {
       throw UnimplementedError();
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   final TargetPlatform _targetPlatform;
   @override

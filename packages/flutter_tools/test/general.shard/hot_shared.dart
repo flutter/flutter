@@ -53,7 +53,7 @@ class FakeDevice extends Fake implements Device {
   final DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool supportsHotReload = true;

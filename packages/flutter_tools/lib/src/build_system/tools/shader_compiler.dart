@@ -133,6 +133,9 @@ class ShaderCompiler {
 
       case TargetPlatform.web_javascript:
         return <String>['--sksl'];
+
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 

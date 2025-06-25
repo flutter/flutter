@@ -180,7 +180,7 @@ class FakeDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool get supportsFlavors => _supportsFlavors;

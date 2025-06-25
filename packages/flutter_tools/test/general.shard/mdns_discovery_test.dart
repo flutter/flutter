@@ -1285,7 +1285,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
