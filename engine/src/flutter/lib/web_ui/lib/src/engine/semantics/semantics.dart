@@ -270,6 +270,7 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -382,6 +383,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.Locale? locale;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -782,6 +786,10 @@ abstract class SemanticRole {
     if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
     }
+
+    if (semanticsObject.isLocaleDirty) {
+      _updateLocale();
+    }
   }
 
   void _updateIdentifier() {
@@ -810,6 +818,15 @@ abstract class SemanticRole {
       });
     }
     removeAttribute('aria-controls');
+  }
+
+  void _updateLocale() {
+    final String locale = semanticsObject.locale?.toString() ?? '';
+    if (locale.isEmpty) {
+      removeAttribute('lang');
+      return;
+    }
+    setAttribute('lang', locale);
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1472,6 +1489,18 @@ class SemanticsObject {
     _dirtyFields |= _controlsNodesIndex;
   }
 
+  /// The language of this node.
+  ui.Locale? locale;
+
+  static const int _localeIndex = 1 << 28;
+
+  /// Whether the [locale] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isLocaleDirty => _isDirty(_localeIndex);
+  void _markLocaleDirty() {
+    _dirtyFields |= _localeIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1752,6 +1781,11 @@ class SemanticsObject {
     if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
       controlsNodes = update.controlsNodes;
       _markControlsNodesDirty();
+    }
+
+    if (locale != update.locale) {
+      locale = update.locale;
+      _markLocaleDirty();
     }
 
     // Apply updates to the DOM.
@@ -2392,8 +2426,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
