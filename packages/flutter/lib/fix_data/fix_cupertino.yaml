@@ -428,4 +428,50 @@ transforms:
       minSize:
         kind: fragment
         value: 'arguments[minSize]'
+
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'opacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'value'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'cupertino.dart' ]
+          method: 'toARGB32'
+          inClass: 'CupertinoDynamicColor'
+
+  - title: "Rename 'withOpacity'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'withOpacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
 # Before adding a new fix: read instructions at the top of this file.

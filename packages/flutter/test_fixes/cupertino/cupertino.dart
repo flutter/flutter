@@ -289,4 +289,12 @@ void main() {
 
   // https://github.com/flutter/flutter/pull/161295
   CupertinoButton(minSize: 60.0);
+
+  CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFF000000),
+    darkColor: Color(0xFF000001),
+  );
+  dynamicColor.opacity;
+  dynamicColor.value;
+  dynamicColor = dynamicColor.withOpacity(0.55);
 }

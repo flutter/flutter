@@ -1159,27 +1159,33 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
     }
   }
 
+  @Deprecated('Use component accessors like .r or .g, or toARGB32 for an explicit conversion.')
   @override
   int get value => _effectiveColor.value;
 
   @override
-  int toARGB32() => value;
+  int toARGB32() => _effectiveColor.toARGB32();
 
+  @Deprecated('Use (*.a * 255.0).round() & 0xff.')
   @override
   int get alpha => _effectiveColor.alpha;
 
+  @Deprecated('Use (*.b * 255.0).round() & 0xff.')
   @override
   int get blue => _effectiveColor.blue;
 
   @override
   double computeLuminance() => _effectiveColor.computeLuminance();
 
+  @Deprecated('Use (*.g * 255.0).round() & 0xff.')
   @override
   int get green => _effectiveColor.green;
 
+  @Deprecated('Use .a.')
   @override
   double get opacity => _effectiveColor.opacity;
 
+  @Deprecated('Use (*.r * 255.0).round() & 0xff.')
   @override
   int get red => _effectiveColor.red;
 
@@ -1192,6 +1198,7 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   @override
   Color withGreen(int g) => _effectiveColor.withGreen(g);
 
+  @Deprecated('Use .withValues() to avoid precision loss.')
   @override
   Color withOpacity(double opacity) => _effectiveColor.withOpacity(opacity);
 
