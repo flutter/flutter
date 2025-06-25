@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 set -e # Exit if any program returns an error.
 
 if uname -m | grep "arm64"; then

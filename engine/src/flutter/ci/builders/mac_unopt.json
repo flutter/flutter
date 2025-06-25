@@ -196,6 +196,13 @@
                 {
                     "name": "Run license_cpp unittests",
                     "script": "out/ci/host_release_arm64_licenses/licenses_cpp_testrunner"
+                },
+                {
+                    "name": "Run license_cpp",
+                    "script": "flutter/ci/licenses_cpp.sh",
+                    "parameters": [
+                        "ci/host_release_arm64_licenses"
+                    ]
                 }
             ]
         },

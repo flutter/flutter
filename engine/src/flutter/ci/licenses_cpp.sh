@@ -13,6 +13,14 @@ set -e
 # crucial for making all other paths relative and predictable.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
+# Default verbosity level
+VERBOSITY=1
+
+# Check for QUIET environment variable
+if [[ -n "${QUIET}" ]]; then
+  VERBOSITY=0
+fi
+
 # --- Determine Host Profile Directory ---
 
 HOST_PROFILE_DIR=""
@@ -72,7 +80,8 @@ fi
 "$EXECUTABLE" \
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
-  --licenses_path "$LICENSES_OUTPUT_PATH"
+  --licenses_path "$LICENSES_OUTPUT_PATH" \
+  --v $VERBOSITY
 
-diff -u "$LICENSES_OUTPUT_PATH" "$LICENSES_PATH"
+git diff --no-index  --ignore-cr-at-eol "$LICENSES_PATH" "$LICENSES_OUTPUT_PATH"
 rm "$LICENSES_OUTPUT_PATH"
