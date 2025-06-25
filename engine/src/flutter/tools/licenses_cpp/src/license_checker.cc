@@ -25,8 +25,8 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 4> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT"};
+const std::array<std::string_view, 5> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
