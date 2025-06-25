@@ -2929,7 +2929,7 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   void _onSingleLongTapEndOrCancel() {
-    if(!_isEditableTextMounted) {
+    if (!_isEditableTextMounted) {
       return;
     }
     _hideMagnifierIfSupportedByPlatform();
