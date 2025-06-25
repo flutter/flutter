@@ -30,11 +30,11 @@ class StretchOverscrollEffect extends StatefulWidget {
          'stretchStrength must be between -1.0 and 1.0',
        );
 
-  /// The horizontal overscroll strength applied for the stretching effect.
+  /// The overscroll strength applied for the stretching effect.
   ///
   /// The value should be between -1.0 and 1.0 inclusive.
-  /// Positive values apply a pull from left to right,
-  /// while negative values pull from right to left.
+  /// For horizontal axis, Positive values apply a pull from
+  /// left to right, while negative values pull from right to left.
   ///
   /// {@tool snippet}
   /// This example shows how to set the horizontal stretch strength to pull right.
