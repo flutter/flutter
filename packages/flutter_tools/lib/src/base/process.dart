@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -300,6 +301,12 @@ abstract class ProcessUtils {
   }
 }
 
+extension FirstNChars on String {
+  String firstN(int n) {
+    return substring(0, min(n, length));
+  }
+}
+
 class _DefaultProcessUtils implements ProcessUtils {
   _DefaultProcessUtils({required ProcessManager processManager, required Logger logger})
     : _processManager = processManager,
@@ -337,7 +344,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         environment: _environment(allowReentrantFlutter, environment),
       );
       final RunResult runResult = RunResult(results, cmd);
-      _logger.printTrace(runResult.toString());
+      _logger.printTrace(runResult.toString().firstN(100));
       if (throwOnError &&
           runResult.exitCode != 0 &&
           (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
