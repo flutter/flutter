@@ -1482,10 +1482,10 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       return;
     }
     final double item = getItemFromPixels(pixels, viewportDimension);
-    final int newIndex = item.round();
+    final int rounded = item.round();
 
-    if (newIndex != _cachedItem?.round()) {
-      onIndexChanged.call(newIndex);
+    if (_cachedItem == null || (rounded - _cachedItem!.round()).abs() > 0) {
+      onIndexChanged.call(rounded);
       _cachedItem = item;
     }
   }
