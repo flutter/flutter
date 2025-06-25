@@ -542,7 +542,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
 
   // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
   final RegExp callsTestFunctionPattern = RegExp(
-    r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
+    r'^ *(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
   );
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {

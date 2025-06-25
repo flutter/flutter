@@ -8,6 +8,7 @@ import 'dart:collection';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/source/source.dart';
 
 import 'dependency_graph.dart';
@@ -30,6 +31,11 @@ extension StringExtension on String {
   bool get isDartFile => endsWith('.dart');
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
+}
+
+extension LibraryElement2Extension on LibraryElement2 {
+  /// Convenience method to package path and [uri] into a [PreviewPath]
+  PreviewPath toPreviewPath() => (path: firstFragment.source.fullName, uri: uri);
 }
 
 extension ParsedUnitResultExtension on ParsedUnitResult {

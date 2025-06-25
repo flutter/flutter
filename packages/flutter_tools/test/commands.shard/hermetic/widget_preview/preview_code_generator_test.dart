@@ -259,7 +259,7 @@ List<_i1.WidgetPreview> previews() => [
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
-          const <PreviewPath, PreviewDependencyNode>{},
+          const <PreviewPath, LibraryPreviewNode>{},
         );
         expect(generatedPreviewFile, exists);
 
