@@ -12,7 +12,7 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
   args: 2.7.0
-  dds: 5.0.3
+  dds: 5.0.4
   dwds: 24.3.11
   code_builder: 4.10.1
   completion: 1.0.1
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: fk4goh
+# PUBSPEC CHECKSUM: oka5k6
