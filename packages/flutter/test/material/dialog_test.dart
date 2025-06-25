@@ -2909,12 +2909,7 @@ void main() {
 
   testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildAppWithDialog(
-        const AlertDialog(
-          content: SizedBox(),
-          contentPadding: EdgeInsets.zero,
-        ),
-      ),
+      _buildAppWithDialog(const AlertDialog(content: SizedBox(), contentPadding: EdgeInsets.zero)),
     );
 
     await tester.tap(find.text('X'));
@@ -2943,10 +2938,7 @@ void main() {
   testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildAppWithDialog(
-        const SimpleDialog(
-          contentPadding: EdgeInsets.zero,
-          children: <Widget>[SizedBox()],
-        ),
+        const SimpleDialog(contentPadding: EdgeInsets.zero, children: <Widget>[SizedBox()]),
       ),
     );
 
