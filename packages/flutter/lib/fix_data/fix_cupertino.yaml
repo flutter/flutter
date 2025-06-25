@@ -429,6 +429,7 @@ transforms:
         kind: fragment
         value: 'arguments[minSize]'
 
+  # Changes made in https://github.com/flutter/flutter/pull/171160
   - title: "Rename from 'opacity' to 'a'"
     date: 2025-06-24
     element:
@@ -439,6 +440,7 @@ transforms:
       - kind: 'rename'
         newName: 'a'
 
+  # Changes made in https://github.com/flutter/flutter/pull/171160
   - title: "Replace 'value' with 'toARGB32()'"
     date: 2025-06-24
     element:
@@ -452,6 +454,7 @@ transforms:
           method: 'toARGB32'
           inClass: 'CupertinoDynamicColor'
 
+  # Changes made in https://github.com/flutter/flutter/pull/171160
   - title: "Rename 'withOpacity'"
     date: 2025-06-24
     element:
