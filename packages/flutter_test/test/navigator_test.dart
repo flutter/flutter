@@ -227,12 +227,7 @@ void main() {
     );
 
     expect(find.text('Page 1'), findsOneWidget);
-    expect(
-      () => observer.transitionDuration,
-      throwsA(
-      isFlutterError,
-      ),
-    );
+    expect(() => observer.transitionDuration, throwsA(isFlutterError));
   });
 }
 
