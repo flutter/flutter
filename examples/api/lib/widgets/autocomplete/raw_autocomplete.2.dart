@@ -44,7 +44,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
       child: Column(
         children: <Widget>[
           DropdownButtonFormField<String>(
-            value: _dropdownValue,
+            initialValue: _dropdownValue,
             icon: const Icon(Icons.arrow_downward),
             hint: const Text('This is a regular DropdownButtonFormField'),
             elevation: 16,
