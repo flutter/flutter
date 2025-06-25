@@ -400,26 +400,33 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    return Semantics(
-      container: true,
-      child: FadeTransition(
-        opacity: _controller,
-        child: FractionalTranslation(
-          translation: Tween<Offset>(
-            begin: const Offset(0.0, -0.25),
-            end: Offset.zero,
-          ).evaluate(_controller.view),
-          child:
-              widget.error ??
-              Text(
-                widget.errorText!,
-                style: widget.errorStyle,
-                textAlign: widget.textAlign,
-                overflow: TextOverflow.ellipsis,
-                maxLines: widget.errorMaxLines,
-              ),
-        ),
-      ),
+    final Widget? capturedError = widget.error;
+    final String? capturedErrorText = widget.errorText;
+    return Builder(
+      builder: (BuildContext context) {
+        return Semantics(
+          container: true,
+          liveRegion: !MediaQuery.supportsAnnounceOf(context),
+          child: FadeTransition(
+            opacity: _controller,
+            child: FractionalTranslation(
+              translation: Tween<Offset>(
+                begin: const Offset(0.0, -0.25),
+                end: Offset.zero,
+              ).evaluate(_controller.view),
+              child:
+                  capturedError ??
+                  Text(
+                    capturedErrorText!,
+                    style: widget.errorStyle,
+                    textAlign: widget.textAlign,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: widget.errorMaxLines,
+                  ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -3903,6 +3910,7 @@ class InputDecoration {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
+    SemanticsService? semanticsService,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
