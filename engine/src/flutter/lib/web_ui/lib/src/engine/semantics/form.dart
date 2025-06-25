@@ -16,7 +16,7 @@ class SemanticForm extends SemanticRole {
         EngineSemanticsRole.form,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      ) {}
+      );
 
   @override
   DomElement createElement() {
