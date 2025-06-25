@@ -252,6 +252,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
       fs::path relative_path = fs::relative(full_path, working_dir);
+      VLOG(2) << relative_path;
       if (!data.include_filter.Matches(relative_path.string()) ||
           data.exclude_filter.Matches(relative_path.string())) {
         VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
@@ -303,10 +304,18 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
               }
             }
           });
-      if (!did_find_copyright && !package.license_file.has_value()) {
-        errors.push_back(
-            absl::NotFoundError("Expected copyright in " +
-                                relative_path.lexically_normal().string()));
+      if (!did_find_copyright) {
+        if (package.license_file.has_value()) {
+          fs::path relative_license_path =
+              fs::relative(*package.license_file, working_dir);
+          VLOG(1) << "OK: " << relative_path.lexically_normal()
+                  << " : dir license("
+                  << relative_license_path.lexically_normal() << ")";
+        } else {
+          errors.push_back(
+              absl::NotFoundError("Expected copyright in " +
+                                  relative_path.lexically_normal().string()));
+        }
       }
       if (!did_find_copyright && package.is_root_package) {
         errors.push_back(
