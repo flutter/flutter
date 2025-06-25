@@ -287,32 +287,26 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
             VLOG(2) << comment;
             re2::StringPiece match;
             if (RE2::PartialMatch(comment, pattern, &match)) {
-              did_find_copyright = true;
-              if (!package.license_file.has_value()) {
-                absl::StatusOr<Catalog::Match> match =
-                    data.catalog.FindMatch(comment);
-                if (match.ok()) {
-                  license_map.Add(package.name, match->matched_text);
-                  VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                          << match->matcher;
-                } else {
-                  errors.emplace_back(absl::NotFoundError(
-                      absl::StrCat("Unknown license in ",
-                                   relative_path.lexically_normal().string(),
-                                   " : ", match.status().message())));
-                }
+              absl::StatusOr<Catalog::Match> match =
+                  data.catalog.FindMatch(comment);
+              if (match.ok()) {
+                did_find_copyright = true;
+                license_map.Add(package.name, match->matched_text);
+                VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                        << match->matcher;
               } else {
-                fs::path relative_license_path =
-                    fs::relative(package.license_file.value(), working_dir);
-                VLOG(1) << "OK: " << relative_path.lexically_normal()
-                        << " : dir license(" << relative_license_path << ")";
+                errors.emplace_back(absl::NotFoundError(
+                    absl::StrCat("Unknown license in ",
+                                 relative_path.lexically_normal().string(),
+                                 " : ", match.status().message())));
               }
             }
           });
       if (!did_find_copyright &&
           (!package.license_file.has_value() || package.is_root_package)) {
-        errors.push_back(absl::NotFoundError("Expected copyright in " +
-                                             relative_path.lexically_normal().string()));
+        errors.push_back(
+            absl::NotFoundError("Expected copyright in " +
+                                relative_path.lexically_normal().string()));
       }
     }
   }
