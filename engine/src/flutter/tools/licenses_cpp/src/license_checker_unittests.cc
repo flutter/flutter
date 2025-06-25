@@ -254,6 +254,31 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
                         "Expected copyright in.*main.cc"));
 }
 
+TEST_F(LicenseCheckerTest, SimpleIgnoreFile) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << R"regex(^main\.cc)regex" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kUnknownHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+}
+
 TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
@@ -262,7 +287,7 @@ TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
   ASSERT_TRUE(data.ok());
 
   std::stringstream exclude;
-  exclude << ".*/LICENSE" << std::endl;
+  exclude << "^LICENSE" << std::endl;
   absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
   ASSERT_TRUE(exclude_filter.ok());
   data->exclude_filter = std::move(exclude_filter.value());
