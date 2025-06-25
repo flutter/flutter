@@ -7,7 +7,7 @@ import '../semantics.dart';
 
 /// Indicates a form.
 ///
-/// Uses aria form role to convey this semantic information to the element.
+/// Uses a form element to convey this semantic information to the element.
 ///
 /// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticForm extends SemanticRole {
