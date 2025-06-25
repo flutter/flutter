@@ -66,7 +66,7 @@ enum class DlVertexMode {
 /// color even if the DlVertexMode or indices specify that it contributes
 /// to more than one output triangle.
 ///
-class DlVertices {
+class DlVertices : public std::enable_shared_from_this<DlVertices> {
  public:
   /// @brief     A utility class to build up a |DlVertices| object
   ///            one set of data at a time.

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_SKIA_H_
+#define FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_SKIA_H_
 
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 
@@ -34,3 +35,5 @@ class DlRuntimeEffectSkia final : public DlRuntimeEffect {
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_SKIA_H_

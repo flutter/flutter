@@ -31,4 +31,4 @@ std::shared_ptr<impeller::RuntimeStage> DlRuntimeEffectImpeller::runtime_stage()
   return runtime_stage_;
 }
 
-}
+}  // namespace flutter

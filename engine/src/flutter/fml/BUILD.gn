@@ -113,9 +113,7 @@ source_set("fml") {
 
   deps = []
   if (target_os != "wasm") {
-    deps += [
-      "//flutter/third_party/icu",
-    ]
+    deps += [ "//flutter/third_party/icu" ]
 
     sources += [
       "icu_util.cc",

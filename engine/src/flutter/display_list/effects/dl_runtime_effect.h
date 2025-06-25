@@ -12,7 +12,7 @@
 
 class SkRuntimeEffect;
 namespace impeller {
-  class RuntimeStage;
+class RuntimeStage;
 }
 
 namespace flutter {

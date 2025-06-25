@@ -30,4 +30,4 @@ std::shared_ptr<impeller::RuntimeStage> DlRuntimeEffectSkia::runtime_stage()
   return nullptr;
 }
 
-}
+}  // namespace flutter
