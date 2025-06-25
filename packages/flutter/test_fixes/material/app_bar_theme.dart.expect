@@ -34,4 +34,6 @@ void main() {
   appBarTheme.backgroundColor;
 
   AppBarTheme appBarTheme = AppBarTheme(backgroundColor: Colors.red);
+
+  AppBarThemeData appBarThemeData = AppBarThemeData(backgroundColor: Colors.red);
 }
