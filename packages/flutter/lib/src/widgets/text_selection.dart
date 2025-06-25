@@ -2929,7 +2929,9 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   void _onSingleLongTapEndOrCancel() {
-    if(!_isEditableTextMounted) return;
+    if(!_isEditableTextMounted) {
+      return;
+    }
     _hideMagnifierIfSupportedByPlatform();
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
