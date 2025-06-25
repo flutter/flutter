@@ -7767,7 +7767,7 @@ void main() {
             alignment: FloatingLabelAlignment.center,
           ),
         );
-        // (decorator (800) / icon (40)) / 2
+        // (decorator (800) - icon (40)) / 2
         expect(getLabelCenter(tester).dx, 380.0);
 
         await tester.pumpWidget(
@@ -7778,7 +7778,7 @@ void main() {
             borderIsOutline: true,
           ),
         );
-        // (decorator (800) / icon (40)) / 2
+        // (decorator (800) - icon (40)) / 2
         expect(getLabelCenter(tester).dx, 380.0);
       });
     });
