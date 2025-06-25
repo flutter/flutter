@@ -81,7 +81,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
 
-  /// {@macro flutter.widgets.RawAutocomplete.focusNode}
+  /// The [FocusNode] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [textEditingController] must also be
+  /// not null.
   final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
@@ -107,7 +112,11 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
-  /// {@macro flutter.widgets.RawAutocomplete.textEditingController}
+  /// The [TextEditingController] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
