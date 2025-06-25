@@ -80,7 +80,7 @@ class TestRecordingCanvas implements Canvas {
     _saveCount += 1;
     invocations.add(
       RecordedInvocation(
-        _MethodCall(#saveLayer, <dynamic>[bounds, paint]),
+        _MethodCall(#saveLayer, <dynamic>[bounds, Paint.from(paint)]),
         stack: StackTrace.current,
       ),
     );
@@ -96,6 +96,16 @@ class TestRecordingCanvas implements Canvas {
   @override
   void noSuchMethod(Invocation invocation) {
     invocations.add(RecordedInvocation(invocation, stack: StackTrace.current));
+  }
+
+  @override
+  void drawCircle(Offset c, double radius, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawCircle, <dynamic>[c, radius, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
   }
 }
 
