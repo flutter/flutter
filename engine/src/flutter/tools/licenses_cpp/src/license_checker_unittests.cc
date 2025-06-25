@@ -227,6 +227,7 @@ TEST_F(LicenseCheckerTest, UnknownLicense) {
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 1u);
+  ASSERT_TRUE(!errors.empty());
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
                         "Unknown license in.*LICENSE"))
       << errors[0];
@@ -251,6 +252,63 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
   EXPECT_EQ(errors.size(), 1u);
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
                         "Expected copyright in.*main.cc"));
+}
+
+TEST_F(LicenseCheckerTest, SimpleIgnoreFile) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << R"regex(^main\.cc)regex" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kUnknownHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+}
+
+TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << "^LICENSE" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+)output");
 }
 
 TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
