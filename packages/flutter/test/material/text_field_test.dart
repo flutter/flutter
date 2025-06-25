@@ -15098,7 +15098,7 @@ void main() {
   );
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
-  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from input decoration theme', (
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = _focusNode();
@@ -15106,7 +15106,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          inputDecorationTheme: InputDecorationTheme(floatingLabelBehavior: behavior),
+          inputDecorationTheme: InputDecorationThemeData(floatingLabelBehavior: behavior),
         ),
         home: Scaffold(
           body: TextField(
@@ -15151,13 +15151,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/140607.
-  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData.', (
     WidgetTester tester,
   ) async {
     Widget textFieldBuilder() {
       return MaterialApp(
         theme: ThemeData(
-          inputDecorationTheme: const InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationThemeData(
             errorStyle: TextStyle(color: Colors.green),
           ),
         ),
@@ -16682,19 +16682,14 @@ void main() {
         final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'ContextMenu.onDismissSystemContextMenu',
         });
-        Object? error;
-        try {
-          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            'flutter/platform',
-            messageBytes,
-            (ByteData? data) {},
-          );
-        } catch (e) {
-          error = e;
-        }
+
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/platform',
+          messageBytes,
+          (ByteData? data) {},
+        );
         await tester.pumpAndSettle();
 
-        expect(error, isNull);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Selection handles are not hidden.
