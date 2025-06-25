@@ -46,6 +46,10 @@ import 'test_async_utils.dart';
 /// paints, among other things, two circles of radius 10.0 and 20.0 (in that
 /// order).
 ///
+/// This matcher does not work well when [Paint] instances are mutated and
+/// reused. Create a new instance of [Paint] for subsequent draw calls instead
+/// of mutating and reusing one instance.
+///
 /// See [PaintPattern] for a discussion of the semantics of paint patterns.
 ///
 /// To match something which paints nothing, see [paintsNothing].
