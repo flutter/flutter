@@ -3205,7 +3205,7 @@ class FakeDevice extends Fake implements Device {
   String id;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool isSupportedForProject(FlutterProject project) => _isSupportedForProject;
@@ -3316,7 +3316,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   String id;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool isSupportedForProject(FlutterProject project) => _isSupportedForProject;

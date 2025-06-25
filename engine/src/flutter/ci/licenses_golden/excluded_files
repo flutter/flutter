@@ -444,6 +444,7 @@
 ../../../flutter/shell/vmservice/pubspec.yaml
 ../../../flutter/sky/packages/sky_engine/.gitignore
 ../../../flutter/sky/packages/sky_engine/LICENSE
+../../../flutter/sky/packages/sky_engine/LICENSE_CPP
 ../../../flutter/sky/packages/sky_engine/README.md
 ../../../flutter/sky/packages/sky_engine/lib/_embedder.yaml
 ../../../flutter/sky/packages/sky_engine/pubspec.yaml
@@ -3178,6 +3179,9 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
+../../../flutter/third_party/skia/modules/pathops/BUILD.bazel
+../../../flutter/third_party/skia/modules/pathops/include/BUILD.bazel
+../../../flutter/third_party/skia/modules/pathops/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium

@@ -13,7 +13,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
-  if (!ui_web.debugEmulateFlutterTesterEnvironment) {
+  if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
@@ -129,7 +129,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   @override
   void layout(ui.ParagraphConstraints constraints) {
     paragraphLayout(handle, constraints.width);
-    if (!debugDisableFontFallbacks && !_hasCheckedForMissingCodePoints) {
+    if (!ui_web.TestEnvironment.instance.disableFontFallbacks && !_hasCheckedForMissingCodePoints) {
       _hasCheckedForMissingCodePoints = true;
       final int missingCodePointCount = paragraphGetUnresolvedCodePoints(handle, nullptr, 0);
       if (missingCodePointCount > 0) {
