@@ -1906,4 +1906,83 @@ void main() {
     );
     expect(lastExtent, .25);
   });
+
+  testWidgets(
+    'DraggableScrollableSheet with BouncingScrollPhysics snaps when bouncing over max extent',
+    // https://github.com/flutter/flutter/issues/169712
+    skip: true,
+    (WidgetTester tester) async {
+      double? lastExtent;
+
+      final DraggableScrollableController controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+
+      final List<Widget> children = List<Widget>.generate(12, (int index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Container(color: Colors.green, height: 100, child: Text('Item $index')),
+        );
+      });
+      children.insert(0, Container(color: Colors.green, height: 100));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: DraggableScrollableSheet(
+                  initialChildSize: 0.25,
+                  snap: true,
+                  snapSizes: const <double>[0.25, 0.5, 1.0],
+                  controller: controller,
+                  builder: (BuildContext context, ScrollController scrollController) {
+                    return NotificationListener<DraggableScrollableNotification>(
+                      onNotification: (DraggableScrollableNotification notification) {
+                        lastExtent = notification.extent;
+                        return false;
+                      },
+                      child: ColoredBox(
+                        color: const Color(0xFFABCDEF),
+                        child: CustomScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          controller: scrollController,
+                          slivers: <Widget>[
+                            SliverList(
+                              delegate: SliverChildBuilderDelegate((_, int index) {
+                                return children[index];
+                              }, childCount: children.length),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      final double itemHeight = tester.getSize(find.text('Item 0')).height;
+
+      controller.jumpTo(1.0);
+      await tester.pumpAndSettle();
+
+      await tester.fling(find.text('Item 0'), Offset(0, -itemHeight), 100);
+      await tester.pumpFrames(
+        tester.widget(find.byType(MaterialApp)),
+        const Duration(milliseconds: 500),
+      );
+
+      await tester.fling(find.text('Item 2'), Offset(0, itemHeight), 500);
+      await tester.pumpFrames(
+        tester.widget(find.byType(MaterialApp)),
+        const Duration(milliseconds: 500),
+      );
+
+      expect(lastExtent, 1.0);
+    },
+  );
 }
