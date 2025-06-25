@@ -832,9 +832,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
-  // contextMenuLocation.
-  static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
+  // contextMenuLocation and orientation.
+  static AlignmentDirectional getSheetAlignment(
+    _ContextMenuLocation contextMenuLocation,
+    Orientation orientation,
+  ) {
     return switch (contextMenuLocation) {
+      _ContextMenuLocation.center when orientation == Orientation.landscape =>
+        AlignmentDirectional.topStart,
       _ContextMenuLocation.center => AlignmentDirectional.topCenter,
       _ContextMenuLocation.right => AlignmentDirectional.topEnd,
       _ContextMenuLocation.left => AlignmentDirectional.topStart,
@@ -1002,7 +1007,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
                 child: FadeTransition(
                   opacity: _sheetOpacity,
                   child: Transform.scale(
-                    alignment: getSheetAlignment(_contextMenuLocation),
+                    alignment: getSheetAlignment(_contextMenuLocation, orientation),
                     scale: sheetScale,
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
@@ -1223,6 +1228,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
       screenBounds: screenBounds,
       sheet: sheet,
       contextMenuLocation: contextMenuLocation,
+      orientation: widget.orientation,
       child: AnimatedBuilder(
         animation: _moveController,
         builder: _buildChildAnimation,
@@ -1236,7 +1242,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
   // Build the animation for the _ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget? child) {
     return Transform.scale(
-      alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
+      alignment: _ContextMenuRoute.getSheetAlignment(
+        widget.contextMenuLocation,
+        widget.orientation,
+      ),
       scale: _sheetScaleAnimation.value,
       child: FadeTransition(opacity: _sheetOpacityAnimation, child: child),
     );
@@ -1404,12 +1413,14 @@ class _ContextMenuAlignedChildren extends StatelessWidget {
     required this.screenBounds,
     required this.child,
     required this.sheet,
+    required this.orientation,
     required this.contextMenuLocation,
   });
   final Rect targetRect;
   final Rect screenBounds;
   final Widget child;
   final Widget sheet;
+  final Orientation orientation;
   final _ContextMenuLocation contextMenuLocation;
 
   @override
@@ -1418,6 +1429,7 @@ class _ContextMenuAlignedChildren extends StatelessWidget {
       delegate: _ContextMenuAlignedChildrenDelegate(
         targetRect: targetRect,
         screenBounds: screenBounds,
+        orientation: orientation,
         contextMenuLocation: contextMenuLocation,
       ),
       children: <Widget>[
@@ -1432,45 +1444,36 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
   _ContextMenuAlignedChildrenDelegate({
     required this.targetRect,
     required this.screenBounds,
+    required this.orientation,
     required this.contextMenuLocation,
   });
   final Rect targetRect;
   final Rect screenBounds;
+  final Orientation orientation;
   final _ContextMenuLocation contextMenuLocation;
 
   @override
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(size);
 
-    final Size childSize = layoutChild(_ContextMenuChild.child, constraints);
+    final Size childSize = layoutChild(
+      _ContextMenuChild.child,
+      constraints.copyWith(maxHeight: screenBounds.height - _ContextMenuRouteStaticState._kPadding),
+    );
 
-    final double maxMenuHeight =
-        screenBounds.height - childSize.height - _ContextMenuRouteStaticState._kPadding;
+    final double maxMenuHeight;
+    switch (orientation) {
+      case Orientation.portrait:
+        maxMenuHeight =
+            screenBounds.height - childSize.height - 2 * _ContextMenuRouteStaticState._kPadding;
+      case Orientation.landscape:
+        maxMenuHeight = screenBounds.height - _ContextMenuRouteStaticState._kPadding;
+    }
 
     final Size menuSize = layoutChild(
       _ContextMenuChild.menuSheet,
       constraints.copyWith(maxHeight: maxMenuHeight),
     );
-
-    // Calculate the initial top-left position if child were centered on targetRect.
-    final double initialChildLeft = targetRect.center.dx - childSize.width / 2;
-    final double initialChildTop = targetRect.center.dy - childSize.height;
-
-    // Clamp the child's position to ensure it stays within screen bounds.
-    final double clampedLeft = clampDouble(
-      initialChildLeft,
-      screenBounds.left + _ContextMenuRouteStaticState._kPadding,
-      screenBounds.right - childSize.width - _ContextMenuRouteStaticState._kPadding,
-    );
-    final double clampedTop = clampDouble(
-      initialChildTop,
-      screenBounds.top,
-      screenBounds.bottom -
-          childSize.height -
-          menuSize.height -
-          _ContextMenuRouteStaticState._kPadding,
-    );
-    final Offset childPosition = Offset(clampedLeft, clampedTop);
 
     final double menuX;
     switch (contextMenuLocation) {
@@ -1482,17 +1485,71 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
         menuX = childSize.width - menuSize.width;
     }
 
-    positionChild(_ContextMenuChild.child, childPosition);
-    positionChild(
-      _ContextMenuChild.menuSheet,
-      childPosition + Offset(menuX, childSize.height + _ContextMenuRouteStaticState._kPadding),
+    final double initialChildLeft;
+    final double initialChildTop;
+    final double maxClampedLeft;
+    final double maxClampedTop;
+    final Offset secondChildOffset;
+    final bool menuBeforeChild;
+    switch (orientation) {
+      case Orientation.portrait:
+        initialChildLeft = targetRect.center.dx - childSize.width / 2;
+        initialChildTop = targetRect.center.dy - childSize.height;
+        menuBeforeChild = false;
+        secondChildOffset = Offset(
+          menuX,
+          childSize.height + _ContextMenuRouteStaticState._kPadding,
+        );
+        maxClampedLeft =
+            screenBounds.right - childSize.width - _ContextMenuRouteStaticState._kPadding;
+        maxClampedTop =
+            screenBounds.bottom -
+            childSize.height -
+            menuSize.height -
+            _ContextMenuRouteStaticState._kPadding;
+      case Orientation.landscape:
+        final double totalLandscapeHeight = math.max(childSize.height, menuSize.height);
+        final double totalLandscapeWidth =
+            childSize.width + menuSize.width + _ContextMenuRouteStaticState._kPadding;
+        initialChildLeft = screenBounds.center.dx - totalLandscapeWidth / 2;
+        initialChildTop = screenBounds.center.dy - totalLandscapeHeight / 2;
+        menuBeforeChild = contextMenuLocation == _ContextMenuLocation.right;
+        secondChildOffset = Offset(
+          (menuBeforeChild ? menuSize.width : childSize.width) +
+              _ContextMenuRouteStaticState._kPadding,
+          0.0,
+        );
+        maxClampedLeft =
+            screenBounds.right -
+            childSize.width -
+            menuSize.width -
+            _ContextMenuRouteStaticState._kPadding;
+        maxClampedTop = screenBounds.bottom;
+    }
+
+    // Clamp the child's position to ensure it stays within screen bounds.
+    final double clampedLeft = clampDouble(
+      initialChildLeft,
+      screenBounds.left + _ContextMenuRouteStaticState._kPadding,
+      maxClampedLeft,
     );
+
+    final double clampedTop = clampDouble(
+      initialChildTop,
+      screenBounds.top + _ContextMenuRouteStaticState._kPadding,
+      maxClampedTop,
+    );
+    final Offset firstPosition = Offset(clampedLeft, clampedTop);
+    final Offset secondPosition = firstPosition + secondChildOffset;
+    positionChild(_ContextMenuChild.child, menuBeforeChild ? secondPosition : firstPosition);
+    positionChild(_ContextMenuChild.menuSheet, menuBeforeChild ? firstPosition : secondPosition);
   }
 
   @override
   bool shouldRelayout(_ContextMenuAlignedChildrenDelegate oldDelegate) {
     return oldDelegate.targetRect != targetRect ||
         oldDelegate.screenBounds != screenBounds ||
+        oldDelegate.orientation != orientation ||
         oldDelegate.contextMenuLocation != contextMenuLocation;
   }
 }

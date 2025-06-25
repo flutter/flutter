@@ -1017,7 +1017,7 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
-    }, skip: true); // Skip while still working on landscape mode.
+    });
   });
 
   testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
