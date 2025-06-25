@@ -3250,6 +3250,48 @@ void main() {
       return menuRects;
     }
 
+    testWidgets('menu does not go out of safe area', (WidgetTester tester) async {
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPadding();
+      });
+
+      const Size size = Size.square(500);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+
+      const double padding = 50;
+      tester.view.padding = const FakeViewPadding(top: padding, bottom: padding);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: DropdownMenu<int>(
+                  dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                    for (final int item in Iterable<int>.generate(20))
+                      DropdownMenuEntry<int>(value: item, label: 'Item $item'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownMenu<int>));
+      await tester.pumpAndSettle();
+
+      final Finder menuFinder = find.byType(SingleChildScrollView);
+      expect(menuFinder, findsOneWidget);
+
+      final Rect menuRect = tester.getRect(menuFinder);
+      expect(menuRect.top >= padding, isTrue);
+      expect(menuRect.bottom <= size.height - padding, isTrue);
+    });
+
     testWidgets('unconstrained menus show up in the right place in LTR', (
       WidgetTester tester,
     ) async {
