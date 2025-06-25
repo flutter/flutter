@@ -54,7 +54,7 @@ class ImgElementPlatformView extends StatelessWidget {
     return HtmlElementView(
       viewType: _viewType,
       creationParams: <String, String?>{'src': src},
-      //hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+      hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
 }

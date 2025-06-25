@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
@@ -15,21 +16,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
+import '../widgets/web_platform_view_registry_utils.dart';
 import '_test_http_request.dart';
 
 late final ui.Image testImage;
 
 void runTests() {
   _TestBinding.ensureInitialized();
+  late FakePlatformViewRegistry fakePlatformViewRegistry;
 
   setUpAll(() async {
     testImage = await createTestImage();
+    fakePlatformViewRegistry = FakePlatformViewRegistry();
+
+    // Simulate the engine registering the factory function for <img> elements.
+    fakePlatformViewRegistry.registerViewFactory('Flutter__ImgElementImage__', (
+      int viewId, {
+      Object? params,
+    }) {
+      final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
+      // Create a new <img> element. The browser is able to display the image
+      // without fetching it over the network again.
+      final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
+      print('IMG ELEMENT VIEW FACTORY WAS CALLED!!!');
+      img.src = paramsMap['src']! as String;
+      return img;
+    });
+    ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
   });
 
   tearDown(() {
     debugRestoreHttpRequestFactory();
     debugRestoreImgElementFactory();
     _TestBinding.instance.overrideCodec = null;
+    ui_web.debugOverridePlatformViewRegistry(null);
   });
 
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
@@ -414,6 +434,12 @@ void runTests() {
 
   testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
     final TestImgElement testImg = TestImgElement();
+    // Give the test img naturalHeight and naturalWidth so it can be hit by a
+    // tap gesture.
+    testImg
+      ..src = _uniqueUrl(tester.testDescription)
+      ..naturalWidth = 10
+      ..naturalHeight = 10;
 
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
