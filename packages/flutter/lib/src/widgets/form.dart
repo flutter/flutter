@@ -295,7 +295,7 @@ class FormState extends State<Form> {
       );
     }
 
-    return Semantics(role: SemanticsRole.form, child: form);
+    return Semantics(container: true, role: SemanticsRole.form, child: form);
   }
 
   /// Saves every [FormField] that is a descendant of this [Form].

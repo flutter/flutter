@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'semantics.dart';
+import '../dom.dart';
+import '../semantics.dart';
 
 /// Indicates a form.
 ///
@@ -16,7 +17,12 @@ class SemanticForm extends SemanticRole {
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
-    setAriaRole('form');
+  }
+
+  @override
+  DomElement createElement() {
+    final DomElement element = domDocument.createElement('form');
+    return element;
   }
 
   @override
