@@ -41,6 +41,8 @@ impeller_component("interop_base") {
     "dl_builder.h",
     "formats.cc",
     "formats.h",
+    "fragment_program.cc",
+    "fragment_program.h",
     "glyph_info.cc",
     "glyph_info.h",
     "image_filter.cc",
