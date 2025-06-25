@@ -254,7 +254,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       fs::path relative_path = fs::relative(full_path, working_dir);
       if (!data.include_filter.Matches(relative_path.string()) ||
           data.exclude_filter.Matches(relative_path.string())) {
-        // Ignore file.
+        VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
         continue;
       }
 
@@ -293,7 +293,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                     data.catalog.FindMatch(comment);
                 if (match.ok()) {
                   license_map.Add(package.name, match->matched_text);
-                  VLOG(1) << "OK: " << full_path.lexically_normal() << " : "
+                  VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
                           << match->matcher;
                 } else {
                   errors.emplace_back(absl::NotFoundError(
@@ -311,8 +311,8 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
           });
       if (!did_find_copyright &&
           (!package.license_file.has_value() || package.is_root_package)) {
-        errors.push_back(absl::NotFoundError(
-            "Expected copyright in " + full_path.lexically_normal().string()));
+        errors.push_back(absl::NotFoundError("Expected copyright in " +
+                                             relative_path.lexically_normal().string()));
       }
     }
   }
