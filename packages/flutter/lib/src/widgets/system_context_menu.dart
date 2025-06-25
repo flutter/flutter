@@ -135,6 +135,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
+      if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -411,6 +412,30 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with 
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
+  }
+}
+
+/// Creates an instance of [IOSSystemContextMenuItem] for the
+/// system's built-in Live Text button.
+///
+/// Should only appear when the text field is not secure, has focus, and has
+/// no selection.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataLiveText], which specifies the data to be sent
+///    to the platform for this same button.
+final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
+  /// Creates an instance of [IOSSystemContextMenuItemLiveText].
+  const IOSSystemContextMenuItemLiveText();
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    return const IOSSystemContextMenuItemDataLiveText();
   }
 }
 
