@@ -14,6 +14,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // `StretchingOverscrollIndicator` uses a different algorithm when
+  // shader is available, therefore the tests must be different depending
+  // on shader support.
   final bool isFragmentShader = ui.ImageFilter.isShaderFilterSupported;
 
   Widget buildTest(
