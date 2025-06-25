@@ -7635,6 +7635,10 @@ void main() {
 
       final Rect containerRect = getContainerRect(tester);
       final Rect inputRect = getInputRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 8.0).
+      // Vertical padding affects the container height not the input vertical
+      // position as the input is centered.
       expect(containerRect.height, 48.0);
       expect(inputRect.center.dy, containerRect.center.dy);
       expect(inputRect.left, containerRect.left + 12.0 + kInputExtraPadding);
@@ -7653,6 +7657,8 @@ void main() {
       final Rect containerRect = getContainerRect(tester);
       final Rect inputRect = getInputRect(tester);
       final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0).
       expect(containerRect.height, 48.0);
       expect(labelRect.top, containerRect.top + 4.0);
       expect(inputRect.bottom, containerRect.bottom - 4.0);
@@ -7670,6 +7676,8 @@ void main() {
       final Rect containerRect = getContainerRect(tester);
       final Rect inputRect = getInputRect(tester);
       final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0).
       expect(containerRect.height, 48.0);
       expect(labelRect.top, containerRect.top + 4.0);
       expect(inputRect.bottom, containerRect.bottom - 4.0);
