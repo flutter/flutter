@@ -2907,6 +2907,22 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox)).width, 560);
   });
 
+  testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const AlertDialog(
+          content: SizedBox(),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
   testWidgets('AlertDialog respects the given constraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildAppWithDialog(
@@ -2922,6 +2938,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(
+          contentPadding: EdgeInsets.zero,
+          children: <Widget>[SizedBox()],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
   });
 
   testWidgets('SimpleDialog respects the given constraints', (WidgetTester tester) async {
