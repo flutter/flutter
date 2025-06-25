@@ -32,6 +32,7 @@
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
@@ -315,6 +316,12 @@ class FlutterWindowsEngine {
   // Sets the cursor directly from a cursor handle.
   void SetFlutterCursor(HCURSOR cursor) const;
 
+  WindowManager* window_manager() { return window_manager_.get(); }
+
+  // Returns the root view associated with the top-level window with |hwnd| as
+  // the window handle or nullptr if no such view could be found.
+  FlutterWindowsView* GetViewFromTopLevelWindow(HWND hwnd) const;
+
  protected:
   // Creates the keyboard key handler.
   //
@@ -452,6 +459,10 @@ class FlutterWindowsEngine {
 
   // Handlers for keyboard events from Windows.
   std::unique_ptr<KeyboardHandlerBase> keyboard_key_handler_;
+
+  // The manager that manages the lifecycle of |HostWindow|s, native
+  // Win32 windows hosting a Flutter view in their client area.
+  std::unique_ptr<WindowManager> window_manager_;
 
   // Handlers for text events from Windows.
   std::unique_ptr<TextInputPlugin> text_input_plugin_;

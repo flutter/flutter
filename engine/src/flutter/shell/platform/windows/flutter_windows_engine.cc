@@ -25,6 +25,7 @@
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/window_manager.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
 #include "shell/platform/windows/flutter_project_bundle.h"
 
@@ -205,8 +206,18 @@ FlutterWindowsEngine::FlutterWindowsEngine(
         FlutterWindowsEngine* that =
             static_cast<FlutterWindowsEngine*>(user_data);
         BASE_DCHECK(that->lifecycle_manager_);
-        return that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar,
-                                                    result);
+        bool handled =
+            that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar, result);
+        if (handled) {
+          return true;
+        }
+        auto message_result =
+            that->window_manager_->HandleMessage(hwnd, msg, wpar, lpar);
+        if (message_result) {
+          *result = *message_result;
+          return true;
+        }
+        return false;
       },
       static_cast<void*>(this));
 
@@ -224,6 +235,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::make_unique<CursorHandler>(messenger_wrapper_.get(), this);
   platform_handler_ =
       std::make_unique<PlatformHandler>(messenger_wrapper_.get(), this);
+  window_manager_ = std::make_unique<WindowManager>(this);
   settings_plugin_ = std::make_unique<SettingsPlugin>(messenger_wrapper_.get(),
                                                       task_runner_.get());
 }
@@ -499,6 +511,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
 bool FlutterWindowsEngine::Stop() {
   if (engine_) {
+    window_manager_->OnEngineShutdown();
     for (const auto& [callback, registrar] :
          plugin_registrar_destruction_callbacks_) {
       callback(registrar);
@@ -837,6 +850,20 @@ HCURSOR FlutterWindowsEngine::GetCursorByName(
     idc_name = it->second;
   }
   return windows_proc_table_->LoadCursor(nullptr, idc_name);
+}
+
+FlutterWindowsView* FlutterWindowsEngine::GetViewFromTopLevelWindow(
+    HWND hwnd) const {
+  std::shared_lock read_lock(views_mutex_);
+  auto const iterator =
+      std::find_if(views_.begin(), views_.end(), [hwnd](auto const& pair) {
+        FlutterWindowsView* const view = pair.second;
+        return GetAncestor(view->GetWindowHandle(), GA_ROOT) == hwnd;
+      });
+  if (iterator != views_.end()) {
+    return iterator->second;
+  }
+  return nullptr;
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
