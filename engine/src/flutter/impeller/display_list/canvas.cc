@@ -14,7 +14,6 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -36,6 +35,7 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
+#include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -602,6 +602,32 @@ void Canvas::DrawLine(const Point& p0,
   }
 }
 
+void Canvas::DrawDashedLine(const Point& p0,
+                            const Point& p1,
+                            Scalar on_length,
+                            Scalar off_length,
+                            const Paint& paint) {
+  // Reasons to defer to regular DrawLine:
+  // - performance for degenerate and "regular line" cases
+  // - length is non-positive - DrawLine will draw appropriate "dot"
+  // - off_length is non-positive - no gaps, DrawLine will draw it solid
+  // - on_length is negative - invalid dashing
+  //
+  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
+  // apart so we proceed with the dashing process in that case.
+  Scalar length = p0.GetDistance(p1);
+  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    StrokeDashedLineGeometry geom(p0, p1, on_length, off_length, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    DrawLine(p0, p1, paint);
+  }
+}
+
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, {}, paint)) {
     return;
@@ -649,44 +675,59 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   }
 }
 
-void Canvas::DrawArc(const Rect& oval_bounds,
-                     Scalar start_degrees,
-                     Scalar sweep_degrees,
-                     bool use_center,
-                     const Paint& paint) {
+void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (paint.style == Paint::Style::kStroke &&
-      paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
+  if (paint.style == Paint::Style::kFill) {
+    ArcGeometry geom(arc);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
+  const Rect& oval_bounds = arc.GetOvalBounds();
+  if (paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
     // This is a special case for rendering arcs whose stroke width is so large
     // you are effectively drawing a sector of a circle.
     // https://github.com/flutter/flutter/issues/158567
-    Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
+    Arc expanded_arc(oval_bounds.Expand(Size(paint.stroke.width * 0.5f)),
+                     arc.GetStart(), arc.GetSweep(), true);
 
-    flutter::DlPathBuilder builder;
-    builder.AddArc(expanded_rect, Degrees(start_degrees),
-                   Degrees(sweep_degrees), /*use_center=*/true);
-
-    Paint fill_paint = paint;
-    fill_paint.style = Paint::Style::kFill;
-
-    ArcFillPathGeometry geom(builder.TakePath(), expanded_rect);
+    ArcGeometry geom(expanded_arc);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-  } else {
-    flutter::DlPathBuilder builder;
-    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                   use_center);
+    return;
+  }
 
-    if (paint.style == Paint::Style::kFill) {
-      ArcFillPathGeometry geom(builder.TakePath(), oval_bounds);
+  // IncludeCenter incurs lots of extra work for stroking an arc, including:
+  // - It introduces segments to/from the center point (not too hard).
+  // - It introduces joins on those segments (a bit more complicated).
+  // - Even if the sweep is >=360 degrees, we still draw the segment to
+  //   the center and it basically looks like a pie cut into the complete
+  //   boundary circle, as if the slice were cut, but not extracted
+  //   (hard to express as a continuous kTriangleStrip).
+  if (!arc.IncludeCenter()) {
+    if (arc.IsFullCircle()) {
+      return DrawOval(oval_bounds, paint);
+    }
+
+    // Our fast stroking code only works for circular bounds as it assumes
+    // that the inner and outer radii can be scaled along each angular step
+    // of the arc - which is not true for elliptical arcs where the inner
+    // and outer samples are perpendicular to the traveling direction of the
+    // elliptical curve which may not line up with the center of the bounds.
+    //
+    // TODO(flar): It also only supports Butt and Square caps for now.
+    // See https://github.com/flutter/flutter/issues/169400
+    if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
+      ArcGeometry geom(arc, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    } else {
-      ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
-      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+      return;
     }
   }
+
+  ArcStrokeGeometry geom(arc, paint.stroke);
+  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
@@ -737,29 +778,26 @@ void Canvas::DrawDiffRoundRect(const RoundRect& outer,
   }
 }
 
-void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
+void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
                                    const Paint& paint) {
-  auto& rect = rse.GetBounds();
-  auto& radii = rse.GetRadii();
+  auto& rect = round_superellipse.GetBounds();
+  auto& radii = round_superellipse.GetRadii();
   if (radii.AreAllCornersSame() &&
       AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
     return;
   }
 
-  if (paint.style == Paint::Style::kFill) {
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
 
+  if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(rect, radii);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    return;
+  } else {
+    StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
-
-  auto path = flutter::DlPathBuilder{}  //
-                  .AddRoundSuperellipse(rse)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawCircle(const Point& center,

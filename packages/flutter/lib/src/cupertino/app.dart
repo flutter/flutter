@@ -550,12 +550,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticsLabel,
-    bool isLeftAligned = true,
+    bool usesDefaultAlignment = true,
   }) {
     return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+      icon: usesDefaultAlignment ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
     );
   }
 

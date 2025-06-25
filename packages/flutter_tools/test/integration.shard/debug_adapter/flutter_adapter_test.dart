@@ -290,6 +290,7 @@ Exception: c
 
 The relevant error-causing widget was:
     App App:${Uri.file(project.dir.path)}/lib/main.dart:1:1
+          ^ source: ${project.dir.path.split('.').last}${fileSystem.path.separator}lib${fileSystem.path.separator}main.dart
 
 When the exception was thrown, this was the stack:
 #0      c (package:test/main.dart:1:1)
@@ -374,6 +375,44 @@ The relevant error-causing widget was:
         startsWith('Reloaded'),
         'topLevelFunction',
       ], allowExtras: true);
+
+      await dap.client.terminate();
+    });
+
+    /// Sending many hot reload requests at once previously could result in
+    /// failures because they tried to write to the internal `flutter run`
+    /// process concurrently (via ) which caused "Bad state: StreamSink is bound
+    /// to a stream".
+    ///
+    /// See:
+    /// - https://github.com/Dart-Code/Dart-Code/issues/5554
+    /// - https://github.com/flutter/flutter/issues/137184
+    testWithoutContext('can handle many hot reload requests concurrently', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere(
+          (String output) => output.startsWith('topLevelFunction'),
+        ),
+        dap.client.start(
+          launch:
+              () => dap.client.launch(
+                cwd: project.dir.path,
+                noDebug: true,
+                toolArgs: <String>['-d', 'flutter-tester'],
+              ),
+        ),
+      ], eagerError: true);
+
+      try {
+        await Future.wait(Iterable<Future<void>>.generate(50, (_) => dap.client.hotReload()));
+      } on Response catch (e) {
+        // If the request throws, extract the error message for better failure
+        // message.
+        fail(e.message ?? 'hotReload request failed with unknown error');
+      }
 
       await dap.client.terminate();
     });
