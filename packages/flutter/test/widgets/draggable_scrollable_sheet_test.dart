@@ -1909,8 +1909,6 @@ void main() {
 
   testWidgets(
     'DraggableScrollableSheet with BouncingScrollPhysics snaps when bouncing over max extent',
-    // https://github.com/flutter/flutter/issues/169712
-    skip: true,
     (WidgetTester tester) async {
       double? lastExtent;
 
