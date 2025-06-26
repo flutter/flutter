@@ -3998,10 +3998,8 @@ void main() {
   });
 
   testWidgets('NavigationRail can scroll in low height', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/89167.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(

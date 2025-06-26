@@ -322,22 +322,31 @@ class NavigationRail extends StatefulWidget {
   /// that is null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
 
+  /// Pin the [leading] widget to the top.
+  ///
   /// If `true`, the [leading] widget is pinned to the top of the
   /// [NavigationRail]. Otherwise it precedes directly the main group of
   /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
   final bool leadingAtTop;
 
+  /// Pin the [trailing] widget to the bottom.
+  ///
   /// If `true`, the [trailing] widget is pinned to the bottom of the
   /// [NavigationRail]. Otherwise it follows directly the main group of
   /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
   final bool trailingAtBottom;
 
-  /// Specifies, if the main group of items should be scrollable, when vertical
-  /// space is insufficient to show all of [destinations], [leading] and
-  /// [trailing].
+  /// Whether the main group of items should be scrollable when vertical space
+  /// is insufficient to show all of [destinations], [leading] and [trailing].
   ///
   /// If [leadingAtTop] or [trailingAtBottom] are false, [leading] or [trailing]
-  /// widgets, respectively, are part of the main group, additionally to
+  /// widgets, respectively, are part of the main group in addition to
   /// [destinations]. Otherwise these are statical at the top or bottom,
   /// respectively.
   final bool scrollable;
