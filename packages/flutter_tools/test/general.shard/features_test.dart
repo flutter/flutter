@@ -144,9 +144,9 @@ void main() {
       assert(runtimeIdPattern.hasMatch('multi_window'));
       assert(!runtimeIdPattern.hasMatch('multi-window'));
 
-      final Iterable<String?> runtimeIds = featureFlags.allFeatures
+      final Iterable<String> runtimeIds = featureFlags.allFeatures
           .where((Feature feature) => feature.runtimeId != null)
-          .map((Feature feature) => feature.runtimeId);
+          .map((Feature feature) => feature.runtimeId!);
 
       expect(
         runtimeIds,

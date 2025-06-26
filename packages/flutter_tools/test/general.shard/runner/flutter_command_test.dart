@@ -1364,7 +1364,7 @@ flutter:
     );
 
     group('Flutter version', () {
-      for (final String dartDefine in FlutterCommand.flutterVersionDartDefines.take(1)) {
+      for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
@@ -1597,9 +1597,10 @@ Use the "flutter config" command to enable feature flags.''',
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           FileSystem: () {
             final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-            fileSystem.file('lib/main.dart').createSync(recursive: true);
-            fileSystem.file('pubspec.yaml').createSync();
-            fileSystem.file('.packages').createSync();
+            fileSystem
+              ..file('lib/main.dart').createSync(recursive: true)
+              ..file('pubspec.yaml').createSync()
+              ..file('.packages').createSync();
             fileSystem.file('config.json')
               ..createSync()
               ..writeAsStringSync('{"FLUTTER_ENABLED_FEATURE_FLAGS": "AlreadySet"}');
