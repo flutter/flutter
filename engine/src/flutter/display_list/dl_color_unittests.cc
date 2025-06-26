@@ -324,5 +324,13 @@ TEST(DisplayListColor, isNotClose) {
   EXPECT_FALSE(DlColor(0xffaabbcc).isClose(DlColor(0xffaabbcd)));
 }
 
+TEST(DisplayListColor, ClampAlpha) {
+  EXPECT_EQ(DlColor::ARGB(2.0, 0.0, 0.0, 0.0),
+            DlColor::ARGB(1.0, 0.0, 0.0, 0.0));
+
+  EXPECT_EQ(DlColor::ARGB(-1.0, 0.0, 0.0, 0.0),
+            DlColor::ARGB(0.0, 0.0, 0.0, 0.0));
+}
+
 }  // namespace testing
 }  // namespace flutter
