@@ -83,7 +83,10 @@ public class AndroidTouchProcessor {
   }
 
   static final int[] reservedPrimes = {2, 3, 5, 7, 11, 13};
-  static final int[] primes = {17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151};
+  static final int[] primes = {
+    17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109,
+    113, 127, 131, 137, 139, 149, 151
+  };
 
   // This value must match kPointerDataFieldCount in pointer_data.cc. (The
   // pointer_data.cc also lists other locations that must be kept consistent.)
@@ -270,7 +273,8 @@ public class AndroidTouchProcessor {
   }
 
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
-    return primes[event.getPointerId(pointerIndex)] * reservedPrimes[event.getToolType(pointerIndex)];
+    return primes[event.getPointerId(pointerIndex)]
+        * reservedPrimes[event.getToolType(pointerIndex)];
   }
 
   // TODO: consider creating a PointerPacket class instead of using a procedure that
