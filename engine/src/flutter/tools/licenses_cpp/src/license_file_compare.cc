@@ -6,11 +6,11 @@
 
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 #include "flutter/third_party/abseil-cpp/absl/log/check.h"
+#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
+#include "flutter/third_party/abseil-cpp/absl/log/initialize.h"
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
-#include "flutter/third_party/abseil-cpp/absl/log/initialize.h"
-#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
 
 namespace {
 re2::RE2 copyright_regex = R"regex((?i)copyright(.*\d\d\d\d.*))regex";
@@ -34,7 +34,6 @@ int main(int argc, const char* argv[]) {
 
   absl::InitializeLog();
   absl::SetStderrThreshold(absl::LogSeverity::kInfo);
-
 
   absl::StatusOr<MMapFile> first = MMapFile::Make(argv[1]);
   CHECK(first.ok());
