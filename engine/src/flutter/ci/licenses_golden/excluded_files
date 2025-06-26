@@ -1720,10 +1720,12 @@
 ../../../flutter/third_party/dart/third_party/pkg
 ../../../flutter/third_party/dart/third_party/requirejs
 ../../../flutter/third_party/dart/tools
+../../../flutter/third_party/dart/utils/.dart_tool
 ../../../flutter/third_party/dart/utils/OWNERS
 ../../../flutter/third_party/dart/utils/compiler/.gitignore
 ../../../flutter/third_party/dart/utils/dartanalyzer/.gitignore
 ../../../flutter/third_party/dart/utils/dynamic_module_runner/dynamic_interface.yaml
+../../../flutter/third_party/dart/utils/pubspec.yaml
 ../../../flutter/third_party/depot_tools
 ../../../flutter/third_party/expat/.git
 ../../../flutter/third_party/expat/.github

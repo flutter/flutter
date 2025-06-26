@@ -192,6 +192,7 @@ class TextFormField extends FormField<String> {
     bool scribbleEnabled = true,
     bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
+    List<Locale>? hintLocales,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -306,6 +307,7 @@ class TextFormField extends FormField<String> {
                scribbleEnabled: scribbleEnabled,
                stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
+               hintLocales: hintLocales,
              ),
            );
          },
