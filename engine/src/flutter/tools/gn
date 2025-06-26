@@ -1193,7 +1193,7 @@ def parse_args(args):
       '--no-dart-secure-socket',
       default=False,
       action='store_true',
-      help='Disable secure socket support in Dart.',
+      help='(dangerous) Disable secure socket support in Dart.',
   )
 
   # Impeller flags.
