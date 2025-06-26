@@ -577,3 +577,34 @@ void main() {
 Copyright Test
 )output");
 }
+
+TEST_F(LicenseCheckerTest, UnmatchedCommentsAsErrors) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
+  ASSERT_TRUE(
+      WriteFile(kUnknownHeader, *temp_path / "third_party/foobar/foo.cc").ok());
+  ASSERT_TRUE(
+      WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
+          .ok());
+  Repo repo;
+  repo.Add("third_party/foobar/foo.cc");
+  repo.Add("third_party/foobar/LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  LicenseChecker::Flags flags = {.treat_unmatched_comments_as_errors = true};
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data, flags);
+
+  EXPECT_EQ(errors.size(), 1u);
+  EXPECT_TRUE(
+      FindError(errors, absl::StatusCode::kNotFound,
+                "(?s).*foo.cc.*Selector didn't match.*Unknown Copyright"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
+}
