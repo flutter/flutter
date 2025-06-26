@@ -1462,7 +1462,9 @@ void main() {
 
   test('IOSSystemContextMenuItemDataLookUp debugFillProperties', () {
     const String title = 'my title';
-    const IOSSystemContextMenuItemDataLookUp item = IOSSystemContextMenuItemDataLookUp(title: title);
+    const IOSSystemContextMenuItemDataLookUp item = IOSSystemContextMenuItemDataLookUp(
+      title: title,
+    );
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -1471,7 +1473,9 @@ void main() {
 
   test('IOSSystemContextMenuItemDataSearchWeb debugFillProperties', () {
     const String title = 'my title';
-    const IOSSystemContextMenuItemDataSearchWeb item = IOSSystemContextMenuItemDataSearchWeb(title: title);
+    const IOSSystemContextMenuItemDataSearchWeb item = IOSSystemContextMenuItemDataSearchWeb(
+      title: title,
+    );
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');

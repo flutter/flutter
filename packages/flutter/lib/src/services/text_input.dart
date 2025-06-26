@@ -2822,13 +2822,15 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('isVisible', isVisible));
-    properties.add(FlagProperty(
-      'onSystemHide',
-      value: onSystemHide != null,
-      ifTrue: 'callback set',
-      ifFalse: 'callback null',
-      showName: true,
-    ));
+    properties.add(
+      FlagProperty(
+        'onSystemHide',
+        value: onSystemHide != null,
+        ifTrue: 'callback set',
+        ifFalse: 'callback null',
+        showName: true,
+      ),
+    );
     properties.add(DiagnosticsProperty<bool>('_hiddenBySystem', _hiddenBySystem));
     properties.add(DiagnosticsProperty<bool>('_isDisposed', _isDisposed));
   }
@@ -2977,7 +2979,8 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemLookUp], which performs a similar role but at the
 ///    widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData with Diagnosticable {
+final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataLookUp].
   const IOSSystemContextMenuItemDataLookUp({required this.title});
 
@@ -3009,7 +3012,8 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
 ///  * [IOSSystemContextMenuItemSearchWeb], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData with Diagnosticable {
+final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataSearchWeb].
   const IOSSystemContextMenuItemDataSearchWeb({required this.title});
 
@@ -3040,7 +3044,8 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemShare], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default
 ///    localized value.
-final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData with Diagnosticable {
+final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataShare].
   const IOSSystemContextMenuItemDataShare({required this.title});
 
