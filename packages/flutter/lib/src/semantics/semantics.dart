@@ -5446,7 +5446,16 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
+  @Deprecated(
+    'Use isFocused instead. '
+    'This feature was deprecated after v3.34.0-0.0.pre.',
+  )
   bool get isFocusable => _flags.isFocusable;
+
+  @Deprecated(
+    'Use isFocused instead. '
+    'This feature was deprecated after v3.34.0-0.0.pre.',
+  )
   set isFocusable(bool value) {
     _flags = _flags.copyWith(isFocusable: value);
     _hasBeenAnnotated = true;
