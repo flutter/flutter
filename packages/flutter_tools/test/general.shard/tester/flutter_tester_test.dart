@@ -118,7 +118,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), isFalse);
       expect(await device.uninstallApp(FakeApplicationPackage()), isTrue);
 
-      expect(device.isSupported(), isTrue);
+      expect(await device.isSupported(), isTrue);
     });
 
     testWithoutContext('does not accept profile, release, or jit-release builds', () async {

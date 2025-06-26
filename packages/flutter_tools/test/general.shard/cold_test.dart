@@ -195,7 +195,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
 class FakeDevice extends Fake implements Device {
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool supportsHotReload = false;

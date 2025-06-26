@@ -254,6 +254,31 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
                         "Expected copyright in.*main.cc"));
 }
 
+TEST_F(LicenseCheckerTest, SimpleIgnoreFile) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << R"regex(^main\.cc)regex" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kUnknownHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+}
+
 TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
@@ -262,7 +287,7 @@ TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
   ASSERT_TRUE(data.ok());
 
   std::stringstream exclude;
-  exclude << ".*/LICENSE" << std::endl;
+  exclude << "^LICENSE" << std::endl;
   absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
   ASSERT_TRUE(exclude_filter.ok());
   data->exclude_filter = std::move(exclude_filter.value());
@@ -403,7 +428,7 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
   Repo repo;
   repo.Add("main.cc");
@@ -422,6 +447,30 @@ v2.0
 )output");
 }
 
+TEST_F(LicenseCheckerTest, RootDirectoryIsStrict) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Expected copyright in.*main.cc"));
+}
+
 TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
@@ -431,7 +480,6 @@ TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
 
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
-  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
   ASSERT_EQ(std::system("echo \"Hello world!\" > third_party/foobar/foo.cc"),
             0);
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
@@ -439,7 +487,6 @@ TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
       WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
           .ok());
   Repo repo;
-  repo.Add("main.cc");
   repo.Add("LICENSE");
   repo.Add("third_party/foobar/foo.cc");
   repo.Add("third_party/foobar/LICENSE");
@@ -450,8 +497,7 @@ TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(engine
-foobar
+  EXPECT_EQ(ss.str(), R"output(foobar
 
 Test License
 v2.0

@@ -317,6 +317,15 @@ IMPELLER_DEFINE_HANDLE(ImpellerTexture);
 IMPELLER_DEFINE_HANDLE(ImpellerVulkanSwapchain);
 
 //------------------------------------------------------------------------------
+/// A fragment shader is a small program that is authored in GLSL and compiled
+/// using `impellerc` that runs on each pixel covered by a polygon and allows
+/// the user to configure how it is shaded.
+///
+/// @see https://docs.flutter.dev/ui/design/graphics/fragment-shaders
+///
+IMPELLER_DEFINE_HANDLE(ImpellerFragmentProgram);
+
+//------------------------------------------------------------------------------
 // Signatures
 //------------------------------------------------------------------------------
 
@@ -1393,6 +1402,51 @@ uint64_t ImpellerTextureGetOpenGLHandle(
     ImpellerTexture IMPELLER_NONNULL texture);
 
 //------------------------------------------------------------------------------
+// Fragment Program
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/// @brief      Create a new fragment program using data obtained by compiling a
+///             GLSL shader with `impellerc`.
+///
+/// @warning    The data provided must be compiled by `impellerc`. Providing raw
+///             GLSL strings will lead to a `nullptr` return. Impeller does not
+///             compile shaders at runtime.
+///
+/// @param[in]  data                    The data compiled by `impellerc`.
+/// @param      data_release_user_data  A baton passed back to the caller on the
+///                                     invocation of the mappings release
+///                                     callback. This call can happen on any
+///                                     thread.
+///
+/// @return     The fragment program if one can be created, nullptr otherwise.
+///
+IMPELLER_EXPORT
+IMPELLER_NODISCARD ImpellerFragmentProgram IMPELLER_NULLABLE
+ImpellerFragmentProgramNew(const ImpellerMapping* IMPELLER_NONNULL data,
+                           void* IMPELLER_NULLABLE data_release_user_data);
+
+//------------------------------------------------------------------------------
+/// @brief      Retain a strong reference to the object. The object can be NULL
+///             in which case this method is a no-op.
+///
+/// @param[in]  fragment_program  The fragment program.
+///
+IMPELLER_EXPORT
+void ImpellerFragmentProgramRetain(
+    ImpellerFragmentProgram IMPELLER_NULLABLE fragment_program);
+
+//------------------------------------------------------------------------------
+/// @brief      Release a previously retained reference to the object. The
+///             object can be NULL in which case this method is a no-op.
+///
+/// @param[in]  fragment_program  The fragment program.
+///
+IMPELLER_EXPORT
+void ImpellerFragmentProgramRelease(
+    ImpellerFragmentProgram IMPELLER_NULLABLE fragment_program);
+
+//------------------------------------------------------------------------------
 // Color Sources
 //------------------------------------------------------------------------------
 
@@ -1533,6 +1587,30 @@ ImpellerColorSourceCreateImageNew(
     ImpellerTileMode vertical_tile_mode,
     ImpellerTextureSampling sampling,
     const ImpellerMatrix* IMPELLER_NULLABLE transformation);
+
+//------------------------------------------------------------------------------
+/// @brief      Create a color source whose pixels are shaded by a fragment
+///             program.
+///
+/// @see        https://docs.flutter.dev/ui/design/graphics/fragment-shaders
+///
+/// @param[in]  context            The context.
+/// @param[in]  fragment_program   The fragment program.
+/// @param      samplers           The samplers.
+/// @param[in]  samplers_count     The samplers count.
+/// @param[in]  data               The data (copied).
+/// @param[in]  data_bytes_length  The data bytes length.
+///
+/// @return     The color source.
+///
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerColorSource IMPELLER_NULLABLE
+ImpellerColorSourceCreateFragmentProgramNew(
+    ImpellerContext IMPELLER_NONNULL context,
+    ImpellerFragmentProgram IMPELLER_NONNULL fragment_program,
+    IMPELLER_NONNULL ImpellerTexture* IMPELLER_NULLABLE samplers,
+    size_t samplers_count,
+    const uint8_t* IMPELLER_NULLABLE data,
+    size_t data_bytes_length);
 
 //------------------------------------------------------------------------------
 // Color Filters
@@ -1697,6 +1775,30 @@ IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerImageFilter IMPELLER_NULLABLE
 ImpellerImageFilterCreateMatrixNew(
     const ImpellerMatrix* IMPELLER_NONNULL matrix,
     ImpellerTextureSampling sampling);
+
+//------------------------------------------------------------------------------
+/// @brief      Create an image filter where each pixel is shaded by a fragment
+///             program.
+///
+/// @see        https://docs.flutter.dev/ui/design/graphics/fragment-shaders
+///
+/// @param[in]  context            The context.
+/// @param[in]  fragment_program   The fragment program.
+/// @param      samplers           The samplers.
+/// @param[in]  samplers_count     The samplers count.
+/// @param[in]  data               The data (copied).
+/// @param[in]  data_bytes_length  The data bytes length.
+///
+/// @return     The image filter.
+///
+IMPELLER_EXPORT IMPELLER_NODISCARD ImpellerImageFilter IMPELLER_NULLABLE
+ImpellerImageFilterCreateFragmentProgramNew(
+    ImpellerContext IMPELLER_NONNULL context,
+    ImpellerFragmentProgram IMPELLER_NONNULL fragment_program,
+    IMPELLER_NONNULL ImpellerTexture* IMPELLER_NULLABLE samplers,
+    size_t samplers_count,
+    const uint8_t* IMPELLER_NULLABLE data,
+    size_t data_bytes_length);
 
 //------------------------------------------------------------------------------
 /// @brief      Creates a composed filter that when applied is identical to
