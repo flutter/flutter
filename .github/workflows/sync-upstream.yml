@@ -1,0 +1,44 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时的第0分钟执行（即每小时一次）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史记录，确保标签能被同步
+
+      - name: Add upstream repository
+        run: |
+          git remote remove upstream || true  # 忽略错误如果不存在
+          git remote add upstream git@github.com:flutter/flutter.git    # git@github.com:原仓库所有者/原仓库名.git
+          git remote set-url origin git@github.com:bravestarrhu/flutter.git    # git@github.com:你的用户名/你的fork仓库名.git
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Sync tags
+        run: |
+          git fetch upstream --tags
+          git push origin --tags
+
+      - name: Sync branches
+        run: |
+          git fetch upstream
+          git checkout master
+          git merge upstream/master
+          git push origin master
+          git checkout beta
+          git merge upstream/beta
+          git push origin beta
+          git checkout stable
+          git merge upstream/stable
+          git push origin stable
