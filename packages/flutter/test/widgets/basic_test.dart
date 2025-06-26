@@ -753,7 +753,6 @@ void main() {
 
     testWidgets('Semantics can use form', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
-      final UniqueKey key2 = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(body: Semantics(key: key1, role: SemanticsRole.form, container: true)),
