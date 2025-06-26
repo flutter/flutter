@@ -1376,6 +1376,7 @@ class SearchBar extends StatefulWidget {
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.readOnly = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1534,6 +1535,9 @@ class SearchBar extends StatefulWidget {
   ///  * [BrowserContextMenu], which allows the browser's context menu on web to
   ///    be disabled and Flutter-rendered context menus to appear.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// {@macro flutter.widgets.editableText.readOnly}
+  final bool readOnly;
 
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
@@ -1706,6 +1710,7 @@ class _SearchBarState extends State<SearchBar> {
                         child: Semantics(
                           inputType: SemanticsInputType.search,
                           child: TextField(
+                            readOnly: widget.readOnly,
                             autofocus: widget.autoFocus,
                             onTap: widget.onTap,
                             onTapAlwaysCalled: true,

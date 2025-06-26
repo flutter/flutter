@@ -18294,7 +18294,6 @@ void main() {
     setState(() {
       readOnly = false;
     });
-    //await tester.pump();
     await tester.tap(find.text('Copy'));
     await tester.pump(waitDuration);
 
