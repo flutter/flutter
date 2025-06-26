@@ -201,8 +201,9 @@ TEST_F(LicenseCheckerTest, UnknownFileLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 1u);
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
-                        "Unknown license in.*main.cc"))
-      << errors[0];
+                        "Expected copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "")
+      << (errors.size() > 1 ? absl::StrCat("\n", errors[1]) : "");
 }
 
 TEST_F(LicenseCheckerTest, UnknownLicense) {
@@ -251,7 +252,8 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 1u);
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
-                        "Expected copyright in.*main.cc"));
+                        "Expected copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
 }
 
 TEST_F(LicenseCheckerTest, SimpleIgnoreFile) {
@@ -442,6 +444,10 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
 
   EXPECT_EQ(ss.str(), R"output(engine
 
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
 Test License
 v2.0
 )output");
@@ -468,7 +474,8 @@ TEST_F(LicenseCheckerTest, RootDirectoryIsStrict) {
   EXPECT_EQ(errors.size(), 1u);
 
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
-                        "Expected copyright in.*main.cc"));
+                        "Expected root copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
 }
 
 TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
@@ -527,6 +534,10 @@ TEST_F(LicenseCheckerTest, OnlyPrintMatch) {
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
   EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+--------------------------------------------------------------------------------
+engine
 
 Test License
 v2.0

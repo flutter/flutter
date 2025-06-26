@@ -321,21 +321,22 @@ std::vector<absl::Status> LicenseChecker::Run(
           });
       if (!did_find_copyright) {
         if (package.license_file.has_value()) {
-          fs::path relative_license_path =
-              fs::relative(*package.license_file, working_dir);
-          VLOG(1) << "OK: " << relative_path.lexically_normal()
-                  << " : dir license("
-                  << relative_license_path.lexically_normal() << ")";
+          if (package.is_root_package) {
+            errors.push_back(
+                absl::NotFoundError("Expected root copyright in " +
+                                    relative_path.lexically_normal().string()));
+          } else {
+            fs::path relative_license_path =
+                fs::relative(*package.license_file, working_dir);
+            VLOG(1) << "OK: " << relative_path.lexically_normal()
+                    << " : dir license("
+                    << relative_license_path.lexically_normal() << ")";
+          }
         } else {
           errors.push_back(
               absl::NotFoundError("Expected copyright in " +
                                   relative_path.lexically_normal().string()));
         }
-      }
-      if (!did_find_copyright && package.is_root_package) {
-        errors.push_back(
-            absl::NotFoundError("Expected root copyright in " +
-                                relative_path.lexically_normal().string()));
       }
     }
   }
