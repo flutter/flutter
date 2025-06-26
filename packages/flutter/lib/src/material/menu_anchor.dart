@@ -2957,8 +2957,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus _kMenuViewPadding
-    // pixels in each direction.
+    // The menu can be at most the size of the overlay minus the safe area and
+    // _kMenuViewPadding pixels in each direction.
     return BoxConstraints.loose(
       constraints.biggest,
     ).deflate(safeArea).deflate(const EdgeInsets.all(_kMenuViewPadding));
@@ -3363,6 +3363,9 @@ class _Submenu extends StatelessWidget {
             )
             : Rect.zero;
 
+    // Get the device padding using the Overlay's context because there
+    // may be a SafeArea between it and the portal, so the current context
+    // would have zero padding.
     final EdgeInsets safeArea = MediaQuery.paddingOf(Overlay.of(context).context);
 
     final Widget menuPanel = TapRegion(
