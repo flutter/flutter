@@ -107,6 +107,7 @@ class Radio<T> extends StatefulWidget {
     this.enabled,
     this.groupRegistry,
     this.backgroundColor,
+    this.side,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
 
@@ -155,6 +156,7 @@ class Radio<T> extends StatefulWidget {
     this.enabled,
     this.groupRegistry,
     this.backgroundColor,
+    this.side,
   }) : _radioType = _RadioType.adaptive;
 
   /// {@macro flutter.widget.RawRadio.value}
@@ -411,6 +413,17 @@ class Radio<T> extends StatefulWidget {
   /// If null, then it is transparent in all states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
+  /// The side of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to a border using the fill color.
+  final BorderSide? side;
+
   @override
   State<Radio<T>> createState() => _RadioState<T>();
 }
@@ -517,6 +530,7 @@ class _RadioState<T> extends State<Radio<T>> {
           visualDensity: widget.visualDensity,
           materialTapTargetSize: widget.materialTapTargetSize,
           backgroundColor: widget.backgroundColor,
+          side: widget.side,
         );
       },
     );
@@ -553,6 +567,7 @@ class _RadioPaint extends StatefulWidget {
     required this.visualDensity,
     required this.materialTapTargetSize,
     required this.backgroundColor,
+    required this.side,
   });
 
   final ToggleableStateMixin toggleableState;
@@ -565,6 +580,7 @@ class _RadioPaint extends StatefulWidget {
   final VisualDensity? visualDensity;
   final MaterialTapTargetSize? materialTapTargetSize;
   final WidgetStateProperty<Color?>? backgroundColor;
+  final BorderSide? side;
 
   @override
   State<StatefulWidget> createState() => _RadioPaintState();
@@ -589,6 +605,16 @@ class _RadioPaintState extends State<_RadioPaint> {
       }
       return null;
     });
+  }
+
+  BorderSide? _resolveSide(BorderSide? side, Set<MaterialState> states) {
+    if (side is WidgetStateProperty) {
+      return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
+    }
+    if (!states.contains(WidgetState.selected)) {
+      return side;
+    }
+    return null;
   }
 
   @override
@@ -678,6 +704,21 @@ class _RadioPaintState extends State<_RadioPaint> {
       ),
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
+    // TODO(ValentinVignal): Add side to RadioThemeData.
+    final BorderSide activeSide =
+        _resolveSide(widget.side, activeStates) ??
+        BorderSide(
+          color: effectiveActiveColor,
+          width: 2.0,
+          strokeAlign: BorderSide.strokeAlignCenter,
+        );
+    final BorderSide inactiveSide =
+        _resolveSide(widget.side, inactiveStates) ??
+        BorderSide(
+          color: effectiveInactiveColor,
+          width: 2.0,
+          strokeAlign: BorderSide.strokeAlignCenter,
+        );
 
     return CustomPaint(
       size: size,
@@ -698,7 +739,9 @@ class _RadioPaintState extends State<_RadioPaint> {
             ..activeColor = effectiveActiveColor
             ..inactiveColor = effectiveInactiveColor
             ..activeBackgroundColor = activeBackgroundColor
-            ..inactiveBackgroundColor = inactiveBackgroundColor,
+            ..inactiveBackgroundColor = inactiveBackgroundColor
+            ..activeSide = activeSide
+            ..inactiveSide = inactiveSide,
     );
   }
 }
@@ -724,11 +767,36 @@ class _RadioPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  BorderSide get inactiveSide => _inactiveSide!;
+  BorderSide? _inactiveSide;
+  set inactiveSide(BorderSide? value) {
+    if (_inactiveSide == value) {
+      return;
+    }
+    _inactiveSide = value;
+    notifyListeners();
+  }
+
+  BorderSide get activeSide => _activeSide!;
+  BorderSide? _activeSide;
+  set activeSide(BorderSide? value) {
+    if (_activeSide == value) {
+      return;
+    }
+    _activeSide = value;
+    notifyListeners();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
-    final Offset center = (Offset.zero & size).center;
+    final Rect rect = Offset.zero & size;
+    final Offset center = rect.center;
+    final Rect effectiveRect = (center & const Size.square(_kOuterRadius * 2)).translate(
+      -_kOuterRadius,
+      -_kOuterRadius,
+    );
 
     // Background
     final Paint backgroundPaint =
@@ -738,12 +806,8 @@ class _RadioPainter extends ToggleablePainter {
     canvas.drawCircle(center, _kOuterRadius, backgroundPaint);
 
     // Outer circle
-    final Paint outerCirclePaint =
-        Paint()
-          ..color = Color.lerp(inactiveColor, activeColor, position.value)!
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
-    canvas.drawCircle(center, _kOuterRadius, outerCirclePaint);
+    final BorderSide side = BorderSide.lerp(inactiveSide, activeSide, position.value);
+    CircleBorder(side: side).paint(canvas, effectiveRect);
 
     // Inner circle
     if (!position.isDismissed) {
