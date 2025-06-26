@@ -330,6 +330,8 @@ class FilledButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+      // TODO(camsim99): (ButtonStyleButton) I might need to change the relevant defaultStyleOf methods or
+      // add defaults here since disabledMouseCursor, enabledMouseCursor might be null.
       mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
         WidgetState.disabled: disabledMouseCursor,
         WidgetState.any: enabledMouseCursor,

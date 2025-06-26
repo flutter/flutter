@@ -433,8 +433,9 @@ class ElevatedButton extends ButtonStyleButton {
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-          // TODO(camsim99): Try changing below:
-          enabledMouseCursor: SystemMouseCursors.click,
+          enabledMouseCursor:
+              SystemMouseCursors
+                  .click, // TODO(camsim99): (ButtonStyleButton) I think I should try playing with this default
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
           tapTargetSize: theme.materialTapTargetSize,

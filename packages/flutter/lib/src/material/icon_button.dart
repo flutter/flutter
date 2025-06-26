@@ -692,6 +692,8 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+      // TODO(camsim99): (ButtonStyleButton) might need to mess with logic here as this is how the cursors
+      // are determined for material 3.
       mouseCursor:
           disabledMouseCursor == null && enabledMouseCursor == null
               ? null
@@ -731,6 +733,8 @@ class IconButton extends StatelessWidget {
         maximumSize: maxSize,
         iconSize: iconSize,
         alignment: alignment,
+        // TODO(camsim99): (ButtonStyleButton) See comment above; I think I may need to mess with styleFrom
+        // to make sure that if mouseCursor is null, the default is resolved as expected when using Material 3.
         enabledMouseCursor: mouseCursor,
         disabledMouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
@@ -804,6 +808,7 @@ class IconButton extends StatelessWidget {
       onTap: onPressed,
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
+      // TODO(camsim99): (ButtonStyleButtton) need to check if this needs changing when Material 3 is not used.
       mouseCursor:
           mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
       enableFeedback: effectiveEnableFeedback,

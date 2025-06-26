@@ -259,6 +259,7 @@ class OutlinedButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+      // TODO(camsim99): (ButtonStyleButton) Need to make sure that default values get resolved as expected here.
       mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
         WidgetState.disabled: disabledMouseCursor,
         WidgetState.any: enabledMouseCursor,
@@ -390,6 +391,7 @@ class OutlinedButton extends ButtonStyleButton {
           maximumSize: Size.infinite,
           side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+          // TODO(camsim99): (ButtonStyleButton) need to check if this gets resolved as expected with styleFrom
           enabledMouseCursor: SystemMouseCursors.click,
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
@@ -621,6 +623,8 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
+  // TODO(camsim99): (ButtonStyleButton) need to make sure when Material3 is used that this resolves
+  // as expected.
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
