@@ -275,11 +275,14 @@ public class AndroidTouchProcessor {
         event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
   }
 
-
-  // Some screen mirroring tools will occasionally report
+  // Some screen mirroring tools will occasionally report the same ID as having a different tool
+  // type, which breaks Flutter's internal handling of pointer events. Instead give each
+  // (pointerId, toolType) pair a unique ID. Technically this could break when handling a pointer
+  // of id 2^29, but that seems unlikely.
   // See https://github.com/flutter/flutter/issues/160144.
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
-    return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS) | (event.getToolType(pointerIndex) & TOOL_TYPE_MASK);
+    return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS)
+        | (event.getToolType(pointerIndex) & TOOL_TYPE_MASK);
   }
 
   // TODO: consider creating a PointerPacket class instead of using a procedure that
