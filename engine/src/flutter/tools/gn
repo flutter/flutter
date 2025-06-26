@@ -604,6 +604,8 @@ def to_gn_args(args):
     if sys.platform.startswith(('cygwin', 'win')):
       gn_args['dart_use_fallback_root_certificates'] = True
 
+  gn_args['dart_disable_secure_socket'] = args.no_dart_secure_socket
+
   if args.target_sysroot:
     gn_args['target_sysroot'] = args.target_sysroot
     gn_args['custom_sysroot'] = args.target_sysroot
@@ -1185,6 +1187,13 @@ def parse_args(args):
   )
   parser.add_argument(
       '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
+  )
+
+  parser.add_argument(
+      '--no-dart-secure-socket',
+      default=False,
+      action='store_true',
+      help='(dangerous) Disable secure socket support in Dart.',
   )
 
   # Impeller flags.
