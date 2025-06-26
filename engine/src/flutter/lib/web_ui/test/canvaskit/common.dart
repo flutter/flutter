@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/rendering.dart';
@@ -20,11 +21,14 @@ export '../common/rendering.dart' show renderScene;
 const MethodCodec codec = StandardMethodCodec();
 
 /// Common test setup for all CanvasKit unit-tests.
-void setUpCanvasKitTest({bool withImplicitView = false}) {
+void setUpCanvasKitTest({
+  bool withImplicitView = false,
+  ui_web.TestEnvironment testEnvironment = const ui_web.TestEnvironment.production(),
+}) {
   setUpUnitTests(
     withImplicitView: withImplicitView,
-    emulateTesterEnvironment: false,
     setUpTestViewDimensions: false,
+    testEnvironment: testEnvironment,
   );
 
   setUp(
