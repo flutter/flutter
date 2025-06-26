@@ -19,11 +19,11 @@ inline SkMatrix createMatrix(const SkScalar* f) {
                            f[8]);
 }
 
-inline flutter::DlRect createRect(const float* f) {
+inline flutter::DlRect createDlRect(const float* f) {
   return flutter::DlRect::MakeLTRB(f[0], f[1], f[2], f[3]);
 }
 
-inline flutter::DlRoundingRadii createRadii(const float* f) {
+inline flutter::DlRoundingRadii createDlRadii(const float* f) {
   // Flutter has radii in TL,TR,BR,BL (clockwise) order,
   // but Impeller uses TL,TR,BL,BR (zig-zag) order
   impeller::RoundingRadii radii = {
@@ -35,8 +35,16 @@ inline flutter::DlRoundingRadii createRadii(const float* f) {
   return radii;
 }
 
-inline flutter::DlRoundRect createRRect(const float* f) {
-  return flutter::DlRoundRect::MakeRectRadii(createRect(f), createRadii(f + 4));
+inline flutter::DlRoundRect createDlRRect(const float* f) {
+  return flutter::DlRoundRect::MakeRectRadii(createDlRect(f), createDlRadii(f + 4));
+}
+
+inline SkRRect createSkRRect(const SkScalar* f) {
+  const SkRect* rect = reinterpret_cast<const SkRect*>(f);
+  const SkVector* radiiValues = reinterpret_cast<const SkVector*>(f + 4);
+  SkRRect rr;
+  rr.setRectRadii(*rect, radiiValues);
+  return rr;
 }
 
 // This needs to be kept in sync with the "FilterQuality" enum in dart:ui
