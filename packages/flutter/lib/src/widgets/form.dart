@@ -294,8 +294,12 @@ class FormState extends State<Form> {
         child: _FormScope(formState: this, generation: _generation, child: widget.child),
       );
     }
-
-    return Semantics(container: true, role: SemanticsRole.form, child: form);
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      role: SemanticsRole.form,
+      child: form,
+    );
   }
 
   /// Saves every [FormField] that is a descendant of this [Form].
