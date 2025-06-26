@@ -381,6 +381,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           ),
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
+          webEnableHotReload: true,
         ),
         webEnableExposeUrl: false,
         webRunHeadless: boolArg(kHeadless),
