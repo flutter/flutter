@@ -281,7 +281,7 @@ void sendSemanticsUpdate() {
   transform[15] = 0;
   builder.updateNode(
     id: 0,
-    flags: 0,
+    flags: SemanticsFlags(),
     actions: 0,
     maxValueLength: 0,
     currentValueLength: 0,
@@ -294,8 +294,6 @@ void sendSemanticsUpdate() {
     scrollExtentMax: 0,
     scrollExtentMin: 0,
     rect: const Rect.fromLTRB(0, 0, 10, 10),
-    elevation: 0,
-    thickness: 0,
     identifier: identifier,
     label: label,
     labelAttributes: labelAttributes,
@@ -314,6 +312,7 @@ void sendSemanticsUpdate() {
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
     controlsNodes: null,
+    inputType: SemanticsInputType.none,
   );
   _semanticsUpdate(builder.build());
 }
