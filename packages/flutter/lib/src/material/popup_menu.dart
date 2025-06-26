@@ -435,7 +435,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: widget.height),
         child: Padding(
-          key: const Key('menu item padding'),
           padding: padding,
           child: Align(alignment: AlignmentDirectional.centerStart, child: buildChild()),
         ),

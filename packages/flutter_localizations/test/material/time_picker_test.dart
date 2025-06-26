@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+final Finder dialCustomPaintFinder = find.descendant(
+  of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+  matching: find.byType(CustomPaint),
+);
+
 void main() {
   testWidgets('Material2 - can localize the header in all known formats - portrait', (
     WidgetTester tester,
@@ -567,7 +572,7 @@ void main() {
           locale: locale,
           useMaterial3: false,
         );
-        final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
+        final Size size = tester.getSize(dialCustomPaintFinder);
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
@@ -598,7 +603,7 @@ void main() {
           locale: locale,
           useMaterial3: true,
         );
-        final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
+        final Size size = tester.getSize(dialCustomPaintFinder);
         final double dy = (size.height / 2.0 / 10) * factor;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
@@ -740,9 +745,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -770,9 +773,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -800,9 +801,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -830,9 +829,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -968,7 +965,7 @@ Future<Offset> startPicker(
   );
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
+  return tester.getCenter(dialCustomPaintFinder);
 }
 
 Future<void> finishPicker(WidgetTester tester) async {

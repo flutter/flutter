@@ -1615,7 +1615,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       onTapUp: _handleTapUp,
-      child: CustomPaint(key: const ValueKey<String>('time-picker-dial'), painter: painter),
+      child: CustomPaint(painter: painter),
     );
   }
 }
