@@ -1761,34 +1761,6 @@ void main() {
           Column(
             children: <Widget>[
               Container(),
-              const Text('foo', textDirection: TextDirection.ltr),
-              Container(),
-              const Text('foo', textDirection: TextDirection.ltr),
-              Container(),
-            ],
-          ),
-        );
-
-        expect(
-          find.bySubtype<Widget>(),
-          findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
-            find.byType(Container),
-            find.text('foo'),
-            find.byType(Container),
-            find.text('foo'),
-            find.byType(Container),
-          ]),
-        );
-      },
-    );
-
-    testWidgets(
-      'finds matching candidates for all of the FinderBases in the finderBasesList at locations that is compatible with the ascending order of the finderBasesList when the finderBasesList contains more than one FinderBase that finds the same things',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          Column(
-            children: <Widget>[
-              Container(),
               const SizedBox(),
               Container(),
               const Text('foo', textDirection: TextDirection.ltr),
