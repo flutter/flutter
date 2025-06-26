@@ -82,11 +82,14 @@ public class AndroidTouchProcessor {
     int UNKNOWN = 4;
   }
 
-  static final int[] reservedPrimes = {2, 3, 5, 7, 11, 13};
-  static final int[] primes = {
-    17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109,
-    113, 127, 131, 137, 139, 149, 151
-  };
+  // We need 3 bits to represent 6 possible tool types.
+  // See uniquePointerIdByType().
+  private static final int TOOL_TYPE_BITS = 3;
+
+  // A mask to ensure the toolType doesn't exceed its allocated bits.
+  // For TOOL_TYPE_BITS = 3, this is (1 << 3) - 1 = 8 - 1 = 7 (binary 111).
+  // See uniquePointerIdByType().
+  private static final int TOOL_TYPE_MASK = (1 << TOOL_TYPE_BITS) - 1;
 
   // This value must match kPointerDataFieldCount in pointer_data.cc. (The
   // pointer_data.cc also lists other locations that must be kept consistent.)
@@ -272,9 +275,11 @@ public class AndroidTouchProcessor {
         event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
   }
 
+
+  // Some screen mirroring tools will occasionally report
+  // See https://github.com/flutter/flutter/issues/160144.
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
-    return primes[event.getPointerId(pointerIndex)]
-        * reservedPrimes[event.getToolType(pointerIndex)];
+    return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS) | (event.getToolType(pointerIndex) & TOOL_TYPE_MASK);
   }
 
   // TODO: consider creating a PointerPacket class instead of using a procedure that
