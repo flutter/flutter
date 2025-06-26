@@ -398,7 +398,7 @@ void main() {
     });
 
     testWidgets(
-      'does not trigger haptics and sound when scrolling by tapping on the item',
+      'does not trigger haptics or sounds when scrolling by tapping on the item',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
@@ -444,7 +444,7 @@ void main() {
     );
 
     testWidgets(
-      'do not trigger haptic and sound effects on non-iOS devices',
+      'do not trigger haptic or sounds on non-iOS devices',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];

@@ -24,8 +24,12 @@ enum SystemSoundType {
   /// ignored on the web as well.
   alert,
 
-  // If you add new values here, you also need to update the `SoundType` Java
-  // enum in `PlatformChannel.java`.
+  // If you add new values here, you also need to update:
+  // - the `SoundType` Java enum in `PlatformChannel.java` (Android);
+  // - `FlutterPlatformPlugin.mm` (iOS);
+  // - `FlutterPlatformPlugin.mm` (macOS);
+  // - `fl_platform_handler.cc` (Linux);
+  // - `platform_handler.cc` (Windows);
 }
 
 /// Provides access to the library of short system specific sounds for common
