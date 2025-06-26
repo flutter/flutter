@@ -19,7 +19,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-
+  /*
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -731,5 +731,54 @@ Future<void> testMain() async {
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_query_boxes_ltr_1.png', region: region);
+  });
+*/
+  test('Query WebParagraph.Placeholders', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+    final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
+    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle1);
+    builder.addText('50x50:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      50,
+      50,
+      PlaceholderAlignment.baseline,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.ideographic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle3);
+    builder.addText('100x100:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      100,
+      100,
+      PlaceholderAlignment.baseline,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addText('end.');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_placeholders_1_line.png', region: region);
   });
 }

@@ -156,13 +156,50 @@ class TextLayout {
         continue;
       }
 
+      if (styledBlock.isPlaceholder) {
+        assert(styledBlock.textRange.width == 1);
+
+        styledTextBlocks.add(
+          StyledTextBlock.fromPlaceholder(
+            styledBlock.textRange.start,
+            styledBlock.textRange.end,
+            styledBlock.textStyle,
+            styledBlock.placeholder!,
+          ),
+        );
+
+        final ui.Rect advance = ui.Rect.fromLTWH(
+          blockStart,
+          0,
+          styledBlock.placeholder!.width,
+          styledBlock.placeholder!.height,
+        );
+        textClusters.add(
+          ExtendedTextCluster(
+            null,
+            styledBlock.textStyle,
+            0.0,
+            0.0,
+            styledBlock.textRange,
+            advance, // For placeholders bounds == advance
+            advance,
+            blockStart,
+            styledBlock.isPlaceholder,
+          ),
+        );
+        WebParagraphDebug.log(
+          'blockStart(placeholder): ${blockStart + advance.width} += $blockStart + ${advance.width}',
+        );
+        blockStart += advance.width;
+        continue;
+      }
+
       // Setup all the font affecting attributes
       layoutContext.font = styledBlock.textStyle.buildCssFontString();
       layoutContext.letterSpacing = styledBlock.textStyle.buildLetterSpacingString();
       layoutContext.wordSpacing = styledBlock.textStyle.buildWordSpacingString();
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
-
       styledTextBlocks.add(
         StyledTextBlock(
           styledBlock.textRange.start,
@@ -171,18 +208,9 @@ class TextLayout {
           blockTextMetrics,
         ),
       );
-
       printTextMetrics(text, blockTextMetrics);
 
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
-        final ui.Rect advance = getAdvance(
-          blockTextMetrics,
-          TextRange(start: cluster.begin, end: cluster.end),
-        );
-        final ui.Rect bounds = getBounds(
-          blockTextMetrics,
-          TextRange(start: cluster.begin, end: cluster.end),
-        );
         textClusters.add(
           ExtendedTextCluster(
             cluster,
@@ -193,9 +221,10 @@ class TextLayout {
               start: cluster.begin + styledBlock.textRange.start,
               end: cluster.end + styledBlock.textRange.start,
             ),
-            bounds,
-            advance,
+            getBounds(blockTextMetrics, TextRange(start: cluster.begin, end: cluster.end)),
+            getAdvance(blockTextMetrics, TextRange(start: cluster.begin, end: cluster.end)),
             blockStart,
+            styledBlock.isPlaceholder,
           ),
         );
       }
@@ -204,7 +233,7 @@ class TextLayout {
         TextRange(start: 0, end: text.length),
       );
       WebParagraphDebug.log(
-        'blockStart: ${blockStart + blockAdvance.width} += $blockStart + ${blockAdvance.width})',
+        'blockStart: ${blockStart + blockAdvance.width} += $blockStart + ${blockAdvance.width}',
       );
       blockStart += blockAdvance.width;
     }
@@ -447,7 +476,7 @@ class TextLayout {
 
       WebParagraphDebug.log(
         'Run: "$runText" '
-        '${bidiRun.clusterRange} & $lineClusterRange = $runClusterRange textRange:$runTextRange',
+        '${bidiRun.clusterRange} & $lineClusterRange = $runClusterRange textRange:$runTextRange ${styledTextBlocks.length}',
       );
 
       for (final styledTextBlock in styledTextBlocks) {
@@ -455,54 +484,70 @@ class TextLayout {
           styledTextBlock.textRange,
           runTextRange,
         );
-        if (styleTextRange.width <= 0) {
-          continue;
-        }
+
         WebParagraphDebug.log(
           'Style: ${styledTextBlock.textRange} & $runTextRange = $styleTextRange ',
         );
+        if (styleTextRange.width <= 0) {
+          continue;
+        }
 
         final ClusterRange styleClusterRange = convertTextToClusterRange(styleTextRange);
         final String styleText = getTextFromMonodirectionalClusterRange(styleClusterRange);
-        final ui.Rect advance = getAdvance(
-          styledTextBlock.textMetrics,
-          styleTextRange.translate(-styledTextBlock.textRange.start),
-        );
-        final ExtendedTextCluster firstVisualClusterInBlock =
-            bidiRun.bidiLevel.isEven
-                ? textClusters[styleClusterRange.start]
-                : textClusters[styleClusterRange.end - 1];
-
-        line.visualBlocks.add(
-          LineBlock(
-            styledTextBlock.textMetrics,
-            bidiRun.bidiLevel,
-            styledTextBlock.textStyle,
-            styleClusterRange,
-            styleTextRange,
-            advance,
-            shiftInsideLine - firstVisualClusterInBlock.advance.left,
-            styledTextBlock.textRange.start,
-          ),
-        );
-
-        WebParagraphDebug.log(
-          'Multiply: ${line.visualBlocks.last.multiplier} ${line.visualBlocks.last.rawFontBoundingBoxAscent} ${line.visualBlocks.last.multipliedFontBoundingBoxAscent} ',
-        );
-
-        // Line always counts multipled metrics (no need for the others)
-        line.fontBoundingBoxAscent = math.max(
-          line.fontBoundingBoxAscent,
-          line.visualBlocks.last.multipliedFontBoundingBoxAscent,
-        );
-        line.fontBoundingBoxDescent = math.max(
-          line.fontBoundingBoxDescent,
-          line.visualBlocks.last.multipliedFontBoundingBoxDescent,
-        );
+        ui.Rect advance;
+        double shiftFromTextBlock = 0.0;
+        if (styledTextBlock.isPlaceholder) {
+          assert(styleClusterRange.width == 1);
+          final theOnlyCluster = textClusters[styleClusterRange.start];
+          advance = theOnlyCluster.advance;
+          line.visualBlocks.add(
+            LineBlock.fromPlaceholder(
+              styledTextBlock.placeholder!,
+              bidiRun.bidiLevel,
+              styledTextBlock.textStyle,
+              styleClusterRange,
+              styleTextRange,
+              advance,
+              shiftInsideLine - advance.left,
+              styledTextBlock.textRange.start,
+            ),
+          );
+        } else {
+          advance = getAdvance(
+            styledTextBlock.textMetrics!,
+            styleTextRange.translate(-styledTextBlock.textRange.start),
+          );
+          final ExtendedTextCluster firstVisualClusterInBlock =
+              bidiRun.bidiLevel.isEven
+                  ? textClusters[styleClusterRange.start]
+                  : textClusters[styleClusterRange.end - 1];
+          shiftFromTextBlock = firstVisualClusterInBlock.advance.left;
+          line.visualBlocks.add(
+            LineBlock(
+              styledTextBlock.textMetrics,
+              bidiRun.bidiLevel,
+              styledTextBlock.textStyle,
+              styleClusterRange,
+              styleTextRange,
+              advance,
+              shiftInsideLine - shiftFromTextBlock,
+              styledTextBlock.textRange.start,
+            ),
+          );
+          // Line always counts multipled metrics (no need for the others)
+          line.fontBoundingBoxAscent = math.max(
+            line.fontBoundingBoxAscent,
+            line.visualBlocks.last.multipliedFontBoundingBoxAscent,
+          );
+          line.fontBoundingBoxDescent = math.max(
+            line.fontBoundingBoxDescent,
+            line.visualBlocks.last.multipliedFontBoundingBoxDescent,
+          );
+        }
 
         WebParagraphDebug.log(
           'Style: "$styleText" clusterRange: $styleClusterRange '
-          'width:${advance.width} shift:${line.visualBlocks.last.clusterShiftInLine}=$shiftInsideLine-${firstVisualClusterInBlock.advance.left} ',
+          'width:${advance.width} shift:${line.visualBlocks.last.clusterShiftInLine}=$shiftInsideLine-$shiftFromTextBlock ',
         );
         shiftInsideLine += advance.width;
       }
@@ -808,6 +853,7 @@ class ExtendedTextCluster {
     this.bounds,
     this.advance,
     this.shift,
+    this.placeholder,
   );
 
   ExtendedTextCluster.fromLast(ExtendedTextCluster lastCluster)
@@ -828,7 +874,8 @@ class ExtendedTextCluster {
         0,
         lastCluster.advance.height,
       ),
-      shift = lastCluster.shift;
+      shift = lastCluster.shift,
+      placeholder = false;
 
   ExtendedTextCluster.empty()
     : shift = 0.0,
@@ -836,7 +883,8 @@ class ExtendedTextCluster {
       fontBoundingBoxDescent = 0.0,
       bounds = ui.Rect.zero,
       advance = ui.Rect.zero,
-      textRange = TextRange(start: 0, end: 0);
+      textRange = TextRange(start: 0, end: 0),
+      placeholder = false;
 
   double absolutePositionX() {
     return /*style block shift*/ shift + /*cluster advance inside the style block*/ advance.left;
@@ -850,6 +898,7 @@ class ExtendedTextCluster {
   ui.Rect bounds;
   ui.Rect advance;
   double shift;
+  bool placeholder;
 }
 
 class BidiRun {
@@ -861,8 +910,27 @@ class BidiRun {
 
 class StyledTextBlock extends StyledTextRange {
   StyledTextBlock(super.start, super.end, super.textStyle, this.textMetrics);
+  static StyledTextBlock fromTextMetrics(
+    int start,
+    int end,
+    WebTextStyle textStyle,
+    DomTextMetrics? textMetrics,
+  ) {
+    return StyledTextBlock(start, end, textStyle, textMetrics);
+  }
 
-  final DomTextMetrics textMetrics;
+  static StyledTextBlock fromPlaceholder(
+    int start,
+    int end,
+    WebTextStyle textStyle,
+    WebParagraphPlaceholder placeholder,
+  ) {
+    final result = StyledTextBlock(start, end, textStyle, null);
+    result.markAsPlaceholder(placeholder);
+    return result;
+  }
+
+  final DomTextMetrics? textMetrics;
 }
 
 // This is (possibly) a piece of a bidi run that belongs to the line
@@ -888,6 +956,30 @@ class LineBlock {
     this.textMetricsZero,
   );
 
+  static LineBlock fromPlaceholder(
+    WebParagraphPlaceholder placeholder,
+    int bidiLevel,
+    WebTextStyle textStyle,
+    ClusterRange clusterRange,
+    TextRange textRange,
+    ui.Rect advance,
+    double clusterShiftInLine,
+    int textMetricsZero,
+  ) {
+    final result = LineBlock(
+      null,
+      bidiLevel,
+      textStyle,
+      clusterRange,
+      textRange,
+      advance,
+      clusterShiftInLine,
+      textMetricsZero,
+    );
+    result.placeholder = placeholder;
+    return result;
+  }
+
   double get multiplier => textStyle.height == null ? 1.0 : textStyle.height!;
   double get rawHeight => textMetrics!.fontBoundingBoxAscent + textMetrics!.fontBoundingBoxDescent;
   double get rawFontBoundingBoxAscent => textMetrics!.fontBoundingBoxAscent;
@@ -898,6 +990,7 @@ class LineBlock {
 
   // TODO(jlavrova): we probably do not need that reference
   final DomTextMetrics? textMetrics; // This is just a reference to a parent styled text block
+  WebParagraphPlaceholder? placeholder;
   final int bidiLevel;
   final WebTextStyle textStyle;
   final ClusterRange clusterRange;

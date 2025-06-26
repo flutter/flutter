@@ -423,11 +423,18 @@ class StyledTextRange {
 
   @override
   String toString() {
-    return 'StyledTextRange[${textRange.start}:${textRange.end})';
+    return 'StyledTextRange[${textRange.start}:${textRange.end}) ${placeholder != null ? 'placeholder' : 'text'}';
   }
+
+  void markAsPlaceholder(WebParagraphPlaceholder placeholder) {
+    this.placeholder = placeholder;
+  }
+
+  bool get isPlaceholder => placeholder != null;
 
   TextRange textRange = TextRange(start: 0, end: 0);
   WebTextStyle textStyle;
+  WebParagraphPlaceholder? placeholder;
 }
 
 class WebStrutStyle implements ui.StrutStyle {
@@ -537,7 +544,7 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.downstream => position.offset,
     };
     if (codepointPosition < 0) {
-      return ui.TextRange(start: 0, end: 0);
+      return const ui.TextRange(start: 0, end: 0);
     }
     if (codepointPosition >= text!.length) {
       return ui.TextRange(start: text!.length, end: text!.length);
@@ -756,7 +763,23 @@ class WebLineMetrics implements ui.LineMetrics {
   }
 }
 
-class WebParagraphPlaceholder {}
+final String placeholderChar = String.fromCharCode(0xFFFC);
+
+class WebParagraphPlaceholder {
+  WebParagraphPlaceholder({
+    required this.width,
+    required this.height,
+    required this.alignment,
+    required this.baseline,
+    required this.offset,
+  });
+
+  final double width;
+  final double height;
+  final ui.PlaceholderAlignment alignment;
+  final ui.TextBaseline baseline;
+  final double offset;
+}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
@@ -778,9 +801,30 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     double scale = 1.0,
     double? baselineOffset,
     ui.TextBaseline? baseline,
-  }) {}
+  }) {
+    assert(
+      !(alignment == ui.PlaceholderAlignment.aboveBaseline ||
+              alignment == ui.PlaceholderAlignment.belowBaseline ||
+              alignment == ui.PlaceholderAlignment.baseline) ||
+          baseline != null,
+    );
 
-  void _addPlaceholder(WebParagraphPlaceholder placeholderStyle) {}
+    pushStyle(textStylesStack.last);
+    addText(placeholderChar);
+    textStylesList.last.markAsPlaceholder(
+      WebParagraphPlaceholder(
+        width: width * scale,
+        height: height * scale,
+        alignment: alignment,
+        baseline: baseline ?? ui.TextBaseline.alphabetic,
+        offset: (baselineOffset ?? height) * scale,
+      ),
+    );
+    pop();
+
+    _placeholderCount++;
+    _placeholderScales.add(scale);
+  }
 
   @override
   void addText(String text) {
@@ -809,10 +853,12 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   }
 
   @override
-  int get placeholderCount => 0;
+  int get placeholderCount => _placeholderCount;
+  int _placeholderCount = 0;
 
   @override
-  List<double> get placeholderScales => <double>[];
+  List<double> get placeholderScales => _placeholderScales;
+  final List<double> _placeholderScales = <double>[];
 
   @override
   void pop() {

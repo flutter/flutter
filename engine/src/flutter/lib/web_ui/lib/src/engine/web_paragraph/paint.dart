@@ -49,6 +49,11 @@ class TextPaint {
       if (!block.textStyle.hasElement(styleElement)) {
         continue;
       }
+      // Placeholders do not need painting, just reserving the space
+      if (block.clusterRange.width == 1 &&
+          layout.textClusters[block.clusterRange.start].placeholder) {
+        continue;
+      }
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
@@ -83,6 +88,11 @@ class TextPaint {
     // and then in visual order inside blocks
     for (final LineBlock block in line.visualBlocks) {
       if (!block.textStyle.hasElement(styleElement)) {
+        continue;
+      }
+      // Placeholders do not need painting, just reserving the space
+      if (block.clusterRange.width == 1 &&
+          layout.textClusters[block.clusterRange.start].placeholder) {
         continue;
       }
       WebParagraphDebug.log(
