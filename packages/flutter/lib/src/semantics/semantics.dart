@@ -5447,7 +5447,7 @@ class SemanticsConfiguration {
 
   /// Whether the owning [RenderObject] can hold the input focus.
   @Deprecated(
-    'Use isFocused instead. '
+    'Check if isFocused is null instead. '
     'This feature was deprecated after v3.34.0-0.0.pre.',
   )
   bool get isFocusable => _flags.isFocusable;
