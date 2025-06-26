@@ -1547,6 +1547,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// to be confused with accessibility focus. Accessibility focus is the
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
+  @Deprecated(
+    'Use focused instead. '
+    'Setting focused automatically set focusable to true. '
+    'This feature was deprecated after v3.34.0-0.0.pre.',
+  )
   final bool? focusable;
 
   /// If non-null, whether the node currently holds input focus.
@@ -5466,6 +5471,9 @@ class SemanticsConfiguration {
   set isFocused(bool? value) {
     if (value != null) {
       _flags = _flags.copyWith(isFocusable: true, isFocused: value);
+    }
+    else {
+      _flags = _flags.copyWith(isFocusable: false, isFocused: false);
     }
     _hasBeenAnnotated = true;
   }
