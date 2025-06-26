@@ -70,25 +70,18 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
       assert(!renderObject.debugNeedsPaint);
       final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
-      print('GETTING IMAGE FROM LAYER AT PAINTBOUNDS: ${renderObject.paintBounds}');
       final ui.Image image = await layer.toImage(renderObject.paintBounds);
-      print('GOT IMAGE FROM LAYER AT PAINTBOUNDS: ${renderObject.paintBounds}');
       try {
         final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-        print('ENCODED IMAGE INTO BYTES OF LENGTH: ${bytes?.lengthInBytes}');
         if (bytes == null) {
           return 'could not encode screenshot.';
         }
         if (autoUpdateGoldenFiles) {
-          print('ABOUT TO UPDATE GOLDEN!');
           await goldenFileComparator.update(key, bytes.buffer.asUint8List());
-          print('UPDATED GOLDEN SUCCESSFULLY!');
           return null;
         }
         try {
-          print('ABOUT TO COMPARE GOLDEN!');
           final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
-          print('COMPARED GOLDEN SUCCESSFULLY!');
           return success ? null : 'does not match';
         } on TestFailure catch (ex) {
           return ex.message;
