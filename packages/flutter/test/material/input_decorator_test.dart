@@ -2944,10 +2944,31 @@ void main() {
         );
 
         expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        // Label line height is forced to 1.0 and font size is 16.0,
+        // the label should be vertically centered (20 pixels above and below).
         expect(getLabelRect(tester).top, 20.0);
         expect(getLabelRect(tester).bottom, 36.0);
       },
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/71813.
+    testWidgets('Ambient theme floatingLabelBehavior is used', (WidgetTester tester) async {
+      const FloatingLabelBehavior floatingLabelBehavior = FloatingLabelBehavior.never;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          inputDecorationTheme: const InputDecorationThemeData(
+            floatingLabelBehavior: floatingLabelBehavior,
+          ),
+          decoration: const InputDecoration(label: customLabel),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+      // Label line height is forced to 1.0 and font size is 16.0,
+      // the label should be vertically centered (20 pixels above and below).
+      expect(getCustomLabelRect(tester).top, 20.0);
+      expect(getCustomLabelRect(tester).bottom, 36.0);
+    });
 
     testWidgets('Floating label animation duration and curve', (WidgetTester tester) async {
       Future<void> pumpInputDecorator({required bool isFocused}) async {
@@ -5249,6 +5270,45 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
       // The hintText replaced with SizeBox.
       expect(find.text(hintText), findsNothing);
+    });
+
+    testWidgets('Hint does not change position when maintainHintSize is false - LTR', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(isEmpty: true, decoration: const InputDecoration(hintText: hintText)),
+      );
+      final double expectedHintLeft = getHintRect(tester).left;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+        ),
+      );
+      expect(getHintRect(tester).left, expectedHintLeft);
+    });
+
+    testWidgets('Hint does not change position when maintainHintSize is false - RTL', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      final double expectedHintRight = getHintRect(tester).right;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(hintText: hintText, maintainHintSize: false),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      expect(getHintRect(tester).right, expectedHintRight);
     });
   });
 
@@ -7558,6 +7618,85 @@ void main() {
     });
   });
 
+  group('Material3 - InputDecoration isDense', () {
+    // M3 extra horizontal padding.
+    const double kInputExtraPadding = 4.0;
+
+    testWidgets('Dense layout for an outlined decoration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: labelText,
+            isDense: true,
+          ),
+        ),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 8.0).
+      // Vertical padding affects the container height not the input vertical
+      // position as the input is centered.
+      expect(containerRect.height, 48.0);
+      expect(inputRect.center.dy, containerRect.center.dy);
+      expect(inputRect.left, containerRect.left + 12.0 + kInputExtraPadding);
+      expect(inputRect.right, containerRect.right - 12.0 - kInputExtraPadding);
+    });
+
+    testWidgets('Dense layout for a filled and non-outlined decoration', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(filled: true, labelText: labelText, isDense: true),
+        ),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+      final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0).
+      expect(containerRect.height, 48.0);
+      expect(labelRect.top, containerRect.top + 4.0);
+      expect(inputRect.bottom, containerRect.bottom - 4.0);
+      expect(inputRect.left, containerRect.left + 12.0 + kInputExtraPadding);
+      expect(inputRect.right, containerRect.right - 12.0 - kInputExtraPadding);
+    });
+
+    testWidgets('Dense layout for a non-filled and non-outlined decoration', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(labelText: labelText, isDense: true)),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+      final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0).
+      expect(containerRect.height, 48.0);
+      expect(labelRect.top, containerRect.top + 4.0);
+      expect(inputRect.bottom, containerRect.bottom - 4.0);
+      expect(inputRect.left, containerRect.left);
+      expect(inputRect.right, containerRect.right);
+    });
+
+    testWidgets('Ambient theme is used', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          inputDecorationTheme: const InputDecorationThemeData(isDense: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getContainerRect(tester).height, 48.0);
+    });
+  });
+
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
     Widget buildFrame({
       InputCounterWidgetBuilder? buildCounter,
@@ -9249,6 +9388,17 @@ void main() {
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
+    });
+
+    testWidgets('isDense', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(isDense: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getContainerRect(tester).height, 48.0);
     });
 
     testWidgets('iconColor', (WidgetTester tester) async {
@@ -14878,4 +15028,41 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
     expect(box, isNot(paints..drrect()));
   });
+
+  testWidgets(
+    'InputDecorator _buildError with errorText correctly updates on BuildContext updates',
+    (WidgetTester tester) async {
+      final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>('initial error');
+      const String helperTextValue = 'helper text';
+
+      addTearDown(errorTextNotifier.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ValueListenableBuilder<String?>(
+              key: const Key('value_listenable_builder_parent'),
+              valueListenable: errorTextNotifier,
+              builder: (BuildContext context, String? value, Widget? child) {
+                return buildInputDecorator(
+                  decoration: InputDecoration(errorText: value, helperText: helperTextValue),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsOneWidget);
+      expect(find.text(helperTextValue), findsNothing);
+
+      errorTextNotifier.value = null;
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsNothing);
+      expect(find.text(helperTextValue), findsOneWidget);
+    },
+  );
 }
