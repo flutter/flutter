@@ -774,20 +774,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   Future<void> _updateLLDBIfNeeded() async {
     if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
         globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
-      if (isModule) {
-        // When building a module project for Add-to-App, provide instructions
-        // to manually add the LLDB Init File to their native Xcode project.
-        globals.logger.printWarning(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
-          'To ensure debug mode works, please complete one of the following in '
-          'your native Xcode project:\n'
-          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
-          '    ${lldbInitFile.path}\n\n'
-          '  * If you are already using an LLDB Init File, please append the '
-          'following to your LLDB Init File:\n\n'
-          '    command source ${lldbInitFile.path}\n',
-        );
-      }
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
       await _renderTemplateToFile(
         _lldbPythonHelperTemplate,
