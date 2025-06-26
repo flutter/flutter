@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RouteObserver].
 
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 void main() {
   runApp(const RouteObserverApp());
@@ -31,7 +32,8 @@ class RouteObserverExample extends StatefulWidget {
   State<RouteObserverExample> createState() => _RouteObserverExampleState();
 }
 
-class _RouteObserverExampleState extends State<RouteObserverExample> with RouteAware {
+class _RouteObserverExampleState extends State<RouteObserverExample>
+    with RouteAware {
   List<String> log = <String>[];
 
   @override
