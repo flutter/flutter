@@ -1027,6 +1027,7 @@ class InputConfiguration {
     this.autofill,
     this.autofillGroup,
     this.enableDeltaModel = false,
+    this.enableInteractiveSelection = true,
   });
 
   InputConfiguration.fromFrameworkMessage(Map<String, dynamic> flutterInputConfiguration)
@@ -1052,7 +1053,9 @@ class InputConfiguration {
         flutterInputConfiguration.tryJson('autofill'),
         flutterInputConfiguration.tryList('fields'),
       ),
-      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false;
+      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false,
+      enableInteractiveSelection =
+          flutterInputConfiguration.tryBool('enableInteractiveSelection') ?? true;
 
   /// The ID of the view that contains the text field.
   final int viewId;
@@ -1087,6 +1090,13 @@ class InputConfiguration {
   final EngineAutofillForm? autofillGroup;
 
   final TextCapitalizationConfig textCapitalization;
+
+  /// Whether the user can change the text seelction.
+  ///
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
+  final bool enableInteractiveSelection;
 }
 
 typedef OnChangeCallback =
@@ -1482,6 +1492,7 @@ abstract class DefaultTextEditingStrategy
     assert(isEnabled);
 
     EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    newEditingState = suppressInteractiveSelectionIfNeeded(newEditingState);
     newEditingState = determineCompositionState(newEditingState);
 
     TextEditingDeltaState? newTextEditingDeltaState;
@@ -1502,6 +1513,44 @@ abstract class DefaultTextEditingStrategy
     }
     // Flush delta state.
     _editingDeltaState = null;
+  }
+
+  EditingState suppressInteractiveSelectionIfNeeded(EditingState editingState) {
+    // TODO: Flutter Web's click to move cursor seems to be broken with enableInteractiveSelection: false.
+    if (inputConfiguration.enableInteractiveSelection) {
+      return editingState;
+    }
+
+    if (editingState.baseOffset == editingState.extentOffset) {
+      return editingState;
+    }
+
+    var currentOffset = lastEditingState?.baseOffset ?? 0;
+    if (activeDomElement.isA<DomHTMLInputElement>()) {
+      final element = domElement as DomHTMLInputElement;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final collapsedOffset = switch (element.selectionDirection) {
+        'backward' => selectionStart,
+        'forward' => selectionEnd,
+        _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
+      };
+      element.setSelectionRange(collapsedOffset, collapsedOffset);
+      return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
+      final element = domElement as DomHTMLTextAreaElement;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final collapsedOffset = switch (element.selectionDirection) {
+        'backward' => selectionStart,
+        'forward' => selectionEnd,
+        _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
+      };
+      element.setSelectionRange(collapsedOffset, collapsedOffset);
+      return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
+    } else {
+      return editingState;
+    }
   }
 
   void handleBeforeInput(DomEvent event) {
@@ -1582,6 +1631,17 @@ abstract class DefaultTextEditingStrategy
         }
         // Prevent the browser from inserting a new line.
         event.preventDefault();
+      }
+
+      // Suppress shortcuts if interactive selection is disabled.
+      if (!inputConfiguration.enableInteractiveSelection) {
+        const shortcuts = <String>{'a', 'c', 'v'};
+        final isMacOs = ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+        if (isMacOs && event.metaKey && shortcuts.contains(event.key)) {
+          event.preventDefault();
+        } else if (!isMacOs && event.ctrlKey && shortcuts.contains(event.key)) {
+          event.preventDefault();
+        }
       }
     }
   }
