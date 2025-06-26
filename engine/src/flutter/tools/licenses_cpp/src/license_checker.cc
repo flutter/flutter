@@ -229,6 +229,15 @@ absl::Status MatchLicenseFile(const fs::path& path,
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                                               std::ostream& licenses,
                                               const Data& data) {
+  Flags flags;
+  return Run(working_dir, licenses, data, flags);
+}
+
+std::vector<absl::Status> LicenseChecker::Run(
+    std::string_view working_dir,
+    std::ostream& licenses,
+    const Data& data,
+    const LicenseChecker::Flags& flags) {
   std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path(working_dir);
@@ -285,11 +294,11 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       }
       IterateComments(
           file->GetData(), file->GetSize(), [&](std::string_view comment) {
-            VLOG(3) << comment;
+            VLOG(4) << comment;
             re2::StringPiece match;
             if (RE2::PartialMatch(comment, pattern, &match)) {
-              if (!VLOG_IS_ON(3)) {
-                VLOG(2) << comment;
+              if (!VLOG_IS_ON(4)) {
+                VLOG(3) << comment;
               }
               absl::StatusOr<Catalog::Match> match =
                   data.catalog.FindMatch(comment);
@@ -299,8 +308,14 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                 VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
                         << match->matcher;
               } else {
+                if (flags.treat_unmatched_comments_as_errors) {
+                  errors.push_back(absl::NotFoundError(absl::StrCat(
+                      relative_path.lexically_normal().string(), " : ",
+                      match.status().message(), "\n", comment)));
+                }
                 VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
-                        << " : " << match.status().message();
+                        << " : " << match.status().message() << "\n"
+                        << comment;
               }
             }
           });
@@ -335,14 +350,16 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::ostream& licenses,
-                        std::string_view data_dir) {
+                        std::string_view data_dir,
+                        const LicenseChecker::Flags& flags) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
     std::cerr << "Can't load data at " << data_dir << ": " << data.status()
               << std::endl;
     return 1;
   }
-  std::vector<absl::Status> errors = Run(working_dir, licenses, data.value());
+  std::vector<absl::Status> errors =
+      Run(working_dir, licenses, data.value(), flags);
   for (const absl::Status& status : errors) {
     std::cerr << status << "\n";
   }
