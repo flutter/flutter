@@ -2879,29 +2879,27 @@ void main() {
           height: viewSize.height,
           child: MaterialApp(
             home: Material(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter innerSetState) {
-                setState = innerSetState;
-                return showButton
-                        ? PopupMenuButton<int>(
-                          key: buttonKey,
-                          popUpAnimationStyle: const AnimationStyle(
-                            reverseDuration: Duration(milliseconds: 400),
-                          ),
-                          itemBuilder: (BuildContext context) {
-                            return <PopupMenuEntry<int>>[
-                              PopupMenuItem<int>(
-                                value: 1,
-                                child: const Text('ACTION'),
-                                onTap: () {},
-                              ),
-                            ];
-                          },
-                        )
-                        : Container();
-                }),
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter innerSetState) {
+                  setState = innerSetState;
+                  return showButton
+                      ? PopupMenuButton<int>(
+                        key: buttonKey,
+                        popUpAnimationStyle: const AnimationStyle(
+                          reverseDuration: Duration(milliseconds: 400),
+                        ),
+                        itemBuilder: (BuildContext context) {
+                          return <PopupMenuEntry<int>>[
+                            PopupMenuItem<int>(value: 1, child: const Text('ACTION'), onTap: () {}),
+                          ];
+                        },
+                      )
+                      : Container();
+                },
               ),
             ),
           ),
+        ),
       );
     }
 
