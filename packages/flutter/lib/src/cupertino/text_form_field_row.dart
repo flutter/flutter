@@ -280,7 +280,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        SystemContextMenu.isSupported(context) &&
+        !editableTextState.widget.readOnly) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
