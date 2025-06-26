@@ -29,7 +29,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
-import '../web/web_device.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -1334,11 +1333,7 @@ abstract class FlutterCommand extends Command<void> {
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
         argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload) &&
-        // TODO(nshahan): Enable on web-server when the app is started correctly
-        // https://github.com/dart-lang/sdk/issues/60289.
-        (globals.deviceManager == null ||
-            globals.deviceManager!.specifiedDeviceId != WebServerDevice.kWebServerDeviceId);
+        boolArg(FlutterOptions.kWebExperimentalHotReload);
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -2087,6 +2082,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.unsupported:
       return null;
   }
 }

@@ -224,6 +224,8 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final String? targetOS = switch (targetPlatform) {
@@ -237,6 +239,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
+      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(

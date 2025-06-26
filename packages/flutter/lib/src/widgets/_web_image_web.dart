@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 
 import '../painting/_web_image_info_web.dart';
 import '../rendering/box.dart';
+import '../rendering/platform_view.dart';
 import '../rendering/shifted_box.dart';
 import '../web.dart' as web;
 import 'basic.dart';
@@ -50,7 +51,11 @@ class ImgElementPlatformView extends StatelessWidget {
     if (src == null) {
       return const SizedBox.expand();
     }
-    return HtmlElementView(viewType: _viewType, creationParams: <String, String?>{'src': src});
+    return HtmlElementView(
+      viewType: _viewType,
+      creationParams: <String, String?>{'src': src},
+      hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+    );
   }
 }
 
