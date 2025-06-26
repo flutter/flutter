@@ -38,4 +38,4 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 #.   the contents of hash.txt
 (git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" HEAD DEPS engine bin/internal/release-candidate-branch.version | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
 git hash-object hash.txt
-del hash.txt
+Remove-Item hash.txt
