@@ -14,7 +14,7 @@ set -e
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
 # Default verbosity level
-VERBOSITY=3
+VERBOSITY=1
 
 # Check for QUIET environment variable
 if [[ -n "${QUIET}" ]]; then
