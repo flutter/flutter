@@ -2929,14 +2929,12 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   void _onSingleLongTapEndOrCancel() {
-    if (!_isEditableTextMounted) {
-      return;
-    }
     _hideMagnifierIfSupportedByPlatform();
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
     if (defaultTargetPlatform == TargetPlatform.iOS &&
+        _isEditableTextMounted &&
         delegate.selectionEnabled &&
         editableText.textEditingValue.selection.isCollapsed) {
       // Update the floating cursor.
