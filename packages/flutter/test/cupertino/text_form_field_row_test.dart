@@ -642,6 +642,6 @@ void main() {
       }
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
 }
