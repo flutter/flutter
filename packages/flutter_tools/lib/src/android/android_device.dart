@@ -193,7 +193,8 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-    switch (await _getProperty('ro.product.cpu.abi')) {
+    final String? abi = await _getProperty('ro.product.cpu.abi');
+    switch (abi) {
       case 'arm64-v8a':
         // Perform additional verification for 64 bit ABI. Some devices,
         // like the Kindle Fire 8, misreport the abilist. We might not
@@ -205,12 +206,12 @@ class AndroidDevice extends Device {
         } else {
           return TargetPlatform.android_arm;
         }
+      case 'armeabi-v7a':
+        return TargetPlatform.android_arm;
       case 'x86_64':
         return TargetPlatform.android_x64;
-      case 'x86':
-        return TargetPlatform.android_x86;
       default:
-        return TargetPlatform.android_arm;
+        return TargetPlatform.unsupported;
     }
   }();
 
@@ -221,8 +222,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
         return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android_x86:
-        return buildMode == BuildMode.debug;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -234,6 +233,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -535,10 +535,6 @@ class AndroidDevice extends Device {
     }
 
     final TargetPlatform devicePlatform = await targetPlatform;
-    if (devicePlatform == TargetPlatform.android_x86 && !debuggingOptions.buildInfo.isDebug) {
-      _logger.printError('Profile and release builds are only supported on ARM/x64 targets.');
-      return LaunchResult.failed();
-    }
 
     AndroidApk? builtPackage = package;
     AndroidArch androidArch;
@@ -549,8 +545,6 @@ class AndroidDevice extends Device {
         androidArch = AndroidArch.arm64_v8a;
       case TargetPlatform.android_x64:
         androidArch = AndroidArch.x86_64;
-      case TargetPlatform.android_x86:
-        androidArch = AndroidArch.x86;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -562,6 +556,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.unsupported:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -861,7 +856,16 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async {
+    final TargetPlatform platform = await targetPlatform;
+    return switch (platform) {
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 => true,
+      _ => false,
+    };
+  }
 
   @override
   bool get supportsScreenshot => true;

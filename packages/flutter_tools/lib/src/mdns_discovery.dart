@@ -597,7 +597,6 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -608,6 +607,8 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 

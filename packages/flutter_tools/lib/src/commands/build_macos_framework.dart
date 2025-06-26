@@ -10,14 +10,14 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
-import '../features.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -87,7 +87,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         releaseMode: buildInfo.mode.isRelease,
       );
 
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -192,12 +192,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode =
-          mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
+      final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
+      final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
-  s.name                  = 'FlutterMacOS'
+  s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -211,11 +211,11 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/$frameworkName.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
   s.osx.deployment_target = '10.15'
-  s.vendored_frameworks   = 'FlutterMacOS.framework'
-  s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
+  s.vendored_frameworks   = '$frameworkName'
+  s.prepare_command       = 'unzip $frameworkName -d $frameworkName'
 end
 ''';
 
@@ -234,10 +234,6 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
-      // Dev dependencies are removed from release builds if the explicit package
-      // dependencies flag is on.
-      final bool devDependenciesEnabled =
-          !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
         packageConfigPath: packageConfigPath(),
@@ -251,7 +247,6 @@ end
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
           ).map((DarwinArch e) => e.name).join(' '),
-          kDevDependenciesEnabled: devDependenciesEnabled.toString(),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
@@ -331,7 +326,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'macosx',
+        XcodeSdk.MacOSX.platformName,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${buildOutput.path}',

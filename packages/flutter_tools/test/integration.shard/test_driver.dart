@@ -140,7 +140,10 @@ abstract final class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
-  Future<void> get done async => _process?.exitCode;
+  /// Completes when process exits with the given exit code.
+  ///
+  /// If the process has never been started, complets with `null`.
+  Future<int?> get done async => _process?.exitCode;
 
   Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
@@ -545,6 +548,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         deviceArgs = <String>[
           GoogleChromeDevice.kChromeDeviceId,
           '--web-run-headless',
+          '--no-web-resources-cdn',
           if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
         ];
       default:

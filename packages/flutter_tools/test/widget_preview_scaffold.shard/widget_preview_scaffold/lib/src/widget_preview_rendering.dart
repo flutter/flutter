@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -47,6 +48,7 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     final TextStyle boldStyle = fixBlurryText(
       TextStyle(fontWeight: FontWeight.bold),
     );
+    final TextStyle monospaceStyle = GoogleFonts.robotoMono();
 
     return SizedBox(
       height: size.height,
@@ -61,15 +63,16 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
                     text: 'Failed to initialize widget tree: ',
                     style: boldStyle,
                   ),
-                  // TODO(bkonyi): use monospace font
-                  TextSpan(text: error.toString()),
+                  TextSpan(text: error.toString(), style: monospaceStyle),
                 ],
               ),
             ),
             Text('Stacktrace:', style: boldStyle),
-            // TODO(bkonyi): use monospace font
             SelectableText.rich(
-              TextSpan(children: _formatFrames(trace.frames)),
+              TextSpan(
+                children: _formatFrames(trace.frames),
+                style: monospaceStyle,
+              ),
             ),
           ],
         ),
@@ -322,6 +325,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
+    preview = WidgetPreviewLocalizations(
+      localizationsData: widget.preview.localizations,
+      child: preview,
+    );
+
     preview = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -469,6 +477,72 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     }
 
     return mediaQueryData;
+  }
+}
+
+/// Wraps [child] with a [Localizations] with localization data from
+/// [localizationsData].
+class WidgetPreviewLocalizations extends StatefulWidget {
+  const WidgetPreviewLocalizations({
+    super.key,
+    required this.localizationsData,
+    required this.child,
+  });
+
+  final PreviewLocalizationsData? localizationsData;
+  final Widget child;
+
+  @override
+  State<WidgetPreviewLocalizations> createState() =>
+      _WidgetPreviewLocalizationsState();
+}
+
+class _WidgetPreviewLocalizationsState
+    extends State<WidgetPreviewLocalizations> {
+  PreviewLocalizationsData get _localizationsData => widget.localizationsData!;
+  late final LocalizationsResolver _localizationsResolver =
+      LocalizationsResolver(
+        supportedLocales: _localizationsData.supportedLocales,
+        locale: _localizationsData.locale,
+        localeListResolutionCallback:
+            _localizationsData.localeListResolutionCallback,
+        localeResolutionCallback: _localizationsData.localeResolutionCallback,
+        localizationsDelegates: _localizationsData.localizationsDelegates,
+      );
+
+  @override
+  void didUpdateWidget(WidgetPreviewLocalizations oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final PreviewLocalizationsData? localizationsData =
+        widget.localizationsData;
+    if (localizationsData == null) {
+      return;
+    }
+    _localizationsResolver.update(
+      supportedLocales: localizationsData.supportedLocales,
+      locale: localizationsData.locale,
+      localeListResolutionCallback:
+          localizationsData.localeListResolutionCallback,
+      localeResolutionCallback: localizationsData.localeResolutionCallback,
+      localizationsDelegates: localizationsData.localizationsDelegates,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.localizationsData == null) {
+      return widget.child;
+    }
+    return ListenableBuilder(
+      listenable: _localizationsResolver,
+      builder: (context, _) {
+        return Localizations(
+          locale: _localizationsResolver.locale,
+          delegates: _localizationsResolver.localizationsDelegates.toList(),
+          child: widget.child,
+        );
+      },
+    );
   }
 }
 

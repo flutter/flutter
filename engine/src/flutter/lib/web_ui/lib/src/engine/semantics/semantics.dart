@@ -30,6 +30,7 @@ import 'heading.dart';
 import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
+import 'landmarks.dart';
 import 'link.dart';
 import 'list.dart';
 import 'live_region.dart';
@@ -54,6 +55,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   static const int _kReduceMotionIndex = 1 << 4;
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
+  static const int _kNoAnnounceIndex = 1 << 7;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -72,6 +74,10 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   bool get highContrast => _kHighContrastIndex & _index != 0;
   @override
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
+  // This index check is inverted (== 0 vs != 0); far more platforms support
+  // announce than discourage it.
+  @override
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -97,6 +103,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
+    }
     return 'AccessibilityFeatures$features';
   }
 
@@ -119,6 +128,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? reduceMotion,
     bool? highContrast,
     bool? onOffSwitchLabels,
+    bool? supportsAnnounce,
   }) {
     final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -129,6 +139,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.reduceMotion = reduceMotion ?? this.reduceMotion;
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
+    builder.supportsAnnounce = supportsAnnounce ?? this.supportsAnnounce;
 
     return builder.build();
   }
@@ -146,6 +157,9 @@ class EngineAccessibilityFeaturesBuilder {
   bool get reduceMotion => EngineAccessibilityFeatures._kReduceMotionIndex & _index != 0;
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
+  // This index check is inverted (== 0 vs != 0); far more platforms support
+  // announce than discourage it.
+  bool get supportsAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -180,6 +194,14 @@ class EngineAccessibilityFeaturesBuilder {
   set onOffSwitchLabels(bool value) {
     const int onOffSwitchLabels = EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex;
     _index = value ? _index | onOffSwitchLabels : _index & ~onOffSwitchLabels;
+  }
+
+  // This setter uses an inverted check (!value instead of value) to set the noAnnounce
+  // field in EngineAccessibilityFeatures since far more platforms support announce
+  // than not.
+  set supportsAnnounce(bool value) {
+    const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
+    _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
   }
 
   /// Creates and returns an instance of EngineAccessibilityFeatures based on the value of _index
@@ -237,8 +259,6 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
-    required this.elevation,
-    required this.thickness,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -254,7 +274,7 @@ class SemanticsNodeUpdate {
   final int id;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final int flags;
+  final ui.SemanticsFlags flags;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int actions;
@@ -342,12 +362,6 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List additionalActions;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double elevation;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double thickness;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int headingLevel;
@@ -490,6 +504,24 @@ enum EngineSemanticsRole {
 
   /// An option with a radio button in a set of choices contained by a [menu] or [menuBar].
   menuItemRadio,
+
+  /// A supporting section of a web page.
+  complementary,
+
+  /// A section containing identifying information such as copyright
+  /// information, navigation links and privacy statements.
+  contentInfo,
+
+  /// The primary content of a document.
+  main,
+
+  /// A region of a web page that contains navigation links.
+  navigation,
+
+  /// A section of content sufficiently important but cannot be descrived by one
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
+  /// navigation.
+  region,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -735,11 +767,10 @@ abstract class SemanticRole {
     }
 
     final List<SemanticBehavior>? behaviors = _behaviors;
-    if (behaviors == null) {
-      return;
-    }
-    for (final SemanticBehavior behavior in behaviors) {
-      behavior.update();
+    if (behaviors != null) {
+      for (final SemanticBehavior behavior in behaviors) {
+        behavior.update();
+      }
     }
 
     if (semanticsObject.isIdentifierDirty) {
@@ -995,8 +1026,8 @@ class SemanticsObject {
   SemanticsObject(this.id, this.owner);
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int get flags => _flags;
-  int _flags = 0;
+  ui.SemanticsFlags get flags => _flags;
+  ui.SemanticsFlags _flags = ui.SemanticsFlags.none;
 
   /// Whether the [flags] field has been updated but has not been applied to the
   /// DOM yet.
@@ -1366,7 +1397,7 @@ class SemanticsObject {
   /// See also:
   ///
   ///  * [isHeading], which determines whether this node represents a heading.
-  bool get isHeader => hasFlag(ui.SemanticsFlag.isHeader);
+  bool get isHeader => flags.isHeader;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   String? get identifier => _identifier;
@@ -1467,32 +1498,29 @@ class SemanticsObject {
 
   SemanticsObject? _parent;
 
-  /// Whether this node currently has a given [SemanticsFlag].
-  bool hasFlag(ui.SemanticsFlag flag) => _flags & flag.index != 0;
-
   /// Whether [actions] contains the given action.
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => hasFlag(ui.SemanticsFlag.isFocusable);
+  bool get isFocusable => flags.isFocusable;
 
   /// Whether this object currently has input focus.
   ///
   /// This value only makes sense if [isFocusable] is true.
-  bool get hasFocus => hasFlag(ui.SemanticsFlag.isFocused);
+  bool get hasFocus => flags.isFocused;
 
   /// Whether this object can be in one of "enabled" or "disabled" state.
   ///
   /// If this is true, [isEnabled] communicates the state.
-  bool get hasEnabledState => hasFlag(ui.SemanticsFlag.hasEnabledState);
+  bool get hasEnabledState => flags.hasEnabledState;
 
   /// Whether this object is enabled.
   ///
   /// This field is only meaningful if [hasEnabledState] is true.
-  bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
+  bool get isEnabled => flags.isEnabled;
 
   /// Whether this object can be in one of "expanded" or "collapsed" state.
-  bool get hasExpandedState => hasFlag(ui.SemanticsFlag.hasExpandedState);
+  bool get hasExpandedState => flags.hasExpandedState;
 
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
@@ -1507,38 +1535,37 @@ class SemanticsObject {
   /// When the scrollable container has no scroll extent, it won't have any scroll actions, but
   /// it's still a scrollable container. In this case, we need to use the implicit scrolling flag
   /// to check for scrollability.
-  bool get isScrollContainer => hasFlag(ui.SemanticsFlag.hasImplicitScrolling);
+  bool get isScrollContainer => flags.hasImplicitScrolling;
 
   /// Whether this object has a non-empty list of children.
   bool get hasChildren =>
       _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty;
 
   /// Whether this object represents an editable text field.
-  bool get isTextField => hasFlag(ui.SemanticsFlag.isTextField);
+  bool get isTextField => flags.isTextField;
 
   /// Whether this object represents an interactive link.
-  bool get isLink => hasFlag(ui.SemanticsFlag.isLink);
+  bool get isLink => flags.isLink;
 
   /// Whether this object needs screen readers attention right away.
-  bool get isLiveRegion =>
-      hasFlag(ui.SemanticsFlag.isLiveRegion) && !hasFlag(ui.SemanticsFlag.isHidden);
+  bool get isLiveRegion => flags.isLiveRegion && !flags.isHidden;
 
   /// Whether this object represents an image with no tappable functionality.
-  bool get isVisualOnly => hasFlag(ui.SemanticsFlag.isImage) && !isTappable && !isButton;
+  bool get isVisualOnly => flags.isImage && !isTappable && !isButton;
 
   /// Whether this node defines a scope for a route.
-  bool get scopesRoute => hasFlag(ui.SemanticsFlag.scopesRoute);
+  bool get scopesRoute => flags.scopesRoute;
 
   /// Whether this node describes a route.
-  bool get namesRoute => hasFlag(ui.SemanticsFlag.namesRoute);
+  bool get namesRoute => flags.namesRoute;
 
   /// Whether this object carry enabled/disabled state (and if so whether it is
   /// enabled).
   ///
   /// See [EnabledState] for more details.
   EnabledState enabledState() {
-    if (hasFlag(ui.SemanticsFlag.hasEnabledState)) {
-      if (hasFlag(ui.SemanticsFlag.isEnabled)) {
+    if (flags.hasEnabledState) {
+      if (flags.isEnabled) {
         return EnabledState.enabled;
       } else {
         return EnabledState.disabled;
@@ -1951,6 +1978,16 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.complementary:
+        return EngineSemanticsRole.complementary;
+      case ui.SemanticsRole.contentInfo:
+        return EngineSemanticsRole.contentInfo;
+      case ui.SemanticsRole.main:
+        return EngineSemanticsRole.main;
+      case ui.SemanticsRole.navigation:
+        return EngineSemanticsRole.navigation;
+      case ui.SemanticsRole.region:
+        return EngineSemanticsRole.region;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -2027,6 +2064,11 @@ class SemanticsObject {
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
+      EngineSemanticsRole.complementary => SemanticComplementary(this),
+      EngineSemanticsRole.contentInfo => SemanticContentInfo(this),
+      EngineSemanticsRole.main => SemanticMain(this),
+      EngineSemanticsRole.navigation => SemanticNavigation(this),
+      EngineSemanticsRole.region => SemanticRegion(this),
     };
   }
 
@@ -2089,7 +2131,7 @@ class SemanticsObject {
   /// Whether the object represents a button.
   ///
   /// See also [isButtonLike].
-  bool get isButton => hasFlag(ui.SemanticsFlag.isButton);
+  bool get isButton => flags.isButton;
 
   /// Whether the object behaves like a button even if it does not formally have
   /// the [ui.SemanticsFlag.isButton] flag.
@@ -2105,16 +2147,15 @@ class SemanticsObject {
   /// Because such widgets require the use of specific ARIA roles and HTML
   /// elements, they are managed by the [SemanticCheckable] role, and they do
   /// not use the [Selectable] behavior.
-  bool get isCheckable =>
-      hasFlag(ui.SemanticsFlag.hasCheckedState) || hasFlag(ui.SemanticsFlag.hasToggledState);
+  bool get isCheckable => flags.hasCheckedState || flags.hasToggledState;
 
   /// If true, this node represents something that can be in a "checked" or
   /// state, such as checkboxes, radios, and switches.
-  bool get isChecked => hasFlag(ui.SemanticsFlag.isChecked);
+  bool get isChecked => flags.isChecked;
 
   /// If true, this node represents something that can be in a "mixed" or
   /// state, such as checkboxes.
-  bool get isMixed => hasFlag(ui.SemanticsFlag.isCheckStateMixed);
+  bool get isMixed => flags.isCheckStateMixed;
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2129,11 +2170,11 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isSelected], which indicates whether the node is currently selected.
-  bool get isSelectable => hasFlag(ui.SemanticsFlag.hasSelectedState);
+  bool get isSelectable => flags.hasSelectedState;
 
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
-  bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+  bool get isSelected => flags.isSelected;
 
   /// If true, this node represents something that currently requires user input
   /// before a form can be submitted.
@@ -2146,10 +2187,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isRequired], which indicates whether the is currently required.
-  bool get isRequirable => hasFlag(ui.SemanticsFlag.hasRequiredState);
+  bool get isRequirable => flags.hasRequiredState;
 
   /// If [isRequirable] is true, indicates whether the node is required.
-  bool get isRequired => hasFlag(ui.SemanticsFlag.isRequired);
+  bool get isRequired => flags.isRequired;
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2159,10 +2200,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isExpanded], which indicates whether the node is currently selected.
-  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+  bool get isExpandable => flags.hasExpandedState;
 
   /// Indicates whether the node is currently expanded.
-  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
+  bool get isExpanded => flags.isExpanded;
 
   /// Role-specific adjustment of the vertical position of the children.
   ///
@@ -2485,6 +2526,7 @@ class EngineSemantics {
     final PlatformConfiguration newConfiguration = EnginePlatformDispatcher.instance.configuration
         .copyWith(accessibilityFeatures: original.copyWith(accessibleNavigation: value));
     EnginePlatformDispatcher.instance.configuration = newConfiguration;
+    EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
 
     _semanticsEnabled = value;
 
@@ -2517,7 +2559,7 @@ class EngineSemantics {
   /// actually updating the semantic DOM.
   void didReceiveSemanticsUpdate() {
     if (!_semanticsEnabled) {
-      if (ui_web.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.TestEnvironment.instance.keepSemanticsDisabledOnUpdate) {
         // Running Flutter widget tests in a fake environment. Don't enable
         // engine semantics. Test semantics trees violate invariants in ways
         // production implementation isn't built to handle. For example, tests

@@ -1923,9 +1923,10 @@ abstract class RenderObjectWidget extends Widget {
   @protected
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
 
-  /// A render object previously associated with this widget has been removed
-  /// from the tree. The given [RenderObject] will be of the same type as
-  /// returned by this object's [createRenderObject].
+  /// This method is called when a RenderObject that was previously
+  /// associated with this widget is removed from the render tree.
+  /// The provided [RenderObject] will be of the same type as the one created by
+  /// this widget's [createRenderObject] method.
   @protected
   void didUnmountRenderObject(covariant RenderObject renderObject) {}
 }
