@@ -179,7 +179,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "137.0.7151.119"
+          "version": "138.0.7204.49"
         }
       ],
       "tasks": [
