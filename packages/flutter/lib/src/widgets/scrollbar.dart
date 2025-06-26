@@ -131,6 +131,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [Color] of the thumb. Mustn't be null.
   Color get color => _color;
   Color _color;
+
   set color(Color value) {
     if (color == value) {
       return;
@@ -143,6 +144,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [Color] of the track. Mustn't be null.
   Color get trackColor => _trackColor;
   Color _trackColor;
+
   set trackColor(Color value) {
     if (trackColor == value) {
       return;
@@ -155,6 +157,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [Color] of the track border. Mustn't be null.
   Color get trackBorderColor => _trackBorderColor;
   Color _trackBorderColor;
+
   set trackBorderColor(Color value) {
     if (trackBorderColor == value) {
       return;
@@ -169,6 +172,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Scrollbar's track will be rectangular if [trackRadius] is null.
   Radius? get trackRadius => _trackRadius;
   Radius? _trackRadius;
+
   set trackRadius(Radius? value) {
     if (trackRadius == value) {
       return;
@@ -183,6 +187,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// calling paint.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
+
   set textDirection(TextDirection? value) {
     assert(value != null);
     if (textDirection == value) {
@@ -196,6 +201,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
   double get thickness => _thickness;
   double _thickness;
+
   set thickness(double value) {
     if (thickness == value) {
       return;
@@ -218,6 +224,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Mustn't be null and defaults to 0.
   double get mainAxisMargin => _mainAxisMargin;
   double _mainAxisMargin;
+
   set mainAxisMargin(double value) {
     if (mainAxisMargin == value) {
       return;
@@ -235,6 +242,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Defaults to zero.
   double get crossAxisMargin => _crossAxisMargin;
   double _crossAxisMargin;
+
   set crossAxisMargin(double value) {
     if (crossAxisMargin == value) {
       return;
@@ -249,6 +257,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Scrollbar will be rectangular if [radius] is null.
   Radius? get radius => _radius;
   Radius? _radius;
+
   set radius(Radius? value) {
     assert(shape == null || value == null);
     if (radius == value) {
@@ -271,6 +280,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   OutlinedBorder? get shape => _shape;
   OutlinedBorder? _shape;
+
   set shape(OutlinedBorder? value) {
     assert(radius == null || value == null);
     if (shape == value) {
@@ -292,6 +302,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// greater than or equal to zero.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
+
   set padding(EdgeInsets value) {
     if (padding == value) {
       return;
@@ -314,6 +325,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [minOverscrollLength], which in turn is >= 0. Defaults to 18.0.
   double get minLength => _minLength;
   double _minLength;
+
   set minLength(double value) {
     if (minLength == value) {
       return;
@@ -335,6 +347,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// When null, it will default to the value of [minLength].
   double get minOverscrollLength => _minOverscrollLength;
   double _minOverscrollLength;
+
   set minOverscrollLength(double value) {
     if (minOverscrollLength == value) {
       return;
@@ -364,6 +377,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// {@endtemplate}
   ScrollbarOrientation? get scrollbarOrientation => _scrollbarOrientation;
   ScrollbarOrientation? _scrollbarOrientation;
+
   set scrollbarOrientation(ScrollbarOrientation? value) {
     if (scrollbarOrientation == value) {
       return;
@@ -376,6 +390,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Whether the painter will be ignored during hit testing.
   bool get ignorePointer => _ignorePointer;
   bool _ignorePointer;
+
   set ignorePointer(bool value) {
     if (ignorePointer == value) {
       return;
@@ -388,10 +403,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // - Scrollbar Details
 
   Rect? _trackRect;
+
   // The full painted length of the track
   double get _trackExtent => _lastMetrics!.viewportDimension - _totalTrackMainAxisOffsets;
+
   // The full length of the track that the thumb can travel
   double get _traversableTrackExtent => _trackExtent - (2 * mainAxisMargin);
+
   // Track Offsets
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
@@ -402,10 +420,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   };
 
   Rect? _thumbRect;
+
   // The current scroll position + _leadingThumbMainAxisOffset
   late double _thumbOffset;
+
   // The fraction visible in relation to the traversable length of the track.
   late double _thumbExtent;
+
   // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset => _leadingTrackMainAxisOffset + mainAxisMargin;
@@ -454,16 +475,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // - Scrollable Details
 
   ScrollMetrics? _lastMetrics;
+
   bool get _lastMetricsAreScrollable =>
       _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
   AxisDirection? _lastAxisDirection;
 
   bool get _isVertical =>
       _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
+
   bool get _isReversed =>
       _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
+
   // The amount of scroll distance before and after the current position.
   double get _beforeExtent => _isReversed ? _lastMetrics!.extentAfter : _lastMetrics!.extentBefore;
+
   double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
 
   // The total size of the scrollable content.
