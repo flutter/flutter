@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -14,8 +20,15 @@ void main() {
   const double kOpenScale = 1.15;
   const double kMinScaleFactor = 1.02;
 
-  Widget getChild() {
-    return Container(width: 300.0, height: 100.0, color: CupertinoColors.activeOrange);
+  Widget getChild({double width = 300.0, double height = 100.0}) {
+    return Container(width: width, height: height, color: CupertinoColors.activeOrange);
+  }
+
+  List<Widget> getActions({int number = 10}) {
+    return List<Widget>.generate(
+      number,
+      (int index) => CupertinoContextMenuAction(child: Text('Action $index')),
+    );
   }
 
   Widget getBuilder(BuildContext context, Animation<double> animation) {
@@ -1242,5 +1255,91 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byWidget(child), findsNothing);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in portrait orientation', (WidgetTester tester) async {
+    const Size portraitScreenSize = Size(800.0, 900.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children:
+              children.map((Widget child) {
+                return CupertinoContextMenu(actions: getActions(), child: child);
+              }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.portrait.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in landscape orientation', (WidgetTester tester) async {
+    const Size landscapeScreenSize = Size(800.0, 600.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children:
+              children.map((Widget child) {
+                return CupertinoContextMenu(actions: getActions(), child: child);
+              }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.landscape.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
   });
 }
