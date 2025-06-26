@@ -119,11 +119,9 @@ size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
 }
 
 namespace {
-thread_local uint64_t tls_context_count = 0;
+std::atomic_uint64_t context_count = 0;
 uint64_t CalculateHash(void* ptr) {
-  // You could make a context once per nanosecond for 584 years on one thread
-  // before this overflows.
-  return ++tls_context_count;
+  return context_count.fetch_add(1);
 }
 }  // namespace
 
