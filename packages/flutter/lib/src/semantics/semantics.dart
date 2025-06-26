@@ -5453,7 +5453,7 @@ class SemanticsConfiguration {
   bool get isFocusable => _flags.isFocusable;
 
   @Deprecated(
-    'Use isFocused instead. '
+    'Setting isFocused automatically set this to true. '
     'This feature was deprecated after v3.34.0-0.0.pre.',
   )
   set isFocusable(bool value) {
