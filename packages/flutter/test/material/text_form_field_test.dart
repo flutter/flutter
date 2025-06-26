@@ -1469,6 +1469,16 @@ void main() {
     expect(textFieldWidget.onTapAlwaysCalled, isTrue);
   });
 
+  testWidgets('Passes hintLocales to hintLocales TextField', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('fr', 'FR')];
+    await tester.pumpWidget(
+      MaterialApp(home: Material(child: Center(child: TextFormField(hintLocales: hintLocales)))),
+    );
+
+    final TextField textFieldWidget = tester.widget(find.byType(TextField));
+    expect(textFieldWidget.hintLocales, hintLocales);
+  });
+
   testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
     const Color themeErrorColor = Color(0xff111111);
     const Color errorStyleColor = Color(0xff777777);
