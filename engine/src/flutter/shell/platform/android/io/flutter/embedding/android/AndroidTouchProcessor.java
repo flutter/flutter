@@ -49,6 +49,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerDeviceKind enum in pointer.dart.
+  // Also consider changing TOOL_TYPE_BITS when changing the length of this enum.
   @IntDef({
     PointerDeviceKind.TOUCH,
     PointerDeviceKind.MOUSE,
@@ -275,10 +276,10 @@ public class AndroidTouchProcessor {
         event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
   }
 
-  // Some screen mirroring tools will occasionally report the same ID as having a different tool
-  // type, which breaks Flutter's internal handling of pointer events. Instead give each
-  // (pointerId, toolType) pair a unique ID. Technically this could break when handling a pointer
-  // of id 2^29, but that seems unlikely.
+  // Some screen mirroring tools will occasionally report the same ID as having different associated
+  // tool types across different events, which breaks Flutter's internal handling of pointer events.
+  // Instead give each (pointerId, toolType) pair a unique ID. Technically this could break when
+  // handling a pointer of id 2^29, but that seems unlikely.
   // See https://github.com/flutter/flutter/issues/160144.
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
     return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS)
