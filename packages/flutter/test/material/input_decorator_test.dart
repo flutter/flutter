@@ -7618,6 +7618,299 @@ void main() {
     });
   });
 
+  group('Material3 - InputDecoration floatingLabelAlignment', () {
+    Widget buildInputDecoratorWithFloatingLabel({
+      required TextDirection textDirection,
+      required bool hasIcon,
+      required FloatingLabelAlignment alignment,
+      bool borderIsOutline = false,
+    }) {
+      return buildInputDecorator(
+        textDirection: textDirection,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          floatingLabelAlignment: alignment,
+          icon: hasIcon ? const Icon(Icons.insert_link) : null,
+          labelText: labelText,
+          hintText: hintText,
+          filled: true,
+          border: borderIsOutline ? const OutlineInputBorder() : null,
+        ),
+      );
+    }
+
+    group('LTR with icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.start,
+          ),
+        );
+        // icon (40) + contentPadding (40) + _kInputExtraPadding
+        expect(getLabelRect(tester).left, 84.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.start,
+            borderIsOutline: true,
+          ),
+        );
+        // icon (40) + contentPadding (40) + _kInputExtraPadding
+        expect(getLabelRect(tester).left, 84.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.center,
+          ),
+        );
+        // icon (40) + (decorator (800) - icon (40)) / 2
+        expect(getLabelCenter(tester).dx, 420.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.center,
+            borderIsOutline: true,
+          ),
+        );
+        // icon (40) + (decorator (800) - icon (40)) / 2
+        expect(getLabelCenter(tester).dx, 420.0);
+      });
+    });
+
+    group('LTR without icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.start,
+          ),
+        );
+        // contentPadding (40) + _kInputExtraPadding
+        expect(getLabelRect(tester).left, 44.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.start,
+            borderIsOutline: true,
+          ),
+        );
+        // contentPadding (40) + _kInputExtraPadding
+        expect(getLabelRect(tester).left, 44.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.center,
+          ),
+        );
+        // decorator (800) / 2
+        expect(getLabelCenter(tester).dx, 400.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.ltr,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.center,
+            borderIsOutline: true,
+          ),
+        );
+        // decorator (800) / 2
+        expect(getLabelCenter(tester).dx, 400.0);
+      });
+    });
+
+    group('RTL with icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.start,
+          ),
+        );
+        // decorator (800) - icon (40) - contentPadding (40) - _kInputExtraPadding
+        expect(getLabelRect(tester).right, 716.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.start,
+            borderIsOutline: true,
+          ),
+        );
+        // decorator (800) - icon (40) - contentPadding (40) - _kInputExtraPadding
+        expect(getLabelRect(tester).right, 716.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.center,
+          ),
+        );
+        // (decorator (800) - icon (40)) / 2
+        expect(getLabelCenter(tester).dx, 380.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: true,
+            alignment: FloatingLabelAlignment.center,
+            borderIsOutline: true,
+          ),
+        );
+        // (decorator (800) - icon (40)) / 2
+        expect(getLabelCenter(tester).dx, 380.0);
+      });
+    });
+
+    group('RTL without icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.start,
+          ),
+        );
+        // decorator (800) - contentPadding (40) - _kInputExtraPadding
+        expect(getLabelRect(tester).right, 756.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.start,
+            borderIsOutline: true,
+          ),
+        );
+        // decorator (800) - contentPadding (40) - _kInputExtraPadding
+        expect(getLabelRect(tester).right, 756.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.center,
+          ),
+        );
+        // decorator (800) / 2
+        expect(getLabelCenter(tester).dx, 400.0);
+
+        await tester.pumpWidget(
+          buildInputDecoratorWithFloatingLabel(
+            textDirection: TextDirection.rtl,
+            hasIcon: false,
+            alignment: FloatingLabelAlignment.center,
+            borderIsOutline: true,
+          ),
+        );
+        // decorator (800) / 2
+        expect(getLabelCenter(tester).dx, 400.0);
+      });
+    });
+  });
+
+  group('Material3 - InputDecoration isDense', () {
+    // M3 extra horizontal padding.
+    const double kInputExtraPadding = 4.0;
+
+    testWidgets('Dense layout for an outlined decoration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: labelText,
+            isDense: true,
+          ),
+        ),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 8.0).
+      // Vertical padding affects the container height not the input vertical
+      // position as the input is centered.
+      expect(containerRect.height, 48.0);
+      expect(inputRect.center.dy, containerRect.center.dy);
+      expect(inputRect.left, containerRect.left + 12.0 + kInputExtraPadding);
+      expect(inputRect.right, containerRect.right - 12.0 - kInputExtraPadding);
+    });
+
+    testWidgets('Dense layout for a filled and non-outlined decoration', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(filled: true, labelText: labelText, isDense: true),
+        ),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+      final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0).
+      expect(containerRect.height, 48.0);
+      expect(labelRect.top, containerRect.top + 4.0);
+      expect(inputRect.bottom, containerRect.bottom - 4.0);
+      expect(inputRect.left, containerRect.left + 12.0 + kInputExtraPadding);
+      expect(inputRect.right, containerRect.right - 12.0 - kInputExtraPadding);
+    });
+
+    testWidgets('Dense layout for a non-filled and non-outlined decoration', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(labelText: labelText, isDense: true)),
+      );
+
+      final Rect containerRect = getContainerRect(tester);
+      final Rect inputRect = getInputRect(tester);
+      final Rect labelRect = getLabelRect(tester);
+
+      // Content padding is EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0).
+      expect(containerRect.height, 48.0);
+      expect(labelRect.top, containerRect.top + 4.0);
+      expect(inputRect.bottom, containerRect.bottom - 4.0);
+      expect(inputRect.left, containerRect.left);
+      expect(inputRect.right, containerRect.right);
+    });
+
+    testWidgets('Ambient theme is used', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          inputDecorationTheme: const InputDecorationThemeData(isDense: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getContainerRect(tester).height, 48.0);
+    });
+  });
+
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
     Widget buildFrame({
       InputCounterWidgetBuilder? buildCounter,
@@ -9309,6 +9602,17 @@ void main() {
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
+    });
+
+    testWidgets('isDense', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(isDense: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getContainerRect(tester).height, 48.0);
     });
 
     testWidgets('iconColor', (WidgetTester tester) async {
@@ -14938,4 +15242,41 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
     expect(box, isNot(paints..drrect()));
   });
+
+  testWidgets(
+    'InputDecorator _buildError with errorText correctly updates on BuildContext updates',
+    (WidgetTester tester) async {
+      final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>('initial error');
+      const String helperTextValue = 'helper text';
+
+      addTearDown(errorTextNotifier.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ValueListenableBuilder<String?>(
+              key: const Key('value_listenable_builder_parent'),
+              valueListenable: errorTextNotifier,
+              builder: (BuildContext context, String? value, Widget? child) {
+                return buildInputDecorator(
+                  decoration: InputDecoration(errorText: value, helperText: helperTextValue),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsOneWidget);
+      expect(find.text(helperTextValue), findsNothing);
+
+      errorTextNotifier.value = null;
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsNothing);
+      expect(find.text(helperTextValue), findsOneWidget);
+    },
+  );
 }

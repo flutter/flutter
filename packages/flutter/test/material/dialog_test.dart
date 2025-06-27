@@ -2907,6 +2907,64 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox)).width, 560);
   });
 
+  testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(const AlertDialog(content: SizedBox(), contentPadding: EdgeInsets.zero)),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('AlertDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const AlertDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          content: SizedBox(width: 1000, height: 100),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(contentPadding: EdgeInsets.zero, children: <Widget>[SizedBox()]),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('SimpleDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          contentPadding: EdgeInsets.zero,
+          children: <Widget>[SizedBox(width: 1000, height: 100)],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     // no back button in app bar for RawDialogRoute with full screen dialog set to true
     await tester.pumpWidget(

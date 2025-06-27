@@ -25,8 +25,8 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 4> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT"};
+const std::array<std::string_view, 5> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
@@ -132,6 +132,7 @@ class LicensesWriter {
 struct Package {
   std::string name;
   std::optional<fs::path> license_file;
+  bool is_root_package;
 };
 
 Package GetPackage(const Data& data,
@@ -140,6 +141,7 @@ Package GetPackage(const Data& data,
   Package result = {
       .name = working_dir.filename(),
       .license_file = FindLicense(data, working_dir, "."),
+      .is_root_package = true,
   };
   bool after_third_party = false;
   fs::path current = ".";
@@ -156,6 +158,7 @@ Package GetPackage(const Data& data,
     } else if (component.string() == "third_party") {
       after_third_party = true;
       result.license_file = std::nullopt;
+      result.is_root_package = false;
     }
   }
 
@@ -226,6 +229,15 @@ absl::Status MatchLicenseFile(const fs::path& path,
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                                               std::ostream& licenses,
                                               const Data& data) {
+  Flags flags;
+  return Run(working_dir, licenses, data, flags);
+}
+
+std::vector<absl::Status> LicenseChecker::Run(
+    std::string_view working_dir,
+    std::ostream& licenses,
+    const Data& data,
+    const LicenseChecker::Flags& flags) {
   std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path(working_dir);
@@ -249,9 +261,10 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
       fs::path relative_path = fs::relative(full_path, working_dir);
+      VLOG(2) << relative_path;
       if (!data.include_filter.Matches(relative_path.string()) ||
           data.exclude_filter.Matches(relative_path.string())) {
-        // Ignore file.
+        VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
         continue;
       }
 
@@ -281,30 +294,49 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
       }
       IterateComments(
           file->GetData(), file->GetSize(), [&](std::string_view comment) {
-            VLOG(2) << comment;
+            VLOG(4) << comment;
             re2::StringPiece match;
             if (RE2::PartialMatch(comment, pattern, &match)) {
-              did_find_copyright = true;
-              if (!package.license_file.has_value()) {
-                absl::StatusOr<Catalog::Match> match =
-                    data.catalog.FindMatch(comment);
-                if (match.ok()) {
-                  license_map.Add(package.name, match->matched_text);
-                  VLOG(1) << "OK: " << full_path << " : " << match->matcher;
-                } else {
-                  errors.emplace_back(absl::NotFoundError(
-                      absl::StrCat("Unknown license in ",
-                                   full_path.lexically_normal().string(), " : ",
-                                   match.status().message())));
-                }
+              if (!VLOG_IS_ON(4)) {
+                VLOG(3) << comment;
+              }
+              absl::StatusOr<Catalog::Match> match =
+                  data.catalog.FindMatch(comment);
+              if (match.ok()) {
+                did_find_copyright = true;
+                license_map.Add(package.name, match->matched_text);
+                VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                        << match->matcher;
               } else {
-                VLOG(1) << "OK: " << full_path << " : dir license";
+                if (flags.treat_unmatched_comments_as_errors) {
+                  errors.push_back(absl::NotFoundError(absl::StrCat(
+                      relative_path.lexically_normal().string(), " : ",
+                      match.status().message(), "\n", comment)));
+                }
+                VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
+                        << " : " << match.status().message() << "\n"
+                        << comment;
               }
             }
           });
-      if (!did_find_copyright && !package.license_file.has_value()) {
-        errors.push_back(absl::NotFoundError(
-            "Expected copyright in " + full_path.lexically_normal().string()));
+      if (!did_find_copyright) {
+        if (package.license_file.has_value()) {
+          if (package.is_root_package) {
+            errors.push_back(
+                absl::NotFoundError("Expected root copyright in " +
+                                    relative_path.lexically_normal().string()));
+          } else {
+            fs::path relative_license_path =
+                fs::relative(*package.license_file, working_dir);
+            VLOG(1) << "OK: " << relative_path.lexically_normal()
+                    << " : dir license("
+                    << relative_license_path.lexically_normal() << ")";
+          }
+        } else {
+          errors.push_back(
+              absl::NotFoundError("Expected copyright in " +
+                                  relative_path.lexically_normal().string()));
+        }
       }
     }
   }
@@ -319,14 +351,16 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::ostream& licenses,
-                        std::string_view data_dir) {
+                        std::string_view data_dir,
+                        const LicenseChecker::Flags& flags) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
     std::cerr << "Can't load data at " << data_dir << ": " << data.status()
               << std::endl;
     return 1;
   }
-  std::vector<absl::Status> errors = Run(working_dir, licenses, data.value());
+  std::vector<absl::Status> errors =
+      Run(working_dir, licenses, data.value(), flags);
   for (const absl::Status& status : errors) {
     std::cerr << status << "\n";
   }
