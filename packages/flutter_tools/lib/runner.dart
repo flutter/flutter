@@ -36,7 +36,6 @@ Future<int> run(
   bool? reportCrashes,
   String? flutterVersion,
   Map<Type, Generator>? overrides,
-  required FeatureFlags featureFlags,
   required ShutdownHooks shutdownHooks,
 }) async {
   if (muteCommandLogging) {
@@ -196,8 +195,8 @@ Future<int> _handleToolError(
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
 
-      final String featureFlagsEnabled = featureFlags.allFeatures
-          .where((Feature f) => featureFlags.isEnabled(f) && f.configSetting != null)
+      final String featureFlagsEnabled = allConfigurableFeatures
+          .where(featureFlags.isEnabled)
           .map((Feature f) => f.configSetting)
           .join(', ');
       globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');

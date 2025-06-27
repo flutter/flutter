@@ -84,7 +84,6 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
-                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -139,7 +138,6 @@ void main() {
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   shutdownHooks: ShutdownHooks(),
-                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -208,7 +206,6 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
-                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -264,7 +261,6 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
-                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -373,7 +369,6 @@ void main() {
                     flutterVersion: '[user-branch]/',
                     reportCrashes: true,
                     shutdownHooks: ShutdownHooks(),
-                    featureFlags: TestFeatureFlags(),
                   ),
                 );
                 return null;
@@ -458,7 +453,6 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -489,7 +483,6 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -517,7 +510,6 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -560,7 +552,6 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, false);
@@ -583,7 +574,6 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, false);
@@ -592,7 +582,6 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, true);
@@ -614,7 +603,6 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
@@ -627,7 +615,6 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
@@ -651,7 +638,6 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
@@ -661,7 +647,6 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
@@ -686,7 +671,6 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
-          featureFlags: TestFeatureFlags(),
         );
 
         expect(exitCode, 1, reason: 'Should return 1 due to conflicting options for telemetry');
