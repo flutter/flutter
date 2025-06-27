@@ -17496,7 +17496,7 @@ void main() {
     expect(selection?.start, 11);
     expect(selection?.end, 11);
 
-    // Select all shortcut should be ignored
+    // Select all shortcut should be ignored.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
@@ -17506,13 +17506,13 @@ void main() {
     expect(selection?.start, 11);
     expect(selection?.end, 11);
 
-    // Select all programatically
+    // Select all programatically.
     controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
 
-    // Set the clipboard
+    // Set the clipboard.
     await Clipboard.setData(const ClipboardData(text: 'foo'));
 
-    // Paste shortcut should be ignored
+    // Paste shortcut should be ignored.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyV],
@@ -17521,7 +17521,7 @@ void main() {
     );
     expect(controller.text, 'Hello world');
 
-    // Copy shortcut
+    // Copy shortcut.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.keyC],

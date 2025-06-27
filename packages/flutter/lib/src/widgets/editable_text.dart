@@ -1721,8 +1721,8 @@ class EditableText extends StatefulWidget {
   /// cut/copy/paste menu, and tapping to move the text caret.
   ///
   /// When this is false, the text selection cannot be adjusted by
-  /// the user, text cannot be copied, and the user cannot paste into
-  /// the text field from the clipboard.
+  /// the user, the cut/copy/paste menu is hidden, and shortcuts to
+  /// cut/copy/paste text from the clipboard are disabled.
   ///
   /// Defaults to true.
   /// {@endtemplate}
