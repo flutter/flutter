@@ -227,7 +227,7 @@ class BuildWebCommand extends BuildSubCommand {
         JsCompilerConfig(
           csp: boolArg('csp'),
           dumpInfo: boolArg('dump-info'),
-          minify: minify,
+          minify: minifyJs ?? minify,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
