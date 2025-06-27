@@ -1720,10 +1720,12 @@
 ../../../flutter/third_party/dart/third_party/pkg
 ../../../flutter/third_party/dart/third_party/requirejs
 ../../../flutter/third_party/dart/tools
+../../../flutter/third_party/dart/utils/.dart_tool
 ../../../flutter/third_party/dart/utils/OWNERS
 ../../../flutter/third_party/dart/utils/compiler/.gitignore
 ../../../flutter/third_party/dart/utils/dartanalyzer/.gitignore
 ../../../flutter/third_party/dart/utils/dynamic_module_runner/dynamic_interface.yaml
+../../../flutter/third_party/dart/utils/pubspec.yaml
 ../../../flutter/third_party/depot_tools
 ../../../flutter/third_party/expat/.git
 ../../../flutter/third_party/expat/.github
@@ -3179,9 +3181,6 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
-../../../flutter/third_party/skia/modules/pathops/BUILD.bazel
-../../../flutter/third_party/skia/modules/pathops/include/BUILD.bazel
-../../../flutter/third_party/skia/modules/pathops/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3908,6 +3907,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.system.state/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.test/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.time.alarms/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.controller/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json

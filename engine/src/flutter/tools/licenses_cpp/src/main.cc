@@ -29,12 +29,17 @@ ABSL_FLAG(std::optional<std::string>,
           std::nullopt,
           "Regex that overrides the include filter.");
 ABSL_FLAG(int, v, 0, "Set the verbosity of logs.");
+ABSL_FLAG(bool,
+          treat_unmatched_comments_as_errors,
+          false,
+          "Whether unmatched comments are considered errors.");
 
 namespace {
 int Run(std::string_view working_dir,
         std::ostream& licenses,
         std::string_view data_dir,
-        std::string_view include_filter) {
+        std::string_view include_filter,
+        const LicenseChecker::Flags& flags) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
     std::cerr << "Can't load data at " << data_dir << ": " << data.status()
@@ -53,7 +58,7 @@ int Run(std::string_view working_dir,
   data->include_filter = std::move(filter.value());
 
   std::vector<absl::Status> errors =
-      LicenseChecker::Run(working_dir, licenses, data.value());
+      LicenseChecker::Run(working_dir, licenses, data.value(), flags);
   for (const absl::Status& status : errors) {
     std::cerr << status << "\n";
   }
@@ -85,12 +90,15 @@ int main(int argc, char** argv) {
       std::cerr << "Unable to write to '" << licenses_path.value() << "'.";
       return 1;
     }
+    LicenseChecker::Flags flags;
+    flags.treat_unmatched_comments_as_errors =
+        absl::GetFlag(FLAGS_treat_unmatched_comments_as_errors);
     if (include_filter.has_value()) {
       return Run(working_dir.value(), licenses, data_dir.value(),
-                 include_filter.value());
+                 include_filter.value(), flags);
     } else {
       return LicenseChecker::Run(working_dir.value(), licenses,
-                                 data_dir.value());
+                                 data_dir.value(), flags);
     }
   }
 
