@@ -2653,9 +2653,11 @@ Future<Offset?> startPicker(
   );
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return entryMode == TimePickerEntryMode.dial
-      ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')))
-      : null;
+  final Finder customPaintFinder = find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+    matching: find.byType(CustomPaint),
+  );
+  return entryMode == TimePickerEntryMode.dial ? tester.getCenter(customPaintFinder) : null;
 }
 
 Future<void> finishPicker(WidgetTester tester) async {

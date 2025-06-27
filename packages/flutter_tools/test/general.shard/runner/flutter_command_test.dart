@@ -370,28 +370,6 @@ void main() {
       },
     );
 
-    // TODO(nshahan): Delete when hot reload on web is always enabled
-    // https://github.com/flutter/flutter/issues/170685.
-    testUsingContext('web hot reload enabled by default', () async {
-      final DummyFlutterCommand dummyCommand =
-          DummyFlutterCommand()..usesWebOptions(verboseHelp: false);
-      final CommandRunner<void> runner = createTestCommandRunner(dummyCommand);
-      await runner.run(<String>['dummy']);
-      final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-      expect(buildInfo.webEnableHotReload, isTrue);
-    });
-
-    // TODO(nshahan): Delete when hot reload doesn't break on web-server
-    // https://github.com/dart-lang/sdk/issues/60289.
-    testUsingContext('web hot reload disabled when device is web-server', () async {
-      final DummyFlutterCommand dummyCommand =
-          DummyFlutterCommand()..usesWebOptions(verboseHelp: false);
-      final CommandRunner<void> runner = createTestCommandRunner(dummyCommand);
-      await runner.run(<String>['dummy', '-d', 'web-server']);
-      final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-      expect(buildInfo.webEnableHotReload, isFalse);
-    });
-
     group('signals tests', () {
       late FakeIoProcessSignal mockSignal;
       late ProcessSignal signalUnderTest;

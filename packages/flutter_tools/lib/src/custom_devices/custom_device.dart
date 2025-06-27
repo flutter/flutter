@@ -668,7 +668,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     return true;
   }
 

@@ -1558,6 +1558,8 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       return null;
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 

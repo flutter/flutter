@@ -31,6 +31,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // late Widget _myIcon;
+// late BuildContext context;
 
 // The duration value extracted from:
 // https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/textfield/TextInputLayout.java
@@ -399,26 +400,33 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    return Semantics(
-      container: true,
-      child: FadeTransition(
-        opacity: _controller,
-        child: FractionalTranslation(
-          translation: Tween<Offset>(
-            begin: const Offset(0.0, -0.25),
-            end: Offset.zero,
-          ).evaluate(_controller.view),
-          child:
-              widget.error ??
-              Text(
-                widget.errorText!,
-                style: widget.errorStyle,
-                textAlign: widget.textAlign,
-                overflow: TextOverflow.ellipsis,
-                maxLines: widget.errorMaxLines,
-              ),
-        ),
-      ),
+    final Widget? capturedError = widget.error;
+    final String? capturedErrorText = widget.errorText;
+    return Builder(
+      builder: (BuildContext context) {
+        return Semantics(
+          container: true,
+          liveRegion: !MediaQuery.supportsAnnounceOf(context),
+          child: FadeTransition(
+            opacity: _controller,
+            child: FractionalTranslation(
+              translation: Tween<Offset>(
+                begin: const Offset(0.0, -0.25),
+                end: Offset.zero,
+              ).evaluate(_controller.view),
+              child:
+                  capturedError ??
+                  Text(
+                    capturedErrorText!,
+                    style: widget.errorStyle,
+                    textAlign: widget.textAlign,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: widget.errorMaxLines,
+                  ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -714,7 +722,7 @@ class _RenderDecoration extends RenderBox
        _material3 = material3;
 
   // TODO(bleroux): consider defining this value as a Material token and making it
-  // configurable by InputDecorationTheme.
+  // configurable by InputDecorationThemeData.
   double get subtextGap => material3 ? 4.0 : 8.0;
   double get prefixToInputGap => material3 ? 4.0 : 0.0;
   double get inputToSuffixGap => material3 ? 4.0 : 0.0;
@@ -1841,7 +1849,7 @@ class InputDecorator extends StatefulWidget {
   /// The text and styles to use when decorating the child.
   ///
   /// Null [InputDecoration] properties are initialized with the corresponding
-  /// values from [ThemeData.inputDecorationTheme].
+  /// values from the ambient [InputDecorationThemeData].
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1923,12 +1931,8 @@ class InputDecorator extends StatefulWidget {
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
   ///
-  /// Will withdraw when not empty, when focused while enabled, or when
-  /// floating behavior is [FloatingLabelBehavior.always].
-  bool get _labelShouldWithdraw =>
-      !isEmpty ||
-      (isFocused && decoration.enabled) ||
-      decoration.floatingLabelBehavior == FloatingLabelBehavior.always;
+  /// Will withdraw when not empty or when focused while enabled.
+  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
   State<InputDecorator> createState() => _InputDecoratorState();
@@ -1979,15 +1983,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void initState() {
     super.initState();
 
-    final bool labelIsInitiallyFloating =
-        widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
-        widget._labelShouldWithdraw;
-
-    _floatingLabelController = AnimationController(
-      duration: _kTransitionDuration,
-      vsync: this,
-      value: labelIsInitiallyFloating ? 1.0 : 0.0,
-    );
+    _floatingLabelController = AnimationController(duration: _kTransitionDuration, vsync: this);
     _floatingLabelController.addListener(_handleChange);
     _floatingLabelAnimation = CurvedAnimation(
       parent: _floatingLabelController,
@@ -2002,6 +1998,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void didChangeDependencies() {
     super.didChangeDependencies();
     _effectiveDecoration = null;
+
+    final bool labelIsInitiallyFloating =
+        decoration.floatingLabelBehavior != FloatingLabelBehavior.never && labelShouldWithdraw;
+    _floatingLabelController.value = labelIsInitiallyFloating ? 1.0 : 0.0;
   }
 
   @override
@@ -2022,9 +2022,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   InputDecoration? _effectiveDecoration;
   InputDecoration get decoration =>
-      _effectiveDecoration ??= widget.decoration.applyDefaults(
-        Theme.of(context).inputDecorationTheme,
-      );
+      _effectiveDecoration ??= widget.decoration.applyDefaults(InputDecorationTheme.of(context));
 
   TextAlign? get textAlign => widget.textAlign;
   bool get isFocused => widget.isFocused;
@@ -2034,6 +2032,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get _floatingLabelEnabled {
     return decoration.floatingLabelBehavior != FloatingLabelBehavior.never;
   }
+
+  bool get labelShouldWithdraw =>
+      widget._labelShouldWithdraw ||
+      decoration.floatingLabelBehavior == FloatingLabelBehavior.always;
 
   @override
   void didUpdateWidget(InputDecorator old) {
@@ -2046,7 +2048,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
-      if (_floatingLabelEnabled && widget._labelShouldWithdraw) {
+      if (_floatingLabelEnabled && labelShouldWithdraw) {
         _floatingLabelController.forward();
       } else {
         _floatingLabelController.reverse();
@@ -2080,16 +2082,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
     final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
     if (isHovering) {
-      final Color hoverColor =
-          decoration.hoverColor ??
-          themeData.inputDecorationTheme.hoverColor ??
-          themeData.hoverColor;
+      final Color hoverColor = decoration.hoverColor ?? themeData.hoverColor;
       return Color.alphaBlend(hoverColor.withOpacity(0.12), enabledColor);
     }
     return enabledColor;
   }
 
-  Color _getFillColor(ThemeData themeData, InputDecorationTheme defaults) {
+  Color _getFillColor(ThemeData themeData, InputDecorationThemeData defaults) {
     if (decoration.filled != true) {
       // filled == null same as filled == false
       return Colors.transparent;
@@ -2104,35 +2103,28 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled == null || !decoration.filled! || !decoration.enabled) {
       return Colors.transparent;
     }
-    return decoration.hoverColor ??
-        themeData.inputDecorationTheme.hoverColor ??
-        themeData.hoverColor;
+    return decoration.hoverColor ?? themeData.hoverColor;
   }
 
-  Color _getIconColor(ThemeData themeData, InputDecorationTheme defaults) {
+  Color _getIconColor(ThemeData themeData, InputDecorationThemeData defaults) {
     return MaterialStateProperty.resolveAs(decoration.iconColor, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState) ??
         MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(
-    InputDecorationTheme inputDecorationTheme,
     IconButtonThemeData iconButtonTheme,
-    InputDecorationTheme defaults,
+    InputDecorationThemeData defaults,
   ) {
     return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
-        MaterialStateProperty.resolveAs(inputDecorationTheme.prefixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
         MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(
-    InputDecorationTheme inputDecorationTheme,
     IconButtonThemeData iconButtonTheme,
-    InputDecorationTheme defaults,
+    InputDecorationThemeData defaults,
   ) {
     return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
-        MaterialStateProperty.resolveAs(inputDecorationTheme.suffixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
         MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
@@ -2142,8 +2134,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // floatingLabelBehavior isn't set to always, then the label appears where the
   // hint would.
   bool get _hasInlineLabel {
-    return !widget._labelShouldWithdraw &&
-        (decoration.labelText != null || decoration.label != null);
+    return !labelShouldWithdraw && (decoration.labelText != null || decoration.label != null);
   }
 
   // If the label is a floating placeholder, it's always shown.
@@ -2151,15 +2142,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
+  TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
     final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
       defaults.labelStyle!,
       materialState,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.labelStyle, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState);
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2170,15 +2159,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   // The base style for the inline hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineHintStyle(ThemeData themeData, InputDecorationTheme defaults) {
+  TextStyle _getInlineHintStyle(ThemeData themeData, InputDecorationThemeData defaults) {
     final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
       defaults.hintStyle!,
       materialState,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.hintStyle, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState);
 
     return (themeData.useMaterial3
             ? themeData.textTheme.bodyLarge!
@@ -2188,7 +2175,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         .merge(style);
   }
 
-  TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
+  TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
     TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(
       defaults.floatingLabelStyle!,
       materialState,
@@ -2200,12 +2187,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       decoration.floatingLabelStyle ?? decoration.labelStyle,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState) ??
-        MaterialStateProperty.resolveAs(
-          themeData.inputDecorationTheme.floatingLabelStyle,
-          materialState,
-        );
+    final TextStyle? style = MaterialStateProperty.resolveAs(
+      decoration.floatingLabelStyle,
+      materialState,
+    );
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2214,14 +2199,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         .copyWith(height: 1);
   }
 
-  TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
+  TextStyle _getHelperStyle(ThemeData themeData, InputDecorationThemeData defaults) {
     return MaterialStateProperty.resolveAs(
       defaults.helperStyle!,
       materialState,
     ).merge(MaterialStateProperty.resolveAs(decoration.helperStyle, materialState));
   }
 
-  TextStyle _getErrorStyle(ThemeData themeData, InputDecorationTheme defaults) {
+  TextStyle _getErrorStyle(ThemeData themeData, InputDecorationThemeData defaults) {
     return MaterialStateProperty.resolveAs(
       defaults.errorStyle!,
       materialState,
@@ -2235,7 +2220,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (_hasError) MaterialState.error,
   };
 
-  InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
+  InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationThemeData defaults) {
     final InputBorder border =
         MaterialStateProperty.resolveAs(decoration.border, materialState) ??
         const UnderlineInputBorder();
@@ -2266,7 +2251,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         borderSide: BorderSide(
           color: _getDefaultM2BorderColor(themeData),
           width:
-              ((decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) ||
+              ((decoration.isCollapsed!) ||
                       decoration.border == InputBorder.none ||
                       !decoration.enabled)
                   ? 0.0
@@ -2289,14 +2274,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return FadeTransition(opacity: _curvedAnimation!, child: child);
   }
 
+  static Widget _topStartLayout(Widget? currentChild, List<Widget> previousChildren) {
+    return Stack(children: <Widget>[...previousChildren, if (currentChild != null) currentChild]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final VisualDensity visualDensity = decoration.visualDensity ?? themeData.visualDensity;
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final InputDecorationTheme defaults =
+    final InputDecorationThemeData defaults =
         useMaterial3 ? _InputDecoratorDefaultsM3(context) : _InputDecoratorDefaultsM2(context);
-    final InputDecorationTheme inputDecorationTheme = themeData.inputDecorationTheme;
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
@@ -2331,6 +2319,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               : AnimatedSwitcher(
                 duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
                 transitionBuilder: _buildTransition,
+                layoutBuilder: _topStartLayout,
                 child: showHint ? hintWidget : const SizedBox.shrink(),
               );
     }
@@ -2375,10 +2364,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           child: AnimatedDefaultTextStyle(
             duration: _kTransitionDuration,
             curve: _kTransitionCurve,
-            style:
-                widget._labelShouldWithdraw
-                    ? _getFloatingLabelStyle(themeData, defaults)
-                    : labelStyle,
+            style: labelShouldWithdraw ? _getFloatingLabelStyle(themeData, defaults) : labelStyle,
             child:
                 decoration.label ??
                 Text(decoration.labelText!, overflow: TextOverflow.ellipsis, textAlign: textAlign),
@@ -2394,13 +2380,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // If at least two out of the three are visible, it needs semantics sort
     // order.
     final bool needsSemanticsSortOrder =
-        widget._labelShouldWithdraw &&
+        labelShouldWithdraw &&
         (input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix));
 
     final Widget? prefix =
         hasPrefix
             ? _AffixText(
-              labelIsFloating: widget._labelShouldWithdraw,
+              labelIsFloating: labelShouldWithdraw,
               text: decoration.prefixText,
               style:
                   MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ??
@@ -2414,7 +2400,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget? suffix =
         hasSuffix
             ? _AffixText(
-              labelIsFloating: widget._labelShouldWithdraw,
+              labelIsFloating: labelShouldWithdraw,
               text: decoration.suffixText,
               style:
                   MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ??
@@ -2465,14 +2451,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ),
                   child: IconTheme.merge(
                     data: IconThemeData(
-                      color: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      color: _getPrefixIconColor(iconButtonTheme, defaults),
                       size: iconSize,
                     ),
                     child: IconButtonTheme(
                       data: IconButtonThemeData(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll<Color>(
-                            _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                            _getPrefixIconColor(iconButtonTheme, defaults),
                           ),
                           iconSize: WidgetStatePropertyAll<double>(iconSize),
                         ).merge(iconButtonTheme.style),
@@ -2503,14 +2489,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ),
                   child: IconTheme.merge(
                     data: IconThemeData(
-                      color: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      color: _getSuffixIconColor(iconButtonTheme, defaults),
                       size: iconSize,
                     ),
                     child: IconButtonTheme(
                       data: IconButtonThemeData(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll<Color>(
-                            _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                            _getSuffixIconColor(iconButtonTheme, defaults),
                           ),
                           iconSize: WidgetStatePropertyAll<double>(iconSize),
                         ).merge(iconButtonTheme.style),
@@ -2574,7 +2560,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final EdgeInsetsDirectional contentPadding;
     final double floatingLabelHeight;
 
-    if (decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) {
+    if (decoration.isCollapsed!) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsetsDirectional.zero;
     } else if (!border.isOutline) {
@@ -2631,7 +2617,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
-        isCollapsed: decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed,
+        isCollapsed: decoration.isCollapsed!,
         inputGap: inputGap,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
@@ -2662,8 +2648,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
-    final BoxConstraints? constraints =
-        decoration.constraints ?? themeData.inputDecorationTheme.constraints;
+    final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
       return ConstrainedBox(constraints: constraints, child: decorator);
     }
@@ -2748,7 +2733,7 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// Unless specified by [ThemeData.inputDecorationTheme], [InputDecorator]
+  /// Unless specified by the ambient [InputDecorationThemeData], [InputDecorator]
   /// defaults [isDense] to false and [filled] to false. The default border is
   /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
   /// then no border is drawn.
@@ -3148,8 +3133,8 @@ class InputDecoration {
 
   /// The duration of the [hintText] fade in and fade out animations.
   ///
-  /// If null, defaults to [InputDecorationTheme.hintFadeDuration].
-  /// If [InputDecorationTheme.hintFadeDuration] is null defaults to 20ms.
+  /// If null, defaults to [InputDecorationThemeData.hintFadeDuration].
+  /// If [InputDecorationThemeData.hintFadeDuration] is null defaults to 20ms.
   final Duration? hintFadeDuration;
 
   /// Whether the input field's height should always be greater than or equal to
@@ -3243,7 +3228,7 @@ class InputDecoration {
   /// field in place of the content.
   /// {@endtemplate}
   ///
-  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
+  /// If null, [InputDecorationThemeData.floatingLabelBehavior] will be used.
   ///
   /// See also:
   ///
@@ -3263,7 +3248,7 @@ class InputDecoration {
   /// top of the field.
   /// {@endtemplate}
   ///
-  /// If null, [InputDecorationTheme.floatingLabelAlignment] will be used.
+  /// If null, [InputDecorationThemeData.floatingLabelAlignment] will be used.
   ///
   /// See also:
   ///
@@ -3615,7 +3600,7 @@ class InputDecoration {
   /// into the final fill color.
   ///
   /// By default the [fillColor] is based on the current
-  /// [InputDecorationTheme.fillColor].
+  /// [InputDecorationThemeData.fillColor].
   ///
   /// {@macro flutter.material.input_decorator.container_description}
   final Color? fillColor;
@@ -3623,7 +3608,7 @@ class InputDecoration {
   /// The fill color of the decoration's container when it has the input focus.
   ///
   /// By default the [focusColor] is based on the current
-  /// [InputDecorationTheme.focusColor].
+  /// [InputDecorationThemeData.focusColor].
   ///
   /// This [focusColor] is ignored by [TextField] and [TextFormField] because
   /// they don't respond to focus changes by changing their decorator's
@@ -3835,9 +3820,8 @@ class InputDecoration {
   /// allows you to control how big the decorator will be in its available
   /// space.
   ///
-  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
-  /// [InputDecorationTheme.constraints] will be used. If that
-  /// is null then the decorator will fill the available width with
+  /// If null, then the ambient [InputDecorationThemeData.constraints] will be used.
+  /// If that is null then the decorator will fill the available width with
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
@@ -3855,15 +3839,14 @@ class InputDecoration {
   /// When the visual density is [VisualDensity.standard] vertical aspect of
   /// [contentPadding] is not changed.
   ///
-  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
-  /// [InputDecorationTheme.visualDensity] will be used. If that is null then
-  /// [ThemeData.visualDensity] will be used.
+  /// If null, then the ambient [InputDecorationThemeData.visualDensity] will be used.
+  /// If that is null then [ThemeData.visualDensity] will be used.
   ///
   /// See also:
   ///
   ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
   ///    within a [Theme].
-  ///  * [InputDecorationTheme.visualDensity], which can override this setting for a
+  ///  * [InputDecorationThemeData.visualDensity], which can override this setting for a
   ///    given decorator.
   final VisualDensity? visualDensity;
 
@@ -3927,6 +3910,7 @@ class InputDecoration {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
+    SemanticsService? semanticsService,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3990,11 +3974,22 @@ class InputDecoration {
   }
 
   /// Used by widgets like [TextField] and [InputDecorator] to create a new
-  /// [InputDecoration] with default values taken from the [theme].
+  /// [InputDecoration] with default values taken from the [inputDecorationTheme].
   ///
   /// Only null valued properties from this [InputDecoration] are replaced
-  /// by the corresponding values from [theme].
-  InputDecoration applyDefaults(InputDecorationTheme theme) {
+  /// by the corresponding values from [inputDecorationTheme].
+  InputDecoration applyDefaults(Object inputDecorationTheme) {
+    // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
+    if (inputDecorationTheme is! InputDecorationTheme &&
+        inputDecorationTheme is! InputDecorationThemeData) {
+      throw ArgumentError(
+        'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+      );
+    }
+    final InputDecorationThemeData theme =
+        (inputDecorationTheme is InputDecorationTheme)
+            ? inputDecorationTheme.data
+            : inputDecorationTheme as InputDecorationThemeData;
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? theme.floatingLabelStyle,
@@ -4229,18 +4224,628 @@ class InputDecoration {
 
 /// Defines the default appearance of [InputDecorator]s.
 ///
-/// This class is used to define the value of [ThemeData.inputDecorationTheme].
-/// The [InputDecorator], [TextField], and [TextFormField] widgets use
-/// the current input decoration theme to initialize null [InputDecoration]
-/// properties.
+/// Descendant widgets obtain the current theme's [InputDecorationThemeData] using
+/// [InputDecorationTheme.of]. When a widget uses [InputDecorationTheme.of], it is
+/// automatically rebuilt if the theme later changes.
+///
+/// See also:
+///
+///  * [InputDecorationThemeData], which describes the actual configuration of an
+///    input decoration theme.
+///  * [ThemeData.inputDecorationTheme], which specifies an input decoration theme as
+///    part of the overall Material theme.
+class InputDecorationTheme extends InheritedTheme with Diagnosticable {
+  /// Creates a [InputDecorationTheme] that controls visual parameters for
+  /// descendant [InputDecorator]s.
+  const InputDecorationTheme({
+    super.key,
+    TextStyle? labelStyle,
+    TextStyle? floatingLabelStyle,
+    TextStyle? helperStyle,
+    int? helperMaxLines,
+    TextStyle? hintStyle,
+    Duration? hintFadeDuration,
+    int? hintMaxLines,
+    TextStyle? errorStyle,
+    int? errorMaxLines,
+    FloatingLabelBehavior? floatingLabelBehavior,
+    FloatingLabelAlignment? floatingLabelAlignment,
+    bool? isDense,
+    EdgeInsetsGeometry? contentPadding,
+    bool? isCollapsed,
+    Color? iconColor,
+    TextStyle? prefixStyle,
+    Color? prefixIconColor,
+    BoxConstraints? prefixIconConstraints,
+    TextStyle? suffixStyle,
+    Color? suffixIconColor,
+    BoxConstraints? suffixIconConstraints,
+    TextStyle? counterStyle,
+    bool? filled,
+    Color? fillColor,
+    BorderSide? activeIndicatorBorder,
+    BorderSide? outlineBorder,
+    Color? focusColor,
+    Color? hoverColor,
+    InputBorder? errorBorder,
+    InputBorder? focusedBorder,
+    InputBorder? focusedErrorBorder,
+    InputBorder? disabledBorder,
+    InputBorder? enabledBorder,
+    InputBorder? border,
+    bool? alignLabelWithHint,
+    BoxConstraints? constraints,
+    VisualDensity? visualDensity,
+    InputDecorationThemeData? data,
+    Widget? child,
+  }) : assert(
+         data == null ||
+             (labelStyle ??
+                     floatingLabelStyle ??
+                     helperStyle ??
+                     helperMaxLines ??
+                     hintStyle ??
+                     hintFadeDuration ??
+                     hintMaxLines ??
+                     errorStyle ??
+                     errorMaxLines ??
+                     floatingLabelBehavior ??
+                     floatingLabelAlignment ??
+                     isDense ??
+                     contentPadding ??
+                     isCollapsed ??
+                     iconColor ??
+                     prefixStyle ??
+                     prefixIconColor ??
+                     prefixIconConstraints ??
+                     suffixStyle ??
+                     suffixIconColor ??
+                     suffixIconConstraints ??
+                     counterStyle ??
+                     filled ??
+                     fillColor ??
+                     activeIndicatorBorder ??
+                     outlineBorder ??
+                     focusColor ??
+                     hoverColor ??
+                     errorBorder ??
+                     focusedBorder ??
+                     focusedErrorBorder ??
+                     disabledBorder ??
+                     enabledBorder ??
+                     border ??
+                     alignLabelWithHint ??
+                     constraints ??
+                     visualDensity) ==
+                 null,
+       ),
+       _labelStyle = labelStyle,
+       _floatingLabelStyle = floatingLabelStyle,
+       _helperStyle = helperStyle,
+       _helperMaxLines = helperMaxLines,
+       _hintStyle = hintStyle,
+       _hintFadeDuration = hintFadeDuration,
+       _hintMaxLines = hintMaxLines,
+       _errorStyle = errorStyle,
+       _errorMaxLines = errorMaxLines,
+       _floatingLabelBehavior = floatingLabelBehavior ?? FloatingLabelBehavior.auto,
+       _floatingLabelAlignment = floatingLabelAlignment ?? FloatingLabelAlignment.start,
+       _isDense = isDense ?? false,
+       _contentPadding = contentPadding,
+       _isCollapsed = isCollapsed ?? false,
+       _iconColor = iconColor,
+       _prefixStyle = prefixStyle,
+       _prefixIconColor = prefixIconColor,
+       _prefixIconConstraints = prefixIconConstraints,
+       _suffixStyle = suffixStyle,
+       _suffixIconColor = suffixIconColor,
+       _suffixIconConstraints = suffixIconConstraints,
+       _counterStyle = counterStyle,
+       _filled = filled ?? false,
+       _fillColor = fillColor,
+       _activeIndicatorBorder = activeIndicatorBorder,
+       _outlineBorder = outlineBorder,
+       _focusColor = focusColor,
+       _hoverColor = hoverColor,
+       _errorBorder = errorBorder,
+       _focusedBorder = focusedBorder,
+       _focusedErrorBorder = focusedErrorBorder,
+       _disabledBorder = disabledBorder,
+       _enabledBorder = enabledBorder,
+       _border = border,
+       _alignLabelWithHint = alignLabelWithHint ?? false,
+       _constraints = constraints,
+       _visualDensity = visualDensity,
+       _data = data,
+       super(child: child ?? const SizedBox.shrink());
+
+  final InputDecorationThemeData? _data;
+  final TextStyle? _labelStyle;
+  final TextStyle? _floatingLabelStyle;
+  final TextStyle? _helperStyle;
+  final int? _helperMaxLines;
+  final TextStyle? _hintStyle;
+  final Duration? _hintFadeDuration;
+  final int? _hintMaxLines;
+  final TextStyle? _errorStyle;
+  final int? _errorMaxLines;
+  final FloatingLabelBehavior _floatingLabelBehavior;
+  final FloatingLabelAlignment _floatingLabelAlignment;
+  final bool _isDense;
+  final EdgeInsetsGeometry? _contentPadding;
+  final bool _isCollapsed;
+  final Color? _iconColor;
+  final TextStyle? _prefixStyle;
+  final Color? _prefixIconColor;
+  final BoxConstraints? _prefixIconConstraints;
+  final TextStyle? _suffixStyle;
+  final Color? _suffixIconColor;
+  final BoxConstraints? _suffixIconConstraints;
+  final TextStyle? _counterStyle;
+  final bool _filled;
+  final Color? _fillColor;
+  final BorderSide? _activeIndicatorBorder;
+  final BorderSide? _outlineBorder;
+  final Color? _focusColor;
+  final Color? _hoverColor;
+  final InputBorder? _errorBorder;
+  final InputBorder? _focusedBorder;
+  final InputBorder? _focusedErrorBorder;
+  final InputBorder? _disabledBorder;
+  final InputBorder? _enabledBorder;
+  final InputBorder? _border;
+  final bool _alignLabelWithHint;
+  final BoxConstraints? _constraints;
+  final VisualDensity? _visualDensity;
+
+  /// Overrides the default value for [InputDecoration.labelStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.labelStyle] property in [data] instead.
+  TextStyle? get labelStyle => _data != null ? _data.labelStyle : _labelStyle;
+
+  /// Overrides the default value for [InputDecoration.floatingLabelStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.floatingLabelStyle] property in [data] instead.
+  TextStyle? get floatingLabelStyle =>
+      _data != null ? _data.floatingLabelStyle : _floatingLabelStyle;
+
+  /// Overrides the default value for [InputDecoration.floatingLabelStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.helperStyle] property in [data] instead.
+  TextStyle? get helperStyle => _data != null ? _data.helperStyle : _helperStyle;
+
+  /// Overrides the default value for [InputDecoration.helperMaxLines].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.helperMaxLines] property in [data] instead.
+  int? get helperMaxLines => _data != null ? _data.helperMaxLines : _helperMaxLines;
+
+  /// Overrides the default value for [InputDecoration.hintStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.hintStyle] property in [data] instead.
+  TextStyle? get hintStyle => _data != null ? _data.hintStyle : _hintStyle;
+
+  /// Overrides the default value for [InputDecoration.hintFadeDuration].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.hintFadeDuration] property in [data] instead.
+  Duration? get hintFadeDuration => _data != null ? _data.hintFadeDuration : _hintFadeDuration;
+
+  /// Overrides the default value for [InputDecoration.hintMaxLines].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.hintMaxLines] property in [data] instead.
+  int? get hintMaxLines => _data != null ? _data.hintMaxLines : _hintMaxLines;
+
+  /// Overrides the default value for [InputDecoration.errorStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.errorStyle] property in [data] instead.
+  TextStyle? get errorStyle => _data != null ? _data.errorStyle : _errorStyle;
+
+  /// Overrides the default value for [InputDecoration.errorMaxLines].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.errorMaxLines] property in [data] instead.
+  int? get errorMaxLines => _data != null ? _data.errorMaxLines : _errorMaxLines;
+
+  /// Overrides the default value for [InputDecoration.floatingLabelBehavior].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.floatingLabelBehavior] property in [data] instead.
+  FloatingLabelBehavior get floatingLabelBehavior =>
+      _data != null ? _data.floatingLabelBehavior : _floatingLabelBehavior;
+
+  /// Overrides the default value for [InputDecoration.floatingLabelAlignment].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.floatingLabelAlignment] property in [data] instead.
+  FloatingLabelAlignment get floatingLabelAlignment =>
+      _data != null ? _data.floatingLabelAlignment : _floatingLabelAlignment;
+
+  /// Overrides the default value for [InputDecoration.isDense].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.isDense] property in [data] instead.
+  bool get isDense => _data != null ? _data.isDense : _isDense;
+
+  /// Overrides the default value for [InputDecoration.contentPadding].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.contentPadding] property in [data] instead.
+  EdgeInsetsGeometry? get contentPadding => _data != null ? _data.contentPadding : _contentPadding;
+
+  /// Overrides the default value for [InputDecoration.isCollapsed].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.isCollapsed] property in [data] instead.
+  bool get isCollapsed => _data != null ? _data.isCollapsed : _isCollapsed;
+
+  /// Overrides the default value for [InputDecoration.iconColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.iconColor] property in [data] instead.
+  Color? get iconColor => _data != null ? _data.iconColor : _iconColor;
+
+  /// Overrides the default value for [InputDecoration.prefixStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.prefixStyle] property in [data] instead.
+  TextStyle? get prefixStyle => _data != null ? _data.prefixStyle : _prefixStyle;
+
+  /// Overrides the default value for [InputDecoration.prefixIconColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.prefixIconColor] property in [data] instead.
+  Color? get prefixIconColor => _data != null ? _data.prefixIconColor : _prefixIconColor;
+
+  /// Overrides the default value for [InputDecoration.prefixIconConstraints].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.prefixIconConstraints] property in [data] instead.
+  BoxConstraints? get prefixIconConstraints =>
+      _data != null ? _data.prefixIconConstraints : _prefixIconConstraints;
+
+  /// Overrides the default value for [InputDecoration.suffixStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.suffixStyle] property in [data] instead.
+  TextStyle? get suffixStyle => _data != null ? _data.suffixStyle : _suffixStyle;
+
+  /// Overrides the default value for [InputDecoration.suffixIconColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.suffixIconColor] property in [data] instead.
+  Color? get suffixIconColor => _data != null ? _data.suffixIconColor : _suffixIconColor;
+
+  /// Overrides the default value for [InputDecoration.suffixIconConstraints].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.suffixIconConstraints] property in [data] instead.
+  BoxConstraints? get suffixIconConstraints =>
+      _data != null ? _data.suffixIconConstraints : _suffixIconConstraints;
+
+  /// Overrides the default value for [InputDecoration.counterStyle].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.counterStyle] property in [data] instead.
+  TextStyle? get counterStyle => _data != null ? _data.counterStyle : _counterStyle;
+
+  /// Overrides the default value for [InputDecoration.filled].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.filled] property in [data] instead.
+  bool get filled => _data != null ? _data.filled : _filled;
+
+  /// Overrides the default value for [InputDecoration.fillColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.fillColor] property in [data] instead.
+  Color? get fillColor => _data != null ? _data.fillColor : _fillColor;
+
+  /// The borderSide of the UnderlineInputBorder with `color` and `weight`.
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.activeIndicatorBorder] property in [data] instead.
+  BorderSide? get activeIndicatorBorder =>
+      _data != null ? _data.activeIndicatorBorder : _activeIndicatorBorder;
+
+  /// The borderSide of the OutlineInputBorder with `color` and `weight`.
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.outlineBorder] property in [data] instead.
+  BorderSide? get outlineBorder => _data != null ? _data.outlineBorder : _outlineBorder;
+
+  /// Overrides the default value for [InputDecoration.focusColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.focusColor] property in [data] instead.
+  Color? get focusColor => _data != null ? _data.focusColor : _focusColor;
+
+  /// Overrides the default value for [InputDecoration.hoverColor].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.hoverColor] property in [data] instead.
+  Color? get hoverColor => _data != null ? _data.hoverColor : _hoverColor;
+
+  /// Overrides the default value for [InputDecoration.errorBorder].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.errorBorder] property in [data] instead.
+  InputBorder? get errorBorder => _data != null ? _data.errorBorder : _errorBorder;
+
+  /// Overrides the default value for [InputDecoration.focusedBorder].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.focusedBorder] property in [data] instead.
+  InputBorder? get focusedBorder => _data != null ? _data.focusedBorder : _focusedBorder;
+
+  /// Overrides the default value for [InputDecoration.focusedErrorBorder].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.focusedErrorBorder] property in [data] instead.
+  InputBorder? get focusedErrorBorder =>
+      _data != null ? _data.focusedErrorBorder : _focusedErrorBorder;
+
+  /// Overrides the default value for [InputDecoration.disabledBorder].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.disabledBorder] property in [data] instead.
+  InputBorder? get disabledBorder => _data != null ? _data.disabledBorder : _disabledBorder;
+
+  /// Overrides the default value for [InputDecoration.enabledBorder].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.enabledBorder] property in [data] instead.
+  InputBorder? get enabledBorder => _data != null ? _data.enabledBorder : _enabledBorder;
+
+  /// Overrides the default value for [InputDecoration.border].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.border] property in [data] instead.
+  InputBorder? get border => _data != null ? _data.border : _border;
+
+  /// Overrides the default value for [InputDecoration.alignLabelWithHint].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.alignLabelWithHint] property in [data] instead.
+  bool get alignLabelWithHint => _data != null ? _data.alignLabelWithHint : _alignLabelWithHint;
+
+  /// Overrides the default value for [InputDecoration.constraints].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.constraints] property in [data] instead.
+  BoxConstraints? get constraints => _data != null ? _data.constraints : _constraints;
+
+  /// Overrides the default value for [InputDecoration.visualDensity].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.visualDensity] property in [data] instead.
+  VisualDensity? get visualDensity => _data != null ? _data.visualDensity : _visualDensity;
+
+  /// The properties used for all descendant [TabBar] widgets.
+  InputDecorationThemeData get data =>
+      _data ??
+      InputDecorationThemeData(
+        labelStyle: _labelStyle,
+        floatingLabelStyle: _floatingLabelStyle,
+        helperStyle: _helperStyle,
+        helperMaxLines: _helperMaxLines,
+        hintStyle: _hintStyle,
+        hintFadeDuration: _hintFadeDuration,
+        hintMaxLines: _hintMaxLines,
+        errorStyle: _errorStyle,
+        errorMaxLines: _errorMaxLines,
+        floatingLabelBehavior: _floatingLabelBehavior,
+        floatingLabelAlignment: _floatingLabelAlignment,
+        isDense: _isDense,
+        contentPadding: _contentPadding,
+        isCollapsed: _isCollapsed,
+        iconColor: _iconColor,
+        prefixStyle: _prefixStyle,
+        prefixIconColor: _prefixIconColor,
+        prefixIconConstraints: _prefixIconConstraints,
+        suffixStyle: _suffixStyle,
+        suffixIconColor: _suffixIconColor,
+        suffixIconConstraints: _suffixIconConstraints,
+        counterStyle: _counterStyle,
+        filled: _filled,
+        fillColor: _fillColor,
+        activeIndicatorBorder: _activeIndicatorBorder,
+        outlineBorder: _outlineBorder,
+        focusColor: _focusColor,
+        hoverColor: _hoverColor,
+        errorBorder: _errorBorder,
+        focusedBorder: _focusedBorder,
+        focusedErrorBorder: _focusedErrorBorder,
+        disabledBorder: _disabledBorder,
+        enabledBorder: _enabledBorder,
+        border: _border,
+        alignLabelWithHint: _alignLabelWithHint,
+        constraints: _constraints,
+        visualDensity: _visualDensity,
+      );
+
+  /// Returns the closest [InputDecorationThemeData] instance given the build context.
+  ///
+  /// If there is no enclosing [InputDecorationTheme] widget, then
+  /// [ThemeData.inputDecorationTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// InputDecorationThemeData theme = InputDecorationTheme.of(context);
+  /// ```
+  static InputDecorationThemeData of(BuildContext context) {
+    final InputDecorationTheme? inputDecorationTheme =
+        context.dependOnInheritedWidgetOfExactType<InputDecorationTheme>();
+    return inputDecorationTheme?.data ?? Theme.of(context).inputDecorationTheme;
+  }
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  ///
+  /// This method is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.copyWith] instead.
+  InputDecorationTheme copyWith({
+    TextStyle? labelStyle,
+    TextStyle? floatingLabelStyle,
+    TextStyle? helperStyle,
+    int? helperMaxLines,
+    TextStyle? hintStyle,
+    Duration? hintFadeDuration,
+    int? hintMaxLines,
+    TextStyle? errorStyle,
+    int? errorMaxLines,
+    FloatingLabelBehavior? floatingLabelBehavior,
+    FloatingLabelAlignment? floatingLabelAlignment,
+    bool? isDense,
+    EdgeInsetsGeometry? contentPadding,
+    bool? isCollapsed,
+    Color? iconColor,
+    TextStyle? prefixStyle,
+    Color? prefixIconColor,
+    BoxConstraints? prefixIconConstraints,
+    TextStyle? suffixStyle,
+    Color? suffixIconColor,
+    BoxConstraints? suffixIconConstraints,
+    TextStyle? counterStyle,
+    bool? filled,
+    Color? fillColor,
+    BorderSide? activeIndicatorBorder,
+    BorderSide? outlineBorder,
+    Color? focusColor,
+    Color? hoverColor,
+    InputBorder? errorBorder,
+    InputBorder? focusedBorder,
+    InputBorder? focusedErrorBorder,
+    InputBorder? disabledBorder,
+    InputBorder? enabledBorder,
+    InputBorder? border,
+    bool? alignLabelWithHint,
+    BoxConstraints? constraints,
+    VisualDensity? visualDensity,
+  }) {
+    return InputDecorationTheme(
+      labelStyle: labelStyle ?? this.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
+      helperStyle: helperStyle ?? this.helperStyle,
+      helperMaxLines: helperMaxLines ?? this.helperMaxLines,
+      hintStyle: hintStyle ?? this.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      errorStyle: errorStyle ?? this.errorStyle,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
+      floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
+      isDense: isDense ?? this.isDense,
+      contentPadding: contentPadding ?? this.contentPadding,
+      iconColor: iconColor ?? this.iconColor,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      prefixIconColor: prefixIconColor ?? this.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
+      suffixIconColor: suffixIconColor ?? this.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
+      counterStyle: counterStyle ?? this.counterStyle,
+      filled: filled ?? this.filled,
+      fillColor: fillColor ?? this.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? this.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? this.outlineBorder,
+      focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
+      errorBorder: errorBorder ?? this.errorBorder,
+      focusedBorder: focusedBorder ?? this.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? this.disabledBorder,
+      enabledBorder: enabledBorder ?? this.enabledBorder,
+      border: border ?? this.border,
+      alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+      constraints: constraints ?? this.constraints,
+      visualDensity: visualDensity ?? this.visualDensity,
+    );
+  }
+
+  /// Returns a copy of this InputDecorationTheme where the non-null fields in
+  /// the given InputDecorationTheme override the corresponding nullable fields
+  /// in this InputDecorationTheme.
+  ///
+  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
+  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
+  ///
+  /// In other words, the fields of the provided [InputDecorationTheme] are used to
+  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
+  InputDecorationTheme merge(InputDecorationTheme? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      labelStyle: labelStyle ?? other.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? other.floatingLabelStyle,
+      helperStyle: helperStyle ?? other.helperStyle,
+      helperMaxLines: helperMaxLines ?? other.helperMaxLines,
+      hintStyle: hintStyle ?? other.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? other.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? other.hintMaxLines,
+      errorStyle: errorStyle ?? other.errorStyle,
+      errorMaxLines: errorMaxLines ?? other.errorMaxLines,
+      contentPadding: contentPadding ?? other.contentPadding,
+      iconColor: iconColor ?? other.iconColor,
+      prefixStyle: prefixStyle ?? other.prefixStyle,
+      prefixIconColor: prefixIconColor ?? other.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? other.prefixIconConstraints,
+      suffixStyle: suffixStyle ?? other.suffixStyle,
+      suffixIconColor: suffixIconColor ?? other.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? other.suffixIconConstraints,
+      counterStyle: counterStyle ?? other.counterStyle,
+      fillColor: fillColor ?? other.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? other.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? other.outlineBorder,
+      focusColor: focusColor ?? other.focusColor,
+      hoverColor: hoverColor ?? other.hoverColor,
+      errorBorder: errorBorder ?? other.errorBorder,
+      focusedBorder: focusedBorder ?? other.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? other.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? other.disabledBorder,
+      enabledBorder: enabledBorder ?? other.enabledBorder,
+      border: border ?? other.border,
+      constraints: constraints ?? other.constraints,
+      visualDensity: visualDensity ?? other.visualDensity,
+    );
+  }
+
+  @override
+  bool updateShouldNotify(InputDecorationTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return InputDecorationTheme(data: data, child: child);
+  }
+}
+
+/// Defines the default appearance of [InputDecorator]s.
+///
+/// Descendant widgets obtain the current theme's [InputDecorationThemeData] using
+/// [InputDecorationTheme.of]. When a widget uses [InputDecorationTheme.of], it is
+/// automatically rebuilt if the theme later changes.
 ///
 /// The [InputDecoration.applyDefaults] method is used to combine an input
 /// decoration theme with an [InputDecoration] object.
+///
+/// See also:
+///
+///  * [ThemeData.inputDecorationTheme], which specifies an input decoration theme as
+///    part of the overall Material theme.
 @immutable
-class InputDecorationTheme with Diagnosticable {
-  /// Creates a value for [ThemeData.inputDecorationTheme] that
-  /// defines default values for [InputDecorator].
-  const InputDecorationTheme({
+class InputDecorationThemeData with Diagnosticable {
+  /// Creates a [InputDecorationThemeData] that can be used to override default
+  /// properties in a [InputDecorationTheme] widget.
+  const InputDecorationThemeData({
     this.labelStyle,
     this.floatingLabelStyle,
     this.helperStyle,
@@ -4718,7 +5323,7 @@ class InputDecorationTheme with Diagnosticable {
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  InputDecorationTheme copyWith({
+  InputDecorationThemeData copyWith({
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
     TextStyle? helperStyle,
@@ -4757,7 +5362,7 @@ class InputDecorationTheme with Diagnosticable {
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
   }) {
-    return InputDecorationTheme(
+    return InputDecorationThemeData(
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
       helperStyle: helperStyle ?? this.helperStyle,
@@ -4798,51 +5403,53 @@ class InputDecorationTheme with Diagnosticable {
     );
   }
 
-  /// Returns a copy of this InputDecorationTheme where the non-null fields in
-  /// the given InputDecorationTheme override the corresponding nullable fields
-  /// in this InputDecorationTheme.
+  /// Returns a copy of this InputDecorationThemeData where the non-null fields in
+  /// the given InputDecorationThemeData override the corresponding nullable fields
+  /// in this InputDecorationThemeData.
   ///
-  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
-  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
+  /// The non-nullable fields of InputDecorationThemeData, such as
+  /// [floatingLabelBehavior], [isDense], [isCollapsed], [filled], and
+  /// [alignLabelWithHint] cannot be overridden.
   ///
-  /// In other words, the fields of the provided [InputDecorationTheme] are used to
-  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
-  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
-    if (inputDecorationTheme == null) {
+  /// In other words, the fields of the provided [InputDecorationThemeData]
+  /// are used to fill in the unspecified and nullable fields of this
+  /// InputDecorationThemeData.
+  InputDecorationThemeData merge(InputDecorationThemeData? other) {
+    if (other == null) {
       return this;
     }
     return copyWith(
-      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
-      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
-      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
-      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
-      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
-      hintFadeDuration: hintFadeDuration ?? inputDecorationTheme.hintFadeDuration,
-      hintMaxLines: hintMaxLines ?? inputDecorationTheme.hintMaxLines,
-      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
-      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
-      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
-      iconColor: iconColor ?? inputDecorationTheme.iconColor,
-      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
-      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
-      prefixIconConstraints: prefixIconConstraints ?? inputDecorationTheme.prefixIconConstraints,
-      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
-      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
-      suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
-      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
-      fillColor: fillColor ?? inputDecorationTheme.fillColor,
-      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
-      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
-      focusColor: focusColor ?? inputDecorationTheme.focusColor,
-      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
-      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
-      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
-      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
-      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
-      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
-      border: border ?? inputDecorationTheme.border,
-      constraints: constraints ?? inputDecorationTheme.constraints,
-      visualDensity: visualDensity ?? inputDecorationTheme.visualDensity,
+      labelStyle: labelStyle ?? other.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? other.floatingLabelStyle,
+      helperStyle: helperStyle ?? other.helperStyle,
+      helperMaxLines: helperMaxLines ?? other.helperMaxLines,
+      hintStyle: hintStyle ?? other.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? other.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? other.hintMaxLines,
+      errorStyle: errorStyle ?? other.errorStyle,
+      errorMaxLines: errorMaxLines ?? other.errorMaxLines,
+      contentPadding: contentPadding ?? other.contentPadding,
+      iconColor: iconColor ?? other.iconColor,
+      prefixStyle: prefixStyle ?? other.prefixStyle,
+      prefixIconColor: prefixIconColor ?? other.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? other.prefixIconConstraints,
+      suffixStyle: suffixStyle ?? other.suffixStyle,
+      suffixIconColor: suffixIconColor ?? other.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? other.suffixIconConstraints,
+      counterStyle: counterStyle ?? other.counterStyle,
+      fillColor: fillColor ?? other.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? other.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? other.outlineBorder,
+      focusColor: focusColor ?? other.focusColor,
+      hoverColor: hoverColor ?? other.hoverColor,
+      errorBorder: errorBorder ?? other.errorBorder,
+      focusedBorder: focusedBorder ?? other.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? other.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? other.disabledBorder,
+      enabledBorder: enabledBorder ?? other.enabledBorder,
+      border: border ?? other.border,
+      constraints: constraints ?? other.constraints,
+      visualDensity: visualDensity ?? other.visualDensity,
     );
   }
 
@@ -4897,7 +5504,7 @@ class InputDecorationTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InputDecorationTheme &&
+    return other is InputDecorationThemeData &&
         other.labelStyle == labelStyle &&
         other.floatingLabelStyle == floatingLabelStyle &&
         other.helperStyle == helperStyle &&
@@ -4941,7 +5548,7 @@ class InputDecorationTheme with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const InputDecorationTheme defaultTheme = InputDecorationTheme();
+    const InputDecorationThemeData defaultTheme = InputDecorationThemeData();
     properties.add(
       DiagnosticsProperty<TextStyle>(
         'labelStyle',
@@ -5148,7 +5755,7 @@ class InputDecorationTheme with Diagnosticable {
   }
 }
 
-class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
+class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   const _InputDecoratorDefaultsM2(this.context) : super();
 
   final BuildContext context;
@@ -5267,7 +5874,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
+class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
    _InputDecoratorDefaultsM3(this.context)
     : super();
 

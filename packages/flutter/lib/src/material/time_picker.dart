@@ -1615,7 +1615,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       onTapUp: _handleTapUp,
-      child: CustomPaint(key: const ValueKey<String>('time-picker-dial'), painter: painter),
+      child: CustomPaint(painter: painter),
     );
   }
 }
@@ -2100,7 +2100,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
       errorStyle: defaultTheme.inputDecorationTheme.errorStyle,
-    ).applyDefaults(inputDecorationTheme);
+    ).applyDefaults(inputDecorationTheme.data);
     // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
     final String? hintText = focusNode.hasFocus ? null : _formattedValue;

@@ -89,6 +89,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required List<Widget> children,
@@ -129,6 +130,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
@@ -186,6 +188,16 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
+
+  /// The behavior of reporting the selected item index.
+  ///
+  /// This determines when the `onSelectedItemChanged` callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   /// An option callback when the currently centered item changes.
   ///
@@ -357,6 +369,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: widget.onSelectedItemChanged,
                 dragStartBehavior: DragStartBehavior.down,
+                changeReportingBehavior: widget.changeReportingBehavior,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
                   onTappedChild: _handleChildTap,

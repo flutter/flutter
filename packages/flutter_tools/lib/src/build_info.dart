@@ -585,7 +585,8 @@ enum TargetPlatform {
   // and [AndroidArch].
   android_arm,
   android_arm64,
-  android_x64;
+  android_x64,
+  unsupported;
 
   String get fuchsiaArchForTargetPlatform {
     switch (this) {
@@ -605,6 +606,7 @@ enum TargetPlatform {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
@@ -627,9 +629,13 @@ enum TargetPlatform {
       case TargetPlatform.ios:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Unexpected target platform $this');
     }
   }
+
+  static Never throwUnsupportedTarget() =>
+      throw UnsupportedError('Target platform is unsupported.');
 }
 
 /// iOS and macOS target device architecture.
@@ -749,6 +755,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
     TargetPlatform.tester => 'flutter-tester',
     TargetPlatform.web_javascript => 'web-javascript',
     TargetPlatform.android => 'android',
+    TargetPlatform.unsupported => 'unsupported',
   };
 }
 

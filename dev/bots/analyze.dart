@@ -542,7 +542,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
 
   // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
   final RegExp callsTestFunctionPattern = RegExp(
-    r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
+    r'^ *(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
   );
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
@@ -2672,9 +2672,6 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/docs.sh',
 
   'dev/checks',
-  'dev/conductor/bin/conductor',
-  'dev/conductor/bin/packages_autoroller',
-  'dev/conductor/core/lib/src/proto/compile_proto.sh',
 
   'dev/customer_testing/ci.sh',
 

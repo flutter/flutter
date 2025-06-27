@@ -26,4 +26,16 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # bin/internal/content_aware_hash.ps1: script for calculating the hash on windows
 # bin/internal/content_aware_hash.sh: script for calculating the hash on mac/linux
 # .github/workflows/content-aware-hash.yml: github action for CI/CD hashing
-cmd /c "git -C ""$flutterRoot"" ls-tree --format ""%(objectname) %(path)"" HEAD DEPS engine bin/internal/release-candidate-branch.version | git hash-object --stdin"
+#
+# Removing the "cmd" requirement enables powershell usage on other hosts
+# 1. git ls-tree | Out-String - combines output of pipeline into a single string
+#    rather than an array for each line.
+#    "-NoNewline" not available on PS5.1 and also removes all newlines.
+# 2. -replace "`r`n", "`n"  - removes line endings
+#    NOTE: Out-String adds a new line; so Out-File -NoNewline strips that.
+# 3. Out-File -NoNewline -Encoding ascii outputs 8bit ascii
+# 4. git hash-object with stdin from a pipeline consumes UTF-16, so consume
+#.   the contents of hash.txt
+(git -C "$flutterRoot" ls-tree --format "%(objectname) %(path)" HEAD DEPS engine bin/internal/release-candidate-branch.version | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
+git hash-object hash.txt
+Remove-Item hash.txt
