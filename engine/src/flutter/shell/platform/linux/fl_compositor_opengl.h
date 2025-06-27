@@ -28,24 +28,24 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 /**
  * fl_compositor_opengl_new:
  * @engine: an #FlEngine.
+ * @context: the OpenGL context that is being rendered into.
  *
  * Creates a new OpenGL compositor.
  *
  * Returns: a new #FlCompositorOpenGL.
  */
-FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine);
+FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
+                                             GdkGLContext* context);
 
 /**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
- * @view_id: view to render.
  * @width: width of the window in pixels.
  * @height: height of the window in pixels.
  *
  * Performs OpenGL commands to render current Flutter view.
  */
 void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
-                                 FlutterViewId view_id,
                                  int width,
                                  int height);
 
