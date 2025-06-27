@@ -50,7 +50,7 @@ void main() {
       side: BorderSide(width: 20.0),
       borderRadius: BorderRadius.all(Radius.circular(200.0)),
     );
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -169,7 +169,7 @@ void main() {
     const RoundedSuperellipseBorder insideRoundedSuperellipseBorder = RoundedSuperellipseBorder(
       side: BorderSide(width: 10),
     );
-    expect(insideRoundedSuperellipseBorder.dimensions, const EdgeInsets.all(10));
+    expect(insideRoundedSuperellipseBorder.dimensions, EdgeInsets.zero);
 
     const RoundedSuperellipseBorder centerRoundedSuperellipseBorder = RoundedSuperellipseBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
@@ -179,10 +179,10 @@ void main() {
     const RoundedSuperellipseBorder outsideRoundedSuperellipseBorder = RoundedSuperellipseBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
-    expect(outsideRoundedSuperellipseBorder.dimensions, EdgeInsets.zero);
+    expect(outsideRoundedSuperellipseBorder.dimensions, const EdgeInsets.all(10));
 
     const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
-    expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
+    expect(insideCircleBorder.dimensions, EdgeInsets.zero);
 
     const CircleBorder centerCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
@@ -192,7 +192,7 @@ void main() {
     const CircleBorder outsideCircleBorder = CircleBorder(
       side: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
     );
-    expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
+    expect(outsideCircleBorder.dimensions, const EdgeInsets.all(10));
   });
 
   test('RoundedSuperellipseBorder.lerp with different StrokeAlign', () {

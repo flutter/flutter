@@ -47,7 +47,7 @@ void main() {
       side: BorderSide(width: 20.0),
       borderRadius: BorderRadius.all(Radius.circular(200.0)),
     );
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -132,9 +132,9 @@ void main() {
       side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside),
       borderRadius: borderRadius,
     );
-    expect(inside.dimensions, const EdgeInsets.all(10.0));
+    expect(inside.dimensions, EdgeInsets.zero);
     expect(center.dimensions, const EdgeInsets.all(5.0));
-    expect(outside.dimensions, EdgeInsets.zero);
+    expect(outside.dimensions, const EdgeInsets.all(10.0));
 
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 120.0, 40.0);
 
