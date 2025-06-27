@@ -1129,7 +1129,7 @@ void main() {
     expect(text.text.style?.color, customForegroundColor);
   });
 
-  testWidgets('CupertinoButton respects foregroundColor when disabled', (
+  testWidgets('CupertinoButton foregroundColor applies to its text when disabled', (
     WidgetTester tester,
   ) async {
     const Color customForegroundColor = Color(0xFF5500FF);
