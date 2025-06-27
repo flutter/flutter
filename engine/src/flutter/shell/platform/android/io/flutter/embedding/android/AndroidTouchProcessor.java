@@ -287,6 +287,7 @@ public class AndroidTouchProcessor {
   // long, so it can be fixed if needed.
   // See https://github.com/flutter/flutter/issues/160144.
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
+    assert (event.getToolType(pointerIndex) & ~TOOL_TYPE_MASK) == 0;
     return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS)
         | (event.getToolType(pointerIndex) & TOOL_TYPE_MASK);
   }
