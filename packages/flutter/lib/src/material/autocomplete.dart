@@ -86,7 +86,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.split}
   ///
   /// If this parameter is not null, then [textEditingController] must also be
-  /// not null.
+  /// non-null.
   final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
@@ -116,7 +116,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   ///
   /// {@macro flutter.widgets.RawAutocomplete.split}
   ///
-  /// If this parameter is not null, then [focusNode] must also be not null.
+  /// If this parameter is not null, then [focusNode] must also be non-null.
   final TextEditingController? textEditingController;
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
