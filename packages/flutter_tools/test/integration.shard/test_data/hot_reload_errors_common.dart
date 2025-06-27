@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
-import '../../web.shard/test_data/expression_evaluation_web_common.dart';
 import '../test_driver.dart';
 import '../test_utils.dart';
 import 'hot_reload_const_project.dart';
@@ -69,9 +68,21 @@ void testAll({
           additionalCommandArgs: additionalCommandArgs,
         );
         project.removeFieldFromConstClass();
-        final LibraryRef library = await getRootLibrary(flutter);
+
+        final LibraryRef library = (await flutter.getFlutterIsolate()).libraries!.firstWhere(
+          (LibraryRef l) => l.uri!.contains('package:test/main.dart'),
+        );
         final ObjRef result = await flutter.evaluate(library.id!, '42.isEven');
-        expectInstance(result, InstanceKind.kBool, true.toString());
+        expect(
+          result,
+          const TypeMatcher<InstanceRef>()
+              .having((InstanceRef instance) => instance.kind, 'kind', InstanceKind.kBool)
+              .having(
+                (InstanceRef instance) => instance.valueAsString,
+                'valueAsString',
+                true.toString(),
+              ),
+        );
       },
     );
   });
