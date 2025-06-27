@@ -854,6 +854,7 @@ class DoctorText {
         startedValidatorTasks: _validatorTasks,
         showPii: showPii,
         sendEvent: _sendDoctorEvent,
+        verbose: _logger.isVerbose,
       );
       // Do not send the doctor event a second time.
       _sendDoctorEvent = false;
