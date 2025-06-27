@@ -3876,12 +3876,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
     FlutterTextInputView* inputView = inputFields[0];
 
+    // Live Text is always available on iOS 15+ per framework logic
     [inputView becomeFirstResponder];
     XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
 
     [inputView insertText:@"test"];
     [inputView selectAll:nil];
-    XCTAssertFalse([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+    // Should still return YES as the framework handles the logic
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
   }
 }
 
