@@ -192,7 +192,7 @@ class CupertinoButton extends StatefulWidget {
   /// specified.
   final Color disabledColor;
 
-  /// The color of the button's foreground.
+  /// The color of the button's text and icons.
   ///
   /// Defaults to the [CupertinoTheme]'s `primaryColor` when the
   /// [CupertinoButton.filled] constructor is used.
