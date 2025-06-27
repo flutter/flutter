@@ -1323,10 +1323,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     return self.hasText;
   } else if (action == @selector(captureTextFromCamera:)) {
     if (@available(iOS 15.0, *)) {
-      BOOL isSecure = self.isSecureTextEntry;
-      BOOL hasNoSelection = _selectedTextRange.empty;
-      BOOL isFocused = self.isFirstResponder;
-      return !isSecure && isFocused && hasNoSelection;
+      return YES;
     }
     return NO;
   }

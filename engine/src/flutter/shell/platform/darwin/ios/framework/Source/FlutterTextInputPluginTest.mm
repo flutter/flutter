@@ -3875,10 +3875,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     [self setClientId:123 configuration:config];
     NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
     FlutterTextInputView* inputView = inputFields[0];
-    
+
     [inputView becomeFirstResponder];
     XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
-    
+
     [inputView insertText:@"test"];
     [inputView selectAll:nil];
     XCTAssertFalse([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);

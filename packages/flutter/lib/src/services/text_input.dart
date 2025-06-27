@@ -3053,7 +3053,8 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
 /// provided, the platform will use its default localized title.
 ///
 /// See https://github.com/flutter/flutter/issues/169781
-final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData with Diagnosticable {
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
   const IOSSystemContextMenuItemDataLiveText({this.title});
 

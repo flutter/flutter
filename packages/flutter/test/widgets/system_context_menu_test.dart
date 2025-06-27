@@ -741,12 +741,10 @@ void main() {
   );
 
   test('IOSSystemContextMenuItemDataLiveText debugFillProperties', () {
-    const String? title = null;
-    const IOSSystemContextMenuItemDataLiveText item = IOSSystemContextMenuItemDataLiveText(title: title);
+    const IOSSystemContextMenuItemDataLiveText item = IOSSystemContextMenuItemDataLiveText();
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
-    expect(diagnosticsNodes.first.value, title);
+    expect(diagnosticsNodes.first.value, null);
   });
-
 }
