@@ -1081,7 +1081,7 @@ void main() {
     expect(text.text.style?.color, customForegroundColor);
   });
 
-  testWidgets('CupertinoButton uses default color when foregroundColor not specified', (
+  testWidgets('CupertinoButton uses the theme's primaryColor when foregroundColor is not specified', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
