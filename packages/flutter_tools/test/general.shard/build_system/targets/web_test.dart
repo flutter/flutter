@@ -1186,8 +1186,7 @@ name: foo
                           else
                             '--no-strip-wasm',
                           if (!sourceMaps) '--no-source-maps',
-                          if (minify) '--minify',
-                          if (!minify) '--no-minify',
+                          if (minify) '--minify' else '--no-minify',
                           if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
                           '-o',
                           environment.buildDir.childFile('main.dart.wasm').absolute.path,

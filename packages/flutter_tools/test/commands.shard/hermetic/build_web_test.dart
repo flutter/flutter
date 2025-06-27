@@ -457,7 +457,6 @@ void main() {
             expect(configs, hasLength(2));
             expect(configs[0].renderer, WebRendererMode.skwasm);
             expect(configs[0].compileTarget, CompileTarget.wasm);
-            expect(configs[0].compileTarget, CompileTarget.wasm);
             expect(configs[1].renderer, WebRendererMode.canvaskit);
             expect(configs[1].compileTarget, CompileTarget.js);
 
@@ -468,7 +467,6 @@ void main() {
           }),
     },
   );
-
 
   testUsingContext(
     'Passes minify to only wasm when minify-wasm specified',
