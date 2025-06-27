@@ -53,7 +53,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerDeviceKind enum in pointer.dart.
-  // Also consider changing TOOL_TYPE_BITS when changing the length of this enum.
+  // When changing the length of this enum check if TOOL_TYPE_BITS needs to increase its value. Next increase is at length 8. 
   @IntDef({
     PointerDeviceKind.TOUCH,
     PointerDeviceKind.MOUSE,
