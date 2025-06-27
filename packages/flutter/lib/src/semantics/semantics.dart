@@ -5474,10 +5474,12 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] currently holds the input focus.
   bool? get isFocused => _flags.isFocusable ? _flags.isFocused : null;
   set isFocused(bool? value) {
-    if (value != isFocused) {
-      _flags = _flags.copyWith(isFocusable: value != null, isFocused: value);
-      _hasBeenAnnotated = true;
+    if (value != null){
+      _flags = _flags.copyWith(isFocusable: true, isFocused: value);
+    } else {
+      _flags = _flags.copyWith(isFocusable: false, isFocused: false);
     }
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
