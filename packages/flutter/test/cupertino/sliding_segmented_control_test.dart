@@ -2178,7 +2178,7 @@ void main() {
       matching: find.byType(ScaleTransition),
     );
 
-    await tester.pumpAndSettle(const Duration(milliseconds: 206));
+    await tester.pumpAndSettle();
     double scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
     expect(scale, greaterThan(1.0));
 
@@ -2186,7 +2186,6 @@ void main() {
 
     await tester.pumpAndSettle();
     scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
-    // Spring animations approach but don't exactly reach normal scale.
-    expect(scale, moreOrLessEquals(1.0, epsilon: 0.01));
+    expect(scale, moreOrLessEquals(1.0));
   });
 }

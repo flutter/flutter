@@ -52,9 +52,9 @@ const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 // amount of time.
 const double _kMinThumbScale = 0.95;
 
-// The maximum scale factor of the thumb, when being pressed on for a sufficient
-// amount of time.
-const double _kMaxThumbScale = 1.05;
+// The peak scale factor of the thumb during the pressing animation of a
+// momentary variant.
+const double _kMaxThumbScaleForMomentary = 1.05;
 
 // The minimum horizontal distance between the edges of the separator and the
 // closest child.
@@ -162,12 +162,12 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
                 TweenSequenceItem<double>(
                   tween: Tween<double>(
                     begin: highlightPressScaleAnimation.value,
-                    end: _kMaxThumbScale,
+                    end: _kMaxThumbScaleForMomentary,
                   ),
                   weight: 50,
                 ),
                 TweenSequenceItem<double>(
-                  tween: Tween<double>(begin: _kMaxThumbScale, end: 1.0),
+                  tween: Tween<double>(begin: _kMaxThumbScaleForMomentary, end: 1.0),
                   weight: 50,
                 ),
               ])
