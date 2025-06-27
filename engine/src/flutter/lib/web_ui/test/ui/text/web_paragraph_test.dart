@@ -740,43 +740,105 @@ Future<void> testMain() async {
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
 
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 50,
+      textDirection: TextDirection.ltr,
+    );
     final WebTextStyle textStyle1 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
-    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 40);
-    final WebTextStyle textStyle3 = WebTextStyle(fontFamily: 'Roboto', fontSize: 30);
+    final WebTextStyle textStyle2 = WebTextStyle(fontFamily: 'Roboto', fontSize: 20);
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(textStyle1);
-    builder.addText('50x50:');
+    builder.addText('Alphabetic 20 on baseline:');
     builder.pop();
     builder.pushStyle(textStyle2);
     builder.addPlaceholder(
-      50,
-      50,
-      PlaceholderAlignment.baseline,
-      scale: 1.0,
-      baselineOffset: 0.0,
-      baseline: TextBaseline.ideographic,
-    );
-    builder.pop();
-    builder.pushStyle(textStyle3);
-    builder.addText('100x100:');
-    builder.pop();
-    builder.pushStyle(textStyle2);
-    builder.addPlaceholder(
-      100,
-      100,
+      20,
+      20,
       PlaceholderAlignment.baseline,
       scale: 1.0,
       baselineOffset: 0.0,
       baseline: TextBaseline.alphabetic,
     );
     builder.pop();
+    builder.pushStyle(textStyle1);
+    builder.addText('\nAlphabetic 20 above baseline:');
+    builder.pop();
     builder.pushStyle(textStyle2);
-    builder.addText('end.');
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.aboveBaseline,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle1);
+    builder.addText('\nAlphabetic 20 below baseline:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.belowBaseline,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle1);
+    builder.addText('\nAlphabetic 20 middle:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.middle,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle1);
+    builder.addText('\nAlphabetic 20 top:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.top,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
+    builder.pop();
+    builder.pushStyle(textStyle1);
+    builder.addText('\nAlphabetic 20 bottom:');
+    builder.pop();
+    builder.pushStyle(textStyle2);
+    builder.addPlaceholder(
+      20,
+      20,
+      PlaceholderAlignment.bottom,
+      scale: 1.0,
+      baselineOffset: 0.0,
+      baseline: TextBaseline.alphabetic,
+    );
     builder.pop();
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+
+    final rects = paragraph.getBoxesForPlaceholders();
+    final Paint bluePaint =
+        Paint()
+          ..color = const Color(0xFF0000FF)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
+    for (final rect in rects) {
+      canvas.drawRect(rect.toRect(), bluePaint);
+    }
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_placeholders_1_line.png', region: region);

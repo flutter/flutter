@@ -50,14 +50,13 @@ class TextPaint {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
-      if (block.clusterRange.width == 1 &&
-          layout.textClusters[block.clusterRange.start].placeholder) {
+      if (block is LinePlaceholdeBlock) {
         continue;
       }
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
-        block,
+        block as LineClusterBlock,
         ui.Offset(
           line.advance.left + line.formattingShift + block.clusterShiftInLine,
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
@@ -172,11 +171,11 @@ class TextPaint {
 
   (ui.Rect sourceRect, ui.Rect targetRect) calculateBlock(
     TextLayout layout,
-    LineBlock block,
+    LineClusterBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
   ) {
-    final advance = paragraph.getLayout().getAdvance(
+    final ui.Rect advance = paragraph.getLayout().getAdvance(
       block.textMetrics!,
       block.textRange.translate(-block.textMetricsZero),
     );

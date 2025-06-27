@@ -11,6 +11,10 @@ class WebParagraphDebug {
     }
   }
 
+  static void warning(String arg) {
+    print('WARNING: $arg');
+  }
+
   static void error(String arg) {
     print('ERROR: $arg');
   }

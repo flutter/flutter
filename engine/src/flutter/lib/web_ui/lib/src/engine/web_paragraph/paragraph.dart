@@ -509,8 +509,7 @@ class WebParagraph implements ui.Paragraph {
   List<TextLine> get lines => _layout.lines;
 
   @override
-  List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders;
-  late List<ui.TextBox> _boxesForPlaceholders;
+  List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -798,7 +797,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     double width,
     double height,
     ui.PlaceholderAlignment alignment, {
-    double scale = 1.0,
+    double? scale,
     double? baselineOffset,
     ui.TextBaseline? baseline,
   }) {
@@ -813,17 +812,17 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     addText(placeholderChar);
     textStylesList.last.markAsPlaceholder(
       WebParagraphPlaceholder(
-        width: width * scale,
-        height: height * scale,
+        width: width * (scale ?? 1.0),
+        height: height * (scale ?? 1.0),
         alignment: alignment,
         baseline: baseline ?? ui.TextBaseline.alphabetic,
-        offset: (baselineOffset ?? height) * scale,
+        offset: (baselineOffset ?? height) * (scale ?? 1.0),
       ),
     );
     pop();
 
     _placeholderCount++;
-    _placeholderScales.add(scale);
+    _placeholderScales.add(scale ?? 1.0);
   }
 
   @override

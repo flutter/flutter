@@ -36,14 +36,14 @@ abstract class Painter {
 
   void paintBackground(
     CanvasKitCanvas canvas,
-    LineBlock block,
+    LineClusterBlock block,
     ui.Rect sourceRect,
     ui.Rect targetRect,
   );
 
   void paintDecorations(
     CanvasKitCanvas canvas,
-    LineBlock block,
+    LineClusterBlock block,
     ui.Rect sourceRect,
     ui.Rect targetRect,
   );
@@ -66,7 +66,7 @@ class Canvas2DPainter extends Painter {
   @override
   void paintDecorations(
     CanvasKitCanvas canvas,
-    LineBlock block,
+    LineClusterBlock block,
     ui.Rect sourceRect,
     ui.Rect targetRect,
   ) {
