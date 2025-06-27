@@ -33,9 +33,9 @@ overridden by setting the `JAVA_HOME` environment variable.
 This example sets the java version to 17 downloaded with brew and then runs the tests:
 `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/ ./gradlew test`
 
-Alternatively, you can run all the tests in one file by passing in the fully qualified class name, 
-e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in 
-one file by passing in the fully qualified class name followed by the method name, 
+You can run all the tests in one file by passing in the fully qualified class name,
+e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in
+one file by passing in the fully qualified class name followed by the method name,
 e.g `./gradlew test --tests "com.flutter.gradle.BaseApplicationNameHandlerTest.setBaseName respects Flutter tool property"`.
 
 Sometimes changing a test name and then running it will cause an IDE error. To get Android Studio back
