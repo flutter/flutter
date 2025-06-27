@@ -446,7 +446,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
@@ -493,7 +493,7 @@ class FakeMacOSDevice extends MacOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

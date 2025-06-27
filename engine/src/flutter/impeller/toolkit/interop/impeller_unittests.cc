@@ -656,4 +656,39 @@ TEST_P(InteropPlaygroundTest, CanControlEllipses) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
+  auto iplr = OpenAssetAsHPPMapping("interop_runtime_stage_cs.frag.iplr");
+  ASSERT_TRUE(!!iplr);
+  auto program = hpp::FragmentProgram::WithData(std::move(iplr));
+  ASSERT_TRUE(program);
+  auto context = GetHPPContext();
+  auto filter =
+      hpp::ImageFilter::FragmentProgram(context, program, {}, nullptr);
+  ASSERT_TRUE(filter);
+  auto bay_bridge = OpenAssetAsHPPTexture("bay_bridge.jpg");
+  ASSERT_TRUE(bay_bridge);
+
+  float size_data[4] = {500, 500};
+  auto uniform_data = hpp::Mapping{reinterpret_cast<const uint8_t*>(&size_data),
+                                   sizeof(size_data), nullptr};
+
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawRect({10, 10, 500, 500},
+                          hpp::Paint{}
+                              .SetColor({1.0, 1.0, 1.0, 1.0})
+                              .SetColorSource(hpp::ColorSource::FragmentProgram(
+                                  context,             //
+                                  program,             //
+                                  {bay_bridge.Get()},  // samplers
+                                  &uniform_data        // uniform data
+                                  )))
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
 }  // namespace impeller::interop::testing

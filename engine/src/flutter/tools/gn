@@ -530,6 +530,14 @@ def to_gn_args(args):
     gn_args['ios_use_simulator'] = gn_args['use_ios_simulator']
     gn_args.update(setup_apple_sdks())
 
+  # Make the Dart VM include a simulator, even though it is generating arm64
+  # code on an arm64 device, so that it can fall back to interpreting the arm64
+  # code if the device does not support JITing.
+  if runtime_mode == 'debug' and gn_args[
+      'target_os'] == 'ios' and not gn_args['use_ios_simulator'] and gn_args[
+          'target_cpu'] == 'arm64' and gn_args['dart_target_arch'] == 'arm64':
+    gn_args['dart_force_simulator'] = True
+
   if args.dart_debug:
     gn_args['dart_debug'] = True
 
@@ -595,6 +603,8 @@ def to_gn_args(args):
   if args.target_os is None:
     if sys.platform.startswith(('cygwin', 'win')):
       gn_args['dart_use_fallback_root_certificates'] = True
+
+  gn_args['dart_disable_secure_socket'] = args.no_dart_secure_socket
 
   if args.target_sysroot:
     gn_args['target_sysroot'] = args.target_sysroot
@@ -1177,6 +1187,13 @@ def parse_args(args):
   )
   parser.add_argument(
       '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
+  )
+
+  parser.add_argument(
+      '--no-dart-secure-socket',
+      default=False,
+      action='store_true',
+      help='(dangerous) Disable secure socket support in Dart.',
   )
 
   # Impeller flags.
