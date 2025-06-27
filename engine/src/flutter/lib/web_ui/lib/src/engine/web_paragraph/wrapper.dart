@@ -42,6 +42,7 @@ class TextWrapper {
     return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
   }
 
+  // TODO(jlavrova): Consider combining this with `_layout.addLine`.
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
     _whitespaces = ClusterRange.collapsed(start);
