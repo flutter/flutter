@@ -1021,7 +1021,7 @@ void main() {
     await gesture.removePointer();
   });
 
-  testWidgets('CupertinoButton respects foregroundColor', (WidgetTester tester) async {
+  testWidgets('CupertinoButton foregroundColor applies to its text', (WidgetTester tester) async {
     const Color customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
