@@ -68,7 +68,16 @@ void testAll({
           additionalCommandArgs: additionalCommandArgs,
         );
         project.removeFieldFromConstClass();
-
+        await expectLater(
+          flutter.hotReload(),
+          throwsA(
+            isA<Exception>().having(
+              (Exception e) => e.toString(),
+              'message',
+              contains('Try performing a hot restart instead.'),
+            ),
+          ),
+        );
         final LibraryRef library = (await flutter.getFlutterIsolate()).libraries!.firstWhere(
           (LibraryRef l) => l.uri!.contains('package:test/main.dart'),
         );
