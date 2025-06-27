@@ -444,7 +444,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      logger = BufferLogger.test();
+      logger = BufferLogger.test(verbose: true);
     });
 
     testUsingContext(
