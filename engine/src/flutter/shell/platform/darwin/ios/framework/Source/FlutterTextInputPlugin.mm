@@ -1357,12 +1357,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                               toPosition:[self endOfDocument]]];
 }
 
-- (void)captureTextFromCamera:(id)sender {
-  if (@available(iOS 15.0, *)) {
-    [super captureTextFromCamera:sender];
-  }
-}
-
 #pragma mark - UITextInput Overrides
 
 - (id<UITextInputTokenizer>)tokenizer {
