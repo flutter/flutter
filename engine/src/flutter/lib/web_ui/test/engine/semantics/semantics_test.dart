@@ -152,7 +152,7 @@ void runSemanticsTests() {
     _testLandmarks();
   });
   group('locale', () {
-    _testLandmarks();
+    _testLocale();
   });
 }
 
@@ -5428,7 +5428,7 @@ void _testLocale() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-        locale: ui.Locale('es-MX'),
+        locale: const ui.Locale('es-MX'),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
@@ -5482,7 +5482,7 @@ void updateNode(
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
-  ui.Locale? locale = null,
+  ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
