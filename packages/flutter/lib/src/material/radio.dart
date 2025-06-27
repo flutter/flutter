@@ -64,6 +64,20 @@ const double _kInnerRadius = 4.5;
 /// ** See code in examples/api/lib/material/radio/radio.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// Here is an example of how the you can override the default theme of a
+/// [Radio] with [WidgetStateProperty].
+///
+/// In this example:
+/// - The first [Radio] uses a custom [fillColor] that changes depending on whether
+///   the radio button is selected.
+/// - The second [Radio] applies a different [backgroundColor] based on its selection state.
+/// - The third [Radio] customizes the [side] property to display a different border color
+///   when selected or unselected.
+///
+/// ** See code in examples/api/lib/material/radio/radio.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RadioListTile], which combines this widget with a [ListTile] so that
@@ -413,7 +427,11 @@ class Radio<T> extends StatefulWidget {
   /// If null, then it is transparent in all states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
-  /// The side of the radio button, in all [WidgetState]s.
+  /// The side for the circular border of the radio button, in all
+  /// [WidgetState]s.
+  ///
+  /// This property can be a [BorderSide] or a [WidgetStateBorderSide] to leverage
+  /// widget state resolution.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.selected].
