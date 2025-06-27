@@ -5471,8 +5471,7 @@ class SemanticsConfiguration {
   set isFocused(bool? value) {
     if (value != null) {
       _flags = _flags.copyWith(isFocusable: true, isFocused: value);
-    }
-    else {
+    } else {
       _flags = _flags.copyWith(isFocusable: false, isFocused: false);
     }
     _hasBeenAnnotated = true;

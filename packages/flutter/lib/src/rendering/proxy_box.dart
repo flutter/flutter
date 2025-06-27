@@ -4462,9 +4462,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.readOnly != null) {
       config.isReadOnly = _properties.readOnly!;
     }
-    if (_properties.focused != null) {
-      config.isFocused = _properties.focused;
-    }
+
+    config.isFocused = _properties.focused;
+
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
     }
