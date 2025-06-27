@@ -7,9 +7,9 @@ import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/test_initialization.dart';
@@ -21,17 +21,11 @@ void main() {
 
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 
+const ui.Rect kWideRegion = ui.Rect.fromLTRB(0, 0, 1000, 100);
+
 void testMain() {
   group('Font fallbacks', () {
-    setUpUnitTests(
-      withImplicitView: true,
-      emulateTesterEnvironment: false,
-      setUpTestViewDimensions: false,
-    );
-
-    setUp(() {
-      debugDisableFontFallbacks = false;
-    });
+    setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
     /// Used to save and restore [ui.PlatformDispatcher.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
@@ -44,7 +38,8 @@ void testMain() {
         <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
             as JsFlutterConfiguration?,
       );
-      renderer.fontCollection.fontFallbackManager!.downloadQueue.debugOnLoadFontFamily =
+      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'en';
+      renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily =
           (String family) => downloadedFontFamilies.add(family);
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
@@ -59,19 +54,13 @@ void testMain() {
     });
 
     test('can override font fallback base URL using JS', () {
-      expect(
-        renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefix,
-        'assets/fallback_fonts/',
-      );
+      expect(configuration.fontFallbackBaseUrl, 'assets/fallback_fonts/');
       debugOverrideJsConfiguration(
         <String, Object?>{'fontFallbackBaseUrl': 'http://my-special-fonts.com/'}.jsify()
             as JsFlutterConfiguration?,
       );
 
-      expect(
-        renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefix,
-        'http://my-special-fonts.com/',
-      );
+      expect(configuration.fontFallbackBaseUrl, 'http://my-special-fonts.com/');
     });
 
     test('will download Noto Sans Arabic if Arabic text is added', () async {
@@ -104,6 +93,41 @@ void testMain() {
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
       await matchGoldenFile('ui_font_fallback_arabic.png', region: kDefaultRegion);
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
+    });
+
+    test('will download Noto Sans JP if Japanese text is added in ja', () async {
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+
+      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'ja';
+
+      // Creating this paragraph should cause us to start to download the
+      // fallback font.
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('表紙がゆっくりと開き始める。ページの間から淡い光が漏れ出る、');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+
+      expect(
+        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+        contains(startsWith('Noto Sans JP')),
+      );
+
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
+
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.pushStyle(ui.TextStyle(fontSize: 32));
+      pb.addText('表紙がゆっくりと開き始める。ページの間から淡い光が漏れ出る、');
+      pb.pop();
+      final ui.Paragraph paragraph = pb.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+      canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_font_fallback_jp.png', region: kWideRegion);
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     });
 
@@ -573,24 +597,33 @@ void testMain() {
       }
     });
 
-    test('fallback fonts do not download when debugDisableFontFallbacks is set', () async {
-      debugDisableFontFallbacks = true;
+    group('when fallback fonts are disabled', () {
+      setUp(() {
+        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment(disableFontFallbacks: true));
+      });
+      tearDown(() {
+        ui_web.TestEnvironment.tearDown();
+      });
 
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      test('fallback fonts do not download', () async {
+        expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
+          'Roboto',
+        ]);
 
-      // Creating this paragraph would cause us to start to download the
-      // fallback font if we didn't disable font fallbacks.
-      final ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
-      pb.addText('Hello 😊');
-      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+        // Creating this paragraph would cause us to start to download the
+        // fallback font if we didn't disable font fallbacks.
+        final ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+        pb.addText('Hello 😊');
+        pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+        await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      // Make sure we didn't download the fallback font.
-      expect(
-        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
-        isNot(contains('Noto Color Emoji 9')),
-      );
+        // Make sure we didn't download the fallback font.
+        expect(
+          renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+          isNot(contains('Noto Color Emoji 9')),
+        );
+      });
     });
 
     test('only woff2 fonts are used for fallback', () {

@@ -31,13 +31,31 @@ enum _CheckableKind {
 }
 
 _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) {
-  if (semanticsObject.hasFlag(ui.SemanticsFlag.isInMutuallyExclusiveGroup)) {
+  if (semanticsObject.flags.isInMutuallyExclusiveGroup) {
     return _CheckableKind.radio;
-  } else if (semanticsObject.hasFlag(ui.SemanticsFlag.hasToggledState)) {
+  } else if (semanticsObject.flags.hasToggledState) {
     return _CheckableKind.toggle;
   } else {
     return _CheckableKind.checkbox;
   }
+}
+
+/// Renders semantics objects that contain a group of radio buttons.
+///
+/// Radio buttons in the group have the [SemanticCheckable] role and must have
+/// the [ui.SemanticsFlag.isInMutuallyExclusiveGroup] flag.
+class SemanticRadioGroup extends SemanticRole {
+  SemanticRadioGroup(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.radioGroup,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      ) {
+    setAriaRole('radiogroup');
+  }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
 /// Renders semantics objects that have checkable (on/off) states.
@@ -84,10 +102,7 @@ class SemanticCheckable extends SemanticRole {
 
       setAttribute(
         'aria-checked',
-        (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked) ||
-                semanticsObject.hasFlag(ui.SemanticsFlag.isToggled))
-            ? 'true'
-            : 'false',
+        (semanticsObject.flags.isChecked || semanticsObject.flags.isToggled) ? 'true' : 'false',
       );
     }
   }
@@ -129,13 +144,63 @@ class SemanticCheckable extends SemanticRole {
 class Selectable extends SemanticBehavior {
   Selectable(super.semanticsObject, super.owner);
 
+  // Roles confirmed to support aria-selected according to ARIA spec.
+  // See: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-selected
+  static const Set<ui.SemanticsRole> _rolesSupportingAriaSelected = {
+    // Note: Flutter currently supports row and tab from the list (gridcell, option, row, tab).
+    ui.SemanticsRole.row,
+    ui.SemanticsRole.tab,
+  };
+
   @override
   void update() {
     if (semanticsObject.isFlagsDirty) {
       if (semanticsObject.isSelectable) {
-        owner.setAttribute('aria-selected', semanticsObject.isSelected);
+        final ui.SemanticsRole currentRole = semanticsObject.role;
+        final bool isSelected = semanticsObject.isSelected;
+
+        if (_rolesSupportingAriaSelected.contains(currentRole)) {
+          owner.setAttribute('aria-selected', isSelected);
+          owner.removeAttribute('aria-current');
+        } else {
+          owner.removeAttribute('aria-selected');
+          owner.setAttribute('aria-current', isSelected);
+        }
       } else {
         owner.removeAttribute('aria-selected');
+        owner.removeAttribute('aria-current');
+      }
+    }
+  }
+}
+
+/// Adds checkability behavior to a semantic node.
+///
+/// A checkable node would have the `aria-checked` set to "true" if the node
+/// is currently checked (i.e. [SemanticsObject.isChecked] is true), set to
+/// "mixed" if the node is in a mixed state (i.e. [SemanticsObject.isMixed]) and
+/// set to "false" if it's not checked or mixed
+/// (i.e. [SemanticsObject.isChecked] and [SemanticsObject.isMixed] are
+/// false). If the node is not checkable (i.e. [SemanticsObject.isCheckable]
+/// is false), then `aria-checked` is unset.
+///
+/// This behavior is typically used for a checkbox or a radio button.
+class Checkable extends SemanticBehavior {
+  Checkable(super.semanticsObject, super.owner);
+
+  @override
+  void update() {
+    if (semanticsObject.isFlagsDirty) {
+      if (semanticsObject.isCheckable) {
+        if (semanticsObject.isChecked) {
+          owner.setAttribute('aria-checked', 'true');
+        } else if (semanticsObject.isMixed) {
+          owner.setAttribute('aria-checked', 'mixed');
+        } else {
+          owner.setAttribute('aria-checked', 'false');
+        }
+      } else {
+        owner.removeAttribute('aria-checked');
       }
     }
   }

@@ -12,7 +12,6 @@ import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
@@ -209,13 +208,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -239,9 +236,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   @override
   bool get refreshWirelessDevices => true;
-
-  @override
-  bool get reportNullSafety => true;
 
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
@@ -360,12 +354,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             argParser.options.containsKey('fast-start') &&
             boolArg('fast-start') &&
             !runningWithPrebuiltApplication,
-        nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
-        serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
@@ -672,10 +664,6 @@ class RunCommand extends RunCommandBase {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
-
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
     }
@@ -724,6 +712,9 @@ class RunCommand extends RunCommandBase {
         fileSystem: globals.fs,
         analytics: globals.analytics,
         logger: globals.logger,
+        terminal: globals.terminal,
+        platform: globals.platform,
+        outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
       );
     }
@@ -794,7 +785,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${sentenceCase(getFriendlyModeName(buildMode))} '
+          '${buildMode.uppercaseFriendlyName}'
           'mode is not supported by ${device.displayName}.',
         );
       }
@@ -871,6 +862,7 @@ class RunCommand extends RunCommandBase {
       }
     } on RPCError catch (error) {
       if (error.code == RPCErrorKind.kServiceDisappeared.code ||
+          error.code == RPCErrorKind.kConnectionDisposed.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

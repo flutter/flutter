@@ -133,6 +133,9 @@ class HotRunner extends ResidentRunner {
 
   String? flavor;
 
+  @override
+  bool get supportsDetach => stopAppDuringCleanup;
+
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
       return;
@@ -263,11 +266,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
-
-    if (debuggingOptions.serveObservatory) {
-      await enableObservatory();
-    }
-
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
@@ -554,7 +552,6 @@ class HotRunner extends ResidentRunner {
       }
       devFS.assetPathsToEvict.clear();
       devFS.shaderPathsToEvict.clear();
-      devFS.scenePathsToEvict.clear();
     }
   }
 
@@ -643,7 +640,7 @@ class HotRunner extends ResidentRunner {
         );
         operations.add(
           reloadIsolate.then((vm_service.Isolate? isolate) async {
-            if ((isolate != null) && isPauseEvent(isolate.pauseEvent!.kind!)) {
+            if (isolate != null) {
               // The embedder requires that the isolate is unpaused, because the
               // runInView method requires interaction with dart engine APIs that
               // are not thread-safe, and thus must be run on the same thread that
@@ -653,7 +650,7 @@ class HotRunner extends ResidentRunner {
               // or in a frequently called method) or an exception. Instead, all
               // breakpoints are first disabled and exception pause mode set to
               // None, and then the isolate resumed.
-              // These settings to not need restoring as Hot Restart results in
+              // These settings do not need restoring as Hot Restart results in
               // new isolates, which will be configured by the editor as they are
               // started.
               final List<Future<void>> breakpointAndExceptionRemoval = <Future<void>>[
@@ -665,11 +662,21 @@ class HotRunner extends ResidentRunner {
                   device.vmService!.service.removeBreakpoint(isolate.id!, breakpoint.id!),
               ];
               await Future.wait(breakpointAndExceptionRemoval);
-              await device.vmService!.service.resume(view.uiIsolate!.id!);
+              if (isPauseEvent(isolate.pauseEvent!.kind!)) {
+                await device.vmService!.service.resume(view.uiIsolate!.id!);
+              }
             }
           }),
         );
       }
+
+      // Wait for the UI isolates to have their breakpoints removed and exception pause mode
+      // cleared while also ensuring the isolate's are no longer paused. If we don't clear
+      // the exception pause mode before we start killing child isolates, it's possible that
+      // any UI isolate waiting on a result from a child isolate could throw an unhandled
+      // exception and re-pause the isolate, causing hot restart to hang.
+      await Future.wait(operations);
+      operations.clear();
 
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
@@ -732,8 +739,8 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  /// Returns [true] if the reload was successful.
-  /// Prints errors if [printErrors] is [true].
+  /// Returns `true` if the reload was successful.
+  /// Prints errors if [printErrors] is `true`.
   static bool validateReloadReport(
     vm_service.ReloadReport? reloadReport, {
     bool printErrors = true,
@@ -1156,42 +1163,11 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  @override
-  void printHelp({required bool details}) {
-    globals.printStatus('Flutter run key commands.');
-    commandHelp.r.print();
-    if (supportsRestart) {
-      commandHelp.R.print();
-    }
-    if (details) {
-      printHelpDetails();
-      commandHelp.hWithDetails.print();
-    } else {
-      commandHelp.hWithoutDetails.print();
-    }
-    if (stopAppDuringCleanup) {
-      commandHelp.d.print();
-    }
-    commandHelp.c.print();
-    commandHelp.q.print();
-    if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-      globals.printStatus('');
-      globals.printStatus('Running without sound null safety ⚠️', emphasis: true);
-      globals.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
-    globals.printStatus('');
-    printDebuggerList();
-  }
-
   @visibleForTesting
   Future<void> evictDirtyAssets() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty &&
-          device.devFS!.shaderPathsToEvict.isEmpty &&
-          device.devFS!.scenePathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1241,14 +1217,8 @@ class HotRunner extends ResidentRunner {
           device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
         );
       }
-      for (final String assetPath in device.devFS!.scenePathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictScene(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
-      device.devFS!.scenePathsToEvict.clear();
     }
     await Future.wait<void>(futures);
   }
@@ -1451,7 +1421,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
         final Future<void> reassembleWork = device.vmService!.flutterReassemble(
-          isolateId: view.uiIsolate!.id!,
+          isolateId: view.uiIsolate!.id,
         );
         reassembleFutures.add(
           reassembleWork.then(

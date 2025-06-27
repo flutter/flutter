@@ -3,24 +3,18 @@
 // found in the LICENSE file.
 import 'dart:math' as math;
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show PlatformViewManager, configuration, longestIncreasingSubsequence;
-import '../display.dart';
-import '../dom.dart';
-import '../html/path_to_svg_clip.dart';
-import '../platform_views/slots.dart';
-import '../svg.dart';
-import '../util.dart';
-import '../vector_math.dart';
-import 'canvas.dart';
-import 'layer.dart';
-import 'overlay_scene_optimizer.dart';
-import 'painting.dart';
-import 'path.dart';
-import 'picture.dart';
-import 'picture_recorder.dart';
-import 'rasterizer.dart';
+/// Used for clipping and filter svg resources.
+///
+/// Position needs to be absolute since these svgs are sandwiched between
+/// canvas elements and can cause layout shifts otherwise.
+final SVGSVGElement kSvgResourceHeader =
+    createSVGSVGElement()
+      ..setAttribute('width', 0)
+      ..setAttribute('height', 0)
+      ..style.position = 'absolute';
 
 /// This composites HTML views into the [ui.Scene].
 class HtmlViewEmbedder {
@@ -267,7 +261,7 @@ class HtmlViewEmbedder {
             _svgClipDefs.putIfAbsent(viewId, () => <String>{}).add(clipId);
             clipView.style.clipPath = 'url(#$clipId)';
           } else if (mutator.path != null) {
-            final CkPath path = mutator.path! as CkPath;
+            final CkPath path = (mutator.path! as LazyPath).builtPath as CkPath;
             _ensureSvgPathDefs();
             final DomElement pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;

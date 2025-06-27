@@ -18,7 +18,7 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData.light(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       // Material 3 defaults
       await tester.pumpWidget(
         MaterialApp(
@@ -372,10 +372,10 @@ Size _destinationSize(WidgetTester tester) {
 }
 
 Align _destinationsAlign(WidgetTester tester) {
-  // The first Expanded widget is the one within the main Column for the rail
+  // The first Flexible widget is the one within the main Column for the rail
   // content.
   return tester.firstWidget<Align>(
-    find.descendant(of: find.byType(Expanded), matching: find.byType(Align)),
+    find.descendant(of: find.byType(Flexible), matching: find.byType(Align)),
   );
 }
 

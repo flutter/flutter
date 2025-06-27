@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -75,6 +77,15 @@ class PluginTest {
         await plugin.runFlutterTest();
         if (!dartOnlyPlugin) {
           await plugin.example.runNativeTests(buildTarget);
+          if (buildTarget == 'ios') {
+            bool runResult = false;
+            await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
+              runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
+            });
+            if (!runResult) {
+              return TaskResult.failure('flutter run either failed or had an engine error.');
+            }
+          }
         }
       }
       section('Create Flutter app');
@@ -173,7 +184,8 @@ class _FlutterProject {
       '# The following section is specific to Flutter packages.\n'
           'flutter:\n'
           '\n'
-          '  disable-swift-package-manager: true\n',
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -315,7 +327,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
   Future<void> runNativeTests(String buildTarget) async {
     // Native unit tests rely on building the app first to generate necessary
     // build files.
-    await build(buildTarget, validateNativeBuildProject: false);
+    await build(buildTarget, validateNativeBuildProject: false, buildMode: 'debug');
 
     switch (buildTarget) {
       case 'apk':
@@ -353,7 +365,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
                 'build',
                 'linux',
                 'x64',
-                'release',
+                'debug',
                 'plugins',
                 'plugintest',
                 'plugintest_test',
@@ -370,6 +382,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           destination: 'platform=macOS',
           configuration: 'Debug',
           testName: 'native_plugin_unit_tests_macos',
+          extraOptions: <String>['-parallel-testing-enabled', 'NO'],
           skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
@@ -384,7 +397,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
                 arch,
                 'plugins',
                 'plugintest',
-                'Release',
+                'Debug',
                 'plugintest_test.exe',
               ),
               <String>[],
@@ -404,6 +417,16 @@ public class $pluginClass: NSObject, FlutterPlugin {
     required String template,
     Map<String, String>? environment,
   }) async {
+    final bool isDarwin = target == 'ios' || target == 'macos';
+    if (template != 'plugin' && isDarwin) {
+      // ios-language option is only supported for plugins. Remove the -i flag and the next parameter, "swift" or
+      // "objc". This isn't proper arg parsing (for example doesn't handle -i=objc, but good enough for these tests
+      // since they blow up if -i is passed incorrectly.
+      final int indexOfIOSLanguage = options.indexOf('-i');
+      if (indexOfIOSLanguage != -1) {
+        options.removeRange(indexOfIOSLanguage, indexOfIOSLanguage + 2);
+      }
+    }
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -419,7 +442,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     });
 
     final _FlutterProject project = _FlutterProject(directory, name);
-    if (template == 'plugin' && (target == 'ios' || target == 'macos')) {
+    if (template == 'plugin' && isDarwin) {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
@@ -479,7 +502,7 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString =
-        target == 'ios' ? "s.platform = :ios, '12.0'" : "s.platform = :osx, '10.11'";
+        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
@@ -509,8 +532,10 @@ s.dependency 'AppAuth', '1.6.0'
     String target, {
     bool validateNativeBuildProject = true,
     bool configOnly = false,
+    String buildMode = 'release',
     Directory? localEngine,
   }) async {
+    assert(const <String>{'debug', 'release', 'profile'}.contains(buildMode));
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput = await evalFlutter(
         'build',
@@ -519,6 +544,7 @@ s.dependency 'AppAuth', '1.6.0'
           '-v',
           if (target == 'ios') '--no-codesign',
           if (configOnly) '--config-only',
+          if (buildMode != 'release') '--$buildMode',
           if (localEngine != null)
           // The engine directory is of the form <fake-source-path>/out/<fakename>,
           // which has to be broken up into the component flags.
@@ -633,5 +659,48 @@ s.dependency 'AppAuth', '1.6.0'
       await Future<void>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
+  }
+
+  Future<bool> runApp({required List<String> options}) async {
+    return inDirectory(Directory(rootPath), () async {
+      final Process process = await startFlutter('run', options: options);
+      final Completer<void> stdoutDone = Completer<void>();
+      final Completer<void> stderrDone = Completer<void>();
+
+      bool engineError = false;
+
+      void onStdout(String line) {
+        print('stdout: $line');
+        if (line.contains('The Flutter DevTools debugger and profiler')) {
+          process.stdin.writeln('R');
+        }
+        if (line.contains('Restarted application')) {
+          // Do a hot restart.
+          process.stdin.writeln('q');
+        }
+        if (line.contains('ERROR:')) {
+          engineError = true;
+          // Quit the app. This makes the 'flutter run' process exit.
+          process.stdin.writeln('q');
+        }
+      }
+
+      process.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(onStdout, onDone: stdoutDone.complete);
+
+      process.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
+
+      await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+      if (engineError) {
+        return false;
+      }
+      final int exitCode = await process.exitCode;
+      return exitCode == 0;
+    });
   }
 }

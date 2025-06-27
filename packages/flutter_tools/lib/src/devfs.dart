@@ -19,7 +19,6 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
 import 'build_system/tools/asset_transformer.dart';
-import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
@@ -381,13 +380,15 @@ class UpdateFSReport {
     Duration compileDuration = Duration.zero,
     Duration transferDuration = Duration.zero,
     Duration findInvalidatedDuration = Duration.zero,
+    bool hotReloadRejected = false,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes,
        _scannedSourcesCount = scannedSourcesCount,
        _compileDuration = compileDuration,
        _transferDuration = transferDuration,
-       _findInvalidatedDuration = findInvalidatedDuration;
+       _findInvalidatedDuration = findInvalidatedDuration,
+       _hotReloadRejected = hotReloadRejected;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
@@ -397,6 +398,12 @@ class UpdateFSReport {
   Duration get transferDuration => _transferDuration;
   Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
+  /// Whether there was a hot reload rejection in this compile.
+  ///
+  /// On the web, hot reload can be rejected during compile time instead of at
+  /// runtime.
+  bool get hotReloadRejected => _hotReloadRejected;
+
   bool _success;
   int _invalidatedSourcesCount;
   int _syncedBytes;
@@ -404,6 +411,7 @@ class UpdateFSReport {
   Duration _compileDuration;
   Duration _transferDuration;
   Duration _findInvalidatedDuration;
+  bool _hotReloadRejected;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -415,6 +423,9 @@ class UpdateFSReport {
     _compileDuration += report._compileDuration;
     _transferDuration += report._transferDuration;
     _findInvalidatedDuration += report._findInvalidatedDuration;
+    if (report._hotReloadRejected) {
+      _hotReloadRejected = true;
+    }
   }
 }
 
@@ -476,7 +487,6 @@ class DevFS {
   final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
-  final Set<String> scenePathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   bool hasSetAssetDirectory = false;
@@ -509,6 +519,7 @@ class DevFS {
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
       if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           rpcException.message.contains('Service connection disposed')) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.
@@ -564,7 +575,6 @@ class DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -652,23 +662,6 @@ class DevFS {
               syncedBytes += content.size;
               if (!bundleFirstUpload) {
                 shaderPathsToEvict.add(archivePath);
-              }
-            });
-          case AssetKind.model:
-            if (sceneImporter == null) {
-              break;
-            }
-            final Future<DevFSContent?> pending = sceneImporter.reimportScene(entry.content);
-            pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
-              if (content == null) {
-                assetBuildFailed = true;
-                return;
-              }
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-              if (!bundleFirstUpload) {
-                scenePathsToEvict.add(archivePath);
               }
             });
           case AssetKind.regular:

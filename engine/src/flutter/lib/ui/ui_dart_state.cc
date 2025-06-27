@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
-#include <iostream>
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
@@ -12,15 +11,6 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
-
-#if defined(FML_OS_ANDROID)
-#include <android/log.h>
-#elif defined(FML_OS_IOS)
-extern "C" {
-// Cannot import the syslog.h header directly because of macro collision.
-extern void syslog(int, const char*, ...);
-}
-#endif
 
 using tonic::ToDart;
 
@@ -34,14 +24,16 @@ UIDartState::Context::Context(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
-    fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+    std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
     bool enable_impeller,
-    impeller::RuntimeStageBackend runtime_stage_backend)
+    bool enable_flutter_gpu)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
       io_manager(std::move(io_manager)),
@@ -52,8 +44,9 @@ UIDartState::Context::Context(
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
+      runtime_stage_backend(std::move(runtime_stage_backend)),
       enable_impeller(enable_impeller),
-      runtime_stage_backend(runtime_stage_backend) {}
+      enable_flutter_gpu(enable_flutter_gpu) {}
 
 UIDartState::UIDartState(
     TaskObserverAdd add_callback,
@@ -91,8 +84,8 @@ bool UIDartState::IsImpellerEnabled() const {
   return context_.enable_impeller;
 }
 
-impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
-  return context_.runtime_stage_backend;
+bool UIDartState::IsFlutterGPUEnabled() const {
+  return context_.enable_impeller && context_.enable_flutter_gpu;
 }
 
 void UIDartState::DidSetIsolate() {
@@ -182,10 +175,14 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
   FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
-    add_callback_(reinterpret_cast<intptr_t>(this),
-                  [this]() { this->FlushMicrotasksNow(); });
-  } else {
-    remove_callback_(reinterpret_cast<intptr_t>(this));
+    FML_DCHECK(!callback_queue_id_.has_value());
+    callback_queue_id_ =
+        add_callback_(reinterpret_cast<intptr_t>(this),
+                      [this]() { this->FlushMicrotasksNow(); });
+  } else if (callback_queue_id_.has_value()) {
+    remove_callback_(callback_queue_id_.value(),
+                     reinterpret_cast<intptr_t>(this));
+    callback_queue_id_.reset();
   }
 }
 
@@ -194,12 +191,13 @@ UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
 }
 
-fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {
+fml::TaskRunnerAffineWeakPtr<ImageDecoder> UIDartState::GetImageDecoder()
+    const {
   return context_.image_decoder;
 }
 
-fml::WeakPtr<ImageGeneratorRegistry> UIDartState::GetImageGeneratorRegistry()
-    const {
+fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+UIDartState::GetImageGeneratorRegistry() const {
   return context_.image_generator_registry;
 }
 
@@ -219,26 +217,6 @@ void UIDartState::LogMessage(const std::string& tag,
                              const std::string& message) const {
   if (log_message_callback_) {
     log_message_callback_(tag, message);
-  } else {
-    // Fall back to previous behavior if unspecified.
-#if defined(FML_OS_ANDROID)
-    __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
-                        static_cast<int>(message.size()), message.c_str());
-#elif defined(FML_OS_IOS)
-    std::stringstream stream;
-    if (!tag.empty()) {
-      stream << tag << ": ";
-    }
-    stream << message;
-    std::string log = stream.str();
-    syslog(1 /* LOG_ALERT */, "%.*s", static_cast<int>(log.size()),
-           log.c_str());
-#else
-    if (!tag.empty()) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-#endif
   }
 }
 
@@ -269,6 +247,11 @@ Dart_Isolate UIDartState::CreatePlatformIsolate(Dart_Handle entry_point,
                                                 char** error) {
   FML_UNREACHABLE();
   return nullptr;
+}
+
+/// The runtime stage to use for fragment shaders.
+impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
+  return context_.runtime_stage_backend.get();
 }
 
 }  // namespace flutter

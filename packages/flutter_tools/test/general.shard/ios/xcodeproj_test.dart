@@ -1346,6 +1346,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+
           useMacOSConfig: true,
         );
 
@@ -1387,6 +1388,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+
           useMacOSConfig: true,
         );
 
@@ -1822,6 +1824,7 @@ flutter:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+
             configurationBuildDir: 'path/to/project/build/ios/iphoneos',
           );
 

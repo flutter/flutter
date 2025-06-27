@@ -366,6 +366,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
     this.engineRevisionShort = 'abcde',
+    this.engineAge = '0 hours ago',
+    this.engineCommitDate = '12/01/01',
     this.repositoryUrl = 'https://github.com/flutter/flutter.git',
     this.frameworkVersion = '0.0.0',
     this.frameworkRevision = '11111111111111111111',
@@ -416,6 +418,12 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String engineRevisionShort;
+
+  @override
+  final String? engineCommitDate;
+
+  @override
+  final String engineAge;
 
   @override
   final String? repositoryUrl;
@@ -485,7 +493,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
-    this.isExplicitPackageDependenciesEnabled = false,
   });
 
   @override
@@ -522,9 +529,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
-  final bool isExplicitPackageDependenciesEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -537,10 +541,24 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
-      explicitPackageDependencies => isExplicitPackageDependenciesEnabled,
       _ => false,
     };
   }
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+  ];
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {

@@ -201,18 +201,19 @@ platform-windows:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
-
-team:
+'c: contributor-productivity':
   - changed-files:
     - any-glob-to-any-file:
-      - docs/about/**/*
       - docs/contributing/**/*
-      - docs/postmortems/**/*
 
+# Keep this synced with CODEOWNERS.
 team-android:
   - changed-files:
     - any-glob-to-any-file:
       - docs/platform/android/**/*
+      - engine/src/flutter/shell/platform/android/**/*
+      - packages/flutter_tools/**/*android*
+      - packages/flutter_tools/**/*gradle*
 
 team-ecosystem:
   - changed-files:
@@ -228,7 +229,9 @@ team-infra:
   - changed-files:
     - any-glob-to-any-file:
       - docs/infra/**/*
+      - docs/releases/**/*
 
+# Keep this synced with CODEOWNERS.
 team-ios:
   - changed-files:
     - any-glob-to-any-file:
@@ -239,11 +242,6 @@ team-ios:
       - packages/flutter_tools/**/*xcode*
       - packages/flutter_tools/**/*ios*
       - packages/flutter_tools/**/*macos*
-
-team-release:
-  - changed-files:
-    - any-glob-to-any-file:
-      - docs/releases/**/*
 
 team-tool:
   - changed-files:

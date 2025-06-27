@@ -24,7 +24,6 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
-import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -51,7 +50,6 @@ class FlutterDevice {
     ResidentCompiler? generator,
     this.userIdentifier,
     required this.developmentShaderCompiler,
-    this.developmentSceneImporter,
   }) : generator =
            generator ??
            ResidentCompiler(
@@ -100,16 +98,6 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
-    final DevelopmentSceneImporter sceneImporter = DevelopmentSceneImporter(
-      sceneImporter: SceneImporter(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        fileSystem: globals.fs,
-      ),
-      fileSystem: globals.fs,
-    );
-
     final ResidentCompiler generator;
 
     // For both web and non-web platforms we initialize dill to/from
@@ -120,30 +108,18 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      final String platformDillName;
-      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      switch (buildInfo.nullSafetyMode) {
-        case NullSafetyMode.unsound:
-          platformDillName = 'ddc_outline.dill';
-          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-            extraFrontEndOptions.add('--no-sound-null-safety');
-          }
-        case NullSafetyMode.sound:
-          platformDillName = 'ddc_outline_sound.dill';
-          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-            extraFrontEndOptions.add('--sound-null-safety');
-          }
-        case NullSafetyMode.autodetect:
-          throw StateError(
-            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
-            'got NullSafetyMode.autodetect',
-          );
-      }
+      const String platformDillName = 'ddc_outline.dill';
 
       final String platformDillPath = globals.fs.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
+      final List<String> extraFrontEndOptions = <String>[
+        ...buildInfo.extraFrontEndOptions,
+        if (buildInfo.webEnableHotReload)
+        // These flags are only valid to be passed when compiling with DDC.
+        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+      ];
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -158,7 +134,7 @@ class FlutterDevice {
             getDefaultCachedKernelPath(
               trackWidgetCreation: buildInfo.trackWidgetCreation,
               dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: extraFrontEndOptions,
+              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
             ),
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
@@ -223,7 +199,6 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
-      developmentSceneImporter: sceneImporter,
     );
   }
 
@@ -233,7 +208,6 @@ class FlutterDevice {
   final BuildInfo buildInfo;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
-  final DevelopmentSceneImporter? developmentSceneImporter;
 
   DevFSWriter? devFSWriter;
   Stream<Uri?>? vmServiceUris;
@@ -431,7 +405,7 @@ class FlutterDevice {
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device!.displayName} in $modeName mode...',
@@ -507,7 +481,7 @@ class FlutterDevice {
 
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.mode.friendlyName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
@@ -575,7 +549,6 @@ class FlutterDevice {
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
         shaderCompiler: developmentShaderCompiler,
-        sceneImporter: developmentSceneImporter,
         dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
@@ -629,6 +602,9 @@ abstract class ResidentHandlers {
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
 
+  /// Whether an application can be detached without being stopped.
+  bool get supportsDetach;
+
   // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   ResidentDevtoolsHandler? get residentDevtoolsHandler;
 
@@ -639,6 +615,8 @@ abstract class ResidentHandlers {
   FileSystem? get fileSystem;
 
   /// Called to print help to the terminal.
+  ///
+  /// If [details] is true, prints out extra help information.
   void printHelp({required bool details});
 
   /// Perform a hot reload or hot restart of all attached applications.
@@ -983,9 +961,6 @@ abstract class ResidentHandlers {
   Future<void> cleanupAfterSignal();
 
   /// Tear down the runner and leave the application running.
-  ///
-  /// This is not supported on web devices where the runner is running
-  /// the application server as well.
   Future<void> detach();
 
   /// Tear down the runner and exit the application.
@@ -1010,6 +985,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String? dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    CommandHelp? commandHelp,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1019,12 +995,14 @@ abstract class ResidentRunner extends ResidentHandlers {
                ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
                : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
-       commandHelp = CommandHelp(
-         logger: globals.logger,
-         terminal: globals.terminal,
-         platform: globals.platform,
-         outputPreferences: globals.outputPreferences,
-       ) {
+       commandHelp =
+           commandHelp ??
+           CommandHelp(
+             logger: globals.logger,
+             terminal: globals.terminal,
+             platform: globals.platform,
+             outputPreferences: globals.outputPreferences,
+           ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -1136,7 +1114,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   // there is no devFS associated with the first device.
   Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
-  /// Returns [true] if the resident runner exited after invoking [exit()].
+  /// Returns `true` if the resident runner exited after invoking [exit].
   bool get exited => _exited;
 
   @override
@@ -1149,6 +1127,9 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   bool get canHotReload => hotMode;
+
+  /// Whether the hot reload support is implemented as hot restart.
+  bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
   ///
@@ -1372,23 +1353,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished.complete(0);
   }
 
-  Future<void> enableObservatory() async {
-    assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests =
-        <Future<vm_service.Response?>>[
-          for (final FlutterDevice? device in flutterDevices)
-            if (device != null)
-              // Notify the VM service if the user wants Observatory to be served.
-              device.vmService?.callMethodWrapper('_serveObservatory') ??
-                  Future<vm_service.Response?>.value(),
-        ];
-    try {
-      await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch (e) {
-      globals.printWarning('Unable to enable Observatory: $e');
-    }
-  }
-
   @protected
   void appFinished() {
     if (_finished.isCompleted) {
@@ -1444,7 +1408,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
       if (includeVmService) {
         // Caution: This log line is parsed by device lab tests.
-        globals.printStatus(
+        logger.printStatus(
           'A Dart VM Service on ${device.device!.displayName} '
           'is available at: ${device.vmService!.httpAddress}',
         );
@@ -1453,14 +1417,14 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (_residentDevtoolsHandler!.printDtdUri) {
           final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
           if (dtdUri != null) {
-            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+            logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
           }
         }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
         if (uri != null) {
-          globals.printStatus(
+          logger.printStatus(
             'The Flutter DevTools debugger and profiler '
             'on ${device.device!.displayName} '
             'is available at: ${urlToDisplayString(uri)}',
@@ -1469,6 +1433,32 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
     }
     _reportedDebuggers = true;
+  }
+
+  @override
+  void printHelp({required bool details}) {
+    logger.printStatus('Flutter run key commands.');
+    // Don't print the command in the case where the runner implements reload as
+    // restart since it's misleading.
+    if (canHotReload && !reloadIsRestart) {
+      commandHelp.r.print();
+    }
+    if (supportsRestart) {
+      commandHelp.R.print();
+    }
+    if (details) {
+      printHelpDetails();
+      commandHelp.hWithDetails.print();
+    } else {
+      commandHelp.hWithoutDetails.print();
+    }
+    if (supportsDetach) {
+      commandHelp.d.print();
+    }
+    commandHelp.c.print();
+    commandHelp.q.print();
+    logger.printStatus('');
+    printDebuggerList();
   }
 
   void printHelpDetails() {
@@ -1552,7 +1542,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
@@ -1569,6 +1558,8 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       return null;
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 
@@ -1658,7 +1649,7 @@ class TerminalHandler {
     subscription?.cancel();
   }
 
-  /// Returns [true] if the input has been handled by this function.
+  /// Returns `true` if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
     switch (character) {

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -66,6 +68,15 @@ TEST(DisplayListGeometryTypes, VectorToSizeConversion) {
 
   EXPECT_NE(sk_v, ToSkVector(dl_s));
   EXPECT_NE(ToDlSize(sk_v), dl_s);
+}
+
+TEST(DisplayListGeometryTypes, RSEToRRectConversion) {
+  DlRoundSuperellipse dl_rse = DlRoundSuperellipse::MakeRectRadius(
+      DlRect::MakeLTRB(10, 20, 30, 40), 1.0f);
+  SkRRect sk_rrect =
+      SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 20, 30, 40), 1.0f, 1.0f);
+
+  EXPECT_EQ(sk_rrect, ToApproximateSkRRect(dl_rse));
 }
 
 }  // namespace testing

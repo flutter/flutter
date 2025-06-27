@@ -16,7 +16,6 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import '../tools/asset_transformer.dart';
-import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
@@ -59,7 +58,10 @@ Future<Depfile> copyAssets(
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
   }
-  final Pool pool = Pool(kMaxOpenFiles);
+  final Pool copyFilesPool = Pool(kMaxOpenFiles);
+  final Pool transformPool = Pool(
+    (environment.platform.numberOfProcessors ~/ 2).clamp(1, kMaxOpenFiles),
+  );
   final List<File> inputs = <File>[
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
@@ -78,12 +80,6 @@ Future<Depfile> copyAssets(
     targetPlatform: targetPlatform,
   );
   final ShaderCompiler shaderCompiler = ShaderCompiler(
-    processManager: environment.processManager,
-    logger: environment.logger,
-    fileSystem: environment.fileSystem,
-    artifacts: environment.artifacts,
-  );
-  final SceneImporter sceneImporter = SceneImporter(
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
@@ -112,7 +108,9 @@ Future<Depfile> copyAssets(
 
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
-      final PoolResource resource = await pool.request();
+      final PoolResource copyResource = await copyFilesPool.request();
+      PoolResource? transformResource;
+
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
@@ -131,6 +129,7 @@ Future<Depfile> copyAssets(
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
+                transformResource = await transformPool.request();
                 final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: content.file as File,
                   outputPath: file.path,
@@ -160,12 +159,6 @@ Future<Depfile> copyAssets(
                     outputPath: file.path,
                     targetPlatform: targetPlatform,
                   );
-            case AssetKind.model:
-              doCopy =
-                  !await sceneImporter.importScene(
-                    input: content.file as File,
-                    outputPath: file.path,
-                  );
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
@@ -174,7 +167,8 @@ Future<Depfile> copyAssets(
           await file.writeAsBytes(await entry.value.content.contentsAsBytes());
         }
       } finally {
-        resource.release();
+        copyResource.release();
+        transformResource?.release();
       }
     }),
   );
@@ -196,7 +190,7 @@ Future<Depfile> copyAssets(
           componentEntries.value.entries.map<Future<void>>((
             MapEntry<String, AssetBundleEntry> entry,
           ) async {
-            final PoolResource resource = await pool.request();
+            final PoolResource resource = await copyFilesPool.request();
             try {
               // This will result in strange looking files, for example files with `/`
               // on Windows or files that end up getting URI encoded such as `#.ext`

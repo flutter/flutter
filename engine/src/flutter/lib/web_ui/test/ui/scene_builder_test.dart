@@ -19,11 +19,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    withImplicitView: true,
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
   group('${ui.SceneBuilder}', () {
     const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
@@ -644,6 +640,18 @@ Future<void> testMain() async {
         'scene_builder_backdrop_filter_blur_decal_tile_mode.png',
         region: const ui.Rect.fromLTWH(0, 0, 10 * 50, 10 * 50),
       );
+    });
+
+    test('push pop balance enfocement is consistent', () async {
+      final sceneBuilder = ui.SceneBuilder();
+      // Normally pop() must follow a previously non-popped layer push. However,
+      // the Flutter engine chooses to be lenient and allows calling pop() with
+      // no layers.
+      sceneBuilder.pop();
+
+      // Just checking that a scene can be built without crashing after a stray
+      // pop() from above.
+      sceneBuilder.build();
     });
   });
 }

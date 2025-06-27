@@ -172,10 +172,9 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
             'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
             'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '19',
+            'FLUTTER_ENGINE_SWITCH_17': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '18',
           },
         ),
       ]);
@@ -200,7 +199,6 @@ void main() {
           purgePersistentCache: true,
           useTestFonts: true,
           verboseSystemLogs: true,
-          nullAssertions: true,
         ),
       );
 
@@ -433,10 +431,10 @@ class FakeDesktopDevice extends DesktopDevice {
          operatingSystemUtils: operatingSystemUtils,
        );
 
-  /// The [mainPath] last passed to [buildForDevice].
+  /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
 
-  /// The [buildInfo] last passed to [buildForDevice].
+  /// The `buildInfo` last passed to [buildForDevice].
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
@@ -448,7 +446,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
@@ -495,7 +493,7 @@ class FakeMacOSDevice extends MacOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

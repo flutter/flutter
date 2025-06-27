@@ -42,6 +42,9 @@ class ColdRunner extends ResidentRunner {
   FileSystem get fileSystem => globals.fs;
 
   @override
+  bool get supportsDetach => _didAttach;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
@@ -70,10 +73,6 @@ class ColdRunner extends ResidentRunner {
         appFailedToStart();
         return 2;
       }
-    }
-
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
     }
 
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
@@ -157,10 +156,6 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
-    }
-
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
@@ -185,23 +180,6 @@ class ColdRunner extends ResidentRunner {
     }
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
-  }
-
-  @override
-  void printHelp({required bool details}) {
-    globals.printStatus('Flutter run key commands.');
-    if (details) {
-      printHelpDetails();
-      commandHelp.hWithDetails.print();
-    } else {
-      commandHelp.hWithoutDetails.print();
-    }
-    if (_didAttach) {
-      commandHelp.d.print();
-    }
-    commandHelp.c.print();
-    commandHelp.q.print();
-    printDebuggerList();
   }
 
   @override

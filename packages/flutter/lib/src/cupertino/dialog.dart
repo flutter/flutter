@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show ImageFilter, SemanticsRole, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -463,6 +463,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                           child: CupertinoPopupSurface(
                             isSurfacePainted: false,
                             child: Semantics(
+                              role: SemanticsRole.alertDialog,
                               namesRoute: true,
                               scopesRoute: true,
                               explicitChildNodes: true,
@@ -569,7 +570,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
@@ -683,7 +684,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       isVibrancePainted = debugIsVibrancePainted;
       return true;
     }());
-    if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
+    if (!isVibrancePainted) {
       if (blurSigma == 0) {
         return null;
       }
@@ -718,13 +719,13 @@ class CupertinoPopupSurface extends StatelessWidget {
     }
 
     if (filter != null) {
-      return ClipRRect(
+      return ClipRSuperellipse(
         borderRadius: _clipper,
         child: BackdropFilter(filter: filter, child: contents),
       );
     }
 
-    return ClipRRect(borderRadius: _clipper, child: contents);
+    return ClipRSuperellipse(borderRadius: _clipper, child: contents);
   }
 }
 
@@ -1298,7 +1299,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final List<Widget> children = <Widget>[
       Flexible(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -1319,8 +1320,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       if (widget.cancelButton != null) _buildCancelButton(),
     ];
     final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
-      Orientation.portrait => MediaQuery.sizeOf(context).width,
-      Orientation.landscape => MediaQuery.sizeOf(context).height,
+      Orientation.portrait => MediaQuery.widthOf(context),
+      Orientation.landscape => MediaQuery.heightOf(context),
     };
 
     return SafeArea(
@@ -1332,6 +1333,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           namesRoute: true,
           scopesRoute: true,
           explicitChildNodes: true,
+          role: SemanticsRole.dialog,
           label: 'Alert',
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
@@ -1591,24 +1593,30 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    late final Color backgroundColor;
-    BorderRadius? borderRadius;
+    late final Widget child;
     if (!widget.isCancel) {
-      backgroundColor = widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor;
-    } else {
-      backgroundColor = widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    }
-    return MetaData(
-      metaData: this,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: borderRadius,
+      child = ColoredBox(
+        color: CupertinoDynamicColor.resolve(
+          widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor,
+          context,
         ),
         child: widget.child,
-      ),
-    );
+      );
+    } else {
+      child = DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          ),
+          color: CupertinoDynamicColor.resolve(
+            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+            context,
+          ),
+        ),
+        child: widget.child,
+      );
+    }
+    return MetaData(metaData: this, child: child);
   }
 }
 
@@ -2107,6 +2115,7 @@ class CupertinoDialogAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.textStyle,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -2140,6 +2149,12 @@ class CupertinoDialogAction extends StatefulWidget {
   /// must be used if a text size is desired other than that specified in
   /// [_kCupertinoDialogActionStyle].
   final TextStyle? textStyle;
+
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -2261,7 +2276,8 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
             );
 
     return MouseRegion(
-      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor:
+          widget.mouseCursor ?? (enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
@@ -2299,23 +2315,31 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderAlertDialogActionsLayout(dividerThickness: _dividerThickness);
+    return _RenderAlertDialogActionsLayout(
+      dividerThickness: _dividerThickness,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderAlertDialogActionsLayout renderObject) {
-    renderObject.dividerThickness = _dividerThickness;
+    renderObject
+      ..dividerThickness = _dividerThickness
+      ..textDirection = Directionality.of(context);
   }
 }
 
 class _RenderAlertDialogActionsLayout extends RenderFlex {
-  _RenderAlertDialogActionsLayout({List<RenderBox>? children, required double dividerThickness})
-    : _dividerThickness = dividerThickness,
-      super(
-        direction: Axis.vertical,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-      ) {
+  _RenderAlertDialogActionsLayout({
+    List<RenderBox>? children,
+    required double dividerThickness,
+    super.textDirection,
+  }) : _dividerThickness = dividerThickness,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
     addAll(children);
   }
 
@@ -2397,12 +2421,17 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
+    final bool ltr = textDirection == TextDirection.ltr;
     RenderBox slot = firstChild!;
-    double x = 0;
+    double x = ltr ? 0 : (overallWidth - slotWidth);
     while (true) {
       slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
       (slot.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += slot.size.width;
+      if (ltr) {
+        x += slot.size.width;
+      } else {
+        x -= slot.size.width;
+      }
 
       final RenderBox? divider = childAfter(slot);
       if (divider == null) {
@@ -2410,8 +2439,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       }
       divider.layout(BoxConstraints.tight(Size(dividerThickness, height)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += dividerThickness;
-
+      if (ltr) {
+        x += dividerThickness;
+      } else {
+        x -= dividerThickness;
+      }
       slot = childAfter(divider)!;
     }
   }

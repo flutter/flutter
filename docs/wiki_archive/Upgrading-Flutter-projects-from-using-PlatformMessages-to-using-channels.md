@@ -155,4 +155,4 @@ Similar to Flutter side, using `FlutterMessageChannel` and `FlutterMethodChannel
     }];
 
 
-[API documentation](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Headers). See [platform_channel](../../examples/platform_channel/ios/Runner/AppDelegate.m) for another example.
+[API documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Headers). See [platform_channel](../../examples/platform_channel/ios/Runner/AppDelegate.m) for another example.

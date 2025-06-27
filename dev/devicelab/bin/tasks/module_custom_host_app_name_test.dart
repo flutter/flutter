@@ -242,6 +242,7 @@ Future<void> main() async {
         'intermediates',
         'assets',
         'debug',
+        'mergeDebugAssets',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -315,6 +316,7 @@ Future<void> main() async {
         'intermediates',
         'assets',
         'release',
+        'mergeReleaseAssets',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -333,7 +335,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

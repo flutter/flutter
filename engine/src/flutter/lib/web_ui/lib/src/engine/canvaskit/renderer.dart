@@ -11,6 +11,9 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+bool get isExperimentalWebParagraph =>
+    configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
+
 enum CanvasKitVariant {
   /// The appropriate variant is chosen based on the browser.
   ///
@@ -25,6 +28,12 @@ enum CanvasKitVariant {
   /// WARNING: In most cases, you should use [auto] instead of this variant. Using
   /// this variant in a non-Chromium browser will result in a broken app.
   chromium,
+
+  /// The variant that contains the new WebParagraph implementation on top of Chrome's Text Clusters
+  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  ///
+  /// WARNING: This is an experimental variant that's not yet ready for production use.
+  experimentalWebParagraph,
 }
 
 class CanvasKitRenderer implements Renderer {
@@ -48,7 +57,8 @@ class CanvasKitRenderer implements Renderer {
   Rasterizer _rasterizer = _createRasterizer();
 
   static Rasterizer _createRasterizer() {
-    if (configuration.canvasKitUseOffscreenCanvas) {
+    if (configuration.canvasKitUseOffscreenCanvas &&
+        !configuration.canvasKitForceMultiSurfaceRasterizer) {
       return OffscreenCanvasRasterizer();
     }
     return MultiSurfaceRasterizer();
@@ -77,9 +87,19 @@ class CanvasKitRenderer implements Renderer {
     _rasterizer = _createRasterizer();
   }
 
+  /// Resets the [Rasterizer] to the default value. Used in tests.
+  void debugResetRasterizer() {
+    _rasterizer = _createRasterizer();
+  }
+
   /// Override the rasterizer with the given [_rasterizer]. Used in tests.
   void debugOverrideRasterizer(Rasterizer testRasterizer) {
     _rasterizer = testRasterizer;
+  }
+
+  /// Returns the current [Rasterizer]. Used in tests.
+  Rasterizer debugGetRasterizer() {
+    return _rasterizer;
   }
 
   set resourceCacheMaxBytes(int bytes) => _rasterizer.setResourceCacheMaxBytes(bytes);
@@ -100,7 +120,7 @@ class CanvasKitRenderer implements Renderer {
         canvasKit = windowFlutterCanvasKit!;
       } else if (windowFlutterCanvasKitLoaded != null) {
         // CanvasKit is being preloaded by flutter.js. Wait for it to complete.
-        canvasKit = await promiseToFuture<CanvasKit>(windowFlutterCanvasKitLoaded!);
+        canvasKit = await windowFlutterCanvasKitLoaded!.toDart;
       } else {
         canvasKit = await downloadCanvasKit();
         windowFlutterCanvasKit = canvasKit;
@@ -332,15 +352,17 @@ class CanvasKitRenderer implements Renderer {
     ui.FilterQuality? filterQuality,
   ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
 
-  @override
-  ui.Path createPath() => CkPath();
+  CkPathConstructors pathConstructors = CkPathConstructors();
 
   @override
-  ui.Path copyPath(ui.Path src) => CkPath.from(src as CkPath);
+  ui.Path createPath() => LazyPath(pathConstructors);
+
+  @override
+  ui.Path copyPath(ui.Path src) => LazyPath.fromLazyPath(src as LazyPath);
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) =>
-      CkPath.combine(op, path1, path2);
+      LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
 
   @override
   ui.TextStyle createTextStyle({
@@ -403,20 +425,23 @@ class CanvasKitRenderer implements Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) => CkParagraphStyle(
-    textAlign: textAlign,
-    textDirection: textDirection,
-    maxLines: maxLines,
-    fontFamily: fontFamily,
-    fontSize: fontSize,
-    height: height,
-    textHeightBehavior: textHeightBehavior,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    strutStyle: strutStyle,
-    ellipsis: ellipsis,
-    locale: locale,
-  );
+  }) =>
+      isExperimentalWebParagraph
+          ? WebParagraphStyle()
+          : CkParagraphStyle(
+            textAlign: textAlign,
+            textDirection: textDirection,
+            maxLines: maxLines,
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            height: height,
+            textHeightBehavior: textHeightBehavior,
+            fontWeight: fontWeight,
+            fontStyle: fontStyle,
+            strutStyle: strutStyle,
+            ellipsis: ellipsis,
+            locale: locale,
+          );
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -429,20 +454,24 @@ class CanvasKitRenderer implements Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => CkStrutStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    leading: leading,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    forceStrutHeight: forceStrutHeight,
-  );
+  }) =>
+      isExperimentalWebParagraph
+          ? WebStrutStyle()
+          : CkStrutStyle(
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
+            fontSize: fontSize,
+            height: height,
+            leadingDistribution: leadingDistribution,
+            leading: leading,
+            fontWeight: fontWeight,
+            fontStyle: fontStyle,
+            forceStrutHeight: forceStrutHeight,
+          );
 
   @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) => CkParagraphBuilder(style);
+  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
+      isExperimentalWebParagraph ? WebParagraphBuilder() : CkParagraphBuilder(style);
 
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
@@ -587,4 +616,7 @@ class CanvasKitRenderer implements Renderer {
     baseline: baseline,
     lineNumber: lineNumber,
   );
+
+  @override
+  void dumpDebugInfo() {}
 }

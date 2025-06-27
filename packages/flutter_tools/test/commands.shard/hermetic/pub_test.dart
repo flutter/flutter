@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -9,15 +11,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
-import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String minimalV2EmbeddingManifest = r'''
@@ -36,19 +35,10 @@ void main() {
   late FakePub pub;
   late BufferLogger logger;
 
-  // TODO(matanlurey): Remove after `flutter_gen` is removed.
-  // See https://github.com/flutter/flutter/issues/102983 for details.
-  FeatureFlags disableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      // ignore: avoid_redundant_argument_values
-      isExplicitPackageDependenciesEnabled: false,
-    );
-  }
-
   setUp(() {
     Cache.disableLocking();
     fileSystem = MemoryFileSystem.test();
-    pub = FakePub(fileSystem);
+    pub = FakePub();
     logger = BufferLogger.test();
   });
 
@@ -73,7 +63,7 @@ void main() {
   testUsingContext(
     'pub get usage values are resilient to missing package config files before running "pub get"',
     () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
       fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
       fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
@@ -106,7 +96,7 @@ void main() {
   testUsingContext(
     'pub get usage values are resilient to poorly formatted package config before "pub get"',
     () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
       fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
       fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
@@ -144,7 +134,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
-      targetDirectory.childFile('pubspec.yaml').createSync();
+      targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -152,8 +142,19 @@ void main() {
       await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
       final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
       final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
+
       expect(packageConfigFile.existsSync(), true);
-      expect(packageConfigFile.readAsStringSync(), '{"configVersion":2,"packages":[]}');
+      expect(json.decode(packageConfigFile.readAsStringSync()), <String, Object>{
+        'configVersion': 2,
+        'packages': <Object?>[
+          <String, Object?>{
+            'name': 'my_app',
+            'rootUri': '../',
+            'packageUri': 'lib/',
+            'languageVersion': '3.7',
+          },
+        ],
+      });
     },
     overrides: <Type, Generator>{
       Pub: () => pub,
@@ -166,7 +167,7 @@ void main() {
     "pub get doesn't treat unknown flag as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
@@ -183,7 +184,7 @@ void main() {
     "pub get doesn't treat -v as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
@@ -202,7 +203,7 @@ void main() {
     "pub add doesn't treat dependency syntax as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
       fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
@@ -231,7 +232,7 @@ void main() {
   testUsingContext(
     "pub get skips example directory if it doesn't contain a pubspec.yaml",
     () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
       fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
@@ -279,58 +280,11 @@ void main() {
       FileSystem: () => fileSystem,
     },
   );
-
-  testUsingContext(
-    'pub get triggers localizations generation when generate: true',
-    () async {
-      final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync('''
-      flutter:
-        generate: true
-      ''');
-      fileSystem.currentDirectory.childFile('l10n.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-        arb-dir: lib/l10n
-        ''');
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-        ..createSync(recursive: true);
-      arbFile.writeAsStringSync('''
-      {
-        "helloWorld": "Hello, World!",
-        "@helloWorld": {
-          "description": "Sample description"
-        }
-      }
-      ''');
-
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-
-      await commandRunner.run(<String>['get']);
-      final FlutterCommandResult result = await command.runCommand();
-
-      expect(result.exitStatus, ExitStatus.success);
-      final Directory outputDirectory = fileSystem.directory(
-        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
-      );
-      expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-    },
-    overrides: <Type, Generator>{
-      Pub: () => pub,
-      ProcessManager: () => FakeProcessManager.any(),
-      FileSystem: () => fileSystem,
-      FeatureFlags: disableExplicitPackageDependencies,
-    },
-  );
 }
 
 class FakePub extends Fake implements Pub {
-  FakePub(this.fileSystem);
+  FakePub();
 
-  final FileSystem fileSystem;
   List<String>? expectedArguments;
 
   @override
@@ -340,24 +294,10 @@ class FakePub extends Fake implements Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    if (expectedArguments != null) {
-      expect(arguments, expectedArguments);
-    }
     if (project != null) {
-      fileSystem
-          .directory(project.directory)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+      writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     }
-  }
-
-  @override
-  Future<Map<String, Object?>> deps(FlutterProject project) {
-    return FakePubWithPrimedDeps().deps(project);
   }
 }

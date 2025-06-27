@@ -14,6 +14,9 @@
 #import <OCMock/OCMock.h>
 #import "flutter/testing/testing.h"
 
+#include <cstdint>
+#include "flutter/common/constants.h"
+
 @interface FlutterTextField (Testing)
 - (void)setPlatformNode:(flutter::FlutterTextPlatformNode*)node;
 @end
@@ -54,6 +57,53 @@
 - (bool)testClearClientDuringComposing;
 @end
 
+@interface FlutterTextInputPluginTestDelegate : NSObject <FlutterTextInputPluginDelegate> {
+  id<FlutterBinaryMessenger> _binaryMessenger;
+  FlutterViewController* _viewController;
+  FlutterViewController* _implicitViewController;
+}
+
+@end
+
+@implementation FlutterTextInputPluginTestDelegate
+
+static const FlutterViewIdentifier kViewId = 1;
+
+@synthesize binaryMessenger = _binaryMessenger;
+
+- (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)messenger
+                         viewController:(FlutterViewController*)viewController {
+  self = [super init];
+  if (self) {
+    _binaryMessenger = messenger;
+    _viewController = viewController;
+  }
+  return self;
+}
+
+- (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)messenger
+                 implicitViewController:(FlutterViewController*)viewController {
+  self = [super init];
+  if (self) {
+    _binaryMessenger = messenger;
+    _implicitViewController = viewController;
+  }
+  return self;
+}
+
+- (nullable FlutterViewController*)viewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier == kViewId) {
+    return _viewController;
+  } else if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    return _implicitViewController;
+  } else {
+    return nil;
+  }
+}
+
+@end
+
 @implementation FlutterInputPluginTestObjc
 
 - (bool)testEmptyCompositionRange {
@@ -67,10 +117,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -115,10 +169,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -181,10 +239,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -247,10 +309,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -306,11 +372,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -358,11 +428,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
   };
@@ -386,11 +460,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"autofill" : @{
@@ -424,11 +502,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"autofill" : @{
@@ -457,11 +539,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"obscureText" : @YES,
@@ -490,11 +576,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"autofill" : @{
@@ -528,11 +618,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"fields" : @[
@@ -576,11 +670,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"autofill" : @{
@@ -614,11 +712,15 @@
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Set input client 1.
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"inputType" : @{@"name" : @"inputName"},
     @"autofill" : @{
@@ -669,8 +771,19 @@
       [windowMock convertRectToScreen:NSMakeRect(28, 10, 2, 19)])
       .andReturn(NSMakeRect(38, 20, 2, 19));
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:controllerMock];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:controllerMock];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
 
   FlutterMethodCall* call = [FlutterMethodCall
       methodCallWithMethodName:@"TextInput.setEditableSizeAndTransform"
@@ -729,8 +842,19 @@
       [viewMock window])
       .andReturn(windowMock);
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:controllerMock];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:controllerMock];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
 
   FlutterMethodCall* call = [FlutterMethodCall
       methodCallWithMethodName:@"TextInput.setEditableSizeAndTransform"
@@ -791,8 +915,19 @@
       [windowMock convertRectToScreen:NSMakeRect(-18, 6, 3, 3)])
       .andReturn(NSMakeRect(-18, 6, 3, 3));
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:controllerMock];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:controllerMock];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
 
   FlutterMethodCall* call = [FlutterMethodCall
       methodCallWithMethodName:@"TextInput.setEditableSizeAndTransform"
@@ -847,10 +982,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -896,10 +1035,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1011,10 +1154,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1246,10 +1393,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1306,6 +1457,7 @@
 }
 
 - (bool)testPerformKeyEquivalent {
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   __block NSEvent* eventBeingDispatchedByKeyboardManager = nil;
   FlutterViewController* viewControllerMock = OCMClassMock([FlutterViewController class]);
   OCMStub([viewControllerMock isDispatchingKeyEvent:[OCMArg any]])
@@ -1327,8 +1479,19 @@
                                    isARepeat:NO
                                      keyCode:0x50];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewControllerMock];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewControllerMock];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
 
   OCMExpect([viewControllerMock keyDown:event]);
 
@@ -1379,12 +1542,16 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   plugin.textInputContext = textInputContext;
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1456,10 +1623,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1533,10 +1704,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputType" : @{@"name" : @"TextInputType.multiline"},
     @"inputAction" : @"TextInputAction.newline",
   };
@@ -1597,10 +1772,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputType" : @{@"name" : @"TextInputType.multiline"},
     @"inputAction" : @"TextInputAction.send",
   };
@@ -1693,10 +1872,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1752,10 +1935,14 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -1813,8 +2000,11 @@
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   // Can't run CFRunLoop in default mode because it causes crashes from scheduled
   // sources from other tests.
@@ -1834,6 +2024,51 @@
     CFRunLoopRunInMode((__bridge CFStringRef)runLoopMode, 0, true);
   }
   // At this point the selectors should be dropped; otherwise, OCMReject will throw.
+  return true;
+}
+
+- (bool)testInsertTextWithCollapsedSelectionInsideComposing {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub([engineMock binaryMessenger]).andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"text"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id result){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"今日は家に帰ります",
+                                                                @"selectionBase" : @(0),
+                                                                @"selectionExtent" : @(3),
+                                                                @"composingBase" : @(0),
+                                                                @"composingExtent" : @(9),
+                                                              }];
+  [plugin handleMethodCall:call
+                    result:^(id result){
+                    }];
+
+  [plugin insertText:@"今日は家に帰ります" replacementRange:NSMakeRange(NSNotFound, 0)];
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "今日は家に帰ります");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 9);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 9);
+
   return true;
 }
 
@@ -1969,10 +2204,14 @@ TEST(FlutterTextInputPluginTest, TestAttributedSubstringOutOfRange) {
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
     @"inputAction" : @"action",
     @"enableDeltaModel" : @"true",
     @"inputType" : @{@"name" : @"inputName"},
@@ -2034,11 +2273,12 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
 
     FlutterTextFieldMock* mockTextField =
         [[FlutterTextFieldMock alloc] initWithPlatformNode:&text_platform_node
-                                               fieldEditor:viewController.textInputPlugin];
+                                               fieldEditor:engine.textInputPlugin];
     [viewController.view addSubview:mockTextField];
     [mockTextField startEditing];
 
     NSDictionary* setClientConfig = @{
+      @"viewId" : @(flutter::kFlutterImplicitViewId),
       @"inputAction" : @"action",
       @"inputType" : @{@"name" : @"inputName"},
     };
@@ -2047,7 +2287,7 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
                                           arguments:@[ @(1), setClientConfig ]];
     FlutterResult result = ^(id result) {
     };
-    [viewController.textInputPlugin handleMethodCall:methodCall result:result];
+    [engine.textInputPlugin handleMethodCall:methodCall result:result];
 
     NSDictionary* arguments = @{
       @"text" : @"new text",
@@ -2058,7 +2298,7 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
     };
     methodCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
                                                    arguments:arguments];
-    [viewController.textInputPlugin handleMethodCall:methodCall result:result];
+    [engine.textInputPlugin handleMethodCall:methodCall result:result];
     EXPECT_EQ([mockTextField.lastUpdatedString isEqualToString:@"new text"], YES);
     EXPECT_EQ(NSEqualRanges(mockTextField.lastUpdatedSelection, NSMakeRange(1, 1)), YES);
 
@@ -2118,24 +2358,33 @@ TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
                                                      defer:NO];
   window.contentView = viewController.view;
 
-  ASSERT_EQ(viewController.textInputPlugin.superview, nil);
-  ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
+  ASSERT_EQ(engine.textInputPlugin.superview, nil);
+  ASSERT_FALSE(window.firstResponder == engine.textInputPlugin);
 
-  [viewController.textInputPlugin
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(flutter::kFlutterImplicitViewId),
+  };
+  [engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                         arguments:@[ @(1), setClientConfig ]]
+                result:^(id){
+                }];
+
+  [engine.textInputPlugin
       handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
                 result:^(id){
                 }];
 
-  ASSERT_EQ(viewController.textInputPlugin.superview, viewController.view);
-  ASSERT_TRUE(window.firstResponder == viewController.textInputPlugin);
+  ASSERT_EQ(engine.textInputPlugin.superview, viewController.view);
+  ASSERT_TRUE(window.firstResponder == engine.textInputPlugin);
 
-  [viewController.textInputPlugin
+  [engine.textInputPlugin
       handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.hide" arguments:@[]]
                 result:^(id){
                 }];
 
-  ASSERT_EQ(viewController.textInputPlugin.superview, nil);
-  ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
+  ASSERT_EQ(engine.textInputPlugin.superview, nil);
+  ASSERT_FALSE(window.firstResponder == engine.textInputPlugin);
 }
 
 TEST(FlutterTextInputPluginTest, FirstResponderIsCorrect) {
@@ -2155,16 +2404,25 @@ TEST(FlutterTextInputPluginTest, FirstResponderIsCorrect) {
 
   [window makeFirstResponder:viewController.flutterView];
 
-  [viewController.textInputPlugin
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(flutter::kFlutterImplicitViewId),
+  };
+  [engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                         arguments:@[ @(1), setClientConfig ]]
+                result:^(id){
+                }];
+
+  [engine.textInputPlugin
       handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
                 result:^(id){
                 }];
 
-  ASSERT_TRUE(window.firstResponder == viewController.textInputPlugin);
+  ASSERT_TRUE(window.firstResponder == engine.textInputPlugin);
 
   ASSERT_FALSE(viewController.flutterView.acceptsFirstResponder);
 
-  [viewController.textInputPlugin
+  [engine.textInputPlugin
       handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.hide" arguments:@[]]
                 result:^(id){
                 }];
@@ -2184,11 +2442,47 @@ TEST(FlutterTextInputPluginTest, HasZeroSizeAndClipsToBounds) {
                                                                                 nibName:@""
                                                                                  bundle:nil];
 
-  FlutterTextInputPlugin* plugin =
-      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
 
   ASSERT_TRUE(NSIsEmptyRect(plugin.frame));
   ASSERT_TRUE(plugin.clipsToBounds);
+}
+
+TEST(FlutterTextInputPluginTest, WorksWithoutViewId) {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                   implicitViewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+      // omit viewId
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  ASSERT_TRUE(plugin.currentViewController == viewController);
+}
+
+TEST(FlutterTextInputPluginTest, InsertTextWithCollapsedSelectionInsideComposing) {
+  ASSERT_TRUE(
+      [[FlutterInputPluginTestObjc alloc] testInsertTextWithCollapsedSelectionInsideComposing]);
 }
 
 }  // namespace flutter::testing

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/native_library.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/allocation.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -24,7 +25,10 @@
 namespace impeller::interop::testing {
 
 using InteropPlaygroundTest = PlaygroundTest;
-INSTANTIATE_OPENGLES_PLAYGROUND_SUITE(InteropPlaygroundTest);
+INSTANTIATE_PLAYGROUND_SUITE(InteropPlaygroundTest);
+
+// Just ensures that context can be subclassed.
+class ContextSub : public hpp::Context {};
 
 TEST_P(InteropPlaygroundTest, CanCreateContext) {
   auto context = CreateContext();
@@ -43,6 +47,11 @@ TEST_P(InteropPlaygroundTest, CanCreateDisplayListBuilder) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateSurface) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP()
+        << "This test checks wrapping FBOs which is an OpenGL ES only call.";
+    return;
+  }
   auto context = CreateContext();
   ASSERT_TRUE(context);
   const auto window_size = GetWindowSize();
@@ -283,6 +292,32 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanCreateDecorations) {
+  hpp::TypographyContext context;
+  auto para =
+      hpp::ParagraphBuilder(context)
+          .PushStyle(
+              hpp::ParagraphStyle{}
+                  .SetForeground(hpp::Paint{}.SetColor({1.0, 0.0, 0.0, 1.0}))
+                  .SetFontSize(150.0f)
+                  .SetTextDecoration(ImpellerTextDecoration{
+                      .types = kImpellerTextDecorationTypeLineThrough |
+                               kImpellerTextDecorationTypeUnderline,
+                      .color = ImpellerColor{0.0, 1.0, 0.0, 0.75},
+                      .style = kImpellerTextDecorationStyleWavy,
+                      .thickness_multiplier = 1.5,
+                  }))
+          .AddText(std::string{"Holy text decorations Batman!"})
+          .Build(900);
+  auto dl = hpp::DisplayListBuilder{}.DrawParagraph(para, {100, 100}).Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
 TEST_P(InteropPlaygroundTest, CanCreateShapes) {
   hpp::DisplayListBuilder builder;
 
@@ -461,6 +496,193 @@ TEST_P(InteropPlaygroundTest, CanRenderTextAlignments) {
 
   auto dl = builder.Build();
 
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanRenderShadows) {
+  hpp::DisplayListBuilder builder;
+  {
+    builder.DrawRect(ImpellerRect{0, 0, 400, 400},
+                     hpp::Paint{}.SetColor(ImpellerColor{
+                         0.0, 1.0, 0.0, 1.0, kImpellerColorSpaceSRGB}));
+  }
+  ImpellerRect box = {100, 100, 100, 100};
+  {
+    hpp::PathBuilder path_builder;
+    path_builder.AddRect(box);
+    ImpellerColor shadow_color = {0.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB};
+    builder.DrawShadow(path_builder.Build(), shadow_color, 4.0f, false, 1.0f);
+  }
+  {
+    hpp::Paint red_paint;
+    red_paint.SetColor(
+        ImpellerColor{1.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB});
+    builder.DrawRect(box, red_paint);
+  }
+  auto dl = builder.Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanMeasureText) {
+  hpp::TypographyContext type_context;
+  hpp::ParagraphBuilder paragraph_builder(type_context);
+  hpp::ParagraphStyle paragraph_style;
+  paragraph_style.SetFontSize(50);
+  paragraph_builder.PushStyle(paragraph_style);
+  const std::string text =
+      "🏁 Can 👨‍👨‍👦‍👦 Measure 🔍 Text\nAnd this is line "
+      "two.\nWhoa! Three lines. How high does this go?\r\nI stopped counting.";
+  const auto u16text = fml::Utf8ToUtf16(text);
+  ASSERT_NE(text.size(), u16text.size());
+  paragraph_builder.AddText(reinterpret_cast<const uint8_t*>(text.data()),
+                            text.size());
+  hpp::DisplayListBuilder builder;
+  // Don't rely on implicit line breaks in this test to make it less brittle to
+  // different fonts being picked.
+  hpp::Paragraph paragraph = paragraph_builder.Build(FLT_MAX);
+  const auto line_count = paragraph.GetLineCount();
+  ASSERT_EQ(line_count, 4u);
+
+  // Line Metrics.
+  {
+    auto metrics = paragraph.GetLineMetrics();
+    ASSERT_GT(metrics.GetAscent(0), 0.0);
+    ASSERT_GT(metrics.GetUnscaledAscent(0), 0.0);
+    ASSERT_GT(metrics.GetDescent(0), 0.0);
+    ASSERT_GT(metrics.GetBaseline(0), 0.0);
+    ASSERT_TRUE(metrics.IsHardbreak(0));
+    ASSERT_DOUBLE_EQ(metrics.GetLeft(0), 0.0);
+    ASSERT_EQ(metrics.GetCodeUnitStartIndex(0), 0u);
+    ASSERT_EQ(metrics.GetCodeUnitEndIndexIncludingNewline(0),
+              metrics.GetCodeUnitEndIndex(0) + 1u);
+    ASSERT_GT(metrics.GetCodeUnitStartIndex(1), 0u);
+    // Last line should cover the entire range.
+    ASSERT_EQ(metrics.GetCodeUnitEndIndex(3), u16text.size());
+  }
+
+  // Glyph info by code point.
+  {
+    auto glyph = paragraph.GlyphInfoAtCodeUnitIndex(0u);
+    ASSERT_TRUE(glyph);
+    ASSERT_EQ(glyph.GetGraphemeClusterCodeUnitRangeBegin(), 0u);
+    ASSERT_EQ(glyph.GetGraphemeClusterCodeUnitRangeEnd(),
+              fml::Utf8ToUtf16("🏁").size());
+    auto bounds = glyph.GetGraphemeClusterBounds();
+    ASSERT_GT(bounds.width, 0.0);
+    ASSERT_GT(bounds.height, 0.0);
+    ASSERT_FALSE(glyph.IsEllipsis());
+    ASSERT_EQ(glyph.GetTextDirection(), kImpellerTextDirectionLTR);
+
+    ImpellerRect bounds2 = {};
+    ImpellerGlyphInfoGetGraphemeClusterBounds(glyph.Get(), &bounds2);
+    ASSERT_EQ(bounds.width, bounds2.width);
+    ASSERT_EQ(bounds.height, bounds2.height);
+  }
+
+  // Glyph info by coordinates.
+  {
+    auto glyph = paragraph.GlyphInfoAtParagraphCoordinates(0.0, 0.0);
+    ASSERT_TRUE(glyph);
+    ASSERT_EQ(glyph.GetGraphemeClusterCodeUnitRangeEnd(),
+              fml::Utf8ToUtf16("🏁").size());
+  }
+
+  // Glyph Figure out word boundaries.
+  {
+    auto glyph = paragraph.GlyphInfoAtCodeUnitIndex(0u);
+    ASSERT_TRUE(glyph);
+    auto range =
+        paragraph.GetWordBoundary(glyph.GetGraphemeClusterCodeUnitRangeEnd());
+    ASSERT_GT(range.end, 0u);
+    ImpellerRange range2 = {};
+    ImpellerParagraphGetWordBoundary(
+        paragraph.Get(), glyph.GetGraphemeClusterCodeUnitRangeEnd(), &range2);
+    ASSERT_EQ(range.start, range2.start);
+    ASSERT_EQ(range.end, range2.end);
+  }
+
+  builder.DrawParagraph(paragraph, ImpellerPoint{100, 100});
+  auto dl = builder.Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
+  const auto path =
+      hpp::PathBuilder{}.MoveTo({100, 100}).LineTo({200, 200}).Build();
+  const auto bounds = path.GetBounds();
+  ASSERT_EQ(bounds.x, 100);
+  ASSERT_EQ(bounds.y, 100);
+  ASSERT_EQ(bounds.width, 100);
+  ASSERT_EQ(bounds.height, 100);
+}
+
+TEST_P(InteropPlaygroundTest, CanControlEllipses) {
+  hpp::TypographyContext context;
+  auto style = hpp::ParagraphStyle{};
+  style.SetFontSize(50);
+  style.SetForeground(hpp::Paint{}.SetColor({.red = 1.0, .alpha = 1.0}));
+  const auto text = std::string{"The quick brown fox jumped over the lazy dog"};
+  style.SetEllipsis("🐶");
+  auto para1 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  style.SetForeground(hpp::Paint{}.SetColor({.green = 1.0, .alpha = 1.0}));
+  style.SetEllipsis(nullptr);
+  auto para2 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawParagraph(para1, {100, 100})
+                .DrawParagraph(para2, {100, 200})
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
+  auto iplr = OpenAssetAsHPPMapping("interop_runtime_stage_cs.frag.iplr");
+  ASSERT_TRUE(!!iplr);
+  auto program = hpp::FragmentProgram::WithData(std::move(iplr));
+  ASSERT_TRUE(program);
+  auto context = GetHPPContext();
+  auto filter =
+      hpp::ImageFilter::FragmentProgram(context, program, {}, nullptr);
+  ASSERT_TRUE(filter);
+  auto bay_bridge = OpenAssetAsHPPTexture("bay_bridge.jpg");
+  ASSERT_TRUE(bay_bridge);
+
+  float size_data[4] = {500, 500};
+  auto uniform_data = hpp::Mapping{reinterpret_cast<const uint8_t*>(&size_data),
+                                   sizeof(size_data), nullptr};
+
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawRect({10, 10, 500, 500},
+                          hpp::Paint{}
+                              .SetColor({1.0, 1.0, 1.0, 1.0})
+                              .SetColorSource(hpp::ColorSource::FragmentProgram(
+                                  context,             //
+                                  program,             //
+                                  {bay_bridge.Get()},  // samplers
+                                  &uniform_data        // uniform data
+                                  )))
+                .Build();
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
         hpp::Surface window(surface.GetC());

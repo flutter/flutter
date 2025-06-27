@@ -76,7 +76,7 @@ final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
 );
 
 void main() {
-  final ThemeData material3Theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+  final ThemeData material3Theme = ThemeData(brightness: Brightness.dark);
   final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
 
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
@@ -1616,6 +1616,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          role: SemanticsRole.alertDialog,
                           children: <TestSemantics>[
                             TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
                             // The content semantics does not merge into the semantics
@@ -1803,6 +1804,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          role: SemanticsRole.dialog,
                           children: <TestSemantics>[
                             // Title semantics does not merge into the semantics
                             // node 4.
@@ -2680,6 +2682,39 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
+  testWidgets('Applies AnimationStyle to showAdaptiveDialog', (WidgetTester tester) async {
+    const AnimationStyle animationStyle = AnimationStyle(
+      duration: Duration(seconds: 1),
+      curve: Curves.easeInOut,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Go'));
+    showAdaptiveDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
+      animationStyle: animationStyle,
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsOneWidget);
+
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsNothing);
+  });
+
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     addTearDown(okNode.dispose);
@@ -2817,6 +2852,157 @@ void main() {
     // The dialog is showing and the text field still has focus.
     expect(find.text(dialogText), findsOneWidget);
     expect(getTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('requestFocus works correctly in showDialog.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('Dialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const Dialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          child: SizedBox(width: 1000, height: 100),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(const AlertDialog(content: SizedBox(), contentPadding: EdgeInsets.zero)),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('AlertDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const AlertDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          content: SizedBox(width: 1000, height: 100),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(contentPadding: EdgeInsets.zero, children: <Widget>[SizedBox()]),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('SimpleDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          contentPadding: EdgeInsets.zero,
+          children: <Widget>[SizedBox(width: 1000, height: 100)],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+    // no back button in app bar for RawDialogRoute with full screen dialog set to true
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('X'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    RawDialogRoute<void>(
+                      pageBuilder: (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return Scaffold(
+                          appBar: AppBar(title: const Text('title')),
+                          body: const Text('body'),
+                        );
+                      },
+                      fullscreenDialog: true,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton), findsNothing);
+    expect(find.byType(CloseButton), findsOneWidget);
   });
 }
 

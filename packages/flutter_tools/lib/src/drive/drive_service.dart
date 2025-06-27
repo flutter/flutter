@@ -15,6 +15,7 @@ import '../base/dds.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../resident_runner.dart';
@@ -26,12 +27,16 @@ class FlutterDriverFactory {
     required ApplicationPackageFactory applicationPackageFactory,
     required Platform platform,
     required Logger logger,
+    required Terminal terminal,
+    required OutputPreferences outputPreferences,
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _platform = platform,
        _logger = logger,
+       _terminal = terminal,
+       _outputPreferences = outputPreferences,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _devtoolsLauncher = devtoolsLauncher;
@@ -39,6 +44,8 @@ class FlutterDriverFactory {
   final ApplicationPackageFactory _applicationPackageFactory;
   final Platform _platform;
   final Logger _logger;
+  final Terminal _terminal;
+  final OutputPreferences _outputPreferences;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
@@ -48,7 +55,9 @@ class FlutterDriverFactory {
     if (web) {
       return WebDriverService(
         logger: _logger,
+        terminal: _terminal,
         platform: _platform,
+        outputPreferences: _outputPreferences,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
       );
@@ -81,11 +90,11 @@ abstract class DriverService {
   /// If --use-existing-app is provided, configured the correct VM Service URI.
   Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions);
 
-  /// Start the test file with the provided [arguments] and [environment], returning
-  /// the test process exit code.
+  /// Start the test file with the provided [arguments] and current environment,
+  /// returning the test process exit code.
   ///
-  /// if [profileMemory] is provided, it will be treated as a file path to write a
-  /// devtools memory profile.
+  /// If [profileMemory] is provided, it will be treated as a file path to
+  /// write a devtools memory profile.
   Future<int> startTest(
     String testFile,
     List<String> arguments,

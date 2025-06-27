@@ -124,19 +124,17 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
     auto aiks_context = render_target.GetAiksContext();
 
     auto dl_builder = DisplayListBuilder();
-    dl_builder.SetTransform(&surface_transformation_);
+    dl_builder.SetTransform(ToDlMatrix(surface_transformation_));
     slice_->render_into(&dl_builder);
     auto display_list = dl_builder.Build();
 
     auto cull_rect =
-        impeller::IRect::MakeSize(impeller_target->GetRenderTargetSize());
-    SkIRect sk_cull_rect =
-        SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
+        impeller::Rect::MakeSize(impeller_target->GetRenderTargetSize());
 
     return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                     *impeller_target,                   //
                                     display_list,                       //
-                                    sk_cull_rect,                       //
+                                    cull_rect,                          //
                                     /*reset_host_buffer=*/true,         //
                                     /*is_onscreen=*/false               //
     );
@@ -182,7 +180,7 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
   }
   DlSkCanvasAdapter dl_canvas(canvas);
   int restore_count = dl_canvas.GetSaveCount();
-  dl_canvas.SetTransform(surface_transformation_);
+  dl_canvas.SetTransform(ToDlMatrix(surface_transformation_));
   if (clear_surface) {
     dl_canvas.Clear(DlColor::kTransparent());
   }

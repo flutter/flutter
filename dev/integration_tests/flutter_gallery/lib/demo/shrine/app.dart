@@ -81,14 +81,14 @@ IconThemeData _customIconTheme(IconThemeData original) {
 }
 
 ThemeData _buildShrineTheme() {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData();
   return base.copyWith(
     colorScheme: kShrineColorScheme,
     primaryColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
+    inputDecorationTheme: const InputDecorationThemeData(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),

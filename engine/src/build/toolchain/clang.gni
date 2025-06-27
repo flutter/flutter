@@ -2,10 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if (is_mac || is_ios) {
-  import("//build/config/ios/ios_sdk.gni")  # For use_ios_simulator
-}
-
 declare_args() {
   # Enable the optional type profiler in Clang, which will tag heap allocations
   # with the allocation type.

@@ -78,8 +78,8 @@ To run or debug the tests in IDE, make sure `FLUTTER_ROOT` directory is set up.
 For example, in Android Studio, select the configuration for the test, click "Edit Configurations...",
 under "Environment Variables" section, enter `FLUTTER_ROOT=directory_to_your_flutter_framework_repo`.
 
-The pre-built flutter tool runs in release mode with the observatory off by default.
-To enable debugging mode and the observatory on the `flutter` tool, uncomment the
+The pre-built flutter tool runs in release mode with the Dart VM service off by default.
+To enable debugging mode and Dart DevTools for the `flutter` tool, uncomment the
 `FLUTTER_TOOL_ARGS` line in the `bin/flutter` (or `bin/flutter-dev`) shell script.
 
 ## Debugging the `flutter` command-line tool in VS Code
@@ -161,28 +161,21 @@ If you need to pin a particular version, edit the table at the top of the `updat
 
 ## Using a locally-built engine with the `flutter` tool
 
-To allow the tool to be used with a locally-built engine, the `flutter` tool accepts two
-global parameters: `local-engine-src-path`, which specifies the path to your engine repository,
-and `local-engine`, which specifies which build of the engine to use.
+To allow the tool to be used with a locally-built engine, the `flutter` tool accepts three
+global parameters:
 
-**Important:** before building your local engine, you should ensure that your engine feature branch is based on the
-same upstream version of the engine that the Flutter SDK/flutter tool has pinned. You can find the engine version
-that the Flutter SDK has pinned at `flutter/bin/internal/engine.version`.
+* `local-engine`, which specifies which build of the engine to run
+* `local-engine-host`, which specifies which build of the engine to use for host artifacts like the dart compiler
+* `local-engine-src-path` (optional), which specifies the path to your engine sources
 
-A typical invocation would be: `--local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
+A typical invocation would be: `--local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
 
-If your engine is in a directory called `engine` that is a peer to the framework repository's `flutter` directory, then you can omit `--local-engine-src-path` and only specify `--local-engine`.
+If your engine is in a directory other than the `engine` directory that is a peer to the
+framework repository's `flutter` directory, then you must specify `--local-engine-src-path` as well.
 
 You can also set the environment variable `$FLUTTER_ENGINE` instead of specifying `--local-engine-src-path`.
 
 The `--local-engine` should specify the build of the engine to use, e.g. a profile build for Android, a debug build for Android, or whatever. It must match the other arguments provided to the tool, e.g. don't use the `android_debug_unopt` build when you specify `--release`, since the Debug build expects to compile and run Dart code in a JIT environment, while `--release` implies a Release build which uses AOT compilation.
-
-<!-- TODO(matanl): https://github.com/flutter/flutter/issues/132245, update this. -->
-
-> ⚠️ **WARNING**: As of [#132245](https://github.com/flutter/flutter/issues/132245), `--local-engine-host` will be mandatory.
->
-> If you're currently relying on the host engine being implicitly defined, you will need to update your workflow to explicitly specify the host engine.
-> For example, if you're currently running `flutter run --local-engine=android_debug_unopt`, you will need to run `flutter run --local-engine=android_debug_unopt --local-engine-host=host_debug_unopt` instead.
 
 If you've modified the public API of `dart:ui` in your local build of the engine
 and you need to be able to analyze the framework code with the new API,
@@ -194,7 +187,7 @@ with. A typical example would be:
 ```yaml
 dependency_overrides:
   sky_engine:
-    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_engine
+    path: /path/to/flutter/engine/src/out/host_debug/gen/dart-pkg/sky_engine
 ```
 
 Replace `host_debug` with the actual build that you want to use (similar to `--local-engine`, but typically

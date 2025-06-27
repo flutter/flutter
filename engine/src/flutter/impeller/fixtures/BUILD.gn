@@ -68,6 +68,10 @@ impeller_shaders("shader_fixtures") {
     "texture.vert",
   ]
 
+  if (impeller_enable_vulkan) {
+    vulkan_exclusions = [ "half.frag" ]
+  }
+
   if (impeller_enable_opengles) {
     gles_exclusions = [
       "sample.comp",
@@ -79,10 +83,12 @@ impeller_shaders("shader_fixtures") {
 }
 
 impellerc("runtime_stages") {
+  mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
     "runtime_stage_filter_example.frag",
+    "interop_runtime_stage_cs.frag",
     "runtime_stage_simple.frag",
     "runtime_stage_position.frag",
     "gradient.frag",
@@ -102,11 +108,11 @@ impellerc("runtime_stages") {
 
 test_fixtures("file_fixtures") {
   fixtures = [
-    "//flutter/third_party/txt/third_party/fonts/ahem.ttf",
-    "//flutter/third_party/txt/third_party/fonts/HomemadeApple.ttf",
-    "//flutter/third_party/txt/third_party/fonts/NotoColorEmoji.ttf",
-    "//flutter/third_party/txt/third_party/fonts/Roboto-Medium.ttf",
-    "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
+    "//flutter/txt/third_party/fonts/ahem.ttf",
+    "//flutter/txt/third_party/fonts/HomemadeApple.ttf",
+    "//flutter/txt/third_party/fonts/NotoColorEmoji.ttf",
+    "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
+    "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     "airplane.jpg",
     "bay_bridge.jpg",
     "blend_mode_dst.png",
@@ -126,6 +132,7 @@ test_fixtures("file_fixtures") {
     "sample.comp",
     "sample.frag",
     "sample.vert",
+    "check_gles_definition.frag",
     "sample_with_binding.vert",
     "simple.vert.hlsl",
     "sa%m#ple.vert",

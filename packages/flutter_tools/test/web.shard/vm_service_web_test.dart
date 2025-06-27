@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -38,8 +39,8 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -51,8 +52,8 @@ void main() {
     testWithoutContext('can validate flutter version in parallel', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -83,8 +84,8 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);

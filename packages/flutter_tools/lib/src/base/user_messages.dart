@@ -275,6 +275,9 @@ class UserMessages {
   String get gtkLibrariesMissing =>
       'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get eglinfoMissing =>
+      "Unable to access driver information using 'eglinfo'.\n"
+      'It is likely available from your distribution (e.g.: apt install mesa-utils)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) =>
@@ -327,6 +330,8 @@ class UserMessages {
       'You are using a locally built engine (--local-engine) but have not specified --local-engine-host.\n'
       'You may be building with a different engine than the one you are running with. '
       'See https://github.com/flutter/flutter/issues/132245 for details.';
+  String get runnerHostEngineRequiresLocalEngine =>
+      'You must specify --local-engine if you are using --local-engine-host.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerNoWebSdk(String webSdkPath) => 'No Flutter web sdk found at $webSdkPath.';

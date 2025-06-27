@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -133,6 +135,21 @@ void main() {
 
     layout(editable, constraints: constraints);
     expect(editable.size.height, 100);
+  });
+
+  test('has default semantics input type', () {
+    const InlineSpan text = TextSpan(text: 'text');
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: text,
+    );
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    editable.describeSemanticsConfiguration(config);
+    expect(config.inputType, SemanticsInputType.text);
   });
 
   test('Reports the height of the first line when maxLines is 1', () {
@@ -1642,9 +1659,9 @@ void main() {
       composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
       expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
       composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8))!; // H
-      expect(composingRect, const Rect.fromLTRB(14.0, 18.0, 24.0, 28.0));
+      expect(composingRect, const Rect.fromLTRB(14.0, 14.0, 24.0, 28.0));
       composingRect = editable.getRectForComposingRange(const TextRange(start: 8, end: 9))!; // I
-      expect(composingRect, const Rect.fromLTRB(24.0, 18.0, 34.0, 28.0));
+      expect(composingRect, const Rect.fromLTRB(24.0, 14.0, 34.0, 28.0));
       composingRect = editable.getRectForComposingRange(const TextRange(start: 9, end: 10))!;
       expect(composingRect, const Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));
     });

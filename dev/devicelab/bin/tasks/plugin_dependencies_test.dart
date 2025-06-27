@@ -280,7 +280,7 @@ public class DummyPluginAClass {
         section('Build plugin A example iOS app');
 
         await inDirectory(exampleApp, () async {
-          await evalFlutter('build', options: <String>['ios', '--no-codesign', '--verbose']);
+          await evalFlutter('build', options: <String>['ios', '--no-codesign']);
         });
 
         final Directory appBundle = Directory(
@@ -335,7 +335,8 @@ public class DummyPluginAClass {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

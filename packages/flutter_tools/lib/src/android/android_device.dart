@@ -51,7 +51,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 
 /// A physical Android device or emulator.
 ///
-/// While [isEmulator] attempts to distinguish between the device categories,
+/// While [isLocalEmulator] attempts to distinguish between the device categories,
 /// this is a best effort process and not a guarantee; certain physical devices
 /// identify as emulators. These device identifiers may be added to the [kKnownHardware]
 /// map to specify that they are actually physical devices.
@@ -193,7 +193,8 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-    switch (await _getProperty('ro.product.cpu.abi')) {
+    final String? abi = await _getProperty('ro.product.cpu.abi');
+    switch (abi) {
       case 'arm64-v8a':
         // Perform additional verification for 64 bit ABI. Some devices,
         // like the Kindle Fire 8, misreport the abilist. We might not
@@ -205,12 +206,12 @@ class AndroidDevice extends Device {
         } else {
           return TargetPlatform.android_arm;
         }
+      case 'armeabi-v7a':
+        return TargetPlatform.android_arm;
       case 'x86_64':
         return TargetPlatform.android_x64;
-      case 'x86':
-        return TargetPlatform.android_x86;
       default:
-        return TargetPlatform.android_arm;
+        return TargetPlatform.unsupported;
     }
   }();
 
@@ -221,8 +222,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
         return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android_x86:
-        return buildMode == BuildMode.debug;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -234,6 +233,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -535,10 +535,6 @@ class AndroidDevice extends Device {
     }
 
     final TargetPlatform devicePlatform = await targetPlatform;
-    if (devicePlatform == TargetPlatform.android_x86 && !debuggingOptions.buildInfo.isDebug) {
-      _logger.printError('Profile and release builds are only supported on ARM/x64 targets.');
-      return LaunchResult.failed();
-    }
 
     AndroidApk? builtPackage = package;
     AndroidArch androidArch;
@@ -549,8 +545,6 @@ class AndroidDevice extends Device {
         androidArch = AndroidArch.arm64_v8a;
       case TargetPlatform.android_x64:
         androidArch = AndroidArch.x86_64;
-      case TargetPlatform.android_x86:
-        androidArch = AndroidArch.x86;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -562,6 +556,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.unsupported:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -617,7 +612,6 @@ class AndroidDevice extends Device {
       );
     }
 
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final String? traceToFile = debuggingOptions.traceToFile;
@@ -684,7 +678,11 @@ class AndroidDevice extends Device {
           'disable-service-auth-codes',
           'true',
         ],
-        if (dartVmFlags.isNotEmpty) ...<String>['--es', 'dart-flags', dartVmFlags],
+        if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[
+          '--es',
+          'dart-flags',
+          debuggingOptions.dartFlags,
+        ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
@@ -840,7 +838,7 @@ class AndroidDevice extends Device {
     multiLine: true,
   );
 
-  /// Return the most recent timestamp in the Android log or [null] if there is
+  /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   @visibleForTesting
   Future<String?> lastLogcatTimestamp() async {
@@ -858,7 +856,16 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async {
+    final TargetPlatform platform = await targetPlatform;
+    return switch (platform) {
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 => true,
+      _ => false,
+    };
+  }
 
   @override
   bool get supportsScreenshot => true;

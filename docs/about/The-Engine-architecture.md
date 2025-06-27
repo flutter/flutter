@@ -1,4 +1,4 @@
-Flutter combines [a Dart framework](https://github.com/flutter/flutter) with a high-performance [engine](https://github.com/flutter/engine).
+Flutter combines [a Dart framework](https://github.com/flutter/flutter) with a high-performance [engine](https://github.com/flutter/flutter/tree/main/engine).
 
 The Flutter Engine is a portable runtime for high-quality cross-platform
 applications. It implements Flutter's core libraries, including animation and
@@ -14,7 +14,7 @@ Flutter Engine sits in this stack, highlights API boundaries, and identifies the
 repositories where the individual pieces live. The legend below clarifies some
 of the terminology commonly used to describe the pieces of a Flutter app.
 
-<img src="https://raw.githubusercontent.com/flutter/engine/main/docs/app_anatomy.svg?sanitize=true" alt="Flutter Architecture Diagram" width="40%"/>
+<img src="https://raw.githubusercontent.com/flutter/flutter/main/engine/src/flutter/docs/app_anatomy.svg?sanitize=true" alt="Flutter Architecture Diagram" width="40%"/>
 
 #### Dart App
 
@@ -28,7 +28,7 @@ of the terminology commonly used to describe the pieces of a Flutter app.
   hit-testing, gesture detection, accessibility, text input, etc.).
 * Composites the app's widget tree into a scene.
 
-#### Engine ([source code](https://github.com/flutter/engine/tree/main/shell/common))
+#### Engine ([source code](https://github.com/flutter/flutter/tree/main/engine/src/flutter/shell/common))
 
 * Responsible for rasterizing composited scenes.
 * Provides low-level implementation of Flutter's core APIs (e.g. graphics, text
@@ -36,7 +36,7 @@ of the terminology commonly used to describe the pieces of a Flutter app.
 * Exposes its functionality via its **dart:ui API** to the framework.
 * Integrates with a specific platform via the Engine's **Embedder API**.
 
-#### Embedder ([source code](https://github.com/flutter/engine/tree/main/shell/platform))
+#### Embedder ([source code](https://github.com/flutter/flutter/tree/main/engine/src/flutter/shell/platform))
 
 * Coordinates with the underlying operating system for access to services like
   rendering surfaces, accessibility, and input.
@@ -55,10 +55,10 @@ Flutter's engine takes core technologies, Skia, a 2D graphics rendering library,
 and Dart, a VM for a garbage-collected object-oriented language, and hosts them
 in a shell. Different platforms have different shells, for example we have
 shells for
-[Android](https://github.com/flutter/engine/tree/main/shell/platform/android)
-and [iOS](https://github.com/flutter/engine/tree/main/shell/platform/darwin). We
+[Android](https://github.com/flutter/flutter/tree/main/engine/src/flutter/shell/platform/android)
+and [iOS](https://github.com/flutter/flutter/tree/main/engine/src/flutter/shell/platform/darwin). We
 also have an [embedder
-API](https://github.com/flutter/engine/tree/main/shell/platform/embedder) which
+API](https://github.com/flutter/flutter/tree/main/engine/src/flutter/shell/platform/embedder) which
 allows Flutter's engine to be used as a library (see [Custom Flutter Engine
 Embedders](../engine/Custom-Flutter-Engine-Embedders.md)).
 
@@ -70,7 +70,7 @@ library called `dart:ui` to provide low-level access to Skia features and the
 shell. The shells can also communicate directly to Dart code via [Platform
 Channels](https://flutter.io/platform-channels/) which bypass the engine.
 
-![Flutter Architecture Diagram](https://raw.githubusercontent.com/flutter/engine/main/docs/flutter_overview.svg?sanitize=true)
+![Flutter Architecture Diagram](https://github.com/flutter/flutter/tree/main/engine/src/flutter/docs/flutter_overview.svg?sanitize=true)
 
 ## Threading
 
@@ -266,7 +266,7 @@ this task runner.
 There are two different ways to create Flutter engines which has ramifications
 on how threading is managed across multiple Flutter engines. Flutter engines can
 be instantiated directly or through the FlutterEngineGroup APIs
-[[ios](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
+[[ios](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
 [android](https://api.flutter.dev/javadoc/io/flutter/embedding/engine/FlutterEngineGroup.html)].
 If an engine is instantiated directly, it gets its own engine threads and [dart isolate
 group](https://dart.dev/language/concurrency#performance-and-isolate-groups).

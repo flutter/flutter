@@ -105,6 +105,8 @@ typedef enum {
   kFlutterAccessibilityFeatureHighContrast = 1 << 5,
   /// Request to show on/off labels inside switches.
   kFlutterAccessibilityFeatureOnOffSwitchLabels = 1 << 6,
+  /// Indicate the platform does not support announcements.
+  kFlutterAccessibilityFeatureNoAnnounce = 1 << 7,
 } FlutterAccessibilityFeature;
 
 /// The set of possible actions that can be conveyed to a semantics node.
@@ -172,6 +174,10 @@ typedef enum {
 /// The set of properties that may be associated with a semantics node.
 ///
 /// Must match the `SemanticsFlag` enum in semantics.dart.
+///
+/// @deprecated     Use `FlutterSemanticsFlags` instead. No new flags will
+///                 be added to `FlutterSemanticsFlag`. New flags will
+///                 continue to be added to `FlutterSemanticsFlags`.
 typedef enum {
   /// The semantics node has the quality of either being "checked" or
   /// "unchecked".
@@ -249,7 +255,100 @@ typedef enum {
   /// The semantics node has the quality of either being "selected" or
   /// "not selected".
   kFlutterSemanticsFlagHasSelectedState = 1 << 28,
+  /// Whether a semantics node has the quality of being required.
+  kFlutterSemanticsFlagHasRequiredState = 1 << 29,
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
+  kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
+
+typedef enum {
+  /// The property is not applicable to this semantics node.
+  kFlutterTristateNone,
+  /// The property is applicable and its state is "true" or "on".
+  kFlutterTristateTrue,
+  /// The property is applicable and its state is "false" or "off".
+  kFlutterTristateFalse,
+} FlutterTristate;
+
+typedef enum {
+  /// The semantics node does not have check state.
+  kFlutterCheckStateNone,
+  /// The semantics node is checked.
+  kFlutterCheckStateTrue,
+  /// The semantics node is not checked.
+  kFlutterCheckStateFalse,
+  /// The semantics node represents a checkbox in mixed state.
+  kFlutterCheckStateMixed,
+} FlutterCheckState;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterSemanticsFlags).
+  size_t struct_size;
+  /// Whether a semantics node is checked.
+  FlutterCheckState is_checked;
+  /// Whether a semantics node is selected.
+  FlutterTristate is_selected;
+  /// Whether a semantic node is currently enabled.
+  FlutterTristate is_enabled;
+  /// If true, the semantics node is "on". If false, the semantics node is
+  /// "off".
+  FlutterTristate is_toggled;
+  /// Whether a semantic node that is currently expanded.
+  FlutterTristate is_expanded;
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  FlutterTristate is_required;
+  /// Whether the semantic node currently holds the user's focus.
+  FlutterTristate is_focused;
+  /// Whether the semantic node represents a button.
+  bool is_button;
+  /// Whether the semantic node represents a text field.
+  bool is_text_field;
+  /// Whether a semantic node is in a mutually exclusive group.
+  bool is_in_mutually_exclusive_group;
+  /// Whether a semantic node is a header that divides content into sections.
+  bool is_header;
+  /// Whether the value of the semantics node is obscured.
+  bool is_obscured;
+  /// Whether the semantics node is the root of a subtree for which a route name
+  /// should be announced.
+  bool scopes_route;
+  /// Whether the semantics node label is the name of a visually distinct route.
+  bool names_route;
+  /// Whether the semantics node is considered hidden.
+  bool is_hidden;
+  /// Whether the semantics node represents an image.
+  bool is_image;
+  /// Whether the semantics node is a live region.
+  bool is_live_region;
+  /// Whether the platform can scroll the semantics node when the user attempts
+  /// to move the accessibility focus to an offscreen child.
+  ///
+  /// For example, a `ListView` widget has implicit scrolling so that users can
+  /// easily move the accessibility focus to the next set of children. A
+  /// `PageView` widget does not have implicit scrolling, so that users don't
+  /// navigate to the next page when reaching the end of the current one.
+  bool has_implicit_scrolling;
+  /// Whether the value of the semantics node is coming from a multi-line text
+  /// field.
+  ///
+  /// This is used for text fields to distinguish single-line text fields from
+  /// multi-line ones.
+  bool is_multiline;
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
+  bool is_read_only;
+  /// Whether the semantics node represents a link.
+  bool is_link;
+  /// Whether the semantics node represents a slider.
+  bool is_slider;
+  /// Whether the semantics node represents a keyboard key.
+  bool is_keyboard_key;
+} FlutterSemanticsFlags;
 
 typedef enum {
   /// Text has unknown text direction.
@@ -1060,6 +1159,74 @@ typedef struct {
   FlutterRemoveViewCallback remove_view_callback;
 } FlutterRemoveViewInfo;
 
+/// Represents the direction in which the focus transitioned across
+/// [FlutterView]s.
+typedef enum {
+  /// Indicates the focus transition did not have a direction.
+  ///
+  /// This is typically associated with focus being programmatically requested
+  /// or when focus is lost.
+  kUndefined,
+
+  /// Indicates the focus transition was performed in a forward direction.
+  ///
+  /// This is typically result of the user pressing tab.
+  kForward,
+
+  /// Indicates the focus transition was performed in a backward direction.
+  ///
+  /// This is typically result of the user pressing shift + tab.
+  kBackward,
+} FlutterViewFocusDirection;
+
+/// Represents the focus state of a given [FlutterView].
+typedef enum {
+  /// Specifies that a view does not have platform focus.
+  kUnfocused,
+
+  /// Specifies that a view has platform focus.
+  kFocused,
+} FlutterViewFocusState;
+
+/// A view focus event is sent to the engine by the embedder when a native view
+/// focus state has changed.
+///
+/// Passed through FlutterEngineSendViewFocusEvent.
+typedef struct {
+  /// The size of this struct.
+  /// Must be sizeof(FlutterViewFocusEvent).
+  size_t struct_size;
+
+  /// The identifier of the view that received the focus event.
+  FlutterViewId view_id;
+
+  /// The focus state of the view.
+  FlutterViewFocusState state;
+
+  /// The direction in which the focus transitioned across [FlutterView]s.
+  FlutterViewFocusDirection direction;
+} FlutterViewFocusEvent;
+
+/// A FlutterViewFocusChangeRequest is sent by the engine to the embedder when
+/// when a FlutterView focus state has changed and native view focus
+/// needs to be updated.
+///
+/// Received in FlutterProjectArgs.view_focus_change_request_callback.
+typedef struct {
+  /// The size of this struct.
+  /// Must be sizeof(FlutterViewFocusChangeRequest).
+  size_t struct_size;
+
+  /// The identifier of the view that received the focus event.
+  FlutterViewId view_id;
+
+  /// The focus state of the view.
+  FlutterViewFocusState state;
+
+  /// The direction in which the focus transitioned across [FlutterView]s.
+  FlutterViewFocusDirection direction;
+} FlutterViewFocusChangeRequest;
+
 /// The phase of the pointer event.
 typedef enum {
   kCancel,
@@ -1435,7 +1602,11 @@ typedef struct {
   /// The unique identifier for this node.
   int32_t id;
   /// The set of semantics flags associated with this node.
-  FlutterSemanticsFlag flags;
+  ///
+  /// @deprecated     Use `flags2` instead. No new flags will
+  ///                 be added to `FlutterSemanticsFlag`. New flags will
+  ///                 continue to be added to `FlutterSemanticsFlags`.
+  FlutterSemanticsFlag flags__deprecated__;
   /// The set of semantics actions applicable to this node.
   FlutterSemanticsAction actions;
   /// The position at which the text selection originates.
@@ -1519,6 +1690,9 @@ typedef struct {
   // Array of string attributes associated with the `decreased_value`.
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
+  // The set of semantics flags associated with this node. Prefer to use this
+  // over `flags__deprecated__`.
+  FlutterSemanticsFlags* flags2;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -1612,6 +1786,8 @@ typedef struct {
   /// Array of semantics custom action pointers. Has length
   /// `custom_action_count`.
   FlutterSemanticsCustomAction2** custom_actions;
+  // The ID of the view that this update is associated with.
+  FlutterViewId view_id;
 } FlutterSemanticsUpdate2;
 
 typedef void (*FlutterUpdateSemanticsNodeCallback)(
@@ -1642,6 +1818,10 @@ typedef struct {
 
 typedef void (*FlutterChannelUpdateCallback)(
     const FlutterChannelUpdate* /* channel update */,
+    void* /* user data */);
+
+typedef void (*FlutterViewFocusChangeRequestCallback)(
+    const FlutterViewFocusChangeRequest* /* request */,
     void* /* user data */);
 
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
@@ -1703,6 +1883,10 @@ typedef struct {
   /// Specify a callback that is used to set the thread priority for embedder
   /// task runners.
   void (*thread_priority_setter)(FlutterThreadPriority);
+  /// Specify the task runner for the thread on which the UI tasks will be run.
+  /// This may be same as platform_task_runner, in which case the Flutter engine
+  /// will run the UI isolate on platform thread.
+  const FlutterTaskRunnerDescription* ui_task_runner;
 } FlutterCustomTaskRunners;
 
 typedef struct {
@@ -2549,7 +2733,39 @@ typedef struct {
   /// being registered on the framework side. The callback is invoked from
   /// a task posted to the platform thread.
   FlutterChannelUpdateCallback channel_update_callback;
+
+  /// The callback invoked by the engine when FlutterView focus state has
+  /// changed. The embedder can use this callback to request focus change for
+  /// the native view. The callback is invoked from a task posted to the
+  /// platform thread.
+  FlutterViewFocusChangeRequestCallback view_focus_change_request_callback;
+
+  /// Opaque identifier provided by the engine. Accessible in Dart code through
+  /// `PlatformDispatcher.instance.engineId`. Can be used in native code to
+  /// retrieve the engine instance that is running the Dart code.
+  int64_t engine_id;
 } FlutterProjectArgs;
+
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterSendSemanticsActionInfo).
+  size_t struct_size;
+
+  /// The ID of the view that includes the node.
+  FlutterViewId view_id;
+
+  /// The semantics node identifier.
+  uint64_t node_id;
+
+  /// The semantics action.
+  FlutterSemanticsAction action;
+
+  /// Data associated with the action.
+  const uint8_t* data;
+
+  /// The data length.
+  size_t data_length;
+} FlutterSendSemanticsActionInfo;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
@@ -2598,8 +2814,8 @@ FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data);
 ///             engine may need the embedder to post tasks back to it before
 ///             `FlutterEngineRun` has returned. Embedders can only post tasks
 ///             to the engine if they have a handle to the engine. In such
-///             cases, embedders are advised to get the engine handle via the
-///             `FlutterInitializeCall`. Then they can call
+///             cases, embedders are advised to get the engine handle by calling
+///             `FlutterEngineInitialize`. Then they can call
 ///             `FlutterEngineRunInitialized` knowing that they will be able to
 ///             service custom tasks on other threads with the engine handle.
 ///
@@ -2752,6 +2968,16 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
                                                 engine,
                                             const FlutterRemoveViewInfo* info);
+
+//------------------------------------------------------------------------------
+/// @brief      Notifies the engine that platform view focus state has changed.
+///
+/// @param[in]  engine  A running engine instance
+/// @param[in]  event   The focus event data describing the change.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSendViewFocusEvent(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterViewFocusEvent* event);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
@@ -2974,7 +3200,10 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
     FlutterAccessibilityFeature features);
 
 //------------------------------------------------------------------------------
-/// @brief      Dispatch a semantics action to the specified semantics node.
+/// @brief      Dispatch a semantics action to the specified semantics node
+///             in the implicit view.
+///
+/// @deprecated Use `FlutterEngineSendSemanticsAction` instead.
 ///
 /// @param[in]  engine       A running engine instance.
 /// @param[in]  node_id      The semantics node identifier.
@@ -2991,6 +3220,22 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
+
+//------------------------------------------------------------------------------
+/// @brief      Dispatch a semantics action to the specified semantics node
+///             within a specific view.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The dispatch semantics on view arguments.
+///                     This can be deallocated once
+///                     |FlutterEngineSendSemanticsAction| returns.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSendSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info);
 
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
@@ -3379,6 +3624,9 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
+typedef FlutterEngineResult (*FlutterEngineSendSemanticsActionFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info);
 typedef FlutterEngineResult (*FlutterEngineOnVsyncFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     intptr_t baton,
@@ -3429,6 +3677,9 @@ typedef FlutterEngineResult (*FlutterEngineAddViewFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineRemoveViewFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterRemoveViewInfo* info);
+typedef FlutterEngineResult (*FlutterEngineSendViewFocusEventFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterViewFocusEvent* event);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -3477,6 +3728,8 @@ typedef struct {
   FlutterEngineSetNextFrameCallbackFnPtr SetNextFrameCallback;
   FlutterEngineAddViewFnPtr AddView;
   FlutterEngineRemoveViewFnPtr RemoveView;
+  FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
+  FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

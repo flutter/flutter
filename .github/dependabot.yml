@@ -14,9 +14,10 @@ updates:
       - "christopherfujino"
       - "jmagman"
     labels:
-      - "team"
       - "team-infra"
       - "autosubmit"
+    # Updating patch versions for "github-actions" is too chatty.
+    # See https://github.com/flutter/flutter/issues/158350.
     ignore:
-      - dependency-name: "codecov/codecov-action"
+      - dependency-name: "*"
         update-types: ["version-update:semver-patch"]

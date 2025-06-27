@@ -63,6 +63,28 @@ void invokePlatformTaskRunner() {
 }
 
 @pragma('vm:entry-point')
+void canSpecifyCustomUITaskRunner() {
+  signalNativeTest();
+  PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
+}
+
+@pragma('vm:entry-point')
+void mergedPlatformUIThread() {
+  signalNativeTest();
+  PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
+}
+
+@pragma('vm:entry-point')
+void uiTaskRunnerFlushesMicrotasks() {
+  // Microtasks are always flushed at the beginning of the frame, hence the delay.
+  Future.delayed(const Duration(milliseconds: 50), () {
+    Future.microtask(() {
+      signalNativeTest();
+    });
+  });
+}
+
+@pragma('vm:entry-point')
 void invokePlatformThreadIsolate() {
   signalNativeTest();
   runOnPlatformThread(ffiSignalNativeTest);
@@ -152,7 +174,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
           childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -163,8 +185,6 @@ Future<void> a11y_main() async {
           scrollPosition: 0.0,
           scrollExtentMax: 0.0,
           scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
           hint: '',
           hintAttributes: <StringAttribute>[],
           value: '',
@@ -176,6 +196,8 @@ Future<void> a11y_main() async {
           tooltip: 'tooltip',
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
+          controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 84,
@@ -185,7 +207,7 @@ Future<void> a11y_main() async {
           rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
           transform: kTestTransform,
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -196,8 +218,6 @@ Future<void> a11y_main() async {
           scrollPosition: 0.0,
           scrollExtentMax: 0.0,
           scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
           hint: '',
           hintAttributes: <StringAttribute>[],
           value: '',
@@ -211,6 +231,8 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
+          controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 96,
@@ -222,7 +244,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List.fromList(<int>[128]),
           childrenInHitTestOrder: Int32List.fromList(<int>[128]),
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -233,8 +255,6 @@ Future<void> a11y_main() async {
           scrollPosition: 0.0,
           scrollExtentMax: 0.0,
           scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
           hint: '',
           hintAttributes: <StringAttribute>[],
           value: '',
@@ -246,6 +266,8 @@ Future<void> a11y_main() async {
           tooltip: 'tooltip',
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
+          controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 128,
@@ -257,7 +279,7 @@ Future<void> a11y_main() async {
           additionalActions: Int32List.fromList(<int>[21]),
           platformViewId: 0x3f3,
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -267,8 +289,6 @@ Future<void> a11y_main() async {
           scrollPosition: 0.0,
           scrollExtentMax: 0.0,
           scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
           hint: '',
           hintAttributes: <StringAttribute>[],
           value: '',
@@ -281,6 +301,8 @@ Future<void> a11y_main() async {
           textDirection: TextDirection.ltr,
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
+          controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -327,7 +349,7 @@ Future<void> a11y_string_attributes() async {
         childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
         childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
         actions: 0,
-        flags: 0,
+        flags: SemanticsFlags.none,
         maxValueLength: 0,
         currentValueLength: 0,
         textSelectionBase: 0,
@@ -338,8 +360,6 @@ Future<void> a11y_string_attributes() async {
         scrollPosition: 0.0,
         scrollExtentMax: 0.0,
         scrollExtentMin: 0.0,
-        elevation: 0.0,
-        thickness: 0.0,
         hint: "It's a number",
         hintAttributes: <StringAttribute>[
           LocaleStringAttribute(
@@ -368,6 +388,8 @@ Future<void> a11y_string_attributes() async {
         tooltip: 'tooltip',
         textDirection: TextDirection.ltr,
         additionalActions: Int32List(0),
+        controlsNodes: null,
+        inputType: SemanticsInputType.none,
       );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1486,6 +1508,12 @@ void window_metrics_event_all_view_ids() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void remove_view_callback_too_early() {
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 Future<void> channel_listener_response() async {
   channelBuffers.setListener('test/listen', (
     ByteData? data,
@@ -1577,4 +1605,97 @@ Future<void> render_impeller_image_snapshot_test() async {
 
   final bool result = (pixel & 0xFF) == color.alpha && ((pixel >> 8) & 0xFF) == color.blue;
   notifyBoolValue(result);
+}
+
+@pragma('vm:entry-point')
+void testSendViewFocusEvent() {
+  PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
+    notifyStringValue('${event.viewId} ${event.state} ${event.direction}');
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void testSendViewFocusChangeRequest() {
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 1,
+    state: ViewFocusState.unfocused,
+    direction: ViewFocusDirection.undefined,
+  );
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 2,
+    state: ViewFocusState.focused,
+    direction: ViewFocusDirection.forward,
+  );
+  PlatformDispatcher.instance.requestViewFocusChange(
+    viewId: 3,
+    state: ViewFocusState.focused,
+    direction: ViewFocusDirection.backward,
+  );
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+Future<void> a11y_main_multi_view() async {
+  // 1: Return initial state (semantics disabled).
+  notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
+
+  // 2: Add the first view (implicitly handled by PlatformDispatcher).
+  // 3: Add the second view (implicitly handled by PlatformDispatcher).
+
+  // 4: Await semantics enabled from embedder.
+  await semanticsChanged;
+  notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
+
+  // 5: Return initial state of accessibility features.
+  notifyAccessibilityFeatures(PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
+
+  // 6: Fire semantics updates.
+  SemanticsUpdateBuilder createForView(FlutterView view) {
+    return SemanticsUpdateBuilder()..updateNode(
+      id: view.viewId + 1, // For simplicity, give each node an id of viewId + 1
+      identifier: '',
+      label: 'A: root',
+      labelAttributes: <StringAttribute>[],
+      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      transform: kTestTransform,
+      childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      additionalActions: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+    );
+  }
+
+  for (final view in PlatformDispatcher.instance.views) {
+    view.updateSemantics(createForView(view).build());
+  }
+
+  signalNativeTest();
+
+  // 7: Await semantics disabled from embedder.
+  await semanticsChanged;
+  notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }

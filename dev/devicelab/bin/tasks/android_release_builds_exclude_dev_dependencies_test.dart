@@ -15,13 +15,6 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        utils.section(
-          'Configure plugins to be marked as dev dependencies in .flutter-plugins-dependencies file',
-        );
-
-        // Enable plugins being marked as dev dependncies in the .flutter-plugins-dependencies file.
-        await utils.flutter('config', options: <String>['--explicit-package-dependencies']);
-
         // Create dev_dependency plugin to use for test.
         final Directory tempDir = Directory.systemTemp.createTempSync(
           'android_release_builds_exclude_dev_dependencies_test.',
@@ -107,7 +100,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

@@ -24,7 +24,7 @@ set -e
 function follow_links() (
   cd -P "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
-  while [[ -h "$file" ]]; do
+  while [[ -L "$file" ]]; do
     cd -P "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
     cd -P "$(dirname -- "$file")"
@@ -34,21 +34,43 @@ function follow_links() (
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
-SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
-YAPF_DIR="$(cd "$SRC_DIR/flutter/third_party/yapf"; pwd -P)"
+SRC_DIR="$(
+  cd "$SCRIPT_DIR/../.."
+  pwd -P
+)"
+YAPF_DIR="$(
+  cd "$SRC_DIR/flutter/third_party/yapf"
+  pwd -P
+)"
+
+has_lib2to3_check_script="
+import sys
+version = sys.version_info
+try:
+    __import__('lib2to3')
+    print(f'Python3 version {version.major}.{version.minor} has '
+          f'the lib2to3 import.')
+except ImportError:
+    print(f'Python3 version {version.major}.{version.minor} does not have '
+          f'the lib2to3 import.',
+          file=sys.stderr)
+    sys.exit(1)
+"
 
 # TODO: https://github.com/flutter/flutter/issues/158384
 # Migrate to a supported Python formatter.
-if command -v python3.10 &> /dev/null; then
+if command -v python3.10 &>/dev/null && (python3.10 -c "$has_lib2to3_check_script" || exit 1); then
   PYTHON_EXEC="python3.10"
-elif command -v python3.11 &> /dev/null; then
+elif command -v python3.11 &>/dev/null && (python3.11 -c "$has_lib2to3_check_script" || exit 1); then
   PYTHON_EXEC="python3.11"
+elif command -v python3.12 &>/dev/null && (python3.12 -c "$has_lib2to3_check_script" || exit 1); then
+  PYTHON_EXEC="python3.12"
 else
   python3 -c "
 import sys
 version = sys.version_info
-if (version.major, version.minor) > (3, 11):
-    print(f'Error: The yapf Python formatter requires Python version 3.11 or '
+if (version.major, version.minor) > (3, 12):
+    print(f'Error: The yapf Python formatter requires Python version 3.12 or '
           f'earlier. The installed python3 version is '
           f'{version.major}.{version.minor}.',
           file=sys.stderr)

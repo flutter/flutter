@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -66,7 +67,7 @@ class IOSSimulatorUtils {
   final Xcode _xcode;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!_xcode.isInstalledAndMeetsVersionCheck) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
@@ -96,7 +97,7 @@ class IOSSimulatorUtils {
   }
 
   Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async {
-    if (!_xcode.isInstalledAndMeetsVersionCheck) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulatorRuntime>[];
     }
 
@@ -115,8 +116,8 @@ class SimControl {
   final ProcessUtils _processUtils;
   final Xcode _xcode;
 
-  /// Runs `simctl list --json` and returns the JSON of the corresponding
-  /// [section].
+  /// Runs `simctl list --json` and returns the JSON of
+  /// the corresponding section.
   Future<Map<String, Object?>> _listBootedDevices() async {
     // Sample output from `simctl list available booted --json`:
     //
@@ -412,7 +413,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     if (!globals.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
@@ -431,8 +432,8 @@ class IOSSimulator extends Device {
   String? _supportMessage;
 
   @override
-  String supportMessage() {
-    if (isSupported()) {
+  Future<String> supportMessage() async {
+    if (await isSupported()) {
       return 'Supported';
     }
 
@@ -553,7 +554,7 @@ class IOSSimulator extends Device {
         analytics: globals.analytics,
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
       throwToolExit('Could not build the application for the simulator.');

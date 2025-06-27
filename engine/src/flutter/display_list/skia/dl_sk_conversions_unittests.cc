@@ -11,10 +11,11 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
+#include "flutter/third_party/skia/include/core/SkSamplingOptions.h"
+#include "flutter/third_party/skia/include/core/SkTileMode.h"
+
 #include "gtest/gtest.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
-#include "third_party/skia/include/core/SkTileMode.h"
 
 namespace flutter {
 namespace testing {
@@ -30,17 +31,23 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
 
 TEST(DisplayListSkConversions, ToSkColor) {
   // Red
-  ASSERT_EQ(ToSk(DlColor::kRed()), SK_ColorRED);
+  ASSERT_EQ(ToSkColor(DlColor::kRed()), SK_ColorRED);
+  ASSERT_EQ(ToSkColor4f(DlColor::kRed()), SkColors::kRed);
 
   // Green
-  ASSERT_EQ(ToSk(DlColor::kGreen()), SK_ColorGREEN);
+  ASSERT_EQ(ToSkColor(DlColor::kGreen()), SK_ColorGREEN);
+  ASSERT_EQ(ToSkColor4f(DlColor::kGreen()), SkColors::kGreen);
 
   // Blue
-  ASSERT_EQ(ToSk(DlColor::kBlue()), SK_ColorBLUE);
+  ASSERT_EQ(ToSkColor(DlColor::kBlue()), SK_ColorBLUE);
+  ASSERT_EQ(ToSkColor4f(DlColor::kBlue()), SkColors::kBlue);
 
   // Half transparent grey
   auto const grey_hex_half_opaque = 0x7F999999;
-  ASSERT_EQ(ToSk(DlColor(grey_hex_half_opaque)), SkColor(grey_hex_half_opaque));
+  ASSERT_EQ(ToSkColor(DlColor(grey_hex_half_opaque)),
+            SkColor(grey_hex_half_opaque));
+  ASSERT_EQ(ToSkColor4f(DlColor(grey_hex_half_opaque)),
+            SkColor4f::FromColor(grey_hex_half_opaque));
 }
 
 TEST(DisplayListSkConversions, ToSkTileMode) {
@@ -140,8 +147,6 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kSaturation)                    \
   FUNC(kColor)                         \
   FUNC(kLuminosity)                    \
-  FUNC(kLastCoeffMode)                 \
-  FUNC(kLastSeparableMode)             \
   FUNC(kLastMode)
 
 TEST(DisplayListSkConversions, ToSkBlendMode){

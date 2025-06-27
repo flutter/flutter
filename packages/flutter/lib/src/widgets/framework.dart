@@ -822,8 +822,6 @@ enum _StateLifecycle {
 /// The signature of [State.setState] functions.
 typedef StateSetter = void Function(VoidCallback fn);
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 /// The logic and internal state for a [StatefulWidget].
 ///
 /// State is information that (1) can be read synchronously when the widget is
@@ -1009,13 +1007,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$State',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'State', this));
   }
 
   /// Called whenever the widget configuration changes.
@@ -1345,9 +1337,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -1933,9 +1923,10 @@ abstract class RenderObjectWidget extends Widget {
   @protected
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
 
-  /// A render object previously associated with this widget has been removed
-  /// from the tree. The given [RenderObject] will be of the same type as
-  /// returned by this object's [createRenderObject].
+  /// This method is called when a RenderObject that was previously
+  /// associated with this widget is removed from the render tree.
+  /// The provided [RenderObject] will be of the same type as the one created by
+  /// this widget's [createRenderObject] method.
   @protected
   void didUnmountRenderObject(covariant RenderObject renderObject) {}
 }
@@ -2909,7 +2900,7 @@ class BuildOwner {
           ErrorHint(
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]);
       }
@@ -3513,13 +3504,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget) : _widget = widget {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$Element',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'Element', this));
   }
 
   Element? _parent;
@@ -4764,9 +4749,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
     if (key is GlobalKey) {

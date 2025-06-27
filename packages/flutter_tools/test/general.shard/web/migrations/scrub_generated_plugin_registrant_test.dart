@@ -9,25 +9,15 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 
 import '../../../src/context.dart'; // legacy
-import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../../../src/test_build_system.dart';
-import '../../../src/test_flutter_command_runner.dart'; // legacy
+import '../../../src/test_flutter_command_runner.dart';
+import '../../../src/throwing_pub.dart'; // legacy
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      isExplicitPackageDependenciesEnabled: true,
-      // Assumed to be true below.
-      isWebEnabled: true,
-    );
-  }
-
   setUpAll(() {
     Cache.flutterRoot = '';
     Cache.disableLocking();
@@ -81,8 +71,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -110,8 +99,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -142,8 +130,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -170,8 +157,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -204,8 +190,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         BuildSystem: () => buildSystem,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
@@ -284,4 +269,9 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
+  writePackageConfigFiles(
+    directory: fileSystem.currentDirectory,
+    mainLibName: 'foo',
+    packages: <String, String>{'bar': 'bar'},
+  );
 }

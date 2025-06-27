@@ -78,9 +78,7 @@ void main() {
     // The format is [ABI, ABI list]: expected target platform.
     final Map<List<String>, TargetPlatform> values = <List<String>, TargetPlatform>{
       <String>['x86_64', 'unknown']: TargetPlatform.android_x64,
-      <String>['x86', 'unknown']: TargetPlatform.android_x86,
-      // The default ABI is arm32
-      <String>['???', 'unknown']: TargetPlatform.android_arm,
+      <String>['armeabi-v7a', 'unknown']: TargetPlatform.android_arm,
       <String>['arm64-v8a', 'arm64-v8a,']: TargetPlatform.android_arm64,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
       <String>['arm64-v8a', 'arm']: TargetPlatform.android_arm,
@@ -107,9 +105,7 @@ void main() {
     // The format is [ABI, ABI list]: expected release mode support.
     final Map<List<String>, bool> values = <List<String>, bool>{
       <String>['x86_64', 'unknown']: true,
-      <String>['x86', 'unknown']: false,
-      // The default ABI is arm32
-      <String>['???', 'unknown']: true,
+      <String>['armeabi-v7a', 'unknown']: true,
       <String>['arm64-v8a', 'arm64-v8a,']: true,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
       <String>['arm64-v8a', 'arm']: true,
@@ -180,6 +176,17 @@ void main() {
     );
 
     expect(await device.isLocalEmulator, true);
+  });
+
+  testWithoutContext('isSupported is false for x86 devices', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [x86]',
+      ),
+    ]);
+    final AndroidDevice device = setUpAndroidDevice(processManager: processManager);
+    expect(await device.isSupported(), false);
   });
 
   testWithoutContext('isSupportedForProject is true on module project', () async {
@@ -499,10 +506,10 @@ Uptime: 441088659 Realtime: 521464097
   });
 
   testUsingContext(
-    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection',
+    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by text',
     () async {
       final BufferLogger logger = globals.logger as BufferLogger;
-      final FlutterVmService vmService = FlutterVmService(_MyFakeVmService());
+      final FlutterVmService vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedText());
       final AdbLogReader logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
       await logReader.provideVmService(vmService);
       expect(
@@ -518,12 +525,47 @@ Uptime: 441088659 Realtime: 521464097
     },
     overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
+
+  testUsingContext(
+    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by code',
+    () async {
+      final BufferLogger logger = globals.logger as BufferLogger;
+      final FlutterVmService vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedCode());
+      final AdbLogReader logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
+      await logReader.provideVmService(vmService);
+      expect(
+        logger.traceText,
+        'VmService.getVm call failed: null: (-32010) '
+        'Dummy text not matched\n',
+      );
+      expect(
+        logger.errorText,
+        'An error occurred when setting up filtering for adb logs. '
+        'Unable to communicate with the VM service.\n',
+      );
+    },
+    overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
+  );
 }
 
-class _MyFakeVmService extends Fake implements VmService {
+/// A mock VM Service that throws a generic [RPCErrorKind.kServerError] error
+/// with the text "Service connection disposed".
+///
+/// This is the way these errors are currently sent (as of Feb 2025) but are
+/// planned to be migrated to their own error code (see
+/// [_MyFakeVmServiceConnectionDisposedCode]) soon.
+class _MyFakeVmServiceConnectionDisposedText extends Fake implements VmService {
   @override
   Future<VM> getVM() async {
     throw RPCError(null, RPCErrorKind.kServerError.code, 'Service connection disposed');
+  }
+}
+
+/// A mock VM Service that throws a [RPCErrorKind.kConnectionDisposed] error.
+class _MyFakeVmServiceConnectionDisposedCode extends Fake implements VmService {
+  @override
+  Future<VM> getVM() async {
+    throw RPCError(null, RPCErrorKind.kConnectionDisposed.code, 'Dummy text not matched');
   }
 }
 

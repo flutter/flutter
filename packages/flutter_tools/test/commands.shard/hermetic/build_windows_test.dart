@@ -19,6 +19,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
@@ -62,7 +64,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -568,7 +570,16 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
+          '  "DART_DEFINES=${encodeDartDefinesMap(<String, String>{
+            'foo': 'a', //
+            'bar': 'b',
+            'FLUTTER_VERSION': '0.0.0',
+            'FLUTTER_CHANNEL': 'master',
+            'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+            'FLUTTER_FRAMEWORK_REVISION': '11111',
+            'FLUTTER_ENGINE_REVISION': 'abcde',
+            'FLUTTER_DART_VERSION': '12',
+          })}"',
           r'  "DART_OBFUSCATION=true"',
           r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',

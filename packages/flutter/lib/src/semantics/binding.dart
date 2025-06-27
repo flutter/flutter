@@ -10,6 +10,7 @@ library;
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -26,7 +27,17 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
-      ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+      ..onAccessibilityFeaturesChanged = () {
+        // TODO(chunhtai): Web should not notify accessibility feature changes during updateSemantics
+        // https://github.com/flutter/flutter/issues/158399
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+            handleAccessibilityFeaturesChanged();
+          }, debugLabel: 'SemanticsBinding.handleAccessibilityFeaturesChanged');
+        } else {
+          handleAccessibilityFeaturesChanged();
+        }
+      };
     _handleSemanticsEnabledChanged();
   }
 
@@ -227,15 +238,7 @@ mixin SemanticsBinding on BindingBase {
 /// To obtain a [SemanticsHandle], call [SemanticsBinding.ensureSemantics].
 class SemanticsHandle {
   SemanticsHandle._(this._onDispose) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/semantics.dart',
-        className: '$SemanticsHandle',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('semantics', 'SemanticsHandle', this));
   }
 
   final VoidCallback _onDispose;
@@ -246,12 +249,7 @@ class SemanticsHandle {
   /// framework will stop generating semantics information.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     _onDispose();
   }
 }

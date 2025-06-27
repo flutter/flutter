@@ -22,6 +22,37 @@ void main() {
     );
   });
 
+  test('nodesNeedingLayout updated with layout changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
+    renderObject.attach(owner);
+    expect(owner.needLayout, isEmpty);
+
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    renderObject.markNeedsLayout();
+    expect(owner.needLayout, contains(renderObject));
+
+    owner.flushLayout();
+    expect(owner.needLayout, isEmpty);
+  });
+
+  test('nodesNeedingPaint updated with paint changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true)
+      ..isRepaintBoundary = true;
+    final OffsetLayer layer = OffsetLayer();
+    layer.attach(owner);
+    renderObject.attach(owner);
+    expect(owner.needPaint, isEmpty);
+
+    renderObject.markNeedsPaint();
+    renderObject.scheduleInitialPaint(layer);
+    expect(owner.needPaint, contains(renderObject));
+
+    owner.flushPaint();
+    expect(owner.needPaint, isEmpty);
+  });
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
@@ -262,6 +293,24 @@ void main() {
         RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)),
         painter,
         oldLayer: oldLayer as ClipRRectLayer?,
+      );
+    });
+  });
+
+  test('PaintingContext.pushClipRSuperellipse reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipRSuperellipseLayer>((
+      PaintingContextCallback painter,
+      PaintingContext context,
+      Offset offset,
+      Layer? oldLayer,
+    ) {
+      return context.pushClipRSuperellipse(
+        true,
+        offset,
+        Rect.zero,
+        RSuperellipse.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)),
+        painter,
+        oldLayer: oldLayer as ClipRSuperellipseLayer?,
       );
     });
   });
@@ -667,4 +716,11 @@ class TestThrowingRenderObject extends RenderObject {
     assert(false); // The test shouldn't call this.
     return Rect.zero;
   }
+}
+
+final class _TestPipelineOwner extends PipelineOwner {
+  // Make these protected fields visible for testing.
+  Iterable<RenderObject> get needLayout => super.nodesNeedingLayout;
+
+  Iterable<RenderObject> get needPaint => super.nodesNeedingPaint;
 }

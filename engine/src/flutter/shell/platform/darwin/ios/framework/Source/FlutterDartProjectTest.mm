@@ -225,34 +225,6 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)testRequestsWarningWhenImpellerOptOut {
-  auto settings = FLTDefaultSettingsForBundle();
-  XCTAssertEqual(settings.warn_on_impeller_opt_out, YES);
-}
-
-- (void)testEnableImpellerSettingIsCorrectlyParsed {
-  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"YES");
-
-  auto settings = FLTDefaultSettingsForBundle();
-  // Check settings.enable_impeller value is same as the value defined in Info.plist.
-  XCTAssertEqual(settings.enable_impeller, YES);
-  [mockMainBundle stopMocking];
-}
-
-- (void)testEnableImpellerSettingIsCorrectlyOverriddenByCommandLine {
-  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"NO");
-  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
-  NSArray* arguments = @[ @"process_name", @"--enable-impeller" ];
-  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
-
-  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
-  // Check settings.enable_impeller value is same as the value on command line.
-  XCTAssertEqual(settings.enable_impeller, YES);
-  [mockMainBundle stopMocking];
-}
-
 - (void)testEnableDartAssertsCommandLineArgument {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableDartAsserts"]).andReturn(@"YES");
@@ -264,6 +236,19 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(settings.dart_flags.size(), 1u);
   XCTAssertEqual(settings.dart_flags[0], "--enable-asserts");
+  [mockMainBundle stopMocking];
+}
+
+- (void)testEnableFlutterGPUCommandLineArgument {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"]).andReturn(@"YES");
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+  XCTAssertTrue(settings.enable_flutter_gpu);
   [mockMainBundle stopMocking];
 }
 

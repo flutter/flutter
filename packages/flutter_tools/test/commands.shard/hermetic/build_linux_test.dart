@@ -23,6 +23,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -60,7 +61,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -651,7 +652,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
+          '  "DART_DEFINES=${encodeDartDefinesMap(<String, String>{
+            'foo.bar': '2', //
+            'fizz.far': '3',
+            'FLUTTER_VERSION': '0.0.0',
+            'FLUTTER_CHANNEL': 'master',
+            'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+            'FLUTTER_FRAMEWORK_REVISION': '11111',
+            'FLUTTER_ENGINE_REVISION': 'abcde',
+            'FLUTTER_DART_VERSION': '12',
+          })}"',
           '  "DART_OBFUSCATION=true"',
           '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -685,10 +695,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fizz_bar")
 ''');
       fileSystem.file('pubspec.yaml').createSync();
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,
       );

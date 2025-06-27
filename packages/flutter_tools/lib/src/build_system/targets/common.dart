@@ -11,8 +11,10 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -120,15 +122,10 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[InstallCodeAssets()];
 }
 
 /// Generate a snapshot of the dart code used in the program.
-///
-/// This target depends on the `.dart_tool/package_config.json` file
-/// even though it is not listed as an input. Pub inserts a timestamp into
-/// the file which causes unnecessary rebuilds, so instead a subset of the contents
-/// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
 
@@ -137,7 +134,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
     ),
@@ -220,7 +217,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
@@ -228,6 +224,8 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final String? targetOS = switch (targetPlatform) {
@@ -235,13 +233,13 @@ class KernelSnapshot extends Target {
       TargetPlatform.android ||
       TargetPlatform.android_arm ||
       TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 ||
-      TargetPlatform.android_x86 => 'android',
+      TargetPlatform.android_x64 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
+      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -250,6 +248,9 @@ class KernelSnapshot extends Target {
     );
 
     final String dillPath = environment.buildDir.childFile(dillName).path;
+
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
+    await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
 
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
@@ -271,7 +272,7 @@ class KernelSnapshot extends Target {
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
-      dartDefines: decodeDartDefines(environment.defines, kDartDefines),
+      dartDefines: dartDefines,
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
       targetOS: targetOS,
@@ -280,6 +281,45 @@ class KernelSnapshot extends Target {
     if (output == null || output.errorCount != 0) {
       throw Exception();
     }
+  }
+
+  Future<void> _addFlavorToDartDefines(
+    List<String> dartDefines,
+    Environment environment,
+    TargetPlatform targetPlatform,
+  ) async {
+    final String? flavor;
+
+    // For iOS and macOS projects, parse the flavor from the configuration, do
+    // not get from the FLAVOR environment variable. This is because when built
+    // from Xcode, the scheme/flavor can be changed through the UI and is not
+    // reflected in the environment variable.
+    final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromTargetPlatform(
+      targetPlatform,
+    );
+
+    if (darwinPlatform != null) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+      flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
+    } else {
+      flavor = environment.defines[kFlavor];
+    }
+    if (flavor == null) {
+      return;
+    }
+
+    // It is possible there is a flavor already in dartDefines, from another
+    // part of the build process, but this should take precedence as it happens
+    // last (xcodebuild execution).
+    //
+    // See https://github.com/flutter/flutter/issues/169598.
+
+    // If the flavor is already in the dart defines, remove it.
+    dartDefines.removeWhere((String define) => define.startsWith(kAppFlavor));
+
+    // Then, add it to the end.
+    dartDefines.add('$kAppFlavor=$flavor');
   }
 }
 

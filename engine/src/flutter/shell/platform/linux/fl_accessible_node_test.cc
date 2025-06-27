@@ -12,10 +12,13 @@ TEST(FlAccessibleNodeTest, BuildTree) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, 0);
-  g_autoptr(FlAccessibleNode) child1 = fl_accessible_node_new(engine, 1);
+  int64_t view_id = 123;
+  g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, view_id, 0);
+  g_autoptr(FlAccessibleNode) child1 =
+      fl_accessible_node_new(engine, view_id, 1);
   fl_accessible_node_set_parent(child1, ATK_OBJECT(root), 0);
-  g_autoptr(FlAccessibleNode) child2 = fl_accessible_node_new(engine, 1);
+  g_autoptr(FlAccessibleNode) child2 =
+      fl_accessible_node_new(engine, view_id, 1);
   fl_accessible_node_set_parent(child2, ATK_OBJECT(root), 1);
   g_autoptr(GPtrArray) children =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -47,7 +50,7 @@ TEST(FlAccessibleNodeTest, SetName) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_name(node, "test");
   EXPECT_STREQ(atk_object_get_name(ATK_OBJECT(node)), "test");
 }
@@ -57,7 +60,7 @@ TEST(FlAccessibleNodeTest, SetExtents) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_extents(node, 1, 2, 3, 4);
   gint x, y, width, height;
   atk_component_get_extents(ATK_COMPONENT(node), &x, &y, &width, &height,
@@ -73,11 +76,11 @@ TEST(FlAccessibleNodeTest, SetFlags) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsEnabled |
-                                              kFlutterSemanticsFlagIsFocusable |
-                                              kFlutterSemanticsFlagIsFocused));
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
+  FlutterSemanticsFlags flags = {};
+  flags.is_enabled = kFlutterTristateTrue;
+  flags.is_focused = kFlutterTristateTrue;
+  fl_accessible_node_set_flags(node, &flags);
 
   AtkStateSet* state = atk_object_ref_state_set(ATK_OBJECT(node));
   EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_ENABLED));
@@ -93,32 +96,38 @@ TEST(FlAccessibleNodeTest, GetRole) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsButton));
+  FlutterSemanticsFlags flags1 = {};
+  flags1.is_button = true;
+  fl_accessible_node_set_flags(node, &flags1);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PUSH_BUTTON);
 
-  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
-                                         kFlutterSemanticsFlagHasCheckedState));
+  FlutterSemanticsFlags flags2 = {};
+  flags2.is_checked = kFlutterCheckStateFalse;
+  fl_accessible_node_set_flags(node, &flags2);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_CHECK_BOX);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(
-                kFlutterSemanticsFlagHasCheckedState |
-                kFlutterSemanticsFlagIsInMutuallyExclusiveGroup));
+  FlutterSemanticsFlags flags3 = {};
+  flags3.is_checked = kFlutterCheckStateFalse;
+  flags3.is_in_mutually_exclusive_group = true;
+  fl_accessible_node_set_flags(node, &flags3);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_RADIO_BUTTON);
 
-  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
-                                         kFlutterSemanticsFlagHasToggledState));
+  FlutterSemanticsFlags flags4 = {};
+  flags4.is_toggled = kFlutterTristateFalse;
+  fl_accessible_node_set_flags(node, &flags4);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TOGGLE_BUTTON);
 
-  fl_accessible_node_set_flags(node, kFlutterSemanticsFlagIsTextField);
+  FlutterSemanticsFlags flags5 = {};
+  flags5.is_text_field = true;
+  fl_accessible_node_set_flags(node, &flags5);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TEXT);
 
-  fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsTextField |
-                                              kFlutterSemanticsFlagIsObscured));
+  FlutterSemanticsFlags flags6 = {};
+  flags6.is_text_field = true;
+  flags6.is_obscured = true;
+  fl_accessible_node_set_flags(node, &flags6);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PASSWORD_TEXT);
 }
 
@@ -127,7 +136,7 @@ TEST(FlAccessibleNodeTest, SetActions) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_actions(
       node, static_cast<FlutterSemanticsAction>(
                 kFlutterSemanticsActionTap | kFlutterSemanticsActionLongPress));

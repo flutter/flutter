@@ -22,7 +22,6 @@ Future<void> main() async {
               '--target-platform=android-arm',
               '--obfuscate',
               '--split-debug-info=foo/',
-              '--verbose',
             ],
           );
         });
@@ -67,7 +66,6 @@ Future<void> main() async {
               '--split-debug-info=foo/',
               '--no-debug',
               '--no-profile',
-              '--verbose',
             ],
           );
         });
@@ -108,7 +106,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

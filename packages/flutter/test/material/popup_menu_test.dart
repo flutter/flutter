@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, SemanticsFlag;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1280,6 +1279,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1288,6 +1288,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1302,6 +1303,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1316,6 +1318,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1330,6 +1333,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1344,6 +1348,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1419,6 +1424,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1427,6 +1433,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1499,6 +1506,7 @@ void main() {
                 TestSemantics(
                   children: <TestSemantics>[
                     TestSemantics(
+                      role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
                       textDirection: TextDirection.ltr,
@@ -1507,6 +1515,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1521,6 +1530,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1530,6 +1540,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1544,6 +1555,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1558,6 +1570,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
+                              role: SemanticsRole.menuItem,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
                                 SemanticsFlag.hasEnabledState,
@@ -1719,7 +1732,7 @@ void main() {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: ThemeData(),
         home: Scaffold(
           body: Center(
             child: PopupMenuButton<String>(
@@ -1743,14 +1756,7 @@ void main() {
     await tester.pumpAndSettle();
 
     EdgeInsetsGeometry paddingFor(String text) {
-      return tester
-          .widget<Padding>(
-            find.ancestor(
-              of: find.widgetWithText(Align, 'Item 0'),
-              matching: find.byKey(const Key('menu item padding')),
-            ),
-          )
-          .padding;
+      return tester.widget<Padding>(find.widgetWithText(Padding, 'Item 0').first).padding;
     }
 
     expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 12.0));
@@ -1818,14 +1824,7 @@ void main() {
     await tester.pumpAndSettle();
 
     EdgeInsetsGeometry paddingFor(String text) {
-      return tester
-          .widget<Padding>(
-            find.ancestor(
-              of: find.widgetWithText(Align, 'Item 0'),
-              matching: find.byKey(const Key('menu item padding')),
-            ),
-          )
-          .padding;
+      return tester.widget<Padding>(find.widgetWithText(Padding, 'Item 0').first).padding;
     }
 
     expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 16.0));
@@ -2433,11 +2432,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(
-                  key: key,
-                  mouseCursor: SystemMouseCursors.text,
-                  value: 1,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(
+                    key: key,
+                    mouseCursor: SystemMouseCursors.text,
+                    value: 1,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),
@@ -2468,7 +2472,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(key: key, value: 1, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(key: key, value: 1, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2490,7 +2499,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: PopupMenuItem<int>(key: key, value: 1, enabled: false, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [PopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: PopupMenuItem<int>(key: key, value: 1, enabled: false, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2517,11 +2531,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(
-                  key: key,
-                  mouseCursor: SystemMouseCursors.text,
-                  value: 1,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(
+                    key: key,
+                    mouseCursor: SystemMouseCursors.text,
+                    value: 1,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),
@@ -2553,7 +2572,12 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(key: key, value: 1, child: Container()),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(key: key, value: 1, child: Container()),
+                ),
               ),
             ),
           ),
@@ -2575,11 +2599,16 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: CheckedPopupMenuItem<int>(
-                  key: key,
-                  value: 1,
-                  enabled: false,
-                  child: Container(),
+                // The [SemanticsRole.menu] is added here to make sure
+                // [CheckedPopupMenuItem]'s parent role is menu.
+                child: Semantics(
+                  role: SemanticsRole.menu,
+                  child: CheckedPopupMenuItem<int>(
+                    key: key,
+                    value: 1,
+                    enabled: false,
+                    child: Container(),
+                  ),
                 ),
               ),
             ),
@@ -2818,6 +2847,71 @@ void main() {
 
     // The `MediaQueryData.padding` should be removed.
     expect(mediaQueryPadding, EdgeInsets.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163477
+  testWidgets("PopupMenu's overlay can be rebuilt even when the button is unmounted", (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey buttonKey = GlobalKey();
+
+    late StateSetter setState;
+    bool showButton = true;
+
+    Widget widget({required Size viewSize}) {
+      return Center(
+        child: SizedBox(
+          width: viewSize.width,
+          height: viewSize.height,
+          child: MaterialApp(
+            home: Material(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter innerSetState) {
+                  setState = innerSetState;
+                  return showButton
+                      ? PopupMenuButton<int>(
+                        key: buttonKey,
+                        popUpAnimationStyle: const AnimationStyle(
+                          reverseDuration: Duration(milliseconds: 400),
+                        ),
+                        itemBuilder: (BuildContext context) {
+                          return <PopupMenuEntry<int>>[
+                            PopupMenuItem<int>(value: 1, child: const Text('ACTION'), onTap: () {}),
+                          ];
+                        },
+                      )
+                      : Container();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Pump a button
+    await tester.pumpWidget(widget(viewSize: const Size(500, 500)));
+
+    // Tap the button to show the menu
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.text('ACTION'), findsOne);
+    expect(find.byKey(buttonKey), findsOne);
+
+    // Hide the button. The menu still shows since it's placed on a separate route.
+    setState(() {
+      showButton = false;
+    });
+    await tester.pump();
+    expect(find.text('ACTION'), findsOne);
+    expect(find.byKey(buttonKey), findsNothing);
+
+    // Resize the view, causing the menu to rebuild. Before the fix, this
+    // rebuild would lead to a crash, because it relies on context of the button,
+    // which has been unmounted.
+    await tester.pumpWidget(widget(viewSize: const Size(300, 300)));
+
+    expect(tester.takeException(), isNull);
   });
 
   group('feedback', () {
@@ -3406,7 +3500,7 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: scrollbarTheme, useMaterial3: true),
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
         home: Material(
           child: Column(
             children: <Widget>[
@@ -3438,7 +3532,7 @@ void main() {
     // Test local ScrollbarTheme overrides global ScrollbarTheme.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: scrollbarTheme, useMaterial3: true),
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
         home: Material(
           child: Column(
             children: <Widget>[
@@ -3584,7 +3678,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
 
     Widget buildMenu() {
       return MaterialApp(
@@ -3780,7 +3874,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key popupMenuButtonKey = UniqueKey();
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
 
     Widget buildMenu() {
       return MaterialApp(
@@ -4433,6 +4527,135 @@ void main() {
     );
 
     await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('PopupMenuDivider custom thickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(thickness: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.width, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom indent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(indent: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final EdgeInsetsDirectional margin = container.margin! as EdgeInsetsDirectional;
+    expect(margin.start, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(color: Colors.deepOrange),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.color, Colors.deepOrange);
+  });
+
+  testWidgets('PopupMenuDivider custom end indent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(endIndent: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final EdgeInsetsDirectional margin = container.margin! as EdgeInsetsDirectional;
+    expect(margin.end, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuDivider(radius: BorderRadius.circular(5)),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+    expect(borderRadius.bottomLeft, const Radius.circular(5));
+    expect(borderRadius.bottomRight, const Radius.circular(5));
+    expect(borderRadius.topLeft, const Radius.circular(5));
+    expect(borderRadius.topRight, const Radius.circular(5));
   });
 }
 

@@ -21,8 +21,9 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 enum _StdioStream { stdout, stderr }
 
@@ -32,12 +33,6 @@ void main() {
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
   late FakeAnalytics fakeAnalytics;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   void pretendPodVersionFails() {
     fakeProcessManager.addCommand(
@@ -58,10 +53,19 @@ void main() {
   }
 
   FlutterProject setupProjectUnderTest() {
+    fileSystem.directory('project').childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: my_app
+environement:
+  sdk: '^3.5.0'
+''');
+
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
     );
+    writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;
@@ -91,23 +95,11 @@ void main() {
           'flutter_tools',
           'templates',
           'cocoapods',
-          'Podfile-ios-objc',
+          'Podfile-ios',
         ),
       )
       ..createSync(recursive: true)
-      ..writeAsStringSync('Objective-C iOS podfile template');
-    fileSystem.file(
-        fileSystem.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          'templates',
-          'cocoapods',
-          'Podfile-ios-swift',
-        ),
-      )
-      ..createSync(recursive: true)
-      ..writeAsStringSync('Swift iOS podfile template');
+      ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
           Cache.flutterRoot!,
@@ -205,33 +197,12 @@ void main() {
   });
 
   group('Setup Podfile', () {
-    testUsingContext('creates objective-c Podfile when not present', () async {
+    testUsingContext('creates iOS Podfile when not present', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
+      projectUnderTest.ios.xcodeProject.createSync(recursive: true);
       await cocoaPodsUnderTest.setupPodfile(projectUnderTest.ios);
 
-      expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Objective-C iOS podfile template');
-    });
-
-    testUsingContext('creates swift Podfile if swift', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      final FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(
-        buildSettings: <String, String>{'SWIFT_VERSION': '5.0'},
-      );
-      final CocoaPods cocoaPodsUnderTest = CocoaPods(
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
-        analytics: fakeAnalytics,
-      );
-
-      final FlutterProject project = FlutterProject.fromDirectoryTest(
-        fileSystem.directory('project'),
-      );
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
-
-      expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift iOS podfile template');
+      expect(projectUnderTest.ios.podfile.readAsStringSync(), 'iOS podfile template');
     });
 
     testUsingContext('creates macOS Podfile when not present', () async {
@@ -389,11 +360,6 @@ void main() {
       'includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins',
       () async {
         final FlutterProject projectUnderTest = setupProjectUnderTest();
-        final File packageConfigFile = fileSystem.file(
-          fileSystem.path.join('project', '.dart_tool', 'package_config.json'),
-        );
-        packageConfigFile.createSync(recursive: true);
-        packageConfigFile.writeAsStringSync('{"configVersion":2,"packages":[]}');
         projectUnderTest.ios.podfile
           ..createSync()
           ..writeAsStringSync('Custom Podfile');
@@ -410,7 +376,7 @@ void main() {
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true);
+        await injectPlugins(project, iosPlatform: true, releaseMode: false);
 
         final String debugContents =
             projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -434,8 +400,7 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });
@@ -1637,23 +1602,10 @@ Specs satisfying the `$fakePluginName (from `Flutter/ephemeral/.symlinks/plugins
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({
-    this.isInstalled = true,
-    this.buildSettings = const <String, String>{},
-    this.version,
-  });
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.version});
 
   @override
   final bool isInstalled;
-
-  @override
-  Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    XcodeProjectBuildContext? buildContext,
-    Duration timeout = const Duration(minutes: 1),
-  }) async => buildSettings;
-
-  final Map<String, String> buildSettings;
 
   @override
   Version? version;

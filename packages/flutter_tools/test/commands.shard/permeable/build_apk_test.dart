@@ -7,6 +7,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,6 +26,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' show FakeFlutterVersion;
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -75,7 +78,7 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
             ),
@@ -89,7 +92,7 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
             ),
@@ -508,6 +511,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -547,6 +558,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Psplit-debug-info=${tempDir.path}',
               '-Ptrack-widget-creation=true',
@@ -590,6 +609,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
@@ -633,6 +660,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -678,6 +713,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -702,7 +745,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-not-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -731,6 +780,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -757,7 +814,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
         expect(processManager, hasNoRemainingExpectations);
       },

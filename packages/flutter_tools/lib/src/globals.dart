@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:file/memory.dart';
+library;
+
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -46,7 +49,6 @@ import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
-import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
@@ -256,7 +258,7 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///
 /// This is depended on by [localFileSystem] which is called before any
-/// [Context] is set up, and thus this cannot be a Context getter.
+/// [AppContext] is set up, and thus this cannot be a Context getter.
 final ShutdownHooks shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
@@ -286,14 +288,9 @@ final RegExp kVMServiceMessageRegExp = RegExp(
   r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
 );
 
-// The official tool no longer allows non-null safe builds. This can be
-// overridden in other clients.
-NonNullSafeBuilds get nonNullSafeBuilds =>
-    context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
-
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///
-/// A value of [null] indicates that no installation of java could be found on
+/// A value of `null` indicates that no installation of java could be found on
 /// the host machine.
 Java? get java => context.get<Java>();
 

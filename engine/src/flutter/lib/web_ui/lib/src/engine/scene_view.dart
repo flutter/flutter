@@ -53,6 +53,9 @@ class EngineSceneView {
   _SceneRender? _currentRender;
   _SceneRender? _nextRender;
 
+  // Only populated in debug mode.
+  _SceneRender? _previousRender;
+
   Future<void> renderScene(EngineScene scene, FrameTimingRecorder? recorder) {
     if (_currentRender != null) {
       // If a scene is already queued up, drop it and queue this one up instead
@@ -71,7 +74,7 @@ class EngineSceneView {
   Future<void> _kickRenderLoop() async {
     final _SceneRender current = _currentRender!;
     await _renderScene(current.scene, current.recorder);
-    current.done();
+    _renderComplete(current);
     _currentRender = _nextRender;
     _nextRender = null;
     if (_currentRender == null) {
@@ -194,6 +197,20 @@ class EngineSceneView {
       }
     }
   }
+
+  void _renderComplete(_SceneRender render) {
+    render.done();
+    if (kDebugMode) {
+      _previousRender = render;
+    }
+  }
+
+  Map<String, dynamic>? dumpDebugInfo() {
+    if (kDebugMode && _previousRender != null) {
+      return _previousRender!.scene.debugJsonDescription;
+    }
+    return null;
+  }
 }
 
 sealed class SliceContainer {
@@ -205,7 +222,7 @@ sealed class SliceContainer {
 final class PictureSliceContainer extends SliceContainer {
   factory PictureSliceContainer(ui.Rect bounds) {
     final DomElement container = domDocument.createElement(kCanvasContainerTag);
-    final DomCanvasElement canvas = createDomCanvasElement(
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
       width: bounds.width.toInt(),
       height: bounds.height.toInt(),
     );
@@ -254,13 +271,13 @@ final class PictureSliceContainer extends SliceContainer {
   }
 
   void renderBitmap(DomImageBitmap bitmap) {
-    final DomCanvasRenderingContextBitmapRenderer ctx = canvas.contextBitmapRenderer;
+    final DomImageBitmapRenderingContext ctx = canvas.contextBitmapRenderer;
     ctx.transferFromImageBitmap(bitmap);
   }
 
   @override
   final DomElement container;
-  final DomCanvasElement canvas;
+  final DomHTMLCanvasElement canvas;
 }
 
 final class PlatformViewContainer extends SliceContainer {

@@ -25,7 +25,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
 import 'theme.dart';
-import 'theme_data.dart' show MaterialTapTargetSize;
 
 // Examples can assume:
 // late BuildContext context;
@@ -124,7 +123,8 @@ class ButtonTheme extends InheritedTheme {
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ButtonThemeData] from the closest ancestor [ButtonTheme]
+  /// widget.
   ///
   /// Typical usage is as follows:
   ///

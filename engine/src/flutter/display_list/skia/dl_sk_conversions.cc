@@ -7,6 +7,7 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -26,7 +27,7 @@ SkPaint ToSk(const DlPaint& paint) {
   SkPaint sk_paint;
 
   sk_paint.setAntiAlias(paint.isAntiAlias());
-  sk_paint.setColor(ToSk(paint.getColor()));
+  sk_paint.setColor(ToSkColor4f(paint.getColor()));
   sk_paint.setBlendMode(ToSk(paint.getBlendMode()));
   sk_paint.setStyle(ToSk(paint.getDrawStyle()));
   sk_paint.setStrokeWidth(paint.getStrokeWidth());
@@ -247,7 +248,7 @@ sk_sp<SkColorFilter> ToSk(const DlColorFilter* filter) {
     case DlColorFilterType::kBlend: {
       const DlBlendColorFilter* blend_filter = filter->asBlend();
       FML_DCHECK(blend_filter != nullptr);
-      return SkColorFilters::Blend(ToSk(blend_filter->color()),
+      return SkColorFilters::Blend(ToSkColor4f(blend_filter->color()), nullptr,
                                    ToSk(blend_filter->mode()));
     }
     case DlColorFilterType::kMatrix: {

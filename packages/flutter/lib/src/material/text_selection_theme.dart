@@ -30,7 +30,7 @@ import 'theme.dart';
 ///
 ///  * [TextSelectionTheme], an [InheritedWidget] that propagates the theme down its
 ///    subtree.
-///  * [InputDecorationTheme], which defines most other visual properties of
+///  * [InputDecorationThemeData], which defines most other visual properties of
 ///    text fields.
 @immutable
 class TextSelectionThemeData with Diagnosticable {
@@ -53,7 +53,8 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// On iOS [TextField] and [SelectableText] cannot access [selectionHandleColor].
   /// To set the [selectionHandleColor] on iOS, you can change the
-  /// [CupertinoThemeData.primaryColor] in [ThemeData.cupertinoOverrideTheme].
+  /// [CupertinoThemeData.selectionHandleColor] by wrapping the subtree
+  /// containing your [TextField] or [SelectableText] with a [CupertinoTheme].
   final Color? selectionHandleColor;
 
   /// Creates a copy of this object with the given fields replaced with the

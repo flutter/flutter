@@ -35,6 +35,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -72,63 +73,6 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
-      },
-    );
-
-    testUsingContext(
-      'does not support --no-sound-null-safety by default',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await expectLater(
-          () => createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--use-application-binary=app/bar/faz', '--no-sound-null-safety']),
-          throwsA(
-            isException.having(
-              (Exception exception) => exception.toString(),
-              'toString',
-              contains('Could not find an option named "no-sound-null-safety"'),
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-      },
-    );
-
-    testUsingContext(
-      'supports --no-sound-null-safety with an overridden NonNullSafeBuilds',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final FakeDevice device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.android,
-        );
-
-        testDeviceManager.devices = <Device>[device];
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await createTestCommandRunner(command).run(const <String>[
-          'run',
-          '--use-application-binary=app/bar/faz',
-          '--no-sound-null-safety',
-        ]);
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () => testDeviceManager,
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
 
@@ -231,15 +175,9 @@ void main() {
         artifacts = Artifacts.test();
         fs = MemoryFileSystem.test();
 
-        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: flutter_app');
-        fs.currentDirectory.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-{
-  "packages": [],
-  "configVersion": 2
-}
-''');
+        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();
         final File mainFile = libDir.childFile('main.dart');
@@ -1136,39 +1074,6 @@ void main() {
         },
       );
 
-      // Tests whether using a deprecated webRenderer toggles a warningText.
-      Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
-        testUsingContext(
-          'Using the "${webRenderer.name}" renderer triggers a warningText.',
-          () async {
-            // Run the command so it parses the renderer, but ignore all errors.
-            // We only care about the logger.
-            try {
-              await createTestCommandRunner(
-                RunCommand(),
-              ).run(<String>['run', '--no-pub', ...webRenderer.toCliDartDefines]);
-            } on ToolExit catch (error) {
-              expect(error, isA<ToolExit>());
-            }
-            expect(
-              logger.warningText,
-              contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
-            );
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => fileSystem,
-            ProcessManager: () => FakeProcessManager.any(),
-            Logger: () => logger,
-            DeviceManager: () => testDeviceManager,
-          },
-        );
-      }
-
-      /// Do test all the deprecated WebRendererModes
-      WebRendererMode.values
-          .where((WebRendererMode mode) => mode.isDeprecated)
-          .forEach(testWebRendererDeprecationMessage);
-
       testUsingContext(
         'accepts headers with commas in them',
         () async {
@@ -1251,7 +1156,7 @@ void main() {
   });
 
   testUsingContext(
-    'Flutter run catches catches errors due to vm service disconnection and throws a tool exit',
+    'Flutter run catches catches errors due to vm service disconnection by text and throws a tool exit',
     () async {
       final FakeResidentRunner residentRunner = FakeResidentRunner();
       residentRunner.rpcError = RPCError(
@@ -1271,6 +1176,41 @@ void main() {
         'flutter._listViews',
         RPCErrorKind.kServerError.code,
         'Service connection disposed.',
+      );
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Flutter run catches catches errors due to vm service disconnection by code and throws a tool exit',
+    () async {
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kServiceDisappeared.code,
+        '',
+      );
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kConnectionDisposed.code,
+        'dummy text not matched.',
       );
 
       await expectToolExitLater(
@@ -1345,7 +1285,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-vulkan-validation',
@@ -1368,7 +1307,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
@@ -1537,7 +1475,7 @@ class FakeDevice extends Fake implements Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 
   @override
-  bool isSupported() => supported;
+  Future<bool> isSupported() async => supported;
 
   @override
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);

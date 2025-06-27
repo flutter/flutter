@@ -43,7 +43,8 @@ bool CommandBufferVK::IsValid() const {
   return true;
 }
 
-bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
+bool CommandBufferVK::OnSubmitCommands(bool block_on_schedule,
+                                       CompletionCallback callback) {
   FML_UNREACHABLE()
 }
 
@@ -160,13 +161,14 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
 
 fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
+    PipelineKey pipeline_key,
     const ContextVK& context) {
   if (!IsValid()) {
     return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(layout,
-                                                                      context);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(
+      layout, pipeline_key, context);
 }
 
 void CommandBufferVK::PushDebugGroup(std::string_view label) const {

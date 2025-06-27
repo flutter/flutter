@@ -51,7 +51,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
@@ -85,7 +86,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
       'build',
       options: <String>[
         'ios-framework',
-        '--verbose',
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',
@@ -470,7 +470,6 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'build',
       options: <String>[
         'macos-framework',
-        '--verbose',
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',

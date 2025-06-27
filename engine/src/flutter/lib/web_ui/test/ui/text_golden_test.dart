@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -18,11 +19,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    withImplicitView: true,
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
   test('text styles - default', () async {
     await testTextStyle('default');
@@ -181,6 +178,19 @@ Future<void> testMain() async {
 
   test('text styles - non-existent font family', () async {
     await testTextStyle('non-existent font family', fontFamily: 'DoesNotExist');
+  });
+
+  test('text styles - changes font after font manually loaded', () async {
+    await testTextStyle('before font load', fontFamily: 'Roboto Slab');
+    final FlutterFontCollection collection = renderer.fontCollection;
+    final ByteBuffer robotoSlabData = await httpFetchByteBuffer(
+      '/assets/fonts/RobotoSlab-VariableFont_wght.ttf',
+    );
+    expect(
+      await collection.loadFontFromList(robotoSlabData.asUint8List(), fontFamily: 'Roboto Slab'),
+      true,
+    );
+    await testTextStyle('after font load', fontFamily: 'Roboto Slab');
   });
 
   test('text styles - family fallback', () async {

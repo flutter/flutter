@@ -59,6 +59,21 @@ void _removeView(int viewId) {
 }
 
 @pragma('vm:entry-point')
+void _sendViewFocusEvent(int viewId, int viewFocusState, int viewFocusDirection) {
+  final ViewFocusEvent viewFocusEvent = ViewFocusEvent(
+    viewId: viewId,
+    state: ViewFocusState.values[viewFocusState],
+    direction: ViewFocusDirection.values[viewFocusDirection],
+  );
+  PlatformDispatcher.instance._sendViewFocusEvent(viewFocusEvent);
+}
+
+@pragma('vm:entry-point')
+void _setEngineId(int engineId) {
+  PlatformDispatcher.instance._engineId = engineId;
+}
+
+@pragma('vm:entry-point')
 void _updateDisplays(
   List<int> ids,
   List<double> widths,
@@ -268,8 +283,8 @@ void _dispatchPointerDataPacket(ByteData packet) {
 }
 
 @pragma('vm:entry-point')
-void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
-  PlatformDispatcher.instance._dispatchSemanticsAction(nodeId, action, args);
+void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
+  PlatformDispatcher.instance._dispatchSemanticsAction(viewId, nodeId, action, args);
 }
 
 @pragma('vm:entry-point')

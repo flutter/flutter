@@ -107,7 +107,6 @@ class ShaderCompiler {
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android:
@@ -123,6 +122,7 @@ class ShaderCompiler {
         ];
 
       case TargetPlatform.ios:
+        return <String>['--runtime-stage-metal'];
       case TargetPlatform.darwin:
         return <String>['--sksl', '--runtime-stage-metal'];
 
@@ -133,6 +133,9 @@ class ShaderCompiler {
 
       case TargetPlatform.web_javascript:
         return <String>['--sksl'];
+
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 

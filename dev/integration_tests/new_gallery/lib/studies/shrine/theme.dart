@@ -21,13 +21,13 @@ IconThemeData _customIconTheme(IconThemeData original) {
 }
 
 ThemeData _buildShrineTheme() {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData();
   return base.copyWith(
     appBarTheme: const AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark, elevation: 0),
     scaffoldBackgroundColor: shrineBackgroundWhite,
     cardColor: shrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    inputDecorationTheme: const InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationThemeData(
       border: CutCornersBorder(borderSide: BorderSide(color: shrineBrown900, width: 0.5)),
       contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
     ),

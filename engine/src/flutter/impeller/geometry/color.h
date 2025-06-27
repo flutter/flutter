@@ -18,16 +18,16 @@
 
 #define IMPELLER_FOR_EACH_BLEND_MODE(V) \
   V(Clear)                              \
-  V(Source)                             \
-  V(Destination)                        \
-  V(SourceOver)                         \
-  V(DestinationOver)                    \
-  V(SourceIn)                           \
-  V(DestinationIn)                      \
-  V(SourceOut)                          \
-  V(DestinationOut)                     \
-  V(SourceATop)                         \
-  V(DestinationATop)                    \
+  V(Src)                                \
+  V(Dst)                                \
+  V(SrcOver)                            \
+  V(DstOver)                            \
+  V(SrcIn)                              \
+  V(DstIn)                              \
+  V(SrcOut)                             \
+  V(DstOut)                             \
+  V(SrcATop)                            \
+  V(DstATop)                            \
   V(Xor)                                \
   V(Plus)                               \
   V(Modulate)                           \
@@ -59,16 +59,16 @@ enum class BlendMode : uint8_t {
   // The following blend modes are able to be used as pipeline blend modes or
   // via `BlendFilterContents`.
   kClear = 0,
-  kSource,
-  kDestination,
-  kSourceOver,
-  kDestinationOver,
-  kSourceIn,
-  kDestinationIn,
-  kSourceOut,
-  kDestinationOut,
-  kSourceATop,
-  kDestinationATop,
+  kSrc,
+  kDst,
+  kSrcOver,
+  kDstOver,
+  kSrcIn,
+  kDstIn,
+  kSrcOut,
+  kDstOut,
+  kSrcATop,
+  kDstATop,
   kXor,
   kPlus,
   kModulate,
@@ -92,7 +92,8 @@ enum class BlendMode : uint8_t {
   kColor,
   kLuminosity,
 
-  kLast = kLuminosity,
+  kLastMode = kLuminosity,
+  kDefaultMode = kSrcOver,
 };
 
 const char* BlendModeToString(BlendMode blend_mode);
@@ -155,7 +156,7 @@ struct Color {
   }
 
   /// @brief Convert this color to a 32-bit representation.
-  static constexpr uint32_t ToIColor(Color color) {
+  static inline uint32_t ToIColor(Color color) {
     return (((std::lround(color.alpha * 255.0f) & 0xff) << 24) |
             ((std::lround(color.red * 255.0f) & 0xff) << 16) |
             ((std::lround(color.green * 255.0f) & 0xff) << 8) |
@@ -242,7 +243,7 @@ struct Color {
    *
    * @return constexpr std::array<u_int8, 4>
    */
-  constexpr std::array<uint8_t, 4> ToR8G8B8A8() const {
+  inline std::array<uint8_t, 4> ToR8G8B8A8() const {
     uint8_t r = std::round(red * 255.0f);
     uint8_t g = std::round(green * 255.0f);
     uint8_t b = std::round(blue * 255.0f);
@@ -255,7 +256,7 @@ struct Color {
    *
    * @return constexpr uint32_t
    */
-  constexpr uint32_t ToARGB() const {
+  inline uint32_t ToARGB() const {
     std::array<uint8_t, 4> result = ToR8G8B8A8();
     return result[3] << 24 | result[0] << 16 | result[1] << 8 | result[2];
   }
@@ -926,6 +927,12 @@ namespace std {
 inline std::ostream& operator<<(std::ostream& out, const impeller::Color& c) {
   out << "(" << c.red << ", " << c.green << ", " << c.blue << ", " << c.alpha
       << ")";
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::BlendMode& mode) {
+  out << "BlendMode::k" << BlendModeToString(mode);
   return out;
 }
 

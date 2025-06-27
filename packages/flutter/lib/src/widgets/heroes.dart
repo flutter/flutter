@@ -518,15 +518,7 @@ class _HeroFlightManifest {
 // Builds the in-flight hero widget.
 class _HeroFlight {
   _HeroFlight(this.onFlightEnded) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_HeroFlight',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_HeroFlight', this));
     _proxyAnimation = ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
 
@@ -633,9 +625,7 @@ class _HeroFlight {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     if (overlayEntry != null) {
       overlayEntry!.remove();
       overlayEntry!.dispose();
@@ -687,12 +677,11 @@ class _HeroFlight {
       final HeroFlightDirection type = initialManifest.type;
       switch (type) {
         case HeroFlightDirection.pop:
-          return initial.value == 1.0 && initialManifest.isUserGestureTransition
+          return initialManifest.isUserGestureTransition
               // During user gesture transitions, the animation controller isn't
-              // driving the reverse transition, but should still be in a previously
-              // completed stage with the initial value at 1.0.
-              ? initial.status == AnimationStatus.completed
-              : initial.status == AnimationStatus.reverse;
+              // driving the reverse transition, so the status is not important.
+              ||
+              initial.status == AnimationStatus.reverse;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
@@ -824,15 +813,7 @@ class HeroController extends NavigatorObserver {
   /// The [createRectTween] argument is optional. If null, the controller uses a
   /// linear [Tween<Rect>].
   HeroController({this.createRectTween}) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$HeroController',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'HeroController', this));
   }
 
   /// Used to create [RectTween]s that interpolate the position of heroes in flight.
@@ -914,7 +895,7 @@ class HeroController extends NavigatorObserver {
     }
     final Animation<double> newRouteAnimation = toRoute.animation!;
     final Animation<double> oldRouteAnimation = fromRoute.animation!;
-    final HeroFlightDirection flightType;
+    final HeroFlightDirection? flightType;
     switch ((isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status)) {
       case (true, _, _):
       case (_, AnimationStatus.reverse, _):
@@ -922,25 +903,34 @@ class HeroController extends NavigatorObserver {
       case (_, _, AnimationStatus.forward):
         flightType = HeroFlightDirection.push;
       default:
-        return;
+        flightType = null;
     }
 
     // A user gesture may have already completed the pop, or we might be the initial route
-    switch (flightType) {
-      case HeroFlightDirection.pop:
-        if (fromRoute.animation!.value == 0.0) {
-          return;
-        }
-      case HeroFlightDirection.push:
-        if (toRoute.animation!.value == 1.0) {
-          return;
-        }
+    if (flightType != null) {
+      switch (flightType) {
+        case HeroFlightDirection.pop:
+          if (fromRoute.animation!.value == 0.0) {
+            return;
+          }
+        case HeroFlightDirection.push:
+          if (toRoute.animation!.value == 1.0) {
+            return;
+          }
+      }
     }
 
     // For pop transitions driven by a user gesture: if the "to" page has
     // maintainState = true, then the hero's final dimensions can be measured
-    // immediately because their page's layout is still valid.
-    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && toRoute.maintainState) {
+    // immediately because their page's layout is still valid. Unless due to directly
+    // adding routes to the pages stack causing the route to never get laid out.
+    final RenderBox? fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+    final bool hasValidSize =
+        (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
+    if (isUserGestureTransition &&
+        flightType == HeroFlightDirection.pop &&
+        toRoute.maintainState &&
+        hasValidSize) {
       _startHeroTransition(fromRoute, toRoute, flightType, isUserGestureTransition);
     } else {
       // Otherwise, delay measuring until the end of the next frame to allow
@@ -950,7 +940,6 @@ class HeroController extends NavigatorObserver {
       // frame completes, we'll know where the heroes in the `to` route are
       // going to end up, and the `to` route will go back onstage.
       toRoute.offstage = toRoute.animation!.value == 0.0;
-
       WidgetsBinding.instance.addPostFrameCallback((Duration value) {
         if (fromRoute.navigator == null || toRoute.navigator == null) {
           return;
@@ -965,7 +954,7 @@ class HeroController extends NavigatorObserver {
   void _startHeroTransition(
     PageRoute<dynamic> from,
     PageRoute<dynamic> to,
-    HeroFlightDirection flightType,
+    HeroFlightDirection? flightType,
     bool isUserGestureTransition,
   ) {
     // If the `to` route was offstage, then we're implicitly restoring its
@@ -1014,7 +1003,7 @@ class HeroController extends NavigatorObserver {
       final _HeroState? toHero = toHeroes[tag];
       final _HeroFlight? existingFlight = _flights[tag];
       final _HeroFlightManifest? manifest =
-          toHero == null
+          toHero == null || flightType == null
               ? null
               : _HeroFlightManifest(
                 type: flightType,
@@ -1106,12 +1095,7 @@ class HeroController extends NavigatorObserver {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     for (final _HeroFlight flight in _flights.values) {
       flight.dispose();
     }

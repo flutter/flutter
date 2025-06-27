@@ -144,6 +144,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -154,6 +155,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
+    expect(data.supportsAnnounce, false);
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
@@ -169,6 +171,7 @@ void main() {
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
+      supportsAnnounce: true,
       alwaysUse24HourFormat: true,
       navigationMode: NavigationMode.directional,
     );
@@ -202,6 +205,7 @@ void main() {
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
     expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
+    expect(data.supportsAnnounce, platformData.supportsAnnounce);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -222,7 +226,7 @@ void main() {
       expect(data.hashCode, data.copyWith().hashCode);
       expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
       expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-      expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
+      expect(data.textScaler, isSystemTextScaler(withScaleFactor: 123));
       expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
       expect(
         data.padding,
@@ -255,6 +259,10 @@ void main() {
         data.onOffSwitchLabels,
         tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
       );
+      expect(
+        data.supportsAnnounce,
+        tester.platformDispatcher.accessibilityFeatures.supportsAnnounce,
+      );
       expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
       expect(data.navigationMode, NavigationMode.traditional);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -274,6 +282,7 @@ void main() {
         boldText: true,
         highContrast: true,
         onOffSwitchLabels: true,
+        supportsAnnounce: true,
         alwaysUse24HourFormat: true,
         navigationMode: NavigationMode.directional,
       );
@@ -321,6 +330,7 @@ void main() {
       expect(data.boldText, platformData.boldText);
       expect(data.highContrast, platformData.highContrast);
       expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
+      expect(data.supportsAnnounce, platformData.supportsAnnounce);
       expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
       expect(data.navigationMode, platformData.navigationMode);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -360,7 +370,7 @@ void main() {
       expect(outerData, isNull);
       expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
       expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-      expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
+      expect(data.textScaler, isSystemTextScaler(withScaleFactor: 123));
       expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
       expect(
         data.padding,
@@ -392,6 +402,10 @@ void main() {
       expect(
         data.onOffSwitchLabels,
         tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+      );
+      expect(
+        data.supportsAnnounce,
+        tester.platformDispatcher.accessibilityFeatures.supportsAnnounce,
       );
       expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
       expect(data.navigationMode, NavigationMode.traditional);
@@ -437,10 +451,10 @@ void main() {
     expect(outerData, isNull);
     expect(rebuildCount, 1);
 
-    expect(data.textScaler, const TextScaler.linear(123));
+    expect(data.textScaler.scale(10), 10 * 123);
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaler, const TextScaler.linear(456));
+    expect(data.textScaler.scale(10), 10 * 456);
     expect(rebuildCount, 2);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -451,7 +465,7 @@ void main() {
 
     expect(data.accessibleNavigation, true);
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(data.accessibleNavigation, false);
     expect(rebuildCount, 4);
 
@@ -498,10 +512,10 @@ void main() {
 
     expect(rebuildCount, 1);
 
-    expect(data.textScaler, const TextScaler.linear(44));
+    expect(data.textScaler.scale(10), 10 * 44);
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaler, const TextScaler.linear(44));
+    expect(data.textScaler.scale(10), 10 * 44);
     expect(rebuildCount, 1);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -512,7 +526,7 @@ void main() {
 
     expect(data.accessibleNavigation, true);
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(data.accessibleNavigation, true);
     expect(rebuildCount, 1);
 
@@ -577,6 +591,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.onOffSwitchLabels, data.onOffSwitchLabels);
+    expect(copied.supportsAnnounce, data.supportsAnnounce);
     expect(copied.platformBrightness, data.platformBrightness);
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
@@ -617,6 +632,7 @@ void main() {
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
+      supportsAnnounce: true,
       platformBrightness: Brightness.dark,
       navigationMode: NavigationMode.directional,
       gestureSettings: gestureSettings,
@@ -636,6 +652,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.onOffSwitchLabels, true);
+    expect(copied.supportsAnnounce, true);
     expect(copied.platformBrightness, Brightness.dark);
     expect(copied.navigationMode, NavigationMode.directional);
     expect(copied.gestureSettings, gestureSettings);
@@ -674,6 +691,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -710,6 +728,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -748,6 +767,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -781,6 +801,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -819,6 +840,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -855,6 +877,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -893,6 +916,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -926,6 +950,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -964,6 +989,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -1000,6 +1026,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -1038,6 +1065,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -1071,6 +1099,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -1096,7 +1125,7 @@ void main() {
       ),
     );
 
-    expect(outsideTextScaler, TextScaler.noScaling);
+    expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
     expect(insideTextScaler, const TextScaler.linear(4.0));
   });
 
@@ -1175,6 +1204,32 @@ void main() {
     expect(insideOnOffSwitchLabels, true);
   });
 
+  testWidgets('MediaQuery.supportsAnnounce', (WidgetTester tester) async {
+    late bool outsideSupportsAnnounce;
+    late bool insideSupportsAnnounce;
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideSupportsAnnounce = MediaQuery.supportsAnnounceOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(supportsAnnounce: true),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideSupportsAnnounce = MediaQuery.supportsAnnounceOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideSupportsAnnounce, false);
+    expect(insideSupportsAnnounce, true);
+  });
+
   testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
@@ -1223,6 +1278,15 @@ void main() {
 
     expect(mediaQueryInside, isNotNull);
     expect(mediaQueryOutside, isNot(mediaQueryInside));
+  });
+
+  testWidgets('MediaQuery.fromView creates a SystemTextScaler', (WidgetTester tester) async {
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+    tester.platformDispatcher.textScaleFactorTestValue = 123.0;
+    expect(
+      MediaQueryData.fromView(tester.view).textScaler,
+      isSystemTextScaler(withScaleFactor: 123.0),
+    );
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (
@@ -1305,6 +1369,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1336,6 +1401,7 @@ void main() {
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
+    expect(subScreenMediaQuery.supportsAnnounce, true);
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
@@ -1382,6 +1448,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          supportsAnnounce: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1419,6 +1486,7 @@ void main() {
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
+    expect(subScreenMediaQuery.supportsAnnounce, true);
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
@@ -1576,6 +1644,10 @@ void main() {
       values: <_MediaQueryAspectCase>[
         const _MediaQueryAspectCase(MediaQuery.sizeOf, MediaQueryData(size: Size(1, 1))),
         const _MediaQueryAspectCase(MediaQuery.maybeSizeOf, MediaQueryData(size: Size(1, 1))),
+        const _MediaQueryAspectCase(MediaQuery.widthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.maybeWidthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.heightOf, MediaQueryData(size: Size(0, 1))),
+        const _MediaQueryAspectCase(MediaQuery.maybeHeightOf, MediaQueryData(size: Size(0, 1))),
         const _MediaQueryAspectCase(MediaQuery.orientationOf, MediaQueryData(size: Size(2, 1))),
         const _MediaQueryAspectCase(
           MediaQuery.maybeOrientationOf,
@@ -1680,6 +1752,14 @@ void main() {
           MediaQueryData(onOffSwitchLabels: true),
         ),
         const _MediaQueryAspectCase(
+          MediaQuery.supportsAnnounceOf,
+          MediaQueryData(supportsAnnounce: true),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeSupportsAnnounceOf,
+          MediaQueryData(supportsAnnounce: true),
+        ),
+        const _MediaQueryAspectCase(
           MediaQuery.disableAnimationsOf,
           MediaQueryData(disableAnimations: true),
         ),
@@ -1732,4 +1812,79 @@ void main() {
       ],
     ),
   );
+
+  testWidgets('MediaQuery width and height can be listened to independently', (
+    WidgetTester tester,
+  ) async {
+    MediaQueryData data = const MediaQueryData(size: Size(800, 600));
+
+    int widthBuildCount = 0;
+    int heightBuildCount = 0;
+
+    final Widget showWidth = Builder(
+      builder: (BuildContext context) {
+        widthBuildCount++;
+        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget showHeight = Builder(
+      builder: (BuildContext context) {
+        heightBuildCount++;
+        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showWidth,
+                showHeight,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
+                    });
+                  },
+                  child: const Text('Increase height by 100'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('width: 800.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 1);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase height by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 700.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 2);
+  });
 }
