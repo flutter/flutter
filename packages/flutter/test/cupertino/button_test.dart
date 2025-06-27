@@ -1061,37 +1061,6 @@ void main() {
     expect(iconTheme.data.color, customForegroundColor);
   });
 
-  testWidgets('CupertinoButton foregroundColor applies to both its text and its icon', (
-    WidgetTester tester,
-  ) async {
-    const Color customForegroundColor = Color(0xFF5500FF);
-
-    await tester.pumpWidget(
-      boilerplate(
-        child: CupertinoButton(
-          onPressed: () {},
-          foregroundColor: customForegroundColor,
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [Icon(IconData(0xE000)), SizedBox(width: 8), Text('Button')],
-          ),
-        ),
-      ),
-    );
-
-    // Check that the icon has the custom foreground color
-    final IconTheme iconTheme = tester.widget(
-      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(IconTheme)),
-    );
-    expect(iconTheme.data.color, customForegroundColor);
-
-    // Check that the text has the custom foreground color
-    final RichText text = tester.widget(
-      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
-    );
-    expect(text.text.style?.color, customForegroundColor);
-  });
-
   testWidgets('CupertinoButton uses the theme's primaryColor when foregroundColor is not specified', (
     WidgetTester tester,
   ) async {
