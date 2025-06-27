@@ -160,7 +160,7 @@ void main() {
 
         expect(
           fakeStdio.writtenToStderr,
-          contains('Feature flags enabled: '),
+          contains(contains('Feature flags enabled:')),
           reason: 'Should emit feature flags (ignore specifics for test stability)',
         );
       },
