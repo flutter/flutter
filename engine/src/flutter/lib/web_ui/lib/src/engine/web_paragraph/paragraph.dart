@@ -320,12 +320,14 @@ class WebParagraph implements ui.Paragraph {
   }
 
   /// Paints this paragraph instance on a [canvas] at the given [offset].
+  // TODO(jlavrova): Delete.
   void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 
+  // TODO(jlavrova): Delete.
   void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
@@ -421,15 +423,17 @@ class WebParagraphPlaceholder {}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
-    : paragraphStyle = paragraphStyle as WebParagraphStyle {
-    textStylesList.add(StyledTextRange.zero(paragraphStyle.getTextStyle()));
-    textStylesStack.add(paragraphStyle.getTextStyle());
-  }
+    : paragraphStyle = paragraphStyle as WebParagraphStyle,
+      textStylesList = <StyledTextRange>[StyledTextRange.zero(paragraphStyle.getTextStyle())],
+      textStylesStack = <WebTextStyle>[paragraphStyle.getTextStyle()];
 
   final WebParagraphStyle paragraphStyle;
-  List<StyledTextRange> textStylesList = <StyledTextRange>[];
-  List<WebTextStyle> textStylesStack = <WebTextStyle>[];
-  String text = '';
+
+  // TODO(jlavrova): Combine these two. We can do this with only a List<StyledTextRange>.
+  final List<StyledTextRange> textStylesList;
+  final List<WebTextStyle> textStylesStack;
+
+  final StringBuffer textBuffer = StringBuffer();
 
   @override
   void addPlaceholder(
@@ -445,12 +449,14 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    this.text += text;
+    textBuffer.write(text);
     finishStyledTextRange();
   }
 
   @override
   WebParagraph build() {
+    final String text = textBuffer.toString();
+
     // We only keep the default style if there is nothing else
     if (textStylesList.length > 1) {
       textStylesList.removeAt(0);
@@ -488,7 +494,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   void pushStyle(ui.TextStyle textStyle) {
     textStylesStack.add(textStyle as WebTextStyle);
     final last = textStylesList.last;
-    if (last.end == text.length && last.style == textStyle) {
+    if (last.end == textBuffer.length && last.style == textStyle) {
       // Just continue with the same style
       return;
     }
@@ -497,15 +503,18 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void startStyledTextRange() {
     finishStyledTextRange();
-    textStylesList.add(StyledTextRange.collapsed(text.length, textStylesStack.last));
+    textStylesList.add(StyledTextRange.collapsed(textBuffer.length, textStylesStack.last));
   }
 
   void finishStyledTextRange() {
+    // TODO(jlavrova): Instead of removing empty styles, can we try reusing the last one if it's empty?
+    //                 We would need to make `StyledTextRange.style` non-final.
+
     // Remove all text styles without text
-    while (textStylesList.length > 1 && textStylesList.last.start == text.length) {
+    while (textStylesList.length > 1 && textStylesList.last.start == textBuffer.length) {
       textStylesList.removeLast();
     }
     // Update the first one found with text
-    textStylesList.last.end = text.length;
+    textStylesList.last.end = textBuffer.length;
   }
 }
