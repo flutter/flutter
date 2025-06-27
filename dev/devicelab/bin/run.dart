@@ -75,6 +75,11 @@ Future<void> main(List<String> rawArgs) async {
   /// Use an emulator for this test if it is an android test.
   final bool useEmulator = (args['use-emulator'] as bool?) ?? false;
 
+  /// Do not automatically reboot the device after a certain number of tests.
+  /// In LUCI, every device is automatically restarted after a set number of tests.
+  /// Disabling the automatic reboot can be useful when running tests locally in a loop.
+  final bool disableReboot = (args['disable-reboot'] as bool?) ?? false;
+
   if (args.wasParsed('list')) {
     for (int i = 0; i < taskNames.length; i++) {
       print('${(i + 1).toString().padLeft(3)} - ${taskNames[i]}');
@@ -135,6 +140,7 @@ Future<void> main(List<String> rawArgs) async {
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
       useEmulator: useEmulator,
+      disableReboot: disableReboot,
     );
   }
 }
@@ -377,6 +383,11 @@ ArgParser createArgParser(List<String> taskNames) {
       help:
           'If this is an android test, use an emulator to run the test instead of '
           'a physical device.',
+    )
+    ..addFlag(
+      'disable-reboot',
+      negatable: false,
+      help: 'Do not automatically reboot the device after a certain number of tests',
     )
     ..addMultiOption(
       'test',
