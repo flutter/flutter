@@ -36,6 +36,7 @@ Future<int> run(
   bool? reportCrashes,
   String? flutterVersion,
   Map<Type, Generator>? overrides,
+  required FeatureFlags featureFlags,
   required ShutdownHooks shutdownHooks,
 }) async {
   if (muteCommandLogging) {
@@ -119,6 +120,7 @@ Future<int> run(
             reportCrashes!,
             getVersion,
             shutdownHooks,
+            featureFlags: featureFlags,
           );
         }
       },
@@ -136,6 +138,7 @@ Future<int> run(
           reportCrashes!,
           getVersion,
           shutdownHooks,
+          featureFlags: featureFlags,
         );
       },
     )!;
@@ -149,8 +152,9 @@ Future<int> _handleToolError(
   List<String> args,
   bool reportCrashes,
   String Function() getFlutterVersion,
-  ShutdownHooks shutdownHooks,
-) async {
+  ShutdownHooks shutdownHooks, {
+  required FeatureFlags featureFlags,
+}) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError(
@@ -187,11 +191,16 @@ Future<int> _handleToolError(
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
-
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
+
+      final String featureFlagsEnabled = featureFlags.allFeatures
+          .where((Feature f) => featureFlags.isEnabled(f) && f.configSetting != null)
+          .map((Feature f) => f.configSetting)
+          .join(', ');
+      globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 

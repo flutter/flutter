@@ -34,6 +34,7 @@ void main() {
     int? firstExitCode;
     late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
+    late FakeStdio fakeStdio;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -58,6 +59,7 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      fakeStdio = FakeStdio();
     });
 
     tearDown(() {
@@ -82,6 +84,7 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
+                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -120,6 +123,66 @@ void main() {
       },
     );
 
+    testUsingContext(
+      'error handling crash report (bot)',
+      () async {
+        final Completer<void> completer = Completer<void>();
+        // runner.run() asynchronously calls the exit function set above, so we
+        // catch it in a zone.
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>['crash'],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  shutdownHooks: ShutdownHooks(),
+                  featureFlags: TestFeatureFlags(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report on a bot',
+        );
+
+        expect(
+          fakeStdio.writtenToStderr,
+          contains('Feature flags enabled: enable-android, enable-ios, cli-animations\n'),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform:
+            () => FakePlatform(
+              environment: <String, String>{
+                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+                'FLUTTER_ROOT': '/',
+              },
+            ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () => () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+        BotDetector: () => const FakeBotDetector(true),
+        io.Stdio: () => fakeStdio,
+      },
+    );
+
     // This Completer completes when CrashingFlutterCommand.runCommand
     // completes, but ideally we'd want it to complete when execution resumes
     // runner.run. Currently the distinction does not matter, but if it ever
@@ -145,6 +208,7 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
+                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -200,6 +264,7 @@ void main() {
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
                   shutdownHooks: ShutdownHooks(),
+                  featureFlags: TestFeatureFlags(),
                 ),
               );
               return null;
@@ -282,6 +347,7 @@ void main() {
         fileSystem.currentDirectory = currentDirectory;
         inTestSetup = false;
       });
+
       testUsingContext(
         'create local report in temporary directory',
         () async {
@@ -307,6 +373,7 @@ void main() {
                     flutterVersion: '[user-branch]/',
                     reportCrashes: true,
                     shutdownHooks: ShutdownHooks(),
+                    featureFlags: TestFeatureFlags(),
                   ),
                 );
                 return null;
@@ -391,6 +458,7 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -421,6 +489,7 @@ void main() {
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -448,6 +517,7 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(
@@ -490,6 +560,7 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, false);
@@ -512,6 +583,7 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, false);
@@ -520,6 +592,7 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(globals.analytics.telemetryEnabled, true);
@@ -541,6 +614,7 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
@@ -553,6 +627,7 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
@@ -576,6 +651,7 @@ void main() {
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
@@ -585,6 +661,7 @@ void main() {
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
@@ -609,6 +686,7 @@ void main() {
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
+          featureFlags: TestFeatureFlags(),
         );
 
         expect(exitCode, 1, reason: 'Should return 1 due to conflicting options for telemetry');

@@ -151,6 +151,7 @@ Future<void> main(List<String> args) async {
       TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
+    featureFlags: featureFlags,
   );
 }
 
