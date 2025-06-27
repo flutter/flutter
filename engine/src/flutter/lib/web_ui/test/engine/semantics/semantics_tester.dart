@@ -88,7 +88,7 @@ class SemanticsTester {
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
-    ui.Locale? locale = null,
+    ui.Locale? locale,
   }) {
     // Actions
     if (hasTap ?? false) {
