@@ -284,7 +284,7 @@ public class AndroidTouchProcessor {
   // tool types across different events, which breaks Flutter's internal handling of pointer events.
   // Instead give each (pointerId, toolType) pair a unique ID. Technically this could break when
   // handling a pointer of id 2^29, but that seems unlikely. Flutter's internal handling uses a
-  // long, so it can be fixed if needed.
+  // long, so we can convert this method to return a long if needed.
   // See https://github.com/flutter/flutter/issues/160144.
   private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
     assert (event.getToolType(pointerIndex) & ~TOOL_TYPE_MASK) == 0;
