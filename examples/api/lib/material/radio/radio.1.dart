@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Radio].
+/// Flutter code sample for [Radio] to showcase how to customize radio style.
 
 void main() => runApp(const RadioExampleApp());
 
