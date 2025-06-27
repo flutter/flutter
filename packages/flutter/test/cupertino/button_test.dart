@@ -1061,7 +1061,7 @@ void main() {
     expect(iconTheme.data.color, customForegroundColor);
   });
 
-  testWidgets('CupertinoButton foregroundColor applies to both Text and Icon', (
+  testWidgets('CupertinoButton foregroundColor applies to both its text and its icon', (
     WidgetTester tester,
   ) async {
     const Color customForegroundColor = Color(0xFF5500FF);
