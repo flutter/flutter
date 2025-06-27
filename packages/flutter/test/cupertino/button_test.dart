@@ -1109,7 +1109,7 @@ void main() {
     expect(text.text.style?.color, primaryColor);
   });
 
-  testWidgets('CupertinoButton.filled respects foregroundColor', (WidgetTester tester) async {
+  testWidgets('CupertinoButton.filled foregroundColor applies to its text', (WidgetTester tester) async {
     const Color customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
