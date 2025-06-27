@@ -37,7 +37,7 @@ struct DlColor {
                     DlScalar green,
                     DlScalar blue,
                     DlColorSpace colorspace)
-      : alpha_(alpha),
+      : alpha_(std::clamp(alpha, 0.0f, 1.0f)),
         red_(red),
         green_(green),
         blue_(blue),
