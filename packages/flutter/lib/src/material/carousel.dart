@@ -348,6 +348,7 @@ class CarouselView extends StatefulWidget {
   /// ```dart
   ///
   /// CarouselView(
+  ///   itemExtent: 200.0,
   ///   onIndexChanged: (index) {
   ///     print('Current index: $index');
   ///   },
@@ -1475,18 +1476,34 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   @override
   void didUpdateScrollPositionBy(double delta) {
-    super.didUpdateScrollPositionBy(delta);
     if (itemExtent == null && flexWeights == null) {
       // If both itemExtent and flexWeights are null, we cannot determine the
       // item index from pixels.
       return;
     }
-    final double item = getItemFromPixels(pixels, viewportDimension);
-    final int rounded = item.round();
+    super.didUpdateScrollPositionBy(delta);
 
-    if (_cachedItem == null || (rounded - _cachedItem!.round()).abs() > 0) {
-      onIndexChanged.call(rounded);
-      _cachedItem = item;
+    if (itemExtent != null) {
+      final double center = pixels + viewportDimension / 2;
+      final double item = center / itemExtent!;
+      final int rounded = item.round();
+
+      if (_cachedItem == null || rounded != _cachedItem) {
+        onIndexChanged.call(rounded);
+        _cachedItem = item;
+      }
+      return;
+    }
+
+    // TODO(Mairramer): Find a way to put the hero on the weights
+    if (flexWeights != null) {
+      final double item = getItemFromPixels(pixels, viewportDimension);
+      final int rounded = item.round();
+
+      if (_cachedItem == null || (rounded - _cachedItem!.round()).abs() > 0) {
+        onIndexChanged.call(rounded);
+        _cachedItem = item;
+      }
     }
   }
 
@@ -1626,17 +1643,13 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The current index of the [CarouselView].
+  /// The index of the item aligned with the start of the viewport in the [CarouselView].
   ///
-  /// This is the index of the item whose leading edge is aligned with the
-  /// start of the viewport.
+  /// - In a horizontal carousel, this refers to the item aligned with the left edge.
+  /// - In a vertical carousel, it refers to the item aligned with the top edge.
   ///
-  /// - **Horizontal carousel**: The item aligned with the **left** edge.
-  /// - **Vertical carousel**: The item aligned with the **top** edge.
-  ///
-  /// **Note**: This property indicates the item at the **start** of the viewport,
-  /// which may not be the item currently in the **center**. This behavior is
-  /// consistent regardless of whether `flexWeights` are used.
+  /// Note: This is not necessarily the item at the center of the viewport.
+  /// The behavior is consistent whether or not [flexWeights] are used.
   int get currentIndex => _currentIndex;
   int _currentIndex;
 
