@@ -325,6 +325,19 @@ class PaintingContext extends ClipContext {
   ui.PictureRecorder? _recorder;
   Canvas? _canvas;
 
+  /// The recorder that is being used by this [PaintingContext]
+  /// to record interactions with the [Canvas].
+  ///
+  /// It's fragile to hold a reference to the recorder
+  /// returned by this getter as it can change at any time.
+  ui.PictureRecorder get recorder {
+    if (_recorder == null) {
+      _startRecording();
+    }
+    assert(_currentLayer != null);
+    return _recorder!;
+  }
+
   /// The canvas on which to paint.
   ///
   /// The current canvas can change whenever you paint a child using this
