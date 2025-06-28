@@ -1061,24 +1061,29 @@ void main() {
     expect(iconTheme.data.color, customForegroundColor);
   });
 
-  testWidgets('CupertinoButton uses the theme's primaryColor when foregroundColor is not specified', (
+  testWidgets(
+    "CupertinoButton uses the theme's primaryColor when foregroundColor is not specified",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoButton(onPressed: () {}, child: const Text('Button')),
+          ),
+        ),
+      );
+
+      // The default color should be the primary color from the theme
+      final BuildContext context = tester.element(find.text('Button'));
+      final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+
+      final RichText text = tester.widget(find.byType(RichText));
+      expect(text.text.style?.color, primaryColor);
+    },
+  );
+
+  testWidgets('CupertinoButton.filled foregroundColor applies to its text', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(child: CupertinoButton(onPressed: () {}, child: const Text('Button'))),
-      ),
-    );
-
-    // The default color should be the primary color from the theme
-    final BuildContext context = tester.element(find.text('Button'));
-    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-
-    final RichText text = tester.widget(find.byType(RichText));
-    expect(text.text.style?.color, primaryColor);
-  });
-
-  testWidgets('CupertinoButton.filled foregroundColor applies to its text', (WidgetTester tester) async {
     const Color customForegroundColor = Color(0xFF5500FF);
 
     await tester.pumpWidget(
@@ -1105,10 +1110,10 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        child: CupertinoButton(
+        child: const CupertinoButton(
           onPressed: null, // disabled button
           foregroundColor: customForegroundColor,
-          child: const Text('Button'),
+          child: Text('Button'),
         ),
       ),
     );

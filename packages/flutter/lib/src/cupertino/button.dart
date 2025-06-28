@@ -479,13 +479,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                         : kCupertinoButtonTintedOpacityDark
                   : widget.color?.opacity ?? 1.0,
             );
-    final Color effectiveForegroundColor = widget.foregroundColor != null
-        ? widget.foregroundColor!
-        : widget._style == _CupertinoButtonStyle.filled
-        ? themeData.primaryContrastingColor
-        : enabled
-        ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
+    final Color effectiveForegroundColor =
+        widget.foregroundColor ??
+        switch ((widget._style, enabled)) {
+          (_CupertinoButtonStyle.filled, _) => themeData.primaryContrastingColor,
+          (_, true) => primaryColor,
+          (_, false) => CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context),
+        };
 
     final Color effectiveFocusOutlineColor =
         widget.focusColor ??
