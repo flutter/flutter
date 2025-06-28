@@ -2567,17 +2567,10 @@ void main() {
     expect(find.text(':'), findsNothing);
   });
 
-  test('calendarType test checks', () async {
-    expect(
-      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeparator: true),
-      returnsNormally,
-    );
-
+  test('CupertinoDatePicker customWeekDays parameter validation', () async {
     expect(
       () => CupertinoDatePicker(
         onDateTimeChanged: (DateTime _) {},
-        weekType: CupertinoDatePickerWeekType.workDays,
-        showTimeSeparator: true,
       ),
       returnsNormally,
     );
@@ -2585,8 +2578,7 @@ void main() {
     expect(
       () => CupertinoDatePicker(
         onDateTimeChanged: (DateTime _) {},
-        weekType: CupertinoDatePickerWeekType.weekend,
-        showTimeSeparator: true,
+        customWeekDays: CupertinoDatePicker.weekends,
       ),
       returnsNormally,
     );
@@ -2594,9 +2586,7 @@ void main() {
     expect(
       () => CupertinoDatePicker(
         onDateTimeChanged: (DateTime _) {},
-        weekType: CupertinoDatePickerWeekType.custom,
-        customWeekDays: const <int>[1, 2, 3, 4],
-        showTimeSeparator: true,
+        customWeekDays: CupertinoDatePicker.workDays,
       ),
       returnsNormally,
     );
@@ -2604,7 +2594,15 @@ void main() {
     expect(
       () => CupertinoDatePicker(
         onDateTimeChanged: (DateTime _) {},
-        weekType: CupertinoDatePickerWeekType.custom,
+        customWeekDays: const <int>[DateTime.monday,DateTime.tuesday],
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        customWeekDays: const <int>[],
         showTimeSeparator: true,
       ),
       throwsA(
@@ -2619,7 +2617,7 @@ void main() {
     );
   });
 
-  testWidgets('Calendar type workdays test case 1', (WidgetTester tester) async {
+  testWidgets('Calendar type workdays test case', (WidgetTester tester) async {
     // Set initial date time to a work day.
     final DateTime initialDateTime = DateTime(2025, 6, 13);
     DateTime selectedDate = initialDateTime;
@@ -2628,7 +2626,7 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            weekType: CupertinoDatePickerWeekType.workDays,
+            customWeekDays: CupertinoDatePicker.workDays,
             onDateTimeChanged: (DateTime dateTime) {
               selectedDate = dateTime;
             },
@@ -2637,13 +2635,13 @@ void main() {
       ),
     );
 
-    // Scrolling to satuday should trigger automatic scroll to the next wokday (monday)
+    // Scrolling to Saturday should trigger automatic scroll to the next workday (Monday).
     await tester.drag(find.text('Sat Jun 14'), const Offset(0.0, -100.0));
     expect(selectedDate, DateTime(2025, 6, 16));
   });
 
-  testWidgets('Calendar type workdays test case 2', (WidgetTester tester) async {
-    // Set initial date time to a work day.
+  testWidgets('Calendar type weekends test case', (WidgetTester tester) async {
+    // Set initial date time to a weekend day.
     final DateTime initialDateTime = DateTime(2025, 6, 14);
     DateTime selectedDate = initialDateTime;
     await tester.pumpWidget(
@@ -2651,7 +2649,7 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            weekType: CupertinoDatePickerWeekType.weekend,
+            customWeekDays: CupertinoDatePicker.weekends,
             onDateTimeChanged: (DateTime dateTime) {
               selectedDate = dateTime;
             },
@@ -2668,7 +2666,7 @@ void main() {
     expect(selectedDate, DateTime(2025, 6, 14));
   });
 
-  testWidgets('Calendar type workdays test case 3', (WidgetTester tester) async {
+  testWidgets('CupertinoDatePicker with custom days display check', (WidgetTester tester) async {
     // Set initial date time to a work day.
     final DateTime initialDateTime = DateTime(2025, 6, 16);
     DateTime selectedDate = initialDateTime;
@@ -2677,7 +2675,6 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            weekType: CupertinoDatePickerWeekType.custom,
             customWeekDays: const <int>[DateTime.monday,DateTime.tuesday,DateTime.wednesday],
             onDateTimeChanged: (DateTime dateTime) {
               selectedDate = dateTime;
@@ -2687,15 +2684,13 @@ void main() {
       ),
     );
 
-    // Pressing on the friday day item should trigger automatic scroll back to
-    // saturday.
     await tester.drag(find.text('Sun Jun 15'), const Offset(0.0, 64.0));
     await tester.pump();
 
     expect(selectedDate, initialDateTime);
   });
 
-  testWidgets('Calendar type workdays test case 4', (WidgetTester tester) async {
+  testWidgets('CupertinoDatePicker custom days display', (WidgetTester tester) async {
     // Set initial date time to a work day.
     final DateTime initialDateTime = DateTime(2025, 6, 16);
     DateTime selectedDate = initialDateTime;
@@ -2704,7 +2699,6 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            weekType: CupertinoDatePickerWeekType.custom,
             customWeekDays: const <int>[DateTime.monday,DateTime.tuesday,DateTime.wednesday],
             onDateTimeChanged: (DateTime dateTime) {
               selectedDate = dateTime;
@@ -2714,8 +2708,6 @@ void main() {
       ),
     );
 
-    // Pressing on the friday day item should trigger automatic scroll back to
-    // saturday.
     await tester.drag(find.text('Tue Jun 17'), const Offset(0.0, -64.0));
     await tester.pump();
 
