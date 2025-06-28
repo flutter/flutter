@@ -1318,7 +1318,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   _DropdownRoute<T>? _dropdownRoute;
   Orientation? _lastOrientation;
   FocusNode? _internalNode;
-  FocusNode? get focusNode => widget.focusNode ?? _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
@@ -1344,22 +1344,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
-    focusNode?.addListener(_handleFocusChanged);
+    focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
-    focusNode?.removeListener(_handleFocusChanged);
+    focusNode.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
   }
 
   void _handleFocusChanged() {
-    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
       setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
       });
     }
   }
@@ -1374,8 +1374,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusNode == null) {
-      _internalNode ??= _createFocusNode();
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      if (_internalNode != null && widget.focusNode != null) {
+        _internalNode!.dispose();
+        _internalNode = null;
+      }
+
+      if (widget.focusNode == null) {
+        _internalNode ??= _createFocusNode();
+      }
+      _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      focusNode.addListener(_handleFocusChanged);
     }
     _updateSelectedIndex();
   }
@@ -1455,7 +1465,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       barrierDismissible: widget.barrierDismissible,
     );
 
-    focusNode?.requestFocus();
+    focusNode.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
@@ -1748,7 +1758,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
     super.key,
     required List<DropdownMenuItem<T>>? items,
     DropdownButtonBuilder? selectedItemBuilder,
+    @Deprecated(
+      'Use initialValue instead. '
+      'This will set the initial value for the form field. '
+      'This feature was deprecated after v3.33.0-1.0.pre.',
+    )
     T? value,
+    T? initialValue,
     Widget? hint,
     Widget? disabledHint,
     required this.onChanged,
@@ -1783,17 +1799,20 @@ class DropdownButtonFormField<T> extends FormField<T> {
   }) : assert(
          items == null ||
              items.isEmpty ||
-             value == null ||
-             items.where((DropdownMenuItem<T> item) => item.value == value).length == 1,
+             (initialValue == null && value == null) ||
+             items
+                     .where((DropdownMenuItem<T> item) => item.value == (initialValue ?? value))
+                     .length ==
+                 1,
          "There should be exactly one item with [DropdownButton]'s value: "
-         '$value. \n'
+         '${initialValue ?? value}. \n'
          'Either zero or 2 or more [DropdownMenuItem]s were detected '
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        decoration = decoration ?? const InputDecoration(),
        super(
-         initialValue: value,
+         initialValue: initialValue ?? value,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;

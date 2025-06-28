@@ -17,10 +17,11 @@ void main() {
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
-  ui_web.debugEmulateFlutterTesterEnvironment = true;
-
   group('flutter_tester emulation', () {
-    setUpCanvasKitTest(withImplicitView: true);
+    setUpCanvasKitTest(
+      withImplicitView: true,
+      testEnvironment: const ui_web.TestEnvironment.flutterTester(),
+    );
 
     test('defaults to FlutterTest font family', () async {
       final CkPictureRecorder recorder = CkPictureRecorder();

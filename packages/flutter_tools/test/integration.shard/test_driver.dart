@@ -548,6 +548,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         deviceArgs = <String>[
           GoogleChromeDevice.kChromeDeviceId,
           '--web-run-headless',
+          '--no-web-resources-cdn',
           if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
         ];
       default:

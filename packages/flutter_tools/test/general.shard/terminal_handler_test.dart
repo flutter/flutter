@@ -1298,7 +1298,7 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
 
 class FakeDevice extends Fake implements Device {
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool supportsScreenshot = false;

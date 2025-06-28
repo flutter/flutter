@@ -109,6 +109,9 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
+    this.leadingAtTop = true,
+    this.trailingAtBottom = false,
+    this.scrollable = false,
   }) : assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
        assert(elevation == null || elevation > 0),
        assert(minWidth == null || minWidth > 0),
@@ -189,8 +192,12 @@ class NavigationRail extends StatefulWidget {
 
   /// The vertical alignment for the group of [destinations] within the rail.
   ///
-  /// The [NavigationRailDestination]s are grouped together with the [trailing]
-  /// widget, between the [leading] widget and the bottom of the rail.
+  /// The [NavigationRailDestination]s are by default grouped together with the
+  /// [trailing] widget, due to [trailingAtBottom] being `false`. The [leading]
+  /// widget, can also be in the aligned group by setting [leadingAtTop] to
+  /// `false`. If these widgets are not included in the group, they are placed
+  /// at the top and bottom, respectively, of the rail and only the space
+  /// between them is considered for the alignment.
   ///
   /// The value must be between -1.0 and 1.0.
   ///
@@ -314,6 +321,35 @@ class NavigationRail extends StatefulWidget {
   /// If this is null, [NavigationRailThemeData.indicatorShape] is used. If
   /// that is null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
+
+  /// Pin the [leading] widget to the top.
+  ///
+  /// If `true`, the [leading] widget is pinned to the top of the
+  /// [NavigationRail]. Otherwise it precedes directly the main group of
+  /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
+  final bool leadingAtTop;
+
+  /// Pin the [trailing] widget to the bottom.
+  ///
+  /// If `true`, the [trailing] widget is pinned to the bottom of the
+  /// [NavigationRail]. Otherwise it follows directly the main group of
+  /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
+  final bool trailingAtBottom;
+
+  /// Whether the main group of items should be scrollable when vertical space
+  /// is insufficient to show all of [destinations], [leading] and [trailing].
+  ///
+  /// If [leadingAtTop] or [trailingAtBottom] are false, [leading] or [trailing]
+  /// widgets, respectively, are part of the main group in addition to
+  /// [destinations]. Otherwise these are statical at the top or bottom,
+  /// respectively.
+  final bool scrollable;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -444,6 +480,52 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
     final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
 
+    Widget mainGroup = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (!widget.leadingAtTop && widget.leading != null) ...<Widget>[
+          widget.leading!,
+          _verticalSpacer,
+        ],
+        for (int i = 0; i < widget.destinations.length; i += 1)
+          _RailDestination(
+            minWidth: minWidth,
+            minExtendedWidth: minExtendedWidth,
+            extendedTransitionAnimation: _extendedAnimation,
+            selected: widget.selectedIndex == i,
+            icon:
+                widget.selectedIndex == i
+                    ? widget.destinations[i].selectedIcon
+                    : widget.destinations[i].icon,
+            label: widget.destinations[i].label,
+            destinationAnimation: _destinationAnimations[i],
+            labelType: labelType,
+            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+            labelTextStyle:
+                widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+            padding: widget.destinations[i].padding,
+            useIndicator: useIndicator,
+            indicatorColor: useIndicator ? indicatorColor : null,
+            indicatorShape: useIndicator ? indicatorShape : null,
+            onTap: () {
+              if (widget.onDestinationSelected != null) {
+                widget.onDestinationSelected!(i);
+              }
+            },
+            indexLabel: localizations.tabLabel(
+              tabIndex: i + 1,
+              tabCount: widget.destinations.length,
+            ),
+            disabled: widget.destinations[i].disabled,
+          ),
+        if (!widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+      ],
+    );
+
+    if (widget.scrollable) {
+      mainGroup = SingleChildScrollView(child: mainGroup);
+    }
+
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: Semantics(
@@ -457,54 +539,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
             child: Column(
               children: <Widget>[
                 _verticalSpacer,
-                if (widget.leading != null) ...<Widget>[widget.leading!, _verticalSpacer],
-                Expanded(
-                  child: Align(
-                    alignment: Alignment(0, groupAlignment),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        for (int i = 0; i < widget.destinations.length; i += 1)
-                          _RailDestination(
-                            minWidth: minWidth,
-                            minExtendedWidth: minExtendedWidth,
-                            extendedTransitionAnimation: _extendedAnimation,
-                            selected: widget.selectedIndex == i,
-                            icon:
-                                widget.selectedIndex == i
-                                    ? widget.destinations[i].selectedIcon
-                                    : widget.destinations[i].icon,
-                            label: widget.destinations[i].label,
-                            destinationAnimation: _destinationAnimations[i],
-                            labelType: labelType,
-                            iconTheme:
-                                widget.selectedIndex == i
-                                    ? selectedIconTheme
-                                    : effectiveUnselectedIconTheme,
-                            labelTextStyle:
-                                widget.selectedIndex == i
-                                    ? selectedLabelTextStyle
-                                    : unselectedLabelTextStyle,
-                            padding: widget.destinations[i].padding,
-                            useIndicator: useIndicator,
-                            indicatorColor: useIndicator ? indicatorColor : null,
-                            indicatorShape: useIndicator ? indicatorShape : null,
-                            onTap: () {
-                              if (widget.onDestinationSelected != null) {
-                                widget.onDestinationSelected!(i);
-                              }
-                            },
-                            indexLabel: localizations.tabLabel(
-                              tabIndex: i + 1,
-                              tabCount: widget.destinations.length,
-                            ),
-                            disabled: widget.destinations[i].disabled,
-                          ),
-                        if (widget.trailing != null) widget.trailing!,
-                      ],
-                    ),
-                  ),
-                ),
+                if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
+                  widget.leading!,
+                  _verticalSpacer,
+                ],
+                Flexible(child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup)),
+                if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
               ],
             ),
           ),
