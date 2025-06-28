@@ -349,10 +349,10 @@ class CarouselView extends StatefulWidget {
   ///
   /// CarouselView(
   ///   itemExtent: 200.0,
-  ///   onIndexChanged: (index) {
+  ///   onIndexChanged: (int index) {
   ///     print('Current index: $index');
   ///   },
-  ///   children: [
+  ///   children: <Widget> [
   ///     Container(color: Colors.red),
   ///     Container(color: Colors.green),
   ///     Container(color: Colors.blue),
@@ -1410,6 +1410,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     this.initialItem = 0,
     double? itemExtent,
     List<int>? flexWeights,
+    this.childCount = 0,
     bool consumeMaxWeight = true,
     super.oldPosition,
   }) : assert(
@@ -1427,6 +1428,8 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   double? _cachedItem;
 
   final ValueChanged<int> onIndexChanged;
+
+  final int childCount;
 
   @override
   bool get consumeMaxWeight => _consumeMaxWeight;
@@ -1476,12 +1479,12 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   @override
   void didUpdateScrollPositionBy(double delta) {
+    super.didUpdateScrollPositionBy(delta);
     if (itemExtent == null && flexWeights == null) {
       // If both itemExtent and flexWeights are null, we cannot determine the
       // item index from pixels.
       return;
     }
-    super.didUpdateScrollPositionBy(delta);
 
     if (itemExtent != null) {
       final double center = pixels + viewportDimension / 2;
@@ -1495,16 +1498,40 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       return;
     }
 
-    // TODO(Mairramer): Find a way to put the hero on the weights
+    // TODO(Mairramer): Fix accumulatedWidth calculation.
     if (flexWeights != null) {
-      final double item = getItemFromPixels(pixels, viewportDimension);
-      final int rounded = item.round();
+      final int currentIndex = getCurrentIndexByCenter(
+        flexWeights: flexWeights!,
+        childCount: childCount,
+      );
 
-      if (_cachedItem == null || (rounded - _cachedItem!.round()).abs() > 0) {
-        onIndexChanged.call(rounded);
-        _cachedItem = item;
+      if (_cachedItem == null || currentIndex != _cachedItem!.toInt()) {
+        onIndexChanged(currentIndex);
+        _cachedItem = currentIndex.toDouble();
       }
     }
+  }
+
+  int getCurrentIndexByCenter({required List<int> flexWeights, required int childCount}) {
+    final int totalWeight = flexWeights.fold(0, (int a, int b) => a + b);
+    final double center = pixels + viewportDimension / 2;
+
+    double accumulatedOffset = 0.0;
+    int weightIndex = 0;
+
+    for (int itemIndex = 0; itemIndex < childCount; itemIndex++) {
+      final double itemWidth = (flexWeights[weightIndex] / totalWeight) * viewportDimension;
+
+      if (center >= accumulatedOffset && center < accumulatedOffset + itemWidth) {
+        return itemIndex;
+      }
+
+      accumulatedOffset += itemWidth;
+
+      weightIndex = (weightIndex + 1) % flexWeights.length;
+    }
+
+    return childCount - 1;
   }
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
@@ -1649,7 +1676,7 @@ class CarouselController extends ScrollController {
   /// - In a vertical carousel, it refers to the item aligned with the top edge.
   ///
   /// Note: This is not necessarily the item at the center of the viewport.
-  /// The behavior is consistent whether or not [flexWeights] are used.
+  /// The behavior is consistent whether or not `flexWeights` are used.
   int get currentIndex => _currentIndex;
   int _currentIndex;
 
@@ -1741,6 +1768,7 @@ class CarouselController extends ScrollController {
       itemExtent: _carouselState!._itemExtent,
       consumeMaxWeight: _carouselState!._consumeMaxWeight,
       flexWeights: _carouselState!._flexWeights,
+      childCount: _carouselState!.widget.children.length,
       oldPosition: oldPosition,
     );
   }
