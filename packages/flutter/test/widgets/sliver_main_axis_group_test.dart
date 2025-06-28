@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/sliver_persistent_header.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
@@ -1069,6 +1070,30 @@ void main() {
     controller.jumpTo(60.22678428085297);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('showOnScreen reveals the Sliver after a pinned child in SliverMainAxisGroup', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 100,
+        controller: controller,
+        slivers: <Widget>[
+          const PinnedHeaderSliver(child: SizedBox(height: 50)),
+          const SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+          const SliverToBoxAdapter(child: SizedBox(height: 400)),
+        ],
+      ),
+    );
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    final RenderObject renderObject = tester.renderObject(find.text('1', skipOffstage: false));
+    renderObject.showOnScreen();
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 50.0));
   });
 }
 
