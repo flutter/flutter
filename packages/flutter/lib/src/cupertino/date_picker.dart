@@ -191,29 +191,6 @@ enum CupertinoDatePickerMode {
   monthYear,
 }
 
-/// Different types of displayed week in CupertinoDatePicker.
-enum CupertinoDatePickerWeekType {
-  /// A calendar that shows all days of the week, including weekends.
-  /// This is the default calendar type.
-  fullWeek,
-
-  /// A calendar that shows only work days (Monday to Friday).
-  /// In this calendar type, the initial date is adjusted to the next work day
-  workDays,
-
-  /// A calendar that shows only weekends (Saturday and Sunday).
-  /// In this calendar type, the initial date is adjusted to the next weekend day.
-  ///
-  /// For example, if the initial date is a Friday, it will be adjusted to the next
-  /// Saturday.
-  weekend,
-
-  /// A calendar that shows only custom days of the week.
-  /// In this calendar type, the initial date is adjusted to the next
-  /// available day of the week.
-  custom,
-}
-
 // Different types of column in CupertinoDatePicker.
 enum _PickerColumnType {
   // Day of month column in date mode.
@@ -331,8 +308,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
-    this.weekType = CupertinoDatePickerWeekType.fullWeek,
-    this.customWeekDays = const [],
+    this.selectableDatePredicate,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
        assert(
@@ -389,12 +365,8 @@ class CupertinoDatePicker extends StatefulWidget {
          'showTimeSeparator is only supported in time or dateAndTime modes',
        ),
        assert(
-         weekType != CupertinoDatePickerWeekType.custom ||
-             (customWeekDays.isNotEmpty &&
-                 customWeekDays.every(
-                   (int day) => day >= DateTime.monday && day <= DateTime.sunday,
-                 )),
-         'custom days should not be empty and should contains only days between 1 and 7.',
+         selectableDatePredicate == null || selectableDatePredicate(initialDateTime ?? DateTime.now()),
+         '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -487,12 +459,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to false.
   final bool showTimeSeparator;
 
-  /// The type of week to display in the date picker.
-  final CupertinoDatePickerWeekType weekType;
-
-  /// A list of custom days of the week to display in the date picker when
-  /// [weekType] is set to [CupertinoDatePickerWeekType.custom].
-  final List<int> customWeekDays;
+  /// Function to provide full control over which [DateTime] can be selected.
+  final SelectableDayPredicate? selectableDatePredicate;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
@@ -769,14 +737,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     dateController = FixedExtentScrollController();
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
-
-    if (widget.weekType == CupertinoDatePickerWeekType.workDays) {
-      _handleWorkDaysInitialDateTime();
-    } else if (widget.weekType == CupertinoDatePickerWeekType.weekend) {
-      _handleWeekendInitialDateTime();
-    } else if (widget.weekType == CupertinoDatePickerWeekType.custom) {
-      _handleCustomCalendarInitialDateTime();
-    }
   }
 
   void _handleSystemFontsChange() {
@@ -786,40 +746,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       // new system fonts.
       estimatedColumnWidths.clear();
     });
-  }
-
-  void _handleWorkDaysInitialDateTime() {
-    int daysToBeAdded = initialDateTime.weekday == DateTime.saturday ? 2 : initialDateTime.weekday == DateTime.sunday ? 1 : 0;
-    initialDateTime = DateTime(
-      initialDateTime.year,
-      initialDateTime.month,
-      initialDateTime.day + daysToBeAdded,
-    );
-  }
-
-  void _handleWeekendInitialDateTime() {
-    int daysToBeAdded = 0;
-    if (initialDateTime.weekday != DateTime.saturday &&
-        initialDateTime.weekday != DateTime.saturday) {
-      daysToBeAdded = DateTime.saturday - initialDateTime.weekday;
-    }
-    initialDateTime = DateTime(
-      initialDateTime.year,
-      initialDateTime.month,
-      initialDateTime.day + daysToBeAdded,
-    );
-  }
-
-  void _handleCustomCalendarInitialDateTime() {
-    int daysToBeAdded = 0;
-    if (!widget.customWeekDays.contains(initialDateTime.weekday)) {
-      daysToBeAdded = widget.customWeekDays.first - initialDateTime.weekday;
-    }
-    initialDateTime = DateTime(
-      initialDateTime.year,
-      initialDateTime.month,
-      initialDateTime.day + daysToBeAdded,
-    );
   }
 
   @override
@@ -893,14 +819,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     if (isDateInvalid) {
       return;
-    } else if (widget.weekType == CupertinoDatePickerWeekType.workDays &&
-        <int>[DateTime.saturday, DateTime.sunday].contains(selected.weekday)) {
-      return;
-    } else if (widget.weekType == CupertinoDatePickerWeekType.weekend &&
-        !<int>[DateTime.saturday, DateTime.sunday].contains(selected.weekday)) {
-      return;
-    } else if (widget.weekType == CupertinoDatePickerWeekType.custom &&
-        !widget.customWeekDays.contains(selected.weekday)) {
+    } else if (widget.selectableDatePredicate?.call(selected) == false) {
       return;
     }
     widget.onDateTimeChanged(selected);
@@ -948,19 +867,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             initialDateTime.day + index + 1,
           );
 
-          bool isValidDate = true;
-
-          if (widget.weekType == CupertinoDatePickerWeekType.workDays &&
-              (rangeStart.weekday == DateTime.saturday || rangeStart.weekday == DateTime.sunday)) {
-            isValidDate = false;
-          } else if (widget.weekType == CupertinoDatePickerWeekType.weekend &&
-              (rangeStart.weekday != DateTime.saturday && rangeStart.weekday != DateTime.sunday)) {
-            isValidDate = false;
-          } else if (widget.weekType == CupertinoDatePickerWeekType.custom &&
-              !widget.customWeekDays.contains(rangeStart.weekday)) {
-            isValidDate = false;
+          final bool isValidDate;
+          if (widget.selectableDatePredicate == null) {
+            isValidDate = true;
+          } else {
+            isValidDate = widget.selectableDatePredicate!.call(rangeStart);
           }
-
           final DateTime now = DateTime.now();
 
           if (widget.minimumDate?.isBefore(rangeEnd) == false) {
@@ -1195,57 +1107,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  bool _isDateBeforeMinDate(DateTime dateTime) {
-    if (widget.minimumDate == null) {
-      return false;
-    }
-
-    return widget.minimumDate!.day >= dateTime.day &&
-        widget.minimumDate!.month >= dateTime.month &&
-        widget.minimumDate!.year >= dateTime.year;
-  }
-
-  void _checkOnWorkDaysDisplay() {
-    final DateTime selectedDate = selectedDateTime;
-
-    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
-    if (selectedDate.weekday == DateTime.sunday || selectedDate.weekday == DateTime.saturday) {
-      int daysThreshold = 1;
-      if (_isDateBeforeMinDate(selectedDate)) {
-        daysThreshold = selectedDate.weekday == DateTime.sunday ? 1 : 2;
-      }
-      final DateTime targetDate = selectedDate.add(Duration(days: daysThreshold));
-
-      _scrollToDate(
-        targetDate,
-        selectedDate,
-        minCheck,
-        focusedIndex: dateController.selectedItem + daysThreshold,
-      );
-    }
-  }
-
-  void _checkOnWeekendDisplay() {
-    final DateTime selectedDate = selectedDateTime;
-    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
-
-    if (selectedDate.weekday != DateTime.sunday && selectedDate.weekday != DateTime.saturday) {
-      final DateTime targetDate = selectedDate.add(const Duration(days: 1));
-
-      _scrollToDate(
-        targetDate,
-        selectedDate,
-        minCheck,
-        focusedIndex: dateController.selectedItem + 1,
-      );
-    }
-  }
-
   void _checkOnCustomDaysDisplay() {
     final DateTime selectedDate = selectedDateTime;
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
 
-    if (!widget.customWeekDays.contains(selectedDate.weekday)) {
+    if (widget.selectableDatePredicate?.call(selectedDate) == false) {
       const int daysThreshold = 1;
       final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
 
@@ -1274,16 +1140,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
+    _checkOnCustomDaysDisplay();
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
       _scrollToDate(targetDate, selectedDate, minCheck);
-    } else if (widget.weekType == CupertinoDatePickerWeekType.workDays) {
-      _checkOnWorkDaysDisplay();
-    } else if (widget.weekType == CupertinoDatePickerWeekType.weekend) {
-      _checkOnWeekendDisplay();
-    } else if (widget.weekType == CupertinoDatePickerWeekType.custom) {
-      _checkOnCustomDaysDisplay();
     }
   }
 
