@@ -2137,4 +2137,148 @@ void main() {
     expect(radioOffset.dy - tileOffset.dy, bottomPositionRadio);
     expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
   });
+
+  testWidgets('RadioListTile respects radioBackgroundColor in enabled/disabled states', (
+    WidgetTester tester,
+  ) async {
+    const Color activeEnabledBackgroundColor = Color(0xFF000001);
+    const Color activeDisabledBackgroundColor = Color(0xFF000002);
+    const Color inactiveEnabledBackgroundColor = Color(0xFF000003);
+    const Color inactiveDisabledBackgroundColor = Color(0xFF000004);
+
+    Color getBackgroundColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledBackgroundColor;
+        }
+        return inactiveDisabledBackgroundColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledBackgroundColor;
+      }
+      return inactiveEnabledBackgroundColor;
+    }
+
+    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+      getBackgroundColor,
+    );
+
+    int? groupValue = 0;
+    Widget buildApp({required bool enabled}) {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return RadioGroup<int>(
+              groupValue: groupValue,
+              onChanged: (int? newValue) {
+                setState(() {
+                  groupValue = newValue;
+                });
+              },
+              child: RadioListTile<int>(
+                value: 0,
+                radioBackgroundColor: backgroundColor,
+                enabled: enabled,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+
+    // Selected and enabled.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeEnabledBackgroundColor),
+    );
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveEnabledBackgroundColor),
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeDisabledBackgroundColor),
+    );
+
+    // Check when the radio is unselected and disabled.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveDisabledBackgroundColor),
+    );
+  });
+
+  testWidgets('RadioListTile respects radioBackgroundColor in hovered state', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredBackgroundColor = Color(0xFF000001);
+
+    final ThemeData theme = ThemeData();
+
+    Color getBackgroundColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredBackgroundColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(
+      getBackgroundColor,
+    );
+
+    const int groupValue = 0;
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: RadioGroup<int>(
+            groupValue: groupValue,
+            onChanged: (int? newValue) {},
+            child: RadioListTile<int>(value: 0, radioBackgroundColor: backgroundColor),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle()
+        ..circle(color: hoveredBackgroundColor),
+    );
+  });
 }
