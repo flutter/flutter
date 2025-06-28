@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ import 'flags.dart';
 
 /// The `stamp` command for recording engine build info.
 final class StampCommand extends CommandBase {
-  /// Constructs the `cleanup` command.
+  /// Constructs the `stamp` command.
   StampCommand({required super.environment, super.help = false, super.usageLineLength}) {
     argParser.addFlag(
       dryRunFlag,
@@ -71,20 +71,18 @@ final class StampCommand extends CommandBase {
 
   Future<String> _getGitRevisionDate(String revision) async {
     final result = await environment.processRunner.runProcess(
-      'git show -s --pretty=format:%ad --date=iso'.split(' '),
+      'git show -s --pretty=format:%ad --date=iso-strict'.split(' '),
       workingDirectory: environment.engine.srcDir,
     );
     if (result.exitCode != 0) {
-      throw Exception(
-        'git show -s --format=%ci $revision failed with exit code ${result.exitCode}',
-      );
+      throw Exception('git show failed with exit code ${result.exitCode}');
     }
     return result.stdout.trim();
   }
 
   Future<String> _getContentHash() async {
     final result = await environment.processRunner.runProcess([
-      '${environment.engine.srcDir.path}/../../bin/internal/content_aware_hash.sh',
+      '${environment.flutterBinInternal}/content_aware_hash.sh',
     ], workingDirectory: environment.engine.srcDir);
     if (result.exitCode != 0) {
       throw Exception('content_aware_hash.sh failed with exit code ${result.exitCode}');

@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:ffi' show Abi;
@@ -58,8 +58,8 @@ void main() {
           switch (entry.command) {
             case ['git', 'rev-parse', 'HEAD']:
               return FakeProcess(stdout: 'a' * 40);
-            case ['git', 'show', '-s', '--pretty=format:%ad', '--date=iso']:
-              return FakeProcess(stdout: '2025-06-27 15:51:55 -0700');
+            case ['git', 'show', '-s', '--pretty=format:%ad', '--date=iso-strict']:
+              return FakeProcess(stdout: '2025-06-27T17:11:53-07:00');
             default:
               if (entry.command.first.endsWith('content_aware_hash.sh')) {
                 return FakeProcess(stdout: '1' * 40);
