@@ -22,7 +22,7 @@ class RadioExampleApp extends StatelessWidget {
   }
 }
 
-enum RadioType { fillColor, backgroundColor, side }
+enum RadioType { fillColor, backgroundColor, side, innerRadius }
 
 class RadioExample extends StatefulWidget {
   const RadioExample({super.key});
@@ -90,6 +90,14 @@ class _RadioExampleState extends State<RadioExample> {
                   );
                 }
               }),
+            ),
+          ),
+
+          const ListTile(
+            title: Text('Inner radius'),
+            leading: Radio<RadioType>(
+              value: RadioType.innerRadius,
+              innerRadius: WidgetStatePropertyAll<double>(6),
             ),
           ),
         ],
