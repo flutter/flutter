@@ -2567,6 +2567,161 @@ void main() {
     expect(find.text(':'), findsNothing);
   });
 
+  test('calendarType test checks', () async {
+    expect(
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeparator: true),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        weekType: CupertinoDatePickerWeekType.workDays,
+        showTimeSeparator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        weekType: CupertinoDatePickerWeekType.weekend,
+        showTimeSeparator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        weekType: CupertinoDatePickerWeekType.custom,
+        customWeekDays: const <int>[1, 2, 3, 4],
+        showTimeSeparator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        onDateTimeChanged: (DateTime _) {},
+        weekType: CupertinoDatePickerWeekType.custom,
+        showTimeSeparator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains(
+            'custom days should not be empty and should contains only days between 1 and 7.',
+          ),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Calendar type workdays test case 1', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 13);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            weekType: CupertinoDatePickerWeekType.workDays,
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Scrolling to satuday should trigger automatic scroll to the next wokday (monday)
+    await tester.drag(find.text('Sat Jun 14'), const Offset(0.0, -100.0));
+    expect(selectedDate, DateTime(2025, 6, 16));
+  });
+
+  testWidgets('Calendar type workdays test case 2', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 14);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            weekType: CupertinoDatePickerWeekType.weekend,
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pressing on the friday day item should trigger automatic scroll back to
+    // saturday.
+    await tester.press(find.text('Fri Jun 13'));
+    await tester.pump();
+
+    expect(selectedDate, DateTime(2025, 6, 14));
+  });
+
+  testWidgets('Calendar type workdays test case 3', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 16);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            weekType: CupertinoDatePickerWeekType.custom,
+            customWeekDays: const <int>[DateTime.monday,DateTime.tuesday,DateTime.wednesday],
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pressing on the friday day item should trigger automatic scroll back to
+    // saturday.
+    await tester.drag(find.text('Sun Jun 15'), const Offset(0.0, 64.0));
+    await tester.pump();
+
+    expect(selectedDate, initialDateTime);
+  });
+
+  testWidgets('Calendar type workdays test case 4', (WidgetTester tester) async {
+    // Set initial date time to a work day.
+    final DateTime initialDateTime = DateTime(2025, 6, 16);
+    DateTime selectedDate = initialDateTime;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            initialDateTime: initialDateTime,
+            weekType: CupertinoDatePickerWeekType.custom,
+            customWeekDays: const <int>[DateTime.monday,DateTime.tuesday,DateTime.wednesday],
+            onDateTimeChanged: (DateTime dateTime) {
+              selectedDate = dateTime;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pressing on the friday day item should trigger automatic scroll back to
+    // saturday.
+    await tester.drag(find.text('Tue Jun 17'), const Offset(0.0, -64.0));
+    await tester.pump();
+
+    expect(selectedDate, DateTime(2025, 6, 17));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/161773
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
