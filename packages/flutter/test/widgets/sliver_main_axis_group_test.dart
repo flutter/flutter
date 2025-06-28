@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/sliver_persistent_header.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
