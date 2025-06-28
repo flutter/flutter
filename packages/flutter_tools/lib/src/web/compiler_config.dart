@@ -146,6 +146,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
+    this.minify = true,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
@@ -155,6 +156,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
+
+  final bool? minify;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -179,6 +182,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       '-O${optimizationLevelForBuildMode(buildMode)}',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
       if (!sourceMaps) '--no-source-maps',
+      if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
     ];
   }
@@ -188,6 +192,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     final Map<String, dynamic> settings = <String, dynamic>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
+      'minify': minify,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
