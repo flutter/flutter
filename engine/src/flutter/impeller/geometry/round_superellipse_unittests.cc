@@ -26,13 +26,9 @@ class SpyPathReceiver : public PathReceiver {
   using CubicSegment =
       std::function<void(const Point&, const Point&, const Point&)>;
 
-  void SpyLineTo(LineSegment line_to) {
-    line_to_ = std::move(line_to);
-  }
+  void SpyLineTo(LineSegment line_to) { line_to_ = std::move(line_to); }
 
-  void SpyCubicTo(CubicSegment cubic_to) {
-    cubic_to_ = std::move(cubic_to);
-  }
+  void SpyCubicTo(CubicSegment cubic_to) { cubic_to_ = std::move(cubic_to); }
 
   // |PathReceiver|
   void MoveTo(const Point& p2, bool will_be_closed) override {}
@@ -52,12 +48,13 @@ class SpyPathReceiver : public PathReceiver {
   }
   // |PathReceiver|
   void Close() override {}
+
  private:
   LineSegment line_to_;
   CubicSegment cubic_to_;
 };
 
-} // namespace
+}  // namespace
 
 namespace testing {
 
@@ -755,7 +752,8 @@ TEST(RoundSuperellipseTest, PointsOutsideOfSharpCorner) {
   EXPECT_FALSE(rr.Contains(Point{147.0, 14.0}));
 }
 
-TEST(RoundSuperellipseTest, PathForRectangularRseWithShapeCornersShouldBeWithinBounds) {
+TEST(RoundSuperellipseTest,
+     PathForRectangularRseWithShapeCornersShouldBeWithinBounds) {
   Rect bounds = Rect::MakeLTRB(34.0f, 242.0f, 766.0f, 358.0f);
   // Regression test for https://github.com/flutter/flutter/issues/170593.
   // The issue was caused by incorrect calculation when building paths for
@@ -772,10 +770,9 @@ TEST(RoundSuperellipseTest, PathForRectangularRseWithShapeCornersShouldBeWithinB
                   .bottom_right = Size(0.0, 0.0),
               });
   SpyPathReceiver receiver;
-  receiver.SpyLineTo([&](const Point& p2) {
-    EXPECT_TRUE(bounds.ContainsInclusive(p2));
-  });
-  receiver.SpyCubicTo([&](const Point& cp1,const Point& cp2, const Point& p2) {
+  receiver.SpyLineTo(
+      [&](const Point& p2) { EXPECT_TRUE(bounds.ContainsInclusive(p2)); });
+  receiver.SpyCubicTo([&](const Point& cp1, const Point& cp2, const Point& p2) {
     EXPECT_TRUE(bounds.ContainsInclusive(p2));
   });
 
