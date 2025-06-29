@@ -493,10 +493,7 @@ class _CarouselViewState extends State<CarouselView> {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
-        onIndexChanged: (int index) {
-          widget.onIndexChanged?.call(index);
-          _controller._setCurrentIndex(index);
-        },
+        onIndexChanged: _handleIndexChanged,
         delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
           return _buildCarouselItem(index);
         }, childCount: widget.children.length),
@@ -511,14 +508,16 @@ class _CarouselViewState extends State<CarouselView> {
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
-      onIndexChanged: (int index) {
-        widget.onIndexChanged?.call(index);
-        _controller._setCurrentIndex(index);
-      },
+      onIndexChanged: _handleIndexChanged,
       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
         return _buildCarouselItem(index);
       }, childCount: widget.children.length),
     );
+  }
+
+  void _handleIndexChanged(int index) {
+    _controller._currentIndex = index;
+    widget.onIndexChanged?.call(index);
   }
 
   @override
@@ -639,7 +638,6 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     markNeedsLayout();
   }
 
-  int get currentIndex => _currentIndex;
   int _currentIndex = 0;
 
   ValueChanged<int>? onIndexChanged;
@@ -910,7 +908,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  int get currentIndex => _currentIndex;
   int _currentIndex = 0;
 
   ValueChanged<int>? onIndexChanged;
@@ -1294,8 +1291,9 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
             )
             : null;
 
-    // Calculate visible center index
-    final double centerOffset = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2;
+    // Calculate the closest item to the center of the viewport.
+    // This is used to determine the current item index for the carousel.
+    final double center = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2;
 
     RenderBox? currentChild = firstChild;
     int? closestIndex;
@@ -1307,9 +1305,9 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       final int index = parentData.index!;
       final double layoutOffset = parentData.layoutOffset ?? 0.0;
       final double itemExtent = _buildItemExtent(index, _currentLayoutDimensions);
-      final double itemCenter = layoutOffset + itemExtent / 2;
+      final double item = layoutOffset + itemExtent / 2;
 
-      final double distance = (centerOffset - itemCenter).abs();
+      final double distance = (center - item).abs();
       if (distance < minDistance) {
         minDistance = distance;
         closestIndex = index;
@@ -1318,7 +1316,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       currentChild = childAfter(currentChild);
     }
 
-    if (closestIndex != null && currentIndex != closestIndex) {
+    if (closestIndex != null && _currentIndex != closestIndex) {
       _currentIndex = closestIndex;
       onIndexChanged?.call(closestIndex);
     }
@@ -1681,27 +1679,14 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 /// carousel list.
 class CarouselController extends ScrollController {
   /// Creates a carousel controller.
-  CarouselController({this.initialItem = 0}) : _currentIndex = initialItem;
+  CarouselController({this.initialItem = 0});
 
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The index of the item aligned with the start of the viewport in the [CarouselView].
-  ///
-  /// - In a horizontal carousel, this refers to the item aligned with the left edge.
-  /// - In a vertical carousel, it refers to the item aligned with the top edge.
-  ///
-  /// Note: This is not necessarily the item at the center of the viewport.
-  /// The behavior is consistent whether or not `flexWeights` are used.
+  /// The current index of the carousel.
   int get currentIndex => _currentIndex;
-  int _currentIndex;
-  // ignore: use_setters_to_change_properties
-  void _setCurrentIndex(int index) {
-    if (_currentIndex == index) {
-      return;
-    }
-    _currentIndex = index;
-  }
+  late int _currentIndex;
 
   _CarouselViewState? _carouselState;
 
