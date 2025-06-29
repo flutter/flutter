@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'common_matchers.dart';
@@ -206,5 +210,35 @@ void main() {
       side: BorderSide(width: 15.0, strokeAlign: BorderSide.strokeAlignCenter),
     );
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
+  });
+
+  testWidgets('RoundedSuperellipseBorder looks correct', (WidgetTester tester) async {
+    Widget containerWithBorder(Size size, BorderRadiusGeometry radius) {
+      return Center(
+        child: Container(
+          height: size.height,
+          width: size.width,
+          decoration: ShapeDecoration(
+            color: const Color.fromARGB(255, 120, 120, 120),
+            shape: RoundedSuperellipseBorder(
+              side: const BorderSide(color: Color.fromARGB(255, 255, 0, 0), width: 4.0),
+              borderRadius: radius,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/170593
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.1.png'),
+    );
   });
 }
