@@ -2662,6 +2662,75 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     ); // thumb
   });
 
+  testWidgets('RawScrollbar.padding accepts EdgeInsetsDirectional', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            minOverscrollLength: 8,
+            thumbVisibility: true,
+            padding: const EdgeInsetsDirectional.only(
+              start: 20.0,
+              top: 40.0,
+              end: 60.0,
+              bottom: 80.0,
+            ),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(734.0, 40.0, 740.0, 520.0)) // track  
+        ..rect(rect: const Rect.fromLTRB(734.0, 40.0, 740.0, 61.0)), // thumb
+    );
+
+    // Test with RTL direction
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            minOverscrollLength: 8,
+            thumbVisibility: true,
+            padding: const EdgeInsetsDirectional.only(
+              start: 20.0,
+              top: 40.0,
+              end: 60.0,
+              bottom: 80.0,
+            ),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(60.0, 40.0, 66.0, 520.0)) // track
+        ..rect(rect: const Rect.fromLTRB(60.0, 40.0, 66.0, 61.0)), // thumb
+    );
+  });
+
   testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (
     WidgetTester tester,
   ) async {
