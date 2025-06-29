@@ -314,8 +314,8 @@ class RoundSuperellipseBuilder {
   void AddQuadrant(const RoundSuperellipseParam::Quadrant& param,
                    bool reverse,
                    Point scale_sign = Point(1, 1)) {
-    auto transform = Matrix::MakeTranslateScale(param.signed_scale.Abs() * scale_sign,
-                                                param.offset);
+    auto transform = Matrix::MakeTranslateScale(
+        param.signed_scale.Abs() * scale_sign, param.offset);
     if (param.top.se_n < 2 || param.right.se_n < 2) {
       receiver_.LineTo(transform * (param.top.offset +
                                     Point(param.top.se_a, param.top.se_a)));
