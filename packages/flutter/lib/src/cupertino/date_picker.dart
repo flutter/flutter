@@ -308,6 +308,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
+    this.customWeekDays = fullWeek,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
        assert(
@@ -362,6 +363,11 @@ class CupertinoDatePicker extends StatefulWidget {
              mode == CupertinoDatePickerMode.dateAndTime ||
              mode == CupertinoDatePickerMode.time,
          'showTimeSeparator is only supported in time or dateAndTime modes',
+       ),
+       assert(
+         customWeekDays.isNotEmpty &&
+             customWeekDays.every((int day) => day >= DateTime.monday && day <= DateTime.sunday),
+         'custom days should not be empty and should contains only days between 1 and 7.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -454,6 +460,10 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to false.
   final bool showTimeSeparator;
 
+  /// A list of custom days of the week to display in the date picker when
+  /// [weekType] is set to [CupertinoDatePickerWeekType.custom].
+  final List<int> customWeekDays;
+
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
   /// Defaults to a value that matches the default iOS date picker wheel.
@@ -500,6 +510,29 @@ class CupertinoDatePicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+
+  /// Static list of weekdays containing only weekends
+  static const List<int> weekends = <int>[DateTime.saturday, DateTime.sunday];
+
+  /// Static list of weekdays containing only work days
+  static const List<int> workDays = <int>[
+    DateTime.monday,
+    DateTime.tuesday,
+    DateTime.wednesday,
+    DateTime.thursday,
+    DateTime.friday,
+  ];
+
+  /// Static list of weekdays containing all days of the week
+  static const List<int> fullWeek = <int>[
+    DateTime.monday,
+    DateTime.tuesday,
+    DateTime.wednesday,
+    DateTime.thursday,
+    DateTime.friday,
+    DateTime.saturday,
+    DateTime.sunday,
+  ];
 
   @override
   State<StatefulWidget> createState() {
@@ -729,6 +762,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     dateController = FixedExtentScrollController();
 
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
+
+    _handleCustomCalendarInitialDateTime();
   }
 
   void _handleSystemFontsChange() {
@@ -738,6 +773,18 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       // new system fonts.
       estimatedColumnWidths.clear();
     });
+  }
+
+  void _handleCustomCalendarInitialDateTime() {
+    int daysToBeAdded = 0;
+    if (!widget.customWeekDays.contains(initialDateTime.weekday)) {
+      daysToBeAdded = widget.customWeekDays.first - initialDateTime.weekday;
+    }
+    initialDateTime = DateTime(
+      initialDateTime.year,
+      initialDateTime.month,
+      initialDateTime.day + daysToBeAdded,
+    );
   }
 
   @override
@@ -811,8 +858,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     if (isDateInvalid) {
       return;
+    } else if (!widget.customWeekDays.contains(selected.weekday)) {
+      return;
     }
-
     widget.onDateTimeChanged(selected);
   }
 
@@ -858,6 +906,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             initialDateTime.day + index + 1,
           );
 
+          final bool isValidDate = widget.customWeekDays.contains(rangeStart.weekday);
           final DateTime now = DateTime.now();
 
           if (widget.minimumDate?.isBefore(rangeEnd) == false) {
@@ -872,7 +921,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
                   ? localizations.todayLabel
                   : localizations.datePickerMediumDate(rangeStart);
 
-          return itemPositioningBuilder(context, Text(dateText, style: _themeTextStyle(context)));
+          return itemPositioningBuilder(
+            context,
+            Text(dateText, style: _themeTextStyle(context, isValid: isValidDate)),
+          );
         },
         selectionOverlay: selectionOverlay,
       ),
@@ -1089,6 +1141,23 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
+  void _checkOnCustomDaysDisplay() {
+    final DateTime selectedDate = selectedDateTime;
+    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
+
+    if (!widget.customWeekDays.contains(selectedDate.weekday)) {
+      const int daysThreshold = 1;
+      final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
+
+      _scrollToDate(
+        targetDate,
+        selectedDate,
+        minCheck,
+        focusedIndex: dateController.selectedItem + daysThreshold,
+      );
+    }
+  }
+
   // One or more pickers have just stopped scrolling.
   void _pickerDidStopScrolling() {
     // Call setState to update the greyed out date/hour/minute/meridiem.
@@ -1105,6 +1174,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
+    _checkOnCustomDaysDisplay();
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
@@ -1112,12 +1182,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
   }
 
-  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck) {
+  void _scrollToDate(DateTime newDate, DateTime fromDate, bool minCheck, {int? focusedIndex}) {
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year ||
           fromDate.month != newDate.month ||
           fromDate.day != newDate.day) {
-        _animateColumnControllerToItem(dateController, selectedDayFromInitial);
+        _animateColumnControllerToItem(dateController, focusedIndex ?? selectedDayFromInitial);
       }
 
       if (fromDate.hour != newDate.hour) {
