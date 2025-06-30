@@ -1024,7 +1024,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       useMaterial3: useMaterial3,
     );
 
-    final TextStyle? effectiveTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
+    final TextStyle? baseTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
+    final Color disabledColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.38);
+    final TextStyle? effectiveTextStyle =
+        widget.enabled
+            ? baseTextStyle
+            : baseTextStyle?.copyWith(color: disabledColor) ?? TextStyle(color: disabledColor);
 
     MenuStyle? effectiveMenuStyle = widget.menuStyle ?? theme.menuStyle ?? defaults.menuStyle!;
 
