@@ -181,12 +181,7 @@ object DependencyVersionChecker {
         project: Project,
         it: Variant
     ): MinSdkVersion {
-        val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
-        return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
-            MinSdkVersion(it.name, it.minSdk.apiLevel)
-        } else {
-            MinSdkVersion(it.name, it.minSdkVersion.apiLevel)
-        }
+        return MinSdkVersion(it.name, it.minSdk.apiLevel)
     }
 
     @VisibleForTesting internal fun getErrorMessage(
