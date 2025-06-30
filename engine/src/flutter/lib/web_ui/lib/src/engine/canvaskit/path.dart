@@ -114,9 +114,7 @@ class CkPath implements DisposablePath {
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    rsuperellipse.toPath(baseObject: this);
   }
 
   @override
