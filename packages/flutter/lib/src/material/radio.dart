@@ -416,6 +416,7 @@ class Radio<T> extends StatefulWidget {
   /// {@endtemplate}
   final bool? enabled;
 
+  /// {@template flutter.material.Radio.backgroundColor}
   /// The color of the background of the radio button, in all [WidgetState]s.
   ///
   /// Resolves in the following states:
@@ -425,6 +426,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   ///
   /// If null, then it is transparent in all states.
+  /// {@endtemplate}
   final WidgetStateProperty<Color?>? backgroundColor;
 
   /// The side for the circular border of the radio button, in all
@@ -658,11 +660,14 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.fillColor?.resolve(inactiveStates);
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
-    // TODO(ValentinVignal): Add backgroundColor to RadioThemeData.
     final Color activeBackgroundColor =
-        widget.backgroundColor?.resolve(activeStates) ?? Colors.transparent;
+        widget.backgroundColor?.resolve(activeStates) ??
+        radioTheme.backgroundColor?.resolve(activeStates) ??
+        Colors.transparent;
     final Color inactiveBackgroundColor =
-        widget.backgroundColor?.resolve(inactiveStates) ?? Colors.transparent;
+        widget.backgroundColor?.resolve(inactiveStates) ??
+        radioTheme.backgroundColor?.resolve(inactiveStates) ??
+        Colors.transparent;
 
     final Set<MaterialState> focusedStates =
         widget.toggleableState.states..add(MaterialState.focused);
