@@ -442,6 +442,10 @@ static void gesture_zoom_end_cb(FlView* self) {
 }
 
 static GdkGLContext* create_context_cb(FlView* self) {
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    return nullptr;
+  }
+
   FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
   g_autoptr(GError) error = nullptr;
   if (!fl_opengl_manager_create_contexts(
@@ -456,6 +460,11 @@ static GdkGLContext* create_context_cb(FlView* self) {
 }
 
 static void realize_cb(FlView* self) {
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    setup_cursor(self);
+    return;
+  }
+
   fl_compositor_setup(fl_engine_get_compositor(self->engine));
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
@@ -481,10 +490,6 @@ static void realize_cb(FlView* self) {
   setup_cursor(self);
 
   handle_geometry_changed(self);
-}
-
-static void secondary_realize_cb(FlView* self) {
-  setup_cursor(self);
 }
 
 static void paint_background(FlView* self, cairo_t* cr) {
@@ -529,7 +534,9 @@ static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
 }
 
 static void unrealize_cb(FlView* self) {
-  g_autoptr(GError) error = nullptr;
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    return;
+  }
 
   fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
 
@@ -814,8 +821,6 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   setup_engine(self);
 
-  g_signal_connect_swapped(self->render_area, "realize",
-                           G_CALLBACK(secondary_realize_cb), self);
   return self;
 }
 
