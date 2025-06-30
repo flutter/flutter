@@ -30,6 +30,7 @@ const kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
+  '--no-sandbox',
 ];
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
@@ -537,7 +538,6 @@ void main() {
           ...kChromeArgs,
           '--headless',
           '--disable-gpu',
-          '--no-sandbox',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -623,7 +623,6 @@ void main() {
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -657,7 +656,6 @@ void main() {
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -695,7 +693,6 @@ void main() {
             ...kChromeArgs,
             '--headless',
             '--disable-gpu',
-            '--no-sandbox',
             '--window-size=2400,1800',
             'example_url',
           ],
