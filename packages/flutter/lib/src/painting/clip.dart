@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/rendering.dart';
 library;
 
-import 'dart:ui' show Canvas, Clip, Paint, Path, RRect, RSuperellipse, Rect, VoidCallback;
+import 'dart:ui' show Canvas, Clip, Paint, Path, RRect, RSuperellipse, Rect, VoidCallback, RSuperellipseCache;
 
 /// Clip utilities used by [PaintingContext].
 abstract class ClipContext {
@@ -72,10 +72,11 @@ abstract class ClipContext {
     RSuperellipse rse,
     Clip clipBehavior,
     Rect bounds,
-    VoidCallback painter,
-  ) {
+    VoidCallback painter, {
+    RSuperellipseCache? cache,
+  }) {
     _clipAndPaint(
-      (bool doAntiAlias) => canvas.clipRSuperellipse(rse, doAntiAlias: doAntiAlias),
+      (bool doAntiAlias) => canvas.clipRSuperellipse(rse, doAntiAlias: doAntiAlias, cache: cache),
       clipBehavior,
       bounds,
       painter,
