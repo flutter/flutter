@@ -619,18 +619,16 @@ class CustomDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
     }
 
     if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
       // launch the readLogs command
-      return _processUtils.start(_config.readLogsCommand!).then((Process process) {
-        _globalLogReaderProcess = process;
-        _globalLogReader.listenToProcessOutput(process);
-        return _globalLogReader;
-      });
+      _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
+      _globalLogReader.listenToProcessOutput(_globalLogReaderProcess);
+      return _globalLogReader;
     }
 
     return _globalLogReader;
