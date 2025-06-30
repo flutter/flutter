@@ -386,6 +386,7 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
         enableFlutterGpu: true,
         dartEntrypointArgs: <String>[],
       ),
