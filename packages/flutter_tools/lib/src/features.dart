@@ -72,13 +72,19 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
   ];
+
+  /// All current Flutter feature flags that can be configured.
+  ///
+  /// [Feature.configSetting] is not `null`.
+  Iterable<Feature> get allConfigurableFeatures {
+    return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
 }
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures =>
-    featureFlags.allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(

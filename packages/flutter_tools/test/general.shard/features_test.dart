@@ -457,4 +457,7 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
 
   @override
   List<Feature> get allFeatures => throw UnimplementedError();
+
+  @override
+  List<Feature> get allConfigurableFeatures => throw UnimplementedError();
 }
