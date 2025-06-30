@@ -788,7 +788,7 @@ abstract class SemanticRole {
     }
 
     if (semanticsObject.isLocaleDirty) {
-      _updateLocale();
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
   }
 
@@ -822,7 +822,8 @@ abstract class SemanticRole {
 
   void _updateLocale() {
     final String locale = semanticsObject.locale?.toString() ?? '';
-    if (locale.isEmpty) {
+    final isSameAsParent = semanticsObject.locale == semanticsObject.parent?.locale;
+    if (locale.isEmpty || isSameAsParent) {
       removeAttribute('lang');
       return;
     }

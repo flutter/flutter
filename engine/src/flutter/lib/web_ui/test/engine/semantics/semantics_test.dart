@@ -5419,7 +5419,7 @@ void _testLandmarks() {
 }
 
 void _testLocale() {
-  test('nodes with complementary role', () {
+  test('nodes with locale update correctly', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5430,6 +5430,33 @@ void _testLocale() {
         id: 0,
         locale: const ui.Locale('es-MX'),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.getAttribute('lang'), 'es-MX');
+  });
+
+  test('nodes with same locale as parent does not set lang', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        locale: const ui.Locale('es-MX'),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            locale: const ui.Locale('es-MX'),
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          ),
+        ],
       );
       tester.apply();
       return tester.getSemanticsObject(0);

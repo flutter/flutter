@@ -532,7 +532,7 @@ class Localizations extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// Whether this is the main localizations with for that represent the app's
+  /// Whether this is the main localizations widget that represents the app's
   /// locale.
   final bool isApplicationLevel;
 
