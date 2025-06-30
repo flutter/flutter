@@ -151,6 +151,9 @@ void runSemanticsTests() {
   group('landmarks', () {
     _testLandmarks();
   });
+  group('forms', () {
+    _testForms();
+  });
 }
 
 void _testSemanticRole() {
@@ -5394,6 +5397,67 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.region);
     expect(object.element.getAttribute('role'), 'region');
     expect(object.element.getAttribute('aria-label'), 'Header 1');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testForms() {
+  test('nodes with form role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.form,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    tester.expectSemantics('''<form id="flt-semantic-node-0" ></form>''');
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.form);
+  });
+
+  test('form with children ', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
+      transform: Matrix4.identity().toFloat64(),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          role: ui.SemanticsRole.form,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(isTextField: true),
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0">
+  <form id="flt-semantic-node-1">
+    <sem id="flt-semantic-node-2">
+      <input />
+    </sem>
+  </form>
+</sem>''');
+    final SemanticsObject object = tester.getSemanticsObject(1);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.form);
   });
 
   semantics().semanticsEnabled = false;
