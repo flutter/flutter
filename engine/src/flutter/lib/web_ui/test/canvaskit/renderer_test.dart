@@ -46,7 +46,8 @@ class TestViewRasterizer extends ViewRasterizer {
   List<LayerTree> treesRendered = <LayerTree>[];
 
   @override
-  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
+  DisplayCanvasFactory<DisplayCanvas> get displayFactory =>
+      DisplayCanvasFactory(createCanvas: () => throw UnimplementedError());
 
   @override
   void prepareToDraw() {
@@ -72,6 +73,19 @@ void testMain() {
 
     tearDown(() {
       CanvasKitRenderer.instance.debugResetRasterizer();
+    });
+
+    test('Uses MultiSurfaceRasterizer by default', () {
+      expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<MultiSurfaceRasterizer>());
+    });
+
+    test('Can be configured to use OffscreenCanvasRasterizer', () {
+      debugOverrideJsConfiguration(
+        <String, Object?>{'canvasKitUseOffscreenCanvas': true}.jsify() as JsFlutterConfiguration?,
+      );
+      addTearDown(() => debugOverrideJsConfiguration(null));
+      CanvasKitRenderer.instance.debugResetRasterizer();
+      expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<OffscreenCanvasRasterizer>());
     });
 
     test('always renders most recent picture and skips intermediate pictures', () async {

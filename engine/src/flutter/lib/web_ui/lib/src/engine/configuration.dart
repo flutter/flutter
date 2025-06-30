@@ -258,6 +258,15 @@ class FlutterConfiguration {
     return CanvasKitVariant.values.byName(variant);
   }
 
+  /// If set to `true`, causes CanvasKit to use a single OffscreenCanvas to
+  /// render instead of multiple on-screen canvases each with their own
+  /// WebGL context.
+  bool get canvasKitUseOffscreenCanvas =>
+      _configuration?.canvasKitUseOffscreenCanvas ?? _defaultCanvasKitUseOffscreenCanvas;
+  static const bool _defaultCanvasKitUseOffscreenCanvas = bool.fromEnvironment(
+    'FLUTTER_WEB_CANVASKIT_USE_OFFSCREENCANVAS',
+  );
+
   /// If set to true, forces CPU-only rendering in CanvasKit (i.e. the engine
   /// won't use WebGL).
   ///
@@ -269,6 +278,8 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
   );
 
+  /// If set to `true`, forces CanvasKit to use one or more <canvas> elements
+  /// to render. This setting takes precedence over [canvasKitUseOffscreenCanvas].
   bool get canvasKitForceMultiSurfaceRasterizer =>
       _configuration?.canvasKitForceMultiSurfaceRasterizer ??
       _defaultCanvasKitForceMultiSurfaceRasterizer;
@@ -354,6 +365,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external String? get canvasKitBaseUrl;
   external String? get canvasKitVariant;
   external bool? get canvasKitForceCpuOnly;
+  external bool? get canvasKitUseOffscreenCanvas;
   external bool? get canvasKitForceMultiSurfaceRasterizer;
   external double? get canvasKitMaximumSurfaces;
   external bool? get debugShowSemanticsNodes;
