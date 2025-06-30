@@ -337,13 +337,12 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// Called whenever the current item index changes, either due to
-  /// user scrolling or programmatic navigation.
+  /// Called when the current item index changes, including the initial layout.
   ///
-  /// This callback provides the updated index of the currently item.
+  /// This is triggered during layout when the item closest to the
+  /// viewport center changes, either due to user scroll or programmatic movement.
   ///
-  /// It is only called when the index actually changes, not on every scroll update.
-  ///
+  /// It will not be called repeatedly unless the index truly changes.
   /// Example:
   /// ```dart
   ///
