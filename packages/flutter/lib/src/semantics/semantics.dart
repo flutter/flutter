@@ -3389,6 +3389,26 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
+  Matrix4 calculateGlobalTransform(SemanticsNode node) {
+    Matrix4 globalTransform = Matrix4.identity();
+    SemanticsNode? current = node;
+
+    // Walk up the semantics tree to accumulate transforms
+    while (current != null) {
+      if (current.transform != null) {
+        globalTransform = current.transform!.multiplied(globalTransform);
+      }
+      current = current.semanticsParent;
+    }
+
+    return globalTransform;
+  }
+
+  Rect getGlobalRect(SemanticsNode node) {
+    Matrix4 globalTransform = calculateGlobalTransform(node);
+    return MatrixUtils.transformRect(globalTransform, node.rect);
+  }
+
   /// Returns a summary of the semantics for this node.
   ///
   /// If this node has [mergeAllDescendantsIntoThisNode], then the returned data
@@ -3544,51 +3564,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       });
     }
 
-    if (identifier.endsWith('parent')) {
-      final SemanticsNode? overlayPortalChild =
-          owner!._overlayPortalChildNodes[identifier.split(' ')[0]];
-      if (overlayPortalChild != null) {
-        _redepthChild(overlayPortalChild);
-      }
-    }
-
-    _SemanticsGeometry? geometry;
-    if (identifier.endsWith('child')) {
-      semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
-      geometry = _SemanticsGeometry.computeChildGeometry(
-        parentPaintClipRect: semanticsParent!.parentPaintClipRect,
-        parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: semanticsParent!,
-        child: this,
-      );
-    }
-
-    // print('>>>>>>>>>>>>>>>>>>>>>>> id: $id, Local rect: $rect');
-    // bool isInOverlayPortalSubtree = false;
-    // SemanticsNode? current = this;
-    // while (current != null) {
-    //   if (current.identifier.endsWith('child')) {
-    //     isInOverlayPortalSubtree = true;
-    //     break;
-    //   }
-    //   current = current.parent;
-    // }
-    // if (isInOverlayPortalSubtree) {
-    //   Rect globalRect = geometry?.rect ?? rect;
-    //   SemanticsNode? current = this;
-    //   while (current != null) {
-    //     final Matrix4? transform = geometry?.transform;
-    //     if (transform != null) {
-    //       globalRect = MatrixUtils.transformRect(transform, globalRect);
-    //     }
-    //     current = current.semanticsParent;
-    //   }
-    //   print(
-    //     '>>>>>>>>>>>>>>>>>>>>>>> id: $id, geometry?.rect is null? ${geometry == null} Global rect: $globalRect',
-    //   );
-    // }
-
     return SemanticsData(
       flagsCollection: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
@@ -3600,8 +3575,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       attributedHint: attributedHint,
       tooltip: tooltip,
       textDirection: textDirection,
-      rect: geometry?.rect ?? rect,
-      transform: geometry?.transform ?? transform,
+      rect: rect,
+      transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
       scrollChildCount: scrollChildCount,
@@ -3671,7 +3646,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || getSemanticsData().identifier.endsWith('parent'));
+    assert(_dirty || identifier.endsWith('parent'));
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -3712,6 +3687,68 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
+    if (data.identifier.endsWith('parent')) {
+      final SemanticsNode? overlayPortalChild =
+          owner!._overlayPortalChildNodes[identifier.split(' ')[0]];
+      if (overlayPortalChild != null) {
+        print(
+          'overlayportalParent id: $id overlayPortalChild id: ${overlayPortalChild.id} depth: ${overlayPortalChild.depth}',
+        );
+      }
+    }
+
+    _SemanticsGeometry? geometry;
+    if (data.identifier.endsWith('child')) {
+      // print(
+      //   'owner!._overlayPortalParentNodes: ${owner!._overlayPortalParentNodes.map((key, value) => MapEntry(key, value.id))}',
+      // );
+      // print('计算SemanticsGeometry!!!!: current node label: $label');
+      semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+
+      // print(
+      //   'PARENT $semanticsParent SEMANTICS CLIP RECT: ${semanticsParent!.parentSemanticsClipRect}',
+      // );
+      geometry = _SemanticsGeometry.computeChildGeometry(
+        parentPaintClipRect: semanticsParent!.parentPaintClipRect,
+        parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
+        parentTransform: null, // semanticsParent!.transform,
+        parent: semanticsParent!,
+        child: this,
+      );
+      transform = geometry.transform;
+      rect = geometry.rect;
+      parentPaintClipRect = geometry.paintClipRect;
+      parentSemanticsClipRect = geometry.semanticsClipRect;
+    }
+
+    // print('>>>>>>>>>>>>>>>>>>>>>>> id: $id, Local rect: $rect');
+    // bool isInOverlayPortalSubtree = false;
+    // SemanticsNode? current = this;
+    // while (current != null) {
+    //   if (current.identifier.endsWith('child')) {
+    //     isInOverlayPortalSubtree = true;
+    //     break;
+    //   }
+    //   current = current.parent;
+    // }
+    // Rect globalRect = geometry!.rect;
+    // SemanticsNode? current = this;
+    // while (current != null) {
+    //   final Matrix4? transform = geometry!.transform;
+    //   if (transform != null) {
+    //     globalRect = MatrixUtils.transformRect(transform, globalRect);
+    //   }
+    //   current = current.semanticsParent;
+    // }
+    Rect globalRect = getGlobalRect(this);
+    print('>>>>>>>>> id: $id, Global rect: $globalRect <<<<<<<<<<');
+    print(
+      'Global rect removing scaling: ${Rect.fromLTRB(globalRect.left / 3.5, globalRect.top / 3.5, globalRect.right / 3.5, globalRect.bottom / 3.5)}',
+    );
+    print('  local rect: ${rect}');
+    // print('geometry transform: \n$transform');
+    // print('>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+
     // bool isInOverlayPortalSubtree = false;
     // SemanticsNode? current = this;
     // while (current != null) {
@@ -3744,7 +3781,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       id: id,
       flags: data.flagsCollection,
       actions: data.actions,
-      rect: data.rect,
+      rect: geometry?.rect ?? data.rect,
       identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
@@ -3768,7 +3805,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: data.transform?.storage ?? _kIdentityTransform,
+      transform: geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -3800,7 +3837,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       updatedChildren.add(child);
     }
     if (isOverlayPortalParent) {
-      String parentIdentifier = getSemanticsData().identifier.split(' ')[0];
+      String parentIdentifier = identifier.split(' ')[0];
       if (owner != null && owner!._overlayPortalChildNodes.containsKey(parentIdentifier)) {
         SemanticsNode overlayChildNode = owner!._overlayPortalChildNodes[parentIdentifier]!;
         if (overlayChildNode.attached) {
@@ -3808,6 +3845,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
       }
     }
+    print('parent id: $id, updatedChildren: ${updatedChildren?.map((e) => e.id)}');
     return updatedChildren;
   }
 
@@ -4156,7 +4194,7 @@ final class _SemanticsGeometry {
       final int fromDepth = childSemanticsNode.depth;
       final int toDepth = parentSemanticsNode.depth;
 
-      print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
+      // print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
       if (fromDepth >= toDepth) {
         assert(
           childSemanticsNode.parent != null,
@@ -4181,12 +4219,12 @@ final class _SemanticsGeometry {
 
     // Calculate transform.
     assert(childToCommonAncestor.length >= 2);
-    print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
+    // print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
     for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
       transform.multiply(childToCommonAncestor[i].transform ?? Matrix4.identity());
       // childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
     }
-    print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
+    // print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
         transform.multiply(parentToCommonAncestorTransform);
@@ -4710,18 +4748,16 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.forEach(updatedVisitedNodes.add);
     } else {
       for (final SemanticsNode node in visitedNodes) {
-        final SemanticsData data = node.getSemanticsData();
-
-        if (data.identifier.isEmpty) {
+        if (node.identifier.isEmpty) {
           // If the node has no identifier, it is not an overlay portal node.
           updatedVisitedNodes.add(node);
           continue;
         }
 
-        final String identifier = data.identifier.split(' ')[0];
+        final String identifier = node.identifier.split(' ')[0];
 
-        final bool isOverlayPortalParent = data.identifier.endsWith('parent');
-        final bool isOverlayPortalChild = data.identifier.endsWith('child');
+        final bool isOverlayPortalParent = node.identifier.endsWith('parent');
+        final bool isOverlayPortalChild = node.identifier.endsWith('child');
 
         if (isOverlayPortalParent) {
           // If the node is an overlay portal parent, we need to update the parent node.
@@ -4736,6 +4772,15 @@ class SemanticsOwner extends ChangeNotifier {
 
         if (isOverlayPortalChild) {
           _overlayPortalChildNodes[identifier] = node;
+          // final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
+
+          final SemanticsNode parent = node.parent!;
+          parent._dropChild(node);
+          final SemanticsNode? actualParentNode = _overlayPortalParentNodes[identifier];
+          actualParentNode?._adoptChild(node);
+          // if (parentNode != null) {
+          //   parentNode._redepthChild(node);
+          // }
         }
 
         updatedVisitedNodes.add(node);
@@ -4764,8 +4809,9 @@ class SemanticsOwner extends ChangeNotifier {
     // print('--------------------------------------------------');
 
     for (final SemanticsNode node in updatedVisitedNodes) {
+      print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id)}');
       assert(
-        node.parent?._dirty != true || node.getSemanticsData().identifier.endsWith('parent'),
+        node.parent?._dirty != true || node.identifier.endsWith('parent'),
       ); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -4777,7 +4823,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || node.getSemanticsData().identifier.endsWith('parent')) && node.attached) {
+      if ((node._dirty || node.identifier.endsWith('parent')) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
