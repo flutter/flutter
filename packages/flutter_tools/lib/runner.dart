@@ -222,6 +222,7 @@ Future<int> _handleToolError(
       final BufferLogger logger = BufferLogger(
         terminal: globals.terminal,
         outputPreferences: globals.outputPreferences,
+        verbose: true /* Capture flutter doctor -v */,
       );
 
       final DoctorText doctorText = DoctorText(logger);

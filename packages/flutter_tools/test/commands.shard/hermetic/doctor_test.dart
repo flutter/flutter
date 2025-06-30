@@ -444,7 +444,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      logger = BufferLogger.test();
+      logger = BufferLogger.test(verbose: true);
     });
 
     testUsingContext(
@@ -795,6 +795,7 @@ void main() {
       },
     );
   });
+
   testUsingContext(
     'If android workflow is disabled, AndroidStudio validator is not included',
     () {
