@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/windows/accessibility_plugin.h"
 #include "flutter/shell/platform/windows/compositor.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
+#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
@@ -157,6 +158,11 @@ class FlutterWindowsEngine {
   IncomingMessageDispatcher* message_dispatcher() {
     return message_dispatcher_.get();
   }
+
+  DisplayMonitor* display_monitor() { return display_monitor_.get(); }
+
+  // Notifies the engine about a display update.
+  void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
 
   TaskRunner* task_runner() { return task_runner_.get(); }
 
@@ -411,6 +417,9 @@ class FlutterWindowsEngine {
   // a view to the engine or after removing a view from the engine.
   mutable std::shared_mutex views_mutex_;
 
+  // The display monitor.
+  std::unique_ptr<DisplayMonitor> display_monitor_;
+
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
 
@@ -498,6 +507,13 @@ class FlutterWindowsEngine {
   std::shared_ptr<egl::ProcTable> gl_;
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
+
+  // Handles display-related window messages.
+  bool HandleDisplayMonitorMessage(HWND hwnd,
+                                   UINT message,
+                                   WPARAM wparam,
+                                   LPARAM lparam,
+                                   LRESULT* result);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };
