@@ -1132,6 +1132,13 @@ class ArtifactUpdater {
     return _downloadArchive(message, url, location, _operatingSystemUtils.unpack);
   }
 
+  /// Download a file from the given [url] and copy it to [location].
+  Future<void> downloadFile(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, (File file, Directory dir) {
+      file.copySync(dir.childFile(file.basename).path);
+    });
+  }
+
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(
     String message,

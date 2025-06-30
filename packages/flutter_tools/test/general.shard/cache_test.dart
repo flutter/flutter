@@ -1031,6 +1031,43 @@ void main() {
     );
   });
 
+  testWithoutContext('FlutterEngineStamp fetches engine_stamp.json', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+    );
+    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
+    final FlutterEngineStamp engineStamp = FlutterEngineStamp(cache, BufferLogger.test());
+
+    final List<String> messages = <String>[];
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
+    artifactUpdater.onDownloadFile = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+    };
+
+    await engineStamp.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(messages, <String>['Downloading engine_stamp...']);
+
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/engine_stamp.json',
+    ]);
+    expect(locations, <String>['/bin/cache']);
+    // file copy is done by the real uploader; not the fake.
+  });
+
   testWithoutContext(
     'LegacyCanvasKitRemover removes old canvaskit artifacts if they exist',
     () async {
@@ -1453,6 +1490,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipArchive;
   void Function(String, Uri, Directory)? onDownloadZipTarball;
+  void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
@@ -1462,6 +1500,11 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   @override
   Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
+  }
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    onDownloadFile?.call(message, url, location);
   }
 
   @override
