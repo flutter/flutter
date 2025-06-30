@@ -1049,6 +1049,35 @@ void main() {
     final SemanticsNode node = SemanticsNode()..indexInParent = 10;
     expect(node.toString(), contains('indexInParent: 10'));
   });
+
+  test('SemanticsConfiguration can set labelParts and interacts with label/attributedLabel', () {
+    final SemanticsConfiguration config = SemanticsConfiguration();
+
+    expect(config.labelParts, isNull);
+    config.labelParts = <String>['Part 1', 'Part 2'];
+    expect(config.labelParts, equals(<String>['Part 1', 'Part 2']));
+    expect(config.label, equals('Part 1 Part 2'));
+    expect(config.attributedLabel.string, equals('Part 1 Part 2'));
+
+    config.label = 'Original';
+    config.labelParts = <String>['Priority', 'Parts'];
+    expect(config.label, equals('Priority Parts'));
+
+    config.label = 'New Label';
+    expect(config.labelParts, isNull);
+    expect(config.label, equals('New Label'));
+
+    config.labelParts = <String>['Test', 'Parts'];
+    config.attributedLabel = AttributedString('Attributed');
+    expect(config.labelParts, isNull);
+    expect(config.label, equals('Attributed'));
+
+    config.attributedLabel = AttributedString('Existing');
+    expect(
+      () => config.labelParts = <String>['Part 1', 'Part 2'],
+      throwsA(isA<AssertionError>()),
+    );
+  });
 }
 
 class TestRender extends RenderProxyBox {

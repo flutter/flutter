@@ -8,6 +8,7 @@ import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
+import 'label_and_value.dart';
 import 'semantics.dart';
 
 /// Text editing used by accesibility mode.
@@ -214,6 +215,8 @@ class SemanticTextField extends SemanticRole {
   /// different from the host [element].
   late final DomHTMLElement editableElement;
 
+  AriaLabelHelper? _ariaHelper;
+
   @override
   void updateValidationResult() {
     SemanticRole.updateAriaInvalid(editableElement, semanticsObject.validationResult);
@@ -323,12 +326,19 @@ class SemanticTextField extends SemanticRole {
       SemanticsTextEditingStrategy._instance?.activate(this);
     }
 
-    if (semanticsObject.hasLabel) {
+    if (semanticsObject.hasLabel || semanticsObject.hasLabelParts) {
       if (semanticsObject.isLabelDirty) {
-        editableElement.setAttribute('aria-label', semanticsObject.label!);
+        _ariaHelper ??= AriaLabelHelper(
+          semanticsObject: semanticsObject,
+          targetElement: editableElement,
+          containerElement: element,
+          idPrefix: 'textfield-label',
+        );
+
+        _ariaHelper!.updateLabel(semanticsObject.label);
       }
     } else {
-      editableElement.removeAttribute('aria-label');
+      _ariaHelper?.cleanUp();
     }
 
     if (semanticsObject.isRequirable) {
@@ -365,6 +375,7 @@ class SemanticTextField extends SemanticRole {
   @override
   void dispose() {
     super.dispose();
+    _ariaHelper?.cleanUp();
     SemanticsTextEditingStrategy._instance?.deactivate(this);
   }
 }

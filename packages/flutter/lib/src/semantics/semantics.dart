@@ -844,6 +844,7 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.labelParts,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -907,6 +908,16 @@ class SemanticsData with Diagnosticable {
   ///
   /// See also [label], which exposes just the raw text.
   final AttributedString attributedLabel;
+
+  /// A list of strings that represent separate parts of the label for accessibility.
+  ///
+  /// On web platforms, this generates an `aria-labelledby` attribute that
+  /// references multiple DOM elements containing each label part. On mobile
+  /// platforms (iOS VoiceOver, Android TalkBack), the parts are automatically
+  /// concatenated into a single accessible string.
+  ///
+  /// This field is mutually exclusive with [attributedLabel].
+  final List<String>? labelParts;
 
   /// A textual description for the current value of the node.
   ///
@@ -1379,6 +1390,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.identifier,
     this.label,
     this.attributedLabel,
+    this.labelParts,
     this.value,
     this.attributedValue,
     this.increasedValue,
@@ -1419,6 +1431,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDismiss,
     this.customSemanticsActions,
   }) : assert(
+         labelParts == null || attributedLabel == null,
+         'Only one of labelParts or attributedLabel should be provided',
+       ),
+
+       assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
        ),
@@ -1730,6 +1747,16 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    is exposed in TalkBack and VoiceOver.
   ///  * [label] for a plain string version of this property.
   final AttributedString? attributedLabel;
+
+  /// A list of strings that represent separate parts of the label for accessibility.
+  ///
+  /// On web platforms, this generates an `aria-labelledby` attribute that
+  /// references multiple DOM elements containing each label part. On mobile
+  /// platforms (iOS VoiceOver, Android TalkBack), the parts are automatically
+  /// concatenated into a single accessible string.
+  ///
+  /// This field is mutually exclusive with [attributedLabel].
+  final List<String>? labelParts;
 
   /// Provides a textual description of the value of the widget.
   ///
@@ -2939,6 +2966,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
   AttributedString get attributedLabel => _attributedLabel;
   AttributedString _attributedLabel = _kEmptyConfig.attributedLabel;
 
+  /// A list of strings that represent separate parts of the label for accessibility.
+  ///
+  /// On web platforms, this generates an `aria-labelledby` attribute that
+  /// references multiple DOM elements containing each label part. On mobile
+  /// platforms (iOS VoiceOver, Android TalkBack), the parts are automatically
+  /// concatenated into a single accessible string.
+  ///
+  /// This field is mutually exclusive with [attributedLabel].
+  List<String>? get labelParts => _labelParts;
+  List<String>? _labelParts = _kEmptyConfig.labelParts;
+
   /// A textual description for the current value of the node.
   ///
   /// The reading direction is given by [textDirection].
@@ -3213,6 +3251,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     _identifier = config.identifier;
     _attributedLabel = config.attributedLabel;
+    _labelParts = config.labelParts;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
     _attributedDecreasedValue = config.attributedDecreasedValue;
@@ -3281,6 +3320,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     AttributedString attributedHint = _attributedHint;
     String tooltip = _tooltip;
     TextDirection? textDirection = _textDirection;
+    List<String>? labelParts = _labelParts;
     Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
     TextSelection? textSelection = _textSelection;
     int? scrollChildCount = _scrollChildCount;
@@ -3396,6 +3436,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
           otherTextDirection: node._textDirection,
         );
 
+        // Merge labelParts - if current node doesn't have labelParts but child does, use child's
+        if ((labelParts == null || labelParts!.isEmpty) && node._labelParts != null && node._labelParts!.isNotEmpty) {
+          labelParts = node._labelParts;
+        }
+
         if (controlsNodes == null) {
           controlsNodes = node._controlsNodes;
         } else if (node._controlsNodes != null) {
@@ -3447,6 +3492,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      labelParts: labelParts,
     );
   }
 
@@ -3503,6 +3549,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
+      labelParts: data.labelParts,
       value: data.attributedValue.string,
       valueAttributes: data.attributedValue.attributes,
       increasedValue: data.attributedIncreasedValue.string,
@@ -5078,6 +5125,8 @@ class SemanticsConfiguration {
   String get label => _attributedLabel.string;
   set label(String label) {
     _attributedLabel = AttributedString(label);
+    _attributedLabelSetExplicitly = false;
+    _labelParts = null;
     _hasBeenAnnotated = true;
   }
 
@@ -5097,9 +5146,39 @@ class SemanticsConfiguration {
   ///  * [label], which is the raw text of this property.
   AttributedString get attributedLabel => _attributedLabel;
   AttributedString _attributedLabel = AttributedString('');
+  bool _attributedLabelSetExplicitly = false;
   set attributedLabel(AttributedString attributedLabel) {
     _attributedLabel = attributedLabel;
+    _attributedLabelSetExplicitly = true;
+    _labelParts = null;
     _hasBeenAnnotated = true;
+  }
+
+  /// A list of strings that represent separate parts of the label for accessibility.
+  ///
+  /// On web platforms, this generates an `aria-labelledby` attribute that
+  /// references multiple DOM elements containing each label part. On mobile
+  /// platforms (iOS VoiceOver, Android TalkBack), the parts are automatically
+  /// concatenated into a single accessible string.
+  ///
+  /// This field is mutually exclusive with [attributedLabel].
+  List<String>? get labelParts => _labelParts;
+  List<String>? _labelParts;
+  set labelParts(List<String>? labelParts) {
+    assert(
+      labelParts == null || !_attributedLabelSetExplicitly,
+      'Cannot set labelParts when attributedLabel is already set. '
+      'Only one of labelParts or attributedLabel should be provided.',
+    );
+    _hasBeenAnnotated = true;
+    if (listEquals(_labelParts, labelParts)) {
+      return;
+    }
+    _labelParts = labelParts;
+    if (labelParts != null && labelParts.isNotEmpty) {
+      _attributedLabel = AttributedString(labelParts.join(' '));
+      _attributedLabelSetExplicitly = false;
+    }
   }
 
   /// A textual description for the current value of the owning [RenderObject].
@@ -5901,6 +5980,7 @@ class SemanticsConfiguration {
       .._sortKey = _sortKey
       .._identifier = _identifier
       .._attributedLabel = _attributedLabel
+      .._labelParts = _labelParts == null ? null : List<String>.from(_labelParts!)
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue

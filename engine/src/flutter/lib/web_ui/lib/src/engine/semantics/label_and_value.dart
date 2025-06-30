@@ -7,6 +7,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../dom.dart';
+import '../util.dart' show listEquals;
 import 'semantics.dart';
 
 /// The method used to represend a label of a leaf node in the DOM.
@@ -113,19 +114,22 @@ abstract final class LabelRepresentationBehavior {
 final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
-  String? _previousLabel;
+  AriaLabelHelper? _ariaHelper;
 
   @override
   void update(String label) {
-    if (label == _previousLabel) {
-      return;
-    }
-    owner.setAttribute('aria-label', label);
+    _ariaHelper ??= AriaLabelHelper(
+      semanticsObject: semanticsObject,
+      targetElement: owner.element,
+      containerElement: owner.element,
+    );
+
+    _ariaHelper!.updateLabel(label);
   }
 
   @override
   void cleanUp() {
-    owner.removeAttribute('aria-label');
+    _ariaHelper?.cleanUp();
   }
 
   // ARIA label does not introduce extra DOM elements, so focus should go to the
@@ -502,6 +506,7 @@ class LabelAndValue extends SemanticBehavior {
       tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
       label: semanticsObject.hasLabel ? semanticsObject.label : null,
       value: shouldDisplayValue ? semanticsObject.value : null,
+      labelParts: semanticsObject.hasLabelParts ? semanticsObject.labelParts : null,
     );
   }
 
@@ -606,8 +611,13 @@ class LabelAndValue extends SemanticBehavior {
   }
 }
 
-String? computeDomSemanticsLabel({String? tooltip, String? label, String? value}) {
-  final String? labelValue = _computeLabelValue(label: label, value: value);
+String? computeDomSemanticsLabel({
+  String? tooltip,
+  String? label,
+  String? value,
+  List<String>? labelParts,
+}) {
+  final String? labelValue = _computeLabelValue(label: label, value: value, labelParts: labelParts);
 
   if (tooltip == null && labelValue == null) {
     return null;
@@ -630,10 +640,135 @@ String? computeDomSemanticsLabel({String? tooltip, String? label, String? value}
   return combinedValue.isNotEmpty ? combinedValue.toString() : null;
 }
 
-String? _computeLabelValue({String? label, String? value}) {
-  final String combinedValue = <String?>[label, value]
-      .whereType<String>() // poor man's null filter
-      .where((String element) => element.trim().isNotEmpty)
-      .join(' ');
+String? _computeLabelValue({String? label, String? value, List<String>? labelParts}) {
+  // If labelParts are provided, use them instead of the regular label
+  if (labelParts != null && labelParts.isNotEmpty) {
+    final String labelPartsValue = labelParts
+        .where((String part) => part.trim().isNotEmpty)
+        .join(' ');
+    if (labelPartsValue.isNotEmpty) {
+      // Combine labelParts with value if both exist
+      final String combinedValue = <String?>[
+        labelPartsValue,
+        value,
+      ].whereType<String>().where((String element) => element.trim().isNotEmpty).join(' ');
+      return combinedValue.isNotEmpty ? combinedValue : null;
+    }
+  }
+
+  // Fallback to regular label + value logic
+  final String combinedValue = <String?>[
+    label,
+    value,
+  ].whereType<String>().where((String element) => element.trim().isNotEmpty).join(' ');
   return combinedValue.isNotEmpty ? combinedValue : null;
+}
+
+/// Helper class for implementing WAI-ARIA labeling with multi-part support.
+///
+/// Automatically chooses between `aria-label` and `aria-labelledby` based on
+/// the available label data, creating hidden span elements when needed for
+/// proper accessibility compliance.
+class AriaLabelHelper {
+  AriaLabelHelper({
+    required this.semanticsObject,
+    required this.targetElement,
+    required this.containerElement,
+    this.idPrefix = 'label',
+  });
+
+  final SemanticsObject semanticsObject;
+
+  final DomElement targetElement;
+
+  final DomElement containerElement;
+
+  final String idPrefix;
+
+  List<String>? _previousLabelParts;
+
+  void updateLabel(String? fallbackLabel) {
+    final List<String>? labelParts = semanticsObject.labelParts;
+
+    final List<String>? validParts =
+        labelParts?.where((String part) => part.trim().isNotEmpty).toList();
+
+    if (validParts != null && validParts.isNotEmpty) {
+      _updateAriaLabelledBy(validParts);
+    } else {
+      _updateAriaLabel(fallbackLabel);
+    }
+  }
+
+  void cleanUp() {
+    targetElement.removeAttribute('aria-label');
+    targetElement.removeAttribute('aria-labelledby');
+    _removeGeneratedLabels();
+  }
+
+  void _updateAriaLabel(String? label) {
+    if (_previousLabelParts != null) {
+      targetElement.removeAttribute('aria-labelledby');
+      _removeGeneratedLabels();
+    }
+
+    if (label != null && label.isNotEmpty) {
+      targetElement.setAttribute('aria-label', label);
+    } else {
+      targetElement.removeAttribute('aria-label');
+    }
+    _previousLabelParts = null;
+  }
+
+  void _updateAriaLabelledBy(List<String> labelParts) {
+    if (listEquals(labelParts, _previousLabelParts)) {
+      return;
+    }
+
+    if (_previousLabelParts == null) {
+      targetElement.removeAttribute('aria-label');
+    }
+
+    final List<String> labelIds = <String>[];
+
+    for (int i = 0; i < labelParts.length; i++) {
+      final String labelId = '$idPrefix-${semanticsObject.id}-$i';
+      labelIds.add(labelId);
+
+      DomElement? labelElement = containerElement.querySelector('#$labelId');
+      if (labelElement == null) {
+        labelElement = domDocument.createElement('span');
+        labelElement.id = labelId;
+        labelElement.style.display = 'none';
+        labelElement.setAttribute('aria-hidden', 'true');
+        containerElement.appendChild(labelElement);
+      }
+      labelElement.text = labelParts[i];
+    }
+
+    // Remove any old label elements that are no longer needed
+    if (_previousLabelParts != null) {
+      for (int i = labelParts.length; i < _previousLabelParts!.length; i++) {
+        final String oldLabelId = '$idPrefix-${semanticsObject.id}-$i';
+        containerElement.querySelector('#$oldLabelId')?.remove();
+      }
+    }
+
+    final String ariaLabelledByValue = labelIds.join(' ');
+    targetElement.setAttribute('aria-labelledby', ariaLabelledByValue);
+
+    _previousLabelParts = List<String>.from(labelParts);
+  }
+
+  void _removeGeneratedLabels() {
+    if (_previousLabelParts == null) {
+      return;
+    }
+
+    for (int i = 0; i < _previousLabelParts!.length; i++) {
+      final String labelId = '$idPrefix-${semanticsObject.id}-$i';
+      containerElement.querySelector('#$labelId')?.remove();
+    }
+    _previousLabelParts = null;
+  }
 }

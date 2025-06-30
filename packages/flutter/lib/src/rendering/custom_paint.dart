@@ -1005,6 +1005,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.label != null) {
       config.label = properties.label!;
     }
+    if (properties.labelParts != null) {
+      config.labelParts = properties.labelParts!;
+    }
     if (properties.value != null) {
       config.value = properties.value!;
     }

@@ -248,6 +248,7 @@ class SemanticsNodeUpdate {
     required this.identifier,
     required this.label,
     required this.labelAttributes,
+    required this.labelParts,
     required this.hint,
     required this.hintAttributes,
     required this.value,
@@ -320,6 +321,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final List<ui.StringAttribute> labelAttributes;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? labelParts;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String hint;
@@ -1162,8 +1166,15 @@ class SemanticsObject {
   List<ui.StringAttribute>? get labelAttributes => _labelAttributes;
   List<ui.StringAttribute>? _labelAttributes;
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode]
+  List<String>? get labelParts => _labelParts;
+  List<String>? _labelParts;
+
   /// Whether this object contains a non-empty label.
   bool get hasLabel => _label != null && _label!.isNotEmpty;
+
+  /// Whether this object contains label parts for aria-labelledby.
+  bool get hasLabelParts => _labelParts != null && _labelParts!.isNotEmpty;
 
   static const int _labelIndex = 1 << 10;
 
@@ -1615,6 +1626,11 @@ class SemanticsObject {
 
     if (_labelAttributes != update.labelAttributes) {
       _labelAttributes = update.labelAttributes;
+      _markLabelDirty();
+    }
+
+    if (_labelParts != update.labelParts) {
+      _labelParts = update.labelParts;
       _markLabelDirty();
     }
 

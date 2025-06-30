@@ -7361,6 +7361,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     String? identifier,
     String? label,
     AttributedString? attributedLabel,
+    List<String>? labelParts,
     String? value,
     AttributedString? attributedValue,
     String? increasedValue,
@@ -7438,6 +7439,7 @@ class Semantics extends SingleChildRenderObjectWidget {
            identifier: identifier,
            label: label,
            attributedLabel: attributedLabel,
+           labelParts: labelParts,
            value: value,
            attributedValue: attributedValue,
            increasedValue: increasedValue,
@@ -7587,6 +7589,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     final bool containsText =
         properties.label != null ||
         properties.attributedLabel != null ||
+        properties.labelParts != null ||
         properties.value != null ||
         properties.attributedValue != null ||
         properties.increasedValue != null ||
