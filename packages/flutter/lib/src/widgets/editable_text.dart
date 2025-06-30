@@ -25,6 +25,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_web_browser_detection_io.dart' if (dart.library.js_util) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -876,8 +877,8 @@ class EditableText extends StatefulWidget {
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
     this.paintCursorAboveText = false,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -964,7 +965,9 @@ class EditableText extends StatefulWidget {
                  ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
                ]
                : inputFormatters,
-       showCursor = showCursor ?? !readOnly;
+       showCursor = showCursor ?? !readOnly,
+       selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -1718,8 +1721,9 @@ class EditableText extends StatefulWidget {
   /// cut/copy/paste menu, and tapping to move the text caret.
   ///
   /// When this is false, the text selection cannot be adjusted by
-  /// the user, text cannot be copied, and the user cannot paste into
-  /// the text field from the clipboard.
+  /// the user, the cut/copy/paste menu is hidden, and the shortcuts to
+  /// cut/copy/paste text do nothing but stop propagation of the key event
+  /// to other key event handlers in the focus chain.
   ///
   /// Defaults to true.
   /// {@endtemplate}
@@ -2048,6 +2052,37 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
+
+  /// The default value for [selectionHeightStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
+  ///
+  /// On native platforms, this defaults to [ui.BoxHeightStyle.includeLineSpacingMiddle] for all
+  /// platforms.
+  static ui.BoxHeightStyle get defaultSelectionHeightStyle {
+    if (kIsWeb) {
+      return ui.BoxHeightStyle.max;
+    }
+    return ui.BoxHeightStyle.includeLineSpacingMiddle;
+  }
+
+  /// The default value for [selectionWidthStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
+  /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
+  ///
+  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
+    if (kIsWeb) {
+      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
+        // On macOS web, the selection width behavior differs when running on
+        // Chrom(e|ium) (blink) or Safari (webkit).
+        return ui.BoxWidthStyle.max;
+      }
+      return ui.BoxWidthStyle.tight;
+    }
+    return ui.BoxWidthStyle.max;
+  }
 
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
@@ -5605,11 +5640,7 @@ class EditableTextState extends State<EditableText>
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
-    PasteTextIntent: _makeOverridable(
-      CallbackAction<PasteTextIntent>(
-        onInvoke: (PasteTextIntent intent) => pasteText(intent.cause),
-      ),
-    ),
+    PasteTextIntent: _makeOverridable(_PasteSelectionAction(this)),
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
@@ -5923,15 +5954,17 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.cursorRadius,
     required this.cursorOffset,
     required this.paintCursorAboveText,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.enableInteractiveSelection = true,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
+  }) : selectionHeightStyle = selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
+       super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;
@@ -6602,6 +6635,10 @@ class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
 
   @override
   Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    if (!state.widget.selectionEnabled) {
+      return null;
+    }
+
     return Actions.invoke(
       context!,
       UpdateSelectionIntent(
@@ -6611,9 +6648,6 @@ class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
       ),
     );
   }
-
-  @override
-  bool get isActionEnabled => state.widget.selectionEnabled;
 }
 
 class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
@@ -6623,15 +6657,35 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    if (!state._value.selection.isValid || state._value.selection.isCollapsed) {
+      return;
+    }
+
+    if (!state.widget.selectionEnabled) {
+      return;
+    }
+
     if (intent.collapseSelection) {
       state.cutSelection(intent.cause);
     } else {
       state.copySelection(intent.cause);
     }
   }
+}
+
+class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
+  _PasteSelectionAction(this.state);
+
+  final EditableTextState state;
 
   @override
-  bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+  void invoke(PasteTextIntent intent, [BuildContext? context]) {
+    if (!state.widget.selectionEnabled) {
+      return;
+    }
+
+    state.pasteText(intent.cause);
+  }
 }
 
 /// A [ClipboardStatusNotifier] whose [value] is hardcoded to

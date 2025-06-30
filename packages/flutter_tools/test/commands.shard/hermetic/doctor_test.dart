@@ -1441,19 +1441,14 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
       VsCodeValidatorTestTargets._(validInstall, missingExtensions);
 
-  static final String validInstall = globals.fs.path.join('test', 'data', 'vscode', 'application');
-  static final String validExtensions = globals.fs.path.join(
+  static final String root = globals.fs.path.join(
     'test',
     'data',
-    'vscode',
-    'extensions',
+    globals.platform.isLinux ? 'vscode_linux' : 'vscode',
   );
-  static final String missingExtensions = globals.fs.path.join(
-    'test',
-    'data',
-    'vscode',
-    'notExtensions',
-  );
+  static final String validInstall = globals.fs.path.join(root, 'application');
+  static final String validExtensions = globals.fs.path.join(root, 'extensions');
+  static final String missingExtensions = globals.fs.path.join(root, 'notExtensions');
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
@@ -1487,7 +1482,7 @@ class FakeDevice extends Fake implements Device {
   Category get category => Category.mobile;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;

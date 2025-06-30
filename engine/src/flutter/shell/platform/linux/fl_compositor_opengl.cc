@@ -16,10 +16,12 @@
 static const char* vertex_shader_src =
     "attribute vec2 position;\n"
     "attribute vec2 in_texcoord;\n"
+    "uniform vec2 offset;\n"
+    "uniform vec2 scale;\n"
     "varying vec2 texcoord;\n"
     "\n"
     "void main() {\n"
-    "  gl_Position = vec4(position, 0, 1);\n"
+    "  gl_Position = vec4(offset + position * scale, 0, 1);\n"
     "  texcoord = in_texcoord;\n"
     "}\n";
 
@@ -70,6 +72,15 @@ struct _FlCompositorOpenGL {
 
   // Shader program.
   GLuint program;
+
+  // Location of layer offset in [program].
+  GLuint offset_location;
+
+  // Location of layer scale in [program].
+  GLuint scale_location;
+
+  // Verticies for the uniform square.
+  GLuint vertex_buffer;
 
   // Framebuffers to render keyed by view ID.
   GHashTable* framebuffers_by_view_id;
@@ -135,11 +146,6 @@ static gchar* get_program_log(GLuint program) {
   return log;
 }
 
-/// Converts a pixel co-ordinate from 0..pixels to OpenGL -1..1.
-static GLfloat pixels_to_gl_coords(GLfloat position, GLfloat pixels) {
-  return (2.0 * position / pixels) - 1.0;
-}
-
 // Perform single run OpenGL initialization.
 static void initialize(FlCompositorOpenGL* self) {
   if (self->initialized) {
@@ -200,8 +206,23 @@ static void setup_shader(FlCompositorOpenGL* self) {
     g_warning("Failed to link program: %s", program_log);
   }
 
+  self->offset_location = glGetUniformLocation(self->program, "offset");
+  self->scale_location = glGetUniformLocation(self->program, "scale");
+
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
+
+  // The uniform square abcd in two triangles cba + cdb
+  // a--b
+  // |  |
+  // c--d
+  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
+                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
+
+  glGenBuffers(1, &self->vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
+               GL_STATIC_DRAW);
 }
 
 static void render_with_blit(FlCompositorOpenGL* self,
@@ -239,6 +260,22 @@ static void render_with_textures(FlCompositorOpenGL* self,
   GLint saved_array_buffer_binding;
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
 
+  // FIXME(robert-ancell): The vertex array is the same for all views, but
+  // cannot be shared in OpenGL. Find a way to not generate this every time.
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  GLint position_location = glGetAttribLocation(self->program, "position");
+  glEnableVertexAttribArray(position_location);
+  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4, 0);
+  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
+  glEnableVertexAttribArray(texcoord_location);
+  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4,
+                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
+
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -248,41 +285,21 @@ static void render_with_textures(FlCompositorOpenGL* self,
     FlFramebuffer* framebuffer =
         FL_FRAMEBUFFER(g_ptr_array_index(framebuffers, i));
 
+    // FIXME(robert-ancell): The offset from present_layers() is not here, needs
+    // to be updated.
+    size_t texture_width = fl_framebuffer_get_width(framebuffer);
+    size_t texture_height = fl_framebuffer_get_height(framebuffer);
+    glUniform2f(self->offset_location, 0, 0);
+    glUniform2f(self->scale_location, texture_width / width,
+                texture_height / height);
+
     GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    // Translate into OpenGL co-ordinates
-    size_t texture_width = fl_framebuffer_get_width(framebuffer);
-    size_t texture_height = fl_framebuffer_get_height(framebuffer);
-    GLfloat x0 = pixels_to_gl_coords(0, width);
-    GLfloat y0 = pixels_to_gl_coords(height - texture_height, height);
-    GLfloat x1 = pixels_to_gl_coords(texture_width, width);
-    GLfloat y1 = pixels_to_gl_coords(height, height);
-    GLfloat vertex_data[] = {x0, y0, 0, 0, x1, y1, 1, 1, x0, y1, 0, 1,
-                             x0, y0, 0, 0, x1, y0, 1, 0, x1, y1, 1, 1};
-
-    GLuint vao, vertex_buffer;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
-                 GL_STATIC_DRAW);
-    GLint position_index = glGetAttribLocation(self->program, "position");
-    glEnableVertexAttribArray(position_index);
-    glVertexAttribPointer(position_index, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(GLfloat) * 4, 0);
-    GLint texcoord_index = glGetAttribLocation(self->program, "in_texcoord");
-    glEnableVertexAttribArray(texcoord_index);
-    glVertexAttribPointer(texcoord_index, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(GLfloat) * 4,
-                          reinterpret_cast<void*>(sizeof(GLfloat) * 2));
-
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vertex_buffer);
   }
+
+  glDeleteVertexArrays(1, &vao);
 
   glDisable(GL_BLEND);
 
@@ -615,12 +632,10 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine) {
 void fl_compositor_opengl_render(FlCompositorOpenGL* self,
                                  FlutterViewId view_id,
                                  int width,
-                                 int height,
-                                 const GdkRGBA* background_color) {
+                                 int height) {
   g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
-  glClearColor(background_color->red, background_color->green,
-               background_color->blue, background_color->alpha);
+  glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
   GPtrArray* framebuffers = reinterpret_cast<GPtrArray*>((g_hash_table_lookup(
@@ -637,5 +652,8 @@ void fl_compositor_opengl_cleanup(FlCompositorOpenGL* self) {
 
   if (self->program != 0) {
     glDeleteProgram(self->program);
+  }
+  if (self->vertex_buffer != 0) {
+    glDeleteBuffers(1, &self->vertex_buffer);
   }
 }

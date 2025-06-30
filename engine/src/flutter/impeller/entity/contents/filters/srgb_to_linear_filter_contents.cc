@@ -91,7 +91,8 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
     return coverage.TransformBounds(entity.GetTransform());
   };
 
-  auto contents = AnonymousContents::Make(render_proc, coverage_proc);
+  std::shared_ptr<Contents> contents =
+      AnonymousContents::Make(render_proc, coverage_proc);
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));

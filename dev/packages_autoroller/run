@@ -26,7 +26,7 @@ unset CDPATH
 function follow_links() (
   cd -P "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
-  while [[ -h "$file" ]]; do
+  while [[ -L "$file" ]]; do
     cd -P "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
     cd -P "$(dirname -- "$file")"
@@ -36,12 +36,18 @@ function follow_links() (
 )
 
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
-BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+BIN_DIR="$(
+  cd "${PROG_NAME%/*}"
+  pwd -P
+)"
 REPO_DIR="$BIN_DIR/../.."
 DART_BIN="$REPO_DIR/bin/dart"
 FLUTTER_BIN="$REPO_DIR/bin/flutter"
 
-# Ensure pub get has been run in the repo before running the conductor
-(cd "$REPO_DIR/dev/conductor/core"; "$FLUTTER_BIN" pub get 1>&2)
+# Ensure pub get has been run in the repo before running the roller
+(
+  cd "$REPO_DIR/dev/packages_autoroller"
+  "$FLUTTER_BIN" pub get 1>&2
+)
 
-exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/packages_autoroller.dart" "$@"
+exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/packages_autoroller/bin/packages_autoroller.dart" "$@"

@@ -125,7 +125,8 @@
       "csetjmp": "cpp",
       "cfenv": "cpp",
       "execution": "cpp",
-      "print": "cpp"
+      "print": "cpp",
+      "unicode.h": "c"
     },
     "C_Cpp.default.includePath": [
       "${default}",

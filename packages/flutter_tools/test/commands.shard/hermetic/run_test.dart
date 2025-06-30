@@ -1475,7 +1475,7 @@ class FakeDevice extends Fake implements Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 
   @override
-  bool isSupported() => supported;
+  Future<bool> isSupported() async => supported;
 
   @override
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);

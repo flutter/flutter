@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:convert' show jsonDecode;
 import 'dart:ui';
 
@@ -733,17 +739,12 @@ void main() {
       'method': 'TextInputClient.performAction',
     });
 
-    Object? error;
-    try {
-      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/textinput',
+      messageBytes,
+      (ByteData? _) {},
+    );
+
     expect(latestUri, equals(uri));
   });
 
@@ -781,17 +782,11 @@ void main() {
       'method': 'TextInputClient.performPrivateCommand',
     });
 
-    Object? error;
-    try {
-      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/textinput',
+      messageBytes,
+      (ByteData? _) {},
+    );
   });
 
   group('Infer keyboardType from autofillHints', () {
@@ -1433,7 +1428,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.idle();
 
-    List<RenderBox> handles = List<RenderBox>.from(
+    List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -1449,7 +1444,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Handles should be updated with bigger font size.
-    handles = List<RenderBox>.from(
+    handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -6256,7 +6251,7 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
@@ -6401,7 +6396,7 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    final List<RenderBox> handles = List<RenderBox>.from(
+    final List<RenderBox> handles = List<RenderBox>.of(
       tester.renderObjectList<RenderBox>(
         find.descendant(
           of: find.byType(CompositedTransformFollower),
@@ -8752,7 +8747,7 @@ void main() {
 
         // Check that the handles' positions are correct.
 
-        final List<RenderBox> handles = List<RenderBox>.from(
+        final List<RenderBox> handles = List<RenderBox>.of(
           tester.renderObjectList<RenderBox>(
             find.descendant(
               of: find.byType(CompositedTransformFollower),
@@ -8906,6 +8901,45 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets('default text selection height style', (WidgetTester tester) async {
+    controller.text = 'a b c d e f g';
+
+    final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
+      fontFamily: 'Roboto',
+      fontSize: 14.0, // default.
+      height: 3.0, // Slightly increase height from default so style is noticeable.
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: style,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            selectionColor: Colors.deepPurpleAccent.withOpacity(0.40),
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    );
+
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 13,
+    ); // select the entire text.
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionStyle.1.png'),
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'multi-line field can scroll with touch on iOS',
@@ -16014,7 +16048,7 @@ void main() {
 
       await tester.tapAt(textOffsetToPosition(tester, 3));
       await tester.pumpAndSettle();
-      final List<RenderBox> handles = List<RenderBox>.from(
+      final List<RenderBox> handles = List<RenderBox>.of(
         tester.renderObjectList<RenderBox>(
           find.descendant(
             of: find.byType(CompositedTransformFollower),
@@ -17433,6 +17467,71 @@ void main() {
     await tester.tap(find.text('Outside'));
     await tester.tap(find.text('Outside'));
     expect(tapOutsideCount, 0);
+  });
+
+  testWidgets('Disabling interactive selection disables shortcuts', (WidgetTester tester) async {
+    controller.text = 'Hello world';
+
+    TextSelection? selection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            enableInteractiveSelection: false,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(selection?.start, 11);
+    expect(selection?.end, 11);
+
+    // Select all shortcut should be ignored.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(selection?.start, 11);
+    expect(selection?.end, 11);
+
+    // Select all programatically.
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+
+    // Set the clipboard.
+    await Clipboard.setData(const ClipboardData(text: 'foo'));
+
+    // Paste shortcut should be ignored.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyV],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.text, 'Hello world');
+
+    // Copy shortcut.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyC],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    final ClipboardData? data = await Clipboard.getData('text/plain');
+    expect(controller.text, 'Hello world');
+    expect(data?.text, 'foo');
   });
 }
 

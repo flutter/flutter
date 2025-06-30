@@ -18,7 +18,6 @@ import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
@@ -27,6 +26,7 @@ import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
 import 'macos/swift_package_manager.dart';
+import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -114,7 +114,6 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
   final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
     project,
     packageConfig,
-    fs,
   );
   for (final Dependency dependency in transitiveDependencies) {
     final String packageName = dependency.name;
@@ -1254,36 +1253,51 @@ Future<void> injectPlugins(
   bool windowsPlatform = false,
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
-  List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project);
+
+  // Filter out dev dependencies for release builds.
+  final List<Plugin> filteredPlugins;
   if (releaseMode) {
-    plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+    filteredPlugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+  } else {
+    filteredPlugins = plugins;
   }
 
-  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
-    plugins,
+  final Map<String, List<Plugin>> filteredPluginsByPlatform = _resolvePluginImplementations(
+    filteredPlugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
   );
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
-  }
-  if (iosPlatform) {
-    await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+    await _writeAndroidPluginRegistrant(
+      project,
+      filteredPluginsByPlatform[AndroidPlugin.kConfigKey]!,
+    );
   }
   if (linuxPlatform) {
-    await _writeLinuxPluginFiles(project, pluginsByPlatform[LinuxPlugin.kConfigKey]!);
-  }
-  if (macOSPlatform) {
-    await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+    await _writeLinuxPluginFiles(project, filteredPluginsByPlatform[LinuxPlugin.kConfigKey]!);
   }
   if (windowsPlatform) {
     await writeWindowsPluginFiles(
       project,
-      pluginsByPlatform[WindowsPlugin.kConfigKey]!,
+      filteredPluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
     );
   }
+
   if (iosPlatform || macOSPlatform) {
+    // iOS and macOS doesn't yet support filtering out dev dependencies.
+    // See https://github.com/flutter/flutter/issues/163874.
+    final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+      plugins,
+      pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    );
+    if (iosPlatform) {
+      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+    }
+    if (macOSPlatform) {
+      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+    }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??
         DarwinDependencyManagement(

@@ -37,7 +37,7 @@ void main() {
     await flutter.run(
       withDebugger: true,
       device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>[if (verbose) '--verbose'],
+      additionalCommandArgs: <String>[if (verbose) '--verbose', '--no-web-resources-cdn'],
     );
   }
 

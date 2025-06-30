@@ -1306,7 +1306,6 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
                     ),
                   ],
@@ -1353,6 +1352,7 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
@@ -9247,55 +9247,67 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
+  for (final bool supportsAnnounce in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (supportsAnnounce=$supportsAnnounce)', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final TextEditingController controller = _textEditingController();
+      final Key key = UniqueKey();
 
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            errorText: 'oh no!',
+      await tester.pumpWidget(
+        overlay(
+          child: MediaQuery(
+            data: MediaQueryData(supportsAnnounce: supportsAnnounce),
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'label',
+                hintText: 'hint',
+                errorText: 'oh no!',
+              ),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              label: 'label',
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              children: <TestSemantics>[
-                TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                label: 'label',
+                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
+                inputType: ui.SemanticsInputType.text,
+                currentValueLength: 0,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    label: 'oh no!',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[if (!supportsAnnounce) SemanticsFlag.isLiveRegion],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreRect: true,
+          ignoreId: true,
         ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+      debugDefaultTargetPlatformOverride = null;
+    });
+  }
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
@@ -15098,7 +15110,7 @@ void main() {
   );
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
-  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from input decoration theme', (
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = _focusNode();
@@ -15106,7 +15118,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          inputDecorationTheme: InputDecorationTheme(floatingLabelBehavior: behavior),
+          inputDecorationTheme: InputDecorationThemeData(floatingLabelBehavior: behavior),
         ),
         home: Scaffold(
           body: TextField(
@@ -15151,13 +15163,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/140607.
-  testWidgets('TextFields can inherit errorStyle color from InputDecorationTheme.', (
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData.', (
     WidgetTester tester,
   ) async {
     Widget textFieldBuilder() {
       return MaterialApp(
         theme: ThemeData(
-          inputDecorationTheme: const InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationThemeData(
             errorStyle: TextStyle(color: Colors.green),
           ),
         ),
@@ -16682,19 +16694,14 @@ void main() {
         final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'ContextMenu.onDismissSystemContextMenu',
         });
-        Object? error;
-        try {
-          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            'flutter/platform',
-            messageBytes,
-            (ByteData? data) {},
-          );
-        } catch (e) {
-          error = e;
-        }
+
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/platform',
+          messageBytes,
+          (ByteData? data) {},
+        );
         await tester.pumpAndSettle();
 
-        expect(error, isNull);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Selection handles are not hidden.

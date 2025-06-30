@@ -1138,75 +1138,82 @@ name: foo
         ]) {
           for (final String buildMode in const <String>['profile', 'release', 'debug']) {
             for (final bool sourceMaps in const <bool>[true, false]) {
-              test(
-                'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps',
-                () => testbed.run(() async {
-                  final int expectedLevel =
-                      level ??
-                      switch (buildMode) {
-                        'debug' => 0,
-                        'profile' || 'release' => 2,
-                        _ => throw UnimplementedError(),
-                      };
-                  environment.defines[kBuildMode] = buildMode;
-                  environment.defines[kDartDefines] = encodeDartDefines(defines);
+              for (final bool minify in const <bool>[true, false]) {
+                test(
+                  'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps minify=$minify',
+                  () => testbed.run(() async {
+                    final int expectedLevel =
+                        level ??
+                        switch (buildMode) {
+                          'debug' => 0,
+                          'profile' || 'release' => 2,
+                          _ => throw UnimplementedError(),
+                        };
+                    environment.defines[kBuildMode] = buildMode;
+                    environment.defines[kDartDefines] = encodeDartDefines(defines);
 
-                  final File depFile = environment.buildDir.childFile('dart2wasm.d');
+                    final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-                  final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
-                  processManager.addCommand(
-                    FakeCommand(
-                      command: <String>[
-                        ..._kDart2WasmLinuxArgs,
-                        '-Ddart.vm.profile=${buildMode == 'profile'}',
-                        '-Ddart.vm.product=${buildMode == 'release'}',
-                        if (buildMode != 'debug') ...<String>[
-                          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-                          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
+                    processManager.addCommand(
+                      FakeCommand(
+                        command: <String>[
+                          ..._kDart2WasmLinuxArgs,
+                          '-Ddart.vm.profile=${buildMode == 'profile'}',
+                          '-Ddart.vm.product=${buildMode == 'release'}',
+                          if (buildMode != 'debug') ...<String>[
+                            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+                            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                          ],
+                          if (renderer == WebRendererMode.skwasm) ...<String>[
+                            '--extra-compiler-option=--import-shared-memory',
+                            '--extra-compiler-option=--shared-memory-max-pages=32768',
+                          ],
+                          ...defines.map((String define) => '-D$define'),
+                          if (renderer == WebRendererMode.skwasm) ...<String>[
+                            '-DFLUTTER_WEB_USE_SKIA=false',
+                            '-DFLUTTER_WEB_USE_SKWASM=true',
+                          ],
+                          if (renderer == WebRendererMode.canvaskit) ...<String>[
+                            '-DFLUTTER_WEB_USE_SKIA=true',
+                            '-DFLUTTER_WEB_USE_SKWASM=false',
+                          ],
+                          '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+                          '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                          '-O$expectedLevel',
+                          if (strip && buildMode == 'release')
+                            '--strip-wasm'
+                          else
+                            '--no-strip-wasm',
+                          if (!sourceMaps) '--no-source-maps',
+                          if (minify) '--minify' else '--no-minify',
+                          if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
+                          '-o',
+                          environment.buildDir.childFile('main.dart.wasm').absolute.path,
+                          environment.buildDir.childFile('main.dart').absolute.path,
                         ],
-                        if (renderer == WebRendererMode.skwasm) ...<String>[
-                          '--extra-compiler-option=--import-shared-memory',
-                          '--extra-compiler-option=--shared-memory-max-pages=32768',
-                        ],
-                        ...defines.map((String define) => '-D$define'),
-                        if (renderer == WebRendererMode.skwasm) ...<String>[
-                          '-DFLUTTER_WEB_USE_SKIA=false',
-                          '-DFLUTTER_WEB_USE_SKWASM=true',
-                        ],
-                        if (renderer == WebRendererMode.canvaskit) ...<String>[
-                          '-DFLUTTER_WEB_USE_SKIA=true',
-                          '-DFLUTTER_WEB_USE_SKWASM=false',
-                        ],
-                        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-                        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
-                        '-O$expectedLevel',
-                        if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
-                        if (!sourceMaps) '--no-source-maps',
-                        if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
-                        '-o',
-                        environment.buildDir.childFile('main.dart.wasm').absolute.path,
-                        environment.buildDir.childFile('main.dart').absolute.path,
-                      ],
-                      onRun:
-                          (_) =>
-                              outputJsFile
-                                ..createSync()
-                                ..writeAsStringSync('foo'),
-                    ),
-                  );
+                        onRun:
+                            (_) =>
+                                outputJsFile
+                                  ..createSync()
+                                  ..writeAsStringSync('foo'),
+                      ),
+                    );
 
-                  await Dart2WasmTarget(
-                    WasmCompilerConfig(
-                      optimizationLevel: level,
-                      stripWasm: strip,
-                      renderer: renderer,
-                      sourceMaps: sourceMaps,
-                    ),
-                  ).build(environment);
+                    await Dart2WasmTarget(
+                      WasmCompilerConfig(
+                        optimizationLevel: level,
+                        stripWasm: strip,
+                        renderer: renderer,
+                        sourceMaps: sourceMaps,
+                        minify: minify,
+                      ),
+                    ).build(environment);
 
-                  expect(outputJsFile.existsSync(), isTrue);
-                }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
-              );
+                    expect(outputJsFile.existsSync(), isTrue);
+                  }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+                );
+              }
             }
           }
         }
@@ -1257,6 +1264,7 @@ name: foo
       WasmCompilerConfig(optimizationLevel: 0),
       WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
       WasmCompilerConfig(stripWasm: false),
+      WasmCompilerConfig(minify: false),
 
       // All properties non-default
       WasmCompilerConfig(

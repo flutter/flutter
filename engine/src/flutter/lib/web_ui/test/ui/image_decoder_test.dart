@@ -14,7 +14,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(emulateTesterEnvironment: false, setUpTestViewDimensions: false);
+  setUpUnitTests(setUpTestViewDimensions: false);
 
   test('$ResizingCodec gives correct repetition count for GIFs', () async {
     final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(

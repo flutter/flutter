@@ -374,12 +374,22 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
     }
 
-    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+    if (buildInfos.any((BuildInfo info) => info.isDebug)) {
       // Add-to-App must manually add the LLDB Init File to their native Xcode
       // project, so provide the files and instructions.
       final File lldbInitSourceFile = project.ios.lldbInitFile;
       final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
       final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+
+      if (!lldbInitTargetFile.existsSync()) {
+        // If LLDB is being added to the output, print a warning with instructions on how to add.
+        globals.printWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please complete instructions found in '
+          '"Embed a Flutter module in your iOS app > Use frameworks > Set LLDB Init File" '
+          'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+        );
+      }
       lldbInitSourceFile.copySync(lldbInitTargetFile.path);
       lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
     }

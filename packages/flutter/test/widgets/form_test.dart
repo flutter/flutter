@@ -169,50 +169,67 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('Should announce only the first error message when validate returns errors', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(validator: (_) => 'First error message'),
-                      TextFormField(validator: (_) => 'Second error message'),
-                    ],
+  for (final _PlatformAnnounceScenario test in <_PlatformAnnounceScenario>[
+    _PlatformAnnounceScenario(
+      supportsAnnounce: false,
+      testName:
+          'Should announce only the first error message when validate returns errors and announce = false',
+    ),
+    _PlatformAnnounceScenario(
+      supportsAnnounce: true,
+      testName:
+          'Should not announce error message when validate returns errors and announce = true',
+    ),
+  ]) {
+    testWidgets(test.testName, (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(supportsAnnounce: test.supportsAnnounce),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      children: <Widget>[
+                        TextFormField(validator: (_) => 'First error message'),
+                        TextFormField(validator: (_) => 'Second error message'),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    formKey.currentState!.reset();
-    await tester.enterText(find.byType(TextFormField).first, '');
-    await tester.pump();
+      );
+      formKey.currentState!.reset();
+      await tester.enterText(find.byType(TextFormField).first, '');
+      await tester.pump();
 
-    // Manually validate.
-    expect(find.text('First error message'), findsNothing);
-    expect(find.text('Second error message'), findsNothing);
-    formKey.currentState!.validate();
-    await tester.pump();
-    expect(find.text('First error message'), findsOneWidget);
-    expect(find.text('Second error message'), findsOneWidget);
+      // Manually validate.
+      expect(find.text('First error message'), findsNothing);
+      expect(find.text('Second error message'), findsNothing);
+      formKey.currentState!.validate();
+      await tester.pump();
+      expect(find.text('First error message'), findsOneWidget);
+      expect(find.text('Second error message'), findsOneWidget);
 
-    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-    expect(announcement.message, 'First error message');
-    expect(announcement.textDirection, TextDirection.ltr);
-    expect(announcement.assertiveness, Assertiveness.assertive);
-  });
+      if (test.supportsAnnounce) {
+        final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+        expect(announcement.message, 'First error message');
+        expect(announcement.textDirection, TextDirection.ltr);
+        expect(announcement.assertiveness, Assertiveness.assertive);
+      } else {
+        final CapturedAccessibilityAnnouncement? announcement =
+            tester.takeAnnouncements().firstOrNull;
+        expect(announcement, null);
+      }
+    });
+  }
 
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -388,7 +405,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(supportsAnnounce: true),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -1614,4 +1631,10 @@ void main() {
       containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.invalid),
     );
   });
+}
+
+class _PlatformAnnounceScenario {
+  _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
+  final bool supportsAnnounce;
+  final String testName;
 }

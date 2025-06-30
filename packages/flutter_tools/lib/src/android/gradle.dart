@@ -55,7 +55,9 @@ const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
 @visibleForTesting
 const String failedToStripDebugSymbolsErrorMessage = r'''
-Release app bundle failed to strip debug symbols from native libraries. Please run flutter doctor and ensure that the Android toolchain does not report any issues.
+Release app bundle failed to strip debug symbols from native libraries.
+Please run flutter doctor and ensure that the Android toolchain does not
+report any issues.
 
 Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 

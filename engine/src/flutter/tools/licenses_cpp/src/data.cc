@@ -26,6 +26,14 @@ absl::StatusOr<Data> Data::Open(std::string_view data_dir) {
                                       exclude_path.string() + ": " +
                                       include_filter.status().ToString());
   }
+  absl::StatusOr<Catalog> catalog = Catalog::Open(data_dir);
+  if (!catalog.ok()) {
+    return absl::InvalidArgumentError("Can't open catalog at " +
+                                      exclude_path.string() + ": " +
+                                      catalog.status().ToString());
+  }
+
   return Data{.include_filter = std::move(*include_filter),
-              .exclude_filter = std::move(*exclude_filter)};
+              .exclude_filter = std::move(*exclude_filter),
+              .catalog = std::move(*catalog)};
 }
