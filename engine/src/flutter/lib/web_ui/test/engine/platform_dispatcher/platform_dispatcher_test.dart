@@ -520,7 +520,7 @@ void testMain() {
       });
 
       test('handles elements with semantics focus action but no tabindex', () {
-        semantics()..semanticsEnabled = true;
+        semantics().semanticsEnabled = true;
 
         final SemanticsTester tester = SemanticsTester(owner());
         tester.updateNode(
@@ -550,7 +550,7 @@ void testMain() {
       });
 
       test('prioritizes tabindex over semantics focus action for focus finding', () {
-        semantics()..semanticsEnabled = true;
+        semantics().semanticsEnabled = true;
 
         final SemanticsTester tester = SemanticsTester(owner());
         tester.updateNode(
@@ -579,7 +579,7 @@ void testMain() {
       });
 
       test('finds child elements with semantics focus action', () {
-        semantics()..semanticsEnabled = true;
+        semantics().semanticsEnabled = true;
 
         final SemanticsTester tester = SemanticsTester(owner());
         tester.updateNode(
