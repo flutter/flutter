@@ -2708,6 +2708,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
+  SemanticsNode? get semanticsParent => _semanticsParent ?? parent;
+  SemanticsNode? _semanticsParent;
+  set semanticsParent(SemanticsNode? value) {
+    if (_semanticsParent == value) {
+      return;
+    }
+    _semanticsParent = value;
+    _markDirty();
+  }
+
   /// The depth of this node in the semantics tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
@@ -3417,6 +3427,51 @@ class SemanticsNode with DiagnosticableTreeMixin {
       });
     }
 
+    if (identifier.endsWith('parent')) {
+      final SemanticsNode? overlayPortalChild =
+          owner!._overlayPortalChildNodes[identifier.split(' ')[0]];
+      if (overlayPortalChild != null) {
+        _redepthChild(overlayPortalChild);
+      }
+    }
+
+    _SemanticsGeometry? geometry;
+    if (identifier.endsWith('child')) {
+      semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+      geometry = _SemanticsGeometry.computeChildGeometry(
+        parentPaintClipRect: semanticsParent!.parentPaintClipRect,
+        parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
+        parentTransform: null,
+        parent: semanticsParent!,
+        child: this,
+      );
+    }
+
+    // print('>>>>>>>>>>>>>>>>>>>>>>> id: $id, Local rect: $rect');
+    // bool isInOverlayPortalSubtree = false;
+    // SemanticsNode? current = this;
+    // while (current != null) {
+    //   if (current.identifier.endsWith('child')) {
+    //     isInOverlayPortalSubtree = true;
+    //     break;
+    //   }
+    //   current = current.parent;
+    // }
+    // if (isInOverlayPortalSubtree) {
+    //   Rect globalRect = geometry?.rect ?? rect;
+    //   SemanticsNode? current = this;
+    //   while (current != null) {
+    //     final Matrix4? transform = geometry?.transform;
+    //     if (transform != null) {
+    //       globalRect = MatrixUtils.transformRect(transform, globalRect);
+    //     }
+    //     current = current.semanticsParent;
+    //   }
+    //   print(
+    //     '>>>>>>>>>>>>>>>>>>>>>>> id: $id, geometry?.rect is null? ${geometry == null} Global rect: $globalRect',
+    //   );
+    // }
+
     return SemanticsData(
       flagsCollection: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
@@ -3428,8 +3483,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       attributedHint: attributedHint,
       tooltip: tooltip,
       textDirection: textDirection,
-      rect: rect,
-      transform: transform,
+      rect: geometry?.rect ?? rect,
+      transform: geometry?.transform ?? transform,
       tags: mergedTags,
       textSelection: textSelection,
       scrollChildCount: scrollChildCount,
@@ -3450,6 +3505,45 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
+  // Matrix4? recalculateTransformForNewParent(SemanticsNode newParent) {
+  //   // If the new parent is the same as the current parent, return the current transform
+  //   // if (parent == newParent) {
+  //   //   return transform;
+  //   // }
+
+  //   // Get the current global transform of the node
+  //   final Matrix4 currentNodeTransform = _getGlobalTransform(this);
+
+  //   // Get the global transform of the new parent
+  //   final Matrix4 parentGlobalTransform = _getGlobalTransform(newParent);
+
+  //   // Calculate the transform from node to new parent
+  //   // This is: parentGlobalTransform.inverted() * nodeGlobalTransform
+  //   final Matrix4 parentInverse = parentGlobalTransform.clone()..invert();
+  //   // if (parentInverse.invert() == 0) {
+  //   //   // If the parent transform is not invertible, return null
+  //   //   return null;
+  //   // }
+
+  //   return (parentInverse * currentNodeTransform) as Matrix4;
+  // }
+
+  // Matrix4 _getGlobalTransform(SemanticsNode node) {
+  //   Matrix4 globalTransform = Matrix4.identity();
+
+  //   // Walk up the parent chain and accumulate transforms
+  //   SemanticsNode? current = node.semanticsParent ?? node.parent;
+  //   while (current != null) {
+  //     final Matrix4? parentTransform = current.transform;
+  //     if (parentTransform != null) {
+  //       globalTransform = (parentTransform * globalTransform) as Matrix4;
+  //     }
+  //     current = current.semanticsParent ?? current.parent;
+  //   }
+
+  //   return globalTransform;
+  // }
+
   static Float64List _initIdentityTransform() {
     return Matrix4.identity().storage;
   }
@@ -3459,7 +3553,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty);
+    assert(_dirty || getSemanticsData().identifier.endsWith('parent'));
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -3474,18 +3568,22 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
     } else {
-      final int childCount = _children!.length;
+      List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      childrenInTraversalOrder = Int32List(childCount);
-      for (int i = 0; i < childCount; i += 1) {
+
+      childrenInTraversalOrder = Int32List(updatedChildren!.length);
+      for (int i = 0; i < updatedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
+      // print('id: $id childrenInTraversalOrder: $childrenInTraversalOrder');
+      final int childCount = _children!.length;
       // _children is sorted in paint order, so we invert it to get the hit test
       // order.
       childrenInHitTestOrder = Int32List(childCount);
       for (int i = childCount - 1; i >= 0; i -= 1) {
         childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
       }
+      // print('childrenInHitTestOrder: $childrenInHitTestOrder');
     }
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
@@ -3495,6 +3593,35 @@ class SemanticsNode with DiagnosticableTreeMixin {
         customSemanticsActionIdsUpdate.add(data.customSemanticsActionIds![i]);
       }
     }
+
+    // bool isInOverlayPortalSubtree = false;
+    // SemanticsNode? current = this;
+    // while (current != null) {
+    //   if (current.identifier.endsWith('child')) {
+    //     isInOverlayPortalSubtree = true;
+    //     break;
+    //   }
+    //   current = current.parent;
+    // }
+
+    // if (identifier.endsWith('child')) {
+    //   semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+    // }
+
+    // Matrix4? updatedTransform;
+    // if (identifier.endsWith('child')) {
+    //   // semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+    //   updatedTransform = _SemanticsGeometry.computeChildGeometry(
+    //     parentTransform: semanticsParent?.transform,
+    //     parent: semanticsParent!,
+    //     child: this,
+    //   );
+    // } else {
+    //   updatedTransform = data.transform;
+    // }
+    // print(
+    //   '------------------ $id: $label -------------------\n transform:\n${data.transform} \nrect: $rect',
+    // );
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
@@ -3537,8 +3664,38 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _dirty = false;
   }
 
+  List<SemanticsNode>? updateChildrenInTraversalOrder() {
+    if (kIsWeb) {
+      return _children;
+    }
+
+    List<SemanticsNode> updatedChildren = [];
+    bool isOverlayPortalParent = getSemanticsData().identifier.endsWith('parent');
+    for (final SemanticsNode child in _children!) {
+      bool isOverlayPortalChild = child.getSemanticsData().identifier.endsWith('child');
+      if (isOverlayPortalChild && !isOverlayPortalParent) {
+        // then we should remove child from children; we don't add it to updatedChildren list.
+        continue;
+      }
+
+      updatedChildren.add(child);
+    }
+    if (isOverlayPortalParent) {
+      String parentIdentifier = getSemanticsData().identifier.split(' ')[0];
+      if (owner != null && owner!._overlayPortalChildNodes.containsKey(parentIdentifier)) {
+        SemanticsNode overlayChildNode = owner!._overlayPortalChildNodes[parentIdentifier]!;
+        if (overlayChildNode.attached) {
+          updatedChildren.add(overlayChildNode);
+        }
+      }
+    }
+    return updatedChildren;
+  }
+
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
+    List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
+
     TextDirection? inheritedTextDirection = textDirection;
     SemanticsNode? ancestor = parent;
     while (inheritedTextDirection == null && ancestor != null) {
@@ -3548,10 +3705,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     List<SemanticsNode>? childrenInDefaultOrder;
     if (inheritedTextDirection != null) {
-      childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
+      childrenInDefaultOrder = _childrenInDefaultOrder(updatedChildren!, inheritedTextDirection);
     } else {
       // In the absence of text direction default to paint order.
-      childrenInDefaultOrder = _children;
+      childrenInDefaultOrder = updatedChildren;
     }
 
     // List.sort does not guarantee stable sort order. Therefore, children are
@@ -3819,6 +3976,220 @@ class _BoxEdge implements Comparable<_BoxEdge> {
   int compareTo(_BoxEdge other) {
     return offset.compareTo(other.offset);
   }
+}
+
+typedef _SemanticsGeometryClips = (Rect? paintClipRect, Rect? semanticsClipRect);
+
+final class _SemanticsGeometry {
+  /// The `paintClipRect` may be null if no clip is to be applied.
+  const _SemanticsGeometry({
+    required this.paintClipRect,
+    required this.semanticsClipRect,
+    required this.transform,
+    required this.rect,
+    required this.hidden,
+  });
+
+  factory _SemanticsGeometry.root(Rect rect) {
+    return _SemanticsGeometry(
+      paintClipRect: null,
+      semanticsClipRect: null,
+      transform: Matrix4.identity(),
+      hidden: false,
+      rect: rect,
+    );
+  }
+
+  /// Value for [SemanticsNode.transform].
+  final Matrix4 transform;
+
+  /// Value for [SemanticsNode.parentSemanticsClipRect].
+  final Rect? semanticsClipRect;
+
+  /// Value for [SemanticsNode.parentPaintClipRect].
+  final Rect? paintClipRect;
+
+  /// Value for [SemanticsNode.rect].
+  final Rect rect;
+
+  /// Whether the semantics node is completely clipped from ui, i.e. by
+  /// paintClipRect, but is still present in semantics tree.
+  final bool hidden;
+
+  static _SemanticsGeometry computeChildGeometry({
+    required Matrix4? parentTransform,
+    required Rect? parentPaintClipRect,
+    required Rect? parentSemanticsClipRect,
+    required SemanticsNode parent,
+    required SemanticsNode child,
+  }) {
+    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    Matrix4? parentToCommonAncestorTransform;
+    SemanticsNode childSemanticsNode = child;
+    SemanticsNode parentSemanticsNode = parent;
+
+    final List<SemanticsNode> childToCommonAncestor = <SemanticsNode>[childSemanticsNode];
+
+    // Find the common ancestor.
+    while (!identical(childSemanticsNode, parentSemanticsNode)) {
+      final int fromDepth = childSemanticsNode.depth;
+      final int toDepth = parentSemanticsNode.depth;
+
+      print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
+      if (fromDepth >= toDepth) {
+        assert(
+          childSemanticsNode.parent != null,
+          '$parent and $child are not in the same render tree.',
+        );
+        childSemanticsNode = childSemanticsNode.semanticsParent!;
+        childToCommonAncestor.add(childSemanticsNode);
+      }
+      if (fromDepth <= toDepth) {
+        assert(
+          parentSemanticsNode.parent != null,
+          '$parent and $child are not in the same render tree.',
+        );
+
+        parentToCommonAncestorTransform ??= Matrix4.identity();
+        parentToCommonAncestorTransform.multiply(
+          parentSemanticsNode.transform ?? Matrix4.identity(),
+        );
+        parentSemanticsNode = parentSemanticsNode.parent!;
+      }
+    }
+
+    // Calculate transform.
+    assert(childToCommonAncestor.length >= 2);
+    print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
+    for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
+      transform.multiply(childToCommonAncestor[i].transform ?? Matrix4.identity());
+      // childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
+    }
+    print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
+    if (parentToCommonAncestorTransform != null) {
+      if (parentToCommonAncestorTransform.invert() != 0) {
+        transform.multiply(parentToCommonAncestorTransform);
+      } else {
+        transform.setZero();
+      }
+    }
+
+    // assert(childToCommonAncestor.last == parent);
+    // Calculate clips.
+    Rect? paintClipRect;
+    Rect? semanticsClipRect;
+    // This is most common case, i.e. parent is the common ancestor.
+    paintClipRect = parentPaintClipRect;
+    semanticsClipRect = parentSemanticsClipRect;
+    // assert(parentToCommonAncestorTransform == null);
+    for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
+      (paintClipRect, semanticsClipRect) = _computeClipRect(
+        childToCommonAncestor[i],
+        childToCommonAncestor[i - 1],
+        semanticsClipRect,
+        paintClipRect,
+      );
+    }
+
+    Rect rect = semanticsClipRect?.intersect(child.rect) ?? child.rect;
+    bool isRectHidden = false;
+    if (paintClipRect != null) {
+      final Rect paintRect = paintClipRect.intersect(rect);
+      isRectHidden = paintRect.isEmpty && !rect.isEmpty;
+      if (!isRectHidden) {
+        rect = paintRect;
+      }
+    }
+
+    return _SemanticsGeometry(
+      transform: transform,
+      paintClipRect: paintClipRect,
+      semanticsClipRect: semanticsClipRect,
+      rect: rect,
+      hidden: isRectHidden,
+    );
+  }
+
+  static _SemanticsGeometryClips _computeClipRect(
+    SemanticsNode parent,
+    SemanticsNode child,
+    Rect? parentSemanticsClipRect,
+    Rect? parentPaintClipRect,
+  ) {
+    assert(identical(child.semanticsParent, parent));
+    if (parentPaintClipRect == null) {
+      return (null, null);
+    }
+    // Computes the paint transform from child to parent. The _transformRect
+    // method will compute the inverse.
+    _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+    _temporaryTransformHolder.multiply(child.transform ?? Matrix4.identity());
+
+    final Rect paintClipRect = _transformRect(parentPaintClipRect, _temporaryTransformHolder)!;
+    final Rect? semanticsClip = parentSemanticsClipRect;
+    // parent.describeSemanticsClip(child) ??
+    // _intersectRects(parentSemanticsClipRect, additionalPaintClip);
+    return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
+  }
+
+  static Rect? _intersectRects(Rect? a, Rect? b) {
+    if (b == null) {
+      return a;
+    }
+    return a?.intersect(b) ?? b;
+  }
+
+  /// From parent to child coordinate system.
+  static Rect? _transformRect(Rect? rect, Matrix4 transform) {
+    if (rect == null) {
+      return null;
+    }
+    if (rect.isEmpty || transform.isZero()) {
+      return Rect.zero;
+    }
+    return MatrixUtils.inverseTransformRect(transform, rect);
+  }
+
+  // A matrix used to store transient transform data.
+  //
+  // Reusing this matrix avoids allocating a new matrix every time a temporary
+  // matrix is needed.
+  //
+  // This instance should never be returned to the caller. Otherwise, the data
+  // stored in it will be overwritten unpredictably by subsequent reuses.
+  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
+
+  // Computes the semantics and painting clip rects for the given child and
+  // assigns the rects to _semanticsClipRect and _paintClipRect respectively.
+  //
+  // The caller must guarantee that child.parent == parent. The resulting rects
+  // are in `child`'s coordinate system.
+  // static _SemanticsGeometryClips _computeClipRect(
+  //   RenderObject parent,
+  //   RenderObject child,
+  //   Rect? parentSemanticsClipRect,
+  //   Rect? parentPaintClipRect,
+  // ) {
+  //   assert(identical(child.parent, parent));
+  //   final Rect? additionalPaintClip = parent.describeApproximatePaintClip(child);
+  //   if (parentPaintClipRect == null && additionalPaintClip == null) {
+  //     return (null, null);
+  //   }
+  //   // Computes the paint transform from child to parent. The _transformRect
+  //   // method will compute the inverse.
+  //   _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+  //   parent.applyPaintTransform(child, _temporaryTransformHolder);
+
+  //   final Rect paintClipRect =
+  //       _transformRect(
+  //         _intersectRects(additionalPaintClip, parentPaintClipRect),
+  //         _temporaryTransformHolder,
+  //       )!;
+  //   final Rect? semanticsClip =
+  //       parent.describeSemanticsClip(child) ??
+  //       _intersectRects(parentSemanticsClipRect, additionalPaintClip);
+  //   return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
+  // }
 }
 
 /// A group of [nodes] that are disjoint vertically or horizontally from other
@@ -4101,6 +4472,8 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
+  final Map<String, SemanticsNode> _overlayPortalParentNodes = <String, SemanticsNode>{};
+  final Map<String, SemanticsNode> _overlayPortalChildNodes = <String, SemanticsNode>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -4205,10 +4578,73 @@ class SemanticsOwner extends ChangeNotifier {
         }
       }
     }
+
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
-    for (final SemanticsNode node in visitedNodes) {
-      assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
+
+    final List<SemanticsNode> updatedVisitedNodes = <SemanticsNode>[];
+
+    if (kIsWeb) {
+      visitedNodes.forEach(updatedVisitedNodes.add);
+    } else {
+      for (final SemanticsNode node in visitedNodes) {
+        final SemanticsData data = node.getSemanticsData();
+
+        if (data.identifier.isEmpty) {
+          // If the node has no identifier, it is not an overlay portal node.
+          updatedVisitedNodes.add(node);
+          continue;
+        }
+
+        final String identifier = data.identifier.split(' ')[0];
+
+        final bool isOverlayPortalParent = data.identifier.endsWith('parent');
+        final bool isOverlayPortalChild = data.identifier.endsWith('child');
+
+        if (isOverlayPortalParent) {
+          // If the node is an overlay portal parent, we need to update the parent node.
+          _overlayPortalParentNodes[identifier] = node;
+        } else {
+          // If the node is a child of an overlay portal, we need to add parent node before node.
+          final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
+          if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
+            updatedVisitedNodes.add(parentNode);
+          }
+        }
+
+        if (isOverlayPortalChild) {
+          _overlayPortalChildNodes[identifier] = node;
+        }
+
+        updatedVisitedNodes.add(node);
+      }
+    }
+    // print('visitedNodes id list: ${visitedNodes.map((SemanticsNode node) => node.id)}');
+    // print(
+    //   'updatedVisitedNodes id list: ${updatedVisitedNodes.map((SemanticsNode node) => node.id)}',
+    // );
+    // print(
+    //   'updatedVisitedNodes label list: ${updatedVisitedNodes.map((SemanticsNode node) => node.label)}',
+    // );
+    // print('--------------- global parent & child list ---------------');
+    // List<String> formattedEntries = [];
+    // _overlayPortalParentNodes.forEach((key, node) {
+    //   formattedEntries.add('$key: ${node.id}');
+    // });
+    // // Join all elements of the list into a single string with a comma and space separator.
+    // print(formattedEntries.join(', '));
+    // List<String> formattedEntries1 = [];
+    // _overlayPortalChildNodes.forEach((key, node) {
+    //   formattedEntries1.add('$key: ${node.id}');
+    // });
+    // print(formattedEntries1.join(', '));
+
+    // print('--------------------------------------------------');
+
+    for (final SemanticsNode node in updatedVisitedNodes) {
+      assert(
+        node.parent?._dirty != true || node.getSemanticsData().identifier.endsWith('parent'),
+      ); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
       // contiguous dirty nodes. This means that when we return here,
@@ -4219,7 +4655,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if (node._dirty && node.attached) {
+      if ((node._dirty || node.getSemanticsData().identifier.endsWith('parent')) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
