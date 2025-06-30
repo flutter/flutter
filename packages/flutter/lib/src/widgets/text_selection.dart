@@ -2933,7 +2933,8 @@ class TextSelectionGestureDetectorBuilder {
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
+    if (_isEditableTextMounted &&
+        defaultTargetPlatform == TargetPlatform.iOS &&
         delegate.selectionEnabled &&
         editableText.textEditingValue.selection.isCollapsed) {
       // Update the floating cursor.
