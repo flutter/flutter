@@ -129,7 +129,7 @@ void main() {
     expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), isTrue);
     expect(await device.uninstallApp(FakeApplicationPackage()), isTrue);
 
-    expect(device.isSupported(), isTrue);
+    expect(await device.isSupported(), isTrue);
     expect(device.getLogReader(), isA<DesktopLogReader>());
 
     expect(await device.stopApp(FakeIOSApp()), isFalse);
