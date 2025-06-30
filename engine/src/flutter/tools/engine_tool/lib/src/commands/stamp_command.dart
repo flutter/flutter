@@ -64,7 +64,12 @@ final class StampCommand extends CommandBase {
       workingDirectory: environment.engine.srcDir,
     );
     if (result.exitCode != 0) {
-      throw Exception('git rev-parse HEAD failed with exit code ${result.exitCode}');
+      environment.logger.error(
+        'git rev-parse HEAD failed with exit code ${result.exitCode}'
+        '\n\n'
+        'STDOUT:\n${result.stdout}\n'
+        'STDERR:\n${result.stderr}\n',
+      );
     }
     return result.stdout.trim();
   }
@@ -75,7 +80,12 @@ final class StampCommand extends CommandBase {
       workingDirectory: environment.engine.srcDir,
     );
     if (result.exitCode != 0) {
-      throw Exception('git show failed with exit code ${result.exitCode}');
+      environment.logger.error(
+        'git show failed with exit code ${result.exitCode}'
+        '\n\n'
+        'STDOUT:\n${result.stdout}\n'
+        'STDERR:\n${result.stderr}\n',
+      );
     }
     return result.stdout.trim();
   }
@@ -85,7 +95,12 @@ final class StampCommand extends CommandBase {
       '${environment.flutterBinInternal}/content_aware_hash.sh',
     ], workingDirectory: environment.engine.srcDir);
     if (result.exitCode != 0) {
-      throw Exception('content_aware_hash.sh failed with exit code ${result.exitCode}');
+      environment.logger.error(
+        'content_aware_hash.sh failed with exit code ${result.exitCode}'
+        '\n\n'
+        'STDOUT:\n${result.stdout}\n'
+        'STDERR:\n${result.stderr}\n',
+      );
     }
     return result.stdout.trim();
   }
