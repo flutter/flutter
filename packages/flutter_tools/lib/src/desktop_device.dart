@@ -296,7 +296,7 @@ abstract class DesktopDevice extends Device {
         addFlag('enable-impeller=false');
     }
     if (debuggingOptions.enableFlutterGpu) {
-      addFlag('enable-flutter-gpu');
+      addFlag('enable-flutter-gpu=true');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.

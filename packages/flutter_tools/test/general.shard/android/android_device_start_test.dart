@@ -221,6 +221,7 @@ void main() {
           '--ez', 'endless-trace-buffer', 'true',
           '--ez', 'purge-persistent-cache', 'true',
           '--ez', 'enable-impeller', 'true',
+          '--ez', 'enable-flutter-gpu', 'true',
           '--ez', 'enable-checked-mode', 'true',
           '--ez', 'verify-entry-points', 'true',
           '--ez', 'start-paused', 'true',
