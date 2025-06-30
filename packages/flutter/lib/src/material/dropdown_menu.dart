@@ -1025,7 +1025,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     );
 
     final TextStyle? baseTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
-    final Color disabledColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.38);
+    final Color? disabledColor = theme.disabledColor ?? defaults.disabledColor;
     final TextStyle? effectiveTextStyle =
         widget.enabled
             ? baseTextStyle
@@ -1504,7 +1504,8 @@ class _RenderDropdownMenuBody extends RenderBox
 
 // Hand coded defaults. These will be updated once we have tokens/spec.
 class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
-  _DropdownMenuDefaultsM3(this.context);
+  _DropdownMenuDefaultsM3(this.context)
+    : super(disabledColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
