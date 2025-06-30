@@ -254,6 +254,7 @@ void main() {
         useTestFonts: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

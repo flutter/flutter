@@ -588,6 +588,7 @@ void main() {
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,
+        enableFlutterGpu: true,
         enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},

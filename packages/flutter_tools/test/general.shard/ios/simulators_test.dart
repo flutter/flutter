@@ -1406,6 +1406,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           purgePersistentCache: true,
           dartFlags: '--baz',
           enableImpeller: ImpellerStatus.disabled,
+          enableFlutterGpu: true,
           hostVmServicePort: 0,
         );
 

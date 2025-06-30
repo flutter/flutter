@@ -363,6 +363,35 @@ void main() {
     );
   });
 
+  testWithoutContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-flutter-gpu=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableFlutterGpu: true,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
   testUsingContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
