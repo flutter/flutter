@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Keresés az interneten",
   "shareButtonLabel": "Megosztás",
   "pasteButtonLabel": "Beillesztés",
-  "selectAllButtonLabel": "Összes kijelölése"
+  "selectAllButtonLabel": "Összes kijelölése",
+  "translateButtonLabel": "Translate"
 }

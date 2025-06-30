@@ -29,5 +29,6 @@
   "shareButtonLabel": "షేర్ చేయండి...",
   "clearButtonLabel": "క్లియర్ చేయండి",
   "cancelButtonLabel": "రద్దు చేయండి",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "translateButtonLabel": "Translate"
 }

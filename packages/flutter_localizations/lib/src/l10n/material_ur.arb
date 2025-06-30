@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں",
   "clearButtonTooltip": "ٹیکسٹ صاف کریں",
-  "selectedDateLabel": "منتخب کردہ"
+  "selectedDateLabel": "منتخب کردہ",
+  "translateButtonLabel": "Translate"
 }

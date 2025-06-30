@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "جستجو در وب",
   "shareButtonLabel": "هم‌رسانی کردن",
   "clearButtonTooltip": "پاک کردن نوشتار",
-  "selectedDateLabel": "انتخاب‌شده"
+  "selectedDateLabel": "انتخاب‌شده",
+  "translateButtonLabel": "Translate"
 }

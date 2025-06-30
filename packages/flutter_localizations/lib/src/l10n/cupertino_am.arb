@@ -29,5 +29,6 @@
   "shareButtonLabel": "አጋራ...",
   "clearButtonLabel": "አጽዳ",
   "cancelButtonLabel": "ይቅር",
-  "backButtonLabel": "ተመለስ"
+  "backButtonLabel": "ተመለስ",
+  "translateButtonLabel": "Translate"
 }

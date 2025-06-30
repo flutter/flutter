@@ -29,5 +29,6 @@
   "shareButtonLabel": "Del…",
   "clearButtonLabel": "Slett",
   "cancelButtonLabel": "Avbryt",
-  "backButtonLabel": "Tilbake"
+  "backButtonLabel": "Tilbake",
+  "translateButtonLabel": "Translate"
 }

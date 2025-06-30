@@ -212,6 +212,9 @@ abstract class WidgetsLocalizations {
   /// Label for "search web" edit buttons and menu items.
   String get searchWebButtonLabel;
 
+  /// Label for "translate" edit buttons and menu items.
+  String get translateButtonLabel;
+
   /// Label for "share" edit buttons and menu items.
   String get shareButtonLabel;
 
@@ -301,6 +304,9 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get shareButtonLabel => 'Share';

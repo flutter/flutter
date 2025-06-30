@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Tuma",
   "pasteButtonLabel": "Bandika",
-  "selectAllButtonLabel": "Chagua vyote"
+  "selectAllButtonLabel": "Chagua vyote",
+  "translateButtonLabel": "Translate"
 }

@@ -29,5 +29,6 @@
   "shareButtonLabel": "Ndaj...",
   "clearButtonLabel": "Pastro",
   "cancelButtonLabel": "Anulo",
-  "backButtonLabel": "Prapa"
+  "backButtonLabel": "Prapa",
+  "translateButtonLabel": "Translate"
 }

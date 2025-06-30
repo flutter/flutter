@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela",
   "clearButtonTooltip": "Rensa text",
-  "selectedDateLabel": "Markerat"
+  "selectedDateLabel": "Markerat",
+  "translateButtonLabel": "Translate"
 }
