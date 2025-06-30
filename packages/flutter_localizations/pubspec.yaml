@@ -13,11 +13,11 @@ dependencies:
 
   flutter:
     sdk: flutter
-  intl: 0.20.2
+  intl: ^0.20.2
   path: 1.9.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-# PUBSPEC CHECKSUM: c2j4ng
+# PUBSPEC CHECKSUM: pmbisj
