@@ -180,6 +180,30 @@ Matcher findsAtLeastNWidgets(int n) => _FindsCountMatcher(n, null);
 ///  * [findsExactly], when you want the finder to find a specific number of candidates.
 Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
+/// Asserts that the [FinderBase] locates at least one widget that could be found
+/// by each FinderBase in the provided [finderBasesList] at a location that is
+/// compatible with the ascending order of the provided [finderBasesList].
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(
+///  find.bySubtype<Widget>(),
+///  findsAscendinglyOrderedWidgets(<FinderBase<dynamic>>[
+///    find.text('Save'),
+///    find.byType(CircularProgressIndicator),
+///    find.byType(Container),
+///  ]),
+/// );
+/// ```
+///
+/// This example asserts that there is a widget that could be found by find.text('Save') that precedes
+/// a widget that could be found by find.byType(CircularProgressIndicator) that precedes
+/// a widget that could be found by find.byType(Container) in the widgets that could be
+/// found by find.bySubtype<Widget>().
+Matcher findsAscendinglyOrderedWidgets(List<FinderBase<dynamic>> finderBasesList) =>
+    _FindsAscendinglyOrderedWidgets(finderBasesList);
+
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
@@ -1147,6 +1171,96 @@ class _FindsCountMatcher extends Matcher {
     }
     assert(max != null && count > min!);
     return mismatchDescription.add('is too many');
+  }
+}
+
+class _FindsAscendinglyOrderedWidgets extends Matcher {
+  _FindsAscendinglyOrderedWidgets(this.finderBasesList) {
+    if (finderBasesList.length < 2) {
+      throw ArgumentError(
+        'findsAscendinglyOrderedWidgets takes a list that has at least two FinderBases as its argument',
+      );
+    }
+  }
+
+  final List<FinderBase<dynamic>> finderBasesList;
+
+  @override
+  Description describe(Description description) {
+    return description.add(
+      'at least one matching candidate for each FinderBase in the finderBasesList at a location that is compatible with the ascending order of the finderBasesList',
+    );
+  }
+
+  @override
+  bool matches(covariant FinderBase<dynamic> finderBase, Map<dynamic, dynamic> matchState) {
+    int lastFoundLocation = -1;
+    final List<dynamic> finderBaseFound = finderBase.evaluate().toList();
+    for (int i = 0; i < finderBasesList.length; i++) {
+      final Iterator<dynamic> expected = finderBasesList.elementAt(i).evaluate().iterator;
+      if (!expected.moveNext()) {
+        matchState[finderBasesList.elementAt(i)] = <bool>[false, false];
+      } else {
+        final int howManyFinderBaseThatFindTheSameThingAlreadyDone =
+            matchState.keys
+                .where(
+                  (dynamic e) =>
+                      // Compares FinderBases to find the FinderBases that finds the same things
+                      finderBasesList.elementAt(i).describeMatch(Plurality.zero) ==
+                          (e as FinderBase<dynamic>).describeMatch(Plurality.zero) &&
+                      finderBasesList.elementAt(i).describeMatch(Plurality.one) ==
+                          e.describeMatch(Plurality.one) &&
+                      finderBasesList.elementAt(i).describeMatch(Plurality.many) ==
+                          e.describeMatch(Plurality.many),
+                )
+                .length;
+        for (int k = 0; k < howManyFinderBaseThatFindTheSameThingAlreadyDone; k++) {
+          expected.moveNext();
+        }
+        final int indexOfCurrrent = finderBaseFound.indexWhere((dynamic e) {
+          return expected.current == e;
+        }, lastFoundLocation + 1);
+        if (indexOfCurrrent < lastFoundLocation + 1) {
+          matchState[finderBasesList.elementAt(i)] = <bool>[true, false];
+        } else {
+          matchState[finderBasesList.elementAt(i)] = <bool>[true, true];
+        }
+        lastFoundLocation = indexOfCurrrent;
+      }
+    }
+    final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
+      (MapEntry<dynamic, dynamic> me) =>
+          (me.value as List<bool>).elementAt(0) && (me.value as List<bool>).elementAt(1),
+    );
+    if (found.length != finderBasesList.length) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
+      (MapEntry<dynamic, dynamic> me) => (me.value as List<bool>).elementAt(0),
+    );
+    if (found.isEmpty) {
+      return mismatchDescription.add('means none were found but some were expected');
+    } else if (found.length == 1) {
+      return mismatchDescription.add('means one was found but some were expected');
+    } else {
+      if (found.length != matchState.length) {
+        return mismatchDescription.add('is not enough');
+      } else {
+        return mismatchDescription.add(
+          'means all were found but in locations that are not compatible with the ascending order of the finderBasesList',
+        );
+      }
+    }
   }
 }
 
