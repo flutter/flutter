@@ -619,7 +619,10 @@ class CustomDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) async {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
     }
