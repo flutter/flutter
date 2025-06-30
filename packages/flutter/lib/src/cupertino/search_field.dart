@@ -21,6 +21,12 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 // Eyeballed on an iPhone 15 simulator running iOS 17.5.
 const double _kMinHeightBeforeTotalTransparency = 4 / 5;
 
+// The maximum icon size of the prefix icon of a focused search field before it
+// is hidden in higher accessibility text scale modes.
+//
+// Eyeballed on an iPhone 15 simulator running iOS 17.5.
+const double _kMaxPrefixIconSize = 30.0;
+
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
 ///
@@ -361,11 +367,14 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   final BorderRadius _kDefaultBorderRadius = const BorderRadius.all(Radius.circular(9.0));
 
   RestorableTextEditingController? _controller;
+  FocusNode? _focusNode;
 
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? _focusNode!;
 
   ScrollNotificationObserverState? _scrollNotificationObserver;
   late double _scaledIconSize;
+  late ValueNotifier<bool> _isFocused;
   double _fadeExtent = 0.0;
 
   @override
@@ -374,6 +383,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     if (widget.controller == null) {
       _createLocalController();
     }
+    if (widget.focusNode == null) {
+      _focusNode = FocusNode();
+    }
+    _isFocused = ValueNotifier<bool>(_effectiveFocusNode.hasFocus);
+    _effectiveFocusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -394,6 +408,16 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       _controller!.dispose();
       _controller = null;
     }
+    if (widget.focusNode != oldWidget.focusNode) {
+      _effectiveFocusNode.removeListener(_onFocusChange);
+      if (widget.focusNode == null && oldWidget.focusNode != null) {
+        _focusNode = FocusNode();
+      } else if (widget.focusNode != null && oldWidget.focusNode == null) {
+        _focusNode!.dispose();
+        _focusNode = null;
+      }
+      _effectiveFocusNode.addListener(_onFocusChange);
+    }
   }
 
   @override
@@ -409,10 +433,14 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
       _scrollNotificationObserver = null;
     }
-    super.dispose();
+    _effectiveFocusNode.removeListener(_onFocusChange);
+    if (widget.focusNode == null) {
+      _focusNode?.dispose();
+    }
     if (widget.controller == null) {
       _controller?.dispose();
     }
+    super.dispose();
   }
 
   void _registerController() {
@@ -479,6 +507,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     return animatedInsets ?? insets;
   }
 
+  void _onFocusChange() {
+    assert(widget.focusNode != null || _focusNode != null);
+    _isFocused.value = _effectiveFocusNode.hasFocus;
+  }
+
   @override
   Widget build(BuildContext context) {
     final String placeholder =
@@ -507,17 +540,24 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
           color: widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
         );
-
-    final IconThemeData iconThemeData = IconThemeData(
-      color: CupertinoDynamicColor.resolve(widget.itemColor, context),
+    final Color iconColor = CupertinoDynamicColor.resolve(widget.itemColor, context);
+    final IconThemeData suffixIconThemeData = IconThemeData(
+      color: iconColor,
       size: _scaledIconSize,
+    );
+    final IconThemeData prefixIconThemeData = IconThemeData(
+      color: iconColor,
+      size:
+          _scaledIconSize >= _kMaxPrefixIconSize && _effectiveFocusNode.hasFocus
+              ? 0.0
+              : _scaledIconSize,
     );
 
     final Widget prefix = Opacity(
       opacity: 1.0 - _fadeExtent,
       child: Padding(
         padding: _animatedInsets(context, widget.prefixInsets),
-        child: IconTheme(data: iconThemeData, child: widget.prefixIcon),
+        child: IconTheme(data: prefixIconThemeData, child: widget.prefixIcon),
       ),
     );
 
@@ -529,38 +569,43 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
           onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
           minSize: 0,
           padding: EdgeInsets.zero,
-          child: IconTheme(data: iconThemeData, child: widget.suffixIcon),
+          child: IconTheme(data: suffixIconThemeData, child: widget.suffixIcon),
         ),
       ),
     );
 
-    return CupertinoTextField(
-      controller: _effectiveController,
-      decoration: decoration,
-      style: widget.style,
-      prefix: prefix,
-      suffix: suffix,
-      keyboardType: widget.keyboardType,
-      onTap: widget.onTap,
-      enabled: widget.enabled ?? true,
-      cursorWidth: widget.cursorWidth,
-      cursorHeight: widget.cursorHeight,
-      cursorRadius: widget.cursorRadius,
-      cursorOpacityAnimates: widget.cursorOpacityAnimates,
-      cursorColor: widget.cursorColor,
-      suffixMode: widget.suffixMode,
-      placeholder: placeholder,
-      placeholderStyle: placeholderStyle,
-      padding: _animatedInsets(context, widget.padding),
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      autocorrect: widget.autocorrect,
-      smartQuotesType: widget.smartQuotesType,
-      smartDashesType: widget.smartDashesType,
-      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      textInputAction: TextInputAction.search,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _isFocused,
+      builder: (BuildContext context, bool value, Widget? child) {
+        return CupertinoTextField(
+          controller: _effectiveController,
+          decoration: decoration,
+          style: widget.style,
+          prefix: prefix,
+          suffix: suffix,
+          keyboardType: widget.keyboardType,
+          onTap: widget.onTap,
+          enabled: widget.enabled ?? true,
+          cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
+          cursorRadius: widget.cursorRadius,
+          cursorOpacityAnimates: widget.cursorOpacityAnimates,
+          cursorColor: widget.cursorColor,
+          suffixMode: widget.suffixMode,
+          placeholder: placeholder,
+          placeholderStyle: placeholderStyle,
+          padding: _animatedInsets(context, widget.padding),
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          focusNode: _effectiveFocusNode,
+          autofocus: widget.autofocus,
+          autocorrect: widget.autocorrect,
+          smartQuotesType: widget.smartQuotesType,
+          smartDashesType: widget.smartDashesType,
+          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          textInputAction: TextInputAction.search,
+        );
+      },
     );
   }
 }
