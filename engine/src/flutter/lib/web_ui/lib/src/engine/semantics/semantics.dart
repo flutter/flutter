@@ -45,6 +45,8 @@ import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
+const String kFlutterSemanticNodePrefix = 'flt-semantic-node-';
+
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
 
@@ -600,7 +602,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -799,7 +801,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('flt-semantic-node-$semanticNodeId');
+          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
