@@ -309,7 +309,7 @@ void _testRoleLifecycle() {
       tester.updateNode(
         id: 0,
         label: 'a label',
-        flags: const ui.SemanticsFlags(isFocusable: true, isButton: true),
+        flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse, isButton: true),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
@@ -2310,17 +2310,12 @@ void _testIncrementables() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    void pumpSemantics({required bool isFocused}) {
+    void pumpSemantics({required ui.Tristate isFocused}) {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         hasIncrease: true,
-        flags: ui.SemanticsFlags(
-          isFocusable: true,
-          isFocused: isFocused,
-          hasEnabledState: true,
-          isEnabled: true,
-        ),
+        flags: ui.SemanticsFlags(isFocused: isFocused, isEnabled: ui.Tristate.isTrue),
         value: 'd',
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2333,11 +2328,11 @@ void _testIncrementables() {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    pumpSemantics(isFocused: false);
+    pumpSemantics(isFocused: ui.Tristate.isFalse);
     final DomElement element = owner().debugSemanticsTree![0]!.element.querySelector('input')!;
     expect(capturedActions, isEmpty);
 
-    pumpSemantics(isFocused: true);
+    pumpSemantics(isFocused: ui.Tristate.isTrue);
     expect(
       reason: 'Framework requested focus. No need to circle the event back to the framework.',
       capturedActions,
@@ -2354,7 +2349,7 @@ void _testIncrementables() {
     );
     capturedActions.clear();
 
-    pumpSemantics(isFocused: false);
+    pumpSemantics(isFocused: ui.Tristate.isFalse);
     expect(reason: 'The engine never calls blur() explicitly.', capturedActions, isEmpty);
 
     // The web doesn't send didLoseAccessibilityFocus as on the web,
@@ -2425,11 +2420,9 @@ void _testCheckables() {
       actions: 0 | ui.SemanticsAction.tap.index,
       label: 'test label',
       flags: const ui.SemanticsFlags(
-        isEnabled: true,
-        hasEnabledState: true,
-        hasToggledState: true,
-        isToggled: true,
-        isFocusable: true,
+        isEnabled: ui.Tristate.isTrue,
+        isToggled: ui.Tristate.isTrue,
+        isFocused: ui.Tristate.isFalse,
       ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2460,7 +2453,7 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags: const ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isToggled: true),
+      flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isFalse, isToggled: ui.Tristate.isTrue),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2483,8 +2476,7 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags: const ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isEnabled: true),
-
+      flags: const ui.SemanticsFlags(isToggled: ui.Tristate.isFalse, isEnabled: ui.Tristate.isTrue),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2508,10 +2500,8 @@ void _testCheckables() {
       actions: 0 | ui.SemanticsAction.tap.index,
 
       flags: const ui.SemanticsFlags(
-        isEnabled: true,
-        hasEnabledState: true,
-        hasCheckedState: true,
-        isChecked: true,
+        isEnabled: ui.Tristate.isTrue,
+        isChecked: ui.CheckedState.isTrue,
       ),
 
       transform: Matrix4.identity().toFloat64(),
@@ -2536,7 +2526,10 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
 
-      flags: const ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isChecked: true),
+      flags: const ui.SemanticsFlags(
+        isChecked: ui.CheckedState.isTrue,
+        isEnabled: ui.Tristate.isFalse,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2559,7 +2552,10 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
 
-      flags: const ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isEnabled: true),
+      flags: const ui.SemanticsFlags(
+        isChecked: ui.CheckedState.isFalse,
+        isEnabled: ui.Tristate.isTrue,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2582,11 +2578,9 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
       flags: const ui.SemanticsFlags(
-        hasCheckedState: true,
-        isChecked: true,
+        isChecked: ui.CheckedState.isTrue,
         isInMutuallyExclusiveGroup: true,
-        hasEnabledState: true,
-        isEnabled: true,
+        isEnabled: ui.Tristate.isTrue,
       ),
 
       transform: Matrix4.identity().toFloat64(),
@@ -2611,10 +2605,9 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
       flags: const ui.SemanticsFlags(
-        hasEnabledState: true,
-        hasCheckedState: true,
+        isEnabled: ui.Tristate.isFalse,
+        isChecked: ui.CheckedState.isTrue,
         isInMutuallyExclusiveGroup: true,
-        isChecked: true,
       ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2638,10 +2631,9 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
       flags: const ui.SemanticsFlags(
-        hasEnabledState: true,
-        hasCheckedState: true,
+        isChecked: ui.CheckedState.isFalse,
         isInMutuallyExclusiveGroup: true,
-        isEnabled: true,
+        isEnabled: ui.Tristate.isTrue,
       ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2669,9 +2661,8 @@ void _testCheckables() {
         tester.updateNode(
           id: 1,
           flags: const ui.SemanticsFlags(
-            isEnabled: true,
-            hasEnabledState: true,
-            hasCheckedState: true,
+            isEnabled: ui.Tristate.isTrue,
+            isChecked: ui.CheckedState.isFalse,
             isInMutuallyExclusiveGroup: true,
           ),
           rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
@@ -2679,11 +2670,9 @@ void _testCheckables() {
         tester.updateNode(
           id: 2,
           flags: const ui.SemanticsFlags(
-            isEnabled: true,
-            hasEnabledState: true,
-            hasCheckedState: true,
+            isEnabled: ui.Tristate.isTrue,
+            isChecked: ui.CheckedState.isTrue,
             isInMutuallyExclusiveGroup: true,
-            isChecked: true,
           ),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
@@ -2706,7 +2695,7 @@ void _testCheckables() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    void pumpSemantics({required bool isFocused}) {
+    void pumpSemantics({required ui.Tristate isFocused}) {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
@@ -2714,10 +2703,9 @@ void _testCheckables() {
         // The following combination of actions and flags describe a checkbox.
         hasTap: true,
         flags: ui.SemanticsFlags(
-          hasEnabledState: true,
-          isEnabled: true,
-          hasCheckedState: true,
-          isFocusable: true,
+          isEnabled: ui.Tristate.isTrue,
+          isChecked: ui.CheckedState.isFalse,
+
           isFocused: isFocused,
         ),
         value: 'd',
@@ -2732,11 +2720,11 @@ void _testCheckables() {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    pumpSemantics(isFocused: false);
+    pumpSemantics(isFocused: ui.Tristate.isFalse);
     final DomElement element = owner().debugSemanticsTree![0]!.element;
     expect(capturedActions, isEmpty);
 
-    pumpSemantics(isFocused: true);
+    pumpSemantics(isFocused: ui.Tristate.isTrue);
     expect(
       reason: 'Framework requested focus. No need to circle the event back to the framework.',
       capturedActions,
@@ -2781,25 +2769,25 @@ void _testSelectables() {
         ),
         tester.updateNode(
           id: 2,
-          flags: const ui.SemanticsFlags(hasSelectedState: true),
+          flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
           role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
+          flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
           role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
         // Add two new nodes to test the aria-current fallback
         tester.updateNode(
           id: 4,
-          flags: const ui.SemanticsFlags(hasSelectedState: true),
+          flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
           rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
         ),
         tester.updateNode(
           id: 5,
-          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
+          flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
           rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
@@ -2824,25 +2812,25 @@ void _testSelectables() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
+      flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
       role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      flags: const ui.SemanticsFlags(hasSelectedState: true),
+      flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
       role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     // Flip the values for the aria-current fallback nodes
     tester.updateNode(
       id: 4,
-      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
+      flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
       rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
     );
     tester.updateNode(
       id: 5,
-      flags: const ui.SemanticsFlags(hasSelectedState: true),
+      flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
       rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
@@ -2869,10 +2857,8 @@ void _testSelectables() {
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
-        hasSelectedState: true,
-        isSelected: true,
-        hasCheckedState: true,
-        isChecked: true,
+        isSelected: ui.Tristate.isTrue,
+        isChecked: ui.CheckedState.isTrue,
       ),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
@@ -2909,12 +2895,12 @@ void _testExpandables() {
         ),
         tester.updateNode(
           id: 2,
-          flags: const ui.SemanticsFlags(hasExpandedState: true),
+          flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isFalse),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
+          flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isTrue),
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
       ],
@@ -2936,12 +2922,12 @@ void _testExpandables() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
+      flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isTrue),
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      flags: const ui.SemanticsFlags(hasExpandedState: true),
+      flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isFalse),
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     tester.apply();
@@ -2968,9 +2954,8 @@ void _testTappable() {
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
+        isFocused: ui.Tristate.isFalse,
+        isEnabled: ui.Tristate.isTrue,
         isButton: true,
       ),
       hasTap: true,
@@ -2998,7 +2983,11 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isButton: true),
+      flags: const ui.SemanticsFlags(
+        isFocused: ui.Tristate.isFalse,
+        isEnabled: ui.Tristate.isFalse,
+        isButton: true,
+      ),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3020,7 +3009,7 @@ void _testTappable() {
     tester.updateNode(
       id: 0,
       // Not a button
-      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isEnabled: true),
+      flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse, isEnabled: ui.Tristate.isTrue),
 
       // But has a tap action and no children
       hasTap: true,
@@ -3049,7 +3038,10 @@ void _testTappable() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-        flags: ui.SemanticsFlags(hasEnabledState: true, isEnabled: enabled, isButton: true),
+        flags: ui.SemanticsFlags(
+          isEnabled: enabled ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+          isButton: true,
+        ),
         hasTap: true,
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
@@ -3080,11 +3072,9 @@ void _testTappable() {
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
-        hasEnabledState: true,
-        isEnabled: true,
+        isEnabled: ui.Tristate.isTrue,
         isButton: true,
-        isFocusable: true,
-        isFocused: true,
+        isFocused: ui.Tristate.isTrue,
       ),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3106,10 +3096,8 @@ void _testTappable() {
         id: 0,
         flags: ui.SemanticsFlags(
           // The following combination of actions and flags describe a button.
-          hasEnabledState: true,
-          isEnabled: true,
+          isEnabled: ui.Tristate.isTrue,
           isButton: true,
-          isFocusable: true,
           isFocused: isFocused,
         ),
         hasTap: true,
@@ -3125,11 +3113,11 @@ void _testTappable() {
       capturedActions.add((event.nodeId, event.type, event.arguments));
     };
 
-    pumpSemantics(isFocused: false);
+    pumpSemantics(isFocused: ui.Tristate.isFalse);
     final DomElement element = owner().debugSemanticsTree![0]!.element;
     expect(capturedActions, isEmpty);
 
-    pumpSemantics(isFocused: true);
+    pumpSemantics(isFocused: ui.Tristate.isTrue);
     expect(
       reason: 'Framework requested focus. No need to circle the event back to the framework.',
       capturedActions,
@@ -3153,7 +3141,7 @@ void _testTappable() {
     );
     capturedActions.clear();
 
-    pumpSemantics(isFocused: false);
+    pumpSemantics(isFocused: ui.Tristate.isFalse);
     expect(capturedActions, isEmpty);
 
     semantics().semanticsEnabled = false;
@@ -3178,9 +3166,8 @@ void _testTappable() {
     tester.updateNode(
       id: 0,
       flags: const ui.SemanticsFlags(
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
+        isFocused: ui.Tristate.isFalse,
+        isEnabled: ui.Tristate.isTrue,
         isButton: true,
       ),
       hasTap: true,
@@ -3189,9 +3176,8 @@ void _testTappable() {
         tester.updateNode(
           id: 1,
           flags: const ui.SemanticsFlags(
-            isFocusable: true,
-            hasEnabledState: true,
-            isEnabled: true,
+            isFocused: ui.Tristate.isFalse,
+            isEnabled: ui.Tristate.isTrue,
             isButton: true,
           ),
           hasTap: true,
@@ -3878,10 +3864,9 @@ void _testRoute() {
               id: 2,
               label: 'Button 1',
               flags: const ui.SemanticsFlags(
-                hasEnabledState: true,
-                isEnabled: true,
+                isEnabled: ui.Tristate.isTrue,
                 isButton: true,
-                isFocusable: true,
+                isFocused: ui.Tristate.isFalse,
               ),
               hasTap: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3890,10 +3875,9 @@ void _testRoute() {
               id: 3,
               label: 'Button 2',
               flags: const ui.SemanticsFlags(
-                hasEnabledState: true,
-                isEnabled: true,
+                isEnabled: ui.Tristate.isTrue,
                 isButton: true,
-                isFocusable: true,
+                isFocused: ui.Tristate.isFalse,
               ),
               hasTap: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3937,10 +3921,9 @@ void _testRoute() {
               id: 2,
               label: 'Button 1',
               flags: const ui.SemanticsFlags(
-                hasEnabledState: true,
-                isEnabled: true,
+                isEnabled: ui.Tristate.isTrue,
                 isButton: true,
-                isFocusable: true,
+                isFocused: ui.Tristate.isFalse,
               ),
               hasTap: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3949,12 +3932,10 @@ void _testRoute() {
               id: 3,
               label: 'Button 2',
               flags: const ui.SemanticsFlags(
-                hasEnabledState: true,
-                isEnabled: true,
+                isEnabled: ui.Tristate.isTrue,
                 isButton: true,
-                isFocusable: true,
                 // Asked for focus explicitly.
-                isFocused: true,
+                isFocused: ui.Tristate.isTrue,
               ),
               hasTap: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3998,10 +3979,9 @@ void _testRoute() {
               id: 3,
               label: 'Click me!',
               flags: const ui.SemanticsFlags(
-                hasEnabledState: true,
-                isEnabled: true,
+                isEnabled: ui.Tristate.isTrue,
                 isButton: true,
-                isFocusable: true,
+                isFocused: ui.Tristate.isFalse,
               ),
               hasTap: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -4284,7 +4264,7 @@ void _testFocusable() {
           tester.updateNode(
             id: 1,
             label: 'focusable text',
-            flags: const ui.SemanticsFlags(isFocusable: true),
+            flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse),
             rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
           ),
         ],
@@ -4311,7 +4291,7 @@ void _testFocusable() {
       tester.updateNode(
         id: 1,
         label: 'test focusable',
-        flags: const ui.SemanticsFlags(isFocusable: true, isFocused: true),
+        flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isTrue),
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
@@ -4614,7 +4594,7 @@ void _testMenus() {
             tester.updateNode(
               id: 4,
               role: ui.SemanticsRole.menuItem,
-              flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
+              flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isTrue),
               children: <SemanticsNodeUpdate>[
                 tester.updateNode(
                   id: 5,
@@ -4697,7 +4677,7 @@ void _testMenus() {
             tester.updateNode(
               id: 4,
               role: ui.SemanticsRole.menuItem,
-              flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
+              flags: const ui.SemanticsFlags(isExpanded: ui.Tristate.isTrue),
               children: <SemanticsNodeUpdate>[
                 tester.updateNode(
                   id: 5,
@@ -4755,24 +4735,24 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    SemanticsObject pumpSemantics(bool hasExpandedState) {
+    SemanticsObject pumpSemantics(ui.Tristate isExpanded) {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItem,
-        flags: ui.SemanticsFlags(hasExpandedState: hasExpandedState),
+        flags: ui.SemanticsFlags(isExpanded: isExpanded),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
       return tester.getSemanticsObject(0);
     }
 
-    final SemanticsObject object0 = pumpSemantics(true);
+    final SemanticsObject object0 = pumpSemantics(ui.Tristate.isFalse);
     expect(object0.semanticRole?.kind, EngineSemanticsRole.menuItem);
     expect(object0.element.getAttribute('role'), 'menuitem');
     expect(object0.element.getAttribute('aria-haspopup'), 'menu');
 
-    final SemanticsObject object1 = pumpSemantics(false);
+    final SemanticsObject object1 = pumpSemantics(ui.Tristate.none);
     expect(object1.element.getAttribute('role'), 'menuitem');
     expect(object1.element.getAttribute('aria-haspopup'), isNull);
   });
@@ -4998,12 +4978,12 @@ void _testRequirable() {
         ),
         tester.updateNode(
           id: 2,
-          flags: const ui.SemanticsFlags(hasRequiredState: true),
+          flags: const ui.SemanticsFlags(isRequired: ui.Tristate.isFalse),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          flags: const ui.SemanticsFlags(hasRequiredState: true, isRequired: true),
+          flags: const ui.SemanticsFlags(isRequired: ui.Tristate.isTrue),
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
       ],
@@ -5025,12 +5005,12 @@ void _testRequirable() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      flags: const ui.SemanticsFlags(hasRequiredState: true, isRequired: true),
+      flags: const ui.SemanticsFlags(isRequired: ui.Tristate.isTrue),
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      flags: const ui.SemanticsFlags(hasRequiredState: true),
+      flags: const ui.SemanticsFlags(isRequired: ui.Tristate.isFalse),
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     tester.apply();

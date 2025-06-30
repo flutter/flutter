@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:ui' show Tristate;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -1289,15 +1290,13 @@ void main() {
       final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
-      expect(semantics.flagsCollection.isFocused, isFalse);
-      expect(semantics.flagsCollection.isFocusable, isTrue);
+      expect(semantics.flagsCollection.isFocused, Tristate.isFalse);
 
       FocusScope.of(key.currentContext!).requestFocus(key.currentState!.focusNode);
       await tester.pumpAndSettle();
 
       expect(key.currentState!.focusNode.hasFocus, isTrue);
-      expect(semantics.flagsCollection.isFocused, isTrue);
-      expect(semantics.flagsCollection.isFocusable, isTrue);
+      expect(semantics.flagsCollection.isFocused, Tristate.isTrue);
 
       key.currentState!.focusNode.canRequestFocus = false;
       await tester.pumpAndSettle();
@@ -1305,7 +1304,7 @@ void main() {
       expect(key.currentState!.focusNode.hasFocus, isFalse);
       expect(key.currentState!.focusNode.canRequestFocus, isFalse);
       expect(semantics.flagsCollection.isFocused, isFalse);
-      expect(semantics.flagsCollection.isFocusable, isFalse);
+      expect(semantics.flagsCollection.isFocused, Tristate.isFalse);
     });
 
     testWidgets('Setting canRequestFocus on focus node causes update.', (
