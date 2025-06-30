@@ -725,7 +725,6 @@ class _FocusState extends State<Focus> {
             defaultTargetPlatform != TargetPlatform.iOS && _couldRequestFocus
                 ? focusNode.requestFocus
                 : null,
-        focusable: _couldRequestFocus,
         focused: _couldRequestFocus ? _hadPrimaryFocus : null,
         child: widget.child,
       );
