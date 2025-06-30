@@ -29,5 +29,6 @@
   "shareButtonLabel": "Ulashish…",
   "clearButtonLabel": "Tozalash",
   "cancelButtonLabel": "Bekor qilish",
-  "backButtonLabel": "Orqaga"
+  "backButtonLabel": "Orqaga",
+  "translateButtonLabel": "Translate"
 }

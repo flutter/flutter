@@ -888,6 +888,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                             lookUpSelectedText:[self textInRange:_selectedTextRange]];
 }
 
+- (void)handleTranslateAction {
+  [self.textInputDelegate flutterTextInputView:self
+                         translateSelectedText:[self textInRange:_selectedTextRange]];
+}
+
 - (void)handleShareAction {
   [self.textInputDelegate flutterTextInputView:self
                              shareSelectedText:[self textInRange:_selectedTextRange]];
@@ -995,6 +1000,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       [self addAdditionalBasicCommandToItems:items
                                         type:type
                                     selector:@selector(handleLookUpAction)
+                                 encodedItem:encodedItem];
+    } else if ([type isEqualToString:@"translate"]) {
+      [self addAdditionalBasicCommandToItems:items
+                                        type:type
+                                    selector:@selector(handleTranslateAction)
                                  encodedItem:encodedItem];
     }
   }

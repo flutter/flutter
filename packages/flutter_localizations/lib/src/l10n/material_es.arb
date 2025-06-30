@@ -147,5 +147,6 @@
   "searchWebButtonLabel": "Buscar en la Web",
   "shareButtonLabel": "Compartir",
   "clearButtonTooltip": "Borrar texto",
-  "selectedDateLabel": "Seleccionada"
+  "selectedDateLabel": "Seleccionada",
+  "translateButtonLabel": "Translate"
 }

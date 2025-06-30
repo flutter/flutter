@@ -29,5 +29,6 @@
   "shareButtonLabel": "Paylaş...",
   "clearButtonLabel": "Temizle",
   "cancelButtonLabel": "İptal",
-  "backButtonLabel": "Geri"
+  "backButtonLabel": "Geri",
+  "translateButtonLabel": "Translate"
 }

@@ -148,5 +148,6 @@
   "searchWebButtonLabel": "Интернеттен іздеу",
   "shareButtonLabel": "Бөлісу",
   "clearButtonTooltip": "Мәтінді тазалау",
-  "selectedDateLabel": "Таңдалды."
+  "selectedDateLabel": "Таңдалды.",
+  "translateButtonLabel": "Translate"
 }

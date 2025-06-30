@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish",
   "pasteButtonLabel": "Joylash",
-  "selectAllButtonLabel": "Hammasi"
+  "selectAllButtonLabel": "Hammasi",
+  "translateButtonLabel": "Translate"
 }

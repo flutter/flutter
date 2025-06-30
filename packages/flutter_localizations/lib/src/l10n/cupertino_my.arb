@@ -29,5 +29,6 @@
   "shareButtonLabel": "မျှဝေရန်...",
   "clearButtonLabel": "ဖယ်ရှားရန်",
   "cancelButtonLabel": "မလုပ်တော့",
-  "backButtonLabel": "နောက်သို့"
+  "backButtonLabel": "နောက်သို့",
+  "translateButtonLabel": "Translate"
 }

@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Buat carian pada Web",
   "shareButtonLabel": "Kongsi",
   "pasteButtonLabel": "Tampal",
-  "selectAllButtonLabel": "Pilih semua"
+  "selectAllButtonLabel": "Pilih semua",
+  "translateButtonLabel": "Translate"
 }
