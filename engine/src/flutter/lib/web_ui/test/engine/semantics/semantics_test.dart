@@ -151,6 +151,9 @@ void runSemanticsTests() {
   group('landmarks', () {
     _testLandmarks();
   });
+  group('locale', () {
+    _testLocale();
+  });
 }
 
 void _testSemanticRole() {
@@ -5399,6 +5402,30 @@ void _testLandmarks() {
   semantics().semanticsEnabled = false;
 }
 
+void _testLocale() {
+  test('nodes with complementary role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        locale: const ui.Locale('es-MX'),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.getAttribute('lang'), 'es-MX');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -5439,6 +5466,7 @@ void updateNode(
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
+  ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -5481,6 +5509,7 @@ void updateNode(
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
     inputType: inputType,
+    locale: locale,
   );
 }
 

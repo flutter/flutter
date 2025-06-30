@@ -4245,11 +4245,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
     bool blockUserActions = false,
+    Locale? localeForSubtree,
     TextDirection? textDirection,
   }) : _container = container,
        _explicitChildNodes = explicitChildNodes,
        _excludeSemantics = excludeSemantics,
        _blockUserActions = blockUserActions,
+       _localeForSubtree = localeForSubtree,
        _textDirection = textDirection,
        _properties = properties,
        super(child) {
@@ -4339,6 +4341,19 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// The [Locale] for the semantics subtree.
+  ///
+  /// Setting this to null will inherit locale from ancestor semantics node
+  Locale? get localeForSubtree => _localeForSubtree;
+  Locale? _localeForSubtree;
+  set localeForSubtree(Locale? value) {
+    if (_localeForSubtree == value) {
+      return;
+    }
+    _localeForSubtree = value;
+    markNeedsSemanticsUpdate();
+  }
+
   void _updateAttributedFields(SemanticsProperties value) {
     _attributedLabel = _effectiveAttributedLabel(value);
     _attributedValue = _effectiveAttributedValue(value);
@@ -4407,6 +4422,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     config.isBlockingUserActions = blockUserActions;
+    config.localeForSubtree = localeForSubtree;
     assert(
       ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
           !(_properties.scopesRoute ?? false),
