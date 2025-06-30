@@ -144,6 +144,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
+    this.onIndexChanged,
   }) : consumeMaxWeight = true,
        flexWeights = null;
 
@@ -205,6 +206,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
+    this.onIndexChanged,
   }) : itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
@@ -334,6 +336,30 @@ class CarouselView extends StatefulWidget {
 
   /// The child widgets for the carousel.
   final List<Widget> children;
+
+  /// Called whenever the current item index changes, either due to
+  /// user scrolling or programmatic navigation.
+  ///
+  /// This callback provides the updated index of the currently item.
+  ///
+  /// It is only called when the index actually changes, not on every scroll update.
+  ///
+  /// Example:
+  /// ```dart
+  ///
+  /// CarouselView(
+  ///   itemExtent: 200.0,
+  ///   onIndexChanged: (int index) {
+  ///     print('Current index: $index');
+  ///   },
+  ///   children: <Widget> [
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///   ],
+  /// )
+  /// ```
+  final ValueChanged<int>? onIndexChanged;
 
   @override
   State<CarouselView> createState() => _CarouselViewState();
@@ -467,6 +493,7 @@ class _CarouselViewState extends State<CarouselView> {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
+        onIndexChanged: _handleIndexChanged,
         delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
           return _buildCarouselItem(index);
         }, childCount: widget.children.length),
@@ -481,10 +508,16 @@ class _CarouselViewState extends State<CarouselView> {
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
+      onIndexChanged: _handleIndexChanged,
       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
         return _buildCarouselItem(index);
       }, childCount: widget.children.length),
     );
+  }
+
+  void _handleIndexChanged(int index) {
+    _controller._currentIndex = index;
+    widget.onIndexChanged?.call(index);
   }
 
   @override
@@ -543,10 +576,19 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.minExtent,
     required this.itemExtent,
+    this.onIndexChanged,
   });
 
   final double itemExtent;
   final double minExtent;
+
+  /// Called whenever the current item index changes, either due to
+  /// user scrolling or programmatic navigation.
+  ///
+  /// This callback provides the updated index of the currently item.
+  ///
+  /// It is only called when the index actually changes, not on every scroll update.
+  final ValueChanged<int>? onIndexChanged;
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
@@ -555,6 +597,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
+      onIndexChanged: onIndexChanged,
     );
   }
 
@@ -562,6 +605,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
     renderObject.minExtent = minExtent;
+    renderObject.onIndexChanged = onIndexChanged;
   }
 }
 
@@ -570,6 +614,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     required super.childManager,
     required double maxExtent,
     required double minExtent,
+    this.onIndexChanged,
   }) : _maxExtent = maxExtent,
        _minExtent = minExtent;
 
@@ -592,6 +637,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     _minExtent = value;
     markNeedsLayout();
   }
+
+  int _currentIndex = 0;
+
+  ValueChanged<int>? onIndexChanged;
 
   // This implements the [itemExtentBuilder] callback.
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
@@ -648,6 +697,17 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
       viewportMainAxisExtent: constraints.viewportMainAxisExtent,
       crossAxisExtent: constraints.crossAxisExtent,
     );
+
+    if (maxExtent > 0.0) {
+      final double center = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2.0;
+      final double item = center / maxExtent;
+      final int rounded = item.round().clamp(0, childManager.childCount - 1);
+      if (rounded != _currentIndex) {
+        _currentIndex = rounded;
+        onIndexChanged?.call(_currentIndex);
+      }
+    }
+
     super.performLayout();
   }
 
@@ -750,6 +810,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     required this.consumeMaxWeight,
     required this.shrinkExtent,
     required this.weights,
+    this.onIndexChanged,
   });
 
   // Determine whether extra scroll offset should be calculate so that every
@@ -774,6 +835,14 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   // view at a time.
   final List<int> weights;
 
+  /// Called whenever the current item index changes, either due to
+  /// user scrolling or programmatic navigation.
+  ///
+  /// This callback provides the updated index of the currently item.
+  ///
+  /// It is only called when the index actually changes, not on every scroll update.
+  final ValueChanged<int>? onIndexChanged;
+
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
@@ -782,12 +851,14 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
       consumeMaxWeight: consumeMaxWeight,
       shrinkExtent: shrinkExtent,
       weights: weights,
+      onIndexChanged: onIndexChanged,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverWeightedCarousel renderObject) {
     renderObject
+      ..onIndexChanged = onIndexChanged
       ..consumeMaxWeight = consumeMaxWeight
       ..shrinkExtent = shrinkExtent
       ..weights = weights;
@@ -802,6 +873,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     required bool consumeMaxWeight,
     required double shrinkExtent,
     required List<int> weights,
+    this.onIndexChanged,
   }) : _consumeMaxWeight = consumeMaxWeight,
        _shrinkExtent = shrinkExtent,
        _weights = weights;
@@ -835,6 +907,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     _weights = value;
     markNeedsLayout();
   }
+
+  int _currentIndex = 0;
+
+  ValueChanged<int>? onIndexChanged;
 
   late SliverLayoutDimensions _currentLayoutDimensions;
 
@@ -1215,6 +1291,36 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
             )
             : null;
 
+    // Calculate the closest item to the center of the viewport.
+    // This is used to determine the current item index for the carousel.
+    final double center = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2;
+
+    RenderBox? currentChild = firstChild;
+    int? closestIndex;
+    double minDistance = double.infinity;
+
+    while (currentChild != null) {
+      final SliverMultiBoxAdaptorParentData parentData =
+          currentChild.parentData! as SliverMultiBoxAdaptorParentData;
+      final int index = parentData.index!;
+      final double layoutOffset = parentData.layoutOffset ?? 0.0;
+      final double itemExtent = _buildItemExtent(index, _currentLayoutDimensions);
+      final double item = layoutOffset + itemExtent / 2;
+
+      final double distance = (center - item).abs();
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = index;
+      }
+
+      currentChild = childAfter(currentChild);
+    }
+
+    if (closestIndex != null && _currentIndex != closestIndex) {
+      _currentIndex = closestIndex;
+      onIndexChanged?.call(closestIndex);
+    }
+
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
@@ -1577,6 +1683,10 @@ class CarouselController extends ScrollController {
 
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
+
+  /// The current index of the carousel.
+  int get currentIndex => _currentIndex;
+  late int _currentIndex;
 
   _CarouselViewState? _carouselState;
 
