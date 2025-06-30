@@ -3716,6 +3716,56 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
   RenderIntrinsicHeight createRenderObject(BuildContext context) => RenderIntrinsicHeight();
 }
 
+/// A widget that mimics a box with a certain intrinsic width and height.
+///
+/// This widget is useful when trying to size a [Flex] widget with either
+/// [IntrinsicWidth] or [IntrinsicHeight] based on only a subset of the provided
+/// child widgets. Wrapping a child widget in an [IntrinsicBox] with either
+/// width or height set to zero will essentially ignore the element when
+/// calculating the [Flex] widget's intrinsic size along that dimension.
+///
+/// Using a non-zero value will cause the parent widget to expand accordingly,
+/// even if the child's actual intrinsic size is smaller.
+///
+/// See also:
+///
+///  * [IntrinsicWidth], a widget that sizes its child depending on its
+///    intrinsic width, which may be overridden by this component.
+///  * [IntrinsicHeight], a widget that does the same for height.
+class IntrinsicBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that mimics a box with intrinsic size but does not affect
+  /// the layout of the child otherwise.
+  ///
+  /// Since this is meant to be used in conjunction with [IntrinsicWidth] or
+  /// [IntrinsicHeight], this class is relatively expensive and should be avoided
+  /// where possible.
+  const IntrinsicBox({super.key, this.width, this.height, super.child})
+    : assert(width == null || width >= 0.0),
+      assert(height == null || height >= 0.0);
+
+  /// If non-null, force the child's intrinsic width to be this value.
+  ///
+  /// This value must not be negative.
+  final double? width;
+
+  /// If non-null, force the child's intrinsic height to be this value.
+  ///
+  /// This value must not be negative.
+  final double? height;
+
+  @override
+  RenderIntrinsicBox createRenderObject(BuildContext context) {
+    return RenderIntrinsicBox(width: width, height: height);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderIntrinsicBox renderObject) {
+    renderObject
+      ..width = width
+      ..height = height;
+  }
+}
+
 /// A widget that positions its child according to the child's baseline.
 ///
 /// This widget shifts the child down such that the child's baseline (or the
