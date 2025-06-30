@@ -51,10 +51,12 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 
 // The following values will need to be modified when the corresponding "warn$DepName" versions
 // are updated in DependencyVersionChecker.kt
-private const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
-private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
-private const val SUPPORTED_KGP_VERSION: String = "1.8.10"
+// These values should match the flutter create template values.
+// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
+private const val SUPPORTED_GRADLE_VERSION: String = "8.12"
+private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 9, 1)
+private const val SUPPORTED_KGP_VERSION: String = "2.1.0"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
@@ -130,7 +132,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `KGP version in warn range results in warning logs`() {
-        val exampleWarnKgpVersion = "1.8.0"
+        val exampleWarnKgpVersion = "1.8.20"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -204,7 +206,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in warn range results in warning logs`() {
-        val exampleWarnGradleVersion = "7.4.0"
+        val exampleWarnGradleVersion = "8.1.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
