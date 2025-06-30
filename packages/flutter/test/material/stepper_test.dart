@@ -1298,12 +1298,8 @@ void main() {
                 as BoxDecoration?)
             ?.color;
 
-    Color lineColor(String keyStep) {
-      return tester
-          .widget<ColoredBox>(
-            find.descendant(of: find.byKey(Key(keyStep)), matching: find.byType(ColoredBox).last),
-          )
-          .color;
+    Color lineColor() {
+      return tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
     }
 
     // Step 1
@@ -1314,7 +1310,7 @@ void main() {
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), disabledColor);
     // in two steps case there will be single line
-    expect(lineColor('line0'), selectedColor);
+    expect(lineColor(), selectedColor);
 
     // now hitting step two
     await tester.tap(find.text('step2'));
@@ -1327,7 +1323,7 @@ void main() {
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), selectedColor);
 
-    expect(lineColor('line0'), selectedColor);
+    expect(lineColor(), selectedColor);
   });
 
   testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
