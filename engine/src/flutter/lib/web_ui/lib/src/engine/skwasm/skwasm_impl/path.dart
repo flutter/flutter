@@ -172,7 +172,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    addPath((rsuperellipse.toPath() as LazyPath).builtPath, ui.Offset.zero);
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override

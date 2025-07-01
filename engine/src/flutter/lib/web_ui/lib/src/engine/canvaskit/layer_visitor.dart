@@ -114,9 +114,7 @@ class PrerollVisitor extends LayerVisitor {
   void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
     // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    mutatorsStack.pushClipRRect(
-      ui.RSuperellipse.toApproximateRRect(clipRSuperellipse.clipRSuperellipse),
-    );
+    mutatorsStack.pushClipRRect(clipRSuperellipse.clipRSuperellipse.toApproximateRRect());
     final ui.Rect childPaintBounds = prerollChildren(clipRSuperellipse);
     if (childPaintBounds.overlaps(clipRSuperellipse.clipRSuperellipse.outerRect)) {
       clipRSuperellipse.paintBounds = childPaintBounds.intersect(
@@ -335,8 +333,10 @@ class MeasureVisitor extends LayerVisitor {
     assert(clipRSuperellipse.needsPainting);
 
     measuringCanvas.save();
-    measuringCanvas.clipRSuperellipse(
-      clipRSuperellipse.clipRSuperellipse,
+    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    measuringCanvas.clipRRect(
+      clipRSuperellipse.clipRSuperellipse.toApproximateRRect(),
       clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -577,10 +577,11 @@ class PaintVisitor extends LayerVisitor {
   @override
   void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
     assert(clipRSuperellipse.needsPainting);
-
     nWayCanvas.save();
-    nWayCanvas.clipPath(
-      clipRSuperellipse.clipRSuperellipse.toPath() as CkPath,
+    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    nWayCanvas.clipRRect(
+      clipRSuperellipse.clipRSuperellipse.toApproximateRRect(),
       clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {

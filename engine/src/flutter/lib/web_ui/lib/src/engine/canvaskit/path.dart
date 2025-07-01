@@ -114,7 +114,8 @@ class CkPath implements DisposablePath {
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    addPath((rsuperellipse.toPath() as LazyPath).builtPath, ui.Offset.zero);
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override

@@ -1159,25 +1159,28 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     uniformRadii: uniformRadii,
   );
 
+  // A web-only flag that labels whether the corner radii are the same on all
+  // four corners.
   @override
   final bool uniformRadii;
 
   bool contains(Offset point) {
-    return toPath().contains(point);
+    final (Path path, Offset offset) = toPathOffset();
+    return path.contains(point - offset);
   }
 
-  Path toPath() {
-    final Path path = Path();
+  // A web-only method that returns a path for this shape, and an offset
+  // that the path is based on.
+  //
+  // For example, to use this path in `Path.addPath`, then the offset should
+  // be used as the 2nd parameter. To use this path in drawing or clipping,
+  // this offset should be used to `translate` the canvas first.
+   (Path, Offset) toPathOffset() {
     if (uniformRadii) {
-      final Offset center = this.center;
-      path.addPath(
-        _RSuperellipseCache.instance.get(width, height, tlRadius),
-        Offset(center.dx, center.dy),
-      );
+      return (_RSuperellipseCache.instance.get(width, height, tlRadius), center);
     } else {
-      path.addPath(_RSuperellipsePathBuilder.exact(this).path, Offset.zero);
+      return (_RSuperellipsePathBuilder.exact(this).path, Offset.zero);
     }
-    return path;
   }
 
   static final RSuperellipse zero = RSuperellipse._raw();
@@ -1202,23 +1205,23 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   //
   // This workaround is needed until the rounded superellipse is implemented on
   // Web. https://github.com/flutter/flutter/issues/163718
-  static RRect toApproximateRRect(RSuperellipse r) {
+  RRect toApproximateRRect() {
     // Experiments have shown that using the same corner radii for the RRect
     // provides an approximation that is close to optimal, as achieving a perfect
     // match is not feasible.
     return RRect._raw(
-      top: r.top,
-      left: r.left,
-      right: r.right,
-      bottom: r.bottom,
-      tlRadiusX: r.tlRadiusX,
-      tlRadiusY: r.tlRadiusY,
-      trRadiusX: r.trRadiusX,
-      trRadiusY: r.trRadiusY,
-      blRadiusX: r.blRadiusX,
-      blRadiusY: r.blRadiusY,
-      brRadiusX: r.brRadiusX,
-      brRadiusY: r.brRadiusY,
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      tlRadiusX: tlRadiusX,
+      tlRadiusY: tlRadiusY,
+      trRadiusX: trRadiusX,
+      trRadiusY: trRadiusY,
+      blRadiusX: blRadiusX,
+      blRadiusY: blRadiusY,
+      brRadiusX: brRadiusX,
+      brRadiusY: brRadiusY,
     );
   }
 }
