@@ -520,10 +520,10 @@ TEST_P(InteropPlaygroundTest, CanRenderShadows) {
     builder.DrawShadow(path_builder.Build(), shadow_color, 4.0f, false, 1.0f);
   }
   {
-    hpp::Paint red_paint;
-    red_paint.SetColor(
-        ImpellerColor{1.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB});
-    builder.DrawRect(box, red_paint);
+    // hpp::Paint red_paint;
+    // red_paint.SetColor(
+    //     ImpellerColor{1.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB});
+    // builder.DrawRect(box, red_paint);
   }
   auto dl = builder.Build();
   ASSERT_TRUE(

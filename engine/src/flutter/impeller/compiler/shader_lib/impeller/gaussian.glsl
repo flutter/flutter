@@ -78,4 +78,17 @@ float16_t IPSigmoid(float16_t x) {
   return 1.03731472073hf / (1.0hf + exp(-4.0hf * x)) - 0.0186573603638hf;
 }
 
+/// Converts a fraction in the range [0,1] to a guassian weighted distribution
+/// over the same range ([0,1]).
+float IPFractionToGaussian(float fraction) {
+  // IPErf produces outputs over [0, 1] from an input range of [-2, +2].
+  // We need to convert the fraction to the appropriate range.
+  //
+  // [0, 1] => [-2, +2]
+  // 0 * 4 - 2 == -2
+  // 1 * 4 - 2 == +2
+  float x = fraction * 4 - 2;
+  return (1.0hf + IPErf(x)) * 0.5hf;
+}
+
 #endif

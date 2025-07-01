@@ -287,6 +287,7 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
   Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
+  Variants<ShadowVerticesShader> shadow_vertices_;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
@@ -708,6 +709,7 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
+    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
     pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
                                                {supports_decal});
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
@@ -1484,6 +1486,11 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
+}
+
+PipelineRef ContentContext::GetDrawShadowVerticesPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->shadow_vertices_, opts);
 }
 
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(
