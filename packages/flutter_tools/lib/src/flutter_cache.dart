@@ -191,7 +191,7 @@ class FlutterWebSdk extends CachedArtifact {
 /// This file is required to divine the engine build and content-hash.
 class FlutterEngineStamp extends CachedArtifact {
   FlutterEngineStamp(Cache cache, this.logger)
-    : super('engine_stamp', cache, DevelopmentArtifact.universal);
+    : super('engine_stamp', cache, DevelopmentArtifact.informative);
 
   final Logger logger;
 

@@ -113,6 +113,9 @@ class DevelopmentArtifact {
   /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
+  /// Artifacts which contain build information for the flutter tool.
+  static const DevelopmentArtifact informative = DevelopmentArtifact._('informative');
+
   /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     androidGenSnapshot,
@@ -126,6 +129,7 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
+    informative,
   ];
 
   @override
