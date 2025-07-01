@@ -102,7 +102,6 @@ class FlutterPlugin : Plugin<Project> {
                 dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
             }
         }
@@ -407,7 +406,7 @@ class FlutterPlugin : Plugin<Project> {
                 //
                 // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
                 // Where:
-                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.forEach { output ->
