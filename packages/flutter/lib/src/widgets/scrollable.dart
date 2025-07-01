@@ -995,7 +995,6 @@ class ScrollableState extends State<Scrollable>
   }
 
   Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? scrollingDeviceKind) {
-    print('CAMILLE: _buildChrome called, _scrollingDeviceKind is currently $scrollingDeviceKind');
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,

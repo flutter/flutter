@@ -419,6 +419,7 @@ class ElevatedButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
+    print('CAMILLE: ElevatedButton is using Material3 -- ${Theme.of(context).useMaterial3}');
     return Theme.of(context)
             .useMaterial3 // TODO(camsim99): if material3 is used then we slip into this case
         ? _ElevatedButtonDefaultsM3(context)
@@ -434,9 +435,7 @@ class ElevatedButton extends ButtonStyleButton {
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-          enabledMouseCursor:
-              SystemMouseCursors
-                  .basic, // TODO(camsim99): (ButtonStyleButton) I think I should try playing with this default
+          enabledMouseCursor: SystemMouseCursors.basic,
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
           tapTargetSize: theme.materialTapTargetSize,
@@ -684,15 +683,8 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
-  // TODO(camsim99): Might need to change how this is resolved as well.
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

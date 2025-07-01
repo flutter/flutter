@@ -436,10 +436,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     // TODO(camsim99): mouse cursor for ButtonStyleButton determined here. The function we
     // see is a MaterialPropertyResolver
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) =>
-          effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
-    );
+    final MaterialStateMouseCursor mouseCursor = _MouseCursor((Set<MaterialState> states) {
+      return effectiveValue((ButtonStyle? style) {
+        print(
+          'CAMILLE: resolved mouse cursor from ButtonStyleButton is ${style?.mouseCursor?.resolve(states)}',
+        );
+        return style?.mouseCursor?.resolve(states);
+      });
+    });
 
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
