@@ -1572,19 +1572,9 @@ abstract class DefaultTextEditingStrategy
     if (e.isA<DomKeyboardEvent>()) {
       final DomKeyboardEvent event = e as DomKeyboardEvent;
       if (event.keyCode == _kReturnKeyCode) {
-        final isMultilineInputType = inputConfiguration.inputType is MultilineInputType;
-        final isNewlineInputAction = inputConfiguration.inputAction == 'TextInputAction.newline';
-        final isShiftKeyPressed = event.shiftKey ?? false;
-
-        // When the input type is multiline and the input action is not
-        // `TextInputAction.newline`, we ignore the "Shift+Enter" combination
-        // to allow users to add a new line without input submission.
-        if (isMultilineInputType && isShiftKeyPressed && !isNewlineInputAction) {
-          return;
-        }
-
         onAction!(inputConfiguration.inputAction);
-        if (isMultilineInputType && isNewlineInputAction) {
+        if (inputConfiguration.inputType is MultilineInputType &&
+            inputConfiguration.inputAction == 'TextInputAction.newline') {
           return;
         }
         // Prevent the browser from inserting a new line.
