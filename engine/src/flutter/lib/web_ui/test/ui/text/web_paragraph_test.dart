@@ -19,7 +19,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-  /*
+
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -732,7 +732,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_query_boxes_ltr_1.png', region: region);
   });
-*/
+
   test('Query WebParagraph.Placeholders', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -830,13 +830,15 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
 
-    final rects = paragraph.getBoxesForPlaceholders();
+    final rects1 = paragraph.getBoxesForPlaceholders();
+    final rects2 = paragraph.getBoxesForPlaceholders();
+    paragraph.getBoxesForRange(0, paragraph.text!.length);
     final Paint bluePaint =
         Paint()
           ..color = const Color(0xFF0000FF)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1;
-    for (final rect in rects) {
+    for (final rect in rects1) {
       canvas.drawRect(rect.toRect(), bluePaint);
     }
 

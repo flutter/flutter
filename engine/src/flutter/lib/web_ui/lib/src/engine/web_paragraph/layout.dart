@@ -175,7 +175,7 @@ class TextLayout {
         );
 
         final ui.Rect advance = ui.Rect.fromLTWH(
-          blockStart,
+          0,
           0,
           styledBlock.placeholder!.width,
           styledBlock.placeholder!.height,
@@ -195,7 +195,7 @@ class TextLayout {
           ),
         );
         WebParagraphDebug.log(
-          'blockStart(placeholder): ${blockStart + advance.width} += $blockStart + ${advance.width}',
+          'placeholder#${textClusters.length}: [${styledBlock.textRange.start}:${styledBlock.textRange.end}) [${advance.left}:${advance.right})',
         );
         blockStart += advance.width;
         continue;
@@ -215,7 +215,7 @@ class TextLayout {
           blockTextMetrics,
         ),
       );
-      printTextMetrics(text, blockTextMetrics);
+      //printTextMetrics(text, blockTextMetrics);
 
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         textClusters.add(
@@ -234,13 +234,13 @@ class TextLayout {
             styledBlock.isPlaceholder,
           ),
         );
+        WebParagraphDebug.log(
+          'text#${textClusters.length}: [${textClusters.last.textRange.start}:${textClusters.last.textRange.end}) [${textClusters.last.advance.left}:${textClusters.last.advance.right})',
+        );
       }
       final ui.Rect blockAdvance = getAdvance(
         blockTextMetrics,
         TextRange(start: 0, end: text.length),
-      );
-      WebParagraphDebug.log(
-        'blockStart: ${blockStart + blockAdvance.width} += $blockStart + ${blockAdvance.width}',
       );
       blockStart += blockAdvance.width;
     }
@@ -520,6 +520,7 @@ class TextLayout {
               styledTextBlock.textRange.start,
             ),
           );
+          WebParagraphDebug.log('Placeholder block: $shiftInsideLine $advance');
           // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
           line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, advance.height);
           line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, 0);
@@ -545,6 +546,10 @@ class TextLayout {
               styledTextBlock.textRange.start,
             ),
           );
+          WebParagraphDebug.log(
+            'TextCluster block: $styleClusterRange ${styleTextRange.translate(-styledTextBlock.textRange.start)} ${-styledTextBlock.textRange.start} $shiftFromTextBlock $shiftInsideLine $advance',
+          );
+
           // Line always counts multipled metrics (no need for the others)
           line.fontBoundingBoxAscent = math.max(
             line.fontBoundingBoxAscent,
@@ -564,6 +569,23 @@ class TextLayout {
       }
     }
 
+    // Now when we calculated all line metrics we have to correct placeholders that depend on it
+    for (final LineBlock block in line.visualBlocks) {
+      if (block is LineClusterBlock) {
+        continue;
+      }
+      final placeholderBlock = block as LinePlaceholdeBlock;
+      placeholderBlock.correctMetrics(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
+      // Line always counts multipled metrics (no need for the others)
+      line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent);
+      line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, placeholderBlock.descent);
+      WebParagraphDebug.log(
+        'Adjusted metrics: '
+        '${line.fontBoundingBoxAscent} => ${math.max(line.fontBoundingBoxAscent, placeholderBlock.ascent)} '
+        '${line.fontBoundingBoxDescent} => ${math.max(line.fontBoundingBoxDescent, placeholderBlock.descent)} ',
+      );
+    }
+
     line.advance = ui.Rect.fromLTWH(
       0,
       top,
@@ -572,15 +594,6 @@ class TextLayout {
       line.height,
     );
     lines.add(line);
-
-    // Now when we calculated all line metrics we have to correct placeholders that depend on it
-    for (final LineBlock block in line.visualBlocks) {
-      if (block is LineClusterBlock) {
-        continue;
-      }
-      final placeholderBlock = block as LinePlaceholdeBlock;
-      placeholderBlock.correctMetrics(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
-    }
 
     WebParagraphDebug.log(
       'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height}',
@@ -655,10 +668,14 @@ class TextLayout {
       }
       for (final LineBlock block in line.visualBlocks) {
         final intersect = intersectTextRange(block.textRange, textRange);
-        WebParagraphDebug.log('block: ${block.textRange} & $textRange = $intersect');
+        WebParagraphDebug.log(
+          'block: ${block.textRange} & $textRange = $intersect '
+          '${block.textMetricsZero} ${block.clusterShiftInLine}',
+        );
         if (intersect.width <= 0) {
           continue;
         }
+        /*
         final rects = block.getSelectionRects(intersect);
         assert(
           rects.length == 1,
@@ -667,13 +684,15 @@ class TextLayout {
           rects.first.left,
           rects.first.top,
           rects.first.width,
-          rects.first.height,
-        ).translate(
-          -block.correctedAdvance.left,
-          block.rawFontBoundingBoxAscent,
+          rects.first.height,)
+          */
+        final firstRect = block.correctedAdvance.translate(
+          block.clusterShiftInLine,
+          block is LinePlaceholdeBlock ? 0 : block.rawFontBoundingBoxAscent,
         ); // block.advance.top == 0
         WebParagraphDebug.log(
           'getSelectionRects(${intersect.start},${intersect.end}): '
+          'shifted (${block.clusterShiftInLine}, ${block.rawFontBoundingBoxAscent}) '
           '${firstRect.left}:${firstRect.right} x ${firstRect.top}:${firstRect.bottom}',
         );
         // Now we need to recalculate the rects
@@ -1072,7 +1091,10 @@ class LineClusterBlock extends LineBlock {
 
   @override
   List<DomRectReadOnly> getSelectionRects(TextRange textRange) {
-    return textMetrics!.getSelectionRects(textRange.start, textRange.end);
+    return textMetrics!.getSelectionRects(
+      textRange.start - textMetricsZero,
+      textRange.end - textMetricsZero,
+    );
   }
 
   // TODO(jlavrova): we probably do not need that reference
@@ -1121,7 +1143,7 @@ class LinePlaceholdeBlock extends LineBlock {
     assert(placeholder != null);
     double baselineAdjustment = 0;
     if (placeholder!.baseline == ui.TextBaseline.ideographic) {
-      baselineAdjustment = lineDescent;
+      baselineAdjustment = lineDescent / 2;
     }
 
     final double height = placeholder!.height;
@@ -1129,48 +1151,50 @@ class LinePlaceholdeBlock extends LineBlock {
     WebParagraphDebug.log(
       'correctMetrics($lineAscent, $lineDescent): height=$height offset=$offset',
     );
-
     switch (placeholder!.alignment) {
       case ui.PlaceholderAlignment.baseline:
         // Matches the baseline of the placeholder with the text baseline. You'll need to specify the TextBaseline to use
-        final double lineHeight = lineAscent + lineDescent;
-        top = lineAscent - lineAscent * height / lineHeight;
-        bottom = top + height;
+        // TODO(jlavrova): the code in this case does not make sense but this is what we have in SkParagraph
+        ascent = 0 - baselineAdjustment + offset;
+        descent = baselineAdjustment + height - offset;
 
       case ui.PlaceholderAlignment.aboveBaseline:
         // Aligns the bottom edge of the placeholder with the baseline
-        bottom = lineAscent;
-        top = bottom - height;
+        ascent = height - baselineAdjustment;
+        descent = baselineAdjustment;
 
       case ui.PlaceholderAlignment.belowBaseline:
         // Aligns the top edge of the placeholder with the baseline
-        top = lineAscent;
-        bottom = top + height;
+        ascent = 0 - baselineAdjustment;
+        descent = baselineAdjustment + height;
 
       case ui.PlaceholderAlignment.top:
         // Aligns the top edge of the placeholder with the top edge of the text
-        top = 0;
-        bottom = height;
+        ascent = lineAscent;
+        descent = height - lineAscent;
 
       case ui.PlaceholderAlignment.bottom:
         // Aligns the bottom edge of the placeholder with the bottom edge of the text
-        bottom = lineAscent + lineDescent;
-        top = bottom - height;
+        ascent = height - lineDescent;
+        descent = lineDescent;
 
       case ui.PlaceholderAlignment.middle:
         // Aligns the middle of the placeholder with the middle of the text
-        final double lineMiddle = (lineAscent + lineDescent) / 2;
-        final double placeholderMiddle = height / 2;
-        top = lineMiddle - placeholderMiddle;
-        bottom = top + height;
+        final double diff = (lineAscent + lineDescent - height) / 2;
+        ascent = lineAscent - diff;
+        descent = lineDescent - diff;
     }
+    top = lineAscent - ascent;
+    bottom = top + height;
     correctedAdvance = ui.Rect.fromLTWH(advance.left, top, advance.width, height);
-    WebParagraphDebug.log('correctMetrics: $correctedAdvance');
+    WebParagraphDebug.log('correctMetrics: $correctedAdvance $ascent $descent');
   }
 
   WebParagraphPlaceholder? placeholder;
   double top = 0;
   double bottom = 0;
+  double ascent = 0;
+  double descent = 0;
 }
 
 class TextLine {
