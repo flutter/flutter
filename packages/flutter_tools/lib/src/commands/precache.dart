@@ -71,7 +71,7 @@ class PrecacheCommand extends FlutterCommand {
       defaultsTo: true,
       help: 'Precache engine_stamp.json.',
       negatable: false,
-      hide: true,
+      hide: !verboseHelp,
     );
     argParser.addFlag(
       'flutter_runner',
