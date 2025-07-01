@@ -1761,6 +1761,11 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// The alignment of the origin, relative to the size of the box.
   ///
+  /// When this and [origin] are both null, the origin is the upper-left corner
+  /// of this render object.
+  /// The default for this field is null for some constructors,
+  /// and [Alignment.center] for others.
+  ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
   ///
