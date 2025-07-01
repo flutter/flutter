@@ -214,7 +214,7 @@ class FlutterEngineStamp extends CachedArtifact {
       fileSystem.path.join(location.path, 'engine_stamp.json'),
     );
     ErrorHandlingFileSystem.deleteIfExists(engineStampFile);
-    await artifactUpdater.downloadFile('Downloading engine_stamp...', url, location);
+    await artifactUpdater.downloadFile('Downloading engine information...', url, location);
   }
 }
 

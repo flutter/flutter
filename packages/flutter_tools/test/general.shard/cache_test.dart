@@ -1059,7 +1059,7 @@ void main() {
 
     await engineStamp.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-    expect(messages, <String>['Downloading engine_stamp...']);
+    expect(messages, <String>['Downloading engine information...']);
 
     expect(downloads, <String>[
       'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/engine_stamp.json',
