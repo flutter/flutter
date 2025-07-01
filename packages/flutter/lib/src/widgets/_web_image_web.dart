@@ -33,29 +33,7 @@ class ImgElementPlatformView extends StatelessWidget {
   static void _register() {
     assert(!_registered);
     _registered = true;
-    //registerFactory(registry: ui_web.platformViewRegistry);
-    print('CALLING REGISTERVIEWFACTORY with ${ui_web.platformViewRegistry}');
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
-      // Create a new <img> element. The browser is able to display the image
-      // without fetching it over the network again.
-      final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
-      img.src = paramsMap['src']! as String;
-      // Set `width` and `height`, otherwise the engine will issue a warning.
-      img.style
-        ..width = '100%'
-        ..height = '100%';
-      return img;
-    });
-  }
-
-  /// Registers the `<img>` element factory with the given [registry].
-  ///
-  /// This is visible for testing only, it should not be called outside of this
-  /// class.
-  @visibleForTesting
-  static void registerFactory({required ui_web.PlatformViewRegistry registry}) {
-    registry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
       final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
@@ -79,7 +57,7 @@ class ImgElementPlatformView extends StatelessWidget {
     }
     return HtmlElementView(
       viewType: _viewType,
-      creationParams: <String, Object?>{'src': src},
+      creationParams: <String, String?>{'src': src},
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
