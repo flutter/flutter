@@ -231,9 +231,10 @@ class EdgeDraggingAutoScroller {
       scrollRenderBox.getTransformTo(null),
       Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
+    const double tolerance = 1e-10;
     assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      (globalRect.size.width + tolerance) >= _dragTargetRelatedToScrollOrigin.size.width &&
+          (globalRect.size.height + tolerance) >= _dragTargetRelatedToScrollOrigin.size.height,
       'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
