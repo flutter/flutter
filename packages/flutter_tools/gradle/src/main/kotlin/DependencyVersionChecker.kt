@@ -180,9 +180,7 @@ object DependencyVersionChecker {
     private fun getMinSdkVersion(
         project: Project,
         it: Variant
-    ): MinSdkVersion {
-        return MinSdkVersion(it.name, it.minSdk.apiLevel)
-    }
+    ): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
 
     @VisibleForTesting internal fun getErrorMessage(
         dependencyName: String,
