@@ -296,7 +296,11 @@ void main() {
         expect(sentDetails.command, 'flutter crash');
         expect(sentDetails.error.toString(), 'Exception: an exception % --');
         expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+        expect(
+          await sentDetails.doctorText.text,
+          stringContainsInOrder(<String>['[!] Flutter', 'Dart version 12']),
+          reason: 'Captures flutter doctor -v, which includes Dart version',
+        );
       },
       overrides: <Type, Generator>{
         Platform:
