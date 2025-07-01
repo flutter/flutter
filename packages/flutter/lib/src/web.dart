@@ -148,5 +148,3 @@ extension type XMLHttpRequest._(JSObject _) implements XMLHttpRequestEventTarget
 }
 
 extension type XMLHttpRequestEventTarget._(JSObject _) implements EventTarget, JSObject {}
-
-enum CSSObjectFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }

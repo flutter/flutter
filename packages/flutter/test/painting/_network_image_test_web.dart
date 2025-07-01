@@ -40,6 +40,12 @@ void runTests() {
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      final String? objectFit = paramsMap['object-fit'] as String?;
+      if (objectFit != null) {
+        img.style.objectFit = objectFit;
+      }
       return img;
     });
     ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
@@ -50,13 +56,6 @@ void runTests() {
     debugRestoreImgElementFactory();
     _TestBinding.instance.overrideCodec = null;
     ui_web.debugOverridePlatformViewRegistry(null);
-  });
-
-  late final FakePlatformViewRegistry fakePlatformViewRegistry;
-  setUpAll(() {
-    fakePlatformViewRegistry = FakePlatformViewRegistry();
-    ImgElementPlatformView.debugOverrideRegisterViewFactory =
-        fakePlatformViewRegistry.registerViewFactory;
   });
 
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
@@ -479,13 +478,24 @@ void runTests() {
   group(
     'ImgElementPlatformView create html element with the right object-fit, height and width',
     () {
-      testWidgets('BoxFit.contain set "cover" as object-fit', (WidgetTester tester) async {
+      testWidgets('If fit is null object-fit is not set', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: null,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, '');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.contain set "contain" as object-fit', (WidgetTester tester) async {
         final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
           tester,
           fit: BoxFit.contain,
           fakePlatformViewRegistry: fakePlatformViewRegistry,
         );
-        expect(element.style.objectFit, 'cover');
+        expect(element.style.objectFit, 'contain');
         expect(element.style.height, '100%');
         expect(element.style.width, '100%');
       });
@@ -534,7 +544,7 @@ void runTests() {
         expect(element.style.width, '100%');
       });
 
-      testWidgets('BoxFit.fill set "cover" as object-fit', (WidgetTester tester) async {
+      testWidgets('BoxFit.fill set "fill" as object-fit', (WidgetTester tester) async {
         final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
           tester,
           fit: BoxFit.fill,
@@ -545,7 +555,7 @@ void runTests() {
         expect(element.style.width, '100%');
       });
 
-      testWidgets('BoxFit.none set "cover" as object-fit', (WidgetTester tester) async {
+      testWidgets('BoxFit.none set "none" as object-fit', (WidgetTester tester) async {
         final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
           tester,
           fit: BoxFit.none,
@@ -728,7 +738,7 @@ class _TestFrameInfo implements ui.FrameInfo {
 
 Future<web.HTMLElement> _pumpImageAndGetHtmlElement(
   WidgetTester tester, {
-  required BoxFit fit,
+  required BoxFit? fit,
   required FakePlatformViewRegistry fakePlatformViewRegistry,
 }) async {
   final TestImgElement testImg = TestImgElement();
