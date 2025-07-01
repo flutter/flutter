@@ -950,6 +950,7 @@ class SemanticsData with Diagnosticable {
     required this.locale,
     this.tags,
     this.transform,
+    this.hitTestTransform,
     this.customSemanticsActionIds,
   }) : assert(
          tooltip == '' || textDirection != null,
@@ -1187,6 +1188,13 @@ class SemanticsData with Diagnosticable {
   /// parent).
   final Matrix4? transform;
 
+  /// The transform used for hit testing from this node's coordinate system to its parent's coordinate system.
+  ///
+  /// By default, the hitTestTransform is null, which represents the identity
+  /// transformation (i.e., that this node has the same coordinate system as its
+  /// parent for hit testing).
+  final Matrix4? hitTestTransform;
+
   /// The identifiers for the custom semantics actions and standard action
   /// overrides for this node.
   ///
@@ -1235,6 +1243,7 @@ class SemanticsData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('rect', rect, showName: false));
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
+    properties.add(TransformProperty('hitTestTransform', hitTestTransform, showName: false, defaultValue: null));
     final List<String> actionSummary = <String>[
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
@@ -1314,6 +1323,7 @@ class SemanticsData with Diagnosticable {
         other.maxValueLength == maxValueLength &&
         other.currentValueLength == currentValueLength &&
         other.transform == transform &&
+        other.hitTestTransform == hitTestTransform &&
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
         other.role == role &&
@@ -1348,6 +1358,7 @@ class SemanticsData with Diagnosticable {
       maxValueLength,
       currentValueLength,
       transform,
+      hitTestTransform,
       headingLevel,
       linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
@@ -3719,6 +3730,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
       rect = geometry.rect;
       parentPaintClipRect = geometry.paintClipRect;
       parentSemanticsClipRect = geometry.semanticsClipRect;
+      print('====================== id: $id ========================');
+      print('transform: ${geometry.transform}');
+      Rect globalRect = getGlobalRect(this);
+      print('>>>>>>>>> id: $id, Global rect: $globalRect <<<<<<<<<<');
+      print(
+        'Global rect removing scaling: ${Rect.fromLTRB(globalRect.left / 3.5, globalRect.top / 3.5, globalRect.right / 3.5, globalRect.bottom / 3.5)}',
+      );
+      print('  local rect: ${rect}');
+      print('==============================================');
     }
 
     // print('>>>>>>>>>>>>>>>>>>>>>>> id: $id, Local rect: $rect');
@@ -3740,12 +3760,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     //   }
     //   current = current.semanticsParent;
     // }
-    Rect globalRect = getGlobalRect(this);
-    print('>>>>>>>>> id: $id, Global rect: $globalRect <<<<<<<<<<');
-    print(
-      'Global rect removing scaling: ${Rect.fromLTRB(globalRect.left / 3.5, globalRect.top / 3.5, globalRect.right / 3.5, globalRect.bottom / 3.5)}',
-    );
-    print('  local rect: ${rect}');
+
     // print('geometry transform: \n$transform');
     // print('>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 
@@ -3777,6 +3792,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // print(
     //   '------------------ $id: $label -------------------\n transform:\n${data.transform} \nrect: $rect',
     // );
+    if (data.identifier.endsWith('child')) {
+      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      print('transform: \n${geometry?.transform}');
+      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    }
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
@@ -3806,6 +3826,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
+      hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -4184,6 +4205,7 @@ final class _SemanticsGeometry {
   }) {
     final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
+    Matrix4? childToCommonAncestorTransform;
     SemanticsNode childSemanticsNode = child;
     SemanticsNode parentSemanticsNode = parent;
 
@@ -4193,15 +4215,16 @@ final class _SemanticsGeometry {
     while (!identical(childSemanticsNode, parentSemanticsNode)) {
       final int fromDepth = childSemanticsNode.depth;
       final int toDepth = parentSemanticsNode.depth;
-
+      print('fromDepth: $fromDepth, toDepth: $toDepth');
       // print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
       if (fromDepth >= toDepth) {
         assert(
           childSemanticsNode.parent != null,
           '$parent and $child are not in the same render tree.',
         );
-        childSemanticsNode = childSemanticsNode.semanticsParent!;
-        childToCommonAncestor.add(childSemanticsNode);
+        childToCommonAncestorTransform ??= Matrix4.identity();
+        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
+        childSemanticsNode = childSemanticsNode.parent!;
       }
       if (fromDepth <= toDepth) {
         assert(
@@ -4218,13 +4241,15 @@ final class _SemanticsGeometry {
     }
 
     // Calculate transform.
-    assert(childToCommonAncestor.length >= 2);
-    // print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
-    for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
-      transform.multiply(childToCommonAncestor[i].transform ?? Matrix4.identity());
-      // childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
-    }
-    // print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
+    // assert(childToCommonAncestor.length >= 2);
+    // // print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
+    // for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
+    //   transform.multiply(childToCommonAncestor[i].transform ?? Matrix4.identity());
+    //   // childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
+    // }
+
+    print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
+    // print('parentToCommonAncestorTransform invert: ${parentToCommonAncestorTransform?.invert()}');
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
         transform.multiply(parentToCommonAncestorTransform);
@@ -4232,6 +4257,7 @@ final class _SemanticsGeometry {
         transform.setZero();
       }
     }
+    print('transform: \n$transform');
 
     // assert(childToCommonAncestor.last == parent);
     // Calculate clips.
@@ -4774,10 +4800,10 @@ class SemanticsOwner extends ChangeNotifier {
           _overlayPortalChildNodes[identifier] = node;
           // final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
 
-          final SemanticsNode parent = node.parent!;
-          parent._dropChild(node);
-          final SemanticsNode? actualParentNode = _overlayPortalParentNodes[identifier];
-          actualParentNode?._adoptChild(node);
+          // final SemanticsNode parent = node.parent!;
+          // parent._dropChild(node);
+          // final SemanticsNode? actualParentNode = _overlayPortalParentNodes[identifier];
+          // actualParentNode?._adoptChild(node);
           // if (parentNode != null) {
           //   parentNode._redepthChild(node);
           // }
