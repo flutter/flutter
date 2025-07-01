@@ -158,6 +158,7 @@ struct SemanticsNode {
 
   SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.
   SkM44 transform = SkM44{};          // Identity
+  SkM44 hitTestTransform = SkM44{};   // Identity
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
   std::vector<int32_t> customAccessibilityActions;
