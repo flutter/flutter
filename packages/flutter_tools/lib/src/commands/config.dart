@@ -61,12 +61,7 @@ class ConfigCommand extends FlutterCommand {
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
-    argParser.addFlag(
-      'machine',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Print config values as json.',
-    );
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
@@ -126,7 +121,7 @@ class ConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       await handleMachine();
       return FlutterCommandResult.success();
     }

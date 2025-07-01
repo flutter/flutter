@@ -78,6 +78,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addMachineOutputFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
@@ -163,14 +164,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'If unset, matches the current package name.',
         valueHelp: 'package-name-regexp',
         splitCommas: false,
-      )
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input '
-            'and provide output and progress in machine friendly format.',
       )
       ..addFlag(
         'update-goldens',
@@ -567,7 +560,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final bool machine = boolArg('machine');
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') || boolArg('branch-coverage')) {
       final Set<String> packagesToInclude = _getCoveragePackages(
@@ -576,7 +568,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !machine,
+        verbose: !outputMachineFormat,
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
@@ -586,7 +578,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     TestWatcher? watcher;
-    if (machine) {
+    if (outputMachineFormat) {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
@@ -648,7 +640,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
@@ -676,7 +668,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
