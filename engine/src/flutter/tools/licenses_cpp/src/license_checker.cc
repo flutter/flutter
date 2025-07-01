@@ -394,3 +394,35 @@ int LicenseChecker::Run(std::string_view working_dir,
 
   return errors.empty() ? 0 : 1;
 }
+
+int LicenseChecker::FileRun(std::string_view working_dir,
+                            std::string_view full_path,
+                            std::ostream& licenses,
+                            std::string_view data_dir,
+                            const Flags& flags) {
+  absl::StatusOr<Data> data = Data::Open(data_dir);
+  if (!data.ok()) {
+    std::cerr << "Can't load data at " << data_dir << ": " << data.status()
+              << std::endl;
+    return 1;
+  }
+
+  ProcessState state;
+  absl::Status process_result = ProcessFile(working_dir, licenses, data.value(),
+                                            full_path, flags, &state);
+
+  if (!process_result.ok()) {
+    std::cerr << process_result << std::endl;
+    return 1;
+  }
+
+  for (const absl::Status& status : state.errors) {
+    std::cerr << status << "\n";
+  }
+
+  if (!state.errors.empty()) {
+    std::cout << "Error count: " << state.errors.size();
+  }
+
+  return state.errors.empty() ? 0 : 1;
+}
