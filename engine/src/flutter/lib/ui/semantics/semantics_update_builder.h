@@ -61,6 +61,7 @@ class SemanticsUpdateBuilder
       std::string tooltip,
       int textDirection,
       const tonic::Float64List& transform,
+      const tonic::Float64List& hitTestTransform,
       const tonic::Int32List& childrenInTraversalOrder,
       const tonic::Int32List& childrenInHitTestOrder,
       const tonic::Int32List& customAccessibilityActions,
