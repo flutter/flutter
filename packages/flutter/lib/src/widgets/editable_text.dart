@@ -5526,6 +5526,9 @@ class EditableTextState extends State<EditableText>
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
+    DoNothingAndStopEnterKeyPropagationIntent: _makeOverridable(
+      _DoNothingAndStopEnterKeyPropagationAction(),
+    ),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
@@ -6741,6 +6744,19 @@ class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOut
 
   @override
   void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
+    // The default action is a no-op.
+  }
+}
+
+class _DoNothingAndStopEnterKeyPropagationAction
+    extends Action<DoNothingAndStopEnterKeyPropagationIntent> {
+  _DoNothingAndStopEnterKeyPropagationAction();
+
+  @override
+  bool consumesKey(Intent intent) => false;
+
+  @override
+  void invoke(Intent intent) {
     // The default action is a no-op.
   }
 }
