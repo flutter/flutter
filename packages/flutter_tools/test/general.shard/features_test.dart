@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -145,9 +144,8 @@ void main() {
       assert(runtimeIdPattern.hasMatch('multi_window'));
       assert(!runtimeIdPattern.hasMatch('multi-window'));
 
-      final Iterable<String> runtimeIds = featureFlags.allFeatures
-          .map((Feature feature) => feature.runtimeId)
-          .nonNulls;
+      final Iterable<String> runtimeIds =
+          featureFlags.allFeatures.map((Feature feature) => feature.runtimeId).nonNulls;
 
       expect(
         runtimeIds,
