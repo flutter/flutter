@@ -172,9 +172,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    addPath((rsuperellipse.toPath() as LazyPath).builtPath, ui.Offset.zero);
   }
 
   @override
