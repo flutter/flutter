@@ -231,8 +231,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
-  bool get enableFlutterGpu =>
-      (argResults!['enable-flutter-gpu'] as bool?) ?? false;
+  bool get enableFlutterGpu => (argResults!['enable-flutter-gpu'] as bool?) ?? false;
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');

@@ -1522,7 +1522,12 @@ dev_dependencies:
         final TestCommand testCommand = TestCommand(testRunner: testRunner);
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-        await commandRunner.run(const <String>['test', '--no-pub', '--enable-impeller', '--enable-flutter-gpu']);
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--enable-impeller',
+          '--enable-flutter-gpu',
+        ]);
         expect(testRunner.lastDebuggingOptionsValue.enableFlutterGpu, true);
       },
       overrides: <Type, Generator>{
