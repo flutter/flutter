@@ -1342,4 +1342,119 @@ void main() {
     await expectGolden('center', centerChild);
     await expectGolden('right', rightChild);
   });
+
+  group('CupertinoContextMenu sheet shrink animation alignment - ', () {
+    Future<void> testShrinkAlignment({
+      required WidgetTester tester,
+      required Alignment alignment,
+      required Size screenSize,
+      required AlignmentDirectional expectedAlignment,
+    }) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(
+        getContextMenu(alignment: alignment, screenSize: screenSize, child: child),
+      );
+
+      // Open the CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture openGesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await openGesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      final Finder sheetFinder = find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ContextMenuSheet',
+      );
+      expect(sheetFinder, findsOneWidget);
+      final Rect initialSheetRect = tester.getRect(sheetFinder);
+      final Finder staticChildFinder = findStaticChild(child);
+      expect(staticChildFinder, findsOneWidget);
+      await tester.pump();
+
+      // Drag down enough to trigger the shrink animation.
+      await tester.fling(staticChildFinder, Offset(0.0, childRect.height / 2), 1000.0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The sheet has shrunk.
+      expect(sheetFinder, findsOneWidget);
+      final Rect shrunkSheetRect = tester.getRect(sheetFinder);
+      expect(shrunkSheetRect.width, lessThan(initialSheetRect.width));
+      expect(shrunkSheetRect.height, lessThan(initialSheetRect.height));
+
+      // Verify alignment based on how the rect has shrunk.
+      switch (expectedAlignment) {
+        case AlignmentDirectional.topStart:
+          expect(
+            shrunkSheetRect.left,
+            moreOrLessEquals(initialSheetRect.left, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        case AlignmentDirectional.topCenter:
+          expect(
+            shrunkSheetRect.center.dx,
+            moreOrLessEquals(
+              initialSheetRect.center.dx,
+              epsilon: Tolerance.defaultTolerance.distance,
+            ),
+          );
+        case AlignmentDirectional.topEnd:
+          expect(
+            shrunkSheetRect.right,
+            moreOrLessEquals(initialSheetRect.right, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        default:
+          fail('Unhandled alignment: $expectedAlignment');
+      }
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Portrait', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topCenter,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
+
+    testWidgets('Landscape', (WidgetTester tester) async {
+      const Size landscapeScreenSize = Size(800.0, 600.0);
+      await binding.setSurfaceSize(landscapeScreenSize);
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
+  });
 }

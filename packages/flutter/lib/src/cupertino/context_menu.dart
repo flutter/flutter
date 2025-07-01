@@ -546,19 +546,23 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _route = null;
   }
 
-  void _onTap() {
+  void _onTapCompleted() {
     _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
+  void _onTap() {
+    _onTapCompleted();
+  }
+
   void _onTapCancel() {
-    _onTap();
+    _onTapCompleted();
   }
 
   void _onTapUp(TapUpDetails details) {
-    _onTap();
+    _onTapCompleted();
   }
 
   void _onTapDown(TapDownDetails details) {
