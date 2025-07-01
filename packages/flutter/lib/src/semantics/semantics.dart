@@ -1243,7 +1243,9 @@ class SemanticsData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('rect', rect, showName: false));
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
-    properties.add(TransformProperty('hitTestTransform', hitTestTransform, showName: false, defaultValue: null));
+    properties.add(
+      TransformProperty('hitTestTransform', hitTestTransform, showName: false, defaultValue: null),
+    );
     final List<String> actionSummary = <String>[
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
@@ -3674,7 +3676,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     } else {
       List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-
+      print('parent id: $id, sortedChildren: ${sortedChildren.map((e) => e.id)}');
       childrenInTraversalOrder = Int32List(updatedChildren!.length);
       for (int i = 0; i < updatedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
@@ -3888,7 +3890,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       // In the absence of text direction default to paint order.
       childrenInDefaultOrder = updatedChildren;
     }
-
+    print('parent id: $id, childrenInDefaultOrder: ${childrenInDefaultOrder?.map((e) => e.id)}');
     // List.sort does not guarantee stable sort order. Therefore, children are
     // first partitioned into groups that have compatible sort keys, i.e. keys
     // in the same group can be compared to each other. These groups stay in
@@ -3923,7 +3925,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       sortNodes.sort();
     }
     everythingSorted.addAll(sortNodes);
-
     return everythingSorted
         .map<SemanticsNode>((_TraversalSortNode sortNode) => sortNode.node)
         .toList();
@@ -4224,7 +4225,7 @@ final class _SemanticsGeometry {
         );
         childToCommonAncestorTransform ??= Matrix4.identity();
         childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.parent!;
+        childSemanticsNode = childSemanticsNode.semanticsParent!;
       }
       if (fromDepth <= toDepth) {
         assert(
@@ -4236,7 +4237,7 @@ final class _SemanticsGeometry {
         parentToCommonAncestorTransform.multiply(
           parentSemanticsNode.transform ?? Matrix4.identity(),
         );
-        parentSemanticsNode = parentSemanticsNode.parent!;
+        parentSemanticsNode = parentSemanticsNode.semanticsParent!;
       }
     }
 
@@ -4788,22 +4789,16 @@ class SemanticsOwner extends ChangeNotifier {
         if (isOverlayPortalParent) {
           // If the node is an overlay portal parent, we need to update the parent node.
           _overlayPortalParentNodes[identifier] = node;
-        } else {
+        } else if (isOverlayPortalChild) {
           // If the node is a child of an overlay portal, we need to add parent node before node.
           final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
+            print('parentNode: ${parentNode.id}');
             updatedVisitedNodes.add(parentNode);
           }
-        }
-
-        if (isOverlayPortalChild) {
           _overlayPortalChildNodes[identifier] = node;
-          // final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
 
-          // final SemanticsNode parent = node.parent!;
-          // parent._dropChild(node);
-          // final SemanticsNode? actualParentNode = _overlayPortalParentNodes[identifier];
-          // actualParentNode?._adoptChild(node);
+          // final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
           // if (parentNode != null) {
           //   parentNode._redepthChild(node);
           // }
@@ -4812,7 +4807,7 @@ class SemanticsOwner extends ChangeNotifier {
         updatedVisitedNodes.add(node);
       }
     }
-    // print('visitedNodes id list: ${visitedNodes.map((SemanticsNode node) => node.id)}');
+    print('visitedNodes id list: ${visitedNodes.map((SemanticsNode node) => node.id)}');
     // print(
     //   'updatedVisitedNodes id list: ${updatedVisitedNodes.map((SemanticsNode node) => node.id)}',
     // );
@@ -4833,9 +4828,9 @@ class SemanticsOwner extends ChangeNotifier {
     // print(formattedEntries1.join(', '));
 
     // print('--------------------------------------------------');
+    print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id)}');
 
     for (final SemanticsNode node in updatedVisitedNodes) {
-      print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id)}');
       assert(
         node.parent?._dirty != true || node.identifier.endsWith('parent'),
       ); // could be null (no parent) or false (not dirty)
