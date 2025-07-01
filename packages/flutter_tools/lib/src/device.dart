@@ -966,6 +966,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -999,6 +1000,7 @@ class DebuggingOptions {
     this.webUseWasm = false,
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -1081,6 +1083,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
@@ -1127,6 +1130,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
+  final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1219,6 +1223,7 @@ class DebuggingOptions {
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
+      if (enableFlutterGpu) '--enable-flutter-gpu',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1276,6 +1281,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
+    'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1344,6 +1350,7 @@ class DebuggingOptions {
         fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+        enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,

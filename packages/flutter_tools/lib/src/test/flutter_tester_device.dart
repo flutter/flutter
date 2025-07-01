@@ -111,6 +111,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         '--enable-impeller'
       else ...<String>['--enable-software-rendering', '--skia-deterministic-rendering'],
+      if (debuggingOptions.enableFlutterGpu) '--enable-flutter-gpu',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',

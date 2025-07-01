@@ -1515,6 +1515,28 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'Enables Flutter GPU',
+      () async {
+        final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+        final TestCommand testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--enable-impeller',
+          '--enable-flutter-gpu',
+        ]);
+        expect(testRunner.lastDebuggingOptionsValue.enableFlutterGpu, true);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'Passes web renderer into debugging options',
       () async {
         final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
