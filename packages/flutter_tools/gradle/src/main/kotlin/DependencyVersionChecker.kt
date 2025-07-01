@@ -90,7 +90,7 @@ object DependencyVersionChecker {
     // flutter.dev/go/android-dependency-versions for more.
     @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 2)
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 0, 0)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
 
     @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
 
@@ -98,7 +98,7 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 1, 0)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 1, 1)
 
     @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 1, 0)
 
@@ -152,7 +152,7 @@ object DependencyVersionChecker {
             val minSdkCheckTask =
                 project.tasks.register(taskName) {
                     doLast {
-                        val minSdkVersion = getMinSdkVersion(project, it)
+                        val minSdkVersion = getMinSdkVersion(it)
                         try {
                             checkMinSdkVersion(minSdkVersion, project.rootDir.path, project.logger)
                         } catch (e: DependencyValidationException) {
@@ -177,10 +177,7 @@ object DependencyVersionChecker {
 
     private fun generateMinSdkCheckTaskName(it: Variant) = "${FlutterPluginUtils.capitalize(it.name)}$MIN_SDK_CHECK_TASK_POSTFIX"
 
-    private fun getMinSdkVersion(
-        project: Project,
-        it: Variant
-    ): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
+    private fun getMinSdkVersion(it: Variant): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
 
     @VisibleForTesting internal fun getErrorMessage(
         dependencyName: String,

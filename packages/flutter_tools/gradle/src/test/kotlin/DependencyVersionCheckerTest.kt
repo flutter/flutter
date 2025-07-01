@@ -206,7 +206,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in warn range results in warning logs`() {
-        val exampleWarnGradleVersion = "8.1.0"
+        val exampleWarnGradleVersion = "8.5.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -477,7 +477,6 @@ private object MockProjectFactory {
                 val variant = mockk<Variant>()
                 every { variant.name } returns it.flavor
                 every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
-                every { variant.minSdkVersion } returns mockk { every { apiLevel } returns it.version }
                 onVariantsFnSlot.captured.invoke(variant)
             }
             return@answers Unit
