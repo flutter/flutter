@@ -14,16 +14,28 @@ import 'constants.dart';
 /// The focus border is drawn using a border color specified by [focusColor] and
 /// is rounded by a border radius specified by [borderRadius].
 ///
+/// For example, to highlight a section of the widget tree when any button inside that
+/// section has focus, one could write:
+///
+/// ```dart
+/// CupertinoFocusHalo.onRect(
+///   child: Column(
+///     children: [
+///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
+///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
+///     ],
+///   ),
+/// )
+/// ```
+///
 /// See also:
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
 /// {@endtemplate}
 class CupertinoFocusHalo extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoFocusHalo}
-  const CupertinoFocusHalo.onRect({
-    required this.child,
-    super.key,
-  })  : _borderRadius = BorderRadius.zero;
+  const CupertinoFocusHalo.onRect({required this.child, super.key})
+    : _borderRadius = BorderRadius.zero;
 
   /// {@macro flutter.cupertino.CupertinoFocusHalo}
   const CupertinoFocusHalo.onRRect({
@@ -48,11 +60,7 @@ class _CupertinoFocusHaloState extends State<CupertinoFocusHalo> {
   bool _childHasFocus = false;
 
   Color get _effectiveFocusOutlineColor =>
-      HSLColor.fromColor(
-            CupertinoColors.activeBlue.withOpacity(
-              kCupertinoFocusColorOpacity,
-            ),
-          )
+      HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
           .withLightness(kCupertinoFocusColorBrightness)
           .withSaturation(kCupertinoFocusColorSaturation)
           .toColor();
