@@ -12,6 +12,28 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
+import '../semantics/semantics_tester.dart';
+
+EngineSemantics semantics() => EngineSemantics.instance;
+EngineSemanticsOwner owner() => EnginePlatformDispatcher.instance.implicitView!.semantics;
+
+/// Creates a DOM mouse event with fractional coordinates to avoid triggering
+/// assistive technology detection logic.
+///
+/// The platform dispatcher's _isIntegerCoordinateNavigation() method detects
+/// assistive technology clicks by checking for integer coordinates. Tests
+/// should use fractional coordinates to simulate normal user clicks.
+DomMouseEvent createTestClickEvent({
+  double clientX = 1.5,
+  double clientY = 1.5,
+  bool bubbles = true,
+}) {
+  return createDomMouseEvent('click', <String, Object>{
+    'clientX': clientX,
+    'clientY': clientY,
+    'bubbles': bubbles,
+  });
+}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -395,7 +417,200 @@ void testMain() {
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
     });
-    // https://github.com/flutter/flutter/issues/160096
+
+    group('NavigationTarget', () {
+      test('creates with element and nodeId', () {
+        final DomElement element = createDomHTMLDivElement();
+        const int nodeId = 123;
+
+        final NavigationTarget target = NavigationTarget(element, nodeId);
+
+        expect(target.element, equals(element));
+        expect(target.nodeId, equals(nodeId));
+      });
+    });
+
+    group('AT Focus Handler Integration', () {
+      test('navigation focus handler is registered during initialization', () {
+        final DomElement navButton = createDomHTMLButtonElement();
+        navButton.setAttribute('id', '${kFlutterSemanticNodePrefix}123');
+        navButton.setAttribute('role', 'button');
+        navButton.tabIndex = 0;
+        domDocument.body!.append(navButton);
+
+        addTearDown(() {
+          navButton.remove();
+        });
+
+        final DomMouseEvent atClickEvent = createDomMouseEvent('click', <String, Object>{
+          'clientX': 0,
+          'clientY': 0,
+          'bubbles': true,
+        });
+
+        navButton.dispatchEvent(atClickEvent);
+
+        expect(navButton.isConnected, isTrue);
+      });
+
+      test('does not interfere with normal click events', () {
+        final DomElement navButton = createDomHTMLButtonElement();
+        navButton.setAttribute('id', '${kFlutterSemanticNodePrefix}456');
+        navButton.setAttribute('role', 'button');
+        navButton.tabIndex = 0;
+        domDocument.body!.append(navButton);
+
+        addTearDown(() {
+          navButton.remove();
+        });
+
+        final DomMouseEvent normalClickEvent = createDomMouseEvent('click', <String, Object>{
+          'clientX': 150.5,
+          'clientY': 200.7,
+          'bubbles': true,
+        });
+
+        navButton.dispatchEvent(normalClickEvent);
+
+        expect(navButton.isConnected, isTrue);
+      });
+
+      test('handles events from multiple navigation element types', () {
+        final List<DomElement> navElements = <DomElement>[
+          createDomHTMLButtonElement()..setAttribute('role', 'button'),
+          createDomElement('a')..setAttribute('role', 'link'),
+          createDomHTMLDivElement()..setAttribute('role', 'tab'),
+        ];
+
+        for (int i = 0; i < navElements.length; i++) {
+          final DomElement element = navElements[i];
+          element.setAttribute('id', '$kFlutterSemanticNodePrefix${100 + i}');
+          element.tabIndex = 0;
+          domDocument.body!.append(element);
+        }
+
+        addTearDown(() {
+          for (final DomElement element in navElements) {
+            element.remove();
+          }
+        });
+
+        for (final DomElement element in navElements) {
+          final DomMouseEvent atEvent = createTestClickEvent();
+
+          expect(() => element.dispatchEvent(atEvent), returnsNormally);
+        }
+      });
+
+      test('properly manages focus state detection', () {
+        final DomElement navButton = createDomHTMLButtonElement();
+        navButton.setAttribute('id', '${kFlutterSemanticNodePrefix}999');
+        navButton.setAttribute('role', 'button');
+        navButton.tabIndex = 0;
+        domDocument.body!.append(navButton);
+
+        addTearDown(() {
+          navButton.remove();
+        });
+
+        final DomMouseEvent atEvent = createTestClickEvent(clientX: 0.5, clientY: 0.5);
+
+        expect(() => navButton.dispatchEvent(atEvent), returnsNormally);
+        expect(navButton.isConnected, isTrue);
+      });
+
+      test('handles elements with semantics focus action but no tabindex', () {
+        semantics().semanticsEnabled = true;
+
+        final SemanticsTester tester = SemanticsTester(owner());
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 500, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
+          ],
+        );
+        final Map<int, SemanticsObject> tree = tester.apply();
+
+        final SemanticsObject semanticsObject = tree[500]!;
+        final DomElement focusableElement = semanticsObject.element;
+
+        focusableElement.removeAttribute('tabindex');
+
+        domDocument.body!.append(focusableElement);
+
+        addTearDown(() {
+          focusableElement.remove();
+          semantics().semanticsEnabled = false;
+        });
+
+        final DomMouseEvent atEvent = createTestClickEvent();
+
+        expect(() => focusableElement.dispatchEvent(atEvent), returnsNormally);
+        expect(focusableElement.isConnected, isTrue);
+      });
+
+      test('prioritizes tabindex over semantics focus action for focus finding', () {
+        semantics().semanticsEnabled = true;
+
+        final SemanticsTester tester = SemanticsTester(owner());
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 600, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
+          ],
+        );
+        final Map<int, SemanticsObject> tree = tester.apply();
+
+        final SemanticsObject semanticsObject = tree[600]!;
+        final DomElement elementWithBoth = semanticsObject.element;
+        elementWithBoth.tabIndex = 0;
+        domDocument.body!.append(elementWithBoth);
+
+        addTearDown(() {
+          elementWithBoth.remove();
+          semantics().semanticsEnabled = false;
+        });
+
+        final DomMouseEvent atEvent = createTestClickEvent(clientX: 0.5, clientY: 0.5);
+
+        expect(() => elementWithBoth.dispatchEvent(atEvent), returnsNormally);
+        expect(elementWithBoth.isConnected, isTrue);
+        expect(elementWithBoth.tabIndex, equals(0));
+      });
+
+      test('finds child elements with semantics focus action', () {
+        semantics().semanticsEnabled = true;
+
+        final SemanticsTester tester = SemanticsTester(owner());
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 700, rect: const ui.Rect.fromLTRB(0, 0, 100, 50), hasFocus: true),
+          ],
+        );
+        final Map<int, SemanticsObject> tree = tester.apply();
+
+        final SemanticsObject semanticsObject = tree[700]!;
+        final DomElement childElement = semanticsObject.element;
+
+        childElement.removeAttribute('tabindex');
+
+        final DomElement parentElement = createDomHTMLDivElement();
+        parentElement.append(childElement);
+        domDocument.body!.append(parentElement);
+
+        addTearDown(() {
+          parentElement.remove();
+          semantics().semanticsEnabled = false;
+        });
+
+        final DomMouseEvent atEvent = createTestClickEvent();
+
+        expect(() => parentElement.dispatchEvent(atEvent), returnsNormally);
+        expect(parentElement.isConnected, isTrue);
+        expect(childElement.isConnected, isTrue);
+      });
+    });
   }, skip: ui_web.browser.isFirefox);
 }
 
