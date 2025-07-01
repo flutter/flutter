@@ -795,6 +795,7 @@ void main() {
       },
     );
   });
+
   testUsingContext(
     'If android workflow is disabled, AndroidStudio validator is not included',
     () {

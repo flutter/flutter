@@ -2,18 +2,8 @@ MIT
 (?s)^(?:MIT License)?\s*Copyright.*Permission is hereby granted.*\n.*following conditions:.*THE SOFTWARE IS PROVIDED
 (?s)^(?:MIT License)?\s*Copyright \(c\) .*
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files \(the "Software"\), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission\s+is\s+hereby\s+granted,\s+free\s+of\s+charge,\s+to\s+any\s+person\s+obtaining\s+a\s+copy\s+of\s+this\s+software\s+and\s+associated\s+documentation\s+files\s+\(the\s+"Software"\),\s+to\s+deal\s+in\s+the\s+Software\s+without\s+restriction,\s+including\s+without\s+limitation\s+the\s+rights\s+to\s+use,\s+copy,\s+modify,\s+merge,\s+publish,\s+distribute,\s+sublicense,\s+and/or\s+sell\s+copies\s+of\s+the\s+Software,\s+and\s+to\s+permit\s+persons\s+to\s+whom\s+the\s+Software\s+is\s+furnished\s+to\s+do\s+so,\s+subject\s+to\s+the\s+following\s+conditions:
 
-The above copyright notice and this permission notice shall be included in\s+all\s+copies or substantial portions of the Software.
+The\s+above\s+copyright\s+notice\s+and\s+this\s+permission\s+notice\s+shall\s+be\s+included\s+in\s+all\s+copies\s+or\s+substantial\s+portions\s+of\s+the\s+Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\s+IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN.*THE.*SOFTWARE\.
+THE\s+SOFTWARE\s+IS\s+PROVIDED\s+"AS\s+IS",\s+WITHOUT\s+WARRANTY\s+OF\s+ANY\s+KIND,\s+EXPRESS\s+OR\s+IMPLIED,\s+INCLUDING\s+BUT\s+NOT\s+LIMITED\s+TO\s+THE\s+WARRANTIES\s+OF\s+MERCHANTABILITY,\s+FITNESS\s+FOR\s+A\s+PARTICULAR\s+PURPOSE\s+AND\s+NONINFRINGEMENT.\s+IN\s+NO\s+EVENT\s+SHALL\s+THE\s+AUTHORS\s+OR\s+COPYRIGHT\s+HOLDERS\s+BE\s+LIABLE\s+FOR\s+ANY\s+CLAIM,\s+DAMAGES\s+OR\s+OTHER\s+LIABILITY,\s+WHETHER\s+IN\s+AN\s+ACTION\s+OF\s+CONTRACT,\s+TORT\s+OR\s+OTHERWISE,\s+ARISING\s+FROM,\s+OUT\s+OF\s+OR\s+IN\s+CONNECTION\s+WITH\s+THE\s+SOFTWARE\s+OR\s+THE\s+USE\s+OR\s+OTHER\s+DEALINGS\s+IN.*THE.*SOFTWARE\.
