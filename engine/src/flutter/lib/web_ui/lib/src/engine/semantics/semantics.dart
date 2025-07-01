@@ -262,6 +262,7 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
+    required this.hitTestTransform,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -357,6 +358,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Float32List transform;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final Float32List hitTestTransform;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List childrenInTraversalOrder;
@@ -2464,8 +2468,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());

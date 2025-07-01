@@ -1527,6 +1527,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * View#onHoverEvent(MotionEvent)}.
    */
   public boolean onAccessibilityHoverEvent(MotionEvent event, boolean ignorePlatformViews) {
+
     if (!accessibilityManager.isTouchExplorationEnabled()) {
       return false;
     }
@@ -1546,6 +1547,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return accessibilityViewEmbedder.onAccessibilityHoverEvent(
           semanticsNodeUnderCursor.id, event);
     }
+
+    Log.e("flutter", "event.getX(): " + event.getX());
+    Log.e("flutter", "event.getY(): " + event.getY());
 
     if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER
         || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
@@ -1586,6 +1590,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (flutterSemanticsTree.isEmpty()) {
       return;
     }
+    // print x y
+    Log.e("flutter", "handleTouchExploration x: " + x + " y: " + y);
     SemanticsNode semanticsNodeUnderCursor =
         getRootSemanticsNode().hitTest(new float[] {x, y, 0, 1}, ignorePlatformViews);
     if (semanticsNodeUnderCursor != hoveredObject) {
@@ -2370,6 +2376,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float right;
     private float bottom;
     private float[] transform;
+    private float[] hitTestTransform;
 
     private SemanticsNode parent;
     private List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
@@ -2565,6 +2572,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       for (int i = 0; i < 16; ++i) {
         transform[i] = buffer.getFloat();
       }
+      if (hitTestTransform == null) {
+        hitTestTransform = new float[16];
+      }
+      for (int i = 0; i < 16; ++i) {
+        hitTestTransform[i] = buffer.getFloat();
+      }
       inverseTransformDirty = true;
       globalGeometryDirty = true;
 
@@ -2662,7 +2675,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
-      if (!Matrix.invertM(inverseTransform, 0, transform, 0)) {
+      if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
     }

@@ -176,6 +176,7 @@ void sendSemanticsUpdate() {
   String tooltip = "tooltip";
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -227,6 +228,7 @@ void sendSemanticsUpdate() {
     tooltip: tooltip,
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -244,6 +246,7 @@ void sendSemanticsUpdateWithRole() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -280,6 +283,7 @@ void sendSemanticsUpdateWithRole() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,

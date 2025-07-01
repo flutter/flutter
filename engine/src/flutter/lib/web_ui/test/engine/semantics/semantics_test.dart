@@ -5680,6 +5680,7 @@ void updateNode(
   String tooltip = '',
   ui.TextDirection textDirection = ui.TextDirection.ltr,
   Float64List? transform,
+  Float64List? hitTestTransform,
   Int32List? childrenInTraversalOrder,
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
@@ -5691,6 +5692,7 @@ void updateNode(
   ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
+  hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
   childrenInHitTestOrder ??= Int32List(0);
   additionalActions ??= Int32List(0);
@@ -5724,6 +5726,7 @@ void updateNode(
     tooltip: tooltip,
     textDirection: textDirection,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
