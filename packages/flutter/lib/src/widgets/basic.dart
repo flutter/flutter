@@ -1728,7 +1728,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
   ///
-  /// This offset is applied after any [alignment] transformation, so in this
+  /// This offset is applied in addition to any [alignment] transformation, so in this
   /// example, the child is rotated about its center, since [alignment]
   /// in [Transform.rotate] defaults to [Alignment.center]:
   ///
