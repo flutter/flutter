@@ -419,7 +419,8 @@ class ElevatedButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Theme.of(context).useMaterial3
+    return Theme.of(context)
+            .useMaterial3 // TODO(camsim99): if material3 is used then we slip into this case
         ? _ElevatedButtonDefaultsM3(context)
         : styleFrom(
           backgroundColor: colorScheme.primary,
@@ -435,7 +436,7 @@ class ElevatedButton extends ButtonStyleButton {
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
           enabledMouseCursor:
               SystemMouseCursors
-                  .click, // TODO(camsim99): (ButtonStyleButton) I think I should try playing with this default
+                  .basic, // TODO(camsim99): (ButtonStyleButton) I think I should try playing with this default
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
           tapTargetSize: theme.materialTapTargetSize,

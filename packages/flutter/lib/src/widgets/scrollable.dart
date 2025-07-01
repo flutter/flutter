@@ -1013,18 +1013,6 @@ class ScrollableState extends State<Scrollable>
   // DESCRIPTION
   PointerDeviceKind? _scrollingDeviceKind;
 
-  void _updateDevice(PointerEvent event) {
-    final PointerDeviceKind newKind = event.kind;
-    print('CAMILLE: _update device called; new kind: $newKind');
-    if (newKind != _scrollingDeviceKind) {
-      // Using setState to rebuild the widget with the new color and text.
-      setState(() {
-        print('CAMILLE: _update device called; setting state!');
-        _scrollingDeviceKind = newKind;
-      });
-    }
-  }
-
   @protected
   @override
   Widget build(BuildContext context) {
@@ -1042,9 +1030,6 @@ class ScrollableState extends State<Scrollable>
       position: position,
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
-        onPointerDown: _updateDevice,
-        onPointerHover: _updateDevice,
-        onPointerMove: _updateDevice,
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
