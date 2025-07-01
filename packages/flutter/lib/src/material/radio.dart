@@ -663,11 +663,11 @@ class _RadioPaintState extends State<_RadioPaint> {
     final Color activeBackgroundColor =
         widget.backgroundColor?.resolve(activeStates) ??
         radioTheme.backgroundColor?.resolve(activeStates) ??
-        Colors.transparent;
+        defaults.backgroundColor!.resolve(activeStates)!;
     final Color inactiveBackgroundColor =
         widget.backgroundColor?.resolve(inactiveStates) ??
         radioTheme.backgroundColor?.resolve(inactiveStates) ??
-        Colors.transparent;
+        defaults.backgroundColor!.resolve(inactiveStates)!;
 
     final Set<MaterialState> focusedStates =
         widget.toggleableState.states..add(MaterialState.focused);
@@ -885,6 +885,10 @@ class _RadioDefaultsM2 extends RadioThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  WidgetStateProperty<Color> get backgroundColor =>
+      WidgetStateProperty.all<Color>(Colors.transparent);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Radio<T>
@@ -969,6 +973,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  WidgetStateProperty<Color> get backgroundColor =>
+      WidgetStateProperty.all<Color>(Colors.transparent);
 }
 // dart format on
 
