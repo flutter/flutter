@@ -226,14 +226,24 @@ absl::Status MatchLicenseFile(const fs::path& path,
   return absl::OkStatus();
 }
 
+/// State stored across calls to ProcessFile.
+struct ProcessState {
+  LicenseMap license_map;
+  std::vector<absl::Status> errors;
+  absl::flat_hash_set<fs::path> seen_license_files;
+};
+
 absl::Status ProcessFile(const fs::path& working_dir_path,
                          std::ostream& licenses,
                          const Data& data,
                          const fs::path& full_path,
                          const LicenseChecker::Flags& flags,
-                         LicenseMap* license_map,
-                         std::vector<absl::Status>* errors,
-                         absl::flat_hash_set<fs::path>* seen_license_files) {
+                         ProcessState* state) {
+  std::vector<absl::Status>* errors = &state->errors;
+  LicenseMap* license_map = &state->license_map;
+  absl::flat_hash_set<fs::path>* seen_license_files =
+      &state->seen_license_files;
+
   bool did_find_copyright = false;
   fs::path relative_path = fs::relative(full_path, working_dir_path);
   VLOG(2) << relative_path;
@@ -329,13 +339,11 @@ std::vector<absl::Status> LicenseChecker::Run(
     std::ostream& licenses,
     const Data& data,
     const LicenseChecker::Flags& flags) {
-  std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path(working_dir);
 
   size_t count = 0;
-  LicenseMap license_map;
-  absl::flat_hash_set<fs::path> seen_license_files;
+  ProcessState state;
   for (const fs::path& git_repo : git_repos) {
     if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
       PrintProgress(count++, git_repos.size());
@@ -343,26 +351,25 @@ std::vector<absl::Status> LicenseChecker::Run(
 
     absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
     if (!git_files.ok()) {
-      errors.push_back(git_files.status());
-      return errors;
+      state.errors.push_back(git_files.status());
+      return state.errors;
     }
     for (const std::string& git_file : git_files.value()) {
       fs::path full_path = git_repo / git_file;
-      absl::Status process_result =
-          ProcessFile(working_dir_path, licenses, data, full_path, flags,
-                      &license_map, &errors, &seen_license_files);
+      absl::Status process_result = ProcessFile(working_dir_path, licenses,
+                                                data, full_path, flags, &state);
       if (!process_result.ok()) {
-        return errors;
+        return state.errors;
       }
     }
   }
-  license_map.Write(licenses);
+  state.license_map.Write(licenses);
   if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
     PrintProgress(count++, git_repos.size());
     std::cout << std::endl;
   }
 
-  return errors;
+  return state.errors;
 }
 
 int LicenseChecker::Run(std::string_view working_dir,
