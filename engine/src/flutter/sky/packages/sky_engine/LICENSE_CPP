@@ -3848,6 +3848,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) %d, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 expat
 
 Copyright (c) 1998-2000 Thai Open Source Software Center Ltd and Clark Cooper
@@ -3985,6 +3991,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2010, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 include
 
 Copyright (c) 2011 - Nick Bruun.
@@ -4051,6 +4063,12 @@ Copyright (c) 2011 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2011, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 ..
 accessibility
 dart
@@ -4061,6 +4079,12 @@ Copyright (c) 2012 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 accessibility
 angle
 dart
@@ -4069,6 +4093,13 @@ skia
 Copyright (c) 2013 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+pkg
+
+Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 ..
 
@@ -4153,11 +4184,25 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 --------------------------------------------------------------------------------
 dart
+pkg
+
+Copyright (c) 2014, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
 skia
 
 Copyright (c) 2015 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+pkg
+
+Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -4165,11 +4210,24 @@ Copyright (c) 2016 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright (c) 2017 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+pkg
+
+Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 vulkan_memory_allocator
 
@@ -4200,6 +4258,18 @@ Copyright (c) 2018 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2018, the Dart project authors. Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 volk
 
 Copyright (c) 2018-2019 Arseny Kapoulkine
@@ -4227,6 +4297,18 @@ skia
 Copyright (c) 2019 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2019, the Dart project authors. Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 ffx_spd
 
@@ -4262,6 +4344,13 @@ Copyright (c) 2020 The ANGLE Project Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+dart
+pkg
+
+Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 libwebp
 
 Copyright (c) 2021, Google Inc. All rights reserved.
@@ -4294,6 +4383,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright (c) 2022 Google LLC. All rights reserved.
@@ -4310,11 +4405,72 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
+dart
+pkg
+
+Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2023, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2023, the Dart project authors. Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2024, the Dart project authors. Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+dart
+
+Copyright (c) 2025, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 1999-2005 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 angle
 
 Copyright 2002 The ANGLE Project Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2003-2009 Google Inc.  All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2003-2009 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2003-2010 Google Inc.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -4332,6 +4488,18 @@ skia
 
 Copyright 2006 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2006 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2006-2007 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 double-conversion
 
@@ -4375,6 +4543,12 @@ Copyright 2007 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+re2
+
+Copyright 2007 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2008 Google Inc.
@@ -4387,11 +4561,23 @@ Copyright 2008 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+re2
+
+Copyright 2008 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2009 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2009 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -4426,6 +4612,12 @@ skia
 Copyright 2010 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2010 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -4914,6 +5106,12 @@ Copyright 2016 The Dart project authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+re2
+
+Copyright 2016 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2017 ARM Ltd.
@@ -5105,6 +5303,12 @@ Copyright 2018 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+re2
+
+Copyright 2018 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2019 Google Inc.
@@ -5173,6 +5377,13 @@ Copyright 2019 The ANGLE Project. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+angle
+
+Copyright 2019 The ANGLE project authors. All Rights Reserved.
+
+Use of this source code is governed by a BSD-style license
+that can be found in the LICENSE file 
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2019 The Android Open Source Project
@@ -5203,6 +5414,12 @@ angle
 Copyright 2019 The Fuchsia Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2019 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -5259,6 +5476,12 @@ angle
 Copyright 2020 The ANGLE Project Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+angle
+
+Copyright 2020 The ANGLE Project Authors. All rights reserved. Use of this
+source code is governed by a BSD-style license that can be found in the
+LICENSE file.
 --------------------------------------------------------------------------------
 angle
 
@@ -5471,6 +5694,12 @@ Copyright 2022 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+re2
+
+Copyright 2022 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
 skia
 
 Copyright 2023 Google Inc.
@@ -5538,6 +5767,12 @@ skia
 Copyright 2023 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+re2
+
+Copyright 2023 The RE2 Authors.  All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
