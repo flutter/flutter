@@ -99,6 +99,28 @@ Widget buildInputDecorator({
   );
 }
 
+Widget buildInputDecoratorWithFloatingLabel({
+  required TextDirection textDirection,
+  required bool hasIcon,
+  FloatingLabelAlignment? alignment,
+  bool borderIsOutline = false,
+  InputDecorationThemeData? localInputDecorationTheme,
+}) {
+  return buildInputDecorator(
+    textDirection: textDirection,
+    localInputDecorationTheme: localInputDecorationTheme,
+    decoration: InputDecoration(
+      contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      floatingLabelAlignment: alignment,
+      icon: hasIcon ? const Icon(Icons.insert_link) : null,
+      labelText: labelText,
+      hintText: hintText,
+      filled: true,
+      border: borderIsOutline ? const OutlineInputBorder() : null,
+    ),
+  );
+}
+
 Finder findBorderPainter() {
   return find.descendant(
     of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
@@ -7619,26 +7641,6 @@ void main() {
   });
 
   group('Material3 - InputDecoration floatingLabelAlignment', () {
-    Widget buildInputDecoratorWithFloatingLabel({
-      required TextDirection textDirection,
-      required bool hasIcon,
-      required FloatingLabelAlignment alignment,
-      bool borderIsOutline = false,
-    }) {
-      return buildInputDecorator(
-        textDirection: textDirection,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          floatingLabelAlignment: alignment,
-          icon: hasIcon ? const Icon(Icons.insert_link) : null,
-          labelText: labelText,
-          hintText: hintText,
-          filled: true,
-          border: borderIsOutline ? const OutlineInputBorder() : null,
-        ),
-      );
-    }
-
     group('LTR with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -9588,6 +9590,75 @@ void main() {
       );
     });
 
+    testWidgets('floatingLabelBehavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+          ),
+          decoration: const InputDecoration(label: customLabel),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+      // Label line height is forced to 1.0 and font size is 16.0,
+      // the label should be vertically centered (20 pixels above and below).
+      expect(getCustomLabelRect(tester).top, 20.0);
+      expect(getCustomLabelRect(tester).bottom, 36.0);
+    });
+
+    testWidgets('floatingLabelAlignment', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecoratorWithFloatingLabel(
+          textDirection: TextDirection.ltr,
+          hasIcon: true,
+          localInputDecorationTheme: const InputDecorationThemeData(
+            floatingLabelAlignment: FloatingLabelAlignment.center,
+          ),
+        ),
+      );
+      // icon (40) + (decorator (800) - icon (40)) / 2
+      expect(getLabelCenter(tester).dx, 420.0);
+    });
+
+    testWidgets('isDense', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(isDense: true),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getContainerRect(tester).height, 48.0);
+    });
+
+    testWidgets('contentPadding', (WidgetTester tester) async {
+      const double start = 11;
+      const double top = 13;
+      const double end = 15;
+      const double bottom = 17;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            contentPadding: EdgeInsetsDirectional.only(
+              start: start,
+              top: top,
+              end: end,
+              bottom: bottom,
+            ),
+          ),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      const double labelHeight = 16.0;
+      const double inputHeight = 24.0;
+      expect(getContainerRect(tester).height, top + labelHeight + inputHeight + bottom);
+      expect(getInputRect(tester).left, start);
+      expect(getInputRect(tester).right, 800 - end);
+    });
+
     testWidgets('isCollapsed', (WidgetTester tester) async {
       // Overall height for a collapsed InputDecorator is 24dp which is the input
       // height (font size = 16, line height = 1.5).
@@ -9602,17 +9673,6 @@ void main() {
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
-    });
-
-    testWidgets('isDense', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          localInputDecorationTheme: const InputDecorationThemeData(isDense: true),
-          decoration: const InputDecoration(labelText: labelText),
-        ),
-      );
-
-      expect(getContainerRect(tester).height, 48.0);
     });
 
     testWidgets('iconColor', (WidgetTester tester) async {
