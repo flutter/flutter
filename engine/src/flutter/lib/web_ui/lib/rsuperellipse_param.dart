@@ -214,7 +214,10 @@ class _RSuperellipseQuadrant {
   );
 
   static Size _replaceNaNWith(Size p, Size sign) {
-    return Size(p.width.isFinite ? p.width : sign.width, p.height.isFinite ? p.height : sign.height);
+    return Size(
+      p.width.isFinite ? p.width : sign.width,
+      p.height.isFinite ? p.height : sign.height,
+    );
   }
 }
 
@@ -244,29 +247,24 @@ class _RSuperellipsePathBuilder {
     path.close();
   }
 
-  // Build a path for a translated version of the provided RSuperellipse, so
-  // that the center of the bound is placed at the origin.
+  // Build a path for an RSuperellipse with arbitrary position and radii.
   _RSuperellipsePathBuilder.exact(RSuperellipse r) : path = Path() {
-    final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
-    final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
-    final _RSuperellipseQuadrant topRight = _RSuperellipseQuadrant.computeQuadrant(
-      Offset(topSplit, rightSplit),
-      Offset(r.right, r.top),
-      r.trRadius,
-      const Size(1, -1),
-    );
-
-    final Offset start =
-        topRight.offset +
-        (topRight.top.offset + Offset(0, topRight.top.se_a)).scale(
-          topRight.signedScale.width,
-          topRight.signedScale.height,
-        );
+    final Offset start = Offset((r.left + r.right) / 2, r.top);
     path.moveTo(start.dx, start.dy);
 
+    final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
+    final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
     final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
     final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
-    _addQuadrant(topRight, false);
+    _addQuadrant(
+      _RSuperellipseQuadrant.computeQuadrant(
+        Offset(topSplit, rightSplit),
+        Offset(r.right, r.top),
+        r.trRadius,
+        const Size(1, -1),
+      ),
+      false,
+    );
     _addQuadrant(
       _RSuperellipseQuadrant.computeQuadrant(
         Offset(bottomSplit, rightSplit),
