@@ -17468,6 +17468,71 @@ void main() {
     await tester.tap(find.text('Outside'));
     expect(tapOutsideCount, 0);
   });
+
+  testWidgets('Disabling interactive selection disables shortcuts', (WidgetTester tester) async {
+    controller.text = 'Hello world';
+
+    TextSelection? selection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            enableInteractiveSelection: false,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(selection?.start, 11);
+    expect(selection?.end, 11);
+
+    // Select all shortcut should be ignored.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyA],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(selection?.start, 11);
+    expect(selection?.end, 11);
+
+    // Select all programatically.
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+
+    // Set the clipboard.
+    await Clipboard.setData(const ClipboardData(text: 'foo'));
+
+    // Paste shortcut should be ignored.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyV],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.text, 'Hello world');
+
+    // Copy shortcut.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[LogicalKeyboardKey.keyC],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    final ClipboardData? data = await Clipboard.getData('text/plain');
+    expect(controller.text, 'Hello world');
+    expect(data?.text, 'foo');
+  });
 }
 
 class UnsettableController extends TextEditingController {

@@ -77,7 +77,7 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
                           controller.close();
                         }
                       },
-                      trailingIcon: const Text('▶'),
+                      trailingIcon: const Icon(Icons.arrow_forward),
                       child: Text('Submenu $i'),
                     );
                   },
