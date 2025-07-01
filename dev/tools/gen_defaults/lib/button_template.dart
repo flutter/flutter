@@ -176,12 +176,7 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

@@ -330,8 +330,6 @@ class FilledButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      // TODO(camsim99): (ButtonStyleButton) I might need to change the relevant defaultStyleOf methods or
-      // add defaults here since disabledMouseCursor, enabledMouseCursor might be null.
       mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
         WidgetState.disabled: disabledMouseCursor,
         WidgetState.any: enabledMouseCursor,
@@ -735,12 +733,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
@@ -882,12 +875,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

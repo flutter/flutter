@@ -419,9 +419,7 @@ class ElevatedButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    print('CAMILLE: ElevatedButton is using Material3 -- ${Theme.of(context).useMaterial3}');
-    return Theme.of(context)
-            .useMaterial3 // TODO(camsim99): if material3 is used then we slip into this case
+    return Theme.of(context).useMaterial3
         ? _ElevatedButtonDefaultsM3(context)
         : styleFrom(
           backgroundColor: colorScheme.primary,
@@ -684,7 +682,8 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
