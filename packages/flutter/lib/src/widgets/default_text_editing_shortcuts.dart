@@ -354,8 +354,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   // The following key combinations have no effect on text editing on this
   // platform:
-  //   * End
-  //   * Home
   //   * Meta + X
   //   * Meta + C
   //   * Meta + V
@@ -365,11 +363,55 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + shift? + arrow left
   //   * Meta + shift? + arrow right
   //   * Meta + shift? + arrow up
-  //   * Shift + end
-  //   * Shift + home
   //   * Meta + shift? + delete
   //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
+  static final Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
+    ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
+      forward: false,
+      collapseSelection: true,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(
+      forward: true,
+      collapseSelection: true,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+    ): const ExtendSelectionToLineBreakIntent(
+      forward: false,
+      collapseSelection: false,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+    ): const ExtendSelectionToLineBreakIntent(
+      forward: true,
+      collapseSelection: false,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+  };
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
@@ -551,6 +593,24 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       LogicalKeyboardKey.end,
       shift: true,
     ): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Control + shift? + end

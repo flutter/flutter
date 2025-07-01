@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+
 #import <Metal/Metal.h>
 #import <OCMock/OCMock.h>
 #import <QuartzCore/QuartzCore.h>
 #import <XCTest/XCTest.h>
 
-#include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 @interface FlutterMetalLayerTest : XCTestCase
 @end
@@ -76,10 +77,10 @@
 
 // For unknown reason sometimes CI fails to create IOSurface. Bail out
 // to prevent flakiness.
-#define BAIL_IF_NO_DRAWABLE(drawable)                \
-  if (drawable == nil) {                             \
-    FML_LOG(ERROR) << "Could not allocate drawable"; \
-    return;                                          \
+#define BAIL_IF_NO_DRAWABLE(drawable)                        \
+  if (drawable == nil) {                                     \
+    [FlutterLogger logError:@"Could not allocate drawable"]; \
+    return;                                                  \
   }
 
 - (void)testFlip {

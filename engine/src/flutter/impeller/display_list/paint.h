@@ -20,6 +20,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
@@ -59,11 +60,11 @@ struct Paint {
         std::shared_ptr<ColorSourceContents> color_source_contents,
         const flutter::DlColorFilter* color_filter,
         bool invert_colors,
-        RectGeometry* rect_geom) const;
+        FillRectGeometry* rect_geom) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<TextureContents> texture_contents,
-        RectGeometry* rect_geom) const;
+        FillRectGeometry* rect_geom) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         const FilterInput::Ref& input,
@@ -76,10 +77,7 @@ struct Paint {
   const flutter::DlColorFilter* color_filter = nullptr;
   const flutter::DlImageFilter* image_filter = nullptr;
 
-  Scalar stroke_width = 0.0;
-  Cap stroke_cap = Cap::kButt;
-  Join stroke_join = Join::kMiter;
-  Scalar stroke_miter = 4.0;
+  StrokeParameters stroke;
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSrcOver;
   bool invert_colors = false;

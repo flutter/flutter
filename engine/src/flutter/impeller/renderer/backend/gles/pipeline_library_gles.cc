@@ -167,7 +167,10 @@ static bool LinkProgram(
 
   if (link_status != GL_TRUE) {
     VALIDATION_LOG << "Could not link shader program: "
-                   << gl.GetProgramInfoLogString(*program);
+                   << gl.GetProgramInfoLogString(*program)
+                   << "\nVertex Shader:\n"
+                   << GetShaderSource(gl, vert_shader) << "\nFragment Shader:\n"
+                   << GetShaderSource(gl, frag_shader);
     return false;
   }
   return true;

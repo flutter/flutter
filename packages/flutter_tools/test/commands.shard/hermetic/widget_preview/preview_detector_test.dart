@@ -2,26 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import 'utils/preview_details_matcher.dart';
+import 'utils/preview_detector_test_utils.dart';
+import 'utils/preview_project.dart';
 
 // Note: this test isn't under the general.shard since tests under that directory
 // have a 2000ms time out and these tests write to the real file system and watch
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
-
-Directory createBasicProjectStructure(FileSystem fs) {
-  return fs.systemTempDirectory.createTempSync('root');
-}
 
 void populatePubspec(Directory projectRoot, String contents) {
   projectRoot.childFile('pubspec.yaml')
@@ -29,251 +24,114 @@ void populatePubspec(Directory projectRoot, String contents) {
     ..writeAsStringSync(contents);
 }
 
-PreviewPath addPreviewContainingFile(Directory projectRoot, List<String> path) {
-  final File file =
-      projectRoot.childDirectory('lib').childFile(path.join(const LocalPlatform().pathSeparator))
-        ..createSync(recursive: true)
-        ..writeAsStringSync(previewContainingFileContents);
-  return (path: file.path, uri: file.uri);
-}
-
-PreviewPath addNonPreviewContainingFile(Directory projectRoot, List<String> path) {
-  final File file =
-      projectRoot.childDirectory('lib').childFile(path.join(const LocalPlatform().pathSeparator))
-        ..createSync(recursive: true)
-        ..writeAsStringSync(nonPreviewContainingFileContents);
-  return (path: file.path, uri: file.uri);
-}
-
-void main() {
-  group('$PreviewDetector', () {
-    // Note: we don't use a MemoryFileSystem since we don't have a way to
-    // provide it to package:analyzer APIs without writing a significant amount
-    // of wrapper logic.
-    late LocalFileSystem fs;
-    late Logger logger;
-    late PreviewDetector previewDetector;
-    late Directory projectRoot;
-    void Function(PreviewMapping)? onChangeDetected;
-    void Function()? onPubspecChangeDetected;
-
-    void onChangeDetectedRoot(PreviewMapping mapping) {
-      onChangeDetected!(mapping);
+/// Creates a project with files containing previews that attempt to use as many widget preview
+/// properties as possible.
+class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
+  BasicProjectWithExhaustivePreviews({
+    required super.projectRoot,
+    required List<String> pathsWithPreviews,
+    required List<String> pathsWithoutPreviews,
+  }) {
+    final List<WidgetPreviewSourceFile> initialSources = <WidgetPreviewSourceFile>[];
+    for (final String path in pathsWithPreviews) {
+      initialSources.add((path: path, source: _previewContainingFileContents));
+      librariesWithPreviews.add(toPreviewPath(path));
     }
-
-    void onPubspecChangeDetectedRoot() {
-      onPubspecChangeDetected!();
+    for (final String path in pathsWithoutPreviews) {
+      initialSources.add((path: path, source: _nonPreviewContainingFileContents));
+      librariesWithoutPreviews.add(toPreviewPath(path));
     }
+    initialSources.forEach(writeFile);
+  }
 
-    setUp(() {
-      fs = LocalFileSystem.test(signals: Signals.test());
-      projectRoot = createBasicProjectStructure(fs);
-      logger = BufferLogger.test();
-      previewDetector = PreviewDetector(
-        projectRoot: projectRoot,
-        logger: logger,
-        fs: fs,
-        onChangeDetected: onChangeDetectedRoot,
-        onPubspecChangeDetected: onPubspecChangeDetectedRoot,
-      );
-    });
-
-    tearDown(() async {
-      await previewDetector.dispose();
-      projectRoot.deleteSync(recursive: true);
-      onChangeDetected = null;
-    });
-
-    testUsingContext('can detect previews in existing files', () async {
-      final List<PreviewPath> previewFiles = <PreviewPath>[
-        addPreviewContainingFile(projectRoot, <String>['foo.dart']),
-        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']),
-      ];
-      addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
-      final PreviewMapping mapping = await previewDetector.findPreviewFunctions(projectRoot);
-      expect(mapping.keys.toSet(), previewFiles.toSet());
-    });
-
-    testUsingContext('can detect previews in updated files', () async {
-      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
-        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
-        PreviewDetails.test(
-          functionName: 'builderPreview',
-          isBuilder: true,
-          name: 'Builder preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'attributesPreview',
-          isBuilder: false,
-          name: 'Attributes preview',
-          width: '100.0',
-          height: '100',
-          textScaleFactor: '2',
-          wrapper: 'testWrapper',
-          theme: 'theming',
-          brightness: 'Brightness.dark',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.preview',
-          isBuilder: false,
-          name: 'Constructor preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.factoryPreview',
-          isBuilder: false,
-          name: 'Factory constructor preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.previewStatic',
-          isBuilder: false,
-          name: 'Static preview',
-        ),
-      ];
-
-      // Create two files with existing previews and one without.
-      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{
-        addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
-        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): expectedPreviewDetails,
-      };
-      final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
-        projectRoot,
-        <String>['baz.dart'],
-      );
-
-      Completer<void> completer = Completer<void>();
-      onChangeDetected = (PreviewMapping updated) {
-        // The new preview in baz.dart should be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
-          ...expectedInitialMapping,
-          nonPreviewContainingFile: expectedPreviewDetails,
-        });
-        completer.complete();
-      };
-      // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize();
-      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
-
-      // Update the file without an existing preview to include a preview and ensure it triggers
-      // the preview detector.
-      addPreviewContainingFile(projectRoot, <String>['baz.dart']);
-      await completer.future;
-
-      completer = Completer<void>();
-      onChangeDetected = (PreviewMapping updated) {
-        // The removed preview in baz.dart should not longer be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), expectedInitialMapping);
-        completer.complete();
+  Map<PreviewPath, List<PreviewDetailsMatcher>> get matcherMapping =>
+      <PreviewPath, List<PreviewDetailsMatcher>>{
+        for (final PreviewPath path in librariesWithPreviews) path: _expectedPreviewDetails,
       };
 
-      // Update the file with an existing preview to remove the preview and ensure it triggers
-      // the preview detector.
-      addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
-      await completer.future;
-    });
+  final Set<PreviewPath> librariesWithPreviews = <PreviewPath>{};
+  final Set<PreviewPath> librariesWithoutPreviews = <PreviewPath>{};
 
-    testUsingContext('can detect previews in newly added files', () async {
-      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
-        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
-        PreviewDetails.test(
-          functionName: 'builderPreview',
-          isBuilder: true,
-          name: 'Builder preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'attributesPreview',
-          isBuilder: false,
-          name: 'Attributes preview',
-          width: '100.0',
-          height: '100',
-          textScaleFactor: '2',
-          wrapper: 'testWrapper',
-          theme: 'theming',
-          brightness: 'Brightness.dark',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.preview',
-          isBuilder: false,
-          name: 'Constructor preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.factoryPreview',
-          isBuilder: false,
-          name: 'Factory constructor preview',
-        ),
-        PreviewDetails.test(
-          functionName: 'MyWidget.previewStatic',
-          isBuilder: false,
-          name: 'Static preview',
-        ),
-      ];
+  /// Adds a file containing previews at [path].
+  void addPreviewContainingFile({required String path}) {
+    writeFile((path: path, source: _previewContainingFileContents));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithoutPreviews.remove(previewPath);
+    librariesWithPreviews.add(previewPath);
+  }
 
-      // The initial mapping should be empty as there's no files containing previews.
-      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{};
+  /// Adds a file with no previews at [path].
+  void addNonPreviewContainingFile({required String path}) {
+    writeFile((path: path, source: _nonPreviewContainingFileContents));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithPreviews.remove(previewPath);
+    librariesWithoutPreviews.add(previewPath);
+  }
 
-      final Completer<void> completer = Completer<void>();
-      late final PreviewPath previewContainingFilePath;
-      onChangeDetected = (PreviewMapping updated) {
-        if (completer.isCompleted) {
-          return;
-        }
-        // The new previews in baz.dart should be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
-          previewContainingFilePath: expectedPreviewDetails,
-        });
-        completer.complete();
-      };
+  /// Adds a new library with a part at [path].
+  ///
+  /// If the file name specified by [path] is 'path.dart', the part file will be named
+  /// 'path_part.dart'.
+  void addLibraryWithPartsContainingPreviews({required String path}) {
+    final String partPath = path.replaceAll('.dart', '_part.dart');
+    writeFile((
+      path: partPath,
+      source: '''
+part of '$path';
 
-      // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize();
-      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
+$_previewContainingFileContents
+''',
+    ));
 
-      // Create baz.dart, which contains previews.
-      previewContainingFilePath = addPreviewContainingFile(projectRoot, <String>['baz.dart']);
-      await completer.future;
-    });
+    writeFile((
+      path: path,
+      source: '''
+part '$partPath';
+''',
+    ));
+    final PreviewPath previewPath = toPreviewPath(path);
+    librariesWithoutPreviews.remove(previewPath);
+    librariesWithPreviews.add(previewPath);
+  }
 
-    testUsingContext('can detect changes in the pubspec.yaml', () async {
-      // Create an initial pubspec.
-      populatePubspec(projectRoot, 'abc');
+  @override
+  // ignore: must_call_super, always throws
+  void removeDirectoryContaining(WidgetPreviewSourceFile file) {
+    throw UnimplementedError('Not supported for $BasicProjectWithExhaustivePreviews');
+  }
 
-      final Completer<void> completer = Completer<void>();
-      onPubspecChangeDetected = () {
-        completer.complete();
-      };
-      // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize();
-      expect(initialPreviews, isEmpty);
+  final List<PreviewDetailsMatcher> _expectedPreviewDetails = <PreviewDetailsMatcher>[
+    PreviewDetailsMatcher(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
+    PreviewDetailsMatcher(functionName: 'builderPreview', isBuilder: true, name: 'Builder preview'),
+    PreviewDetailsMatcher(
+      functionName: 'attributesPreview',
+      isBuilder: false,
+      nameSymbol: 'kAttributesPreview',
+      size: 'Size(100.0, 100)',
+      textScaleFactor: '2.0',
+      wrapper: 'testWrapper',
+      theme: 'theming',
+      brightness: 'Brightness.dark',
+      localizations: 'localizations',
+    ),
+    PreviewDetailsMatcher(
+      functionName: 'MyWidget.preview',
+      isBuilder: false,
+      name: 'Constructor preview',
+    ),
+    PreviewDetailsMatcher(
+      functionName: 'MyWidget.factoryPreview',
+      isBuilder: false,
+      name: 'Factory constructor preview',
+    ),
+    PreviewDetailsMatcher(
+      functionName: 'MyWidget.previewStatic',
+      isBuilder: false,
+      name: 'Static preview',
+    ),
+  ];
 
-      // Change the contents of the pubspec and verify the callback is invoked.
-      populatePubspec(projectRoot, 'foo');
-      await completer.future;
-    });
-  });
-}
-
-/// Creates a copy of [mapping] with [PreviewDetails] entries that have non-deterministic values
-/// that differ per run (e.g., temporary file paths).
-PreviewMapping stripNonDeterministicFields(PreviewMapping mapping) {
-  return mapping.map<PreviewPath, List<PreviewDetails>>((
-    PreviewPath key,
-    List<PreviewDetails> value,
-  ) {
-    return MapEntry<PreviewPath, List<PreviewDetails>>(
-      key,
-      value
-          .map(
-            (PreviewDetails details) => details.copyWith(
-              wrapperLibraryUri: '',
-              themeLibraryUri: '',
-              brightnessLibraryUri: '',
-            ),
-          )
-          .toList(),
-    );
-  });
-}
-
-const String previewContainingFileContents = '''
+  static const String _previewContainingFileContents = '''
 @Preview(name: 'Top-level preview')
 Widget previews() => Text('Foo');
 
@@ -295,7 +153,34 @@ PreviewThemeData theming() => PreviewThemeData(
   cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
 );
 
-@Preview(name: 'Attributes preview', height: 100, width: 100.0, textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
+PreviewLocalizationsData localizations() {
+  return PreviewLocalizationsData(
+    locale: Locale('en'),
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      Locale('en'), // English
+      Locale('es'), // Spanish
+    ],
+    localeListResolutionCallback:
+        (List<Locale>? locales, Iterable<Locale> supportedLocales) => null,
+    localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => null,
+  );
+}
+
+const String kAttributesPreview = 'Attributes preview';
+@Preview(
+  name: kAttributesPreview,
+  size: Size(100.0, 100),
+  textScaleFactor: 2.0,
+  wrapper: testWrapper,
+  theme: theming,
+  brightness: Brightness.dark,
+  localizations: localizations,
+)
 Widget attributesPreview() {
   return Text('Attributes');
 }
@@ -317,6 +202,153 @@ class MyWidget extends StatelessWidget {
 }
 ''';
 
-const String nonPreviewContainingFileContents = '''
+  static const String _nonPreviewContainingFileContents = '''
 String foo() => 'bar';
 ''';
+}
+
+extension on PreviewDependencyGraph {
+  PreviewDependencyGraph get nodesWithPreviews {
+    return PreviewDependencyGraph.fromEntries(
+      entries.where(
+        (MapEntry<PreviewPath, LibraryPreviewNode> element) => element.value.previews.isNotEmpty,
+      ),
+    );
+  }
+}
+
+void main() {
+  initializeTestPreviewDetectorState();
+  group('$PreviewDetector', () {
+    // Note: we don't use a MemoryFileSystem since we don't have a way to
+    // provide it to package:analyzer APIs without writing a significant amount
+    // of wrapper logic.
+    late PreviewDetector previewDetector;
+    late BasicProjectWithExhaustivePreviews project;
+
+    setUp(() {
+      previewDetector = createTestPreviewDetector();
+    });
+
+    tearDown(() async {
+      await previewDetector.dispose();
+    });
+
+    testUsingContext('can detect previews in existing files', () async {
+      project = BasicProjectWithExhaustivePreviews(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[
+          'foo.dart',
+          platformPath(<String>['src', 'bar.dart']),
+        ],
+        pathsWithoutPreviews: <String>['baz'],
+      );
+      final PreviewDependencyGraph mapping = await previewDetector.initialize();
+      expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
+    });
+
+    testUsingContext('can detect previews in updated files', () async {
+      // Create two files with existing previews and one without.
+      project = BasicProjectWithExhaustivePreviews(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[
+          'foo.dart',
+          platformPath(<String>['src', 'bar.dart']),
+        ],
+        pathsWithoutPreviews: <String>['baz'],
+      );
+
+      // Initialize the file watcher.
+      final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
+      expectContainsPreviews(initialPreviews, project.matcherMapping);
+
+      await waitForChangeDetected(
+        onChangeDetected: (PreviewDependencyGraph updated) {
+          // The new preview in baz.dart should be included in the preview mapping.
+          expectContainsPreviews(updated, project.matcherMapping);
+        },
+        changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
+      );
+
+      // Update the file with an existing preview to remove the preview and ensure it triggers
+      // the preview detector.
+      await waitForChangeDetected(
+        onChangeDetected: (PreviewDependencyGraph updated) {
+          // The removed preview in baz.dart should not longer be included in the preview mapping.
+          expectContainsPreviews(updated, project.matcherMapping);
+        },
+        changeOperation: () => project.addNonPreviewContainingFile(path: 'baz.dart'),
+      );
+    });
+
+    testUsingContext('can detect previews in newly added files', () async {
+      project = BasicProjectWithExhaustivePreviews(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      );
+      // The initial mapping should be empty as there's no files containing previews.
+      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+
+      // Initialize the file watcher.
+      final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
+      expect(initialPreviews, expectedInitialMapping);
+
+      await waitForChangeDetected(
+        onChangeDetected: (PreviewDependencyGraph updated) {
+          // The new previews in baz.dart should be included in the preview mapping.
+          expectContainsPreviews(updated, project.matcherMapping);
+        },
+        // Create baz.dart, which contains previews.
+        changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
+      );
+    });
+
+    testUsingContext('can detect previews in existing libraries with parts', () async {
+      project = BasicProjectWithExhaustivePreviews(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      )..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
+      final PreviewDependencyGraph mapping = await previewDetector.initialize();
+      expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
+    });
+
+    testUsingContext('can detect previews in newly added libraries with parts', () async {
+      project = BasicProjectWithExhaustivePreviews(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      );
+      // The initial mapping should be empty as there's no files containing previews.
+      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+
+      final PreviewDependencyGraph mapping = await previewDetector.initialize();
+      expect(mapping.nodesWithPreviews, expectedInitialMapping);
+
+      // Add a library with a part file, which will cause a change detected event for each file.
+      await waitForNChangesDetected(
+        n: 2,
+        changeOperation: () => project.addLibraryWithPartsContainingPreviews(path: 'foo.dart'),
+      );
+      final PreviewDependencyGraph nodesWithPreviews =
+          previewDetector.dependencyGraph.nodesWithPreviews;
+      expect(nodesWithPreviews, isNotEmpty);
+      expect(nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
+    });
+
+    testUsingContext('can detect changes in the pubspec.yaml', () async {
+      // Create an initial pubspec.
+      populatePubspec(previewDetector.projectRoot, 'abc');
+
+      // Initialize the file watcher.
+      final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
+      expect(initialPreviews, isEmpty);
+
+      // Change the contents of the pubspec and verify the callback is invoked.
+      await waitForPubspecChangeDetected(
+        changeOperation: () => populatePubspec(previewDetector.projectRoot, 'foo'),
+      );
+    });
+  });
+}

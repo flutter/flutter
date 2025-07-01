@@ -222,11 +222,9 @@ class FlutterProject {
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
-  /// The `.flutter-plugins` file of this project.
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
-
-  /// The `.flutter-plugins-dependencies` file of this project,
-  /// which contains the dependencies each plugin depends on.
+  /// The `.flutter-plugins-dependencies` file of this project.
+  ///
+  /// Contains the dependencies each plugin depends on.
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   /// The `.gitignore` file of this project.
@@ -412,7 +410,9 @@ class FlutterProject {
     }
   }
 
-  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  /// A JSON encoded string containing the [FlutterManifest.appName],
+  /// [FlutterManifest.buildName] (version), and [FlutterManifest.buildNumber]
+  /// that are used to generate `version.json`.
   String getVersionInfo() {
     final String? buildName = manifest.buildName;
     final String? buildNumber = manifest.buildNumber;
@@ -727,8 +727,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
     final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
       globals.logger,
-      javaV: javaVersion,
-      gradleV: gradleVersion,
+      javaVersion: javaVersion,
+      gradleVersion: gradleVersion,
     );
 
     final bool compatibleKgpGradle = gradle.validateGradleAndKGP(

@@ -22,6 +22,8 @@ group("platform") {
   } else if (is_fuchsia) {
     import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
     deps = [ "fuchsia" ]
+  } else if (is_qnx) {
+    deps = []
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }

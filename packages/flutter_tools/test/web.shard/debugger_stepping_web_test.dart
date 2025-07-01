@@ -6,6 +6,7 @@
 library;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 
 import '../integration.shard/test_data/stepping_project.dart';
 import '../integration.shard/test_driver.dart';
@@ -29,8 +30,8 @@ void main() {
     await flutter.run(
       withDebugger: true,
       startPaused: true,
-      chrome: true,
-      additionalCommandArgs: <String>['--verbose'],
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
     await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.

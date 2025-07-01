@@ -5,7 +5,6 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
@@ -128,7 +127,7 @@ void main() {
                 projectRoot,
                 'build',
                 'ios',
-                '${sentenceCase(buildMode.cliName)}-iphoneos',
+                '${buildMode.uppercaseName}-iphoneos',
               ),
             );
 
@@ -296,6 +295,58 @@ void main() {
             expect(grepResult.exitCode, 1);
           });
         });
+      }
+
+      for (final BuildMode buildMode in <BuildMode>[
+        BuildMode.debug,
+        BuildMode.profile,
+        BuildMode.release,
+      ]) {
+        for (final String arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+            final String artifactDir;
+            switch (buildMode) {
+              case BuildMode.debug:
+              case BuildMode.jitRelease:
+                artifactDir = 'ios';
+              case BuildMode.profile:
+                artifactDir = 'ios-profile';
+              case BuildMode.release:
+                artifactDir = 'ios-release';
+            }
+            final Directory xcframeworkArtifact = fileSystem.directory(
+              fileSystem.path.join(
+                flutterRoot,
+                'bin',
+                'cache',
+                'artifacts',
+                'engine',
+                artifactDir,
+                'Flutter.xcframework',
+              ),
+            );
+            // Verify Info.plist has correct engine version and build mode
+            final File engineStamp = fileSystem.file(
+              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+            );
+            expect(engineStamp, exists);
+            final String engineVersion = engineStamp.readAsStringSync().trim();
+
+            final File infoPlist = fileSystem.file(
+              fileSystem.path.joinAll(<String>[
+                xcframeworkArtifact.path,
+                'ios-arm64',
+                'Flutter.framework',
+                'Info.plist',
+              ]),
+            );
+            expect(infoPlist, exists);
+
+            final String infoPlistContents = infoPlist.readAsStringSync();
+            expect(infoPlistContents, contains(engineVersion));
+            expect(infoPlistContents, contains(buildMode.cliName));
+          });
+        }
       }
 
       testWithoutContext('builds all plugin architectures for simulator', () {

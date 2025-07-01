@@ -232,7 +232,7 @@ class SemanticTextField extends SemanticRole {
   DomHTMLTextAreaElement _createMultiLineField() {
     final textArea = createMultilineTextArea();
 
-    if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
+    if (semanticsObject.flags.isObscured) {
       // -webkit-text-security is not standard, but it's the best we can do.
       // Another option would be to create a single-line <input type="password">
       // but that may have layout quirks, since it cannot represent multi-line
@@ -247,9 +247,7 @@ class SemanticTextField extends SemanticRole {
 
   void _initializeEditableElement() {
     editableElement =
-        semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)
-            ? _createMultiLineField()
-            : _createSingleLineField();
+        semanticsObject.flags.isMultiline ? _createMultiLineField() : _createSingleLineField();
     _updateEnabledState();
 
     // On iOS, even though the semantic text field is transparent, the cursor
@@ -346,26 +344,21 @@ class SemanticTextField extends SemanticRole {
   }
 
   void _updateInputType() {
-    if (semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)) {
+    if (semanticsObject.flags.isMultiline) {
       // text area can't be annotated with input type
       return;
     }
     final DomHTMLInputElement input = editableElement as DomHTMLInputElement;
-    if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
+    if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {
-      switch (semanticsObject.inputType) {
-        case ui.SemanticsInputType.search:
-          input.type = 'search';
-        case ui.SemanticsInputType.email:
-          input.type = 'email';
-        case ui.SemanticsInputType.url:
-          input.type = 'url';
-        case ui.SemanticsInputType.phone:
-          input.type = 'tel';
-        default:
-          input.type = 'text';
-      }
+      input.type = switch (semanticsObject.inputType) {
+        ui.SemanticsInputType.search => 'search',
+        ui.SemanticsInputType.email => 'email',
+        ui.SemanticsInputType.url => 'url',
+        ui.SemanticsInputType.phone => 'tel',
+        _ => 'text',
+      };
     }
   }
 

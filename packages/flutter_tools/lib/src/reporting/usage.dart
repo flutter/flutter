@@ -191,7 +191,7 @@ class _DefaultUsage implements Usage {
       );
       // For each flutter experimental feature, record a session value in a comma
       // separated list.
-      final String enabledFeatures = allFeatures
+      final String enabledFeatures = featureFlags.allFeatures
           .where((Feature feature) {
             final String? configSetting = feature.configSetting;
             return configSetting != null && globals.config.getValue(configSetting) == true;

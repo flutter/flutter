@@ -8,8 +8,10 @@ library;
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -2075,6 +2077,45 @@ void main() {
         expect(hourField.focusNode!.hasFocus, isFalse);
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
+
+      testWidgets(
+        'TAB key selects text in hour and minute fields on the web',
+        (WidgetTester tester) async {
+          await mediaQueryBoilerplate(
+            tester,
+            entryMode: TimePickerEntryMode.input,
+            materialType: materialType,
+          );
+
+          // Focus on the hour field.
+          final Finder hourField = find.byType(TextField).first;
+          await tester.tap(hourField);
+          await tester.pumpAndSettle();
+
+          // Verify that the hour field is focused and its text is selected.
+          final TextField hourTextField = tester.widget(hourField);
+          expect(hourTextField.focusNode!.hasFocus, isTrue);
+          expect(hourTextField.controller!.selection.baseOffset, 0);
+          expect(
+            hourTextField.controller!.selection.extentOffset,
+            hourTextField.controller!.text.length,
+          );
+
+          // Press TAB to move to the minute field.
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pumpAndSettle();
+
+          // Verify that the minute field is focused and its text is selected.
+          final Finder minuteField = find.byType(TextField).last;
+          final TextField minuteTextField = tester.widget(minuteField);
+          expect(minuteTextField.controller!.selection.baseOffset, 0);
+          expect(
+            minuteTextField.controller!.selection.extentOffset,
+            minuteTextField.controller!.text.length,
+          );
+        },
+        skip: !kIsWeb, // [intended] Web-specific behavior
+      );
     });
 
     group('Time picker - Restoration (${materialType.name})', () {
@@ -2612,9 +2653,11 @@ Future<Offset?> startPicker(
   );
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return entryMode == TimePickerEntryMode.dial
-      ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')))
-      : null;
+  final Finder customPaintFinder = find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+    matching: find.byType(CustomPaint),
+  );
+  return entryMode == TimePickerEntryMode.dial ? tester.getCenter(customPaintFinder) : null;
 }
 
 Future<void> finishPicker(WidgetTester tester) async {

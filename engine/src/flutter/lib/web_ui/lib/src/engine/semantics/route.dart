@@ -99,14 +99,7 @@ class SemanticRouteBase extends SemanticRole {
 ///   * [RouteName], which provides a description for this route in the absence
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRouteBase {
-  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object) {
-    // Lacking any more specific information, ARIA role "dialog" is the
-    // closest thing to Flutter's route. This can be revisited if better
-    // options become available, especially if the framework volunteers more
-    // specific information about the route. Other attributes in the vicinity
-    // of routes include: "alertdialog", `aria-modal`, "menu", "tooltip".
-    setAriaRole('dialog');
-  }
+  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object);
 }
 
 /// Indicates the container as a pop dialog.

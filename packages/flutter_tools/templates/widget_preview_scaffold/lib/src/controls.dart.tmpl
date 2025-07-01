@@ -74,13 +74,13 @@ class ZoomControls extends StatelessWidget {
   void _zoomIn() {
     _transformationController.value = Matrix4.copy(
       _transformationController.value,
-    ).scaled(1.1);
+    ).scaledByDouble(1.1, 1.1, 1.1, 1);
   }
 
   void _zoomOut() {
     final Matrix4 updated = Matrix4.copy(
       _transformationController.value,
-    ).scaled(0.9);
+    ).scaledByDouble(0.9, 0.9, 0.9, 1);
 
     // Don't allow for zooming out past the original size of the widget.
     // Assumes scaling is evenly applied to the entire matrix.

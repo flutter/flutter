@@ -97,7 +97,7 @@ abstract class ChromiumDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  bool isSupported() => chromeLauncher.canFindExecutable();
+  Future<bool> isSupported() async => chromeLauncher.canFindExecutable();
 
   @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
@@ -182,6 +182,8 @@ class GoogleChromeDevice extends ChromiumDevice {
   final Platform _platform;
   final ProcessManager _processManager;
 
+  static const String kChromeDeviceId = 'chrome';
+
   @override
   String get name => 'Chrome';
 
@@ -189,7 +191,7 @@ class GoogleChromeDevice extends ChromiumDevice {
   late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
 
   Future<String> _computeSdkNameAndVersion() async {
-    if (!isSupported()) {
+    if (!await isSupported()) {
       return 'unknown';
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
@@ -235,6 +237,8 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
 
   // The first version of Edge with chromium support.
   static const int _kFirstChromiumEdgeMajorVersion = 79;
+
+  static const String kEdgeDeviceId = 'edge';
 
   @override
   String get name => 'Edge';
@@ -336,7 +340,7 @@ class WebDevices extends PollingDeviceDiscovery {
     final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
       if (WebServerDevice.showWebServerDevice) _webServerDevice,
-      if (_chromeDevice.isSupported()) _chromeDevice,
+      if (await _chromeDevice.isSupported()) _chromeDevice,
       if (edgeDevice != null && await edgeDevice._meetsVersionConstraint()) edgeDevice,
     ];
   }
@@ -396,7 +400,7 @@ class WebServerDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

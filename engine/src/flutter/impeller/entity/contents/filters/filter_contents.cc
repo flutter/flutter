@@ -25,7 +25,6 @@
 #include "impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/runtime_stage/runtime_stage.h"
@@ -237,13 +236,18 @@ std::optional<Entity> FilterContents::GetEntity(
   Entity entity_with_local_transform = entity.Clone();
   entity_with_local_transform.SetTransform(GetTransform(entity.GetTransform()));
 
-  auto coverage = GetLocalCoverage(entity_with_local_transform);
+  std::optional<Rect> coverage = GetLocalCoverage(entity_with_local_transform);
   if (!coverage.has_value() || coverage->IsEmpty()) {
     return std::nullopt;
   }
 
-  return RenderFilter(inputs_, renderer, entity_with_local_transform,
-                      effect_transform_, coverage.value(), coverage_hint);
+  return RenderFilter(inputs_,                      //
+                      renderer,                     //
+                      entity_with_local_transform,  //
+                      effect_transform_,            //
+                      coverage.value(),             //
+                      coverage_hint                 //
+  );
 }
 
 std::optional<Snapshot> FilterContents::RenderToSnapshot(

@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include "include/core/SkMatrix.h"
-#include "include/core/SkRect.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
@@ -25,13 +24,13 @@
 namespace flutter {
 namespace testing {
 
-// SkRect::contains treats the rect as a half-open interval which is
+// DlRect::Contains treats the rect as a half-open interval which is
 // appropriate for so many operations. Unfortunately, we are using
 // it here to test containment of the corners of a transformed quad
 // so the corners of the quad that are measured against the right
 // and bottom edges are contained even if they are on the right or
 // bottom edge. This method does the "all sides inclusive" version
-// of SkRect::contains.
+// of DlRect::Contains.
 static bool containsInclusive(const DlRect rect, const DlPoint p) {
   // Test with a slight offset of 1E-9 to "forgive" IEEE bit-rounding
   // Ending up with bounds that are off by 1E-9 (these numbers are all

@@ -215,11 +215,6 @@ void performanceModeImpactsNotifyIdle() {
   PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
 }
 
-@pragma('vm:entry-point')
-void callNotifyDestroyed() {
-  notifyDestroyed();
-}
-
 @pragma('vm:external-name', 'NotifyMessage')
 external void notifyMessage(String string);
 
@@ -380,8 +375,6 @@ Future<void> runCallback(IsolateParam param) async {
 @pragma('vm:entry-point')
 @pragma('vm:external-name', 'NotifyNativeBool')
 external void notifyNativeBool(bool value);
-@pragma('vm:external-name', 'NotifyDestroyed')
-external void notifyDestroyed();
 
 @pragma('vm:entry-point')
 Future<void> testPluginUtilitiesCallbackHandle() async {

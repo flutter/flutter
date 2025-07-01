@@ -7,6 +7,11 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "delay_collect_builds": true,
+      "parallel_download_builds": true,
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -34,7 +39,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--gn-args=dart_dynamic_modules=true",
                 "--rbe",
                 "--no-goma"
@@ -74,7 +78,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--gn-args=dart_dynamic_modules=true",
                 "--rbe",
                 "--no-goma"

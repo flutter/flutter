@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 
 import '../../src/common.dart';
@@ -55,9 +56,33 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{');
 
-    final VsCode vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem);
+    final VsCode vsCode = VsCode.fromDirectory(
+      '',
+      '',
+      fileSystem: fileSystem,
+      platform: const LocalPlatform(),
+    );
 
     expect(vsCode.version, null);
+  });
+
+  testWithoutContext('VsCode.fromDirectory finds packages.json on Linux', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169812
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    // Installations on Linux appear to use $VSCODE_INSTALL/resources/app/package.json rather than
+    // $VSCODE_INSTALL/Resources/app/package.json.
+    fileSystem.file(fileSystem.path.join('', 'resources', 'app', 'package.json'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"version":"1.2.3"}');
+
+    final VsCode vsCode = VsCode.fromDirectory(
+      '',
+      '',
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+    );
+
+    expect(vsCode.version, Version(1, 2, 3));
   });
 
   testWithoutContext('can locate VS Code installed via Snap', () {

@@ -80,10 +80,7 @@ const String samplesIndexJson = '''
 ]''';
 
 /// These files are generated for all project types.
-const List<String> flutterPluginsIgnores = <String>[
-  '.flutter-plugins',
-  '.flutter-plugins-dependencies',
-];
+const List<String> flutterPluginsIgnores = <String>['.flutter-plugins-dependencies'];
 
 void main() {
   late Directory tempDir;
@@ -184,14 +181,14 @@ void main() {
     () async {
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['-i', 'objc', '-a', 'java'],
+        <String>['-a', 'java'],
         <String>[
           'analysis_options.yaml',
           'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
           'flutter_project.iml',
           'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/GeneratedPluginRegistrant.h',
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
           'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
@@ -212,7 +209,7 @@ void main() {
             workflow: 'create',
             commandHasTerminal: false,
             createAndroidLanguage: 'java',
-            createIosLanguage: 'objc',
+            createIosLanguage: 'swift',
           ),
         ),
       );
@@ -241,14 +238,14 @@ void main() {
       await projectDir.create(recursive: true);
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['-i', 'objc', '-a', 'java'],
+        <String>['-a', 'java'],
         <String>[
           'analysis_options.yaml',
           'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
           'flutter_project.iml',
           'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/GeneratedPluginRegistrant.h',
         ],
       );
@@ -276,6 +273,8 @@ void main() {
           '.android/app/',
           '.gitignore',
           '.ios/Flutter',
+          '.ios/Runner/AppDelegate.h',
+          '.ios/Runner/AppDelegate.m',
           '.metadata',
           'analysis_options.yaml',
           'lib/main.dart',
@@ -366,13 +365,13 @@ void main() {
       await projectDir.absolute.childDirectory('.idea').create(recursive: true);
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['-i', 'objc', '-a', 'java'],
+        <String>['-a', 'java'],
         <String>[
           'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
           'flutter_project.iml',
           'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/GeneratedPluginRegistrant.h',
         ],
         unexpectedPaths: <String>['.android/', '.ios/'],
@@ -398,13 +397,13 @@ void main() {
       await projectDir.absolute.childDirectory('ios').create(recursive: true);
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['-i', 'objc', '-a', 'java'],
+        <String>['-a', 'java'],
         <String>[
           'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
           'flutter_project.iml',
           'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/GeneratedPluginRegistrant.h',
         ],
         unexpectedPaths: <String>['.android/', '.ios/'],
@@ -466,13 +465,13 @@ void main() {
           'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
           'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
-          'example/ios/Runner/AppDelegate.m',
+          'example/ios/Runner/AppDelegate.swift',
           'example/ios/Runner/main.m',
           'example/lib/main.dart',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'ios/Runner/AppDelegate.h',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/main.m',
           'lib/main.dart',
           'test/widget_test.dart',
@@ -493,11 +492,11 @@ void main() {
   );
 
   testUsingContext(
-    'kotlin/swift legacy app project',
+    'kotlin legacy app project',
     () async {
       return _createProject(
         projectDir,
-        <String>['--no-pub', '--template=app', '--android-language=kotlin', '--ios-language=swift'],
+        <String>['--no-pub', '--template=app', '--android-language=kotlin'],
         <String>[
           'android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
           'ios/Runner/AppDelegate.swift',
@@ -1643,7 +1642,7 @@ void main() {
     },
   );
 
-  testUsingContext('Correct info.plist key-value pairs for objc iOS project.', () async {
+  testUsingContext('Correct info.plist key-value pairs for project.', () async {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1653,42 +1652,6 @@ void main() {
       '--no-pub',
       '--org',
       'com.foo.bar',
-      '--ios-language=objc',
-      '--project-name=my_project',
-      projectDir.path,
-    ]);
-
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool disabled = _getBooleanValueFromPlist(
-      plistFile: plistFile,
-      key: 'CADisableMinimumFrameDurationOnPhone',
-    );
-    expect(disabled, isTrue);
-    final bool indirectInput = _getBooleanValueFromPlist(
-      plistFile: plistFile,
-      key: 'UIApplicationSupportsIndirectInputEvents',
-    );
-    expect(indirectInput, isTrue);
-    final String displayName = _getStringValueFromPlist(
-      plistFile: plistFile,
-      key: 'CFBundleDisplayName',
-    );
-    expect(displayName, 'My Project');
-  });
-
-  testUsingContext('Correct info.plist key-value pairs for objc swift project.', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>[
-      'create',
-      '--template=app',
-      '--no-pub',
-      '--org',
-      'com.foo.bar',
-      '--ios-language=swift',
       '--project-name=my_project',
       projectDir.path,
     ]);
@@ -1714,7 +1677,7 @@ void main() {
   });
 
   testUsingContext(
-    'Correct info.plist key-value pairs for objc iOS module.',
+    'Correct info.plist key-value pairs for iOS module.',
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1724,7 +1687,6 @@ void main() {
         '--template=module',
         '--org',
         'com.foo.bar',
-        '--ios-language=objc',
         '--project-name=my_project',
         projectDir.path,
       ]);
@@ -1761,91 +1723,7 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'Correct info.plist key-value pairs for swift iOS module.',
-    () async {
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>[
-        'create',
-        '--template=module',
-        '--org',
-        'com.foo.bar',
-        '--ios-language=swift',
-        '--project-name=my_project',
-        projectDir.path,
-      ]);
-
-      final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-      final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-      expect(plistFile, exists);
-      final bool disabled = _getBooleanValueFromPlist(
-        plistFile: plistFile,
-        key: 'CADisableMinimumFrameDurationOnPhone',
-      );
-      expect(disabled, isTrue);
-      final bool indirectInput = _getBooleanValueFromPlist(
-        plistFile: plistFile,
-        key: 'UIApplicationSupportsIndirectInputEvents',
-      );
-      expect(indirectInput, isTrue);
-      final String displayName = _getStringValueFromPlist(
-        plistFile: plistFile,
-        key: 'CFBundleDisplayName',
-      );
-      expect(displayName, 'My Project');
-    },
-    overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
-    },
-  );
-
-  testUsingContext('Correct info.plist key-value pairs for swift iOS plugin.', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>[
-      'create',
-      '--template=plugin',
-      '--no-pub',
-      '--org',
-      'com.foo.bar',
-      '--platforms=ios',
-      '--ios-language=swift',
-      '--project-name=my_project',
-      projectDir.path,
-    ]);
-
-    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool disabled = _getBooleanValueFromPlist(
-      plistFile: plistFile,
-      key: 'CADisableMinimumFrameDurationOnPhone',
-    );
-    expect(disabled, isTrue);
-    final bool indirectInput = _getBooleanValueFromPlist(
-      plistFile: plistFile,
-      key: 'UIApplicationSupportsIndirectInputEvents',
-    );
-    expect(indirectInput, isTrue);
-    final String displayName = _getStringValueFromPlist(
-      plistFile: plistFile,
-      key: 'CFBundleDisplayName',
-    );
-    expect(displayName, 'My Project');
-  });
-
-  testUsingContext('Correct info.plist key-value pairs for objc iOS plugin.', () async {
+  testUsingContext('Correct info.plist key-value pairs for iOS plugin.', () async {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1882,40 +1760,40 @@ void main() {
   });
 
   testUsingContext(
-    'should not show --ios-language deprecation warning issue for Swift',
+    'should show --ios-language deprecation error for non-plugin templates',
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]);
-      expect(
-        logger.warningText,
-        contains(
-          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
-        ),
-      );
-      expect(
-        logger.warningText,
-        isNot(contains('https://github.com/flutter/flutter/issues/148586')),
+      await expectToolExitLater(
+        runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]),
+        contains('The "ios-language" option is only supported for "--template=plugin".'),
       );
     },
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
   testUsingContext(
-    'should show --ios-language deprecation warning issue for Objective-C',
+    'should show --ios-language deprecation warning issue for Objective-C plugins',
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--ios-language=objc', projectDir.path]);
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '-t',
+        'plugin',
+        '--ios-language=objc',
+        projectDir.path,
+      ]);
       expect(
         logger.warningText,
         contains(
           'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
         ),
       );
-      expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/148586'));
+      expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/169683'));
     },
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
@@ -2210,15 +2088,13 @@ void main() {
       '--template=app',
       '--org',
       'com.bar.foo',
-      '-i',
-      'objc',
       '-a',
       'java',
     ], <String>[]);
     projectDir.childDirectory('android').deleteSync(recursive: true);
     return _createProject(
       projectDir,
-      <String>['--no-pub', '-i', 'objc', '-a', 'java'],
+      <String>['--no-pub', '-a', 'java'],
       <String>['android/app/src/main/java/com/bar/foo/flutter_project/MainActivity.java'],
       unexpectedPaths: <String>[
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
@@ -2404,12 +2280,12 @@ void main() {
       existingFile.createSync(recursive: true);
       await _createProject(
         globals.fs.directory(existingDirectory.path),
-        <String>['--overwrite', '-i', 'objc', '-a', 'java'],
+        <String>['--overwrite', '-a', 'java'],
         <String>[
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
           'lib/main.dart',
           'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
+          'ios/Runner/AppDelegate.swift',
           'ios/Runner/GeneratedPluginRegistrant.h',
         ],
       );
@@ -3085,7 +2961,7 @@ void main() {
   });
 
   testUsingContext(
-    'plugin includes native Swift unit tests',
+    'plugin includes native iOS unit tests',
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -3186,7 +3062,7 @@ void main() {
   );
 
   testUsingContext(
-    'plugin includes native Objective-C unit tests',
+    'plugin includes native Swift unit tests',
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -3206,7 +3082,7 @@ void main() {
             .childDirectory('example')
             .childDirectory('ios')
             .childDirectory('RunnerTests')
-            .childFile('RunnerTests.m'),
+            .childFile('RunnerTests.swift'),
         exists,
       );
     },
@@ -4346,34 +4222,6 @@ void main() {
           throwsToolExit(
             message:
                 'The "android-language" option is not supported with the $template template: the language will always be C or C++.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      },
-    );
-
-    testUsingContext(
-      '$template error ios language',
-      () async {
-        final CreateCommand command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        final List<String> args = <String>[
-          'create',
-          '--no-pub',
-          '--template=$template',
-          '--ios-language',
-          'swift',
-          if (template == 'plugin_ffi') '--platforms=ios',
-          projectDir.path,
-        ];
-
-        await expectLater(
-          runner.run(args),
-          throwsToolExit(
-            message:
-                'The "ios-language" option is not supported with the $template template: the language will always be C or C++.',
           ),
         );
       },

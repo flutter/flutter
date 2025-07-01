@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'application_package.dart';
+library;
+
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -234,6 +237,15 @@ class AndroidSdk {
         msg.write(_platforms.map((Directory dir) => '  - ${dir.basename}').join('\n'));
       }
       return <String>[msg.toString()];
+    }
+
+    if (directory.absolute.path.contains(' ')) {
+      final String androidSdkSpaceWarning =
+          'Android SDK location currently '
+          'contains spaces, which is not supported by the Android SDK as it '
+          'causes problems with NDK tools. Try moving it from '
+          '${directory.absolute.path} to a path without spaces.';
+      return <String>[androidSdkSpaceWarning];
     }
 
     return latestVersion!.validateSdkWellFormed();

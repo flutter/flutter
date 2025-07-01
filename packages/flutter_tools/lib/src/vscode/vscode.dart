@@ -68,10 +68,11 @@ class VsCode {
     String extensionDirectory, {
     String? edition,
     required FileSystem fileSystem,
+    required Platform platform,
   }) {
     final String packageJsonPath = fileSystem.path.join(
       installPath,
-      'Resources',
+      platform.isLinux ? 'resources' : 'Resources',
       'app',
       'package.json',
     );
@@ -311,6 +312,7 @@ class VsCode {
             extensionDirectory,
             edition: searchLocation.edition,
             fileSystem: fileSystem,
+            platform: platform,
           ),
         );
       }

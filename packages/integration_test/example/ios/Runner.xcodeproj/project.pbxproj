@@ -234,7 +234,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1510;
-				ORGANIZATIONNAME = "The Chromium Authors";
+				ORGANIZATIONNAME = "The Flutter Authors";
 				TargetAttributes = {
 					769541C723A0351900E5C350 = {
 						CreatedOnToolsVersion = 11.0;

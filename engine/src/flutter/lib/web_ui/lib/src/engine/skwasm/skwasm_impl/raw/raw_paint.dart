@@ -34,6 +34,9 @@ external void paintDispose(PaintHandle paint);
 @Native<Void Function(PaintHandle, ShaderHandle)>(symbol: 'paint_setShader', isLeaf: true)
 external void paintSetShader(PaintHandle handle, ShaderHandle shader);
 
+@Native<Void Function(PaintHandle, Bool)>(symbol: 'paint_setDither', isLeaf: true)
+external void paintSetDither(PaintHandle handle, bool isDither);
+
 @Native<Void Function(PaintHandle, ImageFilterHandle)>(symbol: 'paint_setImageFilter', isLeaf: true)
 external void paintSetImageFilter(PaintHandle handle, ImageFilterHandle filter);
 

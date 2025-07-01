@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../../src/macos/xcode.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -68,7 +69,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.macos.ephemeralDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
-    deleteFile(flutterProject.flutterPluginsFile);
 
     return const FlutterCommandResult(ExitStatus.success);
   }
@@ -119,6 +119,16 @@ class CleanCommand extends FlutterCommand {
 
   @visibleForTesting
   void deleteFile(FileSystemEntity file) {
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(() {
+        _deleteFile(file);
+      });
+    } on Exception catch (e) {
+      globals.printError('Failed to remove ${file.path}: $e');
+    }
+  }
+
+  void _deleteFile(FileSystemEntity file) {
     // This will throw a FileSystemException if the directory is missing permissions.
     try {
       if (!file.existsSync()) {

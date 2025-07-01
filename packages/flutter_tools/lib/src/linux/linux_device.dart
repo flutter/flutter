@@ -40,7 +40,7 @@ class LinuxDevice extends DesktopDevice {
   final Logger _logger;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'Linux';

@@ -176,7 +176,7 @@ void main() {
         fs = MemoryFileSystem.test();
 
         fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
 
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();
@@ -1475,7 +1475,7 @@ class FakeDevice extends Fake implements Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 
   @override
-  bool isSupported() => supported;
+  Future<bool> isSupported() async => supported;
 
   @override
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);

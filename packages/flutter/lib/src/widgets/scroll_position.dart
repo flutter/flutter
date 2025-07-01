@@ -975,7 +975,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
-  @Deprecated('This will lead to bugs.')
+  @Deprecated(
+    'This method bypasses scroll activity management and can cause inconsistent layouts '
+    'or scrolling behavior. Use jumpTo or a custom ScrollPosition instead.',
+  )
   void jumpToWithoutSettling(double value);
 
   /// Stop the current activity and start a [HoldScrollActivity].

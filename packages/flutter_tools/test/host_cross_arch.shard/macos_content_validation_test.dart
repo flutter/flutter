@@ -5,7 +5,7 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
@@ -15,27 +15,26 @@ void main() {
 
   setUpAll(() {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-macos-desktop']);
-
-    // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--explicit-package-dependencies']);
-    }
   });
 
-  tearDownAll(() {
-    // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--no-explicit-package-dependencies']);
-    }
-  });
-
-  for (final String buildMode in <String>['Debug', 'Release']) {
-    test('verify $buildMode FlutterMacOS.xcframework artifact', () {
+  for (final BuildMode buildMode in <BuildMode>[
+    BuildMode.debug,
+    BuildMode.profile,
+    BuildMode.release,
+  ]) {
+    test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
       final String flutterRoot = getFlutterRoot();
 
-      final String artifactDir = (buildMode == 'Debug') ? 'darwin-x64' : 'darwin-x64-release';
+      final String artifactDir;
+      switch (buildMode) {
+        case BuildMode.debug:
+        case BuildMode.jitRelease:
+          artifactDir = 'darwin-x64';
+        case BuildMode.profile:
+          artifactDir = 'darwin-x64-profile';
+        case BuildMode.release:
+          artifactDir = 'darwin-x64-release';
+      }
       final Directory xcframeworkArtifact = fileSystem.directory(
         fileSystem.path.join(
           flutterRoot,
@@ -72,7 +71,31 @@ void main() {
       final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
       expect(artifactStat, '40755');
 
-      if (buildMode == 'Release') {
+      // Verify Info.plist has correct engine version and build mode
+      final File engineStamp = fileSystem.file(
+        fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+      );
+      expect(engineStamp, exists);
+      final String engineVersion = engineStamp.readAsStringSync().trim();
+
+      final File infoPlist = fileSystem.file(
+        fileSystem.path.joinAll(<String>[
+          xcframeworkArtifact.path,
+          'macos-arm64_x86_64',
+          'FlutterMacOS.framework',
+          'Versions',
+          'A',
+          'Resources',
+          'Info.plist',
+        ]),
+      );
+      expect(infoPlist, exists);
+
+      final String infoPlistContents = infoPlist.readAsStringSync();
+      expect(infoPlistContents, contains(engineVersion));
+      expect(infoPlistContents, contains(buildMode.cliName));
+
+      if (buildMode == BuildMode.release) {
         final Directory dsymArtifact = fileSystem.directory(
           fileSystem.path.joinAll(<String>[
             xcframeworkArtifact.path,

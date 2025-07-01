@@ -27,7 +27,7 @@ void main() {
       gradleExecutable,
       'test',
     ], workingDirectory: flutterGradlePluginDirectory.path);
-    expect(runResult.exitCode, 0);
+    expect(runResult.processResult, const ProcessResultMatcher());
   });
 }
 

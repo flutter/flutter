@@ -29,9 +29,8 @@ enum PopupMenuPosition {
 /// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///
 /// Descendant widgets obtain the current [PopupMenuThemeData] object
-/// using `PopupMenuTheme.of(context)`. Instances of
-/// [PopupMenuThemeData] can be customized with
-/// [PopupMenuThemeData.copyWith].
+/// using [PopupMenuTheme.of]. Instances of [PopupMenuThemeData] can be
+/// customized with [PopupMenuThemeData.copyWith].
 ///
 /// Typically, a [PopupMenuThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.popupMenuTheme]. Otherwise,

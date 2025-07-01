@@ -216,6 +216,73 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) => Text(widget.value);
 }
 
+class DeepLinkApp extends StatefulWidget {
+  const DeepLinkApp({super.key});
+
+  static const CupertinoPage<void> _homeScreen = CupertinoPage<void>(
+    name: '/',
+    child: CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text('First')),
+      child: Center(child: Text('Home Screen')),
+    ),
+  );
+  static const CupertinoPage<void> _middleScreen = CupertinoPage<void>(
+    name: '/middle',
+    child: CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text('Second')),
+      child: Center(child: Text('Middle Screen')),
+    ),
+  );
+  static const CupertinoPage<void> _lastScreen = CupertinoPage<void>(
+    name: '/middle/last',
+    child: CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text('Third')),
+      child: Center(child: Text('Last Screen')),
+    ),
+  );
+
+  @override
+  DeepLinkAppState createState() => DeepLinkAppState();
+}
+
+class DeepLinkAppState extends State<DeepLinkApp> {
+  late List<Page<dynamic>> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = <Page<dynamic>>[DeepLinkApp._homeScreen];
+  }
+
+  void goToDeepScreen() {
+    setState(() {
+      _pages = <Page<dynamic>>[
+        DeepLinkApp._homeScreen,
+        DeepLinkApp._middleScreen,
+        DeepLinkApp._lastScreen,
+      ];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      builder: (BuildContext context, Widget? child) {
+        return Navigator(
+          pages: _pages,
+          onDidRemovePage: (Page<Object?> page) {
+            setState(() {
+              if (_pages.length > 1) {
+                _pages = List<Page<dynamic>>.of(_pages)..removeLast();
+              }
+            });
+          },
+        );
+      },
+    );
+  }
+}
+
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
 
@@ -437,6 +504,59 @@ Future<void> main() async {
     // Waits for the animation finishes.
     await tester.pumpAndSettle();
     expect(find.byKey(heroKey), findsNothing);
+  });
+
+  testWidgets('Heroes should unhide if no animation', (WidgetTester tester) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    List<Page<void>> pages = <Page<void>>[
+      MaterialPage<void>(
+        name: '1',
+        child: Hero(tag: 'hero', child: SizedBox(key: key1, width: 20, height: 20)),
+      ),
+    ];
+    final HeroController controller = HeroController();
+    addTearDown(controller.dispose);
+    Widget buildWidget() {
+      return MaterialApp(
+        home: HeroControllerScope(
+          controller: controller,
+          child: Navigator(key: nav, pages: pages, onDidRemovePage: (Page<Object?> page) {}),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+    expect(find.byKey(key1), findsOneWidget);
+
+    pages = <Page<void>>[
+      ...pages,
+      MaterialPage<void>(
+        name: '2',
+        child: Hero(tag: 'hero', child: SizedBox(key: key2, width: 20, height: 20)),
+      ),
+    ];
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    expect(find.byKey(key1), findsNothing);
+    expect(find.byKey(key2), findsOneWidget);
+
+    showDialog<void>(
+      context: nav.currentContext!,
+      useRootNavigator: false,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog'), findsOneWidget);
+
+    // Pop the dialog and remove last page at the same time.
+    nav.currentState!.pop();
+    pages = pages.toList();
+    pages.removeLast();
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    expect(find.byKey(key1), findsOneWidget);
   });
 
   testWidgets('Heroes animate should hide original hero', (WidgetTester tester) async {
@@ -2930,6 +3050,41 @@ Future<void> main() async {
       TargetPlatform.macOS,
     }),
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/168267.
+  testWidgets('Check if previous page is laid out on backswipe gesture before flight', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<DeepLinkAppState> appKey = GlobalKey();
+    await tester.pumpWidget(DeepLinkApp(key: appKey));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Screen'), findsOneWidget);
+    expect(find.text('Last Screen'), findsNothing);
+
+    appKey.currentState?.goToDeepScreen();
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Screen'), findsNothing);
+    expect(find.text('Last Screen'), findsOneWidget);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
+
+    await gesture.moveTo(const Offset(10, 300));
+    await tester.pump();
+    // Should not throw an assert here for size and finite space.
+    await gesture.moveTo(const Offset(500, 300));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Screen'), findsNothing);
+    expect(find.text('Middle Screen'), findsOneWidget);
+    expect(find.text('Last Screen'), findsNothing);
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(

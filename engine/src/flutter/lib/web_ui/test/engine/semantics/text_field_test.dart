@@ -283,6 +283,8 @@ void testMain() {
         'text': 'updated',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState), testTextEditing);
 
@@ -351,7 +353,7 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       // The input will have focus after editing state is set and semantics updated.
-      strategy.setEditingState(EditingState(text: 'foo'));
+      strategy.setEditingState(EditingState(text: 'foo', baseOffset: 0, extentOffset: 0));
 
       // NOTE: at this point some browsers, e.g. some versions of Safari will
       //       have set the focus on the editing element as a result of setting
@@ -447,18 +449,23 @@ void testMain() {
         children: <SemanticsNodeUpdate>[
           builder.updateNode(
             id: 1,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: true,
+              isTextField: true,
+              isFocused: focusFieldId == 1,
+            ),
             value: 'Hello',
-            isFocused: focusFieldId == 1,
+
             rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
           ),
           builder.updateNode(
             id: 2,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: true,
+              isTextField: true,
+              isFocused: focusFieldId == 2,
+            ),
             value: 'World',
-            isFocused: focusFieldId == 2,
             rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
           ),
         ],
@@ -519,15 +526,17 @@ SemanticsObject createTextFieldSemantics({
   final tester = SemanticsTester(owner());
   tester.updateNode(
     id: 0,
-    isEnabled: isEnabled,
     label: label,
     value: value,
-    isTextField: true,
-    isFocused: isFocused,
-    isMultiline: isMultiline,
-    isObscured: isObscured,
-    hasRequiredState: isRequired != null,
-    isRequired: isRequired,
+    flags: ui.SemanticsFlags(
+      isEnabled: isEnabled,
+      isTextField: true,
+      isFocused: isFocused,
+      isMultiline: isMultiline,
+      isObscured: isObscured,
+      hasRequiredState: isRequired != null,
+      isRequired: isRequired ?? false,
+    ),
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,

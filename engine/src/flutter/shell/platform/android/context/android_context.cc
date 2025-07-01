@@ -50,4 +50,8 @@ std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {
   return impeller_context_;
 }
 
+bool AndroidContext::IsDynamicSelection() const {
+  return false;
+}
+
 }  // namespace flutter

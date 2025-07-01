@@ -17,12 +17,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
@@ -42,10 +42,19 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
 import '../src/package_config.dart';
+import '../src/test_build_system.dart';
+import '../src/throwing_pub.dart';
+import 'resident_runner_helpers.dart';
+
+const List<VmServiceExpectation> kSetPauseIsolatesOnStartExpectations = <VmServiceExpectation>[
+  FakeVmServiceRequest(
+    method: 'setFlag',
+    args: <String, Object>{'name': 'pause_isolates_on_start', 'value': 'true'},
+  ),
+];
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
@@ -75,6 +84,12 @@ const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
   ...kAttachIsolateExpectations,
 ];
 
+const List<VmServiceExpectation> kStartPausedAndAttachExpectations = <VmServiceExpectation>[
+  ...kSetPauseIsolatesOnStartExpectations,
+  ...kAttachLogExpectations,
+  ...kAttachIsolateExpectations,
+];
+
 const List<String> kDdcLibraryBundleFlags = <String>[
   '--dartdevc-module-format=ddc',
   '--dartdevc-canary',
@@ -96,12 +111,6 @@ void main() {
   late ProcessManager processManager;
   late FakeAnalytics fakeAnalytics;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return test_fakes.TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
@@ -122,7 +131,7 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -258,8 +267,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -295,8 +303,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -323,8 +330,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -345,8 +351,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -378,8 +383,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -408,8 +412,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -451,8 +454,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -492,8 +494,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -536,8 +537,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -683,8 +683,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -704,7 +703,7 @@ name: my_app
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
       );
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
       final Completer<DebugConnectionInfo> connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
@@ -717,8 +716,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -737,7 +735,8 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
+            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -745,9 +744,10 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
+          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': ''},
+            args: <String, Object>{'isolateId': '1'},
             jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
           ),
           const FakeVmServiceRequest(
@@ -824,8 +824,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -844,7 +843,8 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
+            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -909,8 +909,89 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/167887.
+  testUsingContext(
+    'WASM builds report analysis without crashing',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
+            webEnableHotReload: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+          ),
+          webUseWasm: true,
+        ),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(
+            method: kReloadSourcesServiceName,
+            args: <String, Object>{'isolateId': ''},
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.reassemble',
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+          ),
+        ],
+      );
+      setupMocks();
+      final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+      final FakeProcess process = FakeProcess();
+      final Chromium chrome = Chromium(
+        1,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+      chromiumLauncher.setInstance(chrome);
+
+      flutterDevice.device = GoogleChromeDevice(
+        fileSystem: fileSystem,
+        chromiumLauncher: chromiumLauncher,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+      );
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+
+      expect(debugConnectionInfo, isNotNull);
+
+      final OperationResult result = await residentWebRunner.restart();
+      expect(logger.statusText, contains('Reloaded application in'));
+      expect(result.code, 0);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -918,13 +999,14 @@ name: my_app
   // Test one extra config where `fullRestart` is false without the DDC library
   // bundle format - we should do a hot restart in this case because hot reload
   // is not available.
-  for (final (List<String> flags, bool fullRestart) in <(List<String>, bool)>[
-    (kDdcLibraryBundleFlags, true),
-    (<String>[], true),
-    (<String>[], false),
+  for (final (bool webEnableHotReload, bool fullRestart) in <(bool, bool)>[
+    (true, true),
+    (false, true),
+    (false, false),
   ]) {
     testUsingContext(
-      'Can hot restart after attaching with flags: $flags fullRestart: $fullRestart',
+      'Can hot restart after attaching with '
+      'webEnableHotReload: $webEnableHotReload fullRestart: $fullRestart',
       () async {
         final BufferLogger logger = BufferLogger.test();
         final ResidentRunner residentWebRunner = setUpResidentRunner(
@@ -938,7 +1020,8 @@ name: my_app
               trackWidgetCreation: true,
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              extraFrontEndOptions: flags,
+              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : const <String>[],
+              webEnableHotReload: webEnableHotReload,
             ),
           ),
         );
@@ -1022,8 +1105,7 @@ name: my_app
         Analytics: () => fakeAnalytics,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   }
@@ -1058,8 +1140,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1096,8 +1177,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1137,8 +1217,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1164,13 +1243,13 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
+  // TODO(nshahan): Delete this test case when hot reload can no longer be disabled.
   testUsingContext(
-    'Fails non-fatally on vmservice response error for hot restart',
+    'Fails non-fatally on vmservice response error for hot restart (legacy default case)',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
       fakeVmServiceHost = FakeVmServiceHost(
@@ -1188,6 +1267,8 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
+      // Historically the .restart() would perform a hot restart even without
+      // passing fullRestart: true.
       final OperationResult result = await residentWebRunner.restart();
 
       expect(result.code, 0);
@@ -1195,13 +1276,13 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
+  // TODO(nshahan): Delete this test case when hot reload can no longer be disabled.
   testUsingContext(
-    'Fails fatally on Vm Service error response',
+    'Fails fatally on Vm Service error response (legacy default case)',
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
       fakeVmServiceHost = FakeVmServiceHost(
@@ -1227,11 +1308,98 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
+  for (final bool webEnableHotReload in <bool>[true, false]) {
+    testUsingContext(
+      'Fails non-fatally on vmservice response error for hot restart with webEnableHotReload: $webEnableHotReload',
+      () async {
+        final ResidentRunner residentWebRunner = setUpResidentRunner(
+          flutterDevice,
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo(
+              BuildMode.debug,
+              null,
+              trackWidgetCreation: true,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+              webEnableHotReload: webEnableHotReload,
+              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : <String>[],
+            ),
+          ),
+        );
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            ...kAttachExpectations,
+            const FakeVmServiceRequest(
+              method: kHotRestartServiceName,
+              jsonResponse: <String, Object>{'type': 'Failed'},
+            ),
+          ],
+        );
+        setupMocks();
+        final Completer<DebugConnectionInfo> connectionInfoCompleter =
+            Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+        expect(result.code, 0);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'Fails fatally on Vm Service error response with webEnableHotReload: $webEnableHotReload',
+      () async {
+        final ResidentRunner residentWebRunner = setUpResidentRunner(
+          flutterDevice,
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo(
+              BuildMode.debug,
+              null,
+              trackWidgetCreation: true,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+              webEnableHotReload: webEnableHotReload,
+              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : <String>[],
+            ),
+          ),
+        );
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            ...kAttachExpectations,
+            FakeVmServiceRequest(
+              method: kHotRestartServiceName,
+              // Failed response,
+              error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
+            ),
+          ],
+        );
+        setupMocks();
+        final Completer<DebugConnectionInfo> connectionInfoCompleter =
+            Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+        final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+        expect(result.code, 1);
+        expect(result.message, contains(vm_service.RPCErrorKind.kInternalError.code.toString()));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+  }
   testUsingContext(
     'printHelp without details shows only hot restart help message',
     () async {
@@ -1264,7 +1432,8 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
+            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -1304,8 +1473,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1331,8 +1499,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1363,8 +1530,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1434,8 +1600,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1482,8 +1647,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1524,7 +1688,7 @@ name: my_app
 flutter:
   generate: true
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1541,8 +1705,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1552,7 +1715,7 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1598,8 +1761,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1652,8 +1814,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1671,8 +1832,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1691,8 +1851,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1710,8 +1869,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1730,8 +1888,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1995,6 +2152,11 @@ class FakeChromeTab extends Fake implements ChromeTab {
 class FakeWipConnection extends Fake implements WipConnection {
   @override
   final WipDebugger debugger = FakeWipDebugger();
+
+  @override
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+  }
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.

@@ -984,6 +984,60 @@ void main() {
     await tester.pump();
     expect(rebuilt, isTrue);
   });
+
+  testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(focusNode.dispose);
+    addTearDown(controller.dispose);
+    final Widget layoutBuilderWithParent = SizedBox(
+      key: GlobalKey(),
+      child: LayoutBuilder(
+        builder: (BuildContext _, BoxConstraints _) {
+          // The text field keeps the widget alive in the SliverList.
+          return EditableText(
+            focusNode: focusNode,
+            backgroundCursorColor: const Color(0xFFFFFFFF),
+            cursorColor: const Color(0xFFFFFFFF),
+            style: const TextStyle(),
+            controller: controller,
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 60), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 6000), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+  });
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {

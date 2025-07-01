@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -718,6 +720,8 @@ void main() {
                       SemanticsAction.paste,
                     ],
                     label: 'Search',
+                    currentValueLength: 0,
+                    inputType: SemanticsInputType.search,
                     textDirection: TextDirection.ltr,
                     textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   ),
@@ -743,6 +747,8 @@ void main() {
                   SemanticsAction.paste,
                 ],
                 label: 'Search',
+                currentValueLength: 0,
+                inputType: SemanticsInputType.search,
                 textDirection: TextDirection.ltr,
                 textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
               );
@@ -918,6 +924,8 @@ void main() {
                       SemanticsAction.paste,
                     ],
                     label: 'Search',
+                    inputType: SemanticsInputType.search,
+                    currentValueLength: 0,
                     textDirection: TextDirection.ltr,
                     textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   ),
@@ -943,6 +951,8 @@ void main() {
                   SemanticsAction.paste,
                 ],
                 label: 'Search',
+                inputType: SemanticsInputType.search,
+                currentValueLength: 0,
                 textDirection: TextDirection.ltr,
                 textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
               );
@@ -1077,7 +1087,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme.data);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
@@ -1458,7 +1468,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return theme.copyWith(
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? const TextStyle(color: hintTextColor),
           ),
     );

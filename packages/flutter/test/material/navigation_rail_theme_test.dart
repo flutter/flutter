@@ -327,8 +327,8 @@ Material _railMaterial(WidgetTester tester) {
 
 ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;
@@ -372,10 +372,10 @@ Size _destinationSize(WidgetTester tester) {
 }
 
 Align _destinationsAlign(WidgetTester tester) {
-  // The first Expanded widget is the one within the main Column for the rail
+  // The first Flexible widget is the one within the main Column for the rail
   // content.
   return tester.firstWidget<Align>(
-    find.descendant(of: find.byType(Expanded), matching: find.byType(Align)),
+    find.descendant(of: find.byType(Flexible), matching: find.byType(Align)),
   );
 }
 

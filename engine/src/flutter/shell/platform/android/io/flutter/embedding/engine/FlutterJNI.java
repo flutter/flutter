@@ -147,7 +147,7 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.loadLibrary(context, "flutter");
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 
@@ -254,20 +254,6 @@ public class FlutterJNI {
    */
   @Nullable
   public static String getVMServiceUri() {
-    return vmServiceUri;
-  }
-
-  /**
-   * VM Service URI for the VM instance.
-   *
-   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long, int)} is run.
-   *
-   * @deprecated replaced by {@link #getVMServiceUri()}.
-   */
-  @Deprecated
-  @Nullable
-  public static String getObservatoryUri() {
     return vmServiceUri;
   }
 

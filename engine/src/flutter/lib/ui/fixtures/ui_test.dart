@@ -200,7 +200,7 @@ void sendSemanticsUpdate() {
   transform[15] = 0;
   builder.updateNode(
     id: 0,
-    flags: 0,
+    flags: SemanticsFlags.none,
     actions: 0,
     maxValueLength: 0,
     currentValueLength: 0,
@@ -213,8 +213,6 @@ void sendSemanticsUpdate() {
     scrollExtentMax: 0,
     scrollExtentMin: 0,
     rect: Rect.fromLTRB(0, 0, 10, 10),
-    elevation: 0,
-    thickness: 0,
     identifier: identifier,
     label: label,
     labelAttributes: labelAttributes,
@@ -254,7 +252,7 @@ void sendSemanticsUpdateWithRole() {
   transform[10] = 1;
   builder.updateNode(
     id: 0,
-    flags: 0,
+    flags: SemanticsFlags.none,
     actions: 0,
     maxValueLength: 0,
     currentValueLength: 0,
@@ -267,8 +265,6 @@ void sendSemanticsUpdateWithRole() {
     scrollExtentMax: 0,
     scrollExtentMin: 0,
     rect: Rect.fromLTRB(0, 0, 10, 10),
-    elevation: 0,
-    thickness: 0,
     identifier: "identifier",
     label: "label",
     labelAttributes: const <StringAttribute>[],

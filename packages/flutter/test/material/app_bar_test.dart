@@ -1515,7 +1515,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
-        theme: ThemeData(appBarTheme: const AppBarTheme()),
+        theme: ThemeData(appBarTheme: const AppBarThemeData()),
         home: Scaffold(appBar: AppBar(title: const Text('title'))),
       ),
     );
@@ -2244,17 +2244,21 @@ void main() {
       required double contentHeight,
       bool reverse = false,
       bool includeFlexibleSpace = false,
+      bool animateColor = false,
+      double? scrolledUnderElevation,
     }) {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             elevation: 0,
+            scrolledUnderElevation: scrolledUnderElevation,
             backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
             title: const Text('AppBar'),
             flexibleSpace:
                 includeFlexibleSpace ? const FlexibleSpaceBar(title: Text('FlexibleSpace')) : null,
+            animateColor: animateColor,
           ),
           body: ListView(
             reverse: reverse,
@@ -2337,6 +2341,39 @@ void main() {
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+    });
+
+    testWidgets('backgroundColor animation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildAppBar(contentHeight: 1200.0, scrolledUnderElevation: 0, animateColor: true),
+      );
+
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
+
+      TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.up();
+      await tester.pump();
+
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
+      await tester.pumpAndSettle();
+      expect(getAppBarAnimatedBackgroundColor(tester), scrolledColor);
+
+      gesture = await tester.startGesture(const Offset(50.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.up();
+      await tester.pump();
+
+      expect(getAppBarAnimatedBackgroundColor(tester), scrolledColor);
+
+      // Check intermediate color values.
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getAppBarAnimatedBackgroundColor(tester), isSameColorAs(const Color(0xFF00C33C)));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getAppBarAnimatedBackgroundColor(tester), isSameColorAs(const Color(0xFF0039C6)));
+
+      await tester.pumpAndSettle();
+      expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
     });
 
     testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
@@ -2733,7 +2770,7 @@ void main() {
     Widget buildFrame({double? themeToolbarHeight, double? appBarToolbarHeight}) {
       final AppBar appBar = AppBar(toolbarHeight: appBarToolbarHeight);
       return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(toolbarHeight: themeToolbarHeight)),
+        theme: ThemeData(appBarTheme: AppBarThemeData(toolbarHeight: themeToolbarHeight)),
         home: Builder(
           builder: (BuildContext context) {
             preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
@@ -3395,7 +3432,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           key: GlobalKey(),
-          theme: ThemeData(useMaterial3: false, appBarTheme: const AppBarTheme()),
+          theme: ThemeData(useMaterial3: false, appBarTheme: const AppBarThemeData()),
           home: Scaffold(appBar: AppBar(title: const Text('title'))),
         ),
       );
