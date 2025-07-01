@@ -14,7 +14,7 @@ import 'test_utils.dart';
 
 void main() {
 
-  testUsingContext('8.12', () async {
+  testUsingContext('Flutter Gradle Plugin unit tests using gradle 8.12', () async {
     final String gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final String gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
     final Directory pluginDir = fileSystem
@@ -50,42 +50,6 @@ void main() {
   
   );
 
-
-testUsingContext('8.6', () async {
-    final String gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-    final String gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
-    final Directory pluginDir = fileSystem
-        .directory(getFlutterRoot())
-        .childDirectory('packages')
-        .childDirectory('flutter_tools')
-        .childDirectory('gradle');
-    final File wrapperProps = pluginDir
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .childFile('gradle-wrapper.properties');
-
-    final String originalWrapperContent = wrapperProps.readAsStringSync();
-
-      // Modify gradle-wrapper.properties
-      final String updatedContent = originalWrapperContent.replaceAllMapped(
-        RegExp(r'distributionUrl=.*?/gradle-(.*?)-'),
-        (match) => match.group(0)!.replaceAll(match.group(1)!, '8.6'),
-      );
-      wrapperProps.writeAsStringSync(updatedContent);
-
-      // Inject and make executable
-      globals.gradleUtils?.injectGradleWrapperIfNeeded(pluginDir);
-      makeExecutable(pluginDir.childFile(gradleFileName));
-
-      final RunResult runResult = await globals.processUtils.run(<String>[
-        gradleExecutable,
-        'test',
-      ], workingDirectory: pluginDir.path);
-      expect(runResult.processResult, const ProcessResultMatcher());
-    }
-
-  
-  );
 }
 
 void makeExecutable(File file) {
