@@ -527,6 +527,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
           color: widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
         );
+
     final Color iconColor = CupertinoDynamicColor.resolve(widget.itemColor, context);
     final IconThemeData suffixIconThemeData = IconThemeData(
       color: iconColor,
