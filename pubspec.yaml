@@ -186,7 +186,7 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.0
   video_player_android: 2.8.7
-  video_player_avfoundation: 2.7.1
+  video_player_avfoundation: 2.7.2
   video_player_platform_interface: 6.4.0
   video_player_web: 2.3.5
   vm_service: 15.0.2
@@ -213,4 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: omsgmf
+# PUBSPEC CHECKSUM: omd6r4
