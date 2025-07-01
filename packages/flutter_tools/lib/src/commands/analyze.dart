@@ -238,7 +238,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Don't run pub if asking for machine output.
-    if (!outputMachineFormat) {
+    if (outputMachineFormat) {
       return false;
     }
 
