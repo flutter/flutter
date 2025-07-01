@@ -1073,7 +1073,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
-         uniformRadii: false,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   RSuperellipse.fromRectAndCorners(
@@ -1095,7 +1102,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
-         uniformRadii: false,
+         uniformRadii:
+             topLeft.x == topLeft.y &&
+             topLeft.x == topRight.x &&
+             topLeft.x == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.x == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.x == bottomRight.y,
        );
 
   const RSuperellipse._raw({
@@ -1155,7 +1169,11 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   Path toPath() {
     final Path path = Path();
     if (uniformRadii) {
-      path.addPath(_RSuperellipseCache.instance.get(width, height, tlRadiusX), Offset(left, top));
+      final Offset center = this.center;
+      path.addPath(
+        _RSuperellipseCache.instance.get(width, height, tlRadius),
+        Offset(center.dx, center.dy),
+      );
     } else {
       path.addPath(_RSuperellipsePathBuilder.exact(this).path, Offset.zero);
     }

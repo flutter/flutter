@@ -14,16 +14,16 @@ typedef _Draw = void Function(Canvas canvas, int key, Rect rect, Radius radius, 
 class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
   /// A variant of the benchmark that draws rounded rectangles.
   ///
-  /// This variant is used as a comparison benchmark.
+  /// This variant is used as a comparison benchmark for `drawRSuperellipse`.
   BenchDrawRRectRSuperellipse.drawRRect() : _draw = _drawRRect, super(name: drawRRectName);
 
-  /// A variant of the benchmark that draws rounded superellipses .
-  BenchDrawRRectRSuperellipse.drawRSuperellipse() : super(name: drawRSuperellipseCachedName) {
+  /// A variant of the benchmark that draws rounded superellipses.
+  BenchDrawRRectRSuperellipse.drawRSuperellipse() : super(name: drawRSuperellipseName) {
     _draw = _drawRSuperellipse;
   }
 
   static const String drawRRectName = 'draw_rrect';
-  static const String drawRSuperellipse= 'draw_rsuperellipse';
+  static const String drawRSuperellipseName = 'draw_rsuperellipse';
 
   /// Number of rows in the grid.
   static const int kRows = 25;

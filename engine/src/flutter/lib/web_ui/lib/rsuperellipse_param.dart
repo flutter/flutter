@@ -57,9 +57,8 @@ class _RSuperellipseOctant {
     final Offset pointM = Offset(a - g, a - g);
     final Offset pointJ = Offset(xJ, yJ);
     final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
-    final double circleMaxAngle = radius == 0
-        ? 0
-        : _angleTo(pointM - circleCenter, pointJ - circleCenter);
+    final double circleMaxAngle =
+        radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
 
     return _RSuperellipseOctant(
       offset: center,
@@ -230,11 +229,12 @@ class _RSuperellipsePathBuilder {
   // Build a path for a translated version of the provided RSuperellipse, so
   // that the center of the bound is placed at the origin. The target RSuperellipse
   // must also have a uniform radius.
-  _RSuperellipsePathBuilder.normalized(double width, double height, double radius) : path = Path() {
+  _RSuperellipsePathBuilder.normalized(double width, double height, double radiusX, double radiusY)
+    : path = Path() {
     final _RSuperellipseQuadrant bottomRight = _RSuperellipseQuadrant.computeQuadrant(
       Offset.zero,
       Offset(width / 2, height / 2),
-      Radius.elliptical(radius, radius),
+      Radius.elliptical(radiusX, radiusY),
       const Size(1, 1),
     );
     final Offset start = Offset(0, height / 2);
@@ -483,18 +483,21 @@ class _CacheEntry<K, V> {
 /// we multiply each float by 10 and round it to an integer.
 /// We must also override the `==` and `hashCode` methods.
 class _CacheKey {
-  _CacheKey(double width, double height, double radius)
+  _CacheKey(double width, double height, double radiusX, double radiusY)
     : _widthInt = (width * kPrecisionFactor).round(),
       _heightInt = (height * kPrecisionFactor).round(),
-      _radiusInt = (radius * kPrecisionFactor).round();
+      _radiusXInt = (radiusX * kPrecisionFactor).round(),
+      _radiusYInt = (radiusY * kPrecisionFactor).round();
 
   final int _widthInt;
   final int _heightInt;
-  final int _radiusInt;
+  final int _radiusXInt;
+  final int _radiusYInt;
 
   double get width => _widthInt / kPrecisionFactor;
   double get height => _heightInt / kPrecisionFactor;
-  double get radius => _radiusInt / kPrecisionFactor;
+  double get radiusX => _radiusXInt / kPrecisionFactor;
+  double get radiusY => _radiusYInt / kPrecisionFactor;
 
   @override
   bool operator ==(Object other) {
@@ -502,16 +505,20 @@ class _CacheKey {
     return other is _CacheKey &&
         _widthInt == other._widthInt &&
         _heightInt == other._heightInt &&
-        _radiusInt == other._radiusInt;
+        _radiusXInt == other._radiusXInt &&
+        _radiusYInt == other._radiusYInt;
   }
 
   @override
-  int get hashCode => Object.hash(_widthInt, _heightInt, _radiusInt);
+  int get hashCode => Object.hash(_widthInt, _heightInt, _radiusXInt, _radiusYInt);
 
   @override
   String toString() {
-    // For convenient printing during debugging.
-    return 'Key(w:${_widthInt / 10}, h:${_heightInt / 10}, r:${_radiusInt / 10})';
+    return '_CacheKey('
+        'width: ${_widthInt / kPrecisionFactor},'
+        'height: ${_heightInt / kPrecisionFactor},'
+        'radiusX: ${_radiusXInt / kPrecisionFactor},'
+        'radiusY: ${_radiusYInt / kPrecisionFactor})';
   }
 
   static const double kPrecisionFactor = 10;
@@ -537,8 +544,8 @@ class _RSuperellipseCache {
   ///
   /// If the path is found, it is moved to the most-recently-used position.
   /// Otherwise, a new path is built and inserted.
-  Path get(double width, double height, double radius) {
-    final key = _CacheKey(width, height, radius);
+  Path get(double width, double height, Radius radius) {
+    final key = _CacheKey(width, height, radius.x, radius.y);
 
     // Remove the key and re-insert it to mark it as most recently used.
     final Path? path = _cache.remove(key);
@@ -554,7 +561,12 @@ class _RSuperellipseCache {
   }
 
   Path _buildPath(_CacheKey key) {
-    return _RSuperellipsePathBuilder.normalized(key.width, key.height, key.radius).path;
+    return _RSuperellipsePathBuilder.normalized(
+      key.width,
+      key.height,
+      key.radiusX,
+      key.radiusY,
+    ).path;
   }
 
   /// Evicts all entries from the cache.

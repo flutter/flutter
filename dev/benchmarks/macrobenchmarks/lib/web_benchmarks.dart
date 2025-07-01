@@ -58,10 +58,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchDrawRect.benchmarkName: () => BenchDrawRect.staticPaint(),
   BenchDrawRect.variablePaintBenchmarkName: () => BenchDrawRect.variablePaint(),
   BenchDrawRRectRSuperellipse.drawRRectName: () => BenchDrawRRectRSuperellipse.drawRRect(),
-  BenchDrawRRectRSuperellipse.drawRSuperellipseCachedName:
-      () => BenchDrawRRectRSuperellipse.drawRSuperellipseCached(),
-  BenchDrawRRectRSuperellipse.drawRSuperellipseCachelessName:
-      () => BenchDrawRRectRSuperellipse.drawRSuperellipseCacheless(),
+  BenchDrawRRectRSuperellipse.drawRSuperellipseName: () => BenchDrawRRectRSuperellipse.drawRSuperellipse(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
