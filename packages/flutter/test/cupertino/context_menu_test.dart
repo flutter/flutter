@@ -768,6 +768,7 @@ void main() {
     testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
       final Widget child = getChild();
 
       // Pump a CupertinoContextMenu on the top-left of the screen and open it.
@@ -906,6 +907,7 @@ void main() {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
 
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = getChild();
@@ -971,9 +973,6 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, greaterThan(center.dx));
-
-      // Set the screen back to its normal size.
-      await binding.setSurfaceSize(const Size(800.0, 600.0));
     });
 
     testWidgets('Landscape', (WidgetTester tester) async {
@@ -1260,6 +1259,7 @@ void main() {
   testWidgets('CupertinoContextMenu goldens in portrait orientation', (WidgetTester tester) async {
     const Size portraitScreenSize = Size(800.0, 900.0);
     await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
 
     final Widget leftChild = getChild(width: 200, height: 300);
     final Widget rightChild = getChild(width: 200, height: 300);
@@ -1303,6 +1303,7 @@ void main() {
   testWidgets('CupertinoContextMenu goldens in landscape orientation', (WidgetTester tester) async {
     const Size landscapeScreenSize = Size(800.0, 600.0);
     await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
 
     final Widget leftChild = getChild(width: 200, height: 300);
     final Widget rightChild = getChild(width: 200, height: 300);
@@ -1412,6 +1413,7 @@ void main() {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
 
       await testShrinkAlignment(
         tester: tester,
@@ -1436,6 +1438,7 @@ void main() {
     testWidgets('Landscape', (WidgetTester tester) async {
       const Size landscapeScreenSize = Size(800.0, 600.0);
       await binding.setSurfaceSize(landscapeScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
 
       await testShrinkAlignment(
         tester: tester,
