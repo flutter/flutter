@@ -813,4 +813,66 @@ void main() {
       lessThan(1.0),
     );
   });
+
+  testWidgets('Focused search field hides prefix in higher accessibility text scale modes', (
+    WidgetTester tester,
+  ) async {
+    double scaleFactor = 3.0;
+    const double iconSize = 10.0;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: CupertinoPageScaffold(
+                child: Center(
+                  child: CupertinoSearchTextField(
+                    placeholder: 'Search',
+                    focusNode: focusNode,
+                    prefixIcon: const Icon(CupertinoIcons.add),
+                    suffixIcon: const Icon(CupertinoIcons.xmark),
+                    suffixMode: OverlayVisibilityMode.always,
+                    itemSize: iconSize,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoSearchTextField), matching: find.byType(RichText)),
+    );
+    expect(barItems.length, greaterThan(0));
+
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), Size.square(scaleFactor * iconSize));
+    }
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // The prefix icon shrinks at higher accessibility text scale modes.
+    expect(tester.getSize(find.byIcon(CupertinoIcons.add)), Size.zero);
+    expect(tester.getSize(find.byIcon(CupertinoIcons.xmark)), Size.square(scaleFactor * iconSize));
+
+    setState(() {
+      scaleFactor = 2.9;
+    });
+    await tester.pumpAndSettle();
+
+    // Below the threshold, the prefix icon is displayed.
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), Size.square(scaleFactor * iconSize));
+    }
+  });
 }
