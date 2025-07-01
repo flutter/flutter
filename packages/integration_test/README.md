@@ -241,7 +241,10 @@ instrumentation test for Android, after creating `androidTest` as suggested in t
 ```sh
 pushd android
 # flutter build generates files in android/ for building the app
-flutter build apk
+# Use --force-include-dev-dependencies flag for release build
+# Otherwise integration_test plugin is not included
+flutter build apk --force-include-dev-dependencies
+# Or for debug build: flutter build apk --debug
 ./gradlew app:assembleAndroidTest
 ./gradlew app:assembleDebug -Ptarget=<path_to_test>.dart
 popd
@@ -315,7 +318,7 @@ product="build/ios_integ/Build/Products"
 flutter clean
 
 # Pass --simulator if building for the simulator.
-flutter build ios integration_test/foo_test.dart --release
+flutter build ios integration_test/foo_test.dart --release --force-include-dev-dependencies
 
 pushd ios
 xcodebuild build-for-testing \
