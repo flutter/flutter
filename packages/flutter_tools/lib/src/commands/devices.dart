@@ -14,11 +14,7 @@ import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
   DevicesCommand({bool verboseHelp = false}) {
-    argParser.addFlag(
-      'machine',
-      negatable: false,
-      help: 'Output device information in machine readable structured JSON format.',
-    );
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
       abbr: 't',
@@ -78,7 +74,7 @@ class DevicesCommand extends FlutterCommand {
       deviceConnectionInterface: deviceConnectionInterface,
     );
 
-    await output.findAndOutputAllTargetDevices(machine: boolArg('machine'));
+    await output.findAndOutputAllTargetDevices(machine: outputMachineFormat);
 
     return FlutterCommandResult.success();
   }
