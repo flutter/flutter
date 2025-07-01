@@ -66,6 +66,7 @@ void main() {
       expect(
         cache.artifacts,
         unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
           DevelopmentArtifact.universal,
           DevelopmentArtifact.web,
         }),
@@ -88,7 +89,10 @@ void main() {
 
       expect(
         cache.artifacts,
-        unorderedEquals(<DevelopmentArtifact>{DevelopmentArtifact.universal}),
+        unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.universal,
+          DevelopmentArtifact.informative,
+        }),
       );
     },
   );
@@ -109,6 +113,7 @@ void main() {
       expect(
         cache.artifacts,
         unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
           DevelopmentArtifact.universal,
           DevelopmentArtifact.macOS,
         }),
@@ -131,7 +136,10 @@ void main() {
 
       expect(
         cache.artifacts,
-        unorderedEquals(<DevelopmentArtifact>{DevelopmentArtifact.universal}),
+        unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.universal,
+          DevelopmentArtifact.informative,
+        }),
       );
     },
   );
@@ -152,6 +160,7 @@ void main() {
       expect(
         cache.artifacts,
         unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
           DevelopmentArtifact.universal,
           DevelopmentArtifact.windows,
         }),
@@ -174,7 +183,10 @@ void main() {
 
       expect(
         cache.artifacts,
-        unorderedEquals(<DevelopmentArtifact>{DevelopmentArtifact.universal}),
+        unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.universal,
+          DevelopmentArtifact.informative,
+        }),
       );
     },
   );
@@ -195,6 +207,7 @@ void main() {
       expect(
         cache.artifacts,
         unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
           DevelopmentArtifact.universal,
           DevelopmentArtifact.linux,
         }),
@@ -217,7 +230,10 @@ void main() {
 
       expect(
         cache.artifacts,
-        unorderedEquals(<DevelopmentArtifact>{DevelopmentArtifact.universal}),
+        unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.universal,
+          DevelopmentArtifact.informative,
+        }),
       );
     },
   );
@@ -265,6 +281,7 @@ void main() {
     expect(
       cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.androidGenSnapshot,
@@ -291,6 +308,7 @@ void main() {
     expect(
       cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         DevelopmentArtifact.androidGenSnapshot,
         DevelopmentArtifact.androidMaven,
@@ -317,6 +335,7 @@ void main() {
     expect(
       cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         DevelopmentArtifact.androidGenSnapshot,
         DevelopmentArtifact.androidMaven,
@@ -338,6 +357,7 @@ void main() {
     expect(
       cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.androidGenSnapshot,
@@ -366,6 +386,7 @@ void main() {
     expect(
       cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.androidGenSnapshot,
@@ -420,6 +441,7 @@ void main() {
       expect(
         cache.artifacts,
         unorderedEquals(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
           DevelopmentArtifact.universal,
           DevelopmentArtifact.macOS,
         }),
@@ -463,7 +485,7 @@ void main() {
         DevelopmentArtifact.web,
         DevelopmentArtifact.macOS,
         DevelopmentArtifact.windows,
-        DevelopmentArtifact.linux,
+        DevelopmentArtifact.linux, DevelopmentArtifact.informative,
         DevelopmentArtifact.universal,
         // iOS and android specifically excluded
       }),
