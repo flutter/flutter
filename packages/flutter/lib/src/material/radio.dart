@@ -451,7 +451,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then it defaults to [_kInnerRadius] in all states.
+  /// If null, then it defaults to `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
   @override
