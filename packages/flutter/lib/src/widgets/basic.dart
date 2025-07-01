@@ -1730,7 +1730,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// This offset is applied after any [alignment] transformation, so in this
   /// example, the child is rotated about its center, since [alignment]
-  /// defaults to [Alignment.center]:
+  /// in [Transform.rotate] defaults to [Alignment.center]:
   ///
   /// ```dart
   /// Transform.rotate(
