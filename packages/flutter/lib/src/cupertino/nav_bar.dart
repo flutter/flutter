@@ -1297,7 +1297,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               : bottomScrollOffset;
     }
 
-    if (target != null) {
+    // If the target is not null and within the scrollable range, animate to it.
+    if (target != null && target <= position.maxScrollExtent) {
       position.animateTo(
         target,
         // Eyeballed on an iPhone 16 simulator running iOS 18.

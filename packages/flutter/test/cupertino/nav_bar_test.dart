@@ -3069,6 +3069,74 @@ void main() {
     expect(find.text(largeTitle), findsOneWidget);
     expect(find.byType(CupertinoSearchTextField), findsOneWidget);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar does not enter infinite animation loop when target exceeds maxScrollExtent and prevents buttons from being tapped',
+    (WidgetTester tester) async {
+      const double largeTitleHeight = 52.0;
+
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      tester.view.devicePixelRatio = 1;
+      tester.binding.platformDispatcher.textScaleFactorTestValue = 1;
+      setWindowToPortrait(tester, size: const Size(402, 874));
+
+      int count = 0;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(largeTitle: Text('Large Title')),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  // This height will trigger the issue if the target exceeds maxScrollExtent.
+                  height: 805,
+                  child: Center(
+                    child: CupertinoButton(
+                      child: const Text('Press me!'),
+                      onPressed: () => count++,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify the button is present.
+      expect(find.widgetWithText(CupertinoButton, 'Press me!'), findsOneWidget);
+
+      // Tap the button.
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Press me!'));
+      await tester.pump();
+
+      // Check if the counter has increased.
+      expect(count, 1);
+
+      // Scroll a little over the halfway point.
+      final TestGesture scrollGesture = await tester.startGesture(
+        tester.getCenter(find.byType(Scrollable)),
+      );
+      await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
+      await scrollGesture.up();
+
+      // The crux of this test: this should NOT time out or throw an error.
+      await tester.pumpAndSettle();
+
+      // Tap the button.
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Press me!'));
+      await tester.pump();
+
+      // Check if the counter has increased.
+      expect(count, 2);
+    },
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {
