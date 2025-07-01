@@ -54,6 +54,7 @@ class BuildInfo {
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
     this.webEnableHotReload = false,
+    this.forceIncludeDevDependencies = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -186,6 +187,10 @@ class BuildInfo {
 
   /// If set, web builds with DDC will run with support for hot reload.
   final bool webEnableHotReload;
+
+  /// If set, dev dependencies will be included in all build modes
+  /// including release builds.
+  final bool forceIncludeDevDependencies;
 
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(

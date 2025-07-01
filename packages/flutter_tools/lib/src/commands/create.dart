@@ -537,6 +537,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
         const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          forceIncludeDevDependencies: true,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos,
           linuxPlatform: includeLinux,

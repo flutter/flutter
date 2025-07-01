@@ -194,7 +194,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required Set<AndroidBuildInfo> androidBuildInfo,
     required String target,
-    required Future<void> Function(FlutterProject, {required bool releaseMode}) generateTooling,
+    required Future<void> Function(
+      FlutterProject, {
+      required bool releaseMode,
+      required bool forceIncludeDevDependencies,
+    })
+    generateTooling,
     String? outputDirectoryPath,
     required String buildNumber,
   }) async {
@@ -207,7 +212,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
-      await generateTooling(project, releaseMode: androidBuildInfo.buildInfo.isRelease);
+      await generateTooling(
+        project,
+        releaseMode: androidBuildInfo.buildInfo.isRelease,
+        forceIncludeDevDependencies: androidBuildInfo.buildInfo.forceIncludeDevDependencies,
+      );
       await buildGradleAar(
         project: project,
         androidBuildInfo: androidBuildInfo,

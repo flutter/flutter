@@ -1693,7 +1693,11 @@ Gradle Crashed
         },
         target: '',
         buildNumber: '1.0',
-        generateTooling: (FlutterProject project, {required bool releaseMode}) async {
+        generateTooling: (
+          FlutterProject project, {
+          required bool releaseMode,
+          required bool forceIncludeDevDependencies,
+        }) async {
           generateToolingCalls.add((project, releaseMode));
         },
       );

@@ -666,6 +666,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
+    addForceIncludeDevDependenciesOption();
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();

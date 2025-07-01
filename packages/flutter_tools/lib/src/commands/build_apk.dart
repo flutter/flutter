@@ -20,6 +20,7 @@ class BuildApkCommand extends BuildSubCommand {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
+    addForceIncludeDevDependenciesOption();
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
