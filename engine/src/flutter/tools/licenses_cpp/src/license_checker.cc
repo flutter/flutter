@@ -416,6 +416,7 @@ int LicenseChecker::FileRun(std::string_view working_dir,
     return 1;
   }
 
+  state.license_map.Write(licenses);
   for (const absl::Status& status : state.errors) {
     std::cerr << status << "\n";
   }
