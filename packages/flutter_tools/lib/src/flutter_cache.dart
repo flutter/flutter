@@ -210,7 +210,10 @@ class FlutterEngineStamp extends CachedArtifact {
     final Uri url = Uri.parse(
       '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/engine_stamp.json',
     );
-    ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
+    final File engineStampFile = fileSystem.file(
+      fileSystem.path.join(location.path, 'engine_stamp.json'),
+    );
+    ErrorHandlingFileSystem.deleteIfExists(engineStampFile);
     await artifactUpdater.downloadFile('Downloading engine_stamp...', url, location);
   }
 }
