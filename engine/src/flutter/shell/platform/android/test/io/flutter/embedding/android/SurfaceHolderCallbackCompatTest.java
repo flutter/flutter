@@ -5,15 +5,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.TargetApi;
 import android.view.SurfaceHolder;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 public class SurfaceHolderCallbackCompatTest {
