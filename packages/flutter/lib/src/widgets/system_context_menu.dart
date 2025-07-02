@@ -418,9 +418,6 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with 
 /// Creates an instance of [IOSSystemContextMenuItem] for the
 /// system's built-in Live Text button.
 ///
-/// Should only appear when the text field is not secure, has focus, and has
-/// no selection.
-///
 /// The title and action are both handled by the platform.
 ///
 /// See also:
