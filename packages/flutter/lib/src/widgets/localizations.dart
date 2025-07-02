@@ -459,13 +459,18 @@ class _LocalizationsScope extends InheritedWidget {
 /// resources.
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
-  Localizations({super.key, required this.locale, required this.delegates, this.child})
-    : assert(
-        delegates.any(
-          (LocalizationsDelegate<dynamic> delegate) =>
-              delegate is LocalizationsDelegate<WidgetsLocalizations>,
-        ),
-      );
+  Localizations({
+    super.key,
+    required this.locale,
+    required this.delegates,
+    this.child,
+    this.isApplicationLevel = false,
+  }) : assert(
+         delegates.any(
+           (LocalizationsDelegate<dynamic> delegate) =>
+               delegate is LocalizationsDelegate<WidgetsLocalizations>,
+         ),
+       );
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -526,6 +531,10 @@ class Localizations extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
+
+  /// Whether this is the main localizations widget that represents the app's
+  /// locale.
+  final bool isApplicationLevel;
 
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
@@ -692,10 +701,16 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(chunhtai): notify engine about application locale if this is
+    // application level locale.
     if (_locale == null) {
       return const SizedBox.shrink();
     }
     return Semantics(
+      // If this is not application level, we need to explicit mark the
+      // semantics subtree with the locale.
+      localeForSubtree: widget.isApplicationLevel ? null : widget.locale,
+      container: !widget.isApplicationLevel,
       textDirection: _textDirection,
       child: _LocalizationsScope(
         key: _localizedResourcesScopeKey,

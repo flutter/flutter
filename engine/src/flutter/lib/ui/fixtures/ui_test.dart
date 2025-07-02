@@ -234,6 +234,7 @@ void sendSemanticsUpdate() {
     linkUrl: '',
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }
@@ -287,6 +288,7 @@ void sendSemanticsUpdateWithRole() {
     role: SemanticsRole.tab,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }

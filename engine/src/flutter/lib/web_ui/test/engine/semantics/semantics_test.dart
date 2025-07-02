@@ -151,6 +151,9 @@ void runSemanticsTests() {
   group('landmarks', () {
     _testLandmarks();
   });
+  group('locale', () {
+    _testLocale();
+  });
 }
 
 void _testSemanticRole() {
@@ -5415,6 +5418,97 @@ void _testLandmarks() {
   semantics().semanticsEnabled = false;
 }
 
+void _testLocale() {
+  test('nodes with locale update correctly', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        locale: const ui.Locale('es-MX'),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.getAttribute('lang'), 'es-MX');
+  });
+
+  test('nodes with same locale as parent does not set lang', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    SemanticsObject pumpSemantics() {
+      tester.updateNode(
+        id: 0,
+        locale: const ui.Locale('es-MX'),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            locale: const ui.Locale('es-MX'),
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          ),
+        ],
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.getAttribute('lang'), 'es-MX');
+    final SemanticsObject node1 = tester.getSemanticsObject(1);
+    expect(node1.element.getAttribute('lang'), null);
+  });
+
+  test('nodes changing locale set lang correctly', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    SemanticsObject pumpSemantics() {
+      tester.updateNode(
+        id: 0,
+        locale: const ui.Locale('es-MX'),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            locale: const ui.Locale('es-MX'),
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 2,
+                locale: const ui.Locale('en-US'),
+                rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              ),
+            ],
+          ),
+        ],
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.getAttribute('lang'), 'es-MX');
+    final SemanticsObject node1 = tester.getSemanticsObject(1);
+    expect(node1.element.getAttribute('lang'), null);
+    final SemanticsObject node2 = tester.getSemanticsObject(2);
+    expect(node2.element.getAttribute('lang'), 'en-US');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -5455,6 +5549,7 @@ void updateNode(
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
+  ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -5497,6 +5592,7 @@ void updateNode(
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
     inputType: inputType,
+    locale: locale,
   );
 }
 
