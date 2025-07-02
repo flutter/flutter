@@ -407,7 +407,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
     );
     _upDragController = AnimationController(
       duration: const Duration(microseconds: 1),
-      reverseDuration: const Duration(milliseconds: 180),
       vsync: this,
     );
     _paddingAnimation = _upDragController.drive(
@@ -821,7 +820,11 @@ class _CupertinoDragGestureController<T> {
     // If the sheet is in a stretched state (dragged upward beyond max size),
     // reverse the stretch to return to the normal max height.
     if (upController.value > 0) {
-      upController.reverse();
+      upController.animateBack(
+        0.0,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+      );
     }
 
     // Fling in the appropriate direction.
