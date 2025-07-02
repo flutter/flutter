@@ -211,16 +211,17 @@ absl::Status MatchLicenseFile(const fs::path& path,
   if (!license.ok()) {
     return license.status();
   } else {
-    absl::StatusOr<Catalog::Match> match = data.catalog.FindMatch(
-        std::string_view(license->GetData(), license->GetSize()));
+    absl::StatusOr<std::vector<Catalog::Match>> matches =
+        data.catalog.FindMatch(
+            std::string_view(license->GetData(), license->GetSize()));
 
-    if (match.ok()) {
-      license_map->Add(package.name, match->matched_text);
-      VLOG(1) << "OK: " << path << " : " << match->matcher;
+    if (matches.ok()) {
+      license_map->Add(package.name, matches->front().matched_text);
+      VLOG(1) << "OK: " << path << " : " << matches->front().matcher;
     } else {
-      return absl::NotFoundError(absl::StrCat("Unknown license in ",
-                                              package.license_file->string(),
-                                              " : ", match.status().message()));
+      return absl::NotFoundError(
+          absl::StrCat("Unknown license in ", package.license_file->string(),
+                       " : ", matches.status().message()));
     }
   }
   return absl::OkStatus();
@@ -285,21 +286,21 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
           if (!VLOG_IS_ON(4)) {
             VLOG(3) << comment;
           }
-          absl::StatusOr<Catalog::Match> match =
+          absl::StatusOr<std::vector<Catalog::Match>> matches =
               data.catalog.FindMatch(comment);
-          if (match.ok()) {
+          if (matches.ok()) {
             did_find_copyright = true;
-            license_map->Add(package.name, match->matched_text);
+            license_map->Add(package.name, matches->front().matched_text);
             VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                    << match->matcher;
+                    << matches->front().matcher;
           } else {
             if (flags.treat_unmatched_comments_as_errors) {
               errors->push_back(absl::NotFoundError(
                   absl::StrCat(relative_path.lexically_normal().string(), " : ",
-                               match.status().message(), "\n", comment)));
+                               matches.status().message(), "\n", comment)));
             }
             VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
-                    << " : " << match.status().message() << "\n"
+                    << " : " << matches.status().message() << "\n"
                     << comment;
           }
         }

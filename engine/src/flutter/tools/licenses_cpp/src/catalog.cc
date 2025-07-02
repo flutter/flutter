@@ -8,6 +8,17 @@
 
 namespace fs = std::filesystem;
 
+namespace {
+bool Overlaps(std::string_view a, std::string_view b) {
+  const char* const start1 = a.data();
+  const char* const end1 = start1 + a.size();
+  const char* const start2 = b.data();
+  const char* const end2 = start2 + b.size();
+
+  return start1 < end2 && start2 < end1;
+}
+}  // namespace
+
 absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
   fs::path data_dir_path(data_dir);
   if (!fs::exists(data_dir_path)) {
@@ -91,32 +102,39 @@ Catalog::Catalog(RE2::Set selector,
       matchers_(std::move(matchers)),
       names_(std::move(names)) {}
 
-absl::StatusOr<Catalog::Match> Catalog::FindMatch(
+absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
     std::string_view query) const {
   std::vector<int> selector_results;
   if (!selector_.Match(query, &selector_results)) {
     return absl::NotFoundError("Selector didn't match.");
   }
-  if (selector_results.size() > 1) {
-    std::stringstream ss;
-    ss << "Multiple unique matches found:" << std::endl;
-    for (int idx : selector_results) {
-      ss << "  " << names_[idx] << std::endl;
-    }
-    return absl::InvalidArgumentError(ss.str());
-  }
 
-  std::string_view match_text;
-  RE2* matcher = matchers_[selector_results[0]].get();
-  if (selector_results.size() == 1 &&
-      matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
-                     &match_text,
-                     /*nsubmatch=*/1)) {
-    return Match{.matcher = names_[selector_results[0]],
-                 .matched_text = match_text};
-  } else {
+  std::vector<Catalog::Match> results;
+  for (int selector_result : selector_results) {
+    RE2* matcher = matchers_[selector_result].get();
+    std::string_view match_text;
+    if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
+                       &match_text,
+                       /*nsubmatch=*/1)) {
+      results.emplace_back(Match{.matcher = names_[selector_result],
+                                 .matched_text = match_text});
+    }
+  }
+  if (selector_results.size() != results.size()) {
     return absl::NotFoundError(absl::StrCat(
         "Selected matcher (", names_[selector_results[0]], ") didn't match."));
+  } else {
+    for (size_t i = 0; i < results.size(); ++i) {
+      for (size_t j = i + 1; j < results.size(); ++j) {
+        if (Overlaps(results[i].matched_text, results[j].matched_text)) {
+          return absl::InvalidArgumentError(
+              absl::StrCat("Selected matchers overlap (", results[i].matcher,
+                           ", ", results[j].matcher, ")."));
+        }
+      }
+    }
+
+    return results;
   }
 }
 
