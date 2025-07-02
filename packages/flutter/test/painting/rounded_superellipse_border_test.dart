@@ -229,6 +229,39 @@ void main() {
       );
     }
 
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        BorderRadius.zero,
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_zero.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.all(Radius.circular(36)),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_circular.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.all(Radius.elliptical(20, 50)),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
+    );
+
     // Regression test for https://github.com/flutter/flutter/issues/170593
     await tester.pumpWidget(
       containerWithBorder(
@@ -238,7 +271,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.1.png'),
+      matchesGoldenFile('painting.rounded_superellipse_border.regression_1.png'),
     );
   });
 }

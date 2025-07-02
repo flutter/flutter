@@ -311,11 +311,15 @@ class RoundSuperellipseBuilder {
   // If `reverse` is false, the resulting arc spans from 0 to pi/2, moving
   // clockwise starting from the positive Y-axis. Otherwise it moves from pi/2
   // to 0.
+  //
+  // The `scale_sign` is an additional scaling transformation that potentially
+  // flips the result. This is useful for uniform radii where the same quadrant
+  // parameter set should be drawn to 4 quadrants.
   void AddQuadrant(const RoundSuperellipseParam::Quadrant& param,
                    bool reverse,
                    Point scale_sign = Point(1, 1)) {
-    auto transform = Matrix::MakeTranslateScale(
-        param.signed_scale.Abs() * scale_sign, param.offset);
+    auto transform = Matrix::MakeTranslateScale(param.signed_scale * scale_sign,
+                                                param.offset);
     if (param.top.se_n < 2 || param.right.se_n < 2) {
       receiver_.LineTo(transform * (param.top.offset +
                                     Point(param.top.se_a, param.top.se_a)));
@@ -528,15 +532,15 @@ void RoundSuperellipseParam::Dispatch(PathReceiver& path_receiver) const {
   path_receiver.MoveTo(start, true);
 
   if (all_corners_same) {
-    builder.AddQuadrant(top_right, /*reverse=*/false);
-    builder.AddQuadrant(top_right, /*reverse=*/true);
-    builder.AddQuadrant(top_right, /*reverse=*/false);
-    builder.AddQuadrant(top_right, /*reverse=*/true);
+    builder.AddQuadrant(top_right, /*reverse=*/false, Point(1, 1));
+    builder.AddQuadrant(top_right, /*reverse=*/true, Point(1, -1));
+    builder.AddQuadrant(top_right, /*reverse=*/false, Point(-1, -1));
+    builder.AddQuadrant(top_right, /*reverse=*/true, Point(-1, 1));
   } else {
-    builder.AddQuadrant(top_right, /*reverse=*/false, Point(1, -1));
-    builder.AddQuadrant(bottom_right, /*reverse=*/true, Point(1, 1));
-    builder.AddQuadrant(bottom_left, /*reverse=*/false, Point(-1, 1));
-    builder.AddQuadrant(top_left, /*reverse=*/true, Point(-1, -1));
+    builder.AddQuadrant(top_right, /*reverse=*/false);
+    builder.AddQuadrant(bottom_right, /*reverse=*/true);
+    builder.AddQuadrant(bottom_left, /*reverse=*/false);
+    builder.AddQuadrant(top_left, /*reverse=*/true);
   }
 
   path_receiver.LineTo(start);
