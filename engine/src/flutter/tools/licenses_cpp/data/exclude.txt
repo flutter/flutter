@@ -80,6 +80,7 @@
 ^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
 # These files don't seem to be explicitly excluded but aren't present in the 
 # sky license.
-^third_party/freetype2/.*
+#^third_party/freetype2/.*
+third_party/freetype2/LICENSE.TXT
 # This file is a conglomeration of licenses found in files.
 third_party/vulkan-deps/glslang/src/LICENSE.TXT
