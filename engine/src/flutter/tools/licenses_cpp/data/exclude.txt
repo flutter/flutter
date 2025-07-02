@@ -81,5 +81,5 @@
 # These files don't seem to be explicitly excluded but aren't present in the 
 # sky license.
 ^third_party/freetype2/.*
-# These files have a license that doesn't show up in the sky license.
-^third_party/vulkan-deps/glslang/src/.*
+# This file is a conglomeration of licenses found in files.
+third_party/vulkan-deps/glslang/src/LICENSE.TXT
