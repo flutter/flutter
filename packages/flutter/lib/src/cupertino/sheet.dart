@@ -150,10 +150,12 @@ Future<T?> showCupertinoSheet<T>({
   bool enableDrag = true,
 }) {
   assert(pageBuilder != null || builder != null);
+
+  final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
   final WidgetBuilder widgetBuilder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
-    widgetBuilder = (pageBuilder ?? builder)!;
+    widgetBuilder = effectivePageBuilder!;
   } else {
     widgetBuilder = (BuildContext context) {
       return NavigatorPopHandler(
@@ -175,7 +177,7 @@ Future<T?> showCupertinoSheet<T>({
                       }
                       Navigator.of(context, rootNavigator: true).pop(result);
                     },
-                    child: (pageBuilder ?? builder)!(context),
+                    child: effectivePageBuilder!(context),
                   );
                 },
               ),
