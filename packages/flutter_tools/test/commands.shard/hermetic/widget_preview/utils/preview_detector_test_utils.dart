@@ -19,7 +19,7 @@ bool _stateInitialized = false;
 
 // Global state that must be cleaned up by `tearDown` in initializeTestPreviewDetectorState.
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
-void Function()? _onPubspecChangeDetected;
+void Function(String path)? _onPubspecChangeDetected;
 Directory? _projectRoot;
 late FileSystem _fs;
 
@@ -59,8 +59,8 @@ void _onChangeDetectedRoot(PreviewDependencyGraph mapping) {
   _onChangeDetectedImpl!(mapping);
 }
 
-void _onPubspecChangeDetectedRoot() {
-  _onPubspecChangeDetected!();
+void _onPubspecChangeDetectedRoot(String path) {
+  _onPubspecChangeDetected?.call(path);
 }
 
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
@@ -88,16 +88,16 @@ Future<void> expectHasNoErrors({required void Function() changeOperation}) async
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<void> waitForPubspecChangeDetected({required void Function() changeOperation}) async {
-  final Completer<void> completer = Completer<void>();
-  _onPubspecChangeDetected = () {
+Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+  final Completer<String> completer = Completer<String>();
+  _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
       return;
     }
-    completer.complete();
+    completer.complete(path);
   };
   changeOperation();
-  await completer.future;
+  return completer.future;
 }
 
 /// Waits for a change detected event after executing [changeOperation].
@@ -137,6 +137,17 @@ Future<void> waitForNChangesDetected({
   };
   changeOperation();
   await completer.future;
+}
+
+extension PreviewDependencyGraphExtensions on PreviewDependencyGraph {
+  /// Returns a subset of dependency graph consisting only of library nodes containing previews.
+  PreviewDependencyGraph get nodesWithPreviews {
+    return PreviewDependencyGraph.fromEntries(
+      entries.where(
+        (MapEntry<PreviewPath, LibraryPreviewNode> element) => element.value.previews.isNotEmpty,
+      ),
+    );
+  }
 }
 
 /// Walks the [graph] to verify its structure and that all files contained in
