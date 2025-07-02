@@ -1790,6 +1790,9 @@ abstract class SemanticsUpdateBuilder {
   /// The `role` describes the role of this node. Defaults to
   /// [SemanticsRole.none] if not set.
   ///
+  /// The `locale` describes the language of the content in this node. i.e.
+  /// label, value, and hint.
+  ///
   /// If `validationResult` is not null, indicates the result of validating a
   /// form field. If null, indicates that the node is not being validated, or
   /// that the result is unknown. Form fields that validate user input but do
@@ -1840,6 +1843,7 @@ abstract class SemanticsUpdateBuilder {
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required Locale? locale,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1917,6 +1921,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required Locale? locale,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1964,6 +1969,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       controlsNodes,
       validationResult.index,
       inputType.index,
+      locale?.toString() ?? '',
     );
   }
 
@@ -2010,6 +2016,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Int32,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -2053,6 +2060,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     List<String>? controlsNodes,
     int validationResultIndex,
     int inputType,
+    String locale,
   );
 
   @override
