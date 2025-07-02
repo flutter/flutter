@@ -3066,18 +3066,21 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
 /// (OCR) button.
 ///
 /// This button is only available on iOS 15.0+ devices with camera support.
+/// It allows the user to scan text from the camera and insert it at the
+/// current cursor position.
 ///
-/// The title and action are both handled by the platform. When [title] is not
-/// provided, the platform will use its default localized title.
+/// The title and action are both handled by the platform, and the platform
+/// will use its default localized title.
 ///
-/// See https://github.com/flutter/flutter/issues/169781
+/// See also:
+///
+///  * [IOSSystemContextMenuItemLiveText], which performs a similar role but at the
+///    widget level.
+///  * https://github.com/flutter/flutter/issues/169781
 final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData
     with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
-  const IOSSystemContextMenuItemDataLiveText({this.title});
-
-  @override
-  final String? title;
+  const IOSSystemContextMenuItemDataLiveText();
 
   @override
   String get _jsonType => 'captureTextFromCamera';
@@ -3085,7 +3088,6 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title));
   }
 }
 
