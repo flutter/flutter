@@ -158,7 +158,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// in the [InputDecoration.prefixIcon] and [InputDecoration.suffixIcon].
   ///
   /// Except leading and trailing icons, the text field can be configured by the
-  /// [InputDecorationTheme] property. The menu can be configured by the [menuStyle].
+  /// [inputDecorationTheme] property. The menu can be configured by the [menuStyle].
   const DropdownMenu({
     super.key,
     this.enabled = true,
@@ -177,7 +177,8 @@ class DropdownMenu<T> extends StatefulWidget {
     this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
-    this.inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     this.menuStyle,
     this.controller,
     this.initialSelection,
@@ -194,7 +195,13 @@ class DropdownMenu<T> extends StatefulWidget {
     this.maxLines = 1,
     this.textInputAction,
     this.restorationId,
-  }) : assert(filterCallback == null || enableFilter);
+  }) : assert(filterCallback == null || enableFilter),
+       assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// Determine if the [DropdownMenu] is enabled.
   ///
@@ -316,7 +323,17 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
   /// By default, shows a outlined text field.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// The [MenuStyle] that defines the visual attributes of the menu.
   ///
@@ -1007,7 +1024,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       useMaterial3: useMaterial3,
     );
 
-    final TextStyle? effectiveTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
+    final TextStyle? baseTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
+    final Color? disabledColor = theme.disabledColor ?? defaults.disabledColor;
+    final TextStyle? effectiveTextStyle =
+        widget.enabled
+            ? baseTextStyle
+            : baseTextStyle?.copyWith(color: disabledColor) ?? TextStyle(color: disabledColor);
 
     MenuStyle? effectiveMenuStyle = widget.menuStyle ?? theme.menuStyle ?? defaults.menuStyle!;
 
@@ -1035,7 +1057,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         maximumSize: MaterialStatePropertyAll<Size>(Size(double.infinity, widget.menuHeight!)),
       );
     }
-    final InputDecorationTheme effectiveInputDecorationTheme =
+    final InputDecorationThemeData effectiveInputDecorationTheme =
         widget.inputDecorationTheme ?? theme.inputDecorationTheme ?? defaults.inputDecorationTheme!;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
@@ -1482,7 +1504,8 @@ class _RenderDropdownMenuBody extends RenderBox
 
 // Hand coded defaults. These will be updated once we have tokens/spec.
 class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
-  _DropdownMenuDefaultsM3(this.context);
+  _DropdownMenuDefaultsM3(this.context)
+    : super(disabledColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
@@ -1500,7 +1523,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   }
 
   @override
-  InputDecorationTheme get inputDecorationTheme {
-    return const InputDecorationTheme(border: OutlineInputBorder());
+  InputDecorationThemeData get inputDecorationTheme {
+    return const InputDecorationThemeData(border: OutlineInputBorder());
   }
 }

@@ -45,6 +45,8 @@ import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
+const String kFlutterSemanticNodePrefix = 'flt-semantic-node-';
+
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
 
@@ -75,9 +77,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
   // This index check is inverted (== 0 vs != 0); far more platforms support
-  // "announce" than discourage it.
+  // announce than discourage it.
   @override
-  bool get announce => _kNoAnnounceIndex & _index == 0;
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -103,8 +105,8 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (announce) {
-      features.add('announce');
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
     }
     return 'AccessibilityFeatures$features';
   }
@@ -128,7 +130,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? reduceMotion,
     bool? highContrast,
     bool? onOffSwitchLabels,
-    bool? announce,
+    bool? supportsAnnounce,
   }) {
     final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -139,7 +141,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.reduceMotion = reduceMotion ?? this.reduceMotion;
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
-    builder.announce = announce ?? this.announce;
+    builder.supportsAnnounce = supportsAnnounce ?? this.supportsAnnounce;
 
     return builder.build();
   }
@@ -158,8 +160,8 @@ class EngineAccessibilityFeaturesBuilder {
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
   // This index check is inverted (== 0 vs != 0); far more platforms support
-  // "announce" than discourage it.
-  bool get announce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
+  // announce than discourage it.
+  bool get supportsAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -196,9 +198,11 @@ class EngineAccessibilityFeaturesBuilder {
     _index = value ? _index | onOffSwitchLabels : _index & ~onOffSwitchLabels;
   }
 
-  set announce(bool value) {
+  // This setter uses an inverted check (!value instead of value) to set the noAnnounce
+  // field in EngineAccessibilityFeatures since far more platforms support announce
+  // than not.
+  set supportsAnnounce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
-    // Since we are using noAnnounce for the embedder, we need to flip the value.
     _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
   }
 
@@ -598,7 +602,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -797,7 +801,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('flt-semantic-node-$semanticNodeId');
+          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -2557,7 +2561,7 @@ class EngineSemantics {
   /// actually updating the semantic DOM.
   void didReceiveSemanticsUpdate() {
     if (!_semanticsEnabled) {
-      if (ui_web.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.TestEnvironment.instance.keepSemanticsDisabledOnUpdate) {
         // Running Flutter widget tests in a fake environment. Don't enable
         // engine semantics. Test semantics trees violate invariants in ways
         // production implementation isn't built to handle. For example, tests

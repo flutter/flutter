@@ -2776,8 +2776,8 @@ void main() {
   });
 
   // Regression tests for https://github.com/flutter/flutter/issues/126623
-  group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
-    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
+  group('Overall InputDecorationThemeData does not impact SearchBar and SearchView', () {
+    const InputDecorationThemeData inputDecorationTheme = InputDecorationThemeData(
       focusColor: Colors.green,
       hoverColor: Colors.blue,
       outlineBorder: BorderSide(color: Colors.pink, width: 10),
@@ -2817,7 +2817,7 @@ void main() {
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
     }
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgets('Overall InputDecorationThemeData does not override text field style'
         ' in SearchBar', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2839,7 +2839,7 @@ void main() {
       checkSearchBarDefaults(tester, theme.colorScheme, material);
     });
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgets('Overall InputDecorationThemeData does not override text field style'
         ' in the search view route', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

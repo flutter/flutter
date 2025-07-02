@@ -78,6 +78,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
@@ -465,13 +466,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableDds: enableDds,
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      enableFlutterGpu: (argResults!['enable-flutter-gpu'] as bool?) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
     );
 
-    final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
+    final Uri? nativeAssetsJson =
+        _isIntegrationTest
+            ? null // Don't build for host when running integration tests.
+            : await nativeAssetsBuilder?.build(buildInfo);
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(

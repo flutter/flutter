@@ -259,7 +259,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
-    final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
     final InputBorder effectiveInputBorder =
         datePickerTheme.inputDecorationTheme?.border ??
         theme.inputDecorationTheme.border ??
