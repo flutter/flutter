@@ -12508,6 +12508,706 @@ DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1994, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1995, Thomas G. Lane.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code
+relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code and
+information relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+Modified 2009 by Guido Vollbeding.
+It was modified by The libjpeg-turbo Project to include only code and
+information relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009, 2014-2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009, 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2012, 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2009-2012, 2015, D. R. Commander.
+Copyright (C) 2014, MIPS Technologies, Inc., California.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2010, 2015-2016, D. R. Commander.
+Copyright (C) 2014, MIPS Technologies, Inc., California.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2014, MIPS Technologies, Inc., California.
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modifications:
+Copyright (C) 2013, Linaro Limited.
+Copyright (C) 2014-2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 1997-2009 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2009, 2011, 2014-2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 1997-2009 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2015-2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 2002-2009 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2011, 2016, D. R. Commander.
+Copyright (C) 2013, Linaro Limited.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 2003-2010 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 2009 by Bill Allombert, Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2015, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 2011 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2009, 2011-2012, 2014-2015, D. R. Commander.
+Copyright (C) 2013, Linaro Limited.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+Modified 2013 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010-2011, 2013-2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009, 2011, 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2011, 2014-2016, D. R. Commander.
+Copyright (C) 2015, Matthieu Darbois.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2011, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2010-2011, 2015-2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+Modified 2002-2009 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2011, 2013-2014, 2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+Modified 2003-2008 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2009-2011, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+Modified 2003-2010 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+Modified 2003-2011 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2013-2014, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2012, 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-1998, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2013, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1991-2012, Thomas G. Lane, Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2012-2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1992-1996, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code and
+information relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1992-1997, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code and
+information relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994, Thomas G. Lane.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2002-2010 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2010, 2015, D. R. Commander.
+Copyright (C) 2013, MIPS Technologies, Inc., California.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2009-2010 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Modified 2011 by Siarhei Siamashka.
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2009-2011 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2011, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2009-2011 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2013, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2009-2012 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2011, 2014, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+Modified 2009-2012 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2013, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 1999-2006, MIYASAKA Masaru.
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2011, 2014-2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2015-2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2011, 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2013, Linaro Limited.
+Copyright (C) 2014-2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1996, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2009, 2011, 2014-2015, D. R. Commander.
+Copyright (C) 2013, Linaro Limited.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code and
+information relevant to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+Modified 1997-2009 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2014, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+Modified 2009 by Bill Allombert, Guido Vollbeding.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2014, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+Copyright (C) 2010, 2015-2016, D. R. Commander.
+Copyright (C) 2015, Google, Inc.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright 2009 Pierre Ossman <ossman@cendio.se> for Cendio AB
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1998, Thomas G. Lane.
+Modified 2003-2010 by Guido Vollbeding.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1998, Thomas G. Lane.
+Modified 2010 by Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2014, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1998, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1994-1998, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2016, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1995-1997, Thomas G. Lane.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1995-1997, Thomas G. Lane.
+libjpeg-turbo Modifications:
+Copyright (C) 2015, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1995-1998, Thomas G. Lane.
+Modified 2000-2009 by Guido Vollbeding.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1995-2010, Thomas G. Lane, Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, 2014, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1997-2011, Thomas G. Lane, Guido Vollbeding.
+It was modified by The libjpeg-turbo Project to include only code relevant
+to libjpeg-turbo.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
+libjpeg-turbo
+
+This file was part of the Independent JPEG Group's software:
+Copyright (C) 1997-2011, Thomas G. Lane, Guido Vollbeding.
+libjpeg-turbo Modifications:
+Copyright (C) 2010, D. R. Commander.
+For conditions of distribution and use, see the accompanying README.ijg
+file.
+--------------------------------------------------------------------------------
 expat
 
 This is simple demonstration of how to use expat. This program
