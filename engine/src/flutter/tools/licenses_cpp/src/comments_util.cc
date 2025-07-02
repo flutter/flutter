@@ -6,7 +6,8 @@
 #include "flutter/third_party/re2/re2/re2.h"
 
 static RE2 kAddTrimLineRegex(R"regex(^(?:\s*(?://|#)\s?))regex");
-static RE2 kAddCTrimLineRegex(R"regex(^(?:\s*\**\s)?(.*?)(?:\s*\**\s*)?$)regex");
+static RE2 kAddCTrimLineRegex(
+    R"regex(^(?:\s*\**\s)?(.*?)(?:\s*\**\s*)?$)regex");
 static RE2 kAddCEndTrimLineRegex(R"regex(^\s*(.*?)\*/)regex");
 
 void CommentsUtil::AddTrimLine(std::string* buffer,
