@@ -228,10 +228,9 @@ class CkCanvas {
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, CkPaint paint) {
     final skPaint = paint.toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    save();
     translate(offset.dx, offset.dy);
     skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
-    restore();
+    translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }
 
