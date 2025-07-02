@@ -92,9 +92,9 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
 
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_11
 
     @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 

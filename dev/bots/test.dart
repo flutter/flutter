@@ -129,7 +129,6 @@ Future<void> main(List<String> args) async {
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
-      'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome`
       'web_canvaskit_tests': webTestsSuite.runWebCanvasKitUnitTests,

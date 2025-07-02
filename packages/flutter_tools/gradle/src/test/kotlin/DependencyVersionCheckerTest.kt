@@ -159,7 +159,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Java version in warn range results in warning logs`() {
-        val exampleWarnJavaVersion = JavaVersion.VERSION_1_8
+        val exampleWarnJavaVersion = JavaVersion.VERSION_16
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleWarnJavaVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
