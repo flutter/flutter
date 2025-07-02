@@ -4473,6 +4473,59 @@ void main() {
     controller2.dispose();
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169942.
+  testWidgets(
+    'DropdownMenu disabled state applies proper styling to label and selected value text',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      final Color disabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
+
+      Widget buildDropdownMenu({required bool isEnabled}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: DropdownMenu<String>(
+              width: double.infinity,
+              enabled: isEnabled,
+              initialSelection: 'One',
+              label: const Text('Choose number'),
+              dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+                DropdownMenuEntry<String>(value: 'One', label: 'One'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: true));
+
+      // Find the TextField and its EditableText from DropdownMenu.
+      final TextField enabledTextField = tester.widget(find.byType(TextField));
+      final EditableText enabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify enabled state styling for the TextField.
+      expect(enabledTextField.enabled, isTrue);
+      expect(enabledEditableText.style.color, isNot(disabledColor));
+
+      // Switch to the disabled state by rebuilding the widget.
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: false));
+
+      // Find the TextField and its EditableText in disabled state.
+      final TextField textField = tester.widget(find.byType(TextField));
+      final EditableText disabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify disabled state styling for the TextField.
+      expect(textField.enabled, isFalse);
+      expect(disabledEditableText.style.color, disabledColor);
+
+      // Verify the selected value text has disabled color.
+      final EditableText selectedValueText = tester.widget<EditableText>(
+        find.descendant(of: find.byType(TextField), matching: find.byType(EditableText)),
+      );
+      expect(selectedValueText.style.color, disabledColor);
+    },
+  );
 }
 
 enum TestMenu {
