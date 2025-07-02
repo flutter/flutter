@@ -122,6 +122,7 @@ class Radio<T> extends StatefulWidget {
     this.groupRegistry,
     this.backgroundColor,
     this.side,
+    this.innerRadius,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
 
@@ -171,6 +172,7 @@ class Radio<T> extends StatefulWidget {
     this.groupRegistry,
     this.backgroundColor,
     this.side,
+    this.innerRadius,
   }) : _radioType = _RadioType.adaptive;
 
   /// {@macro flutter.widget.RawRadio.value}
@@ -442,6 +444,16 @@ class Radio<T> extends StatefulWidget {
   /// If null, then it defaults to a border using the fill color.
   final BorderSide? side;
 
+  /// The radius of the inner circle of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to `4.5` in all states.
+  final WidgetStateProperty<double?>? innerRadius;
+
   @override
   State<Radio<T>> createState() => _RadioState<T>();
 }
@@ -549,6 +561,7 @@ class _RadioState<T> extends State<Radio<T>> {
           materialTapTargetSize: widget.materialTapTargetSize,
           backgroundColor: widget.backgroundColor,
           side: widget.side,
+          innerRadius: widget.innerRadius,
         );
       },
     );
@@ -586,6 +599,7 @@ class _RadioPaint extends StatefulWidget {
     required this.materialTapTargetSize,
     required this.backgroundColor,
     required this.side,
+    required this.innerRadius,
   });
 
   final ToggleableStateMixin toggleableState;
@@ -599,6 +613,7 @@ class _RadioPaint extends StatefulWidget {
   final MaterialTapTargetSize? materialTapTargetSize;
   final WidgetStateProperty<Color?>? backgroundColor;
   final BorderSide? side;
+  final WidgetStateProperty<double?>? innerRadius;
 
   @override
   State<StatefulWidget> createState() => _RadioPaintState();
@@ -738,6 +753,8 @@ class _RadioPaintState extends State<_RadioPaint> {
           strokeAlign: BorderSide.strokeAlignCenter,
         );
 
+    final double innerRadius = widget.innerRadius?.resolve(activeStates) ?? _kInnerRadius;
+
     return CustomPaint(
       size: size,
       painter:
@@ -759,7 +776,8 @@ class _RadioPaintState extends State<_RadioPaint> {
             ..activeBackgroundColor = activeBackgroundColor
             ..inactiveBackgroundColor = inactiveBackgroundColor
             ..activeSide = activeSide
-            ..inactiveSide = inactiveSide,
+            ..inactiveSide = inactiveSide
+            ..innerRadius = innerRadius,
     );
   }
 }
@@ -805,6 +823,16 @@ class _RadioPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  double get innerRadius => _innerRadius!;
+  double? _innerRadius;
+  set innerRadius(double? value) {
+    if (_innerRadius == value) {
+      return;
+    }
+    _innerRadius = value;
+    notifyListeners();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
@@ -833,7 +861,7 @@ class _RadioPainter extends ToggleablePainter {
           Paint()
             ..style = PaintingStyle.fill
             ..color = Color.lerp(inactiveColor, activeColor, position.value)!;
-      canvas.drawCircle(center, _kInnerRadius * position.value, innerCirclePaint);
+      canvas.drawCircle(center, innerRadius * position.value, innerCirclePaint);
     }
   }
 }
