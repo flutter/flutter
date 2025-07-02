@@ -15840,6 +15840,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
+rapidjson
+
+The above software in this distribution may have been modified by 
+THL A29 Limited ("Tencent Modifications"). 
+All Tencent Modifications are Copyright (C) 2015 THL A29 Limited.
+--------------------------------------------------------------------------------
 vulkan-deps
 
 The majority of files in this project use the Apache 2.0 License.
