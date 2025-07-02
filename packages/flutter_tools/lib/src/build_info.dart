@@ -1023,6 +1023,12 @@ const kFlavor = 'Flavor';
 /// by the `appFlavor` service.
 const kAppFlavor = 'FLUTTER_APP_FLAVOR';
 
+/// Environment variable of the enabled feature flags to be set in the
+/// dartDefines.
+///
+/// This tells the framework which features are on.
+const String kEnabledFeatureFlags = 'FLUTTER_ENABLED_FEATURE_FLAGS';
+
 /// The Xcode configuration used to build the project.
 const kXcodeConfiguration = 'Configuration';
 
