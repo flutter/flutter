@@ -1,5 +1,5 @@
 bsd3_clause
-(?s)(?:^|\s+)Copyright.*\nRedistribution and use in source and binary forms.*\n\s*Redistributions of source code must retain the above copyright
+(?s)(?:^|\s+)Copyright.*\nRedistribution and use in source and binary forms.*\n\s*Redistributions of source code must retain the above copyright.*Neither the name of
 (?s)Copyright.*
 
 All rights reserved.
