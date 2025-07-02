@@ -567,6 +567,11 @@ class TestFeatureFlags implements FeatureFlags {
     nativeAssets,
     swiftPackageManager,
   ];
+
+  @override
+  Iterable<Feature> get allConfigurableFeatures {
+    return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {

@@ -662,6 +662,7 @@ class AndroidDevice extends Device {
         'enable-impeller',
         'false',
       ],
+      if (debuggingOptions.enableFlutterGpu) ...<String>['--ez', 'enable-flutter-gpu', 'true'],
       if (debuggingOptions.enableVulkanValidation) ...<String>[
         '--ez',
         'enable-vulkan-validation',
