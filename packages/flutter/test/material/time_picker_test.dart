@@ -1495,11 +1495,8 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               theme: ThemeData(useMaterial3: false),
-              home: const MediaQuery(
-                data: MediaQueryData(),
-                child: Material(
-                  child: TimePickerDialog(initialTime: TimeOfDay(hour: 12, minute: 0)),
-                ),
+              home: const Material(
+                child: TimePickerDialog(initialTime: TimeOfDay(hour: 12, minute: 0)),
               ),
             ),
           );
@@ -1521,12 +1518,7 @@ void main() {
 
           await tester.pumpWidget(
             const MaterialApp(
-              home: MediaQuery(
-                data: MediaQueryData(),
-                child: Material(
-                  child: TimePickerDialog(initialTime: TimeOfDay(hour: 12, minute: 0)),
-                ),
-              ),
+              home: Material(child: TimePickerDialog(initialTime: TimeOfDay(hour: 12, minute: 0))),
             ),
           );
           await tester.pumpAndSettle();
