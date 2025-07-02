@@ -55,7 +55,11 @@ class CkCanvas {
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, bool doAntiAlias) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.clipPath(((path as LazyPath).builtPath as CkPath).skiaObject, _clipOpIntersect, doAntiAlias);
+    skCanvas.clipPath(
+      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      _clipOpIntersect,
+      doAntiAlias,
+    );
     translate(-offset.dx, -offset.dy);
   }
 
