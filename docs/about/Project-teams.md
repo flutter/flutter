@@ -12,7 +12,7 @@ The Flutter project has many teams, including, but not limited to:
 
 * Ecosystem ([flutter/plugins](https://github.com/flutter/plugins), [flutter/packages](https://github.com/flutter/packages), [the plugin infrastructure in flutter/flutter](https://github.com/flutter/flutter/tree/main/packages/flutter/lib/src/services); labels ["plugins"](https://github.com/flutter/flutter/labels/plugins), and ["packages"](https://github.com/flutter/flutter/labels/packages))
 
-* The Engine ([flutter engine]https://github.com/flutter/flutter/tree/main/engine) and [flutter/buildroot](https://github.com/flutter/buildroot/); label ["engine"](https://github.com/flutter/flutter/labels/engine))
+* The Engine ([flutter engine](https://github.com/flutter/flutter/tree/main/engine) and [flutter/buildroot](https://github.com/flutter/buildroot/); label ["engine"](https://github.com/flutter/flutter/labels/engine))
 
 * Various platform-specific teams including iOS, Android, Windows, Linux, and macOS; labels ["platform-android"](https://github.com/flutter/flutter/labels/platform-android), ["platform-ios"](https://github.com/flutter/flutter/labels/platform-ios), etc).
 

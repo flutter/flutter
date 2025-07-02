@@ -150,7 +150,10 @@ void main() {
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     processManager.addCommand(
-      const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'getprop']),
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [x86_64]',
+      ),
     );
     processManager.addCommand(
       const FakeCommand(
@@ -218,6 +221,7 @@ void main() {
           '--ez', 'endless-trace-buffer', 'true',
           '--ez', 'purge-persistent-cache', 'true',
           '--ez', 'enable-impeller', 'true',
+          '--ez', 'enable-flutter-gpu', 'true',
           '--ez', 'enable-checked-mode', 'true',
           '--ez', 'verify-entry-points', 'true',
           '--ez', 'start-paused', 'true',
@@ -251,6 +255,7 @@ void main() {
         useTestFonts: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

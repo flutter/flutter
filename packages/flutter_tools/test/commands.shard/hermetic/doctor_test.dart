@@ -444,7 +444,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      logger = BufferLogger.test();
+      logger = BufferLogger.test(verbose: true);
     });
 
     testUsingContext(
@@ -795,6 +795,7 @@ void main() {
       },
     );
   });
+
   testUsingContext(
     'If android workflow is disabled, AndroidStudio validator is not included',
     () {
@@ -1482,7 +1483,7 @@ class FakeDevice extends Fake implements Device {
   Category get category => Category.mobile;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;

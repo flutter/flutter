@@ -13,7 +13,7 @@ final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU()
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _computeEffectiveFontFamily(String? fontFamily) {
-  return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
+  return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
       ? _testFonts.first
       : fontFamily;
 }
@@ -349,7 +349,7 @@ class CkTextStyle implements ui.TextStyle {
       effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       originalFontFamilyFallback: fontFamilyFallback,
       effectiveFontFamilyFallback:
-          ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+          ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -708,7 +708,7 @@ class CkStrutStyle implements ui.StrutStyle {
     bool? forceStrutHeight,
   }) : _fontFamily = _computeEffectiveFontFamily(fontFamily),
        _fontFamilyFallback =
-           ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+           ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
        _fontSize = fontSize,
        _height = height == ui.kTextHeightNone ? null : height,
        _leadingDistribution = leadingDistribution,

@@ -1,4 +1,4 @@
-Signature: 835a28766f7c543ea8912f95f06ad181
+Signature: 829baa84d7d186a42dabeeb0a9b77992
 
 ====================================================================================================
 LIBRARY: dart
@@ -4237,6 +4237,7 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc + ../../../flu
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/utils/dart_mcp_server/dart_mcp_server.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c
 FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc
@@ -4265,6 +4266,7 @@ FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.h
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
+FILE: ../../../flutter/third_party/dart/utils/dart_mcp_server/dart_mcp_server.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2025, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4892,7 +4894,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d9edd9e7a634d535d35c5a9596470bd0406cff3b
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/8d69b07b9d9da1dc80cc4f05ec60489c6164cd42
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
