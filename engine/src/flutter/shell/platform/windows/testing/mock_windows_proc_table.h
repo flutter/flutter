@@ -41,19 +41,21 @@ class MockWindowsProcTable : public WindowsProcTable {
 
   MOCK_METHOD(HCURSOR, SetCursor, (HCURSOR cursor), (const, override));
 
-  MOCK_METHOD(int, GetSystemMetrics, (int), (const, override));
-
-  MOCK_METHOD(BOOL,
-              EnumDisplayDevices,
-              (LPCWSTR, DWORD, PDISPLAY_DEVICE, DWORD),
-              (const, override));
-
   MOCK_METHOD(BOOL,
               EnumDisplaySettings,
-              (LPCWSTR, DWORD, DEVMODE*),
+              (LPCWSTR lpszDeviceName, DWORD iModeNum, DEVMODEW* lpDevMode),
               (const, override));
 
-  MOCK_METHOD(HMONITOR, MonitorFromPoint, (POINT, DWORD), (const, override));
+  MOCK_METHOD(BOOL,
+              GetMonitorInfo,
+              (HMONITOR hMonitor, LPMONITORINFO lpmi),
+              (const, override));
+
+  MOCK_METHOD(
+      BOOL,
+      EnumDisplayMonitors,
+      (HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum, LPARAM dwData),
+      (const, override));
 
   MOCK_METHOD(UINT, GetDpiForMonitor, (HMONITOR, UINT), ());
 

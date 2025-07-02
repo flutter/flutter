@@ -144,13 +144,22 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-enumdisplaysettingsw
   virtual BOOL EnumDisplaySettings(LPCWSTR lpszDeviceName,
                                    DWORD iModeNum,
-                                   DEVMODE* lpDevMode) const;
+                                   DEVMODEW* lpDevMode) const;
 
-  // Get the monitor from a point.
+  // Get monitor info.
   //
   // See:
-  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-monitorfrompoint
-  virtual HMONITOR MonitorFromPoint(POINT pt, DWORD dwFlags) const;
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-getmonitorinfow
+  virtual BOOL GetMonitorInfo(HMONITOR hMonitor, LPMONITORINFO lpmi) const;
+
+  // Enumerate display monitors.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-enumdisplaymonitors
+  virtual BOOL EnumDisplayMonitors(HDC hdc,
+                                   LPCRECT lprcClip,
+                                   MONITORENUMPROC lpfnEnum,
+                                   LPARAM dwData) const;
 
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,

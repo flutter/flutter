@@ -133,12 +133,20 @@ BOOL WindowsProcTable::EnumDisplayDevices(LPCWSTR lpDevice,
 
 BOOL WindowsProcTable::EnumDisplaySettings(LPCWSTR lpszDeviceName,
                                            DWORD iModeNum,
-                                           DEVMODE* lpDevMode) const {
-  return ::EnumDisplaySettings(lpszDeviceName, iModeNum, lpDevMode);
+                                           DEVMODEW* lpDevMode) const {
+  return ::EnumDisplaySettingsW(lpszDeviceName, iModeNum, lpDevMode);
 }
 
-HMONITOR WindowsProcTable::MonitorFromPoint(POINT pt, DWORD dwFlags) const {
-  return ::MonitorFromPoint(pt, dwFlags);
+BOOL WindowsProcTable::GetMonitorInfo(HMONITOR hMonitor,
+                                      LPMONITORINFO lpmi) const {
+  return ::GetMonitorInfoW(hMonitor, lpmi);
+}
+
+BOOL WindowsProcTable::EnumDisplayMonitors(HDC hdc,
+                                           LPCRECT lprcClip,
+                                           MONITORENUMPROC lpfnEnum,
+                                           LPARAM dwData) const {
+  return ::EnumDisplayMonitors(hdc, lprcClip, lpfnEnum, dwData);
 }
 
 }  // namespace flutter

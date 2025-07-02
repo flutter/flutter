@@ -44,8 +44,10 @@ namespace flutter {
 namespace testing {
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SetArgPointee;
 
 class FlutterWindowsEngineTest : public WindowsTest {};
 
@@ -69,42 +71,30 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
 
   auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
 
-  EXPECT_CALL(*windows_proc_table, GetSystemMetrics(::testing::_))
-      .WillRepeatedly(Return(1));  // Return 1 monitor
+  HMONITOR mock_monitor = reinterpret_cast<HMONITOR>(1);
 
-  EXPECT_CALL(*windows_proc_table,
-              EnumDisplayDevices(::testing::_, ::testing::_, ::testing::_,
-                                 ::testing::_))
-      .WillRepeatedly([](LPCWSTR device, DWORD device_num,
-                         PDISPLAY_DEVICE display_device, DWORD flags) {
-        // Simulate one display device
-        if (device_num == 0) {
-          display_device->StateFlags = DISPLAY_DEVICE_ATTACHED_TO_DESKTOP;
-          return TRUE;
-        }
-        return FALSE;
+  MONITORINFOEXW monitor_info = {};
+  monitor_info.cbSize = sizeof(MONITORINFOEXW);
+  monitor_info.rcMonitor = {0, 0, 1920, 1080};
+  monitor_info.rcWork = {0, 0, 1920, 1080};
+  monitor_info.dwFlags = MONITORINFOF_PRIMARY;
+  wcscpy_s(monitor_info.szDevice, L"\\\\.\\DISPLAY1");
+
+  EXPECT_CALL(*windows_proc_table, GetMonitorInfoW(mock_monitor, _))
+      .WillRepeatedly(DoAll(SetArgPointee<1>(monitor_info), Return(TRUE)));
+
+  EXPECT_CALL(*windows_proc_table, EnumDisplayMonitors(nullptr, nullptr, _, _))
+      .WillRepeatedly([&](HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum,
+                          LPARAM dwData) {
+        lpfnEnum(mock_monitor, nullptr, &monitor_info.rcMonitor, dwData);
+        return TRUE;
       });
 
-  EXPECT_CALL(*windows_proc_table,
-              EnumDisplaySettings(::testing::_, ::testing::_, ::testing::_))
-      .WillRepeatedly(
-          [](LPCWSTR device_name, DWORD mode_num, DEVMODE* device_mode) {
-            device_mode->dmDisplayFrequency = 60;
-            device_mode->dmPelsWidth = 1920;
-            device_mode->dmPelsHeight = 1080;
-            return TRUE;
-          });
-
-  EXPECT_CALL(*windows_proc_table, MonitorFromPoint(::testing::_, ::testing::_))
-      .WillRepeatedly(Return(reinterpret_cast<HMONITOR>(1)));
-
-  EXPECT_CALL(*windows_proc_table, GetDpiForMonitor(::testing::_, ::testing::_))
+  EXPECT_CALL(*windows_proc_table, GetDpiForMonitor(mock_monitor, _))
       .WillRepeatedly(Return(96));
 
   // Mock locale information
-  EXPECT_CALL(*windows_proc_table,
-              GetThreadPreferredUILanguages(::testing::_, ::testing::_,
-                                            ::testing::_, ::testing::_))
+  EXPECT_CALL(*windows_proc_table, GetThreadPreferredUILanguages(_, _, _, _))
       .WillRepeatedly(
           [](DWORD flags, PULONG count, PZZWSTR languages, PULONG length) {
             // We need to mock the locale information twice because the first
