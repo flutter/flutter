@@ -1074,13 +1074,12 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
          uniformRadii:
-             topLeft.x == topLeft.y &&
              topLeft.x == topRight.x &&
-             topLeft.x == topRight.y &&
+             topLeft.y == topRight.y &&
              topLeft.x == bottomLeft.x &&
-             topLeft.x == bottomLeft.y &&
+             topLeft.y == bottomLeft.y &&
              topLeft.x == bottomRight.x &&
-             topLeft.x == bottomRight.y,
+             topLeft.y == bottomRight.y,
        );
 
   RSuperellipse.fromRectAndCorners(
@@ -1103,13 +1102,12 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
          uniformRadii:
-             topLeft.x == topLeft.y &&
              topLeft.x == topRight.x &&
-             topLeft.x == topRight.y &&
+             topLeft.y == topRight.y &&
              topLeft.x == bottomLeft.x &&
-             topLeft.x == bottomLeft.y &&
+             topLeft.y == bottomLeft.y &&
              topLeft.x == bottomRight.x &&
-             topLeft.x == bottomRight.y,
+             topLeft.y == bottomRight.y,
        );
 
   const RSuperellipse._raw({
@@ -1175,7 +1173,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   // For example, to use this path in `Path.addPath`, then the offset should
   // be used as the 2nd parameter. To use this path in drawing or clipping,
   // this offset should be used to `translate` the canvas first.
-   (Path, Offset) toPathOffset() {
+  (Path, Offset) toPathOffset() {
     if (uniformRadii) {
       return (_RSuperellipseCache.instance.get(width, height, tlRadius), center);
     } else {

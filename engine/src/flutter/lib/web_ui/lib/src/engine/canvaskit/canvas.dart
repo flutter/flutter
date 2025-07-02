@@ -56,7 +56,11 @@ class CkCanvas {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     save();
     translate(offset.dx, offset.dy);
-    clipPath(path as CkPath, doAntiAlias);
+    skCanvas.clipPath(
+      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      _clipOpIntersect,
+      doAntiAlias,
+    );
     restore();
   }
 
@@ -223,6 +227,16 @@ class CkCanvas {
   void drawRRect(ui.RRect rrect, CkPaint paint) {
     final skPaint = paint.toSkPaint();
     skCanvas.drawRRect(toSkRRect(rrect), skPaint);
+    skPaint.delete();
+  }
+
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    save();
+    translate(offset.dx, offset.dy);
+    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    restore();
     skPaint.delete();
   }
 
