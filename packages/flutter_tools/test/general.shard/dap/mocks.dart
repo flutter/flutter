@@ -12,14 +12,14 @@ import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_test_adapter.dart';
 
 /// A [FlutterDebugAdapter] that captures what process/args will be launched.
-class MockFlutterDebugAdapter extends FlutterDebugAdapter {
-  factory MockFlutterDebugAdapter({
+class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
+  factory FakeFlutterDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
     bool simulateAppStarted = true,
     bool simulateAppStopError = false,
     bool supportsRestart = true,
-    FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
+    FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
@@ -34,7 +34,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
       null,
     );
 
-    return MockFlutterDebugAdapter._(
+    return FakeFlutterDebugAdapter._(
       channel,
       clientChannel: clientChannel,
       fileSystem: fileSystem,
@@ -46,7 +46,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     );
   }
 
-  MockFlutterDebugAdapter._(
+  FakeFlutterDebugAdapter._(
     super.channel, {
     required this.clientChannel,
     required super.fileSystem,
@@ -66,7 +66,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   final bool simulateAppStarted;
   final bool simulateAppStopError;
   final bool supportsRestart;
-  final FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart;
+  final FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart;
 
   late String executable;
   late List<String> processArgs;
@@ -224,8 +224,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 }
 
 /// A [FlutterTestDebugAdapter] that captures what process/args will be launched.
-class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
-  factory MockFlutterTestDebugAdapter({
+class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
+  factory FakeFlutterTestDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
   }) {
@@ -237,7 +237,7 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       null,
     );
 
-    return MockFlutterTestDebugAdapter._(
+    return FakeFlutterTestDebugAdapter._(
       stdinController.sink,
       stdoutController.stream,
       channel,
@@ -246,7 +246,7 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     );
   }
 
-  MockFlutterTestDebugAdapter._(
+  FakeFlutterTestDebugAdapter._(
     this.stdin,
     this.stdout,
     ByteStreamServerChannel channel, {
@@ -281,8 +281,8 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   }
 }
 
-class MockRequest extends Request {
-  MockRequest()
+class FakeRequest extends Request {
+  FakeRequest()
     : super.fromMap(<String, Object?>{
         'command': 'mock_command',
         'type': 'mock_type',

@@ -46,7 +46,7 @@ void main() {
       processManager: FakeProcessManager.any(),
     );
 
-    MockCrashReportSender.sendCalls = 0;
+    FakeCrashReportSender.sendCalls = 0;
     stackTrace = StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
@@ -135,7 +135,7 @@ void main() {
       final RequestInfo requestInfo = RequestInfo();
 
       final CrashReportSender crashReportSender = CrashReportSender(
-        client: MockCrashReportSender(requestInfo),
+        client: FakeCrashReportSender(requestInfo),
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -222,7 +222,7 @@ void main() {
       final RequestInfo requestInfo = RequestInfo();
 
       final CrashReportSender crashReportSender = CrashReportSender(
-        client: MockCrashReportSender(requestInfo),
+        client: FakeCrashReportSender(requestInfo),
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -257,7 +257,7 @@ void main() {
         command: 'crash',
       );
 
-      expect(MockCrashReportSender.sendCalls, 1);
+      expect(FakeCrashReportSender.sendCalls, 1);
       await verifyCrashReportSent(requestInfo, crashes: 4);
     });
 
@@ -346,10 +346,10 @@ class RequestInfo {
   Map<String, String>? fields;
 }
 
-class MockCrashReportSender extends MockClient {
-  MockCrashReportSender(RequestInfo crashInfo)
+class FakeCrashReportSender extends MockClient {
+  FakeCrashReportSender(RequestInfo crashInfo)
     : super((Request request) async {
-        MockCrashReportSender.sendCalls++;
+        FakeCrashReportSender.sendCalls++;
         crashInfo.method = request.method;
         crashInfo.uri = request.url;
 
