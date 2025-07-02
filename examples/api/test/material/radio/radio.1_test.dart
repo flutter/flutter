@@ -14,6 +14,7 @@ void main() {
     expect(find.widgetWithText(ListTile, 'Fill color'), findsOne);
     expect(find.widgetWithText(ListTile, 'Background color'), findsOne);
     expect(find.widgetWithText(ListTile, 'Side'), findsOne);
+    expect(find.widgetWithText(ListTile, 'Inner radius'), findsOne);
 
     final Radio<example.RadioType> radioFillColor = tester.widget<Radio<example.RadioType>>(
       find.byType(Radio<example.RadioType>).first,
@@ -37,7 +38,7 @@ void main() {
     );
 
     final Radio<example.RadioType> radioSide = tester.widget<Radio<example.RadioType>>(
-      find.byType(Radio<example.RadioType>).last,
+      find.byType(Radio<example.RadioType>).at(2),
     );
     expect(
       (radioSide.side! as WidgetStateBorderSide).resolve(const <WidgetState>{WidgetState.selected}),
@@ -47,5 +48,10 @@ void main() {
       (radioSide.side! as WidgetStateBorderSide).resolve(const <WidgetState>{}),
       const BorderSide(color: Colors.grey, width: 1.5, strokeAlign: BorderSide.strokeAlignCenter),
     );
+
+    final Radio<example.RadioType> radioInnerRadius = tester.widget<Radio<example.RadioType>>(
+      find.byType(Radio<example.RadioType>).last,
+    );
+    expect(radioInnerRadius.innerRadius!.resolve(const <WidgetState>{WidgetState.selected}), 6);
   });
 }
