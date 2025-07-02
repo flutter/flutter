@@ -21,7 +21,9 @@ import 'platform_view.dart';
 /// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
   /// Creates a platform view backed with an `<img>` element.
-  ImgElementPlatformView(this.src, {super.key}) {
+  ///
+  /// If `fit` is not provided, the `object-fit` CSS property will not be set.
+  ImgElementPlatformView(this.src, {this.fit, super.key}) {
     if (!_registered) {
       _register();
     }
@@ -39,12 +41,32 @@ class ImgElementPlatformView extends StatelessWidget {
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      final String? objectFit = paramsMap['object-fit'] as String?;
+      if (objectFit != null) {
+        img.style.objectFit = objectFit;
+      }
       return img;
     });
   }
 
   /// The `src` URL for the `<img>` tag.
   final String? src;
+
+  /// Will be coverted to the `object-fit` CSS property for the `<img>` tag.
+  final BoxFit? fit;
+
+  String? get _cssObjectFitString =>  switch (fit) {
+      BoxFit.contain => 'contain',
+      BoxFit.cover => 'cover',
+      BoxFit.fitWidth => 'cover',
+      BoxFit.fitHeight => 'cover',
+      BoxFit.scaleDown => 'cover',
+      BoxFit.fill => 'fill',
+      BoxFit.none => 'none',
+      _ => null,
+    };
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +75,7 @@ class ImgElementPlatformView extends StatelessWidget {
     }
     return HtmlElementView(
       viewType: _viewType,
-      creationParams: <String, String?>{'src': src},
+      creationParams: <String, String?>{'src': src, 'object-fit': _cssObjectFitString},
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
@@ -72,7 +94,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.matchTextDirection = false,
-  }) : super(child: ImgElementPlatformView(image.htmlImage.src));
+  }) : super(child: ImgElementPlatformView(image.htmlImage.src, fit: fit));
 
   /// The underlying HTML element to be displayed.
   final WebImageInfo image;

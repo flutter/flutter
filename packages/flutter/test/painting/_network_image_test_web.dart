@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter/src/painting/_web_image_info_web.dart';
+import 'package:flutter/src/services/platform_views.dart';
 import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter/src/widgets/_web_image_web.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +40,12 @@ void runTests() {
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      final String? objectFit = paramsMap['object-fit'] as String?;
+      if (objectFit != null) {
+        img.style.objectFit = objectFit;
+      }
       return img;
     });
     ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
@@ -467,6 +474,99 @@ void runTests() {
     await tester.tap(find.byKey(containerKey), warnIfMissed: false);
     expect(taps, 1);
   });
+
+  group(
+    'ImgElementPlatformView create html element with the right object-fit, height and width',
+    () {
+      testWidgets('If fit is null object-fit is not set', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: null,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, '');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.contain set "contain" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.contain,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'contain');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.cover set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.cover,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.fitWidth set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fitWidth,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.fitHeight set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fitHeight,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.scaleDown set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.scaleDown,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.fill set "fill" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fill,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'fill');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+
+      testWidgets('BoxFit.none set "none" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.none,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'none');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+    },
+  );
 }
 
 // Generates a unique URL based on the provided key, preventing unintended caching.
@@ -634,4 +734,22 @@ class _TestFrameInfo implements ui.FrameInfo {
 
   @override
   final ui.Image image;
+}
+
+Future<web.HTMLElement> _pumpImageAndGetHtmlElement(
+  WidgetTester tester, {
+  required BoxFit? fit,
+  required FakePlatformViewRegistry fakePlatformViewRegistry,
+}) async {
+  final TestImgElement testImg = TestImgElement();
+  final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+  final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+  final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+  await tester.pumpWidget(Image(image: imageProvider, fit: fit));
+  streamCompleter.setData(imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement));
+  await tester.pump();
+
+  return fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
 }
