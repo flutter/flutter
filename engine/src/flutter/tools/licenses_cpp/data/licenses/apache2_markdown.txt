@@ -1,5 +1,5 @@
 apache2 markdown
-SPDX-License-Identifier: Apache-2\.0\n
+(?s)<!--.*SPDX-License-Identifier: Apache-2\.0\n
 (?s)<!--
 Copyright.*
 
