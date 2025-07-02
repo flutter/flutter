@@ -156,8 +156,9 @@ void main() {
   });
 
   group('Linux Destkop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterLinuxDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterLinuxDesktopFeature));
     });
 
     test('can be configured', () {
@@ -174,8 +175,9 @@ void main() {
   });
 
   group('MacOS Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterMacOSDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterMacOSDesktopFeature));
     });
 
     test('can be configured', () {
@@ -192,8 +194,9 @@ void main() {
   });
 
   group('Windows Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWindowsDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWindowsDesktopFeature));
     });
 
     test('can be configured', () {
@@ -210,8 +213,9 @@ void main() {
   });
 
   group('Web', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWebFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWebFeature));
     });
 
     test('can be configured', () {
@@ -228,8 +232,9 @@ void main() {
   });
 
   group('Android', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterAndroidFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterAndroidFeature));
     });
 
     test('can be configured', () {
@@ -246,8 +251,9 @@ void main() {
   });
 
   group('iOS', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterIOSFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterIOSFeature));
     });
 
     test('can be configured', () {
@@ -314,8 +320,9 @@ void main() {
   });
 
   group('CLI Animations', () {
-    test('is always enabled', () {
+    testUsingContext('is always enabled', () {
       expect(cliAnimation, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(cliAnimation));
     });
 
     test('can be disabled by TERM=dumb', () {
@@ -476,4 +483,7 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
 
   @override
   List<Feature> get allConfigurableFeatures => throw UnimplementedError();
+
+  @override
+  Iterable<Feature> get allEnabledFeatures => throw UnimplementedError();
 }
