@@ -1164,23 +1164,6 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
-  - name: Linux linux_feature_flags_test
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    bringup: true
-    presubmit: false
-    properties:
-      xvfb: "1"
-      dependencies: >-
-        [
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "linux"]
-      task_name: linux_feature_flags_test
-
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
     bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
