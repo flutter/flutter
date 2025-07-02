@@ -347,7 +347,7 @@ void main() {
         final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
           logReader,
-          portForwarder: MockPortForwarder(99),
+          portForwarder: FakePortForwarder(99),
           ipv6: false,
           logger: BufferLogger.test(),
         );
@@ -369,7 +369,7 @@ void main() {
         final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
           logReader,
-          portForwarder: MockPortForwarder(99),
+          portForwarder: FakePortForwarder(99),
           hostPort: 1243,
           ipv6: false,
           logger: BufferLogger.test(),
@@ -392,7 +392,7 @@ void main() {
         final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
           logReader,
-          portForwarder: MockPortForwarder(99),
+          portForwarder: FakePortForwarder(99),
           hostPort: 0,
           ipv6: false,
           logger: BufferLogger.test(),
@@ -415,7 +415,7 @@ void main() {
         final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
           logReader,
-          portForwarder: MockPortForwarder(99),
+          portForwarder: FakePortForwarder(99),
           hostPort: 54777,
           ipv6: true,
           logger: BufferLogger.test(),
@@ -438,7 +438,7 @@ void main() {
         final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
           logReader,
-          portForwarder: MockPortForwarder(99),
+          portForwarder: FakePortForwarder(99),
           hostPort: 54777,
           ipv6: true,
           logger: BufferLogger.test(),
@@ -460,8 +460,8 @@ void main() {
   });
 }
 
-class MockPortForwarder extends DevicePortForwarder {
-  MockPortForwarder([this.availablePort]);
+class FakePortForwarder extends DevicePortForwarder {
+  FakePortForwarder([this.availablePort]);
 
   final int? availablePort;
 

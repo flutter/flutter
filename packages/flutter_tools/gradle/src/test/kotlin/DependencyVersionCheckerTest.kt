@@ -228,7 +228,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `min SDK version in warn range results in warning logs`() {
-        val exampleWarnSDKVersion = 19
+        val exampleWarnSDKVersion = 23
         val flavorName1 = "flavor1"
         val flavorName2 = "flavor2"
         val mockProject =
@@ -340,8 +340,8 @@ class DependencyVersionCheckerTest {
 
         assertEquals(
             dependencyValidationException.message,
-            "Error: Your project's minimum Android SDK (flavor='flavor') version (0) is lower than " +
-                "Flutter's minimum supported version of 1. Please upgrade your minimum Android SDK " +
+            "Error: Your project's minimum Android SDK (flavor='flavor') version ($version) is lower than " +
+                "Flutter's minimum supported version of $errorMinSdkVersion. Please upgrade your minimum Android SDK " +
                 "(flavor='flavor') version. \n" +
                 "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
                 "bypass this check.\n" +
@@ -358,7 +358,7 @@ class DependencyVersionCheckerTest {
         val mockExtraPropertiesExtension = mockk<ExtraPropertiesExtension>()
         val projectDir = "projectDir"
         val flavor = "flavor"
-        val version = 20
+        val version = 23
 
         every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
         every { mockLogger.error(any()) } returns Unit
@@ -377,8 +377,8 @@ class DependencyVersionCheckerTest {
         assertEquals(
             warningMessageSlot.captured,
             "Warning: Flutter support for your project's minimum Android SDK (flavor='flavor') " +
-                "version (20) will soon be dropped. Please upgrade your minimum Android SDK " +
-                "(flavor='flavor') version to a version of at least 21 soon.\n" +
+                "version ($version) will soon be dropped. Please upgrade your minimum Android SDK " +
+                "(flavor='flavor') version to a version of at least $warnMinSdkVersion soon.\n" +
                 "Alternatively, use the flag \"--android-skip-build-dependency-validation\" to " +
                 "bypass this check.\n" +
                 "\n" +
@@ -475,6 +475,9 @@ private object MockProjectFactory {
                 val variant = mockk<Variant>()
                 every { variant.name } returns it.flavor
                 every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
+                // Gradle prints a warning about this api being removed in gradle 9 but there is
+                // no way to suppress individual warnings. We can remove this line when our tests
+                // use gradle 9 or higher.
                 every { variant.minSdkVersion } returns mockk { every { apiLevel } returns it.version }
                 onVariantsFnSlot.captured.invoke(variant)
             }
