@@ -153,7 +153,7 @@ object DependencyVersionChecker {
             val minSdkCheckTask =
                 project.tasks.register(taskName) {
                     doLast {
-                        val minSdkVersion = getMinSdkVersion(it)
+                        val minSdkVersion = getMinSdkVersion(project, it)
                         try {
                             checkMinSdkVersion(minSdkVersion, project.rootDir.path, project.logger)
                         } catch (e: DependencyValidationException) {
@@ -178,7 +178,20 @@ object DependencyVersionChecker {
 
     private fun generateMinSdkCheckTaskName(it: Variant) = "${FlutterPluginUtils.capitalize(it.name)}$MIN_SDK_CHECK_TASK_POSTFIX"
 
-    private fun getMinSdkVersion(it: Variant): MinSdkVersion = MinSdkVersion(it.name, it.minSdk.apiLevel)
+    private fun getMinSdkVersion(
+        project: Project,
+        it: Variant
+    ): MinSdkVersion {
+        val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
+        // TODO(reidbaker): Remove version check as 8.3 is the minimum supported version.
+        // Keeping the check around so that users that bypass will get the error message and not
+        // a compile time error.
+        return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
+            MinSdkVersion(it.name, it.minSdk.apiLevel)
+        } else {
+            MinSdkVersion(it.name, it.minSdkVersion.apiLevel)
+        }
+    }
 
     @VisibleForTesting internal fun getErrorMessage(
         dependencyName: String,
