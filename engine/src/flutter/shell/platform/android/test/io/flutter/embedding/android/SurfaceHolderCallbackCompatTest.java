@@ -8,18 +8,18 @@ import static org.mockito.Mockito.verify;
 import android.annotation.TargetApi;
 import android.view.SurfaceHolder;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.Build;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(RobolectricTestRunner.class)
 public class SurfaceHolderCallbackCompatTest {
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_25)
-  @Config(sdk = Build.API_LEVELS.API_25)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_25)
   public void onAttachToRendererShouldRemoveListenerBelowApi26() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -30,7 +30,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_26)
+  @Config(minSdk = API_LEVELS.API_26)
   public void onAttachToRendererShouldNotRemoveListenerApi26OrAbove() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -41,8 +41,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_25)
-  @Config(sdk = Build.API_LEVELS.API_25)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_25)
   public void onResumeShouldAddListenerBelowApi26() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -53,7 +52,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_26)
+  @Config(minSdk = API_LEVELS.API_26)
   public void onResumeShouldAddListenerOnApi26OrAbove() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -64,8 +63,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_25)
-  @Config(sdk = Build.API_LEVELS.API_25)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_25)
   public void onDetachFromRendererShouldRemoveListenerAndSetAlphaBelowApi26() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -77,7 +75,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_26)
+  @Config(minSdk = API_LEVELS.API_26)
   public void onDetachFromRendererShouldNotRemoveListenerOnApi26OrAbove() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -88,8 +86,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
-  @TargetApi(Build.API_LEVELS.API_25)
-  @Config(sdk = Build.API_LEVELS.API_25)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_25)
   public void alphaCallbackShouldSetAlphaOnSurfaceViewBelowApi26() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
@@ -102,6 +99,7 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void testSurfaceHolderCallbackPassesThroughToInnerCallback() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
     FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
