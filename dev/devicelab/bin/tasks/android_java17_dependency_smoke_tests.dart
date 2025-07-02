@@ -17,7 +17,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 // (*) - support range defined in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts.
 List<VersionTuple> versionTuples = <VersionTuple>[
   // Minimum supported
-  VersionTuple(agpVersion: '8.1.1', gradleVersion: '8.3.0', kotlinVersion: '1.8.10'),
+  VersionTuple(agpVersion: '8.1.1', gradleVersion: '8.3', kotlinVersion: '1.8.10'),
   // Template
   VersionTuple(agpVersion: '8.9.1', gradleVersion: '8.12', kotlinVersion: '2.1.0'),
   // Max known
