@@ -62,7 +62,7 @@ private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 class DependencyVersionCheckerTest {
     @Test
     fun `AGP version in error range results in DependencyValidationException`() {
-        val exampleErrorAgpVersion = AndroidPluginVersion(4, 2, 0)
+        val exampleErrorAgpVersion = AndroidPluginVersion(8, 1, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
