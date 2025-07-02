@@ -433,6 +433,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -504,7 +506,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// The behavior of reporting the selected date.
   ///
-  /// This determines when the `onDateTimeChanged` callback is called.
+  /// This determines when the [onDateTimeChanged] callback is called.
   ///
   /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
   /// calls the callback only when the scrolling stops.
@@ -2189,6 +2191,8 @@ class CupertinoTimerPicker extends StatefulWidget {
   final int secondInterval;
 
   /// Callback called when the timer duration changes.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<Duration> onTimerDurationChanged;
 
   /// Defines how the timer picker should be positioned within its parent.
@@ -2248,7 +2252,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// The behavior of reporting the selected duration.
   ///
-  /// This determines when the `onTimerDurationChanged` callback is called.
+  /// This determines when the [onTimerDurationChanged] callback is called.
   ///
   /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
   /// calls the callback only when the scrolling stops.
