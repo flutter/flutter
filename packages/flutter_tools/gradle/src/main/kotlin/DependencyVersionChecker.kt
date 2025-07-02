@@ -185,7 +185,7 @@ object DependencyVersionChecker {
         val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
         // TODO(reidbaker): Remove version check as 8.3 is the minimum supported version.
         // Keeping the check around so that users that bypass will get the error message and not
-        // a compile time error.
+        // a compile time error. See https://github.com/flutter/flutter/pull/171399
         return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
             MinSdkVersion(it.name, it.minSdk.apiLevel)
         } else {
