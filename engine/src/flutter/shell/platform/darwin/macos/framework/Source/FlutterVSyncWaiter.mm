@@ -154,7 +154,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   }
 }
 
-- (void)dealloc {
+- (void)invalidate {
   // It is possible that there is pending vsync request while the view for which
   // this waiter belongs is being destroyed. In that case trigger the vsync
   // immediately to avoid deadlock.
@@ -163,12 +163,13 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     _block(now, now, _pendingBaton.value());
     _pendingBaton = std::nullopt;
   }
-  // It is possible that block running on UI thread held the last reference to
-  // the waiter, in which case reschedule to main thread.
-  FlutterDisplayLink* link = _displayLink;
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [link invalidate];
-  });
+
+  [_displayLink invalidate];
+  _displayLink = nil;
+}
+
+- (void)dealloc {
+  FML_DCHECK(_displayLink == nil);
 }
 
 @end

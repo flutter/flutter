@@ -493,6 +493,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   BOOL _multiViewEnabled;
 
   // View identifier for the next view to be created.
+  // Only used when multiview is enabled.
   FlutterViewIdentifier _nextViewIdentifier;
 }
 
@@ -911,6 +912,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     info.struct_size = sizeof(FlutterRemoveViewInfo);
     info.view_id = viewIdentifier;
     info.user_data = &removed;
+    // RemoveViewCallback is not finished synchronously, the remove_view_callback
+    // is called from raster thread when the engine knows for sure that the resources
+    // associated with the view are no longer needed.
     info.remove_view_callback = [](const FlutterRemoveViewResult* r) {
       auto removed = reinterpret_cast<bool*>(r->user_data);
       [FlutterRunLoop.mainRunLoop performBlock:^{
@@ -936,9 +940,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
              @"the FlutterEngine is mocked. Please subclass these classes instead.");
   }
   [_viewControllers removeObjectForKey:@(viewIdentifier)];
+
+  FlutterVSyncWaiter* waiter = nil;
   @synchronized(_vsyncWaiters) {
+    waiter = [_vsyncWaiters objectForKey:@(viewIdentifier)];
     [_vsyncWaiters removeObjectForKey:@(viewIdentifier)];
   }
+  [waiter invalidate];
 }
 
 - (void)shutDownIfNeeded {
@@ -1026,12 +1034,14 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 - (void)addViewController:(FlutterViewController*)controller {
   if (!_multiViewEnabled) {
-    // FlutterEngine can only handle the implicit view for now. Adding more views
-    // throws an assertion.
+    // When multiview is disabled, the engine will only assign views to the implicit view ID.
+    // The implicit view ID can be reused if and only if the implicit view is unassigned.
     NSAssert(self.viewController == nil,
              @"The engine already has a view controller for the implicit view.");
     self.viewController = controller;
   } else {
+    // When multiview is enabled, the engine will assign views to a self-incrementing ID.
+    // The implicit view ID can not be reused.
     FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
     [self registerViewController:controller forIdentifier:viewIdentifier];
   }
@@ -1291,6 +1301,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     if (waiter != nil) {
       [waiter waitForVSync:baton];
     } else {
+      // Sometimes there is a vsync request right after the last view is removed.
+      // It still need to be handled, otherwise the engine will stop producing frames
+      // even if a new view is added later.
       self.embedderAPI.OnVsync(_engine, baton, 0, 0);
     }
   };

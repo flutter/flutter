@@ -227,9 +227,18 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 @property(nonatomic, readonly) FlutterWindowController* windowController;
 
 /**
- * Toggles multi-view support. Called by [FlutterWindowController] before
- * creating a new window. This allows registering multiple view controllers
- * with the engine.
+ * Enables multi-view support.
+ *
+ * Called by [FlutterWindowController] before the first view is added. This
+ * affects the behavior when adding view controllers:
+ *
+ *  - When multiview is disabled, the engine will only assign views to the
+ *    implicit view ID. The implicit view ID can be reused if and only if the
+ *    implicit view ID is unassigned.
+ *  - When multiview is enabled, the engine will assign views to a
+ *    self-incrementing ID.
+ *
+ * Calling enableMultiView when multiview is already enabled is a noop.
  */
 - (void)enableMultiView;
 

@@ -12,10 +12,10 @@
 
 #include "flutter/shell/platform/common/isolate_scope.h"
 
-/// A delegate for a Flutter managed window.
+// A delegate for a Flutter managed window.
 @interface FlutterWindowOwner : NSObject <NSWindowDelegate> {
-  /// Strong reference to the window. This is the only strong reference to the
-  /// window.
+  // Strong reference to the window. This is the only strong reference to the
+  // window.
   NSWindow* _window;
   FlutterViewController* _flutterViewController;
   std::optional<flutter::Isolate> _isolate;
