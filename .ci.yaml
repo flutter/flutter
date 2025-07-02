@@ -1049,6 +1049,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4292,6 +4293,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6120,6 +6122,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
