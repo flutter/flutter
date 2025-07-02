@@ -670,4 +670,56 @@ void main() {
     },
     variant: KeySimulatorTransitModeVariant.all(),
   );
+
+  testWidgets('EdgeDraggingAutoScroller handles drag target size correctly with Transform.scale', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Transform.scale(
+              scale: 0.5,
+              child: SizedBox(
+                width: 400,
+                height: 400,
+                child: ListView.builder(
+                  controller: controller,
+                  itemCount: 20,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 100, child: Center(child: Text('Item $index')));
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
+    final EdgeDraggingAutoScroller scroller = EdgeDraggingAutoScroller(
+      scrollableState,
+      velocityScalar: 1.0,
+    );
+    final RenderBox scrollRenderBox = scrollableState.context.findRenderObject()! as RenderBox;
+    final Rect dragTarget = Rect.fromLTWH(
+      0,
+      0,
+      scrollRenderBox.size.width,
+      scrollRenderBox.size.height,
+    );
+
+    scroller.startAutoScrollIfNecessary(dragTarget);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+
+    scroller.stopAutoScroll();
+    await tester.pumpAndSettle();
+  });
 }
