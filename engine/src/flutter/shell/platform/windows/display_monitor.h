@@ -29,6 +29,12 @@ class DisplayMonitor {
                            LRESULT* result);
 
  private:
+  // Called by EnumDisplayMonitors once for each display.
+  static BOOL CALLBACK EnumMonitorCallback(HMONITOR monitor,
+                                           HDC hdc,
+                                           LPRECT rect,
+                                           LPARAM data);
+
   FlutterWindowsEngine* engine_;
 
   std::shared_ptr<WindowsProcTable> win32_;

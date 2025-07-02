@@ -38,86 +38,45 @@ TEST_F(DisplayMonitorTest, MultipleMonitors) {
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
 
-  // Set up expectations of the mock to return 2 monitors
-  EXPECT_CALL(*mock_windows_proc_table, GetSystemMetrics(SM_CMONITORS))
-      .WillRepeatedly(Return(2));
-
-  // Set up EnumDisplayDevices to return two valid display devices
-  DISPLAY_DEVICE display_device1 = {0};
-  display_device1.cb = sizeof(DISPLAY_DEVICE);
-  display_device1.StateFlags = DISPLAY_DEVICE_ATTACHED_TO_DESKTOP;
-  wcscpy_s(display_device1.DeviceName, L"TestDevice1");
-
-  DISPLAY_DEVICE display_device2 = {0};
-  display_device2.cb = sizeof(DISPLAY_DEVICE);
-  display_device2.StateFlags = DISPLAY_DEVICE_ATTACHED_TO_DESKTOP;
-  wcscpy_s(display_device2.DeviceName, L"TestDevice2");
-
-  // First call to EnumDisplayDevices with index 0
-  EXPECT_CALL(*mock_windows_proc_table, EnumDisplayDevices(nullptr, 0, _, 0))
-      .WillOnce(
-          DoAll(::testing::SetArgPointee<2>(display_device1), Return(TRUE)));
-
-  // Call EnumDisplayDevices with index 1
-  EXPECT_CALL(*mock_windows_proc_table, EnumDisplayDevices(nullptr, 1, _, 0))
-      .WillOnce(
-          DoAll(::testing::SetArgPointee<2>(display_device2), Return(TRUE)));
-
-  // Call EnumDisplayDevices with index 2 (returns FALSE to end enumeration)
-  EXPECT_CALL(*mock_windows_proc_table, EnumDisplayDevices(nullptr, 2, _, 0))
-      .WillOnce(Return(FALSE));
-
-  DEVMODE device_mode1 = {0};
-  device_mode1.dmSize = sizeof(DEVMODE);
-  device_mode1.dmPelsWidth = 1920;
-  device_mode1.dmPelsHeight = 1080;
-  device_mode1.dmDisplayFrequency = 60;
-  device_mode1.dmPosition.x = 0;
-  device_mode1.dmPosition.y = 0;
-
-  DEVMODE device_mode2 = {0};
-  device_mode2.dmSize = sizeof(DEVMODE);
-  device_mode2.dmPelsWidth = 2560;
-  device_mode2.dmPelsHeight = 1440;
-  device_mode2.dmDisplayFrequency = 144;
-  device_mode2.dmPosition.x = 1920;
-  device_mode2.dmPosition.y = 0;
-
-  EXPECT_CALL(*mock_windows_proc_table,
-              EnumDisplaySettings(::testing::StrEq(L"TestDevice1"),
-                                  ENUM_CURRENT_SETTINGS, _))
-      .WillOnce(DoAll(::testing::SetArgPointee<2>(device_mode1), Return(TRUE)));
-  EXPECT_CALL(*mock_windows_proc_table,
-              EnumDisplaySettings(::testing::StrEq(L"TestDevice2"),
-                                  ENUM_CURRENT_SETTINGS, _))
-      .WillOnce(DoAll(::testing::SetArgPointee<2>(device_mode2), Return(TRUE)));
-
-  // Set up MonitorFromPoint to return valid monitor handles
   HMONITOR mock_monitor1 = reinterpret_cast<HMONITOR>(123);
   HMONITOR mock_monitor2 = reinterpret_cast<HMONITOR>(456);
 
-  // Calculate center points for the monitors
-  LONG center_x1 = device_mode1.dmPosition.x + (device_mode1.dmPelsWidth / 2);
-  LONG center_y1 = device_mode1.dmPosition.y + (device_mode1.dmPelsHeight / 2);
-  LONG center_x2 = device_mode2.dmPosition.x + (device_mode2.dmPelsWidth / 2);
-  LONG center_y2 = device_mode2.dmPosition.y + (device_mode2.dmPelsHeight / 2);
+  MONITORINFOEXW monitor_info1 = {};
+  monitor_info1.cbSize = sizeof(MONITORINFOEXW);
+  monitor_info1.rcMonitor = {0, 0, 1920, 1080};
+  monitor_info1.rcWork = {0, 0, 1920, 1080};
+  monitor_info1.dwFlags = MONITORINFOF_PRIMARY;
+  wcscpy_s(monitor_info1.szDevice, L"\\\\.\\DISPLAY1");
+
+  MONITORINFOEXW monitor_info2 = {};
+  monitor_info2.cbSize = sizeof(MONITORINFOEXW);
+  monitor_info2.rcMonitor = {1920, 0, 1920 + 2560, 1440};
+  monitor_info2.rcWork = {1920, 0, 1920 + 2560, 1440};
+  monitor_info2.dwFlags = 0;
+  wcscpy_s(monitor_info2.szDevice, L"\\\\.\\DISPLAY2");
+
+  EXPECT_CALL(*mock_windows_proc_table, GetMonitorInfoW(mock_monitor1, _))
+      .WillOnce(DoAll(SetArgPointee<1>(monitor_info1), Return(TRUE)));
+  EXPECT_CALL(*mock_windows_proc_table, GetMonitorInfoW(mock_monitor2, _))
+      .WillOnce(DoAll(SetArgPointee<1>(monitor_info2), Return(TRUE)));
 
   EXPECT_CALL(*mock_windows_proc_table,
-              MonitorFromPoint(AllOf(Field(&POINT::x, center_x1),
-                                     Field(&POINT::y, center_y1)),
-                               MONITOR_DEFAULTTONULL))
-      .WillOnce(Return(mock_monitor1));
-  EXPECT_CALL(*mock_windows_proc_table,
-              MonitorFromPoint(AllOf(Field(&POINT::x, center_x2),
-                                     Field(&POINT::y, center_y2)),
-                               MONITOR_DEFAULTTONULL))
-      .WillOnce(Return(mock_monitor2));
+              EnumDisplayMonitors(nullptr, nullptr, _, _))
+      .WillOnce([&](HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum,
+                    LPARAM dwData) {
+        lpfnEnum(mock_monitor1, nullptr, &monitor_info1.rcMonitor, dwData);
+        lpfnEnum(mock_monitor2, nullptr, &monitor_info2.rcMonitor, dwData);
+        return TRUE;
+      });
 
   // Set up GetDpiForMonitor to return different DPI values
   EXPECT_CALL(*mock_windows_proc_table, GetDpiForMonitor(mock_monitor1, _))
       .WillRepeatedly(Return(96));  // Default/Standard DPI
   EXPECT_CALL(*mock_windows_proc_table, GetDpiForMonitor(mock_monitor2, _))
       .WillRepeatedly(Return(144));  // High DPI
+
+  EXPECT_CALL(*mock_windows_proc_table, EnumDisplaySettings(_, _, _))
+      .WillRepeatedly(Return(TRUE));
 
   // Create the display monitor with the mock engine and proc table
   auto display_monitor =
@@ -136,9 +95,8 @@ TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
 
-  // Set up expectations for the mock
-  EXPECT_CALL(*mock_windows_proc_table, GetSystemMetrics(_))
-      .WillRepeatedly(Return(1));  // Return 1 monitor
+  EXPECT_CALL(*mock_windows_proc_table, EnumDisplayMonitors(_, _, _, _))
+      .WillRepeatedly(Return(TRUE));
 
   // Create the display monitor with the mock engine and proc table
   auto display_monitor =
@@ -149,12 +107,12 @@ TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
   LRESULT result = 0;
 
   // Verify that WM_DISPLAYCHANGE is handled
-  EXPECT_TRUE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_DISPLAYCHANGE,
-                                                   0, 0, &result));
+  EXPECT_FALSE(display_monitor->HandleWindowMessage(
+      dummy_hwnd, WM_DISPLAYCHANGE, 0, 0, &result));
 
   // Verify that WM_DPICHANGED is handled
-  EXPECT_TRUE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_DPICHANGED, 0,
-                                                   0, &result));
+  EXPECT_FALSE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_DPICHANGED,
+                                                    0, 0, &result));
 
   // Verify that other messages are not handled
   EXPECT_FALSE(display_monitor->HandleWindowMessage(dummy_hwnd, WM_PAINT, 0, 0,
