@@ -57,12 +57,13 @@ class Badge extends StatelessWidget {
     this.child,
   });
 
-  /// Convenience constructor for creating a badge with a numeric
-  /// label with 1-[maxCount] digits based on [count].
+  /// Convenience constructor for creating a badge with a numeric label based on [count].
   ///
-  /// Initializes [label] with a [Text] widget that contains [count].
-  /// If [count] is greater than [maxCount], then the label is '[maxCount]+'.
-  /// Otherwise the label is '[count]'.
+  /// Initializes [label] with a [Text] widget that shows:
+  /// - the [count] value if it is less than or equal to [maxCount],
+  /// - otherwise, shows '[maxCount]+'.
+  ///
+  /// For example, if [count] is 1000 and [maxCount] is 99, the label will display '99+'.
   Badge.count({
     super.key,
     this.backgroundColor,
@@ -186,8 +187,8 @@ class Badge extends StatelessWidget {
     final Widget badge;
     final bool hasLabel = label != null;
     if (hasLabel) {
-      final double minSize = effectiveWidthOffset =
-          largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
+      final double minSize =
+          effectiveWidthOffset = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
       badge = DefaultTextStyle(
         style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
           color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
@@ -204,8 +205,8 @@ class Badge extends StatelessWidget {
         ),
       );
     } else {
-      final double effectiveSmallSize = effectiveWidthOffset =
-          smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
+      final double effectiveSmallSize =
+          effectiveWidthOffset = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
       badge = Container(
         width: effectiveSmallSize,
         height: effectiveSmallSize,
@@ -221,9 +222,8 @@ class Badge extends StatelessWidget {
     final AlignmentGeometry effectiveAlignment =
         alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr
-        ? const Offset(4, -4)
-        : const Offset(-4, -4);
+    final Offset defaultOffset =
+        textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
     // Adds a offset const Offset(0, 8) to avoiding breaking customers after
     // the offset calculation changes.
     // See https://github.com/flutter/flutter/pull/146853.
