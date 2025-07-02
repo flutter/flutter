@@ -4607,6 +4607,7 @@ final class _SemanticsParentData {
     required this.blocksUserActions,
     required this.explicitChildNodes,
     required this.tagsForChildren,
+    required this.localeForChildren,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -4633,12 +4634,15 @@ final class _SemanticsParentData {
   /// [_RenderObjectSemantics.shouldFormSemanticsNode] is true.
   final Set<SemanticsTag>? tagsForChildren;
 
+  final Locale? localeForChildren;
+
   @override
   bool operator ==(Object other) {
     return other is _SemanticsParentData &&
         other.mergeIntoParent == mergeIntoParent &&
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
+        other.localeForChildren == localeForChildren &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -4648,6 +4652,7 @@ final class _SemanticsParentData {
       mergeIntoParent,
       blocksUserActions,
       explicitChildNodes,
+      localeForChildren,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -5037,6 +5042,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
+    // localeForSubtree from the config overrides parentData's inherited locale.
+    final Locale? localeForChildren =
+        configProvider.effective.localeForSubtree ?? parentData?.localeForChildren;
+
     siblingMergeGroups.clear();
     mergeUp.clear();
     final _SemanticsParentData childParentData = _SemanticsParentData(
@@ -5044,6 +5053,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
+      localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
     );
@@ -5093,6 +5103,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
         configProvider.updateConfig((SemanticsConfiguration config) {
           config.isBlockingUserActions = blocksUserAction;
+        });
+      }
+      if (localeForChildren != configProvider.effective.locale) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.locale = localeForChildren;
         });
       }
     }
@@ -5163,6 +5178,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         blocksUserActions: childParentData.blocksUserActions,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
+        localeForChildren: childParentData.localeForChildren,
       );
     } else {
       effectiveChildParentData = childParentData;
