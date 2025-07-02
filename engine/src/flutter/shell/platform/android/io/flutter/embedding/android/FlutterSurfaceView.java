@@ -44,7 +44,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     return flutterRenderer != null && !isPaused;
   }
 
-  private final SurfaceHolderCallbackCompat surfaceCallbackCompat;
+  private final SurfaceHolderCallbackCompat surfaceHolderCallbackCompat;
 
   // Connects the {@code Surface} beneath this {@code SurfaceView} with Flutter's native code.
   // Callbacks are received by this Object and then those messages are forwarded to our
@@ -103,7 +103,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
       @NonNull Context context, @Nullable AttributeSet attrs, boolean renderTransparently) {
     super(context, attrs);
     this.renderTransparently = renderTransparently;
-    this.surfaceCallbackCompat =
+    this.surfaceHolderCallbackCompat =
         new SurfaceHolderCallbackCompat(surfaceCallback, this, flutterRenderer);
     init();
   }
@@ -118,7 +118,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
 
     // Grab a reference to our underlying Surface and register callbacks with that Surface so we
     // can monitor changes and forward those changes on to native Flutter code.
-    getHolder().addCallback(surfaceCallbackCompat.callback);
+    getHolder().addCallback(surfaceHolderCallbackCompat.callback);
   }
 
   // This is a work around for TalkBack.
@@ -177,7 +177,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     }
 
     this.flutterRenderer = flutterRenderer;
-    this.surfaceCallbackCompat.onAttachToRenderer(flutterRenderer);
+    this.surfaceHolderCallbackCompat.onAttachToRenderer(flutterRenderer);
 
     resume();
   }
@@ -201,7 +201,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
         disconnectSurfaceFromRenderer();
       }
 
-      surfaceCallbackCompat.onDetachFromRenderer();
+      surfaceHolderCallbackCompat.onDetachFromRenderer();
       flutterRenderer = null;
 
     } else {
@@ -226,7 +226,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
       Log.w(TAG, "resume() invoked when no FlutterRenderer was attached.");
       return;
     }
-    surfaceCallbackCompat.onResume();
+    surfaceHolderCallbackCompat.onResume();
 
     // If we're already attached to an Android window then we're now attached to both a renderer
     // and the Android window. We can begin rendering now.

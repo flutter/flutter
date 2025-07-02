@@ -15,42 +15,69 @@ public class SurfaceHolderCallbackCompat {
   private static final String TAG = "SurfaceHolderCallbackCompat";
   private final FlutterSurfaceView flutterSurfaceView;
   @Nullable private FlutterRenderer flutterRenderer;
-
   private final SurfaceHolder.Callback innerCallback;
 
-  /**
-   * Flag to determine if the alpha compositing workaround is needed for this Android version. On
-   * Android versions prior to API 26 (Oreo), a {@link android.view.SurfaceView} used for Flutter
-   * might initially render as a black rectangle before Flutter draws its first frame. To prevent
-   * this visual glitch, if {@code shouldSetAlpha} is true, the associated {@link
-   * FlutterSurfaceView} is initially made transparent (alpha 0.0f). It is then set to opaque (alpha
-   * 1.0f) only when the Flutter engine signals that the first frame is ready via the {@link
-   * FlutterUiDisplayListener#onFlutterUiDisplayed()} callback. This behavior is not needed on API
-   * 26+ where SurfaceView handles this more gracefully.
-   */
-  private final boolean shouldSetAlpha = android.os.Build.VERSION.SDK_INT < Build.API_LEVELS.API_26;
+  interface FlutterRendererLifecycleCallback {
+    void onAttachToRenderer(FlutterRenderer flutterRenderer);
+
+    void onDetachFromRenderer();
+
+    void onResume();
+  }
 
   public void onAttachToRenderer(FlutterRenderer flutterRenderer) {
-    if (shouldSetAlpha && this.flutterRenderer != null) {
-      this.flutterRenderer.removeIsDisplayingFlutterUiListener(alphaCallback);
-    }
-    this.flutterRenderer = flutterRenderer;
+    lifecycleCallback.onAttachToRenderer(flutterRenderer);
   }
 
   public void onDetachFromRenderer() {
-    if (shouldSetAlpha) {
-      // Make the SurfaceView invisible to avoid showing a black rectangle.
-      this.flutterSurfaceView.setAlpha(0.0f);
-      if (this.flutterRenderer != null) {
-        this.flutterRenderer.removeIsDisplayingFlutterUiListener(alphaCallback);
-      }
-    }
-    this.flutterRenderer = null;
+    lifecycleCallback.onDetachFromRenderer();
   }
 
   public void onResume() {
-    if (shouldSetAlpha && this.flutterRenderer != null) {
-      this.flutterRenderer.addIsDisplayingFlutterUiListener(alphaCallback);
+    lifecycleCallback.onResume();
+  }
+
+  class FlutterRendererLifecycleCallbackPreApi26 implements FlutterRendererLifecycleCallback {
+    @Override
+    public void onAttachToRenderer(FlutterRenderer attachFlutterRenderer) {
+      if (flutterRenderer != null) {
+        flutterRenderer.removeIsDisplayingFlutterUiListener(alphaCallback);
+      }
+      flutterRenderer = attachFlutterRenderer;
+    }
+
+    @Override
+    public void onDetachFromRenderer() {
+      // Make the SurfaceView invisible to avoid showing a black rectangle.
+      flutterSurfaceView.setAlpha(0.0f);
+      if (flutterRenderer != null) {
+        flutterRenderer.removeIsDisplayingFlutterUiListener(alphaCallback);
+      }
+      flutterRenderer = null;
+    }
+
+    @Override
+    public void onResume() {
+      if (flutterRenderer != null) {
+        flutterRenderer.addIsDisplayingFlutterUiListener(alphaCallback);
+      }
+    }
+  }
+
+  class FlutterRendererLifecycleCallbackApi26AndUp implements FlutterRendererLifecycleCallback {
+    @Override
+    public void onAttachToRenderer(FlutterRenderer attachFlutterRenderer) {
+      flutterRenderer = attachFlutterRenderer;
+    }
+
+    @Override
+    public void onDetachFromRenderer() {
+      flutterRenderer = null;
+    }
+
+    @Override
+    public void onResume() {
+      // no-op
     }
   }
 
@@ -98,7 +125,7 @@ public class SurfaceHolderCallbackCompat {
     }
   }
 
-  private class SurfaceHolderCallback2Compat extends SufaceHolderCallback
+  private class SurfaceHolderCallbackPre26 extends SufaceHolderCallback
       implements SurfaceHolder.Callback2 {
     @Override
     public void surfaceRedrawNeeded(@NonNull SurfaceHolder holder) {
@@ -112,7 +139,7 @@ public class SurfaceHolderCallbackCompat {
     }
   }
 
-  private class SurfaceHolderCallback2AsyncCompat extends SurfaceHolderCallback2Compat
+  private class SurfaceHolderCallback2Api26AndUp extends SurfaceHolderCallbackPre26
       implements SurfaceHolder.Callback2 {
     @Override
     @RequiresApi(api = Build.API_LEVELS.API_26)
@@ -141,8 +168,25 @@ public class SurfaceHolderCallbackCompat {
     }
   }
 
+  /**
+   * Flag to determine if the alpha compositing workaround is needed for this Android version. On
+   * Android versions prior to API 26 (Oreo), a {@link android.view.SurfaceView} used for Flutter
+   * might initially render as a black rectangle before Flutter draws its first frame. To prevent
+   * this visual glitch, if {@code shouldSetAlpha} is true, the associated {@link
+   * FlutterSurfaceView} is initially made transparent (alpha 0.0f). It is then set to opaque (alpha
+   * 1.0f) only when the Flutter engine signals that the first frame is ready via the {@link
+   * FlutterUiDisplayListener#onFlutterUiDisplayed()} callback. This behavior is not needed on API
+   * 26+ where SurfaceView handles this more gracefully.
+   */
+  private final boolean shouldSetAlpha = android.os.Build.VERSION.SDK_INT < Build.API_LEVELS.API_26;
+
+  final FlutterRendererLifecycleCallback lifecycleCallback =
+      shouldSetAlpha
+          ? new FlutterRendererLifecycleCallbackPreApi26()
+          : new FlutterRendererLifecycleCallbackApi26AndUp();
+
   final SurfaceHolder.Callback callback =
-      shouldSetAlpha ? new SurfaceHolderCallback2Compat() : new SurfaceHolderCallback2AsyncCompat();
+      shouldSetAlpha ? new SurfaceHolderCallbackPre26() : new SurfaceHolderCallback2Api26AndUp();
 
   public SurfaceHolderCallbackCompat(
       SurfaceHolder.Callback innerCallback,
