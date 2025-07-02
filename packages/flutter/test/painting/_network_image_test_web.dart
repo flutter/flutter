@@ -28,19 +28,6 @@ void runTests() {
   setUpAll(() async {
     testImage = await createTestImage();
     fakePlatformViewRegistry = FakePlatformViewRegistry();
-
-    // Simulate the engine registering the factory function for <img> elements.
-    fakePlatformViewRegistry.registerViewFactory('Flutter__ImgElementImage__', (
-      int viewId, {
-      Object? params,
-    }) {
-      final Map<Object?, Object?> paramsMap = params! as Map<Object?, Object?>;
-      // Create a new <img> element. The browser is able to display the image
-      // without fetching it over the network again.
-      final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
-      img.src = paramsMap['src']! as String;
-      return img;
-    });
     ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
   });
 
@@ -48,6 +35,9 @@ void runTests() {
     debugRestoreHttpRequestFactory();
     debugRestoreImgElementFactory();
     _TestBinding.instance.overrideCodec = null;
+  });
+
+  tearDownAll(() {
     ui_web.debugOverridePlatformViewRegistry(null);
   });
 
@@ -466,6 +456,27 @@ void runTests() {
     expect(taps, isZero);
     await tester.tap(find.byKey(containerKey), warnIfMissed: false);
     expect(taps, 1);
+  });
+
+  testWidgets('Creates an <img> with width and height set', (WidgetTester tester) async {
+    final TestImgElement testImg = TestImgElement();
+    testImg.src = _uniqueUrl(tester.testDescription);
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
+    final web.HTMLImageElement imgElement =
+        imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, testImg.src);
+    expect(imgElement.style.width, '100%');
+    expect(imgElement.style.height, '100%');
   });
 }
 
