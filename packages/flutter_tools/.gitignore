@@ -4,3 +4,6 @@
 
 !ide_templates/intellij/.idea
 !templates/**/.idea
+
+# Do not need gradle cache of flutter gradle plugin code checked in.
+gradle/bin/**

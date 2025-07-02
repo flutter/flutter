@@ -51,7 +51,7 @@ const String templateKotlinGradlePluginVersion = '2.1.0';
 //
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '36';
-const String minSdkVersion = '21';
+const String minSdkVersion = '24';
 const String targetSdkVersion = '36';
 const String ndkVersion = '27.0.12077973';
 
@@ -158,9 +158,10 @@ final RegExp gradleOrgVersionMatch = RegExp(
 );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
-// file which have minSdkVersion 16,17, 18, 19, or 20.
+// file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
+// equals syntax and when using minSdk or minSdkVersion.
 final RegExp tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdkVersion (1[6789]|20)(?=\s*(?://|$))',
+  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 

@@ -21,10 +21,10 @@ apply plugin: "com.android.library"
 
 android {
     namespace "io.flutter.embedding"
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk = 24
     }
 
     sourceSets {
