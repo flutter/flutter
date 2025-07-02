@@ -104,6 +104,8 @@ class PlatformHandler {
   static constexpr char kClipboardError[] = "Clipboard error";
 
   static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
+  static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
+  static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
  private:
   // Called when a method is called on |channel_|;

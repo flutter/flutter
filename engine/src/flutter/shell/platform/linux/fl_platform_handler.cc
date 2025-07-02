@@ -18,6 +18,7 @@ static constexpr char kTextPlainFormat[] = "text/plain";
 
 static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
 static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
+static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
 struct _FlPlatformHandler {
   GObject parent_instance;
@@ -208,6 +209,8 @@ static void system_sound_play(const gchar* type, gpointer user_data) {
     }
   } else if (strcmp(type, kSoundTypeClick) == 0) {
     // We don't make sounds for keyboard on desktops.
+  } else if (strcmp(type, kSoundTypeTick) == 0) {
+    // We don't make ticking sounds on desktops.
   } else {
     g_warning("Ignoring unknown sound type %s in SystemSound.play.\n", type);
   }
