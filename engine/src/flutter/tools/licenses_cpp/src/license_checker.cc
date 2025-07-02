@@ -216,8 +216,10 @@ absl::Status MatchLicenseFile(const fs::path& path,
             std::string_view(license->GetData(), license->GetSize()));
 
     if (matches.ok()) {
-      license_map->Add(package.name, matches->front().matched_text);
-      VLOG(1) << "OK: " << path << " : " << matches->front().matcher;
+      for (const Catalog::Match& match : matches.value()) {
+        license_map->Add(package.name, match.matched_text);
+        VLOG(1) << "OK: " << path << " : " << match.matcher;
+      }
     } else {
       return absl::NotFoundError(
           absl::StrCat("Unknown license in ", package.license_file->string(),
@@ -290,9 +292,11 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
               data.catalog.FindMatch(comment);
           if (matches.ok()) {
             did_find_copyright = true;
-            license_map->Add(package.name, matches->front().matched_text);
-            VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                    << matches->front().matcher;
+            for (const Catalog::Match& match : matches.value()) {
+              license_map->Add(package.name, match.matched_text);
+              VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                      << match.matcher;
+            }
           } else {
             if (flags.treat_unmatched_comments_as_errors) {
               errors->push_back(absl::NotFoundError(
