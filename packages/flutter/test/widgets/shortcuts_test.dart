@@ -1375,7 +1375,7 @@ void main() {
       expect(
         semanticsTester,
         hasSemantics(
-          TestSemantics.root(children: <TestSemantics>[TestSemantics(id: 1)]),
+          TestSemantics.root(),
           ignoreRect: true,
           ignoreTransform: true,
         ),
