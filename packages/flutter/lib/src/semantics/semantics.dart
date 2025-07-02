@@ -1561,6 +1561,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
+  /// If null, the node is not fosusable.
+  ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
   ///
@@ -5472,6 +5474,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
+  /// If the value is `null`, it's not focusable.
   bool? get isFocused => _flags.isFocusable ? _flags.isFocused : null;
   set isFocused(bool? value) {
     if (value != null) {
