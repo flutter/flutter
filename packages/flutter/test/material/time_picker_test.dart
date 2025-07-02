@@ -1520,9 +1520,8 @@ void main() {
           addTearDown(tester.view.reset);
 
           await tester.pumpWidget(
-            MaterialApp(
-              theme: ThemeData(useMaterial3: true),
-              home: const MediaQuery(
+            const MaterialApp(
+              home: MediaQuery(
                 data: MediaQueryData(),
                 child: Material(
                   child: TimePickerDialog(initialTime: TimeOfDay(hour: 12, minute: 0)),
