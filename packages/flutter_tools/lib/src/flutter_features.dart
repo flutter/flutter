@@ -81,4 +81,7 @@ interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlag
     // Otherwise, read it from environment variable > project manifest > global config
     return _featuresConfig.isEnabled(feature) ?? featureSetting.enabledByDefault;
   }
+
+  @override
+  Iterable<Feature> get enabledFeatures => allFeatures.where(isEnabled);
 }
