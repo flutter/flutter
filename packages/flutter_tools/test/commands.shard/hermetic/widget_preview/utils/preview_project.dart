@@ -32,7 +32,7 @@ class WidgetPreviewWorkspace {
 
   /// "Modifies" the workspace's pubspec.yaml.
   void touchPubspec() {
-    _pubspecYaml.setLastAccessedSync(DateTime.now().add(const Duration(seconds: 1)));
+    _pubspecYaml.setLastModifiedSync(DateTime.now());
   }
 
   WidgetPreviewProject createWorkspaceProject({required String name}) {
@@ -128,9 +128,9 @@ dependencies:
     );
   }
 
-  /// "Modifies" the workspace's pubspec.yaml.
+  /// "Modifies" the project's pubspec.yaml.
   void touchPubspec() {
-    _pubspecYaml.setLastAccessedSync(DateTime.now().add(const Duration(seconds: 1)));
+    _pubspecYaml.setLastModifiedSync(DateTime.now());
   }
 
   /// Updates the content of the project's pubspec.yaml.
