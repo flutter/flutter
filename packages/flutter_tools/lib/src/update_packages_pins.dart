@@ -23,6 +23,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
   'code_assets':
       '0.19.4', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+  'data_assets':
+      '0.19.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @mosuem.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912

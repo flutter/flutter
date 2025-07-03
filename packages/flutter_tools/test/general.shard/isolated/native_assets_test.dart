@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 
 import '../../src/common.dart';
@@ -68,7 +69,7 @@ void main() {
         makeCodeAsset('free', LookupInExecutable()),
         makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
       ];
-      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      final DartHookResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
@@ -80,7 +81,7 @@ void main() {
         ),
       );
       await installCodeAssets(
-        dartBuildResult: dartBuildResult,
+        dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -103,7 +104,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
@@ -112,11 +113,7 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
         ),
-        throwsToolExit(
-          message:
-              'Package(s) bar require the native assets feature to be enabled. '
-              'Enable using `flutter config --enable-native-assets`.',
-        ),
+        throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
     },
   );
@@ -134,7 +131,7 @@ void main() {
       final Map<String, String> environmentDefines = <String, String>{
         kBuildMode: BuildMode.debug.cliName,
       };
-      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      final DartHookResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -144,7 +141,7 @@ void main() {
         ),
       );
       await installCodeAssets(
-        dartBuildResult: dartBuildResult,
+        dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -173,7 +170,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
@@ -206,7 +203,7 @@ void main() {
       CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) =>
           CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
-      final DartBuildResult result = await runFlutterSpecificDartBuild(
+      final DartHookResult result = await runFlutterSpecificHooks(
         environmentDefines: <String, String>{
           // Release mode means the dart build has linking enabled.
           kBuildMode: BuildMode.release.cliName,
