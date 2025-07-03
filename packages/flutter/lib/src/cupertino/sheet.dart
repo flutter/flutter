@@ -32,7 +32,8 @@ const double _kTopGapRatio = 0.08;
 // The minimum distance (i.e., maximum upward stretch) from the top of the sheet
 // to the top of the screen, as a ratio of total screen height. This value represents
 // how far the sheet can be temporarily pulled upward before snapping back.
-// Determined through visual tuning to feel natural on iOS 18.0 simulators.
+// Determined through visual tuning to feel natural on <device name, i.e iPhone 16 Pro>
+// running iOS 18.0 simulators.
 const double _kStretchedTopGapRatio = 0.072;
 
 // Tween for animating a Cupertino sheet onto the screen.
@@ -405,10 +406,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _upDragController = AnimationController(
-      duration: const Duration(microseconds: 1),
-      vsync: this,
-    );
+    _upDragController = AnimationController(duration: const Duration(microseconds: 1), vsync: this);
     _paddingAnimation = _upDragController.drive(
       Tween<double>(begin: _kTopGapRatio, end: _kStretchedTopGapRatio),
     );
