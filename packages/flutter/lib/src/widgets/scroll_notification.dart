@@ -189,6 +189,7 @@ class ScrollUpdateNotification extends ScrollNotification {
     this.dragDetails,
     this.scrollDelta,
     int? depth,
+    this.programmatic = false,
   }) {
     if (depth != null) {
       _depth = depth;
@@ -204,6 +205,9 @@ class ScrollUpdateNotification extends ScrollNotification {
   /// The distance by which the [Scrollable] was scrolled, in logical pixels.
   final double? scrollDelta;
 
+  /// If this scroll update was programmatic.
+  final bool programmatic;
+
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
@@ -211,6 +215,7 @@ class ScrollUpdateNotification extends ScrollNotification {
     if (dragDetails != null) {
       description.add('$dragDetails');
     }
+    description.add('programmatic: $programmatic');
   }
 }
 
