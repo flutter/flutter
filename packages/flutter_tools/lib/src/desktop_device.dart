@@ -285,6 +285,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
+    if (debuggingOptions.profileMicrotasks) {
+      addFlag('profile-microtasks=true');
+    }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }

@@ -647,6 +647,7 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
       if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
+      if (debuggingOptions.profileMicrotasks) ...<String>['--ez', 'profile-microtasks', 'true'],
       if (debuggingOptions.purgePersistentCache) ...<String>[
         '--ez',
         'purge-persistent-cache',
