@@ -229,22 +229,14 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(
-      containerWithBorder(
-        const Size(120, 300),
-        BorderRadius.zero,
-      ),
-    );
+    await tester.pumpWidget(containerWithBorder(const Size(120, 300), BorderRadius.zero));
     await expectLater(
       find.byType(Container),
       matchesGoldenFile('painting.rounded_superellipse_border.all_zero.png'),
     );
 
     await tester.pumpWidget(
-      containerWithBorder(
-        const Size(120, 300),
-        const BorderRadius.all(Radius.circular(36)),
-      ),
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(36))),
     );
     await expectLater(
       find.byType(Container),
@@ -252,10 +244,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      containerWithBorder(
-        const Size(120, 300),
-        const BorderRadius.all(Radius.elliptical(20, 50)),
-      ),
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.elliptical(20, 50))),
     );
     await expectLater(
       find.byType(Container),
