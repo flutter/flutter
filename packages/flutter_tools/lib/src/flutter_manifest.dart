@@ -6,7 +6,6 @@
 library;
 
 import 'package:crypto/crypto.dart';
-import 'package:devtools_shared/devtools_extensions_io.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -87,9 +86,9 @@ class FlutterManifest {
     copy._descriptor = <String, Object?>{..._descriptor};
     if (removeDependencies) {
       // Remove the non-Flutter SDK dependencies if they're going to be added back later.
-      copy._descriptor['dependencies'] = <String, Object?>{
+      copy._descriptor['dependencies'] = YamlMap.wrap(<String, Object?>{
         'flutter': <String, Object?>{'sdk': 'flutter'},
-      };
+      });
     }
     copy._flutterDescriptor = <String, Object?>{..._flutterDescriptor};
 
