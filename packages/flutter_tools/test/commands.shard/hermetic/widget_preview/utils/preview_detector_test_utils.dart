@@ -19,7 +19,7 @@ bool _stateInitialized = false;
 
 // Global state that must be cleaned up by `tearDown` in initializeTestPreviewDetectorState.
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
-void Function()? _onPubspecChangeDetected;
+void Function(String path)? _onPubspecChangeDetected;
 Directory? _projectRoot;
 late FileSystem _fs;
 
@@ -59,19 +59,21 @@ void _onChangeDetectedRoot(PreviewDependencyGraph mapping) {
   _onChangeDetectedImpl!(mapping);
 }
 
-void _onPubspecChangeDetectedRoot() {
-  _onPubspecChangeDetected!();
+void _onPubspecChangeDetectedRoot(String path) {
+  _onPubspecChangeDetected?.call(path);
 }
 
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
+  required WidgetPreviewProject project,
   required void Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
     onChangeDetected:
         (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
-          updated,
+          project: project,
+          graph: updated,
           expectedFilesWithErrors: filesWithErrors,
         ),
     changeOperation: changeOperation,
@@ -80,24 +82,28 @@ Future<void> expectHasErrors({
 
 /// Test dependency graph generated as a result of [changeOperation] contains no compile time
 /// errors.
-Future<void> expectHasNoErrors({required void Function() changeOperation}) async {
+Future<void> expectHasNoErrors({
+  required WidgetPreviewProject project,
+  required void Function() changeOperation,
+}) async {
   await expectHasErrors(
+    project: project,
     changeOperation: changeOperation,
     filesWithErrors: const <WidgetPreviewSourceFile>{},
   );
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<void> waitForPubspecChangeDetected({required void Function() changeOperation}) async {
-  final Completer<void> completer = Completer<void>();
-  _onPubspecChangeDetected = () {
+Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+  final Completer<String> completer = Completer<String>();
+  _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
       return;
     }
-    completer.complete();
+    completer.complete(path);
   };
   changeOperation();
-  await completer.future;
+  return completer.future;
 }
 
 /// Waits for a change detected event after executing [changeOperation].
@@ -139,10 +145,22 @@ Future<void> waitForNChangesDetected({
   await completer.future;
 }
 
+extension PreviewDependencyGraphExtensions on PreviewDependencyGraph {
+  /// Returns a subset of dependency graph consisting only of library nodes containing previews.
+  PreviewDependencyGraph get nodesWithPreviews {
+    return PreviewDependencyGraph.fromEntries(
+      entries.where(
+        (MapEntry<PreviewPath, LibraryPreviewNode> element) => element.value.previews.isNotEmpty,
+      ),
+    );
+  }
+}
+
 /// Walks the [graph] to verify its structure and that all files contained in
 /// [expectedFilesWithErrors] actually contain errors.
-void expectPreviewDependencyGraphIsWellFormed(
-  PreviewDependencyGraph graph, {
+void expectPreviewDependencyGraphIsWellFormed({
+  required WidgetPreviewProject project,
+  required PreviewDependencyGraph graph,
   Set<WidgetPreviewSourceFile> expectedFilesWithErrors = const <WidgetPreviewSourceFile>{},
 }) {
   final Set<LibraryPreviewNode> nodesWithErrors = <LibraryPreviewNode>{};
@@ -177,10 +195,7 @@ void expectPreviewDependencyGraphIsWellFormed(
   expect(
     filesWithTransitiveErrors,
     expectedFilesWithErrors
-        .map(
-          (WidgetPreviewSourceFile file) =>
-              previewPathForFile(projectRoot: _projectRoot!, path: file.path),
-        )
+        .map((WidgetPreviewSourceFile file) => project.toPreviewPath(file.path))
         .toSet(),
   );
 }
