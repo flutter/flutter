@@ -7399,6 +7399,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Set<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     ui.SemanticsInputType? inputType,
+    Locale? localeForSubtree,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7406,6 +7407,7 @@ class Semantics extends SingleChildRenderObjectWidget {
          explicitChildNodes: explicitChildNodes,
          excludeSemantics: excludeSemantics,
          blockUserActions: blockUserActions,
+         localeForSubtree: localeForSubtree,
          properties: SemanticsProperties(
            enabled: enabled,
            checked: checked,
@@ -7489,8 +7491,13 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.explicitChildNodes = false,
     this.excludeSemantics = false,
     this.blockUserActions = false,
+    this.localeForSubtree,
     required this.properties,
-  });
+  }) : assert(
+         localeForSubtree == null || container,
+         'To assign locale for subtree, this widget needs to be a '
+         'container',
+       );
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -7522,6 +7529,11 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// This setting is often used in combination with [SemanticsConfiguration.isSemanticBoundary]
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
+
+  /// The [Locale] for widgets in the subtree.
+  ///
+  /// If null, the subtree will inherit the locale form ancestor widget.
+  final Locale? localeForSubtree;
 
   /// Whether to replace all child semantics with this node.
   ///
@@ -7575,6 +7587,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       excludeSemantics: excludeSemantics,
       blockUserActions: blockUserActions,
       properties: properties,
+      localeForSubtree: localeForSubtree,
       textDirection: _getTextDirection(context),
     );
   }
@@ -7612,7 +7625,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..excludeSemantics = excludeSemantics
       ..blockUserActions = blockUserActions
       ..properties = properties
-      ..textDirection = _getTextDirection(context);
+      ..textDirection = _getTextDirection(context)
+      ..localeForSubtree = localeForSubtree;
   }
 
   @override

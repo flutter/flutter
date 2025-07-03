@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <filesystem>
 #include <fstream>
 
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
@@ -12,10 +13,13 @@
 #include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
+namespace fs = std::filesystem;
+
 ABSL_FLAG(std::optional<std::string>,
           working_dir,
           std::nullopt,
           "[REQUIRED] The directory to scan.");
+ABSL_FLAG(std::optional<std::string>, input, std::nullopt, "The file to scan.");
 ABSL_FLAG(std::optional<std::string>,
           data_dir,
           std::nullopt,
@@ -78,6 +82,7 @@ int main(int argc, char** argv) {
   absl::SetStderrThreshold(absl::LogSeverity::kInfo);
 
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
+  std::optional<std::string> input = absl::GetFlag(FLAGS_input);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_data_dir);
   std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
   std::optional<std::string> include_filter =
@@ -93,12 +98,22 @@ int main(int argc, char** argv) {
     LicenseChecker::Flags flags;
     flags.treat_unmatched_comments_as_errors =
         absl::GetFlag(FLAGS_treat_unmatched_comments_as_errors);
-    if (include_filter.has_value()) {
-      return Run(working_dir.value(), licenses, data_dir.value(),
-                 include_filter.value(), flags);
+    if (input.has_value()) {
+      if (include_filter.has_value()) {
+        std::cerr << "`--input_filter` not supported with `--input`"
+                  << std::endl;
+      }
+      fs::path full_path = fs::canonical(input.value());
+      return LicenseChecker::FileRun(working_dir.value(), full_path.string(),
+                                     licenses, data_dir.value(), flags);
     } else {
-      return LicenseChecker::Run(working_dir.value(), licenses,
-                                 data_dir.value(), flags);
+      if (include_filter.has_value()) {
+        return Run(working_dir.value(), licenses, data_dir.value(),
+                   include_filter.value(), flags);
+      } else {
+        return LicenseChecker::Run(working_dir.value(), licenses,
+                                   data_dir.value(), flags);
+      }
     }
   }
 

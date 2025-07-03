@@ -536,7 +536,6 @@ void main() {
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
-
   testWidgets(
     'test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms',
     (WidgetTester tester) async {
@@ -555,6 +554,49 @@ void main() {
     variant: TargetPlatformVariant.all(
       excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS},
     ),
+  );
+
+  testWidgets(
+    'does not crash when long press is cancelled after unmounting',
+    (WidgetTester tester) async {
+      // Regression test for b/425840577.
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, int index) => index == 0 ? const TextField() : const SizedBox(height: 50),
+                    childCount: 200,
+                    addAutomaticKeepAlives: false,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
+      // gesture is not accepted and is cancelled when the recognizer is disposed.
+      await tester.startGesture(tester.getCenter(find.byType(TextField)));
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+
+      // While attempting to long press, scroll the TextField out of view
+      // to dispose of it and its gesture recognizers.
+      scrollController.jumpTo(8000.0);
+      await tester.pump();
+      expect(state.mounted, isFalse);
+      // Should reach the end of the test without any failures.
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(

@@ -78,13 +78,6 @@
 # These files have no header, but they are generated files.
 ^third_party/harfbuzz/src/hb-ot-shaper-indic-table.cc
 ^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
-# These files have headers that should match harfbuzz, but they trip up re2 for
-# some reason. It has something to do with with the utf8 copyright sign, but
-# other files have that and they are processed just fine.
-^third_party/harfbuzz/src/hb-cairo-utils.cc
-^third_party/harfbuzz/src/hb-directwrite-shape.cc
-^third_party/harfbuzz/src/hb-ot-name.h
-^third_party/harfbuzz/src/hb-outline.cc
 # These files don't seem to be explicitly excluded but aren't present in the 
 # sky license.
 ^third_party/freetype2/.*
