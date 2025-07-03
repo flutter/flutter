@@ -1636,7 +1636,7 @@ class _TimePickerInput extends StatefulWidget {
     required this.helpText,
     required this.autofocusHour,
     required this.autofocusMinute,
-    this.emptyInitialTime,
+    required this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1672,7 +1672,7 @@ class _TimePickerInput extends StatefulWidget {
   ///
   /// Useful when users prefer manual input without clearing pre-filled values.
   /// Ignored in dial mode.
-  final bool? emptyInitialTime;
+  final bool emptyInitialTime;
 
   @override
   _TimePickerInputState createState() => _TimePickerInputState();
@@ -1945,7 +1945,7 @@ class _HourTextField extends StatelessWidget {
     required this.onSavedSubmitted,
     required this.onChanged,
     required this.hourLabelText,
-    this.emptyInitialTime,
+    required this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1958,7 +1958,7 @@ class _HourTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String? hourLabelText;
   final String? restorationId;
-  final bool? emptyInitialTime;
+  final bool emptyInitialTime;
 
   @override
   Widget build(BuildContext context) {
@@ -1987,7 +1987,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.validator,
     required this.onSavedSubmitted,
     required this.minuteLabelText,
-    this.emptyInitialTime,
+    required this.emptyInitialTime,
     this.restorationId,
   });
 
@@ -1999,7 +1999,7 @@ class _MinuteTextField extends StatelessWidget {
   final ValueChanged<String?> onSavedSubmitted;
   final String? minuteLabelText;
   final String? restorationId;
-  final bool? emptyInitialTime;
+  final bool emptyInitialTime;
 
   @override
   Widget build(BuildContext context) {
@@ -2029,7 +2029,7 @@ class _HourMinuteTextField extends StatefulWidget {
     required this.validator,
     required this.onSavedSubmitted,
     this.restorationId,
-    this.emptyInitialTime,
+    required this.emptyInitialTime,
     this.onChanged,
   });
 
@@ -2043,7 +2043,7 @@ class _HourMinuteTextField extends StatefulWidget {
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String>? onChanged;
   final String? restorationId;
-  final bool? emptyInitialTime;
+  final bool emptyInitialTime;
 
   @override
   _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
@@ -2076,9 +2076,11 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     super.didChangeDependencies();
     // Only set the text value if it has not been populated with a localized
     // version yet.
+    // If emptyInitialTime is true, set it to an empty string to indicate no
+    // initial time.
     if (!controllerHasBeenSet.value) {
       controllerHasBeenSet.value = true;
-      final String initialTextValue = (widget.emptyInitialTime ?? false) ? '' : _formattedValue;
+      final String initialTextValue = widget.emptyInitialTime ? '' : _formattedValue;
       controller.value.value = TextEditingValue(text: initialTextValue);
     }
   }
@@ -2132,7 +2134,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     ).applyDefaults(inputDecorationTheme);
     // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String? hintText = focusNode.hasFocus ? null : _formattedValue;
+    // Clear the hint text when emptyInitialTime is true to avoid showing a
+    // misleading placeholder.
+    final String? hintText =
+        focusNode.hasFocus
+            ? null
+            : widget.emptyInitialTime
+            ? ''
+            : _formattedValue;
 
     // Because the fill color is specified in both the inputDecorationTheme and
     // the TimePickerTheme, if there's one in the user's input decoration theme,
@@ -2232,7 +2241,7 @@ class TimePickerDialog extends StatefulWidget {
     this.onEntryModeChanged,
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
-    this.emptyInitialTimeInInputMode,
+    this.emptyInitialInput = false,
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2304,7 +2313,7 @@ class TimePickerDialog extends StatefulWidget {
   ///
   /// Improves UX by removing the need to delete default values before typing.
   /// Skipped in dial mode.
-  final bool? emptyInitialTimeInInputMode;
+  final bool emptyInitialInput;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2644,7 +2653,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                               onEntryModeChanged: _handleEntryModeChanged,
                               switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
                               switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
-                              emptyInitialTimeInInputMode: widget.emptyInitialTimeInInputMode,
+                              emptyInitialInput: widget.emptyInitialInput,
                             ),
                           );
                           if (_entryMode.value != TimePickerEntryMode.input &&
@@ -2689,7 +2698,7 @@ class _TimePicker extends StatefulWidget {
     this.onEntryModeChanged,
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
-    this.emptyInitialTimeInInputMode,
+    required this.emptyInitialInput,
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2765,7 +2774,7 @@ class _TimePicker extends StatefulWidget {
   final Icon? switchToTimerEntryModeIcon;
 
   /// If true, input fields start empty in input mode.
-  final bool? emptyInitialTimeInInputMode;
+  final bool emptyInitialInput;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -3028,7 +3037,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
               autofocusHour: _autofocusHour.value,
               autofocusMinute: _autofocusMinute.value,
               restorationId: 'time_picker_input',
-              emptyInitialTime: widget.emptyInitialTimeInInputMode,
+              emptyInitialTime: widget.emptyInitialInput,
             ),
           ],
         );
@@ -3181,7 +3190,7 @@ Future<TimeOfDay?> showTimePicker({
   Orientation? orientation,
   Icon? switchToInputEntryModeIcon,
   Icon? switchToTimerEntryModeIcon,
-  bool? emptyInitialTimeInInputMode,
+  bool emptyInitialInput = false,
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -3198,7 +3207,7 @@ Future<TimeOfDay?> showTimePicker({
     onEntryModeChanged: onEntryModeChanged,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToTimerEntryModeIcon: switchToTimerEntryModeIcon,
-    emptyInitialTimeInInputMode: emptyInitialTimeInInputMode,
+    emptyInitialInput: emptyInitialInput,
   );
   return showDialog<TimeOfDay>(
     context: context,
