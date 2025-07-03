@@ -640,7 +640,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       navigator: route.navigator!,
       getIsCurrent: () => route.isCurrent,
       getIsActive: () => route.isActive,
-      downController: route.controller!, // protected access
+      popDragController: route.controller!, // protected access
     );
   }
 
@@ -785,14 +785,14 @@ class _CupertinoDragGestureController<T> {
   /// Creates a controller for an iOS-style back gesture.
   _CupertinoDragGestureController({
     required this.navigator,
-    required this.downController,
+    required this.popDragController,
     required this.getIsActive,
     required this.getIsCurrent,
   }) {
     navigator.didStartUserGesture();
   }
 
-  final AnimationController downController;
+  final AnimationController popDragController;
   final NavigatorState navigator;
   final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
@@ -800,13 +800,13 @@ class _CupertinoDragGestureController<T> {
   /// The drag gesture has changed by [delta]. The total range of the drag
   /// should be 0.0 to 1.0.
   void dragUpdate(double delta, AnimationController upController) {
-    if (downController.value == 1.0 && delta < 0) {
+    if (popDragController.value == 1.0 && delta < 0) {
       // Divide by stretchable range (when dragging upward at max extent).
       upController.value -=
           delta / (navigator.context.size!.height * (_kTopGapRatio - _kStretchedTopGapRatio));
     } else {
       // Divide by size of the sheet.
-      downController.value -=
+      popDragController.value -=
           delta /
           (navigator.context.size!.height - (navigator.context.size!.height * _kTopGapRatio));
     }
@@ -850,11 +850,11 @@ class _CupertinoDragGestureController<T> {
       // If the drag is dropped with low velocity, the sheet will pop if the
       // the drag goes a little past the halfway point on the screen. This is
       // eyeballed on a simulator running iOS 18.0.
-      animateForward = downController.value > 0.52;
+      animateForward = popDragController.value > 0.52;
     }
 
     if (animateForward) {
-      downController.animateTo(
+      popDragController.animateTo(
         1.0,
         duration: _kDroppedSheetDragAnimationDuration,
         curve: animationCurve,
@@ -866,8 +866,8 @@ class _CupertinoDragGestureController<T> {
         rootNavigator.pop();
       }
 
-      if (downController.isAnimating) {
-        downController.animateBack(
+      if (popDragController.isAnimating) {
+        popDragController.animateBack(
           0.0,
           duration: _kDroppedSheetDragAnimationDuration,
           curve: animationCurve,
@@ -875,17 +875,17 @@ class _CupertinoDragGestureController<T> {
       }
     }
 
-    if (downController.isAnimating) {
+    if (popDragController.isAnimating) {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.
       // late AnimationStatusListener animationStatusCallback;
       void animationStatusCallback(AnimationStatus status) {
         navigator.didStopUserGesture();
-        downController.removeStatusListener(animationStatusCallback);
+        popDragController.removeStatusListener(animationStatusCallback);
       }
 
-      downController.addStatusListener(animationStatusCallback);
+      popDragController.addStatusListener(animationStatusCallback);
     } else {
       navigator.didStopUserGesture();
     }
