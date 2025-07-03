@@ -535,6 +535,11 @@ class RadioListTile<T> extends StatefulWidget {
   /// This property can be a [BorderSide] or a [WidgetStateBorderSide] to leverage
   /// widget state resolution.
   ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
   /// If null, then it defaults to a border using the fill color.
   final BorderSide? radioSide;
 
