@@ -33,7 +33,7 @@ const double _kTopGapRatio = 0.08;
 // to the top of the screen, as a ratio of total screen height. This value represents
 // how far the sheet can be temporarily pulled upward before snapping back.
 // Determined through visual tuning to feel natural on iOS 18.0 simulators.
-const double _kMaxTopGapRatio = 0.072;
+const double _kStretchedTopGapRatio = 0.072;
 
 // Tween for animating a Cupertino sheet onto the screen.
 //
@@ -410,7 +410,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       vsync: this,
     );
     _paddingAnimation = _upDragController.drive(
-      Tween<double>(begin: _kTopGapRatio, end: _kMaxTopGapRatio),
+      Tween<double>(begin: _kTopGapRatio, end: _kStretchedTopGapRatio),
     );
     _secondaryPositionAnimation = _secondaryPositionCurve!.drive(_kMidUpTween);
     _secondaryScaleAnimation = _secondaryPositionCurve!.drive(_kScaleTween);
@@ -805,7 +805,7 @@ class _CupertinoDragGestureController<T> {
     if (downController.value == 1.0 && delta < 0) {
       // Divide by stretchable range (when dragging upward at max extent).
       upController.value -=
-          delta / (navigator.context.size!.height * (_kTopGapRatio - _kMaxTopGapRatio));
+          delta / (navigator.context.size!.height * (_kTopGapRatio - _kStretchedTopGapRatio));
     } else {
       // Divide by size of the sheet.
       downController.value -=
