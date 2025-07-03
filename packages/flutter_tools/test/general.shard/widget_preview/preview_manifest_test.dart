@@ -17,6 +17,7 @@ import 'package:test/test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+// TODO(bkonyi): test pubspec change detection for workspaces
 void main() {
   group('$PreviewManifest', () {
     late FlutterProject rootProject;
@@ -55,7 +56,7 @@ void main() {
               )
               as PreviewManifestContents;
 
-      expect(manifest.containsKey(PreviewManifest.kPubspecHash), true);
+      expect(manifest.containsKey(PreviewManifest.kPubspecHashes), true);
       expect(manifest.containsKey(PreviewManifest.kManifestVersion), true);
       expect(manifest.containsKey(PreviewManifest.kSdkVersion), true);
     });

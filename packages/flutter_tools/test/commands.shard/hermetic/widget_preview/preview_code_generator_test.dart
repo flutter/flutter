@@ -174,7 +174,7 @@ void main() {
         fs: fs,
         logger: logger,
         onChangeDetected: (_) {},
-        onPubspecChangeDetected: () {},
+        onPubspecChangeDetected: (String path) {},
       );
       codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
       final Pub pub = Pub.test(
@@ -229,13 +229,21 @@ import 'package:flutter/widgets.dart' as _i9;
 import 'package:flutter/material.dart' as _i10;
 
 List<_i1.WidgetPreview> previews() => [
-      _i1.WidgetPreview(builder: () => _i2.preview()),
-      _i1.WidgetPreview(builder: () => _i3.barPreview1()),
       _i1.WidgetPreview(
+        packageName: 'foo_project',
+        builder: () => _i2.preview(),
+      ),
+      _i1.WidgetPreview(
+        packageName: 'foo_project',
+        builder: () => _i3.barPreview1(),
+      ),
+      _i1.WidgetPreview(
+        packageName: 'foo_project',
         brightness: _i4.brightnessConstant,
         builder: () => _i3.barPreview2(),
       ),
       _i1.WidgetPreview(
+        packageName: 'foo_project',
         name: 'Foo',
         size: const _i5.Size(
           123,

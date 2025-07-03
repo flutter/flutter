@@ -217,6 +217,7 @@ import 'package:flutter_project/foo.dart' as _i2;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(
+        packageName: 'flutter_project',
         name: 'preview',
         builder: () => _i2.preview(),
       )

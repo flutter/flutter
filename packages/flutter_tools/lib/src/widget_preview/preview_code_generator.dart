@@ -194,6 +194,8 @@ class PreviewCodeGenerator {
         // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
         if (!libraryDetails.dependencyHasErrors &&
             !libraryDetails.hasErrors) ...<String, cb.Expression>{
+          if (preview.packageName != null)
+            PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
           ...?_generateCodeFromAnalyzerExpression(
             allocator: allocator,
             key: PreviewDetails.kName,
