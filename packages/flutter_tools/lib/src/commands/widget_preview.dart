@@ -281,12 +281,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           'widget preview scaffold.',
         );
       }
-      // TODO(matanlurey): Remove this comment once flutter_gen is removed.
-      //
-      // Tracking removal: https://github.com/flutter/flutter/issues/102983.
-      //
-      // Populate the pubspec after the initial build to avoid blowing away the package_config.json
-      // which may have manual changes for flutter_gen support.
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 

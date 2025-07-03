@@ -7,27 +7,21 @@ import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
 
-import '../../../src/common.dart';
-import '../../../src/context.dart';
-import 'utils/preview_details_matcher.dart';
-import 'utils/preview_detector_test_utils.dart';
-import 'utils/preview_project.dart';
+import '../../../../src/common.dart';
+import '../../../../src/context.dart';
+import '../utils/preview_details_matcher.dart';
+import '../utils/preview_detector_test_utils.dart';
+import '../utils/preview_project.dart';
 
 // Note: this test isn't under the general.shard since tests under that directory
 // have a 2000ms time out and these tests write to the real file system and watch
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-void populatePubspec(Directory projectRoot, String contents) {
-  projectRoot.childFile('pubspec.yaml')
-    ..createSync(recursive: true)
-    ..writeAsStringSync(contents);
-}
-
 /// Creates a project with files containing previews that attempt to use as many widget preview
 /// properties as possible.
 class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
-  BasicProjectWithExhaustivePreviews({
+  BasicProjectWithExhaustivePreviews._({
     required super.projectRoot,
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
@@ -42,6 +36,19 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
       librariesWithoutPreviews.add(toPreviewPath(path));
     }
     initialSources.forEach(writeFile);
+  }
+  static Future<BasicProjectWithExhaustivePreviews> create({
+    required Directory projectRoot,
+    required List<String> pathsWithPreviews,
+    required List<String> pathsWithoutPreviews,
+  }) async {
+    final BasicProjectWithExhaustivePreviews project = BasicProjectWithExhaustivePreviews._(
+      projectRoot: projectRoot,
+      pathsWithPreviews: pathsWithPreviews,
+      pathsWithoutPreviews: pathsWithoutPreviews,
+    );
+    await project.initializePubspec();
+    return project;
   }
 
   Map<PreviewPath, List<PreviewDetailsMatcher>> get matcherMapping =>
@@ -100,10 +107,21 @@ part '$partPath';
     throw UnimplementedError('Not supported for $BasicProjectWithExhaustivePreviews');
   }
 
-  final List<PreviewDetailsMatcher> _expectedPreviewDetails = <PreviewDetailsMatcher>[
-    PreviewDetailsMatcher(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
-    PreviewDetailsMatcher(functionName: 'builderPreview', isBuilder: true, name: 'Builder preview'),
+  late final List<PreviewDetailsMatcher> _expectedPreviewDetails = <PreviewDetailsMatcher>[
     PreviewDetailsMatcher(
+      packageName: packageName,
+      functionName: 'previews',
+      isBuilder: false,
+      name: 'Top-level preview',
+    ),
+    PreviewDetailsMatcher(
+      packageName: packageName,
+      functionName: 'builderPreview',
+      isBuilder: true,
+      name: 'Builder preview',
+    ),
+    PreviewDetailsMatcher(
+      packageName: packageName,
       functionName: 'attributesPreview',
       isBuilder: false,
       nameSymbol: 'kAttributesPreview',
@@ -115,16 +133,19 @@ part '$partPath';
       localizations: 'localizations',
     ),
     PreviewDetailsMatcher(
+      packageName: packageName,
       functionName: 'MyWidget.preview',
       isBuilder: false,
       name: 'Constructor preview',
     ),
     PreviewDetailsMatcher(
+      packageName: packageName,
       functionName: 'MyWidget.factoryPreview',
       isBuilder: false,
       name: 'Factory constructor preview',
     ),
     PreviewDetailsMatcher(
+      packageName: packageName,
       functionName: 'MyWidget.previewStatic',
       isBuilder: false,
       name: 'Static preview',
@@ -207,16 +228,6 @@ String foo() => 'bar';
 ''';
 }
 
-extension on PreviewDependencyGraph {
-  PreviewDependencyGraph get nodesWithPreviews {
-    return PreviewDependencyGraph.fromEntries(
-      entries.where(
-        (MapEntry<PreviewPath, LibraryPreviewNode> element) => element.value.previews.isNotEmpty,
-      ),
-    );
-  }
-}
-
 void main() {
   initializeTestPreviewDetectorState();
   group('$PreviewDetector', () {
@@ -235,7 +246,7 @@ void main() {
     });
 
     testUsingContext('can detect previews in existing files', () async {
-      project = BasicProjectWithExhaustivePreviews(
+      project = await BasicProjectWithExhaustivePreviews.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[
           'foo.dart',
@@ -249,7 +260,7 @@ void main() {
 
     testUsingContext('can detect previews in updated files', () async {
       // Create two files with existing previews and one without.
-      project = BasicProjectWithExhaustivePreviews(
+      project = await BasicProjectWithExhaustivePreviews.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[
           'foo.dart',
@@ -282,7 +293,7 @@ void main() {
     });
 
     testUsingContext('can detect previews in newly added files', () async {
-      project = BasicProjectWithExhaustivePreviews(
+      project = await BasicProjectWithExhaustivePreviews.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],
         pathsWithoutPreviews: <String>[],
@@ -305,17 +316,18 @@ void main() {
     });
 
     testUsingContext('can detect previews in existing libraries with parts', () async {
-      project = BasicProjectWithExhaustivePreviews(
-        projectRoot: previewDetector.projectRoot,
-        pathsWithPreviews: <String>[],
-        pathsWithoutPreviews: <String>[],
-      )..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
+      project = await BasicProjectWithExhaustivePreviews.create(
+          projectRoot: previewDetector.projectRoot,
+          pathsWithPreviews: <String>[],
+          pathsWithoutPreviews: <String>[],
+        )
+        ..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
     });
 
     testUsingContext('can detect previews in newly added libraries with parts', () async {
-      project = BasicProjectWithExhaustivePreviews(
+      project = await BasicProjectWithExhaustivePreviews.create(
         projectRoot: previewDetector.projectRoot,
         pathsWithPreviews: <String>[],
         pathsWithoutPreviews: <String>[],
@@ -339,16 +351,18 @@ void main() {
 
     testUsingContext('can detect changes in the pubspec.yaml', () async {
       // Create an initial pubspec.
-      populatePubspec(previewDetector.projectRoot, 'abc');
+      project = await BasicProjectWithExhaustivePreviews.create(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      );
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
       expect(initialPreviews, isEmpty);
 
       // Change the contents of the pubspec and verify the callback is invoked.
-      await waitForPubspecChangeDetected(
-        changeOperation: () => populatePubspec(previewDetector.projectRoot, 'foo'),
-      );
+      await waitForPubspecChangeDetected(changeOperation: () => project.touchPubspec());
     });
   });
 }
