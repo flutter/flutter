@@ -118,7 +118,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
 
     // Grab a reference to our underlying Surface and register callbacks with that Surface so we
     // can monitor changes and forward those changes on to native Flutter code.
-    getHolder().addCallback(surfaceHolderCallbackCompat.callback);
+    getHolder().addCallback(surfaceHolderCallbackCompat);
   }
 
   // This is a work around for TalkBack.

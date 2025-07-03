@@ -104,11 +104,11 @@ public class SurfaceHolderCallbackCompatTest {
     SurfaceHolder.Callback innerCallback = mock(SurfaceHolder.Callback.class);
     SurfaceHolderCallbackCompat test =
         new SurfaceHolderCallbackCompat(innerCallback, fakeSurfaceView, fakeFlutterRenderer);
-    test.callback.surfaceCreated(null);
+    test.surfaceCreated(null);
     verify(innerCallback, times(1)).surfaceCreated(null);
-    test.callback.surfaceChanged(null, 0, 0, 0);
+    test.surfaceChanged(null, 0, 0, 0);
     verify(innerCallback, times(1)).surfaceChanged(null, 0, 0, 0);
-    test.callback.surfaceDestroyed(null);
+    test.surfaceDestroyed(null);
     verify(innerCallback, times(1)).surfaceDestroyed(null);
   }
 }

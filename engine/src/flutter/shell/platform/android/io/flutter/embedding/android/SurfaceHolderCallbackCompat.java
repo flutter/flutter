@@ -10,7 +10,7 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 
-public class SurfaceHolderCallbackCompat {
+public class SurfaceHolderCallbackCompat implements SurfaceHolder.Callback2 {
 
   private static final String TAG = "SurfaceHolderCallbackCompat";
   private final FlutterSurfaceView flutterSurfaceView;
@@ -102,70 +102,62 @@ public class SurfaceHolderCallbackCompat {
         }
       };
 
-  private class SufaceHolderCallback implements SurfaceHolder.Callback {
-    @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder) {
-      if (innerCallback != null) {
-        innerCallback.surfaceCreated(holder);
-      }
-    }
-
-    @Override
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-      if (innerCallback != null) {
-        innerCallback.surfaceChanged(holder, format, width, height);
-      }
-    }
-
-    @Override
-    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-      if (innerCallback != null) {
-        innerCallback.surfaceDestroyed(holder);
-      }
+  @Override
+  public void surfaceCreated(@NonNull SurfaceHolder holder) {
+    if (innerCallback != null) {
+      innerCallback.surfaceCreated(holder);
     }
   }
 
-  private class SurfaceHolderCallbackPre26 extends SufaceHolderCallback
-      implements SurfaceHolder.Callback2 {
-    @Override
-    public void surfaceRedrawNeeded(@NonNull SurfaceHolder holder) {
-      Log.v(TAG, "SurfaceHolder.Callback2.surfaceRedrawNeeded()");
-      /*
-       no-op - instead use surfaceRedrawNeededAsync()
-       Since Flutter rendering now occurs on the main UI thread, we cannot block here
-       and expect to receive a callback. Instead, the Async version of this method
-       should be used. See surfaceRedrawNeededAsync().
-      */
+  @Override
+  public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+    if (innerCallback != null) {
+      innerCallback.surfaceChanged(holder, format, width, height);
     }
   }
 
-  private class SurfaceHolderCallback2Api26AndUp extends SurfaceHolderCallbackPre26
-      implements SurfaceHolder.Callback2 {
-    @Override
-    @RequiresApi(api = Build.API_LEVELS.API_26)
-    public void surfaceRedrawNeededAsync(
-        @NonNull SurfaceHolder holder, @NonNull Runnable finishDrawing) {
-      Log.v(TAG, "SurfaceHolder.Callback2.surfaceRedrawNeededAsync()");
-      if (flutterRenderer == null) {
-        return;
-      }
-      // Run `finishDrawing` when the Flutter UI is ready to display.
-      flutterRenderer.addIsDisplayingFlutterUiListener(
-          new FlutterUiDisplayListener() {
-            @Override
-            public void onFlutterUiDisplayed() {
-              finishDrawing.run();
-              if (flutterRenderer != null) {
-                flutterRenderer.removeIsDisplayingFlutterUiListener(this);
-              }
-            }
-
-            @Override
-            public void onFlutterUiNoLongerDisplayed() {
-              // no-op
-            }
-          });
+  @Override
+  public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+    if (innerCallback != null) {
+      innerCallback.surfaceDestroyed(holder);
     }
+  }
+
+  @Override
+  public void surfaceRedrawNeeded(@NonNull SurfaceHolder holder) {
+    Log.v(TAG, "SurfaceHolder.Callback2.surfaceRedrawNeeded()");
+    /*
+     no-op - instead use surfaceRedrawNeededAsync()
+     Since Flutter rendering now occurs on the main UI thread, we cannot block here
+     and expect to receive a callback. Instead, the Async version of this method
+     should be used. See surfaceRedrawNeededAsync().
+    */
+  }
+
+  @Override
+  @RequiresApi(api = Build.API_LEVELS.API_26)
+  public void surfaceRedrawNeededAsync(
+      @NonNull SurfaceHolder holder, @NonNull Runnable finishDrawing) {
+    Log.v(TAG, "SurfaceHolder.Callback2.surfaceRedrawNeededAsync()");
+    if (flutterRenderer == null) {
+      return;
+    }
+    // Run `finishDrawing` when the Flutter UI is ready to display.
+    flutterRenderer.addIsDisplayingFlutterUiListener(
+        new FlutterUiDisplayListener() {
+          @Override
+          public void onFlutterUiDisplayed() {
+            finishDrawing.run();
+            if (flutterRenderer != null) {
+              flutterRenderer.removeIsDisplayingFlutterUiListener(this);
+            }
+          }
+
+          @Override
+          public void onFlutterUiNoLongerDisplayed() {
+            // no-op
+          }
+        });
   }
 
   /**
@@ -184,9 +176,6 @@ public class SurfaceHolderCallbackCompat {
       shouldSetAlpha
           ? new FlutterRendererLifecycleCallbackPreApi26()
           : new FlutterRendererLifecycleCallbackApi26AndUp();
-
-  final SurfaceHolder.Callback callback =
-      shouldSetAlpha ? new SurfaceHolderCallbackPre26() : new SurfaceHolderCallback2Api26AndUp();
 
   public SurfaceHolderCallbackCompat(
       SurfaceHolder.Callback innerCallback,
