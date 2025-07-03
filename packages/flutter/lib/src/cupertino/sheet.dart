@@ -823,6 +823,7 @@ class _CupertinoDragGestureController<T> {
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
       );
+      return;
     }
 
     // Fling in the appropriate direction.
