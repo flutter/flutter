@@ -355,10 +355,10 @@ class CupertinoSheetTransition extends StatefulWidget {
 class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
     with SingleTickerProviderStateMixin {
   // Controls the top padding animation when the sheet is being slightly stretched upward.
-  late AnimationController _upDragController;
+  late AnimationController _stretchDragController;
 
-  // Animates the top padding of the sheet based on the _upDragController’s value.
-  late Animation<double> _paddingAnimation;
+  // Animates the top padding of the sheet based on the _stretchDragController’s value.
+  late Animation<double> _stretchDragAnimation;
 
   // The offset animation when this page is being covered by another sheet.
   late Animation<Offset> _secondaryPositionAnimation;
@@ -406,8 +406,8 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _upDragController = AnimationController(duration: const Duration(microseconds: 1), vsync: this);
-    _paddingAnimation = _upDragController.drive(
+    _stretchDragController = AnimationController(duration: const Duration(microseconds: 1), vsync: this);
+    _stretchDragAnimation = _stretchDragController.drive(
       Tween<double>(begin: _kTopGapRatio, end: _kStretchedTopGapRatio),
     );
     _secondaryPositionAnimation = _secondaryPositionCurve!.drive(_kMidUpTween);
@@ -415,7 +415,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   }
 
   void _disposeCurve() {
-    _upDragController.dispose();
+    _stretchDragController.dispose();
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryPositionCurve = null;
@@ -461,14 +461,14 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
 
   @override
   Widget build(BuildContext context) {
-    return _UpDragAnimationControllerProvider(
-      controller: _upDragController,
+    return _StretchDragControllerProvider(
+      controller: _stretchDragController,
       child: SizedBox.expand(
         child: AnimatedBuilder(
-          animation: _paddingAnimation,
+          animation: _stretchDragAnimation,
           builder: (BuildContext context, Widget? child) {
             return Padding(
-              padding: EdgeInsets.only(top: MediaQuery.heightOf(context) * _paddingAnimation.value),
+              padding: EdgeInsets.only(top: MediaQuery.heightOf(context) * _stretchDragAnimation.value),
               child: _coverSheetSecondaryTransition(
                 widget.secondaryRouteAnimation,
                 _coverSheetPrimaryTransition(
@@ -487,17 +487,17 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
 }
 
 // Internally used to provide the controller for upward stretch animation.
-class _UpDragAnimationControllerProvider extends InheritedWidget {
-  const _UpDragAnimationControllerProvider({required this.controller, required super.child});
+class _StretchDragControllerProvider extends InheritedWidget {
+  const _StretchDragControllerProvider({required this.controller, required super.child});
 
   final AnimationController controller;
 
-  static _UpDragAnimationControllerProvider? maybeOf(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_UpDragAnimationControllerProvider>();
+  static _StretchDragControllerProvider? maybeOf(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_StretchDragControllerProvider>();
   }
 
   @override
-  bool updateShouldNotify(_UpDragAnimationControllerProvider oldWidget) {
+  bool updateShouldNotify(_StretchDragControllerProvider oldWidget) {
     return false;
   }
 }
@@ -704,13 +704,13 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   _CupertinoDragGestureController<T>? _dragGestureController;
 
   late VerticalDragGestureRecognizer _recognizer;
-  _UpDragAnimationControllerProvider? upDragController;
+  _StretchDragControllerProvider? _stretchDragController;
 
   @override
   void initState() {
     super.initState();
-    assert(upDragController == null);
-    upDragController = _UpDragAnimationControllerProvider.maybeOf(context);
+    assert(_stretchDragController == null);
+    _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
     _recognizer =
         VerticalDragGestureRecognizer(debugOwner: this)
           ..onStart = _handleDragStart
@@ -744,7 +744,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
-    _dragGestureController!.dragUpdate(details.primaryDelta!, upDragController!.controller);
+    _dragGestureController!.dragUpdate(details.primaryDelta!, _stretchDragController!.controller);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -752,7 +752,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     assert(_dragGestureController != null);
     _dragGestureController!.dragEnd(
       details.velocity.pixelsPerSecond.dy / context.size!.height,
-      upDragController!.controller,
+      _stretchDragController!.controller,
     );
     _dragGestureController = null;
   }
@@ -761,7 +761,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     assert(mounted);
     // This can be called even if start is not called, paired with the "down" event
     // that we don't consider here.
-    _dragGestureController?.dragEnd(0.0, upDragController!.controller);
+    _dragGestureController?.dragEnd(0.0, _stretchDragController!.controller);
     _dragGestureController = null;
   }
 
