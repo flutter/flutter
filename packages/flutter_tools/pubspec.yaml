@@ -115,7 +115,6 @@ dependencies:
   yaml_edit: 2.2.2
 
 dev_dependencies:
-  collection: 1.19.1
   file_testing: 3.0.2
 
   checked_yaml: 2.0.4

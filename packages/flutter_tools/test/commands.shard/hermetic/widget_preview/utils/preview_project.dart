@@ -14,11 +14,6 @@ import '../../../../src/common.dart';
 
 typedef WidgetPreviewSourceFile = ({String path, String source});
 
-PreviewPath previewPathForFile({required Directory projectRoot, required String path}) {
-  final File file = projectRoot.childDirectory('lib').childFile(path);
-  return (path: file.path, uri: file.uri);
-}
-
 const String _kPubspec = 'pubspec.yaml';
 
 class WidgetPreviewWorkspace {

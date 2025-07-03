@@ -152,4 +152,7 @@ flutter:
       mainLibName: 'my_app',
     );
   }();
+
+  @override
+  final List<FlutterProject> workspaceProjects = <FlutterProject>[];
 }

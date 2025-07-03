@@ -65,13 +65,15 @@ void _onPubspecChangeDetectedRoot(String path) {
 
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
+  required WidgetPreviewProject project,
   required void Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
     onChangeDetected:
         (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
-          updated,
+          project: project,
+          graph: updated,
           expectedFilesWithErrors: filesWithErrors,
         ),
     changeOperation: changeOperation,
@@ -80,8 +82,12 @@ Future<void> expectHasErrors({
 
 /// Test dependency graph generated as a result of [changeOperation] contains no compile time
 /// errors.
-Future<void> expectHasNoErrors({required void Function() changeOperation}) async {
+Future<void> expectHasNoErrors({
+  required WidgetPreviewProject project,
+  required void Function() changeOperation,
+}) async {
   await expectHasErrors(
+    project: project,
     changeOperation: changeOperation,
     filesWithErrors: const <WidgetPreviewSourceFile>{},
   );
@@ -152,8 +158,9 @@ extension PreviewDependencyGraphExtensions on PreviewDependencyGraph {
 
 /// Walks the [graph] to verify its structure and that all files contained in
 /// [expectedFilesWithErrors] actually contain errors.
-void expectPreviewDependencyGraphIsWellFormed(
-  PreviewDependencyGraph graph, {
+void expectPreviewDependencyGraphIsWellFormed({
+  required WidgetPreviewProject project,
+  required PreviewDependencyGraph graph,
   Set<WidgetPreviewSourceFile> expectedFilesWithErrors = const <WidgetPreviewSourceFile>{},
 }) {
   final Set<LibraryPreviewNode> nodesWithErrors = <LibraryPreviewNode>{};
@@ -188,10 +195,7 @@ void expectPreviewDependencyGraphIsWellFormed(
   expect(
     filesWithTransitiveErrors,
     expectedFilesWithErrors
-        .map(
-          (WidgetPreviewSourceFile file) =>
-              previewPathForFile(projectRoot: _projectRoot!, path: file.path),
-        )
+        .map((WidgetPreviewSourceFile file) => project.toPreviewPath(file.path))
         .toSet(),
   );
 }
