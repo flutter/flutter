@@ -128,6 +128,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         valueHelp: 'path/to/trace.binpb',
       )
       ..addFlag(
+        'profile-microtasks',
+        negatable: false,
+        help:
+            'Enable collection of information about each microtask. '
+            'Information about completed microtasks will be written to the '
+            '"Microtask" timeline stream. Information about queued microtasks '
+            'will be accessible from Dart / Flutter DevTools.',
+        hide: !verboseHelp,
+      )
+      ..addFlag(
         'trace-skia',
         negatable: false,
         help:
@@ -324,6 +334,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         traceSystrace: boolArg('trace-systrace'),
         traceToFile: stringArg('trace-to-file'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
+        profileMicrotasks: boolArg('profile-microtasks'),
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
