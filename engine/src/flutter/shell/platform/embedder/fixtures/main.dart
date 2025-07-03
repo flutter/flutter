@@ -174,7 +174,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
           childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -198,6 +198,7 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
+          locale: null,
         )
         ..updateNode(
           id: 84,
@@ -207,7 +208,7 @@ Future<void> a11y_main() async {
           rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
           transform: kTestTransform,
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -233,6 +234,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
+          locale: null,
         )
         ..updateNode(
           id: 96,
@@ -244,7 +246,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List.fromList(<int>[128]),
           childrenInHitTestOrder: Int32List.fromList(<int>[128]),
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -268,6 +270,7 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
+          locale: null,
         )
         ..updateNode(
           id: 128,
@@ -279,7 +282,7 @@ Future<void> a11y_main() async {
           additionalActions: Int32List.fromList(<int>[21]),
           platformViewId: 0x3f3,
           actions: 0,
-          flags: 0,
+          flags: SemanticsFlags.none,
           maxValueLength: 0,
           currentValueLength: 0,
           textSelectionBase: 0,
@@ -303,6 +306,7 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
+          locale: null,
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -349,7 +353,7 @@ Future<void> a11y_string_attributes() async {
         childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
         childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
         actions: 0,
-        flags: 0,
+        flags: SemanticsFlags.none,
         maxValueLength: 0,
         currentValueLength: 0,
         textSelectionBase: 0,
@@ -390,6 +394,7 @@ Future<void> a11y_string_attributes() async {
         additionalActions: Int32List(0),
         controlsNodes: null,
         inputType: SemanticsInputType.none,
+        locale: null,
       );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1662,7 +1667,7 @@ Future<void> a11y_main_multi_view() async {
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
       actions: 0,
-      flags: 0,
+      flags: SemanticsFlags.none,
       maxValueLength: 0,
       currentValueLength: 0,
       textSelectionBase: 0,
@@ -1686,6 +1691,7 @@ Future<void> a11y_main_multi_view() async {
       additionalActions: Int32List(0),
       controlsNodes: null,
       inputType: SemanticsInputType.none,
+      locale: null,
     );
   }
 

@@ -294,7 +294,7 @@ Future<void> frameworkTestsRunner() async {
       path.join(flutterRoot, 'dev', 'devicelab'),
       ensurePrecompiledTool: false, // See https://github.com/flutter/flutter/issues/86209
     );
-    await runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await runDartTest(path.join(flutterRoot, 'dev', 'packages_autoroller'));
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),

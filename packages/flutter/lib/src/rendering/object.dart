@@ -4607,6 +4607,7 @@ final class _SemanticsParentData {
     required this.blocksUserActions,
     required this.explicitChildNodes,
     required this.tagsForChildren,
+    required this.localeForChildren,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -4633,12 +4634,15 @@ final class _SemanticsParentData {
   /// [_RenderObjectSemantics.shouldFormSemanticsNode] is true.
   final Set<SemanticsTag>? tagsForChildren;
 
+  final Locale? localeForChildren;
+
   @override
   bool operator ==(Object other) {
     return other is _SemanticsParentData &&
         other.mergeIntoParent == mergeIntoParent &&
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
+        other.localeForChildren == localeForChildren &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -4648,6 +4652,7 @@ final class _SemanticsParentData {
       mergeIntoParent,
       blocksUserActions,
       explicitChildNodes,
+      localeForChildren,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -4690,8 +4695,8 @@ class _SemanticsConfigurationProvider {
   ///
   /// This is typically use to recalculate certain properties when mutating
   /// [effective] since [effective] may contain stale data from previous update.
-  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or
-  /// [SemanticsConfiguration.elevation]. Otherwise, use [effective] instead.
+  /// An example is [SemanticsConfiguration.isBlockingUserActions]. Otherwise,
+  /// use [effective] instead.
   SemanticsConfiguration get original {
     if (_originalConfiguration == null) {
       _effectiveConfiguration = _originalConfiguration = SemanticsConfiguration();
@@ -4822,8 +4827,7 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
-/// [_RenderObjectSemantics] that should form a node with elevation adjustments
-/// into [_children].
+/// [_RenderObjectSemantics] that should form a node into [_children].
 ///
 /// At this point, walking the [_children] forms a tree
 /// that exactly resemble the resulting semantics node tree.
@@ -5038,6 +5042,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
+    // localeForSubtree from the config overrides parentData's inherited locale.
+    final Locale? localeForChildren =
+        configProvider.effective.localeForSubtree ?? parentData?.localeForChildren;
+
     siblingMergeGroups.clear();
     mergeUp.clear();
     final _SemanticsParentData childParentData = _SemanticsParentData(
@@ -5045,6 +5053,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
+      localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
     );
@@ -5094,6 +5103,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
         configProvider.updateConfig((SemanticsConfiguration config) {
           config.isBlockingUserActions = blocksUserAction;
+        });
+      }
+      if (localeForChildren != configProvider.effective.locale) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.locale = localeForChildren;
         });
       }
     }
@@ -5164,6 +5178,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         blocksUserActions: childParentData.blocksUserActions,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
+        localeForChildren: childParentData.localeForChildren,
       );
     } else {
       effectiveChildParentData = childParentData;
@@ -5279,15 +5294,34 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _updateChildGeometry() {
     assert(geometry != null);
+    final _SemanticsGeometry parentGeometry = geometry!;
     for (final _RenderObjectSemantics child in _children) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
-        parentPaintClipRect: geometry!.paintClipRect,
-        parentSemanticsClipRect: geometry!.semanticsClipRect,
+        parentPaintClipRect: parentGeometry.paintClipRect,
+        parentSemanticsClipRect: parentGeometry.semanticsClipRect,
         parentTransform: null,
         parent: this,
         child: child,
       );
       child._updateGeometry(newGeometry: childGeometry);
+    }
+    for (final _RenderObjectSemantics explicitSiblingChild in siblingMergeGroups
+        .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
+        .whereType<_RenderObjectSemantics>()
+        .expand(
+          (_RenderObjectSemantics siblingChild) =>
+              siblingChild.shouldFormSemanticsNode
+                  ? <_RenderObjectSemantics>[siblingChild]
+                  : siblingChild._children,
+        )) {
+      final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
+        parentPaintClipRect: parentGeometry.paintClipRect,
+        parentSemanticsClipRect: parentGeometry.semanticsClipRect,
+        parentTransform: parentGeometry.transform,
+        parent: this,
+        child: explicitSiblingChild,
+      );
+      explicitSiblingChild._updateGeometry(newGeometry: childGeometry);
     }
   }
 
@@ -5433,13 +5467,27 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     for (final List<_SemanticsFragment> group in siblingMergeGroups) {
       SemanticsConfiguration? configuration;
       SemanticsNode? node;
+      final List<_RenderObjectSemantics> explicitChildren = <_RenderObjectSemantics>[];
       for (final _SemanticsFragment fragment in group) {
+        if (fragment is _RenderObjectSemantics) {
+          if (fragment.shouldFormSemanticsNode) {
+            explicitChildren.add(fragment);
+            assert(fragment.configToMergeUp == null);
+            continue;
+          }
+          explicitChildren.addAll(fragment._children);
+        }
         if (fragment.configToMergeUp != null) {
           fragment.mergesToSibling = true;
           node ??= fragment.owner.cachedSemanticsNode;
           configuration ??= SemanticsConfiguration();
           configuration.absorb(fragment.configToMergeUp!);
         }
+      }
+      final List<SemanticsNode> childrenNodes = <SemanticsNode>[];
+      for (final _RenderObjectSemantics explicitChild in explicitChildren) {
+        explicitChild._buildSemantics(usedSemanticsIds: usedSemanticsIds);
+        childrenNodes.addAll(explicitChild.semanticsNodes);
       }
       // Can be null if all fragments in switchableFragments are marked as explicit.
       if (configuration != null) {
@@ -5453,7 +5501,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             fragment.owner.cachedSemanticsNode = node;
           }
         }
-        node.updateWith(config: configuration);
+        node.updateWith(config: configuration, childrenInInversePaintOrder: childrenNodes);
         _producedSiblingNodesAndOwners[node] = group;
         semanticsNodes.add(node);
 

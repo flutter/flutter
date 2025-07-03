@@ -2442,6 +2442,178 @@ void main() {
     },
   );
 
+  testWidgets('Rematch selection against the first entry with the same value', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    String selectionLabel = 'Initial label';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu0,
+                dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                  DropdownMenuEntry<TestMenu>(
+                    value: TestMenu.mainMenu0,
+                    label: '$selectionLabel 0',
+                  ),
+                  DropdownMenuEntry<TestMenu>(
+                    value: TestMenu.mainMenu1,
+                    label: '$selectionLabel 1',
+                  ),
+                ],
+                controller: controller,
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => setState(() => selectionLabel = 'Updated label'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Select the second item
+    await tester.tap(findMenuItemButton('$selectionLabel 1'));
+    await tester.pump();
+
+    // Update dropdownMenuEntries labels
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(controller.text, 'Updated label 1');
+  });
+
+  testWidgets('Forget selection if its value does not map to any entry', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    String selectionLabel = 'Initial label';
+    bool selectionInEntries = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  DropdownMenu<TestMenu>(
+                    initialSelection: TestMenu.mainMenu0,
+                    dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                      DropdownMenuEntry<TestMenu>(
+                        value: TestMenu.mainMenu0,
+                        label: '$selectionLabel 0',
+                      ),
+                      if (selectionInEntries)
+                        DropdownMenuEntry<TestMenu>(
+                          value: TestMenu.mainMenu1,
+                          label: '$selectionLabel 1',
+                        ),
+                    ],
+                    controller: controller,
+                  ),
+                  ElevatedButton(
+                    onPressed: () => setState(() => selectionInEntries = !selectionInEntries),
+                    child: null,
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => setState(() => selectionLabel = 'Updated label'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Select the second item
+    await tester.tap(findMenuItemButton('$selectionLabel 1'));
+    await tester.pump();
+
+    // Update dropdownMenuEntries labels
+    await tester.tap(find.byType(FloatingActionButton));
+    // Remove second item from entires
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(controller.text, 'Initial label 1');
+
+    // Put second item back into entries
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    expect(controller.text, 'Initial label 1');
+  });
+
+  testWidgets(
+    'Do not rematch selection if the text field was edited progrmaticlly via controller',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      String selectionLabel = 'Initial label';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: Column(
+                  children: <Widget>[
+                    DropdownMenu<TestMenu>(
+                      initialSelection: TestMenu.mainMenu0,
+                      dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                        DropdownMenuEntry<TestMenu>(
+                          value: TestMenu.mainMenu0,
+                          label: '$selectionLabel 0',
+                        ),
+                      ],
+                      controller: controller,
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() => controller.text = 'Controller Value'),
+                      child: null,
+                    ),
+                  ],
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () => setState(() => selectionLabel = 'Updated label'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Change the text field value via controller
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pump();
+
+      // Update dropdownMenuEntries labels
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+
+      expect(controller.text, 'Controller Value');
+    },
+  );
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -4301,6 +4473,59 @@ void main() {
     controller2.dispose();
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169942.
+  testWidgets(
+    'DropdownMenu disabled state applies proper styling to label and selected value text',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      final Color disabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
+
+      Widget buildDropdownMenu({required bool isEnabled}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: DropdownMenu<String>(
+              width: double.infinity,
+              enabled: isEnabled,
+              initialSelection: 'One',
+              label: const Text('Choose number'),
+              dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+                DropdownMenuEntry<String>(value: 'One', label: 'One'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: true));
+
+      // Find the TextField and its EditableText from DropdownMenu.
+      final TextField enabledTextField = tester.widget(find.byType(TextField));
+      final EditableText enabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify enabled state styling for the TextField.
+      expect(enabledTextField.enabled, isTrue);
+      expect(enabledEditableText.style.color, isNot(disabledColor));
+
+      // Switch to the disabled state by rebuilding the widget.
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: false));
+
+      // Find the TextField and its EditableText in disabled state.
+      final TextField textField = tester.widget(find.byType(TextField));
+      final EditableText disabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify disabled state styling for the TextField.
+      expect(textField.enabled, isFalse);
+      expect(disabledEditableText.style.color, disabledColor);
+
+      // Verify the selected value text has disabled color.
+      final EditableText selectedValueText = tester.widget<EditableText>(
+        find.descendant(of: find.byType(TextField), matching: find.byType(EditableText)),
+      );
+      expect(selectedValueText.style.color, disabledColor);
+    },
+  );
 }
 
 enum TestMenu {

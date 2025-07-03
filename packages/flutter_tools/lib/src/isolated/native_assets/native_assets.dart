@@ -212,8 +212,9 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
-    this.pubspecPath,
-  );
+    this.pubspecPath, {
+    required this.includeDevDependencies,
+  });
 
   final String pubspecPath;
   final String packageConfigPath;
@@ -221,6 +222,9 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final FileSystem fileSystem;
   final Logger logger;
   final String runPackageName;
+
+  /// Include the dev dependencies of [runPackageName].
+  final bool includeDevDependencies;
 
   late final logging.Logger _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -252,6 +256,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     packageConfig,
     Uri.file(packageConfigPath),
     runPackageName,
+    includeDevDependencies: includeDevDependencies,
   );
 
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
@@ -728,6 +733,7 @@ Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
+    case TargetPlatform.unsupported:
       throw Exception('Unknown targetPlatform: $targetPlatform.');
   }
 }
@@ -793,6 +799,8 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       }
     case TargetPlatform.web_javascript:
       throw StateError('No dart builds for web yet.');
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 
@@ -820,6 +828,8 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       throwToolExit('Unsupported Android target platform: $targetPlatform.');
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 

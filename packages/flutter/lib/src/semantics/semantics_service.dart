@@ -7,7 +7,6 @@ library;
 
 import 'dart:ui' show TextDirection;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 
 import 'semantics_event.dart' show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
@@ -34,8 +33,8 @@ abstract final class SemanticsService {
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
   ///
-  /// Not all platforms support announcements. Check to see if
-  /// [isAnnounceSupported] before calling this method.
+  /// Not all platforms support announcements. Check to see if it is supported using
+  /// [MediaQuery.supportsAnnounceOf] before calling this method.
   ///
   /// ### Android
   /// Android has [deprecated announcement events][1] due to its disruptive
@@ -65,13 +64,5 @@ abstract final class SemanticsService {
   static Future<void> tooltip(String message) async {
     final TooltipSemanticsEvent event = TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
-  }
-
-  /// Checks if announce is supported on the given platform.
-  ///
-  /// On Android the announce method is deprecated, therefore will return false.
-  /// On other platforms, this will return true.
-  static bool isAnnounceSupported() {
-    return defaultTargetPlatform != TargetPlatform.android;
   }
 }

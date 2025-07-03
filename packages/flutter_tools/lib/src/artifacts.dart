@@ -164,6 +164,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
+    case TargetPlatform.unsupported:
     case null:
       return targetPlatform;
   }
@@ -531,6 +532,8 @@ class CachedArtifacts implements Artifacts {
           platform ?? _currentHostPlatform(_platform, _operatingSystemUtils),
           mode,
         );
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -901,6 +904,8 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
         return null;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1350,6 +1355,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1578,6 +1585,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 

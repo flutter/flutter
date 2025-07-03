@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-const SemanticsFlags allFlags = SemanticsFlags(
+SemanticsFlags allFlags = SemanticsFlags(
   hasCheckedState: true,
   isChecked: true,
   isSelected: true,
@@ -762,6 +762,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1062,6 +1063,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1135,7 +1137,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1161,6 +1163,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1239,7 +1242,7 @@ void main() {
       }
 
       final SemanticsData emptyData = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1265,6 +1268,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1297,6 +1301,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1358,7 +1363,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1385,6 +1390,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

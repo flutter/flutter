@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -412,7 +413,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     if (!globals.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
@@ -431,8 +432,8 @@ class IOSSimulator extends Device {
   String? _supportMessage;
 
   @override
-  String supportMessage() {
-    if (isSupported()) {
+  Future<String> supportMessage() async {
+    if (await isSupported()) {
       return 'Supported';
     }
 
@@ -553,7 +554,7 @@ class IOSSimulator extends Device {
         analytics: globals.analytics,
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: SupportedPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
       throwToolExit('Could not build the application for the simulator.');

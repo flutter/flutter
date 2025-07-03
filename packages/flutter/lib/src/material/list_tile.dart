@@ -425,6 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
+    this.statesController,
   }) : assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
@@ -762,6 +763,9 @@ class ListTile extends StatelessWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -815,6 +819,7 @@ class ListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
     final ListTileStyle listTileStyle =
         style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list;
@@ -841,20 +846,29 @@ class ListTile extends StatelessWidget {
       ).resolve(states);
     }
 
-    final Color? effectiveIconColor =
+    Color? effectiveIconColor =
         resolveColor(iconColor, selectedColor, iconColor) ??
         resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor) ??
         resolveColor(
           theme.listTileTheme.iconColor,
           theme.listTileTheme.selectedColor,
           theme.listTileTheme.iconColor,
-        ) ??
-        resolveColor(
-          defaults.iconColor,
-          defaults.selectedColor,
-          defaults.iconColor,
-          theme.disabledColor,
         );
+
+    final Color? defaultEffectiveIconColor = resolveColor(
+      defaults.iconColor,
+      defaults.selectedColor,
+      defaults.iconColor,
+      theme.disabledColor,
+    );
+
+    final Color? effectiveIconButtonColor =
+        effectiveIconColor ??
+        iconButtonTheme.style?.foregroundColor?.resolve(states) ??
+        defaultEffectiveIconColor;
+
+    effectiveIconColor ??= defaultEffectiveIconColor;
+
     final Color? effectiveColor =
         resolveColor(textColor, selectedColor, textColor) ??
         resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor) ??
@@ -871,9 +885,11 @@ class ListTile extends StatelessWidget {
         );
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
     final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: effectiveIconColor,
-      ).merge(IconButtonTheme.of(context).style),
+      style:
+          IconButtonTheme.of(context).style?.copyWith(
+            foregroundColor: WidgetStatePropertyAll<Color?>(effectiveIconButtonColor),
+          ) ??
+          IconButton.styleFrom(foregroundColor: effectiveIconButtonColor),
     );
 
     TextStyle? leadingAndTrailingStyle;
@@ -970,6 +986,7 @@ class ListTile extends StatelessWidget {
       splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+      statesController: statesController,
       child: Semantics(
         button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
         selected: selected,

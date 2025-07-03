@@ -200,7 +200,7 @@ void sendSemanticsUpdate() {
   transform[15] = 0;
   builder.updateNode(
     id: 0,
-    flags: 0,
+    flags: SemanticsFlags.none,
     actions: 0,
     maxValueLength: 0,
     currentValueLength: 0,
@@ -234,6 +234,7 @@ void sendSemanticsUpdate() {
     linkUrl: '',
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }
@@ -252,7 +253,7 @@ void sendSemanticsUpdateWithRole() {
   transform[10] = 1;
   builder.updateNode(
     id: 0,
-    flags: 0,
+    flags: SemanticsFlags.none,
     actions: 0,
     maxValueLength: 0,
     currentValueLength: 0,
@@ -287,6 +288,7 @@ void sendSemanticsUpdateWithRole() {
     role: SemanticsRole.tab,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }
