@@ -406,7 +406,10 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _stretchDragController = AnimationController(duration: const Duration(microseconds: 1), vsync: this);
+    _stretchDragController = AnimationController(
+      duration: const Duration(microseconds: 1),
+      vsync: this,
+    );
     _stretchDragAnimation = _stretchDragController.drive(
       Tween<double>(begin: _kTopGapRatio, end: _kStretchedTopGapRatio),
     );
@@ -468,7 +471,9 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
           animation: _stretchDragAnimation,
           builder: (BuildContext context, Widget? child) {
             return Padding(
-              padding: EdgeInsets.only(top: MediaQuery.heightOf(context) * _stretchDragAnimation.value),
+              padding: EdgeInsets.only(
+                top: MediaQuery.heightOf(context) * _stretchDragAnimation.value,
+              ),
               child: _coverSheetSecondaryTransition(
                 widget.secondaryRouteAnimation,
                 _coverSheetPrimaryTransition(
