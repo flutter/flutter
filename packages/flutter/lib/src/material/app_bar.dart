@@ -223,7 +223,25 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actionsPadding,
     this.animateColor = false,
   }) : assert(elevation == null || elevation >= 0.0),
-       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
+       preferredSize = preferredSizeFor(
+         toolbarHeight: toolbarHeight,
+         bottomPreferredSize: bottom?.preferredSize,
+       );
+
+  /// The value [preferredSize] would have on an app bar with the given fields.
+  ///
+  /// The [bottomPreferredSize] parameter corresponds to the value of
+  /// [PreferredSizeWidget.preferredSize] on the [bottom] field.
+  ///
+  /// This can be useful for extending this widget by composition.
+  /// A widget whose build method constructs an [AppBar] and which is meant to be
+  /// used in [Scaffold.appBar] will need a [PreferredSizeWidget.preferredSize]
+  /// implementation that matches the build method's [AppBar].
+  /// That implementation can call this method with parameters matching
+  /// what the build method will pass to the [AppBar] constructor.
+  static Size preferredSizeFor({double? toolbarHeight, Size? bottomPreferredSize}) {
+    return _PreferredAppBarSize(toolbarHeight, bottomPreferredSize?.height);
+  }
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
   /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and

@@ -847,6 +847,27 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
+  testWidgets('AppBar.preferredSize matches preferredSizeFor', (WidgetTester tester) async {
+    void checkMatch({double? toolbarHeight, PreferredSizeWidget? bottom}) {
+      expect(
+        AppBar(toolbarHeight: toolbarHeight, bottom: bottom).preferredSize,
+        AppBar.preferredSizeFor(
+          toolbarHeight: toolbarHeight,
+          bottomPreferredSize: bottom?.preferredSize,
+        ),
+      );
+    }
+
+    checkMatch();
+    checkMatch(toolbarHeight: 80.0);
+    checkMatch(
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(12.0),
+        child: SizedBox(height: 12.0),
+      ),
+    );
+  });
+
   testWidgets('AppBar in body excludes bottom SafeArea padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/26163
     await tester.pumpWidget(
