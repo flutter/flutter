@@ -20,11 +20,11 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'utils/project_testing_utils.dart';
+import '../../../src/common.dart';
+import '../../../src/context.dart';
+import '../../../src/fakes.dart';
+import '../../../src/test_flutter_command_runner.dart';
+import '../utils/project_testing_utils.dart';
 
 void main() {
   late Directory originalCwd;
