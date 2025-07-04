@@ -349,7 +349,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    await processUtils.run(throwOnError: true, compilationArgs);
+    final RunResult runResult = await processUtils.run(
+      throwOnError: !compilerConfig.dryRun,
+      compilationArgs,
+    );
+    if (compilerConfig.dryRun) {
+      _handleDryRunResult(environment, runResult);
+    }
   }
 
   @override
@@ -384,6 +390,42 @@ class Dart2WasmTarget extends Dart2WebTarget {
     'main.dart.mjs',
     if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
   ];
+
+  void _handleDryRunResult(Environment environment, RunResult runResult) {
+    final int exitCode = runResult.exitCode;
+    final String stdout = runResult.stdout;
+    final String stderr = runResult.stderr;
+    if (exitCode != 0 && exitCode != 254) {
+      environment.logger.printWarning('Unexpected wasm dry run failure:');
+      if (stderr.isNotEmpty) {
+        environment.logger.printWarning(stdout);
+        environment.logger.printWarning(stderr);
+      }
+      return;
+    }
+    if (exitCode == 0) {
+      environment.logger.printWarning(
+        'Wasm dry run succeeded. Consider building and testing your application with the '
+        '`--wasm` flag. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm',
+      );
+      return;
+    }
+    if (stderr.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run failed:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(stderr);
+      return;
+    }
+    if (stdout.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run findings:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(
+        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm\n',
+      );
+    }
+  }
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
