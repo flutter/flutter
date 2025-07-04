@@ -31,18 +31,22 @@ void main() {
     expect(await webDevices.pollingGetDevices(), isEmpty);
   });
 
+  _FakeChromiumDevice getFakeChromiumDevice() {
+    final TestChromiumLauncher launcher = TestChromiumLauncher(
+      launcher: () => _OnceClosableChromium(),
+    );
+
+    return _FakeChromiumDevice(
+      chromiumLauncher: launcher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+    );
+  }
+
   testWithoutContext(
     'Successive calls of ChromiumDevice.stopApp() do not try to close chrome',
     () async {
-      final TestChromiumLauncher launcher = TestChromiumLauncher(
-        launcher: () => _OnceClosableChromium(),
-      );
-
-      final _FakeChromiumDevice chromiumDevice = _FakeChromiumDevice(
-        chromiumLauncher: launcher,
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-      );
+      final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
 
       await chromiumDevice.startApp(
         null,
@@ -378,6 +382,26 @@ void main() {
     );
 
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
+  });
+
+  testWithoutContext('HTTP web launch url is not invalid', () async {
+    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+
+    expect(chromiumDevice.isLaunchUrlValid('http://localhost:3000'), true);
+    expect(chromiumDevice.isLaunchUrlValid('http://127.0.0.1:3000/'), true);
+  });
+
+  testWithoutContext('HTTPS web launch url is not invalid', () async {
+    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+
+    expect(chromiumDevice.isLaunchUrlValid('https://localhost:3000'), true);
+    expect(chromiumDevice.isLaunchUrlValid('https://google.com'), true);
+  });
+
+  testWithoutContext('Non-HTTP web launch url scheme is invalid', () async {
+    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+
+    expect(chromiumDevice.isLaunchUrlValid('file://path'), false);
   });
 }
 
