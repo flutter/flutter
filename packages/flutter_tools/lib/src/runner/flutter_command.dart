@@ -138,6 +138,7 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -149,6 +150,7 @@ abstract final class FlutterOptions {
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
   static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
+  static const String kEnableImpeller = 'enable-impeller';
 }
 
 /// flutter command categories for usage.
@@ -1068,6 +1070,10 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
       abbr: 'P',
     );
+    argParser.addOption(
+      FlutterOptions.kAndroidGradleProjectCacheDir,
+      help: 'Specifies the project-specific cache directory. Defaults to .gradle.',
+    );
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -1231,7 +1237,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
     argParser.addFlag(
-      'enable-impeller',
+      FlutterOptions.kEnableImpeller,
       hide: !verboseHelp,
       defaultsTo: null,
       help:
@@ -1240,6 +1246,19 @@ abstract class FlutterCommand extends Command<void> {
           'is available but not the default. This flag will cause Impeller '
           'to be used on Android. On other platforms, this flag will be '
           'ignored.',
+    );
+  }
+
+  void addEnableFlutterGpuFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-flutter-gpu',
+      hide: !verboseHelp,
+      defaultsTo: null,
+      help:
+          'Whether to enable the Flutter GPU API (https://api.flutter.dev/flutter/flutter_gpu/). '
+          'This feature is only supported with the Impeller rendering engine, '
+          'which can be enabled via the "--${FlutterOptions.kEnableImpeller}" '
+          'option.',
     );
   }
 
@@ -1367,6 +1386,11 @@ abstract class FlutterCommand extends Command<void> {
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
 
+    final String? androidGradleProjectCacheDir =
+        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+            : null;
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1449,6 +1473,7 @@ abstract class FlutterCommand extends Command<void> {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)
@@ -1888,9 +1913,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
-    );
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.
@@ -2048,7 +2071,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
@@ -2074,6 +2096,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.unsupported:
       return null;
   }
 }

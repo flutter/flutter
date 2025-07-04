@@ -5,6 +5,7 @@
 /// @docImport 'localizations/gen_l10n.dart';
 library;
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -79,9 +80,16 @@ class FlutterManifest {
     List<Font>? fonts,
     List<Uri>? shaders,
     List<DeferredComponent>? deferredComponents,
+    bool removeDependencies = false,
   }) {
     final FlutterManifest copy = FlutterManifest._(logger: _logger);
     copy._descriptor = <String, Object?>{..._descriptor};
+    if (removeDependencies) {
+      // Remove the non-Flutter SDK dependencies if they're going to be added back later.
+      copy._descriptor['dependencies'] = YamlMap.wrap(<String, Object?>{
+        'flutter': <String, Object?>{'sdk': 'flutter'},
+      });
+    }
     copy._flutterDescriptor = <String, Object?>{..._flutterDescriptor};
 
     if (assets != null && assets.isNotEmpty) {
@@ -265,6 +273,11 @@ class FlutterManifest {
     };
   }
 
+  /// Returns the MD5 hash of the manifest contents.
+  String computeMD5Hash() {
+    return md5.convert(toYaml().toString().codeUnits).toString();
+  }
+
   /// Returns the deferred components configuration if declared. Returns
   /// null if no deferred components are declared.
   late final List<DeferredComponent>? deferredComponents = computeDeferredComponents();
@@ -421,16 +434,6 @@ class FlutterManifest {
   }
 
   /// Whether localization Dart files should be generated.
-  ///
-  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
-  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
-  /// does _not_ imply a synthetic package (and never did); additional
-  /// introspection is required to determine whether a synthetic package is
-  /// required.
-  ///
-  /// See also:
-  ///
-  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;

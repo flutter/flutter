@@ -129,7 +129,7 @@ void main() {
     );
 
     Text placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.darkColor.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.darkColor.value);
 
     await tester.pumpAndSettle();
 
@@ -141,7 +141,7 @@ void main() {
     );
 
     placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.color.value);
   });
 
   testWidgets("placeholderStyle modifies placeholder's style and doesn't affect text's style", (
@@ -623,7 +623,7 @@ void main() {
     expect(suffixIconFinder, findsOneWidget);
     expect(placeholderFinder, findsOneWidget);
 
-    // Initially, the icons and placeholder text are fully opaque.
+    // Initially, the icons are fully opaque.
     expect(
       tester
           .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
@@ -636,7 +636,8 @@ void main() {
           .opacity,
       equals(1.0),
     );
-    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(1.0));
+    // The default placeholder color is semi-transparent.
+    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(0.6));
 
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
@@ -811,5 +812,67 @@ void main() {
           .opacity,
       lessThan(1.0),
     );
+  });
+
+  testWidgets('Focused search field hides prefix in higher accessibility text scale modes', (
+    WidgetTester tester,
+  ) async {
+    double scaleFactor = 3.0;
+    const double iconSize = 10.0;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: CupertinoPageScaffold(
+                child: Center(
+                  child: CupertinoSearchTextField(
+                    placeholder: 'Search',
+                    focusNode: focusNode,
+                    prefixIcon: const Icon(CupertinoIcons.add),
+                    suffixIcon: const Icon(CupertinoIcons.xmark),
+                    suffixMode: OverlayVisibilityMode.always,
+                    itemSize: iconSize,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoSearchTextField), matching: find.byType(RichText)),
+    );
+    expect(barItems.length, greaterThan(0));
+
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), Size.square(scaleFactor * iconSize));
+    }
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // The prefix icon shrinks at higher accessibility text scale modes.
+    expect(tester.getSize(find.byIcon(CupertinoIcons.add)), Size.zero);
+    expect(tester.getSize(find.byIcon(CupertinoIcons.xmark)), Size.square(scaleFactor * iconSize));
+
+    setState(() {
+      scaleFactor = 2.9;
+    });
+    await tester.pumpAndSettle();
+
+    // Below the threshold, the prefix icon is displayed.
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), Size.square(scaleFactor * iconSize));
+    }
   });
 }

@@ -7,6 +7,9 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [

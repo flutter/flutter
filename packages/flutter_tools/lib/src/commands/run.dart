@@ -12,7 +12,6 @@ import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
@@ -129,6 +128,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         valueHelp: 'path/to/trace.binpb',
       )
       ..addFlag(
+        'profile-microtasks',
+        negatable: false,
+        help:
+            'Enable collection of information about each microtask. '
+            'Information about completed microtasks will be written to the '
+            '"Microtask" timeline stream. Information about queued microtasks '
+            'will be accessible from Dart / Flutter DevTools.',
+        hide: !verboseHelp,
+      )
+      ..addFlag(
         'trace-skia',
         negatable: false,
         help:
@@ -217,6 +226,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
@@ -231,6 +241,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
+  bool get enableFlutterGpu => (argResults!['enable-flutter-gpu'] as bool?) ?? false;
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
@@ -293,6 +304,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
+        enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
@@ -322,6 +334,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         traceSystrace: boolArg('trace-systrace'),
         traceToFile: stringArg('trace-to-file'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
+        profileMicrotasks: boolArg('profile-microtasks'),
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
@@ -357,6 +370,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
@@ -786,7 +800,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${sentenceCase(getFriendlyModeName(buildMode))} '
+          '${buildMode.uppercaseFriendlyName}'
           'mode is not supported by ${device.displayName}.',
         );
       }

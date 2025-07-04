@@ -14,6 +14,7 @@ dependencies:
   # These will be replaced with proper constraints after the template is hydrated.
   dtd: 2.5.1
   flutter_lints: 6.0.0
+  google_fonts: 6.2.1
   stack_trace: 1.12.1
   url_launcher: 6.3.1
 
@@ -53,7 +54,7 @@ dependencies:
   url_launcher_web: 2.4.1
   url_launcher_windows: 3.1.4
   vector_math: 2.2.0
-  vm_service: 15.0.1
+  vm_service: 15.0.2
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
@@ -61,4 +62,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: rkqek9
+# PUBSPEC CHECKSUM: mlb1k3

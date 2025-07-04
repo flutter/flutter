@@ -95,6 +95,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('Release branch validation');
+  await verifyReleaseBranchState(flutterRoot);
+
   printProgress('TargetPlatform tool/framework consistency');
   await verifyTargetPlatform(flutterRoot);
 
@@ -298,6 +301,15 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
     parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
   );
   return _Line(lineNumber, content);
+}
+
+Future<void> verifyReleaseBranchState(String workringDirerctory) async {
+  final ProcessResult result = await Process.run(dart, <String>[
+    'bin/check_engine_version.dart',
+  ], workingDirectory: path.join(workringDirerctory, 'dev', 'tools'));
+  if (result.exitCode != 0) {
+    foundError(<String>['${result.stderr}']);
+  }
 }
 
 Future<void> verifyTargetPlatform(String workingDirectory) async {
@@ -530,7 +542,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
 
   // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
   final RegExp callsTestFunctionPattern = RegExp(
-    r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
+    r'^ *(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
   );
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
@@ -2552,18 +2564,12 @@ final String _kTemplateRelativePath = path.join(
 final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
-final String _kLicensePath = path.join(
-  'dev',
-  'conductor',
-  'core',
-  'lib',
-  'src',
-  'proto',
-  'license_header.txt',
-);
 
-String _getFlutterLicense(String flutterRoot) {
-  return '${File(path.join(flutterRoot, _kLicensePath)).readAsLinesSync().join("\n")}\n\n';
+String _getFlutterLicense() {
+  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+      '// Use of this source code is governed by a BSD-style license that can be\n'
+      '// found in the LICENSE file.\n'
+      '\n';
 }
 
 String _removeLicenseIfPresent(String fileContents, String license) {
@@ -2575,7 +2581,7 @@ String _removeLicenseIfPresent(String fileContents, String license) {
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final List<String> errors = <String>[];
-  final String license = _getFlutterLicense(flutterRoot);
+  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs =
@@ -2665,9 +2671,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 
-  'dev/conductor/bin/conductor',
-  'dev/conductor/bin/packages_autoroller',
-  'dev/conductor/core/lib/src/proto/compile_proto.sh',
+  'dev/checks',
 
   'dev/customer_testing/ci.sh',
 
@@ -2677,6 +2681,8 @@ const Set<String> kExecutableAllowlist = <String>{
 
   'dev/integration_tests/deferred_components_test/download_assets.sh',
   'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/packages_autoroller/run',
 
   'dev/tools/gen_keycodes/bin/gen_keycodes',
   'dev/tools/repackage_gradle_wrapper.sh',

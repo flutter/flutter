@@ -32,7 +32,9 @@ void main() {
   late LoggingProcessManager loggingProcessManager;
   late FakeStdio mockStdio;
   late Logger logger;
-  late LocalFileSystem fs;
+  // We perform this initialization just so we can build the generated file path for test
+  // descriptions.
+  LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
   late BotDetector botDetector;
   late Platform platform;
 
@@ -202,6 +204,9 @@ void main() {
     );
 
     const String samplePreviewFile = '''
+import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
+
 @Preview(name: 'preview')
 Widget preview() => Text('Foo');''';
 
@@ -212,6 +217,7 @@ import 'package:flutter_project/foo.dart' as _i2;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(
+        packageName: 'flutter_project',
         name: 'preview',
         builder: () => _i2.preview(),
       )
@@ -219,7 +225,7 @@ List<_i1.WidgetPreview> previews() => [
 ''';
 
     testUsingContext(
-      'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
@@ -231,7 +237,7 @@ List<_i1.WidgetPreview> previews() => [
             .writeAsStringSync(samplePreviewFile);
 
         final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
         await startWidgetPreview(rootProject: rootProject);
@@ -251,7 +257,7 @@ List<_i1.WidgetPreview> previews() => [
     );
 
     testUsingContext(
-      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
@@ -263,7 +269,7 @@ List<_i1.WidgetPreview> previews() => [
             .writeAsStringSync(samplePreviewFile);
 
         final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
         // Try to execute using the CWD.
@@ -289,7 +295,7 @@ List<_i1.WidgetPreview> previews() => [
     );
 
     testUsingContext(
-      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
