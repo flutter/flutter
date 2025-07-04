@@ -25,6 +25,7 @@ import 'checkable.dart';
 import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
+import 'form.dart';
 import 'header.dart';
 import 'heading.dart';
 import 'image.dart';
@@ -528,6 +529,9 @@ enum EngineSemanticsRole {
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
+
+  /// An area that represents a form.
+  form,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -2025,12 +2029,13 @@ class SemanticsObject {
         return EngineSemanticsRole.navigation;
       case ui.SemanticsRole.region:
         return EngineSemanticsRole.region;
+      case ui.SemanticsRole.form:
+        return EngineSemanticsRole.form;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
       case ui.SemanticsRole.progressBar:
@@ -2106,6 +2111,7 @@ class SemanticsObject {
       EngineSemanticsRole.main => SemanticMain(this),
       EngineSemanticsRole.navigation => SemanticNavigation(this),
       EngineSemanticsRole.region => SemanticRegion(this),
+      EngineSemanticsRole.form => SemanticForm(this),
     };
   }
 
