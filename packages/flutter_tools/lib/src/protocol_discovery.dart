@@ -153,7 +153,7 @@ class ProtocolDiscovery {
 /// if there isn't a listener attached.
 /// The events are then delivered when a listener is attached to the stream.
 class _BufferedStreamController<T extends Object> {
-  _BufferedStreamController() : _events = <T>[];
+  _BufferedStreamController() : _events = <Object>[];
 
   /// The stream that this controller is controlling.
   Stream<T> get stream {
