@@ -28,12 +28,12 @@ void main() {
     });
 
     test('includes toolArgs', () async {
-      final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+      final FakeFlutterTestDebugAdapter adapter = FakeFlutterTestDebugAdapter(
         fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
       final Completer<void> responseCompleter = Completer<void>();
-      final MockRequest request = MockRequest();
+      final FakeRequest request = FakeRequest();
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
         cwd: '.',
         program: 'foo.dart',
@@ -50,12 +50,12 @@ void main() {
     });
 
     test('includes env variables', () async {
-      final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+      final FakeFlutterTestDebugAdapter adapter = FakeFlutterTestDebugAdapter(
         fileSystem: MemoryFileSystem.test(style: fsStyle),
         platform: platform,
       );
       final Completer<void> responseCompleter = Completer<void>();
-      final MockRequest request = MockRequest();
+      final FakeRequest request = FakeRequest();
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
         cwd: '.',
         program: 'foo.dart',
@@ -71,12 +71,12 @@ void main() {
 
     group('includes customTool', () {
       test('with no args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+        final FakeFlutterTestDebugAdapter adapter = FakeFlutterTestDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
         final Completer<void> responseCompleter = Completer<void>();
-        final MockRequest request = MockRequest();
+        final FakeRequest request = FakeRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
           cwd: '.',
           program: 'foo.dart',
@@ -94,12 +94,12 @@ void main() {
       });
 
       test('with all args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
+        final FakeFlutterTestDebugAdapter adapter = FakeFlutterTestDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
         );
         final Completer<void> responseCompleter = Completer<void>();
-        final MockRequest request = MockRequest();
+        final FakeRequest request = FakeRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
           cwd: '.',
           program: 'foo.dart',

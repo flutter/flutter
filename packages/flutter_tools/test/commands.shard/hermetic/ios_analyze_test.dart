@@ -65,8 +65,8 @@ void main() {
     });
 
     testWithoutContext('can output json file', () async {
-      final MockIosProject ios = MockIosProject();
-      final MockFlutterProject project = MockFlutterProject(ios);
+      final FakeIosProject ios = FakeIosProject();
+      final FakeFlutterProject project = FakeFlutterProject(ios);
       const String expectedConfig = 'someConfig';
       const String expectedTarget = 'someTarget';
       const String expectedOutputFile = '/someFile';
@@ -84,8 +84,8 @@ void main() {
     });
 
     testWithoutContext('can list build options', () async {
-      final MockIosProject ios = MockIosProject();
-      final MockFlutterProject project = MockFlutterProject(ios);
+      final FakeIosProject ios = FakeIosProject();
+      final FakeFlutterProject project = FakeFlutterProject(ios);
       const List<String> targets = <String>['target1', 'target2'];
       const List<String> configs = <String>['config1', 'config2'];
       ios.expectedProjectInfo = XcodeProjectInfo(targets, configs, const <String>[], logger);
@@ -136,14 +136,14 @@ void main() {
   });
 }
 
-class MockFlutterProject extends Fake implements FlutterProject {
-  MockFlutterProject(this.ios);
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject(this.ios);
 
   @override
   final IosProject ios;
 }
 
-class MockIosProject extends Fake implements IosProject {
+class FakeIosProject extends Fake implements IosProject {
   String? outputConfiguration;
   String? outputTarget;
   late String outputFileLocation;

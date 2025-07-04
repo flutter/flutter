@@ -330,6 +330,21 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
+    // Override the asset resolution behavior to automatically insert
+    // 'packages/$packageName/` in front of non-package paths as some previews
+    // may reference assets that are within the current project and wouldn't
+    // normally require a package specifier.
+    // TODO(bkonyi): this doesn't modify the behavior of asset loading logic in
+    // the engine implementation. This means that any asset loading done by
+    // APIs provided in dart:ui won't work correctly for non-package asset
+    // paths (e.g., shaders loaded by `FragmentProgram.fromAsset()`).
+    //
+    // See https://github.com/flutter/flutter/issues/171284
+    preview = DefaultAssetBundle(
+      bundle: PreviewAssetBundle(packageName: widget.preview.packageName),
+      child: preview,
+    );
+
     preview = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -683,12 +698,28 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
 }
 
 /// Custom [AssetBundle] used to map original asset paths from the parent
-/// project to those in the preview project.
+/// projects to those in the preview project.
 class PreviewAssetBundle extends PlatformAssetBundle {
+  PreviewAssetBundle({required this.packageName});
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  ///
+  /// This should only be null if the preview is defined in a file that's not
+  /// part of a Flutter library (e.g., is defined in a test).
+  // TODO(bkonyi): verify what the behavior should be in this scenario.
+  final String? packageName;
+
   // Assets shipped via package dependencies have paths that start with
   // 'packages'.
   static const String _kPackagesPrefix = 'packages';
 
+  // TODO(bkonyi): when loading an invalid asset path that doesn't start with
+  // 'packages', this throws a FlutterError referencing the modified key
+  // instead of the original. We should catch the error and rethrow one with
+  // the original key in the error message.
   @override
   Future<ByteData> load(String key) {
     // These assets are always present or are shipped via a package and aren't
@@ -697,12 +728,13 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     if (key == 'AssetManifest.bin' ||
         key == 'AssetManifest.json' ||
         key == 'FontManifest.json' ||
-        key.startsWith(_kPackagesPrefix)) {
+        key.startsWith(_kPackagesPrefix) ||
+        packageName == null) {
       return super.load(key);
     }
-    // Other assets are from the parent project. Map their keys to those found
-    // in the pubspec.yaml of the preview envirnment.
-    return super.load('../../$key');
+    // Other assets are from the parent project. Map their keys to package
+    // paths corresponding to the package containing the preview.
+    return super.load(_toPackagePath(key));
   }
 
   @override
@@ -712,9 +744,11 @@ class PreviewAssetBundle extends PlatformAssetBundle {
       return ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
     return await ImmutableBuffer.fromAsset(
-      key.startsWith(_kPackagesPrefix) ? key : '../../$key',
+      key.startsWith(_kPackagesPrefix) ? key : _toPackagePath(key),
     );
   }
+
+  String _toPackagePath(String key) => '$_kPackagesPrefix/$packageName/$key';
 }
 
 /// Main entrypoint for the widget previewer.
@@ -875,16 +909,13 @@ class WidgetPreviewScaffold extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Material(
         color: Colors.transparent,
-        child: DefaultAssetBundle(
-          bundle: PreviewAssetBundle(),
-          child: Stack(
-            children: [
-              // Display the previewer
-              _displayPreviewer(previewView),
-              // Display the layout toggle buttons
-              _displayToggleLayoutButtons(),
-            ],
-          ),
+        child: Stack(
+          children: [
+            // Display the previewer
+            _displayPreviewer(previewView),
+            // Display the layout toggle buttons
+            _displayToggleLayoutButtons(),
+          ],
         ),
       ),
     );
