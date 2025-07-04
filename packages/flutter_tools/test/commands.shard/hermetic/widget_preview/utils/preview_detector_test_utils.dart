@@ -4,15 +4,18 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
-import 'package:test/test.dart';
 
+import '../../../../src/common.dart';
+import '../../../../src/fakes.dart';
 import 'preview_project.dart';
 
 bool _stateInitialized = false;
@@ -47,6 +50,14 @@ PreviewDetector createTestPreviewDetector() {
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   return PreviewDetector(
+    previewAnalytics: WidgetPreviewAnalytics(
+      analytics: getInitializedFakeAnalyticsInstance(
+        fakeFlutterVersion: FakeFlutterVersion(),
+        // We don't care about anything written by fake analytics, so we're safe to use a different
+        // file system here.
+        fs: MemoryFileSystem.test(),
+      ),
+    ),
     projectRoot: _projectRoot!,
     logger: BufferLogger.test(),
     fs: _fs,

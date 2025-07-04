@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -65,7 +64,13 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
       },
-      overrides: <Type, Generator>{Analytics: () => FakeAnalytics()},
+      overrides: <Type, Generator>{
+        Analytics:
+            () => getInitializedFakeAnalyticsInstance(
+              fakeFlutterVersion: FakeFlutterVersion(),
+              fs: MemoryFileSystem.test(),
+            ),
+      },
     );
     device = FakeDevice();
     devFS = FakeDevFS();
@@ -2291,11 +2296,4 @@ flutter:
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
-}
-
-class FakeAnalytics extends Fake implements Analytics {
-  @override
-  void send(Event event) => sentEvents.add(event);
-
-  final List<Event> sentEvents = <Event>[];
 }
