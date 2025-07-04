@@ -15,6 +15,7 @@ dependencies:
   dds: 5.0.2
   dwds: 24.3.10
   code_builder: 4.10.1
+  collection: 1.19.1
   completion: 1.0.1
   coverage: 1.14.0
   crypto: 3.0.6

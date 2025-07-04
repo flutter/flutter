@@ -168,9 +168,7 @@ class ChromiumLauncher {
         return userDataDir;
       }
     }
-    return _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tools_chrome_device.',
-    );
+    return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
   }
 
   /// Launch a Chromium browser to a particular `host` page.
