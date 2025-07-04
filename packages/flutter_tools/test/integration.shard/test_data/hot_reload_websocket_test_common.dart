@@ -16,8 +16,16 @@ import 'hot_reload_project.dart';
 void testAllWebSocket({List<String> additionalCommandArgs = const <String>[]}) {
   group('WebSocket DWDS connection'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
-    // Define timeout constants
+    // Test configuration constants
+    const Duration debugUrlTimeout = Duration(seconds: 20);
+    const Duration appStartTimeout = Duration(seconds: 15);
     const Duration hotReloadTimeout = Duration(seconds: 10);
+
+    // Chrome executable paths (macOS primary, fallback)
+    const List<String> chromePaths = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      'google-chrome',
+    ];
 
     late Directory tempDir;
     final HotReloadProject project = HotReloadProject();
@@ -64,10 +72,10 @@ void testAllWebSocket({List<String> additionalCommandArgs = const <String>[]}) {
           additionalCommandArgs: [...additionalCommandArgs, '--no-web-resources-cdn'],
         );
 
-        // Step 2: Wait for DWDS debug URL to be available (this happens before app startup completes)
+        // Step 2: Wait for DWDS debug URL to be available
         print('Step 2: Waiting for DWDS debug service URL...');
         final String debugUrl = await sawDebugUrl.future.timeout(
-          const Duration(seconds: 20),
+          debugUrlTimeout,
           onTimeout: () {
             throw Exception('DWDS debug URL not found - app may not have started correctly');
           },
@@ -76,42 +84,13 @@ void testAllWebSocket({List<String> additionalCommandArgs = const <String>[]}) {
 
         // Step 3: Launch headless Chrome to connect to DWDS
         print('Step 3: Launching headless Chrome to connect to DWDS...');
-        try {
-          chromeProcess = await io
-              .Process.start('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
-            '--headless',
-            '--disable-gpu',
-            '--no-sandbox',
-            '--disable-extensions',
-            '--disable-dev-shm-usage',
-            '--remote-debugging-port=0',
-            debugUrl,
-          ]);
-          print('✓ Headless Chrome launched and connecting to DWDS');
-        } catch (e) {
-          // Fallback to system Chrome
-          try {
-            chromeProcess = await io.Process.start('google-chrome', [
-              '--headless',
-              '--disable-gpu',
-              '--no-sandbox',
-              '--disable-extensions',
-              '--disable-dev-shm-usage',
-              '--remote-debugging-port=0',
-              debugUrl,
-            ]);
-            print('✓ Headless Chrome launched (system path) and connecting to DWDS');
-          } catch (e2) {
-            throw Exception('Could not launch Chrome: $e2. Please ensure Chrome is installed.');
-          }
-        }
+        chromeProcess = await _launchHeadlessChrome(debugUrl, chromePaths);
+        print('✓ Headless Chrome launched and connecting to DWDS');
 
         // Step 4: Wait for app to start (Chrome connection established)
         print('Step 4: Waiting for Flutter app to start after Chrome connection...');
-
-        // Now that Chrome is connecting, wait for the app startup to complete
         await appStartFuture.timeout(
-          const Duration(seconds: 15),
+          appStartTimeout,
           onTimeout: () {
             throw Exception('App startup did not complete after Chrome connection');
           },
@@ -145,20 +124,53 @@ void testAllWebSocket({List<String> additionalCommandArgs = const <String>[]}) {
         print('✓ WebSocket DWDS test completed successfully');
         print('✓ Verified: web-server device + DWDS + WebSocket connection + hot reload');
       } finally {
-        // Cleanup
-        if (chromeProcess != null) {
-          try {
-            chromeProcess.kill();
-            await chromeProcess.exitCode;
-            print('Chrome process cleaned up');
-          } catch (e) {
-            print('Warning: Failed to clean up Chrome process: $e');
-          }
-        }
-        await subscription.cancel();
+        await _cleanupResources(chromeProcess, subscription);
       }
     });
   });
+}
+
+/// Launches headless Chrome with the given debug URL.
+/// Tries multiple Chrome executable paths until one succeeds.
+Future<io.Process> _launchHeadlessChrome(String debugUrl, List<String> chromePaths) async {
+  const List<String> chromeArgs = [
+    '--headless',
+    '--disable-gpu',
+    '--no-sandbox',
+    '--disable-extensions',
+    '--disable-dev-shm-usage',
+    '--remote-debugging-port=0',
+  ];
+
+  for (final String chromePath in chromePaths) {
+    try {
+      return await io.Process.start(chromePath, [...chromeArgs, debugUrl]);
+    } catch (e) {
+      // Try next path
+      continue;
+    }
+  }
+
+  throw Exception(
+    'Could not launch Chrome. Tried paths: $chromePaths. Please ensure Chrome is installed.',
+  );
+}
+
+/// Cleans up test resources (Chrome process and stdout subscription).
+Future<void> _cleanupResources(
+  io.Process? chromeProcess,
+  StreamSubscription<String> subscription,
+) async {
+  if (chromeProcess != null) {
+    try {
+      chromeProcess.kill();
+      await chromeProcess.exitCode;
+      print('Chrome process cleaned up');
+    } catch (e) {
+      print('Warning: Failed to clean up Chrome process: $e');
+    }
+  }
+  await subscription.cancel();
 }
 
 // Helper to run flutter with web-server device using WebSocket connection.
