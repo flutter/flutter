@@ -488,7 +488,8 @@ class _FakeFlutterVmService extends Fake implements FlutterVmService {
   }
 
   @override
-  final service = _FakeVmService();
+  // ignore: omit_obvious_property_types
+  final _FakeVmService service = _FakeVmService();
 
   (String, String?, Map<String, Object?>?)? callMethodWrapperInvocation;
 

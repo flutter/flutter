@@ -283,15 +283,15 @@ class FakeDeviceLogReader extends DeviceLogReader {
   var disposed = false;
 
   final _lineQueue = <String>[];
-  late final _linesController = StreamController<String>.broadcast(
-    onListen: () {
-      _lineQueue.forEach(_linesController.add);
-      _lineQueue.clear();
-    },
-  );
+  late final _linesController = StreamController<String>.broadcast(onListen: _onListen);
 
   @override
   Stream<String> get logLines => _linesController.stream;
+
+  void _onListen() {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  }
 
   void addLine(String line) {
     if (_linesController.hasListener) {
