@@ -20,8 +20,8 @@ abstract class AndroidBuilder {
     required Set<AndroidBuildInfo> androidBuildInfo,
     required String target,
     required Future<void> Function(FlutterProject, {required bool releaseMode}) generateTooling,
-    String? outputDirectoryPath,
     required String buildNumber,
+    String? outputDirectoryPath,
   });
 
   /// Builds an APK artifact.

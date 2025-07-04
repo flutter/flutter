@@ -153,7 +153,7 @@ class ProtocolDiscovery {
 /// if there isn't a listener attached.
 /// The events are then delivered when a listener is attached to the stream.
 class _BufferedStreamController<T> {
-  _BufferedStreamController() : _events = <dynamic>[];
+  _BufferedStreamController() : _events = <T>[];
 
   /// The stream that this controller is controlling.
   Stream<T> get stream {
@@ -163,22 +163,13 @@ class _BufferedStreamController<T> {
   late final StreamController<T> _streamController = () {
     final streamControllerInstance = StreamController<T>.broadcast();
     streamControllerInstance.onListen = () {
-      for (final dynamic event in _events) {
-        if (event is T) {
-          streamControllerInstance.add(event);
-        } else {
-          streamControllerInstance.addError(
-            (event as Iterable<dynamic>).first as Object,
-            event.last as StackTrace,
-          );
-        }
-      }
+      _events.forEach(streamControllerInstance.add);
       _events.clear();
     };
     return streamControllerInstance;
   }();
 
-  final List<dynamic> _events;
+  final List<T> _events;
 
   /// Sends [event] if there is a listener attached to the broadcast stream.
   /// Otherwise, it enqueues [event] until a listener is attached.
@@ -192,11 +183,7 @@ class _BufferedStreamController<T> {
 
   /// Sends or enqueues an error event.
   void addError(Object error, [StackTrace? stackTrace]) {
-    if (_streamController.hasListener) {
-      _streamController.addError(error, stackTrace);
-    } else {
-      _events.add(<dynamic>[error, stackTrace]);
-    }
+    _streamController.addError(error, stackTrace);
   }
 
   /// Closes the stream.

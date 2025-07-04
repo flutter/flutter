@@ -59,7 +59,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
   for (final dynamic rawElement in elements) {
     final element = rawElement as Map<String, dynamic>;
 
-    final filters = element['filters'] as List<dynamic>?;
+    final filters = element['filters'] as List?;
     expect(
       filters,
       isNotNull,
@@ -67,8 +67,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
     );
 
     String? abi;
-    for (final dynamic rawFilter in filters!) {
-      final filter = rawFilter as Map<String, dynamic>;
+    for (final Map<String, Object?> filter in filters!.cast<Map<String, Object?>>()) {
       if (filter['filterType'] == 'ABI') {
         abi = filter['value'] as String?;
         break;

@@ -532,7 +532,7 @@ class TestTimingEvent {
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
+bool _mapsEqual(Map<Object?, Object?>? a, Map<Object?, Object?>? b) {
   if (a == b) {
     return true;
   }
@@ -543,8 +543,8 @@ bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
     return false;
   }
 
-  for (final dynamic k in a.keys) {
-    final dynamic bValue = b[k];
+  for (final Object? k in a.keys) {
+    final Object? bValue = b[k];
     if (bValue == null && !b.containsKey(k)) {
       return false;
     }
