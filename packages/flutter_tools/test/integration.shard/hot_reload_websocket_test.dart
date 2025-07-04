@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2025 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,5 +9,5 @@ import '../src/common.dart';
 import 'test_data/hot_reload_websocket_test_common.dart';
 
 void main() {
-  testAllWebSocket();
+  testAll();
 }
