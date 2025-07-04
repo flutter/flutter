@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:widget_preview_scaffold/src/dtd_services.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
 class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
@@ -48,5 +50,15 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
             ),
       ),
     );
+  }
+}
+
+class FakeWidgetPreviewScaffoldDtdServices extends Fake
+    implements WidgetPreviewScaffoldDtdServices {
+  bool hotRestartInvoked = false;
+
+  @override
+  Future<void> hotRestartPreviewer() async {
+    hotRestartInvoked = true;
   }
 }

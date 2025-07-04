@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:widget_preview_scaffold/src/dtd_services.dart';
 
 class _WidgetPreviewIconButton extends StatelessWidget {
   const _WidgetPreviewIconButton({
@@ -122,6 +123,23 @@ class SoftRestartButton extends StatelessWidget {
 
   void _onRestart() {
     softRestartListenable.value = true;
+  }
+}
+
+/// A button that triggers a restart of the widget previewer through a hot restart request made
+/// through DTD.
+class WidgetPreviewerRestartButton extends StatelessWidget {
+  const WidgetPreviewerRestartButton({super.key, required this.dtdServices});
+
+  final WidgetPreviewScaffoldDtdServices dtdServices;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.outlined(
+      tooltip: 'Restart the Widget Previewer',
+      onPressed: () => dtdServices.hotRestartPreviewer(),
+      icon: Icon(Icons.restart_alt),
+    );
   }
 }
 
