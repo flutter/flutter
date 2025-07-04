@@ -223,8 +223,7 @@ abstract class FlutterVersion {
 
   @override
   String toString() {
-    final versionText =
-        frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
+    final versionText = frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
     final flutterText =
         'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final frameworkText =

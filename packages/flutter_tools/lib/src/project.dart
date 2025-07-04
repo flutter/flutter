@@ -474,9 +474,7 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _androidNamespacePattern = RegExp(
     'android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]',
   );
-  static final _applicationIdPattern = RegExp(
-    '^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$',
-  );
+  static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
@@ -587,8 +585,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch =
-        firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
     final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
       return (firstMatchInFile(appGradleFile, pattern) != null);
     });

@@ -275,10 +275,7 @@ void main() {
       testUsingContext(
         'succeeds when targeted device is an Android device with --device-user',
         () async {
-          final device = FakeDevice(
-            isLocalEmulator: true,
-            platformType: PlatformType.android,
-          );
+          final device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
 
           testDeviceManager.devices = <Device>[device];
 
@@ -382,8 +379,7 @@ void main() {
         'forwards --uninstall-only to DebuggingOptions',
         () async {
           final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
-            ..startAppSuccess = false;
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
 
@@ -416,8 +412,7 @@ void main() {
         'passes device target platform to analytics',
         () async {
           final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
-            ..startAppSuccess = false;
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
 
@@ -474,8 +469,7 @@ void main() {
               .childFile('AppDelegate.swift')
               .createSync(recursive: true);
           final command = RunCommand();
-          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
-            ..startAppSuccess = false;
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
 
@@ -729,9 +723,7 @@ void main() {
               platformType: PlatformType.android,
             ),
           ];
-          final command = TestRunCommandForUsageValues(
-            devices: devices,
-          );
+          final command = TestRunCommandForUsageValues(devices: devices);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           try {
             // run the command so that CLI args are parsed
@@ -780,9 +772,7 @@ void main() {
         'with only iOS usb device',
         () async {
           final devices = <Device>[FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2')];
-          final command = TestRunCommandForUsageValues(
-            devices: devices,
-          );
+          final command = TestRunCommandForUsageValues(devices: devices);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           try {
             // run the command so that CLI args are parsed
@@ -837,9 +827,7 @@ void main() {
               sdkNameAndVersion: 'iOS 16.2',
             ),
           ];
-          final command = TestRunCommandForUsageValues(
-            devices: devices,
-          );
+          final command = TestRunCommandForUsageValues(devices: devices);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           try {
             // run the command so that CLI args are parsed
@@ -895,9 +883,7 @@ void main() {
             ),
             FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
           ];
-          final command = TestRunCommandForUsageValues(
-            devices: devices,
-          );
+          final command = TestRunCommandForUsageValues(devices: devices);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           try {
             // run the command so that CLI args are parsed
@@ -956,10 +942,7 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.android,
-        );
+        final device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
         testDeviceManager.devices = <Device>[device];
       });
 

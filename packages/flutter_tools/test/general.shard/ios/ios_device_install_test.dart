@@ -24,9 +24,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-const kDyLdLibEntry = <String, String>{
-  'DYLD_LIBRARY_PATH': '/path/to/libraries',
-};
+const kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'};
 
 void main() {
   late Artifacts artifacts;
@@ -354,10 +352,7 @@ IOSDevice setUpIOSDevice({
   bool isCoreDevice = false,
 }) {
   logger ??= BufferLogger.test();
-  final platform = FakePlatform(
-    operatingSystem: 'macos',
-    environment: <String, String>{},
-  );
+  final platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
     platform: platform,

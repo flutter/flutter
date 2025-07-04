@@ -96,8 +96,7 @@ class SwiftPackageManager {
     required Directory symlinkDirectory,
     required String pathRelativeTo,
   }) {
-    final packageDependencies =
-        <SwiftPackagePackageDependency>[];
+    final packageDependencies = <SwiftPackagePackageDependency>[];
     final targetDependencies = <SwiftPackageTargetDependency>[];
 
     for (final plugin in plugins) {

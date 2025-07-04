@@ -208,8 +208,7 @@ void main() {
     expect(deeplink['scheme'], scheme);
     expect(deeplink['host'], host);
     expect(deeplink['path'], path);
-    final intentFilterCheck =
-        deeplink['intentFilterCheck'] as Map<String, dynamic>;
+    final intentFilterCheck = deeplink['intentFilterCheck'] as Map<String, dynamic>;
     expect(intentFilterCheck['hasAutoVerify'], hasAutoVerify);
     expect(intentFilterCheck['hasActionView'], hasActionView);
     expect(intentFilterCheck['hasDefaultCategory'], hasDefaultCategory);
@@ -276,8 +275,7 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final json =
-          jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], true);
       final deeplinks = json['deeplinks']! as List<dynamic>;
@@ -421,8 +419,7 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final json =
-          jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], false);
       final deeplinks = json['deeplinks']! as List<dynamic>;

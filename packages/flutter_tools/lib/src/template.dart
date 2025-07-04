@@ -202,8 +202,7 @@ class Template {
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final List<Directory> imageSourceDirectories;
 
-  final _templateFilePaths =
-      <String, String>{};
+  final _templateFilePaths = <String, String>{};
 
   /// Render the template into the [destination] directory.
   ///

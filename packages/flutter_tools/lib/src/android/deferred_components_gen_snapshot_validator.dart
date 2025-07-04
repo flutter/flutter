@@ -146,11 +146,10 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     }
     if (!exists) {
       // Create an meta-data XmlElement that contains the mapping.
-      final mappingMetadataElement =
-          XmlElement(XmlName.fromString('meta-data'), <XmlAttribute>[
-            XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
-            XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
-          ]);
+      final mappingMetadataElement = XmlElement(XmlName.fromString('meta-data'), <XmlAttribute>[
+        XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
+        XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
+      ]);
       for (final XmlElement application in document.findAllElements('application')) {
         application.children.add(mappingMetadataElement);
         break;

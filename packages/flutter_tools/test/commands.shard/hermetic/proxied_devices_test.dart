@@ -74,10 +74,7 @@ void main() {
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.discoverDevices();
       expect(devices, hasLength(1));
@@ -95,10 +92,7 @@ void main() {
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
@@ -115,10 +109,7 @@ void main() {
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
@@ -147,12 +138,8 @@ void main() {
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
         discoverer.addDevice(fakeDevice);
 
-        final proxiedDevices = ProxiedDevices(
-          clientDaemonConnection,
-          logger: bufferLogger,
-        );
-        final prebuiltApplicationPackage =
-            FakePrebuiltApplicationPackage();
+        final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
+        final prebuiltApplicationPackage = FakePrebuiltApplicationPackage();
         final File dummyApplicationBinary = memoryFileSystem.file('/directory/dummy_file');
         dummyApplicationBinary.parent.createSync();
         dummyApplicationBinary.writeAsStringSync('dummy content');
@@ -208,10 +195,7 @@ void main() {
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
         discoverer.addDevice(fakeDevice);
 
-        final proxiedDevices = ProxiedDevices(
-          clientDaemonConnection,
-          logger: bufferLogger,
-        );
+        final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
         final List<Device> devices = await proxiedDevices.devices();
         expect(devices, hasLength(1));

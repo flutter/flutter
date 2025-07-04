@@ -57,13 +57,9 @@ TestTimeRecorder createRecorderWithTimesForPhase(
   Duration wallClockDuration,
 ) {
   final logger = LoggingLogger();
-  final recorder = TestTimeRecorder(
-    logger,
-    stopwatchFactory: FakeStopwatchFactory(),
-  );
+  final recorder = TestTimeRecorder(logger, stopwatchFactory: FakeStopwatchFactory());
   final combinedStopwatch = recorder.start(phase) as FakeStopwatch;
-  final wallClockStopwatch =
-      recorder.getPhaseWallClockStopwatchForTesting(phase) as FakeStopwatch;
+  final wallClockStopwatch = recorder.getPhaseWallClockStopwatchForTesting(phase) as FakeStopwatch;
   wallClockStopwatch.elapsed = wallClockDuration;
   combinedStopwatch.elapsed = combinedDuration;
   recorder.stop(phase, combinedStopwatch);

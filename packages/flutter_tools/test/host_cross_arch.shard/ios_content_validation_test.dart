@@ -297,11 +297,7 @@ void main() {
         });
       }
 
-      for (final buildMode in <BuildMode>[
-        BuildMode.debug,
-        BuildMode.profile,
-        BuildMode.release,
-      ]) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
         for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
           test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;

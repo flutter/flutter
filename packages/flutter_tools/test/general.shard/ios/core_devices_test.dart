@@ -1482,10 +1482,7 @@ invalid JSON
 
       testWithoutContext('Handles file system disposal', () async {
         final LocalFileSystem localFs = LocalFileSystemFake();
-        final fs = ErrorHandlingFileSystem(
-          delegate: localFs,
-          platform: FakePlatform(),
-        );
+        final fs = ErrorHandlingFileSystem(delegate: localFs, platform: FakePlatform());
         deviceControl = IOSCoreDeviceControl(
           logger: logger,
           processManager: fakeProcessManager,

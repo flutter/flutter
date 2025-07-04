@@ -370,10 +370,7 @@ $assetsSection
     testUsingContext(
       "Two assets are bundled when the package has two assets, listed in the app's pubspec",
       () async {
-        final assetEntries = <String>[
-          'packages/test_package/a/foo',
-          'packages/test_package/a/bar',
-        ];
+        final assetEntries = <String>['packages/test_package/a/foo', 'packages/test_package/a/bar'];
         writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
         writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
@@ -695,10 +692,7 @@ $assetsSection
         );
 
         final assetsOnDisk = <String>['a/foo', 'a/b/foo', 'a/bar'];
-        final assetOnManifest = <String>[
-          'a',
-          'a/bar',
-        ]; // can't list 'a' as asset, should be 'a/'
+        final assetOnManifest = <String>['a', 'a/bar']; // can't list 'a' as asset, should be 'a/'
 
         writePubspecFile('p/p/pubspec.yaml', 'test_package', assets: assetOnManifest);
 

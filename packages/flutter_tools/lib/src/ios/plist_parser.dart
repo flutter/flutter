@@ -50,14 +50,7 @@ class PlistParser {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
-    final args = <String>[
-      _plutilExecutable,
-      '-convert',
-      'xml1',
-      '-o',
-      '-',
-      plistFilePath,
-    ];
+    final args = <String>[_plutilExecutable, '-convert', 'xml1', '-o', '-', plistFilePath];
     try {
       final String xmlContent = _processUtils.runSync(args, throwOnError: true).stdout.trim();
       return xmlContent;

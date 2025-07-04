@@ -40,10 +40,7 @@ void main() {
         'returns DevicesCommandOutputWithExtendedWirelessDeviceDiscovery on MacOS',
         () async {
           final Platform platform = FakePlatform(operatingSystem: 'macos');
-          final devicesCommandOutput = DevicesCommandOutput(
-            platform: platform,
-            logger: fakeLogger,
-          );
+          final devicesCommandOutput = DevicesCommandOutput(platform: platform, logger: fakeLogger);
 
           expect(
             devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,
@@ -54,10 +51,7 @@ void main() {
 
       testWithoutContext('returns default when not on MacOS', () async {
         final Platform platform = FakePlatform();
-        final devicesCommandOutput = DevicesCommandOutput(
-          platform: platform,
-          logger: fakeLogger,
-        );
+        final devicesCommandOutput = DevicesCommandOutput(platform: platform, logger: fakeLogger);
 
         expect(
           devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,

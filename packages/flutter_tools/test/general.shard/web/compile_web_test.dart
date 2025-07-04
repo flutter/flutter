@@ -182,10 +182,7 @@ environement:
     testUsingContext(
       'WebRendererMode.${webRenderer.name} can be initialized from dart defines',
       () {
-        final computed = WebRendererMode.fromDartDefines(
-          webRenderer.dartDefines,
-          useWasm: true,
-        );
+        final computed = WebRendererMode.fromDartDefines(webRenderer.dartDefines, useWasm: true);
 
         expect(computed, webRenderer);
       },

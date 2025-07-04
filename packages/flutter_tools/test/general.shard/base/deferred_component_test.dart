@@ -112,31 +112,19 @@ void main() {
 
   group('LoadingUnit basics', () {
     testWithoutContext('constructor sets values', () {
-      final unit = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
+      final unit = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
       expect(unit.id, 2);
       expect(unit.path, 'path/to/so.so');
       expect(unit.libraries, <String>['lib1', 'lib4']);
     });
 
     testWithoutContext('toString produces correct string', () {
-      final unit = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
+      final unit = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
       expect(unit.toString(), '\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
     testWithoutContext('equalsIgnoringPath works for various input', () {
-      final unit1 = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
+      final unit1 = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
       final unit2 = LoadingUnit(
         id: 2,
         path: 'path/to/other/so.so',
@@ -147,16 +135,8 @@ void main() {
         path: 'path/to/other/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      final unit4 = LoadingUnit(
-        id: 1,
-        path: 'path/to/other/so.so',
-        libraries: <String>['lib1'],
-      );
-      final unit5 = LoadingUnit(
-        id: 1,
-        path: 'path/to/other/so.so',
-        libraries: <String>['lib2'],
-      );
+      final unit4 = LoadingUnit(id: 1, path: 'path/to/other/so.so', libraries: <String>['lib1']);
+      final unit5 = LoadingUnit(id: 1, path: 'path/to/other/so.so', libraries: <String>['lib2']);
       final unit6 = LoadingUnit(
         id: 1,
         path: 'path/to/other/so.so',

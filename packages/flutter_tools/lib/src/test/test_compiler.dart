@@ -140,8 +140,7 @@ class TestCompiler {
     );
   }
 
-  final compilerController =
-      StreamController<_CompilationRequest>();
+  final compilerController = StreamController<_CompilationRequest>();
   final compilationQueue = <_CompilationRequest>[];
   final FlutterProject? flutterProject;
   final BuildInfo buildInfo;

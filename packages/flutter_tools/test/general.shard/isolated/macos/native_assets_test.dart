@@ -75,10 +75,7 @@ void main() {
       dylibPathBuz = '/build/native_assets/macos/buz.framework/Versions/A/buz';
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
-    for (final buildMode in <BuildMode>[
-      BuildMode.debug,
-      if (!flutterTester) BuildMode.release,
-    ]) {
+    for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{

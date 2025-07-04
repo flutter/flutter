@@ -76,14 +76,9 @@ database is locked
 Possibly there are two concurrent builds running in the same filesystem location.
 ''';
 
-final macPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{},
-);
+final macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 
-final os = FakeOperatingSystemUtils(
-  hostPlatform: HostPlatform.darwin_arm64,
-);
+final os = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
 
 void main() {
   late Artifacts artifacts;

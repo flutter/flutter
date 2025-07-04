@@ -32,10 +32,9 @@ void main() {
       // Add previews and verify the help message is gone.
       await tester.pumpWidget(
         WidgetPreviewScaffold(
-          previews:
-              () => <WidgetPreview>[
-                WidgetPreview(builder: () => const Text('Foo')),
-              ],
+          previews: () => <WidgetPreview>[
+            WidgetPreview(builder: () => const Text('Foo')),
+          ],
         ),
       );
 

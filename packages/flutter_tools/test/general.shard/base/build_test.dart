@@ -14,10 +14,7 @@ import '../../src/fake_process_manager.dart';
 
 const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
-const kARMCheckCommand = FakeCommand(
-  command: <String>['sysctl', 'hw.optional.arm64'],
-  exitCode: 1,
-);
+const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
 
 const kDefaultClang = <String>[
   '-miphoneos-version-min=13.0',

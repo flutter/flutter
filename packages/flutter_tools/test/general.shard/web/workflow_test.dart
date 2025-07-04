@@ -55,10 +55,7 @@ void main() {
   });
 
   testWithoutContext('WebWorkflow does not apply if feature flag is disabled', () {
-    final workflow = WebWorkflow(
-      platform: FakePlatform(),
-      featureFlags: TestFeatureFlags(),
-    );
+    final workflow = WebWorkflow(platform: FakePlatform(), featureFlags: TestFeatureFlags());
 
     expect(workflow.appliesToHostPlatform, false);
     expect(workflow.canLaunchDevices, false);

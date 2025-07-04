@@ -81,8 +81,7 @@ void main() {
     'ResidentRunner can attach to device successfully',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       final Future<int?> result = residentRunner.attach(
         appStartedCompleter: futureAppStart,
@@ -276,8 +275,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       final Future<int?> result = residentRunner.attach(
         appStartedCompleter: futureAppStart,
@@ -299,8 +297,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews, listViews],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -334,8 +331,7 @@ void main() {
     'ResidentRunner fails its operation if the device initialization is not complete',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -360,8 +356,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews, listViews],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -422,8 +417,7 @@ void main() {
         ),
         analytics: fakeAnalytics,
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -481,8 +475,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -539,8 +532,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -603,8 +595,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -666,8 +657,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -741,8 +731,7 @@ void main() {
         );
         devFS.nextUpdateReport = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
-        final futureConnectionInfo =
-            Completer<DebugConnectionInfo>.sync();
+        final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
         final futureAppStart = Completer<void>.sync();
         unawaited(
           residentRunner.attach(
@@ -818,8 +807,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -903,8 +891,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -1034,8 +1021,7 @@ void main() {
           ),
         ],
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -1056,8 +1042,7 @@ void main() {
     'ResidentRunner Can handle an RPC exception from hot restart',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
         residentRunner.attach(
@@ -2031,10 +2016,7 @@ flutter:
             ddsUri: Uri.parse('http://localhost/existingDdsInField'),
           );
         };
-        final flutterDevice = TestFlutterDevice(
-          device,
-          vmServiceUris: Stream<Uri>.value(testUri),
-        );
+        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
         final done = Completer<void>();
         unawaited(
           runZonedGuarded(
@@ -2093,10 +2075,7 @@ flutter:
           done.complete();
           return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
         };
-        final flutterDevice = TestFlutterDevice(
-          device,
-          vmServiceUris: Stream<Uri>.value(testUri),
-        );
+        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
         await flutterDevice.connect(
           allowExistingDdsInstance: true,
           debuggingOptions: DebuggingOptions.enabled(
@@ -2246,10 +2225,7 @@ flutter:
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(
-        targetPlatform: TargetPlatform.darwin,
-        sdkNameAndVersion: 'Macos',
-      );
+      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
       final residentCompiler = FakeResidentCompiler();
       final flutterDevice =
           FakeFlutterDevice()

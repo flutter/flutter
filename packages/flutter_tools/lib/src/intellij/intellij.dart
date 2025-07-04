@@ -47,8 +47,7 @@ class IntelliJPlugins {
 
   static final kMinFlutterPluginVersion = Version(16, 0, 0);
   static const kIntellijDartPluginUrl = 'https://plugins.jetbrains.com/plugin/6351-dart';
-  static const kIntellijFlutterPluginUrl =
-      'https://plugins.jetbrains.com/plugin/9212-flutter';
+  static const kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
 
   void validatePackage(
     List<ValidationMessage> messages,

@@ -753,8 +753,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final rescheduledStream =
-          StreamController<XCDeviceEventNotification>();
+      final rescheduledStream = StreamController<XCDeviceEventNotification>();
 
       unawaited(
         xcdevice.deviceEventController.done.whenComplete(() {
@@ -1034,8 +1033,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   var getAvailableIOSDevicesCount = 0;
   final devices = <List<IOSDevice>>[];
   final diagnostics = <String>[];
-  var deviceEventController =
-      StreamController<XCDeviceEventNotification>();
+  var deviceEventController = StreamController<XCDeviceEventNotification>();
 
   XCDeviceEventNotification? waitForDeviceEvent;
 

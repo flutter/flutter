@@ -285,8 +285,7 @@ class _NoContext implements AppContext {
 /// }
 /// ```
 class FileExceptionHandler {
-  final _contextErrors =
-      <String, Map<FileSystemOp, FileSystemException>>{};
+  final _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
   final _tempErrors = <FileSystemOp, FileSystemException>{};
   static final _tempDirectoryEnd = RegExp('rand[0-9]+');
 

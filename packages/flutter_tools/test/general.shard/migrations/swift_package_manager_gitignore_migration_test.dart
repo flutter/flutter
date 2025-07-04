@@ -33,10 +33,7 @@ void main() {
     });
 
     testWithoutContext('skipped if .gitignore file is missing', () {
-      final migration = SwiftPackageManagerGitignoreMigration(
-        mockProject,
-        testLogger,
-      );
+      final migration = SwiftPackageManagerGitignoreMigration(mockProject, testLogger);
       migration.migrate();
       expect(gitignoreFile.existsSync(), isFalse);
 
@@ -54,10 +51,7 @@ void main() {
 
       final DateTime updatedAt = gitignoreFile.lastModifiedSync();
 
-      final migration = SwiftPackageManagerGitignoreMigration(
-        mockProject,
-        testLogger,
-      );
+      final migration = SwiftPackageManagerGitignoreMigration(mockProject, testLogger);
       migration.migrate();
 
       expect(gitignoreFile.lastModifiedSync(), updatedAt);
@@ -75,10 +69,7 @@ void main() {
 
       final DateTime updatedAt = gitignoreFile.lastModifiedSync();
 
-      final migration = SwiftPackageManagerGitignoreMigration(
-        mockProject,
-        testLogger,
-      );
+      final migration = SwiftPackageManagerGitignoreMigration(mockProject, testLogger);
       migration.migrate();
 
       expect(gitignoreFile.lastModifiedSync(), updatedAt);
@@ -96,10 +87,7 @@ void main() {
         'migrate_working_dir/\n',
       );
 
-      final migration = SwiftPackageManagerGitignoreMigration(
-        mockProject,
-        testLogger,
-      );
+      final migration = SwiftPackageManagerGitignoreMigration(mockProject, testLogger);
       migration.migrate();
 
       expect(

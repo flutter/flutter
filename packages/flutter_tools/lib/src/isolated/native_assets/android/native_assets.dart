@@ -108,11 +108,7 @@ Future<CCompilerConfig> cCompilerConfigAndroid() async {
   if (compiler == null || archiver == null || linker == null) {
     throwToolExit('Android NDK Clang could not be found.');
   }
-  final result = CCompilerConfig(
-    compiler: compiler,
-    archiver: archiver,
-    linker: linker,
-  );
+  final result = CCompilerConfig(compiler: compiler, archiver: archiver, linker: linker);
   return result;
 }
 

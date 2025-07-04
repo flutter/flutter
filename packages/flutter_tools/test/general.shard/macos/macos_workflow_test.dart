@@ -38,10 +38,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply when feature is disabled', () {
-    final macOSWorkflow = MacOSWorkflow(
-      platform: macOS,
-      featureFlags: TestFeatureFlags(),
-    );
+    final macOSWorkflow = MacOSWorkflow(platform: macOS, featureFlags: TestFeatureFlags());
 
     expect(macOSWorkflow.appliesToHostPlatform, false);
     expect(macOSWorkflow.canListDevices, false);

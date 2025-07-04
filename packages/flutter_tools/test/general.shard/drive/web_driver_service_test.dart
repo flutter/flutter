@@ -196,10 +196,7 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Edge', () {
-    final expected = <String, dynamic>{
-      'acceptInsecureCerts': true,
-      'browserName': 'edge',
-    };
+    final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false), expected);
   });
@@ -221,10 +218,7 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities android chrome', () {
-    const webBrowserFlags = <String>[
-      '--autoplay-policy=no-user-gesture-required',
-      '--incognito',
-    ];
+    const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
       'platformName': 'android',

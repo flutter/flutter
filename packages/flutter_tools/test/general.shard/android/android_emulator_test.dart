@@ -88,9 +88,7 @@ void main() {
       // Android Studio uses the ID with underscores replaced with spaces
       // for the name if displayname is not set so we do the same.
       const emulatorID = 'This_is_my_ID';
-      final properties = <String, String>{
-        'avd.ini.notadisplayname': 'this is not a display name',
-      };
+      final properties = <String, String>{'avd.ini.notadisplayname': 'this is not a display name'};
       final emulator = AndroidEmulator(
         emulatorID,
         properties: properties,

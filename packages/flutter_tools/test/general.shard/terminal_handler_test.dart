@@ -744,8 +744,7 @@ void main() {
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler =
-          runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
       await terminalHandler.processTerminalInput('v');
@@ -1428,8 +1427,7 @@ class _TestSignals implements Signals {
 
   final List<ProcessSignal> exitSignals;
 
-  final _handlersTable =
-      <ProcessSignal, Map<Object, SignalHandler>>{};
+  final _handlersTable = <ProcessSignal, Map<Object, SignalHandler>>{};
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {

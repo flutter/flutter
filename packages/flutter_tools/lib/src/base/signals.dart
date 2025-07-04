@@ -24,10 +24,7 @@ abstract class Signals {
   }) => LocalSignals._(exitSignals, shutdownHooks: shutdownHooks);
 
   // The default list of signals that should cause the process to exit.
-  static const defaultExitSignals = <ProcessSignal>[
-    ProcessSignal.sigterm,
-    ProcessSignal.sigint,
-  ];
+  static const defaultExitSignals = <ProcessSignal>[ProcessSignal.sigterm, ProcessSignal.sigint];
 
   /// Adds a signal handler to run on receipt of signal.
   ///
@@ -62,17 +59,14 @@ class LocalSignals implements Signals {
   final ShutdownHooks _shutdownHooks;
 
   // A table mapping (signal, token) -> signal handler.
-  final _handlersTable =
-      <ProcessSignal, Map<Object, SignalHandler>>{};
+  final _handlersTable = <ProcessSignal, Map<Object, SignalHandler>>{};
 
   // A table mapping (signal) -> signal handler list. The list is in the order
   // that the signal handlers should be run.
-  final _handlersList =
-      <ProcessSignal, List<SignalHandler>>{};
+  final _handlersList = <ProcessSignal, List<SignalHandler>>{};
 
   // A table mapping (signal) -> low-level signal event stream.
-  final _streamSubscriptions =
-      <ProcessSignal, StreamSubscription<ProcessSignal>>{};
+  final _streamSubscriptions = <ProcessSignal, StreamSubscription<ProcessSignal>>{};
 
   // The stream controller for errors coming from signal handlers.
   final _errorStreamController = StreamController<Object>.broadcast();
