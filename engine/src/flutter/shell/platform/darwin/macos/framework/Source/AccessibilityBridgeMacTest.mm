@@ -113,6 +113,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -175,6 +176,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node1.children_in_traversal_order = node1_children.data();
   node1.children_in_hit_test_order = node1_children.data();
   node1.custom_accessibility_actions_count = 0;
+  node1.identifier = "";
 
   FlutterSemanticsNode2 node2;
   node2.id = 2;
@@ -190,6 +192,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node2.tooltip = "";
   node2.child_count = 0;
   node2.custom_accessibility_actions_count = 0;
+  node2.identifier = "";
 
   bridge->AddFlutterSemanticsNodeUpdate(node1);
   bridge->AddFlutterSemanticsNodeUpdate(node2);
@@ -236,6 +239,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -283,6 +287,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
