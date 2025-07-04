@@ -217,6 +217,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   late final WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
     logger: logger,
     shutdownHooks: shutdownHooks,
+    onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
   );
 
@@ -309,6 +310,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
     _widgetPreviewApp?.restart();
+  }
+
+  void onHotRestartRequest() {
+    logger.printStatus('Triggering restart based on request from preview environment.');
+    _widgetPreviewApp?.restart(fullRestart: true);
   }
 
   /// Configures the Dart Tooling Daemon connection.

@@ -763,12 +763,13 @@ Future<void> mainImpl() async {
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  // TODO(bkonyi): store somewhere.
-  await WidgetPreviewScaffoldDtdServices().connect();
+  final WidgetPreviewScaffoldDtdServices dtdServices =
+      WidgetPreviewScaffoldDtdServices();
+  await dtdServices.connect();
   runWidget(
     DisableWidgetInspectorScope(
       child: binding.wrapWithDefaultView(
-        WidgetPreviewScaffold(previews: previews),
+        WidgetPreviewScaffold(previews: previews, dtdServices: dtdServices),
       ),
     ),
   );
@@ -778,9 +779,14 @@ Future<void> mainImpl() async {
 enum LayoutType { gridView, listView }
 
 class WidgetPreviewScaffold extends StatelessWidget {
-  WidgetPreviewScaffold({super.key, required this.previews});
+  WidgetPreviewScaffold({
+    super.key,
+    required this.previews,
+    required this.dtdServices,
+  });
 
   final List<WidgetPreview> Function() previews;
+  final WidgetPreviewScaffoldDtdServices dtdServices;
 
   // Positioning values for positioning the previewer
   final double _previewLeftPadding = 60.0;
@@ -838,34 +844,41 @@ class WidgetPreviewScaffold extends StatelessWidget {
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Column(
-          children: [
-            ValueListenableBuilder<LayoutType>(
-              valueListenable: _selectedLayout,
-              builder: (context, selectedLayout, _) {
-                return Column(
-                  children: [
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.gridView),
-                      icon: Icon(Icons.grid_on),
-                      color: selectedLayout == LayoutType.gridView
-                          ? Colors.blue
-                          : Colors.black,
-                    ),
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.listView),
-                      icon: Icon(Icons.view_list),
-                      color: selectedLayout == LayoutType.listView
-                          ? Colors.blue
-                          : Colors.black,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+        child: ValueListenableBuilder<LayoutType>(
+          valueListenable: _selectedLayout,
+          builder: (context, selectedLayout, _) {
+            return Column(
+              children: [
+                IconButton(
+                  onPressed: () => _toggleLayout(LayoutType.gridView),
+                  icon: Icon(Icons.grid_on),
+                  color: selectedLayout == LayoutType.gridView
+                      ? Colors.blue
+                      : Colors.black,
+                ),
+                IconButton(
+                  onPressed: () => _toggleLayout(LayoutType.listView),
+                  icon: Icon(Icons.view_list),
+                  color: selectedLayout == LayoutType.listView
+                      ? Colors.blue
+                      : Colors.black,
+                ),
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _hotRestartPreviewerButton() {
+    return Container(
+      alignment: Alignment.topRight,
+      padding: EdgeInsets.only(
+        top: _toggleButtonsTopPadding,
+        right: _toggleButtonsLeftPadding,
+      ),
+      child: WidgetPreviewerRestartButton(dtdServices: dtdServices),
     );
   }
 
@@ -915,6 +928,8 @@ class WidgetPreviewScaffold extends StatelessWidget {
             _displayPreviewer(previewView),
             // Display the layout toggle buttons
             _displayToggleLayoutButtons(),
+            // Display the global hot restart button
+            _hotRestartPreviewerButton(),
           ],
         ),
       ),
