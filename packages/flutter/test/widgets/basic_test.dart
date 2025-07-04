@@ -751,6 +751,18 @@ void main() {
       expect(listItemNode.role, SemanticsRole.listItem);
     });
 
+    testWidgets('Semantics can use form', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: Semantics(key: key1, role: SemanticsRole.form, container: true)),
+        ),
+      );
+      final SemanticsNode formNode = tester.getSemantics(find.byKey(key1));
+
+      expect(formNode.role, SemanticsRole.form);
+    });
+
     testWidgets('Semantics can merge attributed strings with non attributed string', (
       WidgetTester tester,
     ) async {
