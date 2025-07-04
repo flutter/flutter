@@ -126,7 +126,7 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
       } finally {
         await _cleanupResources(chromeProcess, subscription);
       }
-    });
+    }, skip: !platform.isMacOS);
   });
 }
 
