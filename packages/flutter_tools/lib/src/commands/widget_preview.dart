@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -25,6 +26,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
 import '../widget_preview/preview_code_generator.dart';
@@ -45,6 +47,7 @@ class WidgetPreviewCommand extends FlutterCommand {
     required OperatingSystemUtils os,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -58,6 +61,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         os: os,
         processManager: processManager,
         artifacts: artifacts,
+        dtdServicesOverride: dtdServicesOverride,
       ),
     );
     addSubcommand(
@@ -126,7 +130,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.os,
     required this.processManager,
     required this.artifacts,
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
   }) {
+    if (dtdServicesOverride != null) {
+      _dtdService = dtdServicesOverride;
+    }
     addPubOptions();
     argParser
       ..addFlag(
@@ -188,6 +196,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
+  late final WidgetPreviewAnalytics previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
+
   late final FlutterProject rootProject = getRootProject();
 
   late final PreviewPubspecBuilder _previewPubspecBuilder = PreviewPubspecBuilder(
@@ -199,6 +209,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final PreviewDetector _previewDetector = PreviewDetector(
+    previewAnalytics: previewAnalytics,
     projectRoot: rootProject.directory,
     logger: logger,
     fs: fs,
@@ -214,7 +225,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     cache: cache,
   );
 
-  late final WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
+  late WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
@@ -226,6 +237,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // Start the timer tracking how long it takes to launch the preview environment.
+    previewAnalytics.initializeLaunchStopwatch();
+
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     final Directory widgetPreviewScaffold =
         customPreviewScaffoldOutput != null
@@ -264,6 +278,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         return FlutterCommandResult.success();
       }
       _previewManifest.generate();
+
+      // Make the analytics instance aware that we generated the widget preview scaffold as part of
+      // launching the previewer.
+      previewAnalytics.generatedProject();
     }
 
     // WARNING: this access of widgetPreviewScaffoldProject needs to happen
@@ -288,18 +306,15 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final PreviewDependencyGraph graph = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
-    if (boolArg(kLaunchPreviewer)) {
-      shutdownHooks.addShutdownHook(() async {
-        await _widgetPreviewApp?.exitApp();
-      });
-      await configureDtd();
-      _widgetPreviewApp = await runPreviewEnvironment(
-        widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
-      );
-      final int result = await _widgetPreviewApp!.waitForAppToFinish();
-      if (result != 0) {
-        throwToolExit('Failed to launch the widget previewer.', exitCode: result);
-      }
+    shutdownHooks.addShutdownHook(() async {
+      await _widgetPreviewApp?.exitApp();
+    });
+    await configureDtd();
+    final int result = await runPreviewEnvironment(
+      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+    );
+    if (result != 0) {
+      throwToolExit('Failed to launch the widget previewer.', exitCode: result);
     }
 
     await _previewDetector.dispose();
@@ -342,10 +357,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  Future<ResidentRunner> runPreviewEnvironment({
-    required FlutterProject widgetPreviewScaffoldProject,
-  }) async {
-    final ResidentWebRunner runner;
+  Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
       // Since the only target supported by the widget preview scaffold is the web
       // device, only a single web device should be returned.
@@ -394,29 +406,36 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         platform: platform,
       );
 
-      runner = ResidentWebRunner(
-        flutterDevice,
-        target: target,
-        debuggingOptions: debuggingOptions,
-        analytics: analytics,
-        flutterProject: widgetPreviewScaffoldProject,
-        fileSystem: fs,
-        logger: logger,
-        terminal: globals.terminal,
-        platform: platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
-      );
-      final Completer<void> appStarted = Completer<void>();
-      unawaited(runner.run(appStartedCompleter: appStarted));
-      await appStarted.future;
+      if (boolArg(kLaunchPreviewer)) {
+        final Completer<void> appStarted = Completer<void>();
+        _widgetPreviewApp = ResidentWebRunner(
+          flutterDevice,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          analytics: analytics,
+          flutterProject: widgetPreviewScaffoldProject,
+          fileSystem: fs,
+          logger: logger,
+          terminal: globals.terminal,
+          platform: platform,
+          outputPreferences: globals.outputPreferences,
+          systemClock: globals.systemClock,
+        );
+        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        await appStarted.future;
+      }
     } on Exception catch (error) {
       throwToolExit(error.toString());
     }
 
     // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Done loading previews.');
-    return runner;
+
+    // Send an analytics event reporting how long it took for the widget previewer to start.
+    previewAnalytics.reportLaunchTiming();
+
+    // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
+    return _widgetPreviewApp?.waitForAppToFinish() ?? 0;
   }
 }
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
@@ -170,6 +172,14 @@ void main() {
             ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
+        previewAnalytics: WidgetPreviewAnalytics(
+          analytics: getInitializedFakeAnalyticsInstance(
+            // We don't care about anything written to the file system by analytics, so we're safe
+            // to use a different file system here.
+            fs: MemoryFileSystem.test(),
+            fakeFlutterVersion: FakeFlutterVersion(),
+          ),
+        ),
         projectRoot: projectDir,
         fs: fs,
         logger: logger,
