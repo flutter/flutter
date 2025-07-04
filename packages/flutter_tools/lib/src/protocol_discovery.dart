@@ -168,8 +168,8 @@ class _BufferedStreamController<T extends Object> {
           streamControllerInstance.add(event);
         } else {
           streamControllerInstance.addError(
-            (event as Iterable<Object>).first,
-            event.last as StackTrace,
+            (event as Iterable<Object?>).first!,
+            event.last as StackTrace?,
           );
         }
       }
@@ -195,7 +195,7 @@ class _BufferedStreamController<T extends Object> {
     if (_streamController.hasListener) {
       _streamController.addError(error, stackTrace);
     } else {
-      _events.add(<dynamic>[error, stackTrace]);
+      _events.add(<Object?>[error, stackTrace]);
     }
   }
 
