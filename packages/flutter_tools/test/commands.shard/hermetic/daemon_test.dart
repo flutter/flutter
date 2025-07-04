@@ -1189,6 +1189,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsStartPaused => true;
 
   @override
+  // ignore: omit_obvious_property_types
   final FakeDartDevelopmentService dds = FakeDartDevelopmentService();
 
   BuildMode? supportsRuntimeModeCalledBuildMode;
