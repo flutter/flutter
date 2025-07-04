@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 
 import 'preview_project.dart';
 
-bool _stateInitialized = false;
+var _stateInitialized = false;
 
 // Global state that must be cleaned up by `tearDown` in initializeTestPreviewDetectorState.
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
@@ -95,7 +95,7 @@ Future<void> expectHasNoErrors({
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
 Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
-  final Completer<String> completer = Completer<String>();
+  final completer = Completer<String>();
   _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
       return;
@@ -113,7 +113,7 @@ Future<void> waitForChangeDetected({
   required void Function(PreviewDependencyGraph) onChangeDetected,
   required void Function() changeOperation,
 }) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   _onChangeDetectedImpl = (PreviewDependencyGraph updated) {
     if (completer.isCompleted) {
       return;
@@ -130,8 +130,8 @@ Future<void> waitForNChangesDetected({
   required int n,
   required void Function() changeOperation,
 }) async {
-  int changeCount = 0;
-  final Completer<void> completer = Completer<void>();
+  var changeCount = 0;
+  final completer = Completer<void>();
   _onChangeDetectedImpl = (PreviewDependencyGraph updated) {
     if (completer.isCompleted) {
       return;
@@ -163,7 +163,7 @@ void expectPreviewDependencyGraphIsWellFormed({
   required PreviewDependencyGraph graph,
   Set<WidgetPreviewSourceFile> expectedFilesWithErrors = const <WidgetPreviewSourceFile>{},
 }) {
-  final Set<LibraryPreviewNode> nodesWithErrors = <LibraryPreviewNode>{};
+  final nodesWithErrors = <LibraryPreviewNode>{};
   for (final LibraryPreviewNode node in graph.values) {
     expect(_fs.file(node.path.path), exists);
     if (node.hasErrors) {
@@ -179,14 +179,14 @@ void expectPreviewDependencyGraphIsWellFormed({
 
   // Validates that all upstream dependencies are marked as having a transitive dependency
   // containing errors.
-  final Set<PreviewPath> filesWithTransitiveErrors = <PreviewPath>{};
+  final filesWithTransitiveErrors = <PreviewPath>{};
   void dependencyHasErrorsValidator(LibraryPreviewNode node) {
     filesWithTransitiveErrors.add(node.path);
     expect(node.dependencyHasErrors, true);
     node.dependedOnBy.forEach(dependencyHasErrorsValidator);
   }
 
-  for (final LibraryPreviewNode node in nodesWithErrors) {
+  for (final node in nodesWithErrors) {
     filesWithTransitiveErrors.add(node.path);
     node.dependedOnBy.forEach(dependencyHasErrorsValidator);
   }

@@ -6,7 +6,7 @@ import 'project.dart';
 
 class TestProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -20,14 +20,14 @@ class TestProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
 int foo(int bar) {
   return bar + 2;
 }
   ''';
 
   @override
-  final String test = r'''
+  final test = r'''
   import 'package:flutter_test/flutter_test.dart';
   import 'package:test/main.dart';
 

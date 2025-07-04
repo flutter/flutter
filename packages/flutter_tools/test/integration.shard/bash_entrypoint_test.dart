@@ -20,8 +20,8 @@ final Directory flutterRoot = fileSystem.directory(flutterRootPath);
 
 Future<void> main() async {
   test('verify terminating flutter/bin/dart terminates the underlying dart process', () async {
-    final Completer<void> childReadyCompleter = Completer<void>();
-    String stdout = '';
+    final childReadyCompleter = Completer<void>();
+    var stdout = '';
     final Process process = await processManager.start(<String>[
       dartBash.path,
       listenForSigtermScript.path,

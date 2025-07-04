@@ -5,8 +5,8 @@
 import '../base/common.dart';
 import '../build_info.dart';
 
-const String kGooglePlayVersioning = 'https://developer.android.com/studio/publish/versioning.html';
-const String kSupportedAbis = 'https://flutter.dev/to/android-supported-architectures';
+const kGooglePlayVersioning = 'https://developer.android.com/studio/publish/versioning.html';
+const kSupportedAbis = 'https://flutter.dev/to/android-supported-architectures';
 
 /// Validates that the build mode and build number are valid for a given build.
 void validateBuild(AndroidBuildInfo androidBuildInfo) {

@@ -8,14 +8,14 @@ import 'package:analyzer/dart/ast/ast.dart';
 final class PreviewDetails {
   PreviewDetails({required this.packageName, required this.functionName, required this.isBuilder});
 
-  static const String kPackageName = 'packageName';
-  static const String kName = 'name';
-  static const String kSize = 'size';
-  static const String kTextScaleFactor = 'textScaleFactor';
-  static const String kWrapper = 'wrapper';
-  static const String kTheme = 'theme';
-  static const String kBrightness = 'brightness';
-  static const String kLocalizations = 'localizations';
+  static const kPackageName = 'packageName';
+  static const kName = 'name';
+  static const kSize = 'size';
+  static const kTextScaleFactor = 'textScaleFactor';
+  static const kWrapper = 'wrapper';
+  static const kTheme = 'theme';
+  static const kBrightness = 'brightness';
+  static const kLocalizations = 'localizations';
 
   /// The name of the package in which the preview was defined.
   ///

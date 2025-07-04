@@ -26,7 +26,7 @@ void main() {
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
-    const GitTagVersion gitTagVersion = GitTagVersion(
+    const gitTagVersion = GitTagVersion(
       x: 1,
       y: 2,
       z: 3,
@@ -51,9 +51,9 @@ void main() {
     testUsingContext(
       'throws on unknown tag, official branch,  noforce',
       () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const String upstreamRevision = '';
-        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+        final flutterVersion = FakeFlutterVersion(branch: 'beta');
+        const upstreamRevision = '';
+        final latestVersion = FakeFlutterVersion(
           frameworkRevision: upstreamRevision,
         );
         fakeCommandRunner.remoteVersion = latestVersion;
@@ -75,9 +75,9 @@ void main() {
     testUsingContext(
       'throws tool exit with uncommitted changes',
       () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const String upstreamRevision = '';
-        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+        final flutterVersion = FakeFlutterVersion(branch: 'beta');
+        const upstreamRevision = '';
+        final latestVersion = FakeFlutterVersion(
           frameworkRevision: upstreamRevision,
         );
         fakeCommandRunner.remoteVersion = latestVersion;
@@ -100,9 +100,9 @@ void main() {
     testUsingContext(
       "Doesn't continue on known tag, beta branch, no force, already up-to-date",
       () async {
-        const String revision = 'abc123';
-        final FakeFlutterVersion latestVersion = FakeFlutterVersion(frameworkRevision: revision);
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+        const revision = 'abc123';
+        final latestVersion = FakeFlutterVersion(frameworkRevision: revision);
+        final flutterVersion = FakeFlutterVersion(
           branch: 'beta',
           frameworkRevision: revision,
         );
@@ -130,19 +130,19 @@ void main() {
     testUsingContext(
       'correctly provides upgrade version on verify only',
       () async {
-        const String revision = 'abc123';
-        const String upstreamRevision = 'def456';
-        const String version = '1.2.3';
-        const String upstreamVersion = '4.5.6';
+        const revision = 'abc123';
+        const upstreamRevision = 'def456';
+        const version = '1.2.3';
+        const upstreamVersion = '4.5.6';
 
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+        final flutterVersion = FakeFlutterVersion(
           branch: 'beta',
           frameworkRevision: revision,
           frameworkRevisionShort: revision,
           frameworkVersion: version,
         );
 
-        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+        final latestVersion = FakeFlutterVersion(
           frameworkRevision: upstreamRevision,
           frameworkRevisionShort: upstreamRevision,
           frameworkVersion: upstreamVersion,
@@ -174,8 +174,8 @@ void main() {
     testUsingContext(
       'fetchLatestVersion returns version if git succeeds',
       () async {
-        const String revision = 'abc123';
-        const String version = '1.2.3';
+        const revision = 'abc123';
+        const version = '1.2.3';
 
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', '--tags']),
@@ -272,8 +272,8 @@ void main() {
     testUsingContext(
       'git exception during attemptReset throwsToolExit',
       () async {
-        const String revision = 'abc123';
-        const String errorMessage = 'fatal: Could not parse object ´$revision´';
+        const revision = 'abc123';
+        const errorMessage = 'fatal: Could not parse object ´$revision´';
         processManager.addCommand(
           const FakeCommand(
             command: <String>['git', 'reset', '--hard', revision],
@@ -322,17 +322,17 @@ void main() {
     testUsingContext(
       'Show current version to the upgrade message.',
       () async {
-        const String revision = 'abc123';
-        const String upstreamRevision = 'def456';
-        const String version = '1.2.3';
-        const String upstreamVersion = '4.5.6';
+        const revision = 'abc123';
+        const upstreamRevision = 'def456';
+        const version = '1.2.3';
+        const upstreamVersion = '4.5.6';
 
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+        final flutterVersion = FakeFlutterVersion(
           branch: 'beta',
           frameworkRevision: revision,
           frameworkVersion: version,
         );
-        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+        final latestVersion = FakeFlutterVersion(
           frameworkRevision: upstreamRevision,
           frameworkVersion: upstreamVersion,
         );
@@ -405,7 +405,7 @@ void main() {
         'does not throw on unknown tag, official branch, force',
         () async {
           fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
-          final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
+          final flutterVersion = FakeFlutterVersion(branch: 'beta');
 
           final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
             force: true,
@@ -427,7 +427,7 @@ void main() {
       testUsingContext(
         'does not throw tool exit with uncommitted changes and force',
         () async {
-          final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
+          final flutterVersion = FakeFlutterVersion(branch: 'beta');
           fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
           fakeCommandRunner.willHaveUncommittedChanges = true;
 
@@ -451,7 +451,7 @@ void main() {
       testUsingContext(
         "Doesn't throw on known tag, beta branch, no force",
         () async {
-          final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
+          final flutterVersion = FakeFlutterVersion(branch: 'beta');
           fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
 
           final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
@@ -500,7 +500,7 @@ void main() {
           'upgrade continue prints welcome message',
           () async {
             fakeProcessManager = FakeProcessManager.any();
-            final UpgradeCommand upgradeCommand = UpgradeCommand(
+            final upgradeCommand = UpgradeCommand(
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );
@@ -526,8 +526,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  bool willHaveUncommittedChanges = false;
-  bool alreadyUpToDate = false;
+  var willHaveUncommittedChanges = false;
+  var alreadyUpToDate = false;
 
   late FlutterVersion remoteVersion;
 

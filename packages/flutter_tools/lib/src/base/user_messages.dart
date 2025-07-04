@@ -370,7 +370,7 @@ class UserMessages {
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 
   String androidSdkInstallUrl(Platform platform) {
-    const String baseUrl = 'https://flutter.dev/to/';
+    const baseUrl = 'https://flutter.dev/to/';
     if (platform.isMacOS) {
       return '${baseUrl}macos-android-setup';
     } else if (platform.isLinux) {

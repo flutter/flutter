@@ -13,14 +13,14 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
-    final FakeServerSocket socket = FakeServerSocket();
-    final BufferLogger logger = BufferLogger.test();
+    final socket = FakeServerSocket();
+    final logger = BufferLogger.test();
 
-    int bindCalledTimes = 0;
-    final List<Object?> bindAddresses = <Object?>[];
-    final List<int> bindPorts = <int>[];
+    var bindCalledTimes = 0;
+    final bindAddresses = <Object?>[];
+    final bindPorts = <int>[];
 
-    final DaemonServer server = DaemonServer(
+    final server = DaemonServer(
       port: 123,
       logger: logger,
       bind: (Object? address, int port) async {
@@ -37,14 +37,14 @@ void main() {
   });
 
   testWithoutContext('binds on ipv6 if ipv4 failed normally', () async {
-    final FakeServerSocket socket = FakeServerSocket();
-    final BufferLogger logger = BufferLogger.test();
+    final socket = FakeServerSocket();
+    final logger = BufferLogger.test();
 
-    int bindCalledTimes = 0;
-    final List<Object?> bindAddresses = <Object?>[];
-    final List<int> bindPorts = <int>[];
+    var bindCalledTimes = 0;
+    final bindAddresses = <Object?>[];
+    final bindPorts = <int>[];
 
-    final DaemonServer server = DaemonServer(
+    final server = DaemonServer(
       port: 123,
       logger: logger,
       bind: (Object? address, int port) async {
@@ -70,8 +70,8 @@ class FakeServerSocket extends Fake implements ServerSocket {
   @override
   int get port => 1;
 
-  bool closeCalled = false;
-  final StreamController<Socket> controller = StreamController<Socket>();
+  var closeCalled = false;
+  final controller = StreamController<Socket>();
 
   @override
   StreamSubscription<Socket> listen(

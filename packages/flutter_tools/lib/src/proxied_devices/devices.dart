@@ -81,7 +81,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
         _cast<List<dynamic>>(
           await connection.sendRequest('device.discoverDevices'),
         ).cast<Map<String, Object?>>();
-    final List<ProxiedDevice> devices = <ProxiedDevice>[
+    final devices = <ProxiedDevice>[
       for (final Map<String, Object?> device in discoveredDevices) deviceFromDaemonResult(device),
     ];
 
@@ -421,18 +421,18 @@ class ProxiedDevice extends Device {
     await proxiedPortForwarder.dispose();
   }
 
-  final Map<String, Future<String>> _applicationPackageMap = <String, Future<String>>{};
+  final _applicationPackageMap = <String, Future<String>>{};
   Future<String> applicationPackageId(PrebuiltApplicationPackage package) async {
-    final File binary = package.applicationPackage as File;
+    final binary = package.applicationPackage as File;
     final String path = binary.absolute.path;
     if (_applicationPackageMap.containsKey(path)) {
       return _applicationPackageMap[path]!;
     }
     final String fileName = binary.basename;
-    final Completer<String> idCompleter = Completer<String>();
+    final idCompleter = Completer<String>();
     _applicationPackageMap[path] = idCompleter.future;
 
-    final Map<String, Object> args = <String, Object>{'path': fileName};
+    final args = <String, Object>{'path': fileName};
 
     Map<String, Object?>? rollingHashResultJson;
     if (_deltaFileTransfer) {
@@ -451,7 +451,7 @@ class ProxiedDevice extends Device {
 
       await connection.sendRequest('proxy.writeTempFile', args, await binary.readAsBytes());
     } else {
-      final BlockHashes rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
+      final rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
       final List<FileDeltaBlock> delta = await _fileTransfer.computeDelta(
         binary,
         rollingHashResult,
@@ -505,7 +505,7 @@ class _ProxiedLogReader extends DeviceLogReader {
   @override
   String get name => device.displayName;
 
-  final StreamController<String> _logLinesStreamController = StreamController<String>();
+  final _logLinesStreamController = StreamController<String>();
   Stream<String>? _logLines;
 
   String? _id;
@@ -620,9 +620,9 @@ class ProxiedPortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> get forwardedPorts => _hostPortToForwardedPorts.values.toList();
 
-  final Map<int, _ProxiedForwardedPort> _hostPortToForwardedPorts = <int, _ProxiedForwardedPort>{};
+  final _hostPortToForwardedPorts = <int, _ProxiedForwardedPort>{};
 
-  final List<Socket> _connectedSockets = <Socket>[];
+  final _connectedSockets = <Socket>[];
 
   @override
   Future<int> forward(int devicePort, {int? hostPort, bool? ipv6}) async {
@@ -671,7 +671,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         final Future<DaemonEventData> disconnectFuture =
             connection.listenToEvent('proxy.disconnected.$id').first;
 
-        bool socketDoneCalled = false;
+        var socketDoneCalled = false;
 
         unawaited(
           disconnectFuture.then<void>(
@@ -836,11 +836,11 @@ class ProxiedDartDevelopmentService
 
   @override
   Future<void> get done => _completer.future;
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 
   final DartDevelopmentService _localDds;
 
-  bool _ddsStartedLocally = false;
+  var _ddsStartedLocally = false;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -885,7 +885,7 @@ class ProxiedDartDevelopmentService
     final Uri remoteVMServiceUri = vmServiceUri.replace(port: remoteVMServicePort);
 
     String? remoteUriStr;
-    const String method = 'device.startDartDevelopmentService';
+    const method = 'device.startDartDevelopmentService';
     try {
       // Proxies the `done` future.
       unawaited(
@@ -994,7 +994,7 @@ class ProxiedVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   Stream<Uri> get uris {
     if (_uris == null) {
       String? requestId;
-      final StreamController<Uri> controller = StreamController<Uri>();
+      final controller = StreamController<Uri>();
 
       controller.onListen = () {
         connection

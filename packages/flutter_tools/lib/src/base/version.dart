@@ -66,7 +66,7 @@ class Version implements Comparable<Version> {
   /// This is the highest-numbered stable version.
   static Version? primary(List<Version> versions) {
     Version? primary;
-    for (final Version version in versions) {
+    for (final version in versions) {
       if (primary == null || (version > primary)) {
         primary = version;
       }
@@ -89,7 +89,7 @@ class Version implements Comparable<Version> {
   /// of the parsed version.
   final String _text;
 
-  static final RegExp versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
+  static final versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
 
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.

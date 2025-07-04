@@ -33,7 +33,7 @@ import '../web_template.dart';
 
 import 'web_asset_server.dart';
 
-const String kLuciEnvName = 'LUCI_CONTEXT';
+const kLuciEnvName = 'LUCI_CONTEXT';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -134,10 +134,10 @@ class WebDevFS implements DevFS {
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
-  bool hasSetAssetDirectory = false;
+  var hasSetAssetDirectory = false;
 
   @override
-  bool didUpdateFontManifest = false;
+  var didUpdateFontManifest = false;
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -151,11 +151,11 @@ class WebDevFS implements DevFS {
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,
   }) {
-    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
+    final firstConnection = Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
     // [firstConnection] completing; thus test the boolean to determine if
     // the current connection is the first.
-    bool foundFirstConnection = false;
+    var foundFirstConnection = false;
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
         try {
@@ -190,7 +190,7 @@ class WebDevFS implements DevFS {
   }
 
   @override
-  List<Uri> sources = <Uri>[];
+  var sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;
@@ -261,7 +261,7 @@ class WebDevFS implements DevFS {
       return;
     }
 
-    final WebTemplate template = WebTemplate(await file.readAsString());
+    final template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
       logger.printWarning('Warning: In $filename:${warning.lineNumber}: ${warning.warningText}');
     }
@@ -324,7 +324,7 @@ class WebDevFS implements DevFS {
               generateLoadingIndicator: shouldEnableMiddleware,
             ),
       );
-      const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
+      const onLoadEndBootstrap = 'on_load_end_bootstrap.js';
       if (ddcModuleSystem) {
         webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
       }
@@ -362,7 +362,7 @@ class WebDevFS implements DevFS {
     }
     await _validateTemplateFile('index.html');
     await _validateTemplateFile('flutter_bootstrap.js');
-    final DateTime candidateCompileTime = DateTime.now();
+    final candidateCompileTime = DateTime.now();
     if (resetCompiler) {
       generator.reset();
     }

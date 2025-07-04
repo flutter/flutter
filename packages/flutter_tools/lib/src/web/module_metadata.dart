@@ -21,10 +21,10 @@ class ModuleMetadataVersion {
   ///
   /// Version follows simple semantic versioning format 'major.minor.patch'
   /// See https://semver.org
-  static const ModuleMetadataVersion current = ModuleMetadataVersion(2, 0, 0);
+  static const current = ModuleMetadataVersion(2, 0, 0);
 
   /// Previous version supported by the metadata reader
-  static const ModuleMetadataVersion previous = ModuleMetadataVersion(1, 0, 0);
+  static const previous = ModuleMetadataVersion(1, 0, 0);
 
   /// Current metadata version created by the reader
   String get version => '$majorVersion.$minorVersion.$patchVersion';
@@ -62,9 +62,9 @@ class LibraryMetadata {
       importUri = _readRequiredField(json, importUriField),
       partUris = _readOptionalList(json, partUrisField) ?? <String>[];
 
-  static const String nameField = 'name';
-  static const String importUriField = 'importUri';
-  static const String partUrisField = 'partUris';
+  static const nameField = 'name';
+  static const importUriField = 'importUri';
+  static const partUrisField = 'partUris';
 
   /// Library name as defined in pubspec.yaml
   final String name;
@@ -121,12 +121,12 @@ class ModuleMetadata {
     }
   }
 
-  static const String versionField = 'version';
-  static const String nameField = 'name';
-  static const String closureNameField = 'closureName';
-  static const String sourceMapUriField = 'sourceMapUri';
-  static const String moduleUriField = 'moduleUri';
-  static const String librariesField = 'libraries';
+  static const versionField = 'version';
+  static const nameField = 'name';
+  static const closureNameField = 'closureName';
+  static const sourceMapUriField = 'sourceMapUri';
+  static const moduleUriField = 'moduleUri';
+  static const librariesField = 'libraries';
 
   /// Metadata format version
   late final String version;
@@ -150,7 +150,7 @@ class ModuleMetadata {
   /// Module uri
   final String moduleUri;
 
-  final Map<String, LibraryMetadata> libraries = <String, LibraryMetadata>{};
+  final libraries = <String, LibraryMetadata>{};
 
   /// Add [library] to metadata
   ///

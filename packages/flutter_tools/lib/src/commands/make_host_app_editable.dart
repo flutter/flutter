@@ -21,13 +21,13 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'make-host-app-editable';
+  final name = 'make-host-app-editable';
 
   @override
   bool get deprecated => true;
 
   @override
-  final String description =
+  final description =
       'Moves host apps from generated directories to non-generated directories so that they can be edited by developers.';
 
   @override

@@ -25,9 +25,9 @@ void main() {
   testUsingContext('Android analyze command should run pub', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Platform platform = FakePlatform();
-    final BufferLogger logger = BufferLogger.test();
-    final FakeProcessManager processManager = FakeProcessManager.empty();
-    final Terminal terminal = Terminal.test();
+    final logger = BufferLogger.test();
+    final processManager = FakeProcessManager.empty();
+    final terminal = Terminal.test();
     final AnalyzeCommand command = FakeAndroidAnalyzeCommand(
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
@@ -78,9 +78,9 @@ void main() {
       tempDir.childDirectory('android').createSync();
 
       // Setup repo roots
-      const String homePath = '/home/user/flutter';
+      const homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
-      for (final String dir in <String>['dev', 'examples', 'packages']) {
+      for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
       builder = FakeAndroidBuilder();
@@ -113,7 +113,7 @@ void main() {
     });
 
     testUsingContext('can output app link settings', () async {
-      const String buildVariant = 'release';
+      const buildVariant = 'release';
       await runner.run(<String>[
         'analyze',
         '--android',
@@ -141,9 +141,9 @@ void main() {
 }
 
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  List<String> variants = const <String>[];
+  var variants = const <String>[];
   String? outputVariant;
-  final String outputPath = '/';
+  final outputPath = '/';
 
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {

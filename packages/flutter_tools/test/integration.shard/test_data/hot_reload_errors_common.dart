@@ -20,7 +20,7 @@ void testAll({
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadConstProject project = HotReloadConstProject();
+    final project = HotReloadConstProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {

@@ -14,8 +14,8 @@ class DepfileService {
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  static final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-  static final RegExp _escapeExpr = RegExp(r'\\(.)');
+  static final _separatorExpr = RegExp(r'([^\\]) ');
+  static final _escapeExpr = RegExp(r'\\(.)');
 
   /// Given an [depfile] File, write the depfile contents.
   ///
@@ -29,7 +29,7 @@ class DepfileService {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     _writeFilesToBuffer(depfile.outputs, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(depfile.inputs, buffer);
@@ -56,7 +56,7 @@ class DepfileService {
   /// The [file] contains a list of newline separated file URIs. The output
   /// file must be manually specified.
   Depfile parseDart2js(File file, File output) {
-    final List<File> inputs = <File>[
+    final inputs = <File>[
       for (final String rawUri in file.readAsLinesSync())
         if (rawUri.trim().isNotEmpty)
           if (Uri.tryParse(rawUri) case final Uri fileUri when fileUri.scheme == 'file')
@@ -66,8 +66,8 @@ class DepfileService {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-    final bool backslash = _fileSystem.path.style.separator == r'\';
-    for (final File outputFile in files) {
+    final backslash = _fileSystem.path.style.separator == r'\';
+    for (final outputFile in files) {
       String path = _fileSystem.path.normalize(outputFile.path);
       if (backslash) {
         // Backslashes in a depfile have to be escaped if the platform separator is a backslash.

@@ -34,7 +34,7 @@ void main() {
   late Logger logger;
   // We perform this initialization just so we can build the generated file path for test
   // descriptions.
-  LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
+  var fs = LocalFileSystem.test(signals: Signals.test());
   late BotDetector botDetector;
   late Platform platform;
 
@@ -203,14 +203,14 @@ void main() {
       },
     );
 
-    const String samplePreviewFile = '''
+    const samplePreviewFile = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
 @Preview(name: 'preview')
 Widget preview() => Text('Foo');''';
 
-    const String expectedGeneratedFileContents = '''
+    const expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 import 'package:flutter_project/foo.dart' as _i2;
@@ -321,7 +321,7 @@ List<_i1.WidgetPreview> previews() => [
         final Directory rootProject = await createRootProject();
         loggingProcessManager.clear();
 
-        final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+        final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
 
         await startWidgetPreview(rootProject: rootProject);
         expect(

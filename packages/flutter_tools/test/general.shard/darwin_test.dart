@@ -116,7 +116,7 @@ void main() {
 }
 
 class FakeStdio extends Fake implements Stdio {
-  final StringBuffer stderrBuffer = StringBuffer();
+  final stderrBuffer = StringBuffer();
 
   @override
   void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {

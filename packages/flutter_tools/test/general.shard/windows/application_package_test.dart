@@ -19,7 +19,7 @@ void main() {
     late FileSystem fileSystem;
     late BufferLogger logger;
 
-    final Map<Type, Generator> overrides = <Type, Generator>{
+    final overrides = <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       OperatingSystemUtils: () => os,
@@ -33,7 +33,7 @@ void main() {
     });
 
     testUsingContext('Error on non-existing exe file', () {
-      final PrebuiltWindowsApp? windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.exe')) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -42,14 +42,14 @@ void main() {
 
     testUsingContext('Success on exe file', () {
       fileSystem.file('file.exe').createSync();
-      final PrebuiltWindowsApp windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('file.exe'))! as PrebuiltWindowsApp;
 
       expect(windowsApp.name, 'file.exe');
     }, overrides: overrides);
 
     testUsingContext('Error on non-existing zip file', () {
-      final PrebuiltWindowsApp? windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.zip')) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -58,7 +58,7 @@ void main() {
 
     testUsingContext('Bad zipped app, no payload dir', () {
       fileSystem.file('app.zip').createSync();
-      final PrebuiltWindowsApp? windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -76,7 +76,7 @@ void main() {
         fileSystem.directory(exePath1).createSync(recursive: true);
         fileSystem.directory(exePath2).createSync(recursive: true);
       };
-      final PrebuiltWindowsApp? windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -93,7 +93,7 @@ void main() {
         exePath = fileSystem.path.join(targetDirectory.path, 'app.exe');
         fileSystem.directory(exePath).createSync(recursive: true);
       };
-      final PrebuiltWindowsApp windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'))! as PrebuiltWindowsApp;
 
       expect(logger.errorText, isEmpty);
@@ -103,7 +103,7 @@ void main() {
 
     testUsingContext('Error on unknown file type', () {
       fileSystem.file('not_existing.app').createSync();
-      final PrebuiltWindowsApp? windowsApp =
+      final windowsApp =
           WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.app')) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);

@@ -19,8 +19,8 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  final ProjectWithEarlyError project = ProjectWithEarlyError();
-  const String exceptionStart = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞══════════════════';
+  final project = ProjectWithEarlyError();
+  const exceptionStart = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞══════════════════';
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -36,7 +36,7 @@ void main() {
   testWithoutContext(
     'flutter run in non-machine mode reports an early error in an application',
     () async {
-      final StringBuffer stdout = StringBuffer();
+      final stdout = StringBuffer();
 
       final Process process = await processManager.start(<String>[
         flutterBin,
@@ -52,7 +52,7 @@ void main() {
         stdout.writeln(line);
 
         if (line.startsWith('A Dart VM Service on')) {
-          final RegExp exp = RegExp(r'http://127.0.0.1:(\d+)/');
+          final exp = RegExp(r'http://127.0.0.1:(\d+)/');
           final RegExpMatch match = exp.firstMatch(line)!;
           final String port = match.group(1)!;
           final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
@@ -74,12 +74,12 @@ void main() {
   );
 
   testWithoutContext('flutter run in machine mode does not print an error', () async {
-    final StringBuffer stdout = StringBuffer();
+    final stdout = StringBuffer();
 
     await flutter.run(startPaused: true, withDebugger: true, structuredErrors: true);
     await flutter.resume();
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     await Future<void>(() async {
       flutter.stdout.listen((String line) {

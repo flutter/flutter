@@ -10,7 +10,7 @@ import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
 
-const String _kMitLicense = r'''
+const _kMitLicense = r'''
 MIT License
 
 Copyright (c) 6789 Lester
@@ -34,7 +34,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ''';
 
-const String _kApacheLicense = r'''
+const _kApacheLicense = r'''
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/

@@ -75,7 +75,7 @@ class PreviewDetectorMutex {
       return;
     }
 
-    final Completer<void> request = Completer<void>();
+    final request = Completer<void>();
     _outstandingRequests.add(request);
     await request.future;
   }
@@ -92,6 +92,6 @@ class PreviewDetectorMutex {
     _locked = false;
   }
 
-  bool _locked = false;
-  final Queue<Completer<void>> _outstandingRequests = Queue<Completer<void>>();
+  var _locked = false;
+  final _outstandingRequests = Queue<Completer<void>>();
 }
