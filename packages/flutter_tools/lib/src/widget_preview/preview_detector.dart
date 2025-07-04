@@ -14,11 +14,13 @@ import 'package:watcher/watcher.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
+import 'analytics.dart';
 import 'dependency_graph.dart';
 import 'utils.dart';
 
 class PreviewDetector {
   PreviewDetector({
+    required this.previewAnalytics,
     required this.projectRoot,
     required this.fs,
     required this.logger,
@@ -26,6 +28,7 @@ class PreviewDetector {
     required this.onPubspecChangeDetected,
   });
 
+  final WidgetPreviewAnalytics previewAnalytics;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
@@ -88,6 +91,9 @@ class PreviewDetector {
         return;
       }
 
+      // Start tracking how long it takes to reload a preview after the file change is detected.
+      previewAnalytics.startPreviewReloadStopwatch();
+
       // TODO(bkonyi): investigate batching change detection to handle cases where directories are
       // deleted or moved. Currently, analysis, preview detection, and error propagation will be
       // performed for each file contained in a modified directory (i.e., moved or deleted). This
@@ -113,6 +119,10 @@ class PreviewDetector {
       // Determine which files have transitive dependencies with compile time errors.
       _propagateErrors();
       onChangeDetected(_dependencyGraph);
+
+      // Report how long it took to analyze the changed file, find preview instances, update the
+      // dependency graph, generate code, and reload the widget preview scaffold with the changes.
+      previewAnalytics.reportPreviewReloadTiming();
     });
   }
 
