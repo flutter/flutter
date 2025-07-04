@@ -1,0 +1,168 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'image_filter.dart';
+
+/// A widget that replicates the native Android stretch overscroll effect.
+///
+/// This widget is used in the [StretchingOverscrollIndicator] widget and creates
+/// a stretch visual feedback when the user overscrolls at the edges.
+///
+/// Only supported when using the Impeller rendering engine.
+class StretchOverscrollEffect extends StatefulWidget {
+  /// Creates a StretchOverscrollEffect widget that applies a stretch
+  /// effect when the user overscrolls horizontally or vertically.
+  const StretchOverscrollEffect({
+    super.key,
+    this.stretchStrength = 0.0,
+    required this.axis,
+    required this.child,
+  }) : assert(
+         stretchStrength >= -1.0 && stretchStrength <= 1.0,
+         'stretchStrength must be between -1.0 and 1.0',
+       );
+
+  /// The overscroll strength applied for the stretching effect.
+  ///
+  /// The value should be between -1.0 and 1.0 inclusive.
+  /// For horizontal axis, Positive values apply a pull from
+  /// left to right, while negative values pull from right to left.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to set the horizontal stretch strength to pull right.
+  ///
+  /// ```dart
+  /// const StretchOverscrollEffect(
+  ///   stretchStrength: 0.5,
+  ///   axis: Axis.horizontal,
+  ///   child: Text('Hello, World!'),
+  /// );
+  /// ```
+  /// {@end-tool}
+  final double stretchStrength;
+
+  /// The axis along which the stretching overscroll effect is applied.
+  ///
+  /// Determines the direction of the stretch, either horizontal or vertical.
+  final Axis axis;
+
+  /// The child widget that the stretching overscroll effect applies to.
+  final Widget child;
+
+  @override
+  State<StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
+}
+
+class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
+  ui.FragmentShader? _fragmentShader;
+
+  /// The maximum scale multiplier applied during a stretch effect.
+  static const double maxStretchIntensity = 1.0;
+
+  /// The strength of the interpolation used for smoothing the effect.
+  static const double interpolationStrength = 0.7;
+
+  /// A no-op [ui.ImageFilter] that uses the identity matrix.
+  static final ui.ImageFilter _emptyFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
+
+  @override
+  void dispose() {
+    _fragmentShader?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _StretchEffectShader.initializeShader();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isShaderNeeded = widget.stretchStrength.abs() > precisionErrorTolerance;
+
+    final ui.ImageFilter imageFilter;
+
+    if (_StretchEffectShader._initialized) {
+      _fragmentShader?.dispose();
+      _fragmentShader = _StretchEffectShader._program!.fragmentShader();
+      _fragmentShader!.setFloat(2, maxStretchIntensity);
+      if (widget.axis == Axis.vertical) {
+        _fragmentShader!.setFloat(3, 0.0);
+        _fragmentShader!.setFloat(4, widget.stretchStrength);
+      } else {
+        _fragmentShader!.setFloat(3, widget.stretchStrength);
+        _fragmentShader!.setFloat(4, 0.0);
+      }
+      _fragmentShader!.setFloat(5, interpolationStrength);
+
+      imageFilter = ui.ImageFilter.shader(_fragmentShader!);
+    } else {
+      _fragmentShader?.dispose();
+      _fragmentShader = null;
+
+      imageFilter = _emptyFilter;
+    }
+
+    return ImageFiltered(
+      imageFilter: imageFilter,
+      enabled: isShaderNeeded,
+      // A nearly-transparent pixels is used to ensure the shader gets applied,
+      // even when the child is visually transparent or has no paint operations.
+      child: CustomPaint(
+        painter: isShaderNeeded ? _StretchEffectPainter() : null,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// A [CustomPainter] that draws nearly transparent pixels at the four corners.
+///
+/// This ensures the fragment shader covers the entire canvas by forcing
+/// painting operations on all edges, preventing shader optimization skips.
+class _StretchEffectPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint =
+        Paint()
+          ..color = const Color.fromARGB(1, 0, 0, 0)
+          ..style = PaintingStyle.fill;
+
+    canvas.drawPoints(ui.PointMode.points, <Offset>[
+      Offset.zero,
+      Offset(size.width - 1, 0),
+      Offset(0, size.height - 1),
+      Offset(size.width - 1, size.height - 1),
+    ], paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _StretchEffectShader {
+  static bool _initCalled = false;
+  static bool _initialized = false;
+  static ui.FragmentProgram? _program;
+
+  static void initializeShader() {
+    if (!_initCalled) {
+      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag').then((
+        ui.FragmentProgram program,
+      ) {
+        _program = program;
+        _initialized = true;
+      });
+      _initCalled = true;
+    }
+  }
+}
