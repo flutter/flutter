@@ -594,15 +594,14 @@ class BallisticScrollActivity extends ScrollActivity {
     this.shouldIgnorePointer,
   ) {
     _controller =
-      AnimationController.unbounded(
-        debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
-        vsync: vsync,
-      )..addListener(_tick);
-    // No cascade notation when triggering the animateWith,
-    // ensures _controller is initialized before _tick is invoked.
-    //
-    // won't trigger if we dispose _controller before it completes.
-    _controller.animateWith(simulation).whenComplete(_end);
+        AnimationController.unbounded(
+            debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
+            vsync: vsync,
+          )
+          ..addListener(_tick)
+          ..animateWith(
+            simulation,
+          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
@@ -710,7 +709,9 @@ class DrivenScrollActivity extends ScrollActivity {
             value: from,
             debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
             vsync: vsync,
-          )
+          );
+    // no cascade, ensures _controller is initialized before _tick is invoked.
+    _controller
           ..addListener(_tick)
           ..animateTo(
             to,
@@ -731,11 +732,13 @@ class DrivenScrollActivity extends ScrollActivity {
         AnimationController.unbounded(
             debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
             vsync: vsync,
-          )
-          ..addListener(_tick)
-          ..animateWith(
-            simulation,
-          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+          );
+    // no cascade, ensures _controller is initialized before _tick is invoked.
+    _controller
+      ..addListener(_tick)
+      ..animateWith(
+        simulation,
+      ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
