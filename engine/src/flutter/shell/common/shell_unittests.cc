@@ -238,6 +238,7 @@ class TestPlatformView : public PlatformView {
   TestPlatformView(Shell& shell, const TaskRunners& task_runners)
       : PlatformView(shell, task_runners) {}
   MOCK_METHOD(std::unique_ptr<Surface>, CreateRenderingSurface, (), (override));
+  MOCK_METHOD(void, ReleaseResourceContext, (), (const, override));
 };
 
 class MockPlatformMessageHandler : public PlatformMessageHandler {
@@ -4989,6 +4990,45 @@ TEST_F(ShellTest, MergeUIAndPlatformThreadsAfterLaunch) {
       task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
 
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, ReleaseResourceContextWhenIOManagerIsDeleted) {
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  auto settings = CreateSettingsForFixture();
+  bool called_release_resource_context = false;
+  Shell::CreateCallback<PlatformView> platform_view_create_callback =
+      [task_runners, &called_release_resource_context](flutter::Shell& shell) {
+        auto result = std::make_unique<::testing::NiceMock<TestPlatformView>>(
+            shell, task_runners);
+        ON_CALL(*result, ReleaseResourceContext())
+            .WillByDefault(
+                ::testing::Assign(&called_release_resource_context, true));
+        return result;
+      };
+
+  auto parent_shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback = platform_view_create_callback,
+  });
+
+  std::unique_ptr<Shell> child_shell;
+  PostSync(
+      parent_shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&parent_shell, &settings, &child_shell, platform_view_create_callback] {
+        auto configuration = RunConfiguration::InferFromSettings(settings);
+        configuration.SetEntrypoint("emptyMain");
+        auto child = parent_shell->Spawn(
+            std::move(configuration), "", platform_view_create_callback,
+            [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+        child_shell = std::move(child);
+      });
+
+  DestroyShell(std::move(parent_shell), task_runners);
+  ASSERT_FALSE(called_release_resource_context);
+
+  DestroyShell(std::move(child_shell), task_runners);
+  ASSERT_TRUE(called_release_resource_context);
 }
 
 }  // namespace testing
