@@ -27,6 +27,7 @@ import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
+import 'scroll_details.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -938,19 +939,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
-  /// Changes the scrolling position based on a pointer signal from current
-  /// value to delta without animation and without checking if new value is in
-  /// range, taking min/max scroll extent into account.
+  /// Adjusts the scroll position from its current value by [delta] without checking if new value
+  /// is in range, taking min/max scroll extent into account.
   ///
-  /// Any active animation is canceled. If the user is currently scrolling, that
-  /// action is canceled.
+  /// If there is a [RetargetableScrollActivity] running, its target will be adjusted by [delta].
+  /// Any other non-retargetable scroll activities are cancelled and replaced by the activity
+  /// returned from [ScrollPhysics.createScrollActivity]. If the returned activity is null, then
+  /// this method will apply the [delta] directly without using activities.
   ///
-  /// This method dispatches the start/update/end sequence of scrolling
-  /// notifications.
+  /// The provided [delta] takes into account [ScrollBehavior.pointerAxisModifiers], and should
+  /// be preferred over the raw deltas contained in the [event].
   ///
-  /// This method is very similar to [jumpTo], but [pointerScroll] will
-  /// update the [ScrollDirection].
-  void pointerScroll(double delta);
+  /// This method dispatches the start/update/end sequence of scrolling notifications.
+  void pointerScroll(double delta, PointerSignalEvent event);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
@@ -1035,6 +1036,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (!wasScrolling && _activity!.isScrolling) {
       didStartScroll();
     }
+  }
+
+  /// Updates the target scroll position of the current [activity] based on provided [details].
+  ///
+  /// If no activity is running or if the running activity is not a [RetargetableScrollActivity],
+  /// then this method will return false. Otherwise it will retarget the activity and return true.
+  bool retargetActivity(ScrollDetails details) {
+    final ScrollActivity? currentActivity = activity;
+    if (currentActivity is RetargetableScrollActivity) {
+      currentActivity.retarget(details);
+      return true;
+    }
+
+    return false;
   }
 
   // NOTIFICATION DISPATCH

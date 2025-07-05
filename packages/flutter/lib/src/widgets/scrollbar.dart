@@ -2161,7 +2161,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != _cachedController!.position.pixels) {
-      _cachedController!.position.pointerScroll(delta);
+      _cachedController!.position.pointerScroll(delta, event);
     }
   }
 

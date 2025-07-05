@@ -969,7 +969,7 @@ class ScrollableState extends State<Scrollable>
       // any default native actions.
       event.respond(allowPlatformDefault: true);
     } else if (event is PointerScrollInertiaCancelEvent) {
-      position.pointerScroll(0);
+      position.pointerScroll(0, event);
       // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
     }
   }
@@ -979,7 +979,7 @@ class ScrollableState extends State<Scrollable>
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
-      position.pointerScroll(delta);
+      position.pointerScroll(delta, event);
     }
   }
 
