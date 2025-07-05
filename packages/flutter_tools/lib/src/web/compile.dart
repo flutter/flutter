@@ -32,6 +32,9 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
 
+/// Static assets url to set in index.html in flutter build command
+const String kStaticAssetsUrl = 'staticAssetsUrl';
+
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
@@ -64,6 +67,7 @@ class WebBuilder {
     ServiceWorkerStrategy serviceWorkerStrategy, {
     required List<WebCompilerConfig> compilerConfigs,
     String? baseHref,
+    String? staticAssetsUrl,
     String? outputDirectoryPath,
   }) async {
     final bool hasWebPlugins = (await findPlugins(
@@ -100,6 +104,7 @@ class WebBuilder {
             kTargetFile: target,
             kHasWebPlugins: hasWebPlugins.toString(),
             if (baseHref != null) kBaseHref: baseHref,
+            if (staticAssetsUrl != null) kStaticAssetsUrl: staticAssetsUrl,
             kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
           },
