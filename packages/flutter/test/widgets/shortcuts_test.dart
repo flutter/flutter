@@ -1361,9 +1361,7 @@ void main() {
       invoked = 0;
     });
 
-    testWidgets('Shortcuts does not insert a semantics node when includeSemantics is false', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Shortcuts does not insert a semantics', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       addTearDown(semanticsTester.dispose);
 
@@ -1374,11 +1372,7 @@ void main() {
 
       expect(
         semanticsTester,
-        hasSemantics(
-          TestSemantics.root(children: <TestSemantics>[TestSemantics(id: 1)]),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ),
+        hasSemantics(TestSemantics.root(), ignoreRect: true, ignoreTransform: true),
       );
 
       await tester.pumpWidget(

@@ -709,6 +709,7 @@ void main() {
                       SemanticsFlag.hasEnabledState,
                       SemanticsFlag.isEnabled,
                       SemanticsFlag.isFocused,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[
                       if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
@@ -731,6 +732,7 @@ void main() {
                 id: 9,
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isTextField,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                   SemanticsFlag.isFocused,
@@ -910,6 +912,7 @@ void main() {
                     id: 11,
                     flags: <SemanticsFlag>[
                       SemanticsFlag.isTextField,
+                      SemanticsFlag.isFocusable,
                       SemanticsFlag.hasEnabledState,
                       SemanticsFlag.isEnabled,
                       SemanticsFlag.isFocused,
@@ -935,6 +938,7 @@ void main() {
                 id: 11,
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isTextField,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                   SemanticsFlag.isFocused,

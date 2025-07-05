@@ -1373,6 +1373,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           canRequestFocus: _canRequestFocus,
           onFocusChange: handleFocusUpdate,
           autofocus: widget.autofocus,
+          includeSemantics: !widget.excludeFromSemantics,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
             onEnter: handleMouseEnter,

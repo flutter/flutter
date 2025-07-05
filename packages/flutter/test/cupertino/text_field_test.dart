@@ -569,6 +569,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -7687,6 +7688,7 @@ void main() {
       ),
       matchesSemantics(
         isTextField: true,
+        isFocusable: true,
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
@@ -7713,7 +7715,12 @@ void main() {
             .descendant(of: find.byType(CupertinoTextField), matching: find.byType(Semantics))
             .first,
       ),
-      matchesSemantics(hasEnabledState: true, isTextField: true, isReadOnly: true),
+      matchesSemantics(
+        hasEnabledState: true,
+        isTextField: true,
+        isFocusable: true,
+        isReadOnly: true,
+      ),
     );
   });
 
@@ -10408,6 +10415,7 @@ void main() {
                           inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -10475,6 +10483,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],
