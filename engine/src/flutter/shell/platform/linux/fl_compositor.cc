@@ -18,28 +18,6 @@ FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* self) {
   return FL_COMPOSITOR_GET_CLASS(self)->get_renderer_type(self);
 }
 
-void fl_compositor_setup(FlCompositor* self) {
-  g_return_if_fail(FL_IS_COMPOSITOR(self));
-  FL_COMPOSITOR_GET_CLASS(self)->setup(self);
-}
-
-gboolean fl_compositor_create_backing_store(
-    FlCompositor* self,
-    const FlutterBackingStoreConfig* config,
-    FlutterBackingStore* backing_store_out) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->create_backing_store(self, config,
-                                                             backing_store_out);
-}
-
-gboolean fl_compositor_collect_backing_store(
-    FlCompositor* self,
-    const FlutterBackingStore* backing_store) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->collect_backing_store(self,
-                                                              backing_store);
-}
-
 void fl_compositor_wait_for_frame(FlCompositor* self,
                                   int target_width,
                                   int target_height) {
@@ -49,10 +27,9 @@ void fl_compositor_wait_for_frame(FlCompositor* self,
 }
 
 gboolean fl_compositor_present_layers(FlCompositor* self,
-                                      FlutterViewId view_id,
                                       const FlutterLayer** layers,
                                       size_t layers_count) {
   g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->present_layers(self, view_id, layers,
+  return FL_COMPOSITOR_GET_CLASS(self)->present_layers(self, layers,
                                                        layers_count);
 }
