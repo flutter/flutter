@@ -67,6 +67,13 @@ class PrecacheCommand extends FlutterCommand {
       help: 'Precache artifacts required for any development platform.',
     );
     argParser.addFlag(
+      'informative',
+      defaultsTo: true,
+      help: 'Precache engine_stamp.json.',
+      negatable: false,
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
       'flutter_runner',
       help: 'Precache the flutter runner artifacts.',
       hide: !verboseHelp,

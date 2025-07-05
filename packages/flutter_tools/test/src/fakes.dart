@@ -377,6 +377,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.gitTagVersion = const GitTagVersion.unknown(),
     this.flutterRoot = '/path/to/flutter',
     this.nextFlutterVersion,
+    this.engineBuildDate = '12/01/02',
+    this.engineContentHash = 'cccccccccccccccccccccccccccccccccccccccc',
   });
 
   final String branch;
@@ -476,6 +478,12 @@ class FakeFlutterVersion implements FlutterVersion {
   Map<String, Object> toJson() {
     return <String, Object>{};
   }
+
+  @override
+  final String? engineBuildDate;
+
+  @override
+  final String? engineContentHash;
 }
 
 // A test implementation of [FeatureFlags] that allows enabling without reading

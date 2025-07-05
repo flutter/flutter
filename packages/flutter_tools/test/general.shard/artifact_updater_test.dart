@@ -499,6 +499,28 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
+  testWithoutContext('ArtifactUpdater can download a single file', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://example.com'],
+    );
+
+    await artifactUpdater.downloadFile(
+      'test message',
+      Uri.parse('http://example.com/test.json'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(fileSystem.file('out/test.json'), exists);
+  });
+
   testWithoutContext('ArtifactUpdater will delete downloaded files if they exist.', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
