@@ -1836,7 +1836,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
@@ -1854,7 +1853,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
@@ -1946,7 +1944,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
