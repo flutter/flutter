@@ -2918,6 +2918,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.menuPosition,
     required this.menuPadding,
     required this.avoidBounds,
+    required this.safeArea,
     required this.orientation,
     required this.parentOrientation,
   });
@@ -2945,6 +2946,9 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // List of rectangles that we should avoid overlapping. Unusable screen area.
   final Set<Rect> avoidBounds;
 
+  // Media query padding at the context of the rendering Overlay.
+  final EdgeInsets safeArea;
+
   // The orientation of this menu.
   final Axis orientation;
 
@@ -2953,11 +2957,11 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus _kMenuViewPadding
-    // pixels in each direction.
+    // The menu can be at most the size of the overlay minus the safe area and
+    // _kMenuViewPadding pixels in each direction.
     return BoxConstraints.loose(
       constraints.biggest,
-    ).deflate(const EdgeInsets.all(_kMenuViewPadding));
+    ).deflate(safeArea).deflate(const EdgeInsets.all(_kMenuViewPadding));
   }
 
   @override
@@ -2994,8 +2998,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       y = adjustedPosition.dy;
     }
 
+    final Rect safeRect = Rect.fromLTRB(
+      overlayRect.left + safeArea.left,
+      overlayRect.top + safeArea.top,
+      overlayRect.right - safeArea.right,
+      overlayRect.bottom - safeArea.bottom,
+    );
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(
-      overlayRect,
+      safeRect,
       avoidBounds,
     );
     final Rect allowedRect = _closestScreen(subScreens, anchorRect.center);
@@ -3353,6 +3363,11 @@ class _Submenu extends StatelessWidget {
             )
             : Rect.zero;
 
+    // Get the device padding using the Overlay's context because there
+    // may be a SafeArea between it and the portal, so the current context
+    // would have zero padding.
+    final EdgeInsets safeArea = MediaQuery.paddingOf(Overlay.of(context).context);
+
     final Widget menuPanel = TapRegion(
       groupId: menuPosition.tapRegionGroupId,
       consumeOutsideTaps: anchor._root._menuController.isOpen && anchor.widget.consumeOutsideTap,
@@ -3396,6 +3411,7 @@ class _Submenu extends StatelessWidget {
                 anchorRect: anchorRect,
                 textDirection: textDirection,
                 avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
+                safeArea: safeArea,
                 menuPadding: resolvedPadding,
                 alignment: alignment,
                 alignmentOffset: alignmentOffset,
