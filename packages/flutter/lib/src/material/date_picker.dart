@@ -2017,6 +2017,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
 
 class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
   final GlobalKey _scrollViewKey = GlobalKey();
+  final Key _sliverAfterKey = UniqueKey();
   DateTime? _startDate;
   DateTime? _endDate;
   int _initialMonthIndex = 0;
@@ -2124,8 +2125,6 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
-    const Key sliverAfterKey = Key('sliverAfterKey');
-
     return Column(
       children: <Widget>[
         const _DayHeaders(),
@@ -2143,7 +2142,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
             child: CustomScrollView(
               key: _scrollViewKey,
               controller: _controller,
-              center: sliverAfterKey,
+              center: _sliverAfterKey,
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -2152,7 +2151,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
                   ),
                 ),
                 SliverList(
-                  key: sliverAfterKey,
+                  key: _sliverAfterKey,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) => _buildMonthItem(context, index, false),
                     childCount: _numberOfMonths - _initialMonthIndex,
