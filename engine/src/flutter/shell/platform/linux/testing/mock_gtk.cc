@@ -56,6 +56,10 @@ GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }
 
+GdkDisplay* gdk_wayland_display_get_wl_display(GdkDisplay* display) {
+  return mock->gdk_wayland_display_get_wl_display(display);
+}
+
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
   return GDK_DISPLAY(g_object_new(gdk_display_get_type(), nullptr));
 }
