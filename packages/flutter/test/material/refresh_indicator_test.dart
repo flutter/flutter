@@ -1261,4 +1261,72 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  testWidgets('RefreshIndicator - default sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - increased sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          dragSensitivity: 1.5,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 250.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - decreased sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          dragSensitivity: 0.5,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 400.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
 }
