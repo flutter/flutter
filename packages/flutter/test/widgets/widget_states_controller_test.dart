@@ -99,4 +99,20 @@ void main() {
     expect(controller.value, <WidgetState>{});
     expect(count, 1);
   });
+
+  test('WidgetStatesController original reference', () {
+    final WidgetStatesController controller = WidgetStatesController();
+    final Set<WidgetState> original = controller.value;
+
+    expect(original.isEmpty, true);
+
+    controller.update(WidgetState.pressed, true);
+
+
+   expect(controller.value.contains(WidgetState.pressed), true);
+
+   expect(original, isEmpty, reason: 'Original reference should remain empty after update.');
+
+  });
+
 }
