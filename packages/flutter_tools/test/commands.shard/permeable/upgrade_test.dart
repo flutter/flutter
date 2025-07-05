@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -120,6 +121,53 @@ void main() {
         expect(await result, FlutterCommandResult.success());
         expect(testLogger.statusText, contains('Flutter is already up to date'));
         expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'prints minutes the operation took',
+      () async {
+        const String revision = 'abc123';
+        const String upstreamRevision = 'def456';
+        const String version = '1.2.3';
+        const String upstreamVersion = '4.5.6';
+
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          branch: 'beta',
+          frameworkRevision: revision,
+          frameworkRevisionShort: revision,
+          frameworkVersion: version,
+        );
+
+        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+          frameworkRevision: upstreamRevision,
+          frameworkRevisionShort: upstreamRevision,
+          frameworkVersion: upstreamVersion,
+        );
+
+        fakeCommandRunner.remoteVersion = latestVersion;
+
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
+          ),
+        ]);
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          force: false,
+          continueFlow: false,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+          stopwatch: () => FakeStopwatch(const Duration(minutes: 25)),
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(testLogger.statusText, contains('Took 25 minutes'));
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -545,4 +593,14 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> runDoctor() async {}
+}
+
+final class FakeStopwatch extends Fake implements Stopwatch {
+  FakeStopwatch(this.elapsed);
+
+  @override
+  void start() {}
+
+  @override
+  final Duration elapsed;
 }

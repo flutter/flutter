@@ -101,7 +101,9 @@ class UpgradeCommandRunner {
     required GitTagVersion gitTagVersion,
     required FlutterVersion flutterVersion,
     required bool verifyOnly,
+    Stopwatch Function() stopwatch = Stopwatch.new,
   }) async {
+    final Stopwatch timer = stopwatch()..start();
     if (!continueFlow) {
       await runCommandFirstHalf(
         force: force,
@@ -113,6 +115,8 @@ class UpgradeCommandRunner {
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
+    final Duration execution = timer.elapsed;
+    globals.printStatus('Took ${execution.inMinutes} minutes');
     return FlutterCommandResult.success();
   }
 
