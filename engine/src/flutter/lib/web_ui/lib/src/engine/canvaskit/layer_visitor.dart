@@ -333,8 +333,10 @@ class MeasureVisitor extends LayerVisitor {
     assert(clipRSuperellipse.needsPainting);
 
     measuringCanvas.save();
-    measuringCanvas.clipRSuperellipse(
-      clipRSuperellipse.clipRSuperellipse,
+    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
+    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    measuringCanvas.clipRRect(
+      clipRSuperellipse.clipRSuperellipse.toApproximateRRect(),
       clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -575,7 +577,6 @@ class PaintVisitor extends LayerVisitor {
   @override
   void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
     assert(clipRSuperellipse.needsPainting);
-
     nWayCanvas.save();
     // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
