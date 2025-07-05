@@ -967,7 +967,7 @@ class ClipRect extends SingleChildRenderObjectWidget {
 ///  * [ClipRect], for more efficient clips without rounded corners.
 ///  * [ClipRSuperellipse], for a similar clipping shape with smoother
 ///    transitions between the straight sides and the rounded corners. This
-///    shape closely matches the rounded rectangles commonly used in Apple’s
+///    shape closely matches the rounded rectangles commonly used in Apple's
 ///    design language, resembling the `RoundedRectangle` shape in SwiftUI with
 ///    the `.continuous` corner style.
 ///  * [ClipOval], for an elliptical clip.
@@ -2605,7 +2605,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that will become as small as its parent allows.
   const SizedBox.shrink({super.key, super.child}) : width = 0.0, height = 0.0;
 
-  /// Creates a box with the specified size.
+  /// Creates a box from a size.
   SizedBox.fromSize({super.key, super.child, Size? size})
     : width = size?.width,
       height = size?.height;
@@ -3963,7 +3963,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// can rebuild the stack with the children in the new order. If you reorder
 /// the children in this way, consider giving the children non-null keys.
 /// These keys will cause the framework to move the underlying objects for
-/// the children to their new locations rather than recreate them at their
+/// the children to their new locations rather than recreating them at their
 /// new location.
 ///
 /// For more details about the stack layout algorithm, see [RenderStack].
@@ -3972,6 +3972,11 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// you want to make a custom layout manager, you probably want to use
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
+/// [Transform] is an example of a widget that can cause its children to paint
+/// outside its geometry.
+///
+/// To clip children whose geometry does not overflow the stack, consider
+/// using a [ClipRect] widget.
 ///
 /// {@tool snippet}
 ///
@@ -4609,7 +4614,6 @@ class Positioned extends ParentDataWidget<StackParentData> {
 ///  * [Positioned.directional], which also specifies the widget's horizontal
 ///    position using [start] and [end] but has an explicit [TextDirection].
 ///  * [AnimatedPositionedDirectional], which automatically transitions
-///    the child's position over a given duration whenever the given position
 ///    changes.
 class PositionedDirectional extends StatelessWidget {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
@@ -4851,7 +4855,7 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// If the [direction] is [Axis.horizontal], and either the
   /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
-  /// [MainAxisAlignment.end], or there's more than one child, then the
+  /// [MainAxisAlignment.end] or there's more than one child, then the
   /// [textDirection] (or the ambient [Directionality]) must not be null.
   ///
   /// If the [direction] is [Axis.vertical], this controls the meaning of the
@@ -4873,7 +4877,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// property's [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
   ///
   /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
-  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
+  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end] or there's
   /// more than one child, then the [verticalDirection] must not be null.
   ///
   /// If the [direction] is [Axis.horizontal], this controls the meaning of the
@@ -5571,6 +5575,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
+    this.maxLines,
     super.children,
   });
 
@@ -5711,6 +5716,15 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// The maximum number of lines to display before wrapping.
+  ///
+  /// If null, there is no limit on the number of lines.
+  /// If not null, the wrap will stop creating new lines after reaching this limit.
+  /// Children that would exceed this limit are not displayed.
+  ///
+  /// Defaults to null.
+  final int? maxLines;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return RenderWrap(
@@ -5723,6 +5737,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
+      maxLines: maxLines,
     );
   }
 
@@ -5737,7 +5752,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..maxLines = maxLines;
   }
 
   @override
@@ -5757,6 +5773,7 @@ class Wrap extends MultiChildRenderObjectWidget {
         defaultValue: VerticalDirection.down,
       ),
     );
+    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }
 
