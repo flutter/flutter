@@ -442,11 +442,13 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _fallbackController;
+  late AnimationController _internalController;
   AnimationController? _inheritedController;
 
   AnimationController get _controller =>
-      widget.controller ?? _inheritedController ?? _fallbackController;
+      widget.controller ?? _inheritedController ?? _internalController;
+
+  bool get _usingInternalController => _controller == _internalController;
 
   @override
   void initState() {
@@ -455,12 +457,12 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
         context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
         context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
 
-    _fallbackController = AnimationController(
+    _internalController = AnimationController(
       duration: LinearProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
 
-    if (widget.controller == null && _inheritedController == null && widget.value == null) {
+    if (_usingInternalController && widget.value == null) {
       _controller.repeat();
     }
   }
@@ -468,7 +470,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller == null && _inheritedController == null) {
+    if (_usingInternalController) {
       if (widget.value == null && !_controller.isAnimating) {
         _controller.repeat();
       } else if (widget.value != null && _controller.isAnimating) {
@@ -485,7 +487,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
 
   @override
   void dispose() {
-    _fallbackController.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 
@@ -924,11 +926,13 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _fallbackController;
+  late AnimationController _internalController;
   AnimationController? _inheritedController;
 
   AnimationController get _controller =>
-      widget.controller ?? _inheritedController ?? _fallbackController;
+      widget.controller ?? _inheritedController ?? _internalController;
+
+  bool get _usingInternalController => _controller == _internalController;
 
   @override
   void initState() {
@@ -937,12 +941,12 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
         context.getInheritedWidgetOfExactType<ProgressIndicatorTheme>()?.data.controller ??
         context.findAncestorWidgetOfExactType<Theme>()?.data.progressIndicatorTheme.controller;
 
-    _fallbackController = AnimationController(
+    _internalController = AnimationController(
       duration: CircularProgressIndicator.defaultAnimationDuration,
       vsync: this,
     );
 
-    if (widget.controller == null && _inheritedController == null && widget.value == null) {
+    if (_usingInternalController && widget.value == null) {
       _controller.repeat();
     }
   }
@@ -950,8 +954,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.controller == null && _inheritedController == null) {
+    if (_usingInternalController) {
       if (widget.value == null && !_controller.isAnimating) {
         _controller.repeat();
       } else if (widget.value != null && _controller.isAnimating) {
@@ -968,7 +971,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   @override
   void dispose() {
-    _fallbackController.dispose();
+    _internalController.dispose();
     super.dispose();
   }
 

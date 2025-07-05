@@ -1806,6 +1806,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                         listenable: _localizationsResolver,
                         builder: (BuildContext context, _) {
                           return Localizations(
+                            isApplicationLevel: true,
                             locale: _localizationsResolver.locale,
                             delegates: _localizationsResolver.localizationsDelegates.toList(),
                             child: title ?? result,

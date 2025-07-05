@@ -648,4 +648,87 @@ void main() {
     expect(optionFinder(kOptions.length - 1), findsNothing);
     checkOptionHighlight(tester, kOptions.first, highlightColor);
   });
+
+  testWidgets(
+    'passes textEditingController, focusNode to textEditingController, focusNode RawAutocomplete',
+    (WidgetTester tester) async {
+      final TextEditingController textEditingController = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(textEditingController.dispose);
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RawAutocomplete<String> rawAutocomplete = tester.widget(
+        find.byType(RawAutocomplete<String>),
+      );
+      expect(rawAutocomplete.textEditingController, textEditingController);
+      expect(rawAutocomplete.focusNode, focusNode);
+    },
+  );
+
+  testWidgets('when field scrolled offscreen, reshown selected value when scrolled back', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController textEditingController = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(textEditingController.dispose);
+    addTearDown(focusNode.dispose);
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+              const SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    /// Select an option.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    const String textSelection = 'chameleon';
+    await tester.tap(find.text(textSelection));
+
+    // Unfocus and scroll to deconstruct the widge
+    final TextField field = find.byType(TextField).evaluate().first.widget as TextField;
+    field.focusNode?.unfocus();
+    scrollController.jumpTo(2000.0);
+    await tester.pumpAndSettle();
+
+    /// Scroll to go back to the widget.
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+
+    /// Checks that the option selected is still present.
+    final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
+    expect(field2.controller!.text, textSelection);
+  });
 }

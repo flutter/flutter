@@ -150,6 +150,7 @@ abstract final class FlutterOptions {
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
   static const String kWebExperimentalHotReload = 'web-experimental-hot-reload';
+  static const String kEnableImpeller = 'enable-impeller';
 }
 
 /// flutter command categories for usage.
@@ -1236,7 +1237,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
     argParser.addFlag(
-      'enable-impeller',
+      FlutterOptions.kEnableImpeller,
       hide: !verboseHelp,
       defaultsTo: null,
       help:
@@ -1245,6 +1246,19 @@ abstract class FlutterCommand extends Command<void> {
           'is available but not the default. This flag will cause Impeller '
           'to be used on Android. On other platforms, this flag will be '
           'ignored.',
+    );
+  }
+
+  void addEnableFlutterGpuFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-flutter-gpu',
+      hide: !verboseHelp,
+      defaultsTo: null,
+      help:
+          'Whether to enable the Flutter GPU API (https://api.flutter.dev/flutter/flutter_gpu/). '
+          'This feature is only supported with the Impeller rendering engine, '
+          'which can be enabled via the "--${FlutterOptions.kEnableImpeller}" '
+          'option.',
     );
   }
 
@@ -2082,6 +2096,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
+    case TargetPlatform.unsupported:
       return null;
   }
 }

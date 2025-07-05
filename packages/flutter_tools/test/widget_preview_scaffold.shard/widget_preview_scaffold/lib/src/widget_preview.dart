@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
@@ -23,6 +21,7 @@ class WidgetPreview {
   /// properties.
   const WidgetPreview({
     required this.builder,
+    this.packageName,
     this.name,
     this.size,
     this.textScaleFactor,
@@ -30,6 +29,12 @@ class WidgetPreview {
     this.theme,
     this.localizations,
   });
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  final String? packageName;
 
   /// A description to be displayed alongside the preview.
   ///
