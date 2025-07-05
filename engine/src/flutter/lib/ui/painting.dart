@@ -3035,7 +3035,7 @@ abstract class Path {
 
   /// Adds a new sub-path that consists of curves needed to form the rounded
   /// superellipse described by the argument.
-  void addRSuperellipse(RSuperellipse rsuperellipse);
+  void addRSuperellipse(RSuperellipse rsuperellipse, {RSuperellipseCache? cache});
 
   /// Adds the sub-paths of `path`, offset by `offset`, to this path.
   ///
@@ -3380,7 +3380,7 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   external void _addRRect(Float32List rrect);
 
   @override
-  void addRSuperellipse(RSuperellipse rsuperellipse) {
+  void addRSuperellipse(RSuperellipse rsuperellipse, {RSuperellipseCache? cache}) {
     assert(_rsuperellipseIsValid(rsuperellipse));
     _addRSuperellipse(rsuperellipse._native());
   }
@@ -5916,7 +5916,11 @@ abstract class Canvas {
   /// If multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that and some examples of using [clipRSuperellipse].
-  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true});
+  void clipRSuperellipse(
+    RSuperellipse rsuperellipse, {
+    bool doAntiAlias = true,
+    RSuperellipseCache? cache,
+  });
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -6046,7 +6050,7 @@ abstract class Canvas {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-dark-mode-only)
-  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint);
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint, {RSuperellipseCache? cache});
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -6660,7 +6664,11 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   external void _clipRRect(Float32List rrect, bool doAntiAlias);
 
   @override
-  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
+  void clipRSuperellipse(
+    RSuperellipse rsuperellipse, {
+    bool doAntiAlias = true,
+    RSuperellipseCache? cache,
+  }) {
     assert(_rsuperellipseIsValid(rsuperellipse));
     _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
   }
@@ -6779,7 +6787,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   );
 
   @override
-  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint, {RSuperellipseCache? cache}) {
     assert(_rsuperellipseIsValid(rsuperellipse));
     _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
   }

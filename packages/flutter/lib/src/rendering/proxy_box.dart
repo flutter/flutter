@@ -8,7 +8,7 @@
 /// @docImport 'sliver.dart';
 library;
 
-import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
+import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter, RSuperellipseCache;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1768,6 +1768,8 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
   RSuperellipse get _defaultClip =>
       _borderRadius.resolve(textDirection).toRSuperellipse(Offset.zero & size);
 
+  final ui.RSuperellipseCache _cache = ui.RSuperellipseCache();
+
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_clipper != null) {
@@ -1793,6 +1795,7 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
           super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipRSuperellipseLayer?,
+          cache: _cache,
         );
       } else {
         context.paintChild(child!, offset);

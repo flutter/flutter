@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 import 'dart:math';
+import 'dart:ui' as ui show RSuperellipseCache;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -803,7 +804,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
         decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
+          shape: RoundedSuperellipseBorder(borderRadius: const BorderRadius.all(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
         child: AnimatedBuilder(
@@ -1342,6 +1343,9 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     context.paintChild(child, childParentData.offset + offset);
   }
 
+  final ui.RSuperellipseCache _thumbCache = ui.RSuperellipseCache();
+  final ui.RSuperellipseCache _thumbInflatedCache = ui.RSuperellipseCache();
+
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
     // Colors extracted from https://developer.apple.com/design/resources/.
     const List<BoxShadow> thumbShadow = <BoxShadow>[
@@ -1354,16 +1358,16 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       _kThumbRadius,
     );
 
+    final RSuperellipse thumbInflatedShape = thumbShape
+        .inflate(0.5);
+
     for (final BoxShadow shadow in thumbShadow) {
-      context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
+      context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint(), cache: _thumbCache);
     }
 
-    context.canvas.drawRSuperellipse(
-      thumbShape.inflate(0.5),
-      Paint()..color = const Color(0x0A000000),
-    );
+    context.canvas.drawRSuperellipse(thumbInflatedShape, Paint()..color = const Color(0x0A000000), cache: _thumbInflatedCache);
 
-    context.canvas.drawRSuperellipse(thumbShape, Paint()..color = thumbColor);
+    context.canvas.drawRSuperellipse(thumbShape, Paint()..color = thumbColor, cache: _thumbCache);
   }
 
   @override

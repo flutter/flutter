@@ -230,7 +230,8 @@ class StubPath implements ScenePath {
   void addRRect(ui.RRect rrect) => throw UnimplementedError();
 
   @override
-  void addRSuperellipse(ui.RSuperellipse rsuperellipse) => throw UnimplementedError();
+  void addRSuperellipse(ui.RSuperellipse rsuperellipse, {RSuperellipseCache? cache}) =>
+      throw UnimplementedError();
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) =>
