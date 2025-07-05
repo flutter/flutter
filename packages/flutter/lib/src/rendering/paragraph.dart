@@ -557,7 +557,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// The directionality of the text.
