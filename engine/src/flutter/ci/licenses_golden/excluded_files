@@ -1133,6 +1133,7 @@
 ../../../flutter/third_party/boringssl/src/third_party/fiat/METADATA
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.chromium
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.md
+../../../flutter/third_party/boringssl/src/third_party/fiat/bedrock_platform_test.cc
 ../../../flutter/third_party/boringssl/src/third_party/googletest
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/METADATA
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aead_aes_siv_cmac_test.json
