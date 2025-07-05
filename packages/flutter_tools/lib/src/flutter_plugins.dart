@@ -1243,9 +1243,12 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
 /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
 /// may apply optimizations or changes that are only specific to release builds,
 /// such as not including dev-only dependencies.
+/// If [forceIncludeDevDependencies] is `true`, dev-only dependencies will be included
+/// even in release builds.
 Future<void> injectPlugins(
   FlutterProject project, {
   required bool releaseMode,
+  bool forceIncludeDevDependencies = false,
   bool androidPlatform = false,
   bool iosPlatform = false,
   bool linuxPlatform = false,
@@ -1257,7 +1260,7 @@ Future<void> injectPlugins(
 
   // Filter out dev dependencies for release builds.
   final List<Plugin> filteredPlugins;
-  if (releaseMode) {
+  if (releaseMode && !forceIncludeDevDependencies) {
     filteredPlugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
   } else {
     filteredPlugins = plugins;
@@ -1286,17 +1289,14 @@ Future<void> injectPlugins(
   }
 
   if (iosPlatform || macOSPlatform) {
-    // iOS and macOS doesn't yet support filtering out dev dependencies.
-    // See https://github.com/flutter/flutter/issues/163874.
-    final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
-      plugins,
-      pluginResolutionType: _PluginResolutionType.nativeOrDart,
-    );
     if (iosPlatform) {
-      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+      await _writeIOSPluginRegistrant(project, filteredPluginsByPlatform[IOSPlugin.kConfigKey]!);
     }
     if (macOSPlatform) {
-      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+      await _writeMacOSPluginRegistrant(
+        project,
+        filteredPluginsByPlatform[MacOSPlugin.kConfigKey]!,
+      );
     }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??

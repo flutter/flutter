@@ -129,6 +129,7 @@ abstract final class FlutterOptions {
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
+  static const String kForceIncludeDevDependencies = 'force-include-dev-dependencies';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
@@ -1129,9 +1130,21 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addForceIncludeDevDependenciesOption({bool hide = false}) {
+    argParser.addFlag(
+      FlutterOptions.kForceIncludeDevDependencies,
+      negatable: false,
+      help:
+          'If set, dev-dependencies will be included in all build modes '
+          'including release builds.',
+      hide: hide,
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
+    addForceIncludeDevDependenciesOption();
     addBuildPerformanceFile(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
@@ -1190,6 +1203,11 @@ abstract class FlutterCommand extends Command<void> {
       return BuildMode.jitRelease;
     }
     return defaultBuildMode;
+  }
+
+  bool getForceIncludeDevDependencies() {
+    return argParser.options.containsKey(FlutterOptions.kForceIncludeDevDependencies) &&
+        boolArg(FlutterOptions.kForceIncludeDevDependencies);
   }
 
   void usesFlavorOption() {
@@ -1447,6 +1465,8 @@ abstract class FlutterCommand extends Command<void> {
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
+    final bool forceIncludeDevDependencies = getForceIncludeDevDependencies();
+
     return BuildInfo(
       buildMode,
       flavor,
@@ -1483,6 +1503,7 @@ abstract class FlutterCommand extends Command<void> {
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: webEnableHotReload,
+      forceIncludeDevDependencies: forceIncludeDevDependencies,
     );
   }
 
@@ -1872,6 +1893,7 @@ abstract class FlutterCommand extends Command<void> {
       await regeneratePlatformSpecificToolingIfApplicable(
         project,
         releaseMode: getBuildMode().isRelease,
+        forceIncludeDevDependencies: getForceIncludeDevDependencies(),
       );
     }
 
@@ -1909,11 +1931,15 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
     required bool releaseMode,
+    required bool forceIncludeDevDependencies,
   }) async {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
+    await project.regeneratePlatformSpecificTooling(
+      releaseMode: releaseMode,
+      forceIncludeDevDependencies: forceIncludeDevDependencies,
+    );
   }
 
   /// The set of development artifacts required for this command.

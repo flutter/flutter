@@ -394,11 +394,13 @@ class PackagesGetCommand extends FlutterCommand {
         // itself and example(if present).
         await project.regeneratePlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          forceIncludeDevDependencies: true,
         );
         if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
           final FlutterProject exampleProject = project.example;
           await exampleProject.regeneratePlatformSpecificTooling(
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+            forceIncludeDevDependencies: true,
           );
         }
       }

@@ -267,6 +267,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       await regeneratePlatformSpecificToolingIfApplicable(
         project,
         releaseMode: buildInfo.mode.isRelease,
+        forceIncludeDevDependencies: buildInfo.forceIncludeDevDependencies,
       );
 
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);

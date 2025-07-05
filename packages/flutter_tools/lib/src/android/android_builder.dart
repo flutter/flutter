@@ -19,7 +19,12 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required Set<AndroidBuildInfo> androidBuildInfo,
     required String target,
-    required Future<void> Function(FlutterProject, {required bool releaseMode}) generateTooling,
+    required Future<void> Function(
+      FlutterProject, {
+      required bool releaseMode,
+      required bool forceIncludeDevDependencies,
+    })
+    generateTooling,
     String? outputDirectoryPath,
     required String buildNumber,
   });

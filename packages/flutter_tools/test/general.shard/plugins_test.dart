@@ -2444,6 +2444,16 @@ flutter:
           expect(generatedPluginRegistrant, exists);
           expect(generatedPluginRegistrant.readAsStringSync(), contains('bar.foo.Foo'));
 
+          // Test release mode including dev dependencies.
+          await injectPlugins(
+            flutterProject,
+            androidPlatform: true,
+            releaseMode: true,
+            forceIncludeDevDependencies: true,
+          );
+          expect(generatedPluginRegistrant, exists);
+          expect(generatedPluginRegistrant.readAsStringSync(), contains('bar.foo.Foo'));
+
           // Test release mode.
           await injectPlugins(flutterProject, androidPlatform: true, releaseMode: true);
           expect(generatedPluginRegistrant, exists);
@@ -2457,7 +2467,7 @@ flutter:
       );
 
       testUsingContext(
-        'includes dev dependencies from iOS plugin registrant',
+        'excludes dev dependencies from iOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2483,6 +2493,17 @@ flutter:
           expect(generatedPluginRegistrantImpl, exists);
           expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
 
+          // Test release mode including dev dependencies.
+          await injectPlugins(
+            flutterProject,
+            iosPlatform: true,
+            darwinDependencyManagement: dependencyManagement,
+            releaseMode: true,
+            forceIncludeDevDependencies: true,
+          );
+          expect(generatedPluginRegistrantImpl, exists);
+          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
+
           // Test release mode.
           await injectPlugins(
             flutterProject,
@@ -2491,7 +2512,7 @@ flutter:
             releaseMode: true,
           );
           expect(generatedPluginRegistrantImpl, exists);
-          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
+          expect(generatedPluginRegistrantImpl.readAsStringSync(), isNot(contains(devDepImport)));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2521,6 +2542,16 @@ flutter:
           expect(generatedPluginRegistrant, exists);
           expect(generatedPluginRegistrant.readAsStringSync(), contains(expectedDevDepImport));
 
+          // Test release mode including dev dependencies.
+          await injectPlugins(
+            flutterProject,
+            linuxPlatform: true,
+            releaseMode: true,
+            forceIncludeDevDependencies: true,
+          );
+          expect(generatedPluginRegistrant, exists);
+          expect(generatedPluginRegistrant.readAsStringSync(), contains(expectedDevDepImport));
+
           // Test release mode.
           await injectPlugins(flutterProject, linuxPlatform: true, releaseMode: true);
           expect(generatedPluginRegistrant, exists);
@@ -2537,7 +2568,7 @@ flutter:
       );
 
       testUsingContext(
-        'includes dev dependencies from MacOS plugin registrant',
+        'excludes dev dependencies from MacOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2566,6 +2597,20 @@ flutter:
             contains(expectedDevDepRegistration),
           );
 
+          // Test release mode including dev dependencies.
+          await injectPlugins(
+            flutterProject,
+            macOSPlatform: true,
+            darwinDependencyManagement: dependencyManagement,
+            releaseMode: true,
+            forceIncludeDevDependencies: true,
+          );
+          expect(generatedPluginRegistrant, exists);
+          expect(
+            generatedPluginRegistrant.readAsStringSync(),
+            contains(expectedDevDepRegistration),
+          );
+
           // Test release mode.
           await injectPlugins(
             flutterProject,
@@ -2576,7 +2621,7 @@ flutter:
           expect(generatedPluginRegistrant, exists);
           expect(
             generatedPluginRegistrant.readAsStringSync(),
-            contains(expectedDevDepRegistration),
+            isNot(contains(expectedDevDepRegistration)),
           );
         },
         overrides: <Type, Generator>{
@@ -2609,6 +2654,19 @@ flutter:
           await injectPlugins(flutterProject, windowsPlatform: true, releaseMode: false);
           final File generatedPluginRegistrantImpl = flutterProject.windows.managedDirectory
               .childFile('generated_plugin_registrant.cc');
+          expect(generatedPluginRegistrantImpl, exists);
+          expect(
+            generatedPluginRegistrantImpl.readAsStringSync(),
+            contains(expectedDevDepRegistration),
+          );
+
+          // Test release mode including dev dependencies.
+          await injectPlugins(
+            flutterProject,
+            windowsPlatform: true,
+            releaseMode: true,
+            forceIncludeDevDependencies: true,
+          );
           expect(generatedPluginRegistrantImpl, exists);
           expect(
             generatedPluginRegistrantImpl.readAsStringSync(),

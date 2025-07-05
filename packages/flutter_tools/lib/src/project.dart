@@ -337,9 +337,12 @@ class FlutterProject {
   /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
+  /// If [forceIncludeDevDependencies] is `true`, dev-only dependencies will be included
+  /// even in release builds.
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    bool forceIncludeDevDependencies = false,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -352,6 +355,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       releaseMode: releaseMode,
+      forceIncludeDevDependencies: forceIncludeDevDependencies,
     );
   }
 
@@ -361,8 +365,11 @@ class FlutterProject {
   /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
+  /// If [forceIncludeDevDependencies] is `true`, dev-only dependencies will be included
+  /// even in release builds.
   Future<void> ensureReadyForPlatformSpecificTooling({
     required bool releaseMode,
+    required bool forceIncludeDevDependencies,
     bool androidPlatform = false,
     bool iosPlatform = false,
     bool linuxPlatform = false,
@@ -401,6 +408,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      forceIncludeDevDependencies: forceIncludeDevDependencies,
     );
   }
 

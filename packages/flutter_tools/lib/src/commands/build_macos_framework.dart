@@ -85,6 +85,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       await regeneratePlatformSpecificToolingIfApplicable(
         project,
         releaseMode: buildInfo.mode.isRelease,
+        forceIncludeDevDependencies: buildInfo.forceIncludeDevDependencies,
       );
 
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
