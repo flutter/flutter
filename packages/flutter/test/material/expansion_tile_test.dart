@@ -106,9 +106,9 @@ void main() {
         find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox)),
       );
 
-      expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
-      expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
-      expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
+      expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey));
+      expect(getHeight(topKey), getHeight(collapsedKey));
+      expect(getHeight(topKey), getHeight(defaultKey));
 
       ShapeDecoration expandedContainerDecoration =
           getDecoratedBox(expandedKey).decoration as ShapeDecoration;
@@ -145,9 +145,9 @@ void main() {
       // Pump all the way to the end now.
       await tester.pump(const Duration(seconds: 1));
 
-      expect(getHeight(topKey), getHeight(expandedKey) - 2.0);
-      expect(getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey) - 2.0);
-      expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
+      expect(getHeight(topKey), getHeight(expandedKey));
+      expect(getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey));
+      expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey));
 
       // Expanded should be collapsed now.
       expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
@@ -1168,7 +1168,7 @@ void main() {
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
 
     // Test initial ExpansionTile height.
-    expect(getHeight(expansionTileKey), 58.0);
+    expect(getHeight(expansionTileKey), 56.0);
 
     // Test the default expansion animation.
     await tester.tap(find.text('title'));
@@ -1177,17 +1177,17 @@ void main() {
       const Duration(milliseconds: 50),
     ); // Advance the animation by 1/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(65.4, 0.1));
 
     await tester.pump(
       const Duration(milliseconds: 50),
     ); // Advance the animation by 2/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(87.6, 0.1));
 
     await tester.pumpAndSettle(); // Advance the animation to the end.
 
-    expect(getHeight(expansionTileKey), 158.0);
+    expect(getHeight(expansionTileKey), 156.0);
 
     // Tap to collapse the ExpansionTile.
     await tester.tap(find.text('title'));
@@ -1208,17 +1208,17 @@ void main() {
       const Duration(milliseconds: 200),
     ); // Advance the animation by 1/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(65.4, 0.1));
 
     await tester.pump(
       const Duration(milliseconds: 200),
     ); // Advance the animation by 2/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(87.6, 0.1));
 
     await tester.pumpAndSettle(); // Advance the animation to the end.
 
-    expect(getHeight(expansionTileKey), 158.0);
+    expect(getHeight(expansionTileKey), 156.0);
 
     // Tap to collapse the ExpansionTile.
     await tester.tap(find.text('title'));
@@ -1242,17 +1242,17 @@ void main() {
       const Duration(milliseconds: 50),
     ); // Advance the animation by 1/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(139.2, 0.1));
 
     await tester.pump(
       const Duration(milliseconds: 50),
     ); // Advance the animation by 2/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(153, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(151, 0.1));
 
     await tester.pumpAndSettle(); // Advance the animation to the end.
 
-    expect(getHeight(expansionTileKey), 158.0);
+    expect(getHeight(expansionTileKey), 156.0);
 
     // Test the overridden reverse (collapse) animation curve.
     await tester.tap(find.text('title'));
@@ -1261,17 +1261,17 @@ void main() {
       const Duration(milliseconds: 50),
     ); // Advance the animation by 1/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(98.6, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(96.5, 0.1));
 
     await tester.pump(
       const Duration(milliseconds: 50),
     ); // Advance the animation by 2/4 of its duration.
 
-    expect(getHeight(expansionTileKey), closeTo(73.4, 0.1));
+    expect(getHeight(expansionTileKey), closeTo(71.4, 0.1));
 
     await tester.pumpAndSettle(); // Advance the animation to the end.
 
-    expect(getHeight(expansionTileKey), 58.0);
+    expect(getHeight(expansionTileKey), 56.0);
 
     // Test no animation.
     await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
@@ -1280,7 +1280,7 @@ void main() {
     await tester.tap(find.text('title'));
     await tester.pump();
 
-    expect(getHeight(expansionTileKey), 158.0);
+    expect(getHeight(expansionTileKey), 156.0);
   });
 
   testWidgets('Material3 - ExpansionTile draws Inkwell splash on top of background color', (
@@ -1727,16 +1727,16 @@ void main() {
     await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
     final Finder leading = find.text('ExpansionTile');
     final Offset offsetLeading = tester.getTopLeft(leading);
-    expect(offsetLeading, const Offset(56.0, 17.0));
+    expect(offsetLeading, const Offset(56.0, 16.0));
 
     await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
     final Finder trailing = find.text('ExpansionTile');
     final Offset offsetTrailing = tester.getTopLeft(trailing);
-    expect(offsetTrailing, const Offset(16.0, 17.0));
+    expect(offsetTrailing, const Offset(16.0, 16.0));
 
     await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
     final Finder platform = find.text('ExpansionTile');
     final Offset offsetPlatform = tester.getTopLeft(platform);
-    expect(offsetPlatform, const Offset(16.0, 17.0));
+    expect(offsetPlatform, const Offset(16.0, 16.0));
   });
 }
