@@ -3305,6 +3305,48 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/39510.
+  testWidgets('Discrete RangeSlider not interpolate correctly', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.0, 35.0);
+    const Offset startOfTheSliderTrack = Offset(24, 300);
+    const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return RangeSlider(
+                min: 0,
+                max: 35,
+                divisions: 35,
+                values: values,
+                onChanged: (RangeValues newValues) {
+                  setState(() {
+                    values = newValues;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final double targetRatio = 29.0 / 35.0;
+    final double trackWidth = endOfTheSliderTrack.dx - startOfTheSliderTrack.dx;
+    final double tapX = startOfTheSliderTrack.dx + (trackWidth * targetRatio);
+    final Offset target = Offset(tapX, startOfTheSliderTrack.dy);
+
+    await tester.dragFrom(startOfTheSliderTrack, Offset(tapX - startOfTheSliderTrack.dx, 0));
+    await tester.pumpAndSettle();
+
+    await tester.dragFrom(endOfTheSliderTrack, Offset(tapX - endOfTheSliderTrack.dx, 0));
+    await tester.pumpAndSettle();
+
+    expect(values.start, closeTo(29.0, 1e-15));
+    expect(values.end, closeTo(29.0, 1e-15));
+  });
+
   testWidgets('Default RangeSlider when year2023 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
