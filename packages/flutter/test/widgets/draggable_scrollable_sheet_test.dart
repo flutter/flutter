@@ -18,6 +18,7 @@ void main() {
     bool snap = false,
     List<double>? snapSizes,
     Duration? snapAnimationDuration,
+    Curve snapAnimationCurve = Curves.linear,
     double? itemExtent,
     Key? containerKey,
     Key? stackKey,
@@ -44,6 +45,7 @@ void main() {
                 snap: snap,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
+                snapAnimationCurve: snapAnimationCurve,
                 shouldCloseOnMinExtent: shouldCloseOnMinExtent,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
@@ -572,6 +574,91 @@ void main() {
         closeTo(.5, precisionErrorTolerance),
       );
     }, variant: TargetPlatformVariant.all());
+  }
+
+  for (final Curve snapAnimationCurve in <Curve>[
+    Curves.linear,
+    Curves.easeOut,
+    Curves.easeInOutCubic,
+    Curves.bounceOut,
+  ]) {
+    testWidgets(
+      'Widget snaps to nearest snap target while following snapAnimationCurve: $snapAnimationCurve',
+      (WidgetTester tester) async {
+        const Key stackKey = ValueKey<String>('stack');
+        const Key containerKey = ValueKey<String>('container');
+        const Duration snapAnimationDuration = Duration(milliseconds: 300);
+        const double minChildSize = .1;
+        const double maxChildSize = .9;
+        const int snapAnimationTestSteps = 5;
+
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            snap: true,
+            stackKey: stackKey,
+            containerKey: containerKey,
+            initialChildSize: minChildSize,
+            minChildSize: minChildSize,
+            maxChildSize: maxChildSize,
+            snapSizes: <double>[minChildSize, maxChildSize],
+            snapAnimationDuration: snapAnimationDuration,
+            snapAnimationCurve: snapAnimationCurve,
+          ),
+        );
+        await tester.pumpAndSettle();
+        final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+        // Fling up and snap up.
+        await tester.fling(find.text('Item 1'), Offset(0, -.4 * screenHeight), 500);
+        await tester.pump(Duration.zero);
+        double sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
+
+        // Verify that the sheet snaps up according to the curve by checking the size with regular intervals.
+        for (int i = 1; i <= snapAnimationTestSteps; i++) {
+          await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
+
+          final double progress = i / snapAnimationTestSteps;
+          final double expectedSize =
+              sizeAtSnapStart +
+              (maxChildSize - sizeAtSnapStart) * snapAnimationCurve.transform(progress);
+
+          final double actualSize = tester.getSize(find.byKey(containerKey)).height / screenHeight;
+          expect(actualSize, closeTo(expectedSize, precisionErrorTolerance));
+        }
+
+        // Verify that the sheet is at [maxChildSize].
+        expect(
+          tester.getSize(find.byKey(containerKey)).height / screenHeight,
+          closeTo(maxChildSize, precisionErrorTolerance),
+        );
+
+        // Fling down and snap down.
+        await tester.fling(find.text('Item 1'), Offset(0, .6 * screenHeight), 500);
+        await tester.pump(Duration.zero);
+        sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
+
+        // Verify that the sheet snaps down according to the curve by checking the size with regular intervals.
+        for (int i = 1; i <= snapAnimationTestSteps; i++) {
+          await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
+
+          final double progress = i / snapAnimationTestSteps;
+          final double expectedSize =
+              sizeAtSnapStart +
+              (minChildSize - sizeAtSnapStart) * snapAnimationCurve.transform(progress);
+
+          final double actualSize = tester.getSize(find.byKey(containerKey)).height / screenHeight;
+          expect(actualSize, closeTo(expectedSize, precisionErrorTolerance));
+        }
+
+        // Verify that the sheet is at [minChildSize].
+        expect(
+          tester.getSize(find.byKey(containerKey)).height / screenHeight,
+          closeTo(minChildSize, precisionErrorTolerance),
+        );
+      },
+      variant: TargetPlatformVariant.all(),
+    );
   }
 
   for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
