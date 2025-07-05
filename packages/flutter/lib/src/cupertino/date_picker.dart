@@ -308,6 +308,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
        assert(
@@ -432,6 +433,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -500,6 +503,16 @@ class CupertinoDatePicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+
+  /// The behavior of reporting the selected date.
+  ///
+  /// This determines when the [onDateTimeChanged] callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   @override
   State<StatefulWidget> createState() {
@@ -841,6 +854,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           _onSelectedItemChange(index);
         },
@@ -921,6 +935,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           final bool regionChanged = meridiemRegion != index ~/ 12;
           final bool debugIsFlipped = isHourRegionFlipped;
@@ -990,6 +1005,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: _onSelectedItemChange,
         looping: true,
         selectionOverlay: selectionOverlay,
@@ -1045,6 +1061,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedAmPm = index;
           assert(selectedAmPm == 0 || selectedAmPm == 1);
@@ -1401,6 +1418,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedDay = index + 1;
           if (_isCurrentDateValid) {
@@ -1457,6 +1475,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedMonth = index + 1;
           if (_isCurrentDateValid) {
@@ -1508,6 +1527,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedYear = index;
           if (_isCurrentDateValid) {
@@ -1821,6 +1841,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedMonth = index + 1;
           if (_isCurrentDateValid) {
@@ -1871,6 +1892,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
+        changeReportingBehavior: widget.changeReportingBehavior,
         onSelectedItemChanged: (int index) {
           selectedYear = index;
           if (_isCurrentDateValid) {
@@ -2145,6 +2167,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.backgroundColor,
     this.itemExtent = _kItemExtent,
     required this.onTimerDurationChanged,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     this.selectionOverlayBuilder,
   }) : assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
@@ -2169,6 +2192,8 @@ class CupertinoTimerPicker extends StatefulWidget {
   final int secondInterval;
 
   /// Callback called when the timer duration changes.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<Duration> onTimerDurationChanged;
 
   /// Defines how the timer picker should be positioned within its parent.
@@ -2225,6 +2250,16 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+
+  /// The behavior of reporting the selected duration.
+  ///
+  /// This determines when the [onTimerDurationChanged] callback is called.
+  ///
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -2450,6 +2485,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       itemExtent: widget.itemExtent,
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedHour = index;
@@ -2515,6 +2551,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
@@ -2588,6 +2625,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
+      changeReportingBehavior: widget.changeReportingBehavior,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedSecond = index * widget.secondInterval;
