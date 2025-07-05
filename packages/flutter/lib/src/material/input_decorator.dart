@@ -2235,9 +2235,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     if (themeData.useMaterial3) {
       if (decoration.filled!) {
+        final InputDecorationThemeData decorationTheme = InputDecorationTheme.of(context);
         return border.copyWith(
           borderSide: MaterialStateProperty.resolveAs(
-            defaults.activeIndicatorBorder,
+            decorationTheme.activeIndicatorBorder ?? defaults.activeIndicatorBorder,
             materialState,
           ),
         );
