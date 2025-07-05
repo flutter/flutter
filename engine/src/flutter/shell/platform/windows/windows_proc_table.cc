@@ -67,4 +67,22 @@ HCURSOR WindowsProcTable::SetCursor(HCURSOR cursor) const {
   return ::SetCursor(cursor);
 }
 
+BOOL WindowsProcTable::EnumDisplaySettings(LPCWSTR lpszDeviceName,
+                                           DWORD iModeNum,
+                                           DEVMODEW* lpDevMode) const {
+  return ::EnumDisplaySettingsW(lpszDeviceName, iModeNum, lpDevMode);
+}
+
+BOOL WindowsProcTable::GetMonitorInfo(HMONITOR hMonitor,
+                                      LPMONITORINFO lpmi) const {
+  return ::GetMonitorInfoW(hMonitor, lpmi);
+}
+
+BOOL WindowsProcTable::EnumDisplayMonitors(HDC hdc,
+                                           LPCRECT lprcClip,
+                                           MONITORENUMPROC lpfnEnum,
+                                           LPARAM dwData) const {
+  return ::EnumDisplayMonitors(hdc, lprcClip, lpfnEnum, dwData);
+}
+
 }  // namespace flutter

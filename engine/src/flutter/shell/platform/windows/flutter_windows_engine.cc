@@ -198,12 +198,23 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   egl_manager_ = egl::Manager::Create(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
+
+  display_monitor_ =
+      std::make_unique<DisplayMonitor>(this, windows_proc_table_);
+
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
          LRESULT* result) {
         BASE_DCHECK(user_data);
         FlutterWindowsEngine* that =
             static_cast<FlutterWindowsEngine*>(user_data);
+
+        BASE_DCHECK(that->display_monitor_);
+        if (that->display_monitor_->HandleWindowMessage(hwnd, msg, wpar, lpar,
+                                                        result)) {
+          return true;
+        }
+
         BASE_DCHECK(that->lifecycle_manager_);
         return that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar,
                                                     result);
@@ -474,18 +485,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     return false;
   }
 
-  // Configure device frame rate displayed via devtools.
-  FlutterEngineDisplay display = {};
-  display.struct_size = sizeof(FlutterEngineDisplay);
-  display.display_id = 0;
-  display.single_display = true;
-  display.refresh_rate =
-      1.0 / (static_cast<double>(FrameInterval().count()) / 1000000000.0);
-
-  std::vector<FlutterEngineDisplay> displays = {display};
-  embedder_api_.NotifyDisplayUpdate(engine_,
-                                    kFlutterEngineDisplaysUpdateTypeStartup,
-                                    displays.data(), displays.size());
+  display_monitor_->UpdateDisplays();
 
   SendSystemLocales();
 
@@ -692,6 +692,15 @@ void FlutterWindowsEngine::AddPluginRegistrarDestructionCallback(
     FlutterDesktopOnPluginRegistrarDestroyed callback,
     FlutterDesktopPluginRegistrarRef registrar) {
   plugin_registrar_destruction_callbacks_[callback] = registrar;
+}
+
+void FlutterWindowsEngine::UpdateDisplay(
+    const std::vector<FlutterEngineDisplay>& displays) {
+  if (engine_) {
+    embedder_api_.NotifyDisplayUpdate(engine_,
+                                      kFlutterEngineDisplaysUpdateTypeStartup,
+                                      displays.data(), displays.size());
+  }
 }
 
 void FlutterWindowsEngine::SendWindowMetricsEvent(
@@ -1016,8 +1025,11 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
 }
 
 void FlutterWindowsEngine::OnDwmCompositionChanged() {
-  std::shared_lock read_lock(views_mutex_);
+  if (display_monitor_) {
+    display_monitor_->UpdateDisplays();
+  }
 
+  std::shared_lock read_lock(views_mutex_);
   for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
     iterator->second->OnDwmCompositionChanged();
   }
@@ -1084,6 +1096,19 @@ bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {
   FlutterWindowsView* view = iterator->second;
 
   return compositor_->Present(view, info->layers, info->layers_count);
+}
+
+bool FlutterWindowsEngine::HandleDisplayMonitorMessage(HWND hwnd,
+                                                       UINT message,
+                                                       WPARAM wparam,
+                                                       LPARAM lparam,
+                                                       LRESULT* result) {
+  if (!display_monitor_) {
+    return false;
+  }
+
+  return display_monitor_->HandleWindowMessage(hwnd, message, wparam, lparam,
+                                               result);
 }
 
 }  // namespace flutter
