@@ -128,7 +128,7 @@ template("application_snapshot") {
       args += training_args
     }
   } else {
-    dart_action(target_name) {
+    dartvm_action(target_name) {
       forward_variables_from(invoker,
                              [
                                "testonly",
