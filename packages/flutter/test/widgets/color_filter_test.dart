@@ -56,6 +56,46 @@ void main() {
     await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_sepia.png'));
   });
 
+  testWidgets('Color filter - saturation', (WidgetTester tester) async {
+    Future<void> pumpWithColorFilter(ColorFilter colorFilter) {
+      return tester.pumpWidget(
+        RepaintBoundary(
+          child: Container(
+            color: Colors.red,
+            alignment: Alignment.center,
+            child: ColorFiltered(
+              colorFilter: colorFilter,
+              child: Container(
+                height: 256,
+                width: 256,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(64),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpWithColorFilter(ColorFilter.saturation(0));
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('color_filter_saturation_none.png'),
+    );
+    await pumpWithColorFilter(ColorFilter.saturation(0.5));
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('color_filter_saturation_partial.png'),
+    );
+    await pumpWithColorFilter(ColorFilter.saturation(1));
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('color_filter_saturation_full.png'),
+    );
+  });
+
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
       await tester.pumpWidget(
