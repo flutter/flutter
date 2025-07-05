@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -98,6 +97,67 @@ void main() {
     controller3.show();
     controller4.show();
     _PaintOrder.paintOrder.clear();
+  });
+
+  testWidgets("View's MediaQueryData is available to OverlayPortal descendents", (
+    WidgetTester tester,
+  ) async {
+    late final OverlayEntry overlayEntry;
+    MediaQueryData? data;
+    final OverlayPortalController controller = OverlayPortalController(
+      debugLabel: 'local controller',
+    );
+    const Widget target = SizedBox();
+    addTearDown(
+      () =>
+          overlayEntry
+            ..remove()
+            ..dispose(),
+    );
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: FakeFlutterView(
+          tester.view,
+          viewId: 77,
+          padding: const FakeViewPadding(top: 50),
+          viewInsets: const FakeViewPadding(bottom: 100),
+        ),
+        child: MaterialApp(
+          home: Scaffold(
+            // ^ Scaffold obscures MediaQueryData for descendants
+            body: Overlay(
+              initialEntries: <OverlayEntry>[
+                overlayEntry = OverlayEntry(
+                  builder: (BuildContext context) {
+                    return OverlayPortal(
+                      controller: controller,
+                      overlayChildBuilder: (BuildContext context) {
+                        data = MediaQuery.of(context);
+                        return target;
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byWidget(target), findsNothing);
+    expect(data, isNull);
+
+    await tester.pump();
+    expect(find.byWidget(target), findsNothing);
+    expect(data, isNull);
+
+    controller.show();
+    await tester.pumpAndSettle();
+    expect(find.byWidget(target), findsOneWidget);
+    expect(data, isNotNull);
+    expect(data!.padding.top, 50.0);
+    expect(data!.viewInsets.bottom, 100.0);
   });
 
   testWidgets('The overlay child sees the right inherited widgets', (WidgetTester tester) async {
@@ -3094,4 +3154,29 @@ class _RenderPaintRecorder extends RenderProxyBox {
     onPaint?.call();
     super.paint(context, offset);
   }
+}
+
+class FakeFlutterView extends TestFlutterView {
+  FakeFlutterView(
+    TestFlutterView view, {
+    required this.viewId,
+    FakeViewPadding padding = FakeViewPadding.zero,
+    FakeViewPadding viewInsets = FakeViewPadding.zero,
+  }) : _padding = padding,
+       _viewInsets = viewInsets,
+       super(view: view, display: view.display, platformDispatcher: view.platformDispatcher);
+
+  @override
+  final int viewId;
+
+  @override
+  double get devicePixelRatio => 1.0;
+
+  @override
+  FakeViewPadding get padding => _padding;
+  final FakeViewPadding _padding;
+
+  @override
+  FakeViewPadding get viewInsets => _viewInsets;
+  final FakeViewPadding _viewInsets;
 }
