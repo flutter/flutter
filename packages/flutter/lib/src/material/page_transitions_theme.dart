@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'colors.dart';
+import 'predictive_back_page_transitions_builder.dart';
 import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
@@ -1091,7 +1092,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.windows: ZoomPageTransitionsBuilder(),
