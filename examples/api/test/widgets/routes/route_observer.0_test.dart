@@ -35,5 +35,8 @@ void main() {
     // Check the RouteObserver logs after the route is popped again.
     expect(find.text('didPush'), findsOneWidget);
     expect(find.text('didPopNext'), findsNWidgets(2));
+
+    // Check if any overflow or layout exceptions occurred.
+    expect(tester.takeException(), isNull);
   });
 }
