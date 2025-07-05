@@ -191,7 +191,7 @@ class CupertinoPicker extends StatefulWidget {
 
   /// The behavior of reporting the selected item index.
   ///
-  /// This determines when the `onSelectedItemChanged` callback is called.
+  /// This determines when the [onSelectedItemChanged] callback is called.
   ///
   /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
   /// calls the callback only when the scrolling stops.
@@ -199,13 +199,9 @@ class CupertinoPicker extends StatefulWidget {
   /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
   final ChangeReportingBehavior changeReportingBehavior;
 
-  /// An option callback when the currently centered item changes.
+  /// Called when the selected item changes.
   ///
-  /// Value changes when the item closest to the center changes.
-  ///
-  /// This can be called during scrolls and during ballistic flings. To get the
-  /// value only when the scrolling settles, use a [NotificationListener],
-  /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
@@ -279,6 +275,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         if (index != _lastHapticIndex) {
           _lastHapticIndex = index;
           HapticFeedback.selectionClick();
+          SystemSound.play(SystemSoundType.tick);
         }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

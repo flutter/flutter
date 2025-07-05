@@ -105,9 +105,16 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag(
-      'minify',
+      'minify-js',
       help:
-          'Generate minified output. '
+          'Generate minified output for js. '
+          'If not explicitly set, uses the compilation mode (debug, profile, release).',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'minify-wasm',
+      help:
+          'Generate minified output for wasm. '
           'If not explicitly set, uses the compilation mode (debug, profile, release).',
       hide: !verboseHelp,
     );
@@ -181,7 +188,8 @@ class BuildWebCommand extends BuildSubCommand {
     );
 
     final bool sourceMaps = boolArg('source-maps');
-    final bool? minify = argResults!.wasParsed('minify') ? boolArg('minify') : null;
+    final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
+    final bool? minifyWasm = argResults!.wasParsed('minify-wasm') ? boolArg('minify-wasm') : null;
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -200,11 +208,12 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
+          minify: minifyWasm,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
           dumpInfo: boolArg('dump-info'),
-          minify: minify,
+          minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
@@ -216,7 +225,7 @@ class BuildWebCommand extends BuildSubCommand {
         JsCompilerConfig(
           csp: boolArg('csp'),
           dumpInfo: boolArg('dump-info'),
-          minify: minify,
+          minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,

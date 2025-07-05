@@ -6,8 +6,9 @@ import 'package:analyzer/dart/ast/ast.dart';
 
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
-  PreviewDetails({required this.functionName, required this.isBuilder});
+  PreviewDetails({required this.packageName, required this.functionName, required this.isBuilder});
 
+  static const String kPackageName = 'packageName';
   static const String kName = 'name';
   static const String kSize = 'size';
   static const String kTextScaleFactor = 'textScaleFactor';
@@ -15,6 +16,15 @@ final class PreviewDetails {
   static const String kTheme = 'theme';
   static const String kBrightness = 'brightness';
   static const String kLocalizations = 'localizations';
+
+  /// The name of the package in which the preview was defined.
+  ///
+  /// For example, if this preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  ///
+  /// This should only be null if the preview is defined in a file that's not
+  /// part of a Flutter library (e.g., is defined in a test).
+  final String? packageName;
 
   /// The name of the function returning the preview.
   final String functionName;
@@ -115,6 +125,7 @@ final class PreviewDetails {
     }
     return other.runtimeType == runtimeType &&
         other is PreviewDetails &&
+        other.packageName == packageName &&
         other.functionName == functionName &&
         other.isBuilder == isBuilder &&
         other.size == size &&
@@ -127,13 +138,14 @@ final class PreviewDetails {
 
   @override
   String toString() =>
-      'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
-      '$kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
+      'PreviewDetails(function: $functionName packageName: $packageName isBuilder: $isBuilder '
+      '$kName: $name $kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
       '$kTheme: $theme $kBrightness: $_brightness $kLocalizations: $_localizations)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => Object.hashAll(<Object?>[
+    packageName,
     functionName,
     isBuilder,
     size,

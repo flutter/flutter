@@ -306,7 +306,7 @@ public class FlutterViewTest {
   // set to -1 values, so it is clear if the wrong algorithm is used.
   @Test
   @TargetApi(30)
-  @Config(sdk = 30)
+  @Config(sdk = API_LEVELS.API_30)
   public void reportSystemInsetWhenNotFullscreen() {
     // Without custom shadows, the default system ui visibility flags is 0.
     FlutterView flutterView = new FlutterView(ctx);
@@ -348,7 +348,7 @@ public class FlutterViewTest {
   // set to -1 values, so it is clear if the wrong algorithm is used.
   @Test
   @TargetApi(34)
-  @Config(minSdk = 34)
+  @Config(minSdk = API_LEVELS.API_34)
   public void reportSystemInsetWhenNotFullscreenForSystemBar() {
     // Without custom shadows, the default system ui visibility flags is 0.
     FlutterView flutterView = new FlutterView(ctx);
@@ -426,7 +426,7 @@ public class FlutterViewTest {
   // This test uses the pre-API 30 Algorithm for window insets.
   @Test
   @TargetApi(28)
-  @Config(sdk = 28)
+  @Config(sdk = API_LEVELS.API_28)
   public void reportSystemInsetWhenNotFullscreenLegacy() {
     // Without custom shadows, the default system ui visibility flags is 0.
     FlutterView flutterView = new FlutterView(ctx);
@@ -459,7 +459,7 @@ public class FlutterViewTest {
   @SuppressWarnings("deprecation")
   // getSystemUiVisibility, getWindowSystemUiVisibility, required to test pre api 30 behavior.
   @Test
-  @Config(minSdk = 23, maxSdk = 29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
   public void systemInsetHandlesFullscreenNavbarRight() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_90);
@@ -521,7 +521,7 @@ public class FlutterViewTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.API_23, maxSdk = API_LEVELS.API_29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
   public void calculateShouldZeroSidesInLandscapeRotation270API23Plus() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
@@ -531,7 +531,7 @@ public class FlutterViewTest {
   @SuppressWarnings("deprecation")
   // getSystemUiVisibility, getWindowSystemUiVisibility required to test pre api 30 behavior.
   @Test
-  @Config(minSdk = 23, maxSdk = 29, qualifiers = "land")
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29, qualifiers = "land")
   public void systemInsetHandlesFullscreenNavbarLeft() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
@@ -573,7 +573,7 @@ public class FlutterViewTest {
   // set to -1 values, so it is clear if the wrong algorithm is used.
   @Test
   @TargetApi(30)
-  @Config(sdk = 30, qualifiers = "land")
+  @Config(sdk = API_LEVELS.API_30, qualifiers = "land")
   public void systemInsetGetInsetsFullscreen() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
@@ -611,7 +611,7 @@ public class FlutterViewTest {
   // This test uses the pre-API 30 Algorithm for window insets.
   @Test
   @TargetApi(28)
-  @Config(sdk = 28, qualifiers = "land")
+  @Config(sdk = API_LEVELS.API_28, qualifiers = "land")
   public void systemInsetGetInsetsFullscreenLegacy() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     setExpectedDisplayRotation(Surface.ROTATION_270);
@@ -652,7 +652,7 @@ public class FlutterViewTest {
   // set to -1 values, so it is clear if the wrong algorithm is used.
   @Test
   @TargetApi(30)
-  @Config(sdk = 30, qualifiers = "land")
+  @Config(sdk = API_LEVELS.API_30, qualifiers = "land")
   public void systemInsetDisplayCutoutSimple() {
     FlutterView flutterView = spy(new FlutterView(ctx));
     assertEquals(0, flutterView.getSystemUiVisibility());
@@ -700,7 +700,7 @@ public class FlutterViewTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  @Config(minSdk = 28)
+  @Config(minSdk = API_LEVELS.API_28)
   public void onApplyWindowInsetsSetsDisplayCutouts() {
     // Use an Activity context so that FlutterView.onAttachedToWindow completes.
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
@@ -1030,7 +1030,7 @@ public class FlutterViewTest {
 
   @Test
   @SuppressLint("PrivateApi")
-  @Config(sdk = Build.VERSION_CODES.P)
+  @Config(sdk = API_LEVELS.API_28)
   public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid28() throws Exception {
     FlutterView flutterView = new FlutterView(ctx);
 
@@ -1041,7 +1041,7 @@ public class FlutterViewTest {
   }
 
   @Test
-  @Config(sdk = Build.VERSION_CODES.P)
+  @Config(sdk = API_LEVELS.API_28)
   @SuppressLint("PrivateApi")
   public void findViewByAccessibilityIdTraversal_returnsChildViewOnAndroid28() throws Exception {
     FlutterView flutterView = new FlutterView(ctx);
@@ -1058,7 +1058,7 @@ public class FlutterViewTest {
   }
 
   @Test
-  @Config(sdk = Build.VERSION_CODES.Q)
+  @Config(sdk = API_LEVELS.API_29)
   @SuppressLint("PrivateApi")
   public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid29() throws Exception {
     FlutterView flutterView = new FlutterView(ctx);
@@ -1126,7 +1126,7 @@ public class FlutterViewTest {
   // set to -1 values, so it is clear if the wrong algorithm is used.
   @Test
   @TargetApi(30)
-  @Config(sdk = 30)
+  @Config(sdk = API_LEVELS.API_30)
   public void setPaddingTopToZeroForFullscreenMode() {
     FlutterView flutterView = new FlutterView(ctx);
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
@@ -1163,7 +1163,7 @@ public class FlutterViewTest {
   @Test
   @TargetApi(28)
   @Config(
-      sdk = 28,
+      sdk = API_LEVELS.API_28,
       shadows = {
         FlutterViewTest.ShadowFullscreenView.class,
       })
