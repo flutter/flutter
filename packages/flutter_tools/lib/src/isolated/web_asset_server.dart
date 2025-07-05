@@ -131,11 +131,12 @@ class WebAssetServer implements AssetReader {
   static const String _reloadScriptsFileName = 'reload_scripts.json';
 
   /// Given a list of [modules] that need to be reloaded, writes a file that
-  /// contains a list of objects each with two fields:
+  /// contains a list of objects each with three fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
   /// bundle. To support embedded libraries, the path should include the
   /// `baseUri` of the web server.
+  /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///
@@ -144,6 +145,7 @@ class WebAssetServer implements AssetReader {
   /// [
   ///   {
   ///     "src": "<baseUri>/<file_name>",
+  ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
   /// ]
@@ -160,7 +162,11 @@ class WebAssetServer implements AssetReader {
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
-      moduleToLibrary.add(<String, Object>{'src': moduleUri, 'libraries': libraries});
+      moduleToLibrary.add(<String, Object>{
+        'src': moduleUri,
+        'module': metadata.name,
+        'libraries': libraries,
+      });
     }
     writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
