@@ -764,6 +764,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   // Send the initial user settings such as brightness and text scale factor
   // to the engine.
   [self sendInitialSettings];
+
+  // Send the initial accessibility status to the engine.
+  [self updateAccessibilityStatus];
   return YES;
 }
 
@@ -1228,6 +1231,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     [weakSelf handleAccessibilityEvent:message];
   }];
 }
+
 - (void)setUpNotificationCenterListeners {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   // macOS fires this private message when VoiceOver turns on or off.
@@ -1288,8 +1292,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 }
 
-- (void)onAccessibilityStatusChanged:(NSNotification*)notification {
-  BOOL enabled = [notification.userInfo[kEnhancedUserInterfaceKey] boolValue];
+- (void)updateAccessibilityStatus {
+  bool enabled = [NSWorkspace sharedWorkspace].voiceOverEnabled;
+  NSNumber* enableSemantics =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSemantics"];
+  if (enableSemantics != nil) {
+    enabled |= enableSemantics.boolValue;
+  }
   NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
   FlutterViewController* nextViewController;
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
@@ -1297,6 +1306,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 
   self.semanticsEnabled = enabled;
+}
+
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification {
+  [self updateAccessibilityStatus];
 }
 - (void)handleAccessibilityEvent:(NSDictionary<NSString*, id>*)annotatedEvent {
   NSString* type = annotatedEvent[@"type"];
