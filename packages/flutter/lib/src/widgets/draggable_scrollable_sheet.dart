@@ -972,10 +972,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     _ballisticControllers.add(ballisticController);
 
     double lastPosition = extent.currentPixels;
+    final bool wasExpanded = extent.isAtMax;
     void tick() {
       final double delta = ballisticController.value - lastPosition;
       lastPosition = ballisticController.value;
-      extent.addPixelDelta(delta, context.notificationContext!);
+      if (!wasExpanded || !extent.snap) {
+        extent.addPixelDelta(delta, context.notificationContext!);
+      }
       if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't
