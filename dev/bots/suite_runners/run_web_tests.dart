@@ -360,8 +360,6 @@ class WebTestsSuite {
         '--browser-name=chrome',
         '-d',
         'web-server',
-        // TODO(nshahan): Remove when web-server can run with hot reload, https://github.com/dart-lang/sdk/issues/60289.
-        if (buildMode == 'debug') '--no-web-experimental-hot-reload',
         '--$buildMode',
         if (webRenderer == 'skwasm') ...<String>[
           // See: WebRendererMode.dartDefines[skwasm]
@@ -490,7 +488,6 @@ class WebTestsSuite {
         '--browser-name=chrome',
         '-d',
         'web-server',
-        if (buildMode == 'debug') '--no-web-experimental-hot-reload',
         '--$buildMode',
         '--no-web-resources-cdn',
       ],

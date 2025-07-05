@@ -15,7 +15,7 @@ import '../project.dart';
 import 'dependency_graph.dart';
 import 'preview_details.dart';
 
-typedef _PreviewMappingEntry = MapEntry<PreviewPath, PreviewDependencyNode>;
+typedef _PreviewMappingEntry = MapEntry<PreviewPath, LibraryPreviewNode>;
 
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
@@ -124,16 +124,16 @@ class PreviewCodeGenerator {
         });
     for (final _PreviewMappingEntry(
           key: (path: String _, :Uri uri),
-          value: PreviewDependencyNode fileDetails,
+          value: LibraryPreviewNode libraryDetails,
         )
         in sortedPreviews) {
-      for (final PreviewDetails preview in fileDetails.filePreviews) {
+      for (final PreviewDetails preview in libraryDetails.previews) {
         previewExpressions.add(
           _buildPreviewWidget(
             allocator: allocator,
             preview: preview,
             uri: uri,
-            fileDetails: fileDetails,
+            libraryDetails: libraryDetails,
           ),
         );
       }
@@ -154,15 +154,15 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required PreviewDetails preview,
     required Uri uri,
-    required PreviewDependencyNode fileDetails,
+    required LibraryPreviewNode libraryDetails,
   }) {
     cb.Expression previewWidget;
     // TODO(bkonyi): clean up the error related code.
-    if (fileDetails.hasErrors) {
+    if (libraryDetails.hasErrors) {
       previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
         cb.literalString('$uri has errors!'),
       ]);
-    } else if (fileDetails.dependencyHasErrors) {
+    } else if (libraryDetails.dependencyHasErrors) {
       previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
         cb.literalString('Dependency of $uri has errors!'),
       ]);
@@ -192,7 +192,10 @@ class PreviewCodeGenerator {
       <cb.Expression>[],
       <String, cb.Expression>{
         // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
-        if (!fileDetails.dependencyHasErrors && !fileDetails.hasErrors) ...<String, cb.Expression>{
+        if (!libraryDetails.dependencyHasErrors &&
+            !libraryDetails.hasErrors) ...<String, cb.Expression>{
+          if (preview.packageName != null)
+            PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
           ...?_generateCodeFromAnalyzerExpression(
             allocator: allocator,
             key: PreviewDetails.kName,
