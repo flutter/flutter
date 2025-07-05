@@ -32,6 +32,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.Host;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -66,6 +67,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
@@ -1098,7 +1100,66 @@ public class FlutterActivityAndFragmentDelegateTest {
   @SuppressWarnings("deprecation")
   // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
   // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
-  public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemory() {
+  @Config(minSdk = Build.API_LEVELS.API_26)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryAboveApi26() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Test assumes no frames have been displayed.
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    // Emulate the host and call the method that we expect to be forwarded.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    delegate.onCreateView(null, null, null, 0, false);
+    final FlutterRenderer renderer = mockFlutterEngine.getRenderer();
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    // 1 times: once for engine attachment
+    verify(renderer, times(1)).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+
+    verify(mockHost, times(1)).onFlutterUiDisplayed();
+
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(6)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(6)).sendMemoryPressureWarning();
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
+  // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
+  @Config(minSdk = Build.API_LEVELS.FLUTTER_MIN, maxSdk = Build.API_LEVELS.API_25)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryBelowApi26() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
