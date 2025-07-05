@@ -363,29 +363,32 @@ class CanvasKitRenderer implements Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => CkTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background as CkPaint?,
-    foreground: foreground as CkPaint?,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
+  }) =>
+      isExperimentalWebParagraph
+          ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+          : CkTextStyle(
+            color: color,
+            decoration: decoration,
+            decorationColor: decorationColor,
+            decorationStyle: decorationStyle,
+            decorationThickness: decorationThickness,
+            fontWeight: fontWeight,
+            fontStyle: fontStyle,
+            textBaseline: textBaseline,
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
+            fontSize: fontSize,
+            letterSpacing: letterSpacing,
+            wordSpacing: wordSpacing,
+            height: height,
+            leadingDistribution: leadingDistribution,
+            locale: locale,
+            background: background as CkPaint?,
+            foreground: foreground as CkPaint?,
+            shadows: shadows,
+            fontFeatures: fontFeatures,
+            fontVariations: fontVariations,
+          );
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -403,7 +406,12 @@ class CanvasKitRenderer implements Renderer {
     ui.Locale? locale,
   }) =>
       isExperimentalWebParagraph
-          ? WebParagraphStyle()
+          ? WebParagraphStyle(
+            textDirection: textDirection,
+            textAlign: textAlign,
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+          )
           : CkParagraphStyle(
             textAlign: textAlign,
             textDirection: textDirection,
@@ -447,7 +455,7 @@ class CanvasKitRenderer implements Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder() : CkParagraphBuilder(style);
+      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
