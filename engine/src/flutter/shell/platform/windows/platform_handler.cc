@@ -368,6 +368,12 @@ void PlatformHandler::SystemSoundPlay(
   if (sound_type.compare(kSoundTypeAlert) == 0) {
     MessageBeep(MB_OK);
     result->Success();
+  } else if (sound_type.compare(kSoundTypeClick) == 0) {
+    // No-op, as there is no system sound for key presses.
+    result->Success();
+  } else if (sound_type.compare(kSoundTypeTick) == 0) {
+    // No-op, as there is no system sound for ticks.
+    result->Success();
   } else {
     result->NotImplemented();
   }

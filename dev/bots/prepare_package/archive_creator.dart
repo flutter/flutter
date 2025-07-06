@@ -193,7 +193,6 @@ class ArchiveCreator {
     }
     // Validate that the dart binary is codesigned
     try {
-      // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
       await _processRunner.runProcess(<String>[
         'codesign',
         '-vvvv',

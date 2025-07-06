@@ -4,77 +4,78 @@ environment:
   sdk: ^3.7.0-0
 
 workspace:
-  - packages/flutter
-  - packages/flutter/test_private/test
-  - packages/flutter/test_private
-  - packages/flutter_driver
-  - packages/flutter_localizations
-  - packages/flutter_test
-  - packages/integration_test
-  - packages/integration_test/example
-  - packages/integration_test/integration_test_macos
-  - packages/fuchsia_remote_debug_protocol
-  - packages/flutter_web_plugins
-  - packages/flutter_goldens
-  - dev/devicelab
-  - dev/manual_tests
-  - dev/tracing_tests
-  - dev/customer_testing
-  - dev/integration_tests/link_hook
-  - dev/integration_tests/hook_user_defines
-  - dev/integration_tests/flavors
-  - dev/integration_tests/spell_check
-  - dev/integration_tests/wide_gamut_test
-  - dev/integration_tests/release_smoke_test
-  - dev/integration_tests/deferred_components_test
-  - dev/integration_tests/new_gallery
-  - dev/integration_tests/web
-  - dev/integration_tests/ios_add2app_life_cycle/flutterapp
-  - dev/integration_tests/platform_interaction
-  - dev/integration_tests/external_textures
-  - dev/integration_tests/channels
-  - dev/integration_tests/android_semantics_testing
-  - dev/integration_tests/ui
-  - dev/integration_tests/android_views
-  - dev/integration_tests/ios_platform_view_tests
-  - dev/integration_tests/flutter_gallery
-  - dev/integration_tests/android_engine_test
-  - dev/integration_tests/display_cutout_rotation
-  - dev/integration_tests/web_e2e_tests
-  - dev/integration_tests/keyboard_hot_restart
-  - dev/integration_tests/web_compile_tests
-  - dev/integration_tests/ios_app_with_extensions
-  - dev/integration_tests/windows_startup_test
-  - dev/bots
-  - dev/forbidden_from_release_tests
+  - dev/a11y_assessments
   - dev/automated_tests
-  - dev/snippets
-  - dev/tools
-  - dev/tools/android_driver_extensions
-  - dev/tools/gen_keycodes
-  - dev/tools/gen_defaults
-  - dev/tools/vitool
-  - dev/conductor/core
+  - dev/benchmarks/complex_layout
+  - dev/benchmarks/imitation_game_flutter
+  - dev/benchmarks/macrobenchmarks
   - dev/benchmarks/microbenchmarks
   - dev/benchmarks/multiple_flutters/module
   - dev/benchmarks/platform_channels_benchmarks
   - dev/benchmarks/platform_views_layout
   - dev/benchmarks/platform_views_layout_hybrid_composition
-  - dev/benchmarks/macrobenchmarks
-  - dev/benchmarks/complex_layout
-  - dev/benchmarks/imitation_game_flutter
   - dev/benchmarks/test_apps/stocks
-  - dev/a11y_assessments
-  - examples/image_list
-  - examples/platform_channel
-  - examples/layers
-  - examples/hello_world
-  - examples/platform_view
-  - examples/platform_channel_swift
-  - examples/flutter_view
-  - examples/texture
+  - dev/bots
+  - dev/checks_tool
+  - dev/customer_testing
+  - dev/devicelab
+  - dev/forbidden_from_release_tests
+  - dev/integration_tests/android_engine_test
+  - dev/integration_tests/android_semantics_testing
+  - dev/integration_tests/android_views
+  - dev/integration_tests/channels
+  - dev/integration_tests/deferred_components_test
+  - dev/integration_tests/display_cutout_rotation
+  - dev/integration_tests/external_textures
+  - dev/integration_tests/flavors
+  - dev/integration_tests/flutter_gallery
+  - dev/integration_tests/hook_user_defines
+  - dev/integration_tests/ios_add2app_life_cycle/flutterapp
+  - dev/integration_tests/ios_app_with_extensions
+  - dev/integration_tests/ios_platform_view_tests
+  - dev/integration_tests/keyboard_hot_restart
+  - dev/integration_tests/link_hook
+  - dev/integration_tests/new_gallery
+  - dev/integration_tests/platform_interaction
+  - dev/integration_tests/release_smoke_test
+  - dev/integration_tests/spell_check
+  - dev/integration_tests/ui
+  - dev/integration_tests/web
+  - dev/integration_tests/web_compile_tests
+  - dev/integration_tests/web_e2e_tests
+  - dev/integration_tests/wide_gamut_test
+  - dev/integration_tests/windows_startup_test
+  - dev/manual_tests
+  - dev/packages_autoroller
+  - dev/snippets
+  - dev/tools
+  - dev/tools/android_driver_extensions
+  - dev/tools/gen_defaults
+  - dev/tools/gen_keycodes
+  - dev/tools/vitool
+  - dev/tracing_tests
   - examples/api
+  - examples/flutter_view
+  - examples/hello_world
+  - examples/image_list
+  - examples/layers
+  - examples/platform_channel
+  - examples/platform_channel_swift
+  - examples/platform_view
   - examples/splash
+  - examples/texture
+  - packages/flutter
+  - packages/flutter_driver
+  - packages/flutter_goldens
+  - packages/flutter_localizations
+  - packages/flutter_test
+  - packages/flutter_web_plugins
+  - packages/flutter/test_private
+  - packages/flutter/test_private/test
+  - packages/fuchsia_remote_debug_protocol
+  - packages/integration_test
+  - packages/integration_test/example
+  - packages/integration_test/integration_test_macos
 
 dependencies:
   _discoveryapis_commons: 1.0.7
@@ -90,7 +91,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
-  code_assets: 0.19.0
+  code_assets: 0.19.4
   collection: 1.19.1
   convert: 3.1.2
   coverage: 1.14.1
@@ -114,7 +115,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
   googleapis_auth: 1.6.0
-  hooks: 0.19.1
+  hooks: 0.19.5
   html: 0.15.6
   http: 1.4.0
   http_multi_server: 3.2.2
@@ -133,7 +134,7 @@ dependencies:
   meta: 1.16.0
   metrics_center: 1.0.13
   mime: 2.0.0
-  native_toolchain_c: 0.16.1
+  native_toolchain_c: 0.16.6
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -150,7 +151,6 @@ dependencies:
   pool: 1.5.1
   process: 5.0.4
   process_runner: 4.2.0
-  protobuf: 4.1.0
   provider: 6.1.5
   pub_semver: 2.2.0
   pubspec_parse: 1.5.0
@@ -186,12 +186,12 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.0
   video_player_android: 2.8.7
-  video_player_avfoundation: 2.7.1
-  video_player_platform_interface: 6.3.0
+  video_player_avfoundation: 2.7.2
+  video_player_platform_interface: 6.4.0
   video_player_web: 2.3.5
-  vm_service: 15.0.1
+  vm_service: 15.0.2
   vm_snapshot_analysis: 0.7.6
-  watcher: 1.1.1
+  watcher: 1.1.2
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
@@ -199,7 +199,7 @@ dependencies:
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
-  webview_flutter_platform_interface: 2.13.0
+  webview_flutter_platform_interface: 2.13.1
   webview_flutter_wkwebview: 3.22.0
   xdg_directories: 1.1.0
   xml: 6.5.0
@@ -213,5 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-
-# PUBSPEC CHECKSUM: vunepl
+# PUBSPEC CHECKSUM: j61vfe

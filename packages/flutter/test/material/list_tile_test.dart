@@ -2301,18 +2301,74 @@ void main() {
     },
   );
 
+  testWidgets(
+    'IconButtonTheme.style.foregroundColor is preserved in ListTile in non-overriding scenario',
+    (WidgetTester tester) async {
+      const Color iconButtonThemeColor = Colors.blue;
+      const Icon leadingIcon = Icon(Icons.favorite);
+      const Icon trailingIcon = Icon(Icons.close);
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: ThemeData(
+            iconButtonTheme: IconButtonThemeData(
+              style: IconButton.styleFrom(foregroundColor: iconButtonThemeColor),
+            ),
+          ),
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                    trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
+          tester
+              .widget<RichText>(
+                find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+              )
+              .text
+              .style;
+
+      await tester.pumpWidget(buildFrame());
+      expect(getIconStyle(tester, leadingIcon.icon!)?.color, iconButtonThemeColor);
+      expect(getIconStyle(tester, trailingIcon.icon!)?.color, iconButtonThemeColor);
+    },
+  );
+
   testWidgets('ListTile respects and combines parent IconButtonThemeData style', (
     WidgetTester tester,
   ) async {
     const Color customIconColor = Colors.green;
     const Icon leadingIcon = Icon(Icons.favorite);
     const Icon trailingIcon = Icon(Icons.close);
-    const OutlinedBorder customShape = RoundedRectangleBorder(side: BorderSide());
+    const WidgetStateProperty<OutlinedBorder> customShape = WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(side: BorderSide()),
+    );
+    // Specially treated in ButtonStyle.merge, thus check these, too.
+    const WidgetStateProperty<Color> overlayColor = WidgetStatePropertyAll<Color>(Colors.purple);
+    const WidgetStateProperty<MouseCursor> mouseCursor = WidgetStatePropertyAll<MouseCursor>(
+      SystemMouseCursors.resizeUpRightDownLeft,
+    );
 
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(
-          iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(shape: customShape)),
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              overlayColor: overlayColor,
+              mouseCursor: mouseCursor,
+              shape: customShape,
+            ),
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -2328,12 +2384,15 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
 
-    // Verify that the merged theme retains the parent shape
-    final BuildContext tileContext = tester.element(find.byType(ListTile));
-    final IconButtonThemeData mergedTheme = IconButtonTheme.of(tileContext);
-    expect(mergedTheme.style?.shape?.resolve(<MaterialState>{}), customShape);
+    // Verify that the merged theme retains the parent shape and other critical fields.
+    for (final BuildContext iconButtonContext in find.byType(IconButton).evaluate()) {
+      final IconButtonThemeData mergedTheme = IconButtonTheme.of(iconButtonContext);
+      expect(mergedTheme.style?.shape, customShape);
+      expect(mergedTheme.style?.overlayColor, overlayColor);
+      expect(mergedTheme.style?.mouseCursor, mouseCursor);
+    }
 
-    // Verify that ListTile's iconColor overrides the inherited color
+    // Verify that ListTile's iconColor overrides the inherited color.
     Color? getIconColor(IconData iconData) {
       final RichText richText = tester.widget<RichText>(
         find.descendant(of: find.byIcon(iconData), matching: find.byType(RichText)),
@@ -4537,6 +4596,92 @@ void main() {
       buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
     );
     expectThreeLine();
+  });
+
+  testWidgets('ListTile statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ListTile(statesController: controller, onTap: () {}, title: const Text('title')),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Text));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+
+    // If the button is rebuilt disabled, then the pressed state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(child: ListTile(statesController: controller, title: const Text('title'))),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes pressed and adds disabled - two changes
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+    await gesture.removePointer();
   });
 }
 

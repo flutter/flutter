@@ -1445,6 +1445,51 @@ void main() {
       expect(client.latestMethodCall, 'didChangeInputControl');
     });
   });
+
+  test('SystemContextMenuController debugFillProperties', () {
+    final SystemContextMenuController controller = SystemContextMenuController(onSystemHide: () {});
+    final List<DiagnosticsNode> diagnosticsNodes = controller.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(4));
+    expect(diagnosticsNodes[0].name, 'isVisible');
+    expect(diagnosticsNodes[0].value, false);
+    expect(diagnosticsNodes[1].name, 'onSystemHide');
+    expect(diagnosticsNodes[1].value, true);
+    expect(diagnosticsNodes[2].name, '_hiddenBySystem');
+    expect(diagnosticsNodes[2].value, false);
+    expect(diagnosticsNodes[3].name, '_isDisposed');
+    expect(diagnosticsNodes[3].value, false);
+  });
+
+  test('IOSSystemContextMenuItemDataLookUp debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemDataLookUp item = IOSSystemContextMenuItemDataLookUp(
+      title: title,
+    );
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  test('IOSSystemContextMenuItemDataSearchWeb debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemDataSearchWeb item = IOSSystemContextMenuItemDataSearchWeb(
+      title: title,
+    );
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  test('IOSSystemContextMenuItemDataShare debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemDataShare item = IOSSystemContextMenuItemDataShare(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
 }
 
 class FakeTextInputClient with TextInputClient {

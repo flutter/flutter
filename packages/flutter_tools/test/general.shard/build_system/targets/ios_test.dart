@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -1234,22 +1235,28 @@ void main() {
   });
 
   group('DebugIosLLDBInit', () {
+    late FakeStdio fakeStdio;
+
+    setUp(() {
+      fakeStdio = FakeStdio();
+    });
+
     testUsingContext(
       'prints warning if missing LLDB Init File in all schemes',
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
-        final StringBuffer buffer = await capturedConsolePrint(() async {
-          await const DebugIosLLDBInit().build(environment);
-        });
+        await const DebugIosLLDBInit().build(environment);
+
         expect(
-          buffer.toString(),
+          fakeStdio.buffer.toString(),
           contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
         );
       },
@@ -1257,6 +1264,7 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
+        Stdio: () => fakeStdio,
       },
     );
 
@@ -1265,11 +1273,12 @@ void main() {
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneSimulator.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
         await const DebugIosLLDBInit().build(environment);
       },
@@ -1281,15 +1290,16 @@ void main() {
     );
 
     testUsingContext(
-      'skips if iOS version is less than 18.4',
+      'skips if iOS version is less than 26.0',
       () async {
         const String projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
-        environment.defines[kTargetDeviceOSVersion] = '18.3.1';
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '18.3.1';
 
         await const DebugIosLLDBInit().build(environment);
       },
@@ -1313,10 +1323,12 @@ void main() {
             .childFile('MyProject.xcscheme')
           ..createSync(recursive: true)
           ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
-        environment.defines[kIosArchs] = 'arm64';
-        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kSrcRoot] = projectPath;
+        environment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
 
         await const DebugIosLLDBInit().build(environment);
       },
@@ -1343,19 +1355,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }
 }
 
-/// Capture console print events into a string buffer.
-Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+class FakeStdio extends Fake implements Stdio {
   final StringBuffer buffer = StringBuffer();
-  await runZoned<Future<void>>(
-    () async {
-      // Service the event loop.
-      await body();
-    },
-    zoneSpecification: ZoneSpecification(
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-        buffer.writeln(line);
-      },
-    ),
-  );
-  return buffer;
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    buffer.writeln(message);
+  }
 }

@@ -42,6 +42,7 @@ import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
+import 'web_expression_compiler.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
 class DwdsWebRunnerFactory extends WebRunnerFactory {
@@ -262,7 +263,7 @@ class ResidentWebRunner extends ResidentRunner {
       _logger.printStatus('This application is not configured to build on the web.');
       _logger.printStatus('To add web support to a project, run `flutter create .`.');
     }
-    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = debuggingOptions.buildInfo.mode.friendlyName;
     _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
       'on ${device!.device!.displayName} in $modeName mode...',
@@ -303,6 +304,24 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
                 : null;
 
+        // Retrieve connected web devices, excluding the web server device.
+        final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+        final Set<String> nonWebServerConnectedDeviceIds = <String>{
+          for (final Device d in devices!.where(
+            (Device d) =>
+                d.platformType == PlatformType.web &&
+                d.isConnected &&
+                d.id != WebServerDevice.kWebServerDeviceId,
+          ))
+            d.id,
+        };
+
+        // Use Chrome-based connection only if we have a connected ChromiumDevice
+        // Otherwise, use DWDS WebSocket connection
+        final bool useDwdsWebSocketConnection =
+            !(_chromiumLauncher != null &&
+                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
+
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
@@ -327,7 +346,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
-          isWindows: _platform.isWindows,
+          useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: _platform,
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -360,6 +382,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
+        final WebDevFS webDevFS = device!.devFS! as WebDevFS;
+        final bool useDebugExtension =
+            device!.device is WebServerDevice && debuggingOptions.startPaused;
+        // Listen for connected apps early and then await this `Future` later
+        // when we attach.
+        final Future<ConnectionResult?>? connectDebug =
+            supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
         await device!.device!.startApp(
           package,
           mainPath: target,
@@ -369,6 +398,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          connectDebug: connectDebug,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -755,6 +785,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
+    Future<ConnectionResult?>? connectDebug,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
@@ -779,10 +810,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
-      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
-      final bool useDebugExtension =
-          device!.device is WebServerDevice && debuggingOptions.startPaused;
-      _connectionResult = await webDevFS.connect(useDebugExtension);
+      assert(connectDebug != null);
+      _connectionResult = await connectDebug;
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event) {

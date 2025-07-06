@@ -13,6 +13,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
+        Locale,
         Offset,
         Rect,
         SemanticsAction,
@@ -138,12 +139,17 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
     SemanticsRole.listItem => _semanticsListItem,
+    SemanticsRole.complementary => _semanticsComplementary,
+    SemanticsRole.contentInfo => _semanticsContentInfo,
+    SemanticsRole.main => _semanticsMain,
+    SemanticsRole.navigation => _semanticsNavigation,
+    SemanticsRole.region => _semanticsRegion,
+    SemanticsRole.form => _noCheckRequired,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
     SemanticsRole.progressBar => _unimplemented,
@@ -234,16 +240,14 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
-      if (!data.flagsCollection.hasCheckedState) {
-        node.visitChildren(validateRadioGroupChildren);
+      if (data.role == SemanticsRole.radioGroup) {
+        // Children under sub radio groups don't belong to this radio group.
         return error == null;
       }
 
       if (!data.flagsCollection.isInMutuallyExclusiveGroup) {
-        error = FlutterError(
-          'Radio buttons in a radio group must be in a mutually exclusive group',
-        );
-        return false;
+        node.visitChildren(validateRadioGroupChildren);
+        return error == null;
       }
 
       if (data.flagsCollection.isChecked) {
@@ -352,6 +356,108 @@ sealed class _DebugSemanticsRoleChecks {
         'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
     }
+    return null;
+  }
+
+  static bool _isLandmarkRole(SemanticsData nodeData) =>
+      nodeData.role == SemanticsRole.complementary ||
+      nodeData.role == SemanticsRole.contentInfo ||
+      nodeData.role == SemanticsRole.main ||
+      nodeData.role == SemanticsRole.navigation ||
+      nodeData.role == SemanticsRole.region;
+
+  static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
+    final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
+    int sameRoleCount = 0;
+    for (final int id in treeNodes.keys) {
+      if (treeNodes[id]?.getSemanticsData().role == semanticsNode.role) {
+        sameRoleCount++;
+        if (sameRoleCount > 1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static FlutterError? _semanticsComplementary(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The complementary landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The complementary landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsContentInfo(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The contentInfo landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The contentInfo landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsMain(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The main landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The main landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsNavigation(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The navigation landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsRegion(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.isEmpty) {
+      return FlutterError(
+        'A region role should include a label that describes the purpose of the content.',
+      );
+    }
+
     return null;
   }
 }
@@ -739,6 +845,7 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1001,6 +1108,12 @@ class SemanticsData with Diagnosticable {
 
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
+
+  /// The locale for this semantics node.
+  ///
+  /// Assistive technologies uses this property to correctly interpret the
+  /// content of this semantics node.
+  final Locale? locale;
 
   /// Whether [flags] contains the given flag.
   @Deprecated(
@@ -2612,6 +2725,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get depth => _depth;
   int _depth = 0;
 
+  /// The locale of this node.
+  ///
+  /// This property is used by assistive technologies to correctly interpret
+  /// the content of this node.
+  Locale? _locale;
+
   void _redepthChild(SemanticsNode child) {
     assert(child.owner == owner);
     if (child._depth <= _depth) {
@@ -2801,7 +2920,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node is tagged with `tag`.
   bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   /// Semantics flags.
   SemanticsFlags get flagsCollection => _flags;
@@ -3141,6 +3260,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
     _inputType = config._inputType;
+    _locale = config.locale;
 
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -3192,6 +3312,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
+    final Locale? locale = _locale;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3342,6 +3463,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      locale: locale,
     );
   }
 
@@ -3392,7 +3514,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flags,
+      flags: data.flagsCollection,
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,
@@ -3428,6 +3550,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
       inputType: data.inputType,
+      locale: data.locale,
     );
     _dirty = false;
   }
@@ -3540,6 +3663,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         ifTrue: 'merge boundary ⛔️',
       ),
     );
+    if (_locale != null) {
+      properties.add(StringProperty('locale', _locale.toString()));
+    }
     final Offset? offset = transform != null ? MatrixUtils.getAsTranslation(transform!) : null;
     if (offset != null) {
       properties.add(DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -4266,6 +4392,27 @@ class SemanticsConfiguration {
     assert(!isMergingSemanticsOfDescendants || value);
     _isSemanticBoundary = value;
   }
+
+  /// The locale for widgets in the subtree.
+  Locale? get localeForSubtree => _localeForSubtree;
+  Locale? _localeForSubtree;
+  set localeForSubtree(Locale? value) {
+    assert(
+      value == null || _isSemanticBoundary,
+      'to set locale for subtree, this configuration must also be a semantics '
+      'boundary.',
+    );
+    _localeForSubtree = value;
+  }
+
+  /// The locale of the resulting semantics node if this configuration formed
+  /// one.
+  ///
+  /// This is used internally to track the inherited locale from parent
+  /// rendering object and should not be used directly.
+  ///
+  /// To set a locale for a rendering object, use [localeForSubtree] instead.
+  Locale? locale;
 
   /// Whether to block pointer related user actions for the rendering subtree.
   ///
@@ -5630,7 +5777,7 @@ class SemanticsConfiguration {
 
   // INTERNAL FLAG MANAGEMENT
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {

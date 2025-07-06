@@ -433,7 +433,7 @@ Future<void> sendSemanticsTreeInfo() async {
     transform[10] = 1;
     builder.updateNode(
       id: nodeId,
-      flags: 0,
+      flags: ui.SemanticsFlags.none,
       actions: 0,
       maxValueLength: 0,
       currentValueLength: 0,
@@ -466,6 +466,7 @@ Future<void> sendSemanticsTreeInfo() async {
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
+      locale: null,
     );
     return builder.build();
   }

@@ -32,6 +32,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/lib/web_ui/dev', // these are build tools; they do not end up in Engine artifacts
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
+  r'flutter/sky/packages/sky_engine/LICENSE_CPP',
   r'flutter/third_party/android_embedding_dependencies', // Not shipped. Used only for the build-time classpath, and for the in-tree testing framework for Android
   r'flutter/third_party/android_tools', // excluded on advice
   r'flutter/third_party/angle/android',
@@ -171,6 +172,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/pyyaml', // build-time dependency only
   r'flutter/third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
   r'flutter/third_party/rapidjson/doc', // documentation
+  r'flutter/third_party/re2/benchlog',
   r'flutter/third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
   r'flutter/third_party/shaderc/third_party/LICENSE.spirv-tools', // unclear what the purpose of this file is
   r'flutter/third_party/skia/bazel', // contains nothing that ends up in the binary executable
