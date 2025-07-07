@@ -145,6 +145,103 @@ void main() {
     );
   });
 
+  testWidgets(
+    'DropSliderValueIndicatorShape should surround entire multiline label (year2023: true)',
+    (WidgetTester tester) async {
+      const String multilineLabel = 'First line\nSecond line\nThird line\nFourth line\nFifth line';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Slider(
+                value: 2,
+                year2023: true,
+                divisions: 4,
+                max: 5,
+                label: multilineLabel,
+                onChanged: (double newValue) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.press(find.byType(Slider));
+      await tester.pumpAndSettle();
+
+      // Check the golden file.
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_drop_shape_multiline_label.png'),
+      );
+
+      // Find the Overlay where the value indicator is drawn.
+      final RenderBox overlayBox = tester.renderObject(find.byType(Overlay));
+      final Size overlaySize = overlayBox.size;
+
+      // Use TextPainter to measure the label's size as it would be rendered.
+      final TextPainter textPainter = TextPainter(
+        text: const TextSpan(text: multilineLabel, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final Size labelSize = textPainter.size;
+      textPainter.dispose(); // Dispose the TextPainter to prevent memory leaks
+
+      // The overlay of the value indicator should be at least as large as the label, plus some padding.
+      // The DropSliderValueIndicatorShape uses 16.0 padding on each side by default.
+      const double indicatorPadding = 16.0 * 2;
+      expect(overlaySize.height, greaterThanOrEqualTo(labelSize.height + indicatorPadding));
+      expect(overlaySize.width, greaterThanOrEqualTo(labelSize.width + indicatorPadding));
+    },
+  );
+
+  testWidgets(
+    'RoundedRectSliderValueIndicatorShape should surround entire multiline label (year2023: false)',
+    (WidgetTester tester) async {
+      const String multilineLabel = 'First line\nSecond line\nThird line\nFourth line\nFifth line';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Slider(
+                value: 2,
+                year2023: false,
+                divisions: 4,
+                max: 5,
+                label: multilineLabel,
+                onChanged: (double newValue) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.press(find.byType(Slider));
+      await tester.pumpAndSettle();
+      // Check the golden file.
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_roundedrect_shape_multiline_label.png'),
+      );
+
+      // Find the Overlay where the value indicator is drawn.
+      final RenderBox overlayBox = tester.renderObject(find.byType(Overlay));
+      final Size overlaySize = overlayBox.size;
+
+      // Use TextPainter to measure the label's size as it would be rendered.
+      final TextPainter textPainter = TextPainter(
+        text: const TextSpan(text: multilineLabel, style: TextStyle(fontSize: 14.0)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final Size labelSize = textPainter.size;
+      textPainter.dispose(); // Dispose the TextPainter to prevent memory leaks
+
+      // The overlay of the value indicator should be at least as large as the label, plus some padding.
+      // The RoundedRectSliderValueIndicatorShape uses 16.0 padding on each side by default.
+      const double indicatorPadding = 16.0 * 2;
+      expect(overlaySize.height, greaterThanOrEqualTo(labelSize.height + indicatorPadding));
+      expect(overlaySize.width, greaterThanOrEqualTo(labelSize.width + indicatorPadding));
+    },
+  );
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

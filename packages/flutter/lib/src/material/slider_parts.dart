@@ -829,8 +829,27 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
       strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
+      sliderTheme: sliderTheme,
     );
   }
+}
+
+/// Creates a TextPainter with ellipsis when text exceeds maxLines.
+TextPainter _createTextPainterWithEllipsis({
+  required TextPainter originalPainter,
+  required String originalText,
+  required int maxLines,
+  required double textScaleFactor,
+}) {
+  final List<String> lines = originalText.split('\n');
+  final List<String> visibleLines = lines.take(maxLines - 1).toList();
+  visibleLines.add('${lines[maxLines - 1]}...');
+
+  return TextPainter(
+    text: TextSpan(text: visibleLines.join('\n'), style: originalPainter.text?.style),
+    textDirection: originalPainter.textDirection,
+    textScaleFactor: textScaleFactor,
+  )..layout();
 }
 
 class _DropSliderValueIndicatorPathPainter {
@@ -847,9 +866,21 @@ class _DropSliderValueIndicatorPathPainter {
   static const double _upperRectRadius = 4;
 
   Size getPreferredSize(TextPainter labelPainter, double textScaleFactor) {
+    // For getPreferredSize, assuming multiline support for sizing estimation.
+    // The actual rendering decision is made in the paint method based on theme.
+    final bool hasMultipleLines = labelPainter.text?.toPlainText().contains('\n') ?? false;
     final double width =
         math.max(_minLabelWidth, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
-    return Size(width, _preferredHeight * textScaleFactor);
+    if (hasMultipleLines) {
+      final double height = math.max(
+        _preferredHeight,
+        labelPainter.height + (_labelPadding * 2 * textScaleFactor),
+      );
+      return Size(width, height);
+    } else {
+      // Original single-line calculation.
+      return Size(width, _preferredHeight * textScaleFactor);
+    }
   }
 
   double getHorizontalShift({
@@ -912,27 +943,73 @@ class _DropSliderValueIndicatorPathPainter {
     required Size sizeWithOverflow,
     required Color backgroundPaintColor,
     Color? strokePaintColor,
+    required SliderThemeData sliderTheme,
   }) {
     if (scale == 0.0) {
       // Zero scale essentially means "do not draw anything", so it's safe to just return.
       return;
     }
     assert(!sizeWithOverflow.isEmpty);
-    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+
+    final ValueIndicatorMultilineConfig multilineConfig =
+        sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
+
+    // Handle maxLines truncation if multiline is enabled from theme configuration.
+    final String labelText = labelPainter.text?.toPlainText() ?? '';
+    TextPainter finalLabelPainter = labelPainter;
+    if (multilineConfig.enabled && multilineConfig.maxLines != null) {
+      finalLabelPainter = TextPainter(
+        text: labelPainter.text,
+        textDirection: labelPainter.textDirection,
+        textScaleFactor: textScaleFactor,
+        maxLines: multilineConfig.maxLines,
+      )..layout();
+
+      // If lines were truncated, add ellipsis manually.
+      if (finalLabelPainter.didExceedMaxLines) {
+        finalLabelPainter.dispose(); // Dispose the intermediate painter
+        finalLabelPainter = _createTextPainterWithEllipsis(
+          originalPainter: labelPainter,
+          originalText: labelText,
+          maxLines: multilineConfig.maxLines!,
+          textScaleFactor: textScaleFactor,
+        );
+      }
+    }
+
+    final double rectangleWidth = _upperRectangleWidth(finalLabelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
       center: center,
-      labelPainter: labelPainter,
+      labelPainter: finalLabelPainter,
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
-    final Rect upperRect = Rect.fromLTWH(
-      -rectangleWidth / 2 + horizontalShift,
-      -_rectYOffset - _minRectHeight,
-      rectangleWidth,
-      _minRectHeight,
-    );
+
+    final bool hasMultipleLines = multilineConfig.enabled && (labelText.contains('\n'));
+
+    final Rect upperRect;
+    if (hasMultipleLines) {
+      // For multiline text, the rectangle should be positioned to accommodate
+      // the text with proper padding.
+      final double rectHeight = finalLabelPainter.height + (_labelPadding * 2);
+      // Position rectangle above the triangle, with the triangle connecting to the bottom center.
+      upperRect = Rect.fromLTWH(
+        -rectangleWidth / 2 + horizontalShift,
+        -_triangleHeight - rectHeight,
+        rectangleWidth,
+        rectHeight,
+      );
+    } else {
+      // Original single-line calculation.
+      upperRect = Rect.fromLTWH(
+        -rectangleWidth / 2 + horizontalShift,
+        -_rectYOffset - _minRectHeight,
+        rectangleWidth,
+        _minRectHeight,
+      );
+    }
 
     final Paint fillPaint = Paint()..color = backgroundPaintColor;
 
@@ -940,34 +1017,112 @@ class _DropSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
 
-    final BorderRadius adjustedBorderRadius = _adjustBorderRadius(upperRect);
-    final RRect borderRect = adjustedBorderRadius
-        .resolve(labelPainter.textDirection)
-        .toRRect(upperRect);
-    final Path trianglePath = Path()
-      ..lineTo(-_triangleHeight, -_triangleHeight)
-      ..lineTo(_triangleHeight, -_triangleHeight)
-      ..close();
-    trianglePath.addRRect(borderRect);
+    final Path path;
+    if (hasMultipleLines) {
+      // For multiline text, create a single continuous path for the
+      // drop/triangle shape.
+      path = Path();
+
+      const double cornerRadius = _upperRectRadius;
+
+      // Start at the bottom tip of the triangle.
+      path.moveTo(0, 0);
+
+      // Draw left side of triangle to connect with rectangle.
+      path.lineTo(-_triangleHeight, -_triangleHeight);
+
+      // Draw the left edge of the rectangle
+      // (connecting to the left side of triangle).
+      path.lineTo(upperRect.left + cornerRadius, -_triangleHeight);
+
+      // Draw rounded rectangle manually to ensure proper connection
+      // Top left corner.
+      path.arcToPoint(
+        Offset(upperRect.left, -_triangleHeight - cornerRadius),
+        radius: const Radius.circular(cornerRadius),
+      );
+
+      // Left edge.
+      path.lineTo(upperRect.left, upperRect.top + cornerRadius);
+
+      // Top left corner.
+      path.arcToPoint(
+        Offset(upperRect.left + cornerRadius, upperRect.top),
+        radius: const Radius.circular(cornerRadius),
+      );
+
+      // Top edge.
+      path.lineTo(upperRect.right - cornerRadius, upperRect.top);
+
+      // Top right corner.
+      path.arcToPoint(
+        Offset(upperRect.right, upperRect.top + cornerRadius),
+        radius: const Radius.circular(cornerRadius),
+      );
+
+      // Right edge.
+      path.lineTo(upperRect.right, -_triangleHeight - cornerRadius);
+
+      // Bottom right corner.
+      path.arcToPoint(
+        Offset(upperRect.right - cornerRadius, -_triangleHeight),
+        radius: const Radius.circular(cornerRadius),
+      );
+
+      // Connect to right side of triangle.
+      path.lineTo(_triangleHeight, -_triangleHeight);
+
+      // Complete the triangle and close the path.
+      path.close();
+    } else {
+      // Original single-line calculation.
+      final BorderRadius adjustedBorderRadius = _adjustBorderRadius(upperRect);
+      final RRect borderRect = adjustedBorderRadius
+          .resolve(labelPainter.textDirection)
+          .toRRect(upperRect);
+      path = Path()
+        ..lineTo(-_triangleHeight, -_triangleHeight)
+        ..lineTo(_triangleHeight, -_triangleHeight)
+        ..close();
+      path.addRRect(borderRect);
+    }
 
     if (strokePaintColor != null) {
       final Paint strokePaint = Paint()
         ..color = strokePaintColor
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke;
-      canvas.drawPath(trianglePath, strokePaint);
+      canvas.drawPath(path, strokePaint);
     }
 
-    canvas.drawPath(trianglePath, fillPaint);
+    canvas.drawPath(path, fillPaint);
 
     // The label text is centered within the value indicator.
-    final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
-    canvas.translate(0, bottomTipToUpperRectTranslateY);
-    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 1.75);
-    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
-    final Offset labelOffset = boxCenter - halfLabelPainterOffset;
-    labelPainter.paint(canvas, labelOffset);
+    if (hasMultipleLines) {
+      // Center multiline text within the rectangle.
+      final Offset labelOffset = Offset(
+        upperRect.left + (upperRect.width - finalLabelPainter.width) / 2,
+        upperRect.top + (upperRect.height - finalLabelPainter.height) / 2,
+      );
+      finalLabelPainter.paint(canvas, labelOffset);
+    } else {
+      // Original single-line calculation.
+      final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
+      canvas.translate(0, bottomTipToUpperRectTranslateY);
+      final Offset boxCenter = Offset(horizontalShift, upperRect.height / 1.75);
+      final Offset halfLabelPainterOffset = Offset(
+        finalLabelPainter.width / 2,
+        finalLabelPainter.height / 2,
+      );
+      final Offset labelOffset = boxCenter - halfLabelPainterOffset;
+      finalLabelPainter.paint(canvas, labelOffset);
+    }
     canvas.restore();
+
+    // Dispose TextPainter we created (but not the original labelPainter).
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
   }
 }
 
@@ -1311,6 +1466,7 @@ class RoundedRectSliderValueIndicatorShape extends SliderComponentShape {
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
       strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
+      sliderTheme: sliderTheme,
     );
   }
 }
@@ -1321,14 +1477,31 @@ class _RoundedRectSliderValueIndicatorPathPainter {
   static const double _labelPadding = 10.0;
   static const double _preferredHeight = 32.0;
   static const double _minLabelWidth = 16.0;
-  static const double _rectYOffset = 10.0;
   static const double _bottomTipYOffset = 16.0;
-  static const double _preferredHalfHeight = _preferredHeight / 2;
+  static const double _minRectRadius = 4.0;
+
+  /// A default extra padding for rounded corners when the label is multiline.
+  ///
+  /// This constant is to prevent text from appearing to "spill out" of the rounded corners.
+
+  static const double _multilineCornerPadding = 8.0;
 
   Size getPreferredSize(TextPainter labelPainter, double textScaleFactor) {
+    // For getPreferredSize, assuming multiline support for sizing estimation.
+    // The actual rendering decision is made in the paint method based on theme.
+    final bool hasMultipleLines = labelPainter.text?.toPlainText().contains('\n') ?? false;
     final double width =
-        math.max(_minLabelWidth, labelPainter.width) + (_labelPadding * 2) * textScaleFactor;
-    return Size(width, _preferredHeight * textScaleFactor);
+        math.max(_minLabelWidth, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
+    if (hasMultipleLines) {
+      final double height = math.max(
+        _preferredHeight,
+        labelPainter.height + (_labelPadding * 2 * textScaleFactor) + _multilineCornerPadding,
+      );
+      return Size(width, height);
+    } else {
+      // Original single-line calculation.
+      return Size(width, _preferredHeight * textScaleFactor);
+    }
   }
 
   double getHorizontalShift({
@@ -1382,6 +1555,7 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     required Size sizeWithOverflow,
     required Color backgroundPaintColor,
     Color? strokePaintColor,
+    required SliderThemeData sliderTheme,
   }) {
     if (scale == 0.0) {
       // Zero scale essentially means "do not draw anything", so it's safe to just return.
@@ -1389,24 +1563,57 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     }
     assert(!sizeWithOverflow.isEmpty);
 
-    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+    // Calculate the height of the rectangle based on the label painter's height.
+    final ValueIndicatorMultilineConfig multilineConfig =
+        sliderTheme.valueIndicatorMultilineConfig ?? const ValueIndicatorMultilineConfig();
+
+    // Handle maxLines truncation if multiline is enabled from theme configuration.
+    final String labelText = labelPainter.text?.toPlainText() ?? '';
+    TextPainter finalLabelPainter = labelPainter;
+    if (multilineConfig.enabled && multilineConfig.maxLines != null) {
+      finalLabelPainter = TextPainter(
+        text: labelPainter.text,
+        textDirection: labelPainter.textDirection,
+        textScaleFactor: textScaleFactor,
+        maxLines: multilineConfig.maxLines,
+      )..layout();
+
+      // If lines were truncated, add ellipsis manually.
+      if (finalLabelPainter.didExceedMaxLines) {
+        finalLabelPainter.dispose(); // Dispose the intermediate painter
+        finalLabelPainter = _createTextPainterWithEllipsis(
+          originalPainter: labelPainter,
+          originalText: labelText,
+          maxLines: multilineConfig.maxLines!,
+          textScaleFactor: textScaleFactor,
+        );
+      }
+    }
+
+    final double rectangleWidth = _upperRectangleWidth(finalLabelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
       center: center,
-      labelPainter: labelPainter,
+      labelPainter: finalLabelPainter,
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       scale: scale,
     );
 
+    final bool hasMultipleLines = multilineConfig.enabled && labelText.contains('\n');
+    final double cornerPadding = multilineConfig.cornerPadding ?? _multilineCornerPadding;
+    final double rectHeight = hasMultipleLines
+        ? math.max(_preferredHeight, finalLabelPainter.height + (_labelPadding * 2) + cornerPadding)
+        : _preferredHeight * textScaleFactor;
+
+    // The rectangle which is above the thumb, with no triangle)
     final Rect upperRect = Rect.fromLTWH(
       -rectangleWidth / 2 + horizontalShift,
-      -_rectYOffset - _preferredHeight,
+      -_bottomTipYOffset - rectHeight,
       rectangleWidth,
-      _preferredHeight,
+      rectHeight,
     );
-
-    final Paint fillPaint = Paint()..color = backgroundPaintColor;
 
     canvas.save();
     // Prepare the canvas for the base of the tooltip, which is relative to the
@@ -1414,7 +1621,10 @@ class _RoundedRectSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
 
-    final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
+    final double cornerRadius = math.max(rectHeight / 2, _minRectRadius);
+    final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(cornerRadius));
+    canvas.drawRRect(rrect, fillPaint);
+
     if (strokePaintColor != null) {
       final Paint strokePaint = Paint()
         ..color = strokePaintColor
@@ -1423,16 +1633,18 @@ class _RoundedRectSliderValueIndicatorPathPainter {
       canvas.drawRRect(rrect, strokePaint);
     }
 
-    canvas.drawRRect(rrect, fillPaint);
-
-    // The label text is centered within the value indicator.
-    final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
-    canvas.translate(0, bottomTipToUpperRectTranslateY);
-    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2.3);
-    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
-    final Offset labelOffset = boxCenter - halfLabelPainterOffset;
-    labelPainter.paint(canvas, labelOffset);
+    // Draw the label, centered in the rectangle
+    final Offset labelOffset = Offset(
+      rrect.left + (rrect.width - finalLabelPainter.width) / 2,
+      rrect.top + (rrect.height - finalLabelPainter.height) / 2,
+    );
+    finalLabelPainter.paint(canvas, labelOffset);
     canvas.restore();
+
+    // Dispose TextPainter we created (but not the original labelPainter).
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
   }
 }
 
