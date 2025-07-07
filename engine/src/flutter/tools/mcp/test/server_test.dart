@@ -12,7 +12,7 @@ import 'package:process/process.dart' show ProcessManager;
 import 'package:process_runner/process_runner.dart';
 import 'package:test/test.dart';
 
-// TODO(gaaclarke): Get this integrated work the workspace and use the shared
+// TODO(gaaclarke): Get this integrated with the workspace and use the shared
 // version.
 final class _FakeProcessManager implements ProcessManager {
   /// Creates a fake process manager delegates to [onRun] and [onStart].
