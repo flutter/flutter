@@ -142,10 +142,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, equals(Version(4, 1, null)));
         expect(studio, isNotNull);
@@ -206,10 +205,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, equals(Version(2020, 3, null)));
         expect(studio, isNotNull);
@@ -271,10 +269,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, equals(Version(3, 3, null)));
         expect(studio, isNotNull);
@@ -329,10 +326,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, equals(Version(2022, 3, 1)));
         expect(studio, isNotNull);
@@ -566,10 +562,9 @@ void main() {
           'Info.plist',
         );
         plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
         expect(studio, isNotNull);
         expect(
           studio.pluginsPath,
@@ -621,10 +616,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(
           studio.javaPath,
@@ -674,10 +668,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(
           studio.javaPath,
@@ -729,10 +722,9 @@ void main() {
             stderr: '123',
           ),
         );
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, null);
         expect(studio.javaPath, jdkPath);
@@ -774,10 +766,9 @@ void main() {
           'Home',
         );
 
-        final AndroidStudio studio =
-            AndroidStudio.fromMacOSBundle(
-              fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-            )!;
+        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        )!;
 
         expect(studio.version, equals(Version(99999, 99, 99)));
         expect(studio.javaPath, jdkPathFor2022);
@@ -935,11 +926,10 @@ void main() {
         expect(AndroidStudio.allInstalled(), isEmpty);
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{}, // Does not include LOCALAPPDATA
-            ),
+        Platform: () => FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{}, // Does not include LOCALAPPDATA
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -956,11 +946,10 @@ void main() {
         expect(AndroidStudio.allInstalled(), isEmpty);
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{}, // Does not include LOCALAPPDATA
-            ),
+        Platform: () => FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{}, // Does not include LOCALAPPDATA
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -977,11 +966,10 @@ void main() {
         expect(AndroidStudio.allInstalled(), isEmpty);
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{}, // Does not include LOCALAPPDATA
-            ),
+        Platform: () => FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{}, // Does not include LOCALAPPDATA
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },

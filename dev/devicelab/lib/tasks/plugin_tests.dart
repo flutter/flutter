@@ -214,7 +214,8 @@ class _FlutterProject {
     // Add the Dart registration hook that the build will generate a call to.
     final File dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
     content = await dartCode.readAsString();
-    content = '''
+    content =
+        '''
 $content
 
 class $dartPluginClass {
@@ -288,7 +289,8 @@ class $dartPluginClass {
     if (!pluginRegister.existsSync()) {
       pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
     }
-    final String pluginRegisterContent = '''
+    final String pluginRegisterContent =
+        '''
 #if os(macOS)
 import FlutterMacOS
 #elseif os(iOS)
@@ -501,8 +503,9 @@ end
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString =
-        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+    final String versionString = target == 'ios'
+        ? "s.platform = :ios, '13.0'"
+        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(

@@ -363,16 +363,14 @@ class _DefaultProcessUtils implements ProcessUtils {
 
       final StringBuffer stdoutBuffer = StringBuffer();
       final StringBuffer stderrBuffer = StringBuffer();
-      final Future<void> stdoutFuture =
-          process.stdout
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .listen(stdoutBuffer.write)
-              .asFuture<void>();
-      final Future<void> stderrFuture =
-          process.stderr
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .listen(stderrBuffer.write)
-              .asFuture<void>();
+      final Future<void> stdoutFuture = process.stdout
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stdoutBuffer.write)
+          .asFuture<void>();
+      final Future<void> stderrFuture = process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write)
+          .asFuture<void>();
 
       int? exitCode;
       exitCode = await process.exitCode

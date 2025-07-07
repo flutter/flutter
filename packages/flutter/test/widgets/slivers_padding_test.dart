@@ -49,14 +49,14 @@ Future<void> test(
 }
 
 void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers =
-      tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>((
-        RenderBox target,
-      ) {
+  final List<Rect> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false))
+      .map<Rect>((RenderBox target) {
         final Offset topLeft = target.localToGlobal(Offset.zero);
         final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
         return Rect.fromPoints(topLeft, bottomRight);
-      }).toList();
+      })
+      .toList();
   expect(testAnswers, equals(answerKey));
 }
 

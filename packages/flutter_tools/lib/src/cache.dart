@@ -587,12 +587,9 @@ class Cache {
       throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
 
-    final String cipdOverride =
-        original
-            .replace(
-              pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'],
-            )
-            .toString();
+    final String cipdOverride = original
+        .replace(pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'])
+        .toString();
     return cipdOverride;
   }
 
