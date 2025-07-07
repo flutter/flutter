@@ -1049,6 +1049,407 @@ void main() {
     final SemanticsNode node = SemanticsNode()..indexInParent = 10;
     expect(node.toString(), contains('indexInParent: 10'));
   });
+
+  group('SemanticsLabelBuilder', () {
+    test('basic functionality with default separator', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      expect(builder.isEmpty, isTrue);
+      expect(builder.length, 0);
+
+      builder.addPart('Hello');
+      expect(builder.isEmpty, isFalse);
+      expect(builder.length, 1);
+
+      builder.addPart('world');
+      expect(builder.length, 2);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello world');
+      expect(label.attributedLabel, isNull);
+    });
+
+    test('custom separator', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: ', ');
+      builder
+        ..addPart('One')
+        ..addPart('Two')
+        ..addPart('Three');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'One, Two, Three');
+    });
+
+    test('empty separator', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: '');
+      builder
+        ..addPart('Hello')
+        ..addPart('World');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'HelloWorld');
+    });
+
+    test('ignores empty parts', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addPart('Hello')
+        ..addPart('')
+        ..addPart('world');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello world');
+      expect(builder.length, 2);
+    });
+
+    test('single part', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder.addPart('Single');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Single');
+      expect(label.attributedLabel, isNull);
+    });
+
+    test('empty builder', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final SemanticsLabel label = builder.build();
+      expect(label.label, '');
+      expect(label.attributedLabel, isNull);
+    });
+
+    test('clear functionality', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addPart('Hello')
+        ..addPart('world');
+
+      expect(builder.length, 2);
+
+      builder.clear();
+      expect(builder.isEmpty, isTrue);
+      expect(builder.length, 0);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, '');
+    });
+
+    test('reusable builder', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+
+      // First use
+      builder
+        ..addPart('First')
+        ..addPart('use');
+      expect(builder.build().label, 'First use');
+
+      // Clear and reuse
+      builder.clear();
+      builder
+        ..addPart('Second')
+        ..addPart('use');
+      expect(builder.build().label, 'Second use');
+    });
+  });
+
+  group('SemanticsLabelBuilder with AttributedString', () {
+    test('attributed string parts', () {
+      final AttributedString attributedText = AttributedString(
+        'attributed',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+        ],
+      );
+
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addPart('Hello')
+        ..addAttributedPart(attributedText)
+        ..addPart('world');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello attributed world');
+      expect(label.attributedLabel, isNotNull);
+      expect(label.attributedLabel!.string, 'Hello attributed world');
+      expect(label.attributedLabel!.attributes.length, 1);
+      expect(label.attributedLabel!.attributes[0] is SpellOutStringAttribute, isTrue);
+      // Attribute range should be adjusted for position in final string
+      expect(label.attributedLabel!.attributes[0].range, const TextRange(start: 6, end: 11));
+    });
+
+    test('multiple attributed parts', () {
+      final AttributedString attributed1 = AttributedString(
+        'first',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+        ],
+      );
+      final AttributedString  attributed2 = AttributedString(
+        'second',
+        attributes: <StringAttribute>[
+          LocaleStringAttribute(range: const TextRange(start: 0, end: 6), locale: const Locale('en')),
+        ],
+      );
+
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addAttributedPart(attributed1)
+        ..addAttributedPart(attributed2);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'first second');
+      expect(label.attributedLabel!.attributes.length, 2);
+
+      // Check attribute ranges are properly adjusted
+      expect(label.attributedLabel!.attributes[0].range, const TextRange(start: 0, end: 5));
+      expect(label.attributedLabel!.attributes[1].range, const TextRange(start: 6, end: 12));
+    });
+
+    test('ignores empty attributed parts', () {
+      final AttributedString emptyAttributed = AttributedString('');
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+
+      builder
+        ..addPart('Hello')
+        ..addAttributedPart(emptyAttributed)
+        ..addPart('world');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello world');
+      expect(builder.length, 2);
+    });
+
+    test('single attributed part', () {
+      final AttributedString attributedText = AttributedString(
+        'attributed',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+        ],
+      );
+
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder.addAttributedPart(attributedText);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'attributed');
+      expect(label.attributedLabel!.attributes.length, 1);
+      expect(label.attributedLabel!.attributes[0].range, const TextRange(start: 0, end: 5));
+    });
+  });
+
+  group('SemanticsLabelBuilder text direction', () {
+    test('no text direction embedding when overall direction is null', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addPart('Hello', textDirection: TextDirection.ltr)
+        ..addPart('مرحبا', textDirection: TextDirection.rtl);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello مرحبا');
+    });
+
+    test('text direction embedding with LTR overall direction', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      builder
+        ..addPart('Hello', textDirection: TextDirection.ltr)
+        ..addPart('مرحبا', textDirection: TextDirection.rtl)
+        ..addPart('world', textDirection: TextDirection.ltr);
+
+      final SemanticsLabel label = builder.build();
+      // First part never gets embedding, subsequent RTL parts get RLE...PDF
+      expect(label.label, contains('Hello'));
+      expect(label.label, contains('مرحبا'));
+      expect(label.label, contains('world'));
+      // Should contain Unicode RLE and PDF characters around RTL text
+      expect(label.label, contains('\u202B')); // RLE
+      expect(label.label, contains('\u202C')); // PDF
+    });
+
+    test('text direction embedding with RTL overall direction', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.rtl);
+      builder
+        ..addPart('مرحبا', textDirection: TextDirection.rtl)
+        ..addPart('Hello', textDirection: TextDirection.ltr);
+
+      final SemanticsLabel label = builder.build();
+      // LTR part should get LRE...PDF embedding
+      expect(label.label, contains('\u202A')); // LRE (not LRO)
+      expect(label.label, contains('\u202C')); // PDF
+    });
+
+    test('no embedding when all parts have same direction', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      builder
+        ..addPart('Hello', textDirection: TextDirection.ltr)
+        ..addPart('world', textDirection: TextDirection.ltr);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello world');
+      expect(label.label, isNot(contains('\u202B'))); // No RLE
+      expect(label.label, isNot(contains('\u202D'))); // No LRE
+      expect(label.label, isNot(contains('\u202C'))); // No PDF
+    });
+
+    test('part direction falls back to overall direction', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr);
+      builder
+        ..addPart('Hello')
+        ..addPart('world');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Hello world');
+      expect(label.label, isNot(contains('\u202B'))); // No embedding needed
+    });
+
+    test('complex multilingual example', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(
+        textDirection: TextDirection.ltr,
+        separator: ', ',
+      );
+      builder
+        ..addPart('Welcome', textDirection: TextDirection.ltr)
+        ..addPart('مرحبا', textDirection: TextDirection.rtl) // Arabic
+        ..addPart('שלום', textDirection: TextDirection.rtl) // Hebrew
+        ..addPart('to our app', textDirection: TextDirection.ltr);
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, contains('Welcome'));
+      expect(label.label, contains('مرحبا'));
+      expect(label.label, contains('שלום'));
+      expect(label.label, contains('to our app'));
+
+      // Should have Unicode embedding for RTL parts
+      final int rleCount = '\u202B'.allMatches(label.label).length;
+      final int pdfCount = '\u202C'.allMatches(label.label).length;
+      expect(rleCount, 2); // Two RTL parts
+      expect(pdfCount, 2); // Two closing PDF marks
+    });
+  });
+
+  group('SemanticsLabel', () {
+    test('equality', () {
+      final SemanticsLabel label1 = (SemanticsLabelBuilder()..addPart('test')).build();
+      final SemanticsLabel label2 = (SemanticsLabelBuilder()..addPart('test')).build();
+      final SemanticsLabel label3 = (SemanticsLabelBuilder()..addPart('different')).build();
+
+      expect(label1, equals(label2));
+      expect(label1, isNot(equals(label3)));
+      expect(label1.hashCode, equals(label2.hashCode));
+    });
+
+    test('equality with attributed labels', () {
+      final AttributedString    attributed1 = AttributedString(
+        'test',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
+        ],
+      );
+      final AttributedString attributed2 = AttributedString(
+        'test',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
+        ],
+      );
+
+      final SemanticsLabel label1 = (SemanticsLabelBuilder()..addAttributedPart(attributed1)).build();
+      final SemanticsLabel label2 = (SemanticsLabelBuilder()..addAttributedPart(attributed2)).build();
+      final SemanticsLabel label3 = (SemanticsLabelBuilder()..addPart('test')).build();
+
+      // Check that labels with same attributed content are equal
+      expect(label1.label, equals(label2.label));
+      expect(label1.attributedLabel?.string, equals(label2.attributedLabel?.string));
+
+      // Check that attributed and non-attributed labels with same text are not equal
+      expect(label1.label, equals(label3.label));
+      expect(label1.attributedLabel, isNotNull);
+      expect(label3.attributedLabel, isNull);
+    });
+
+    test('toString', () {
+      final SemanticsLabel label = (SemanticsLabelBuilder()..addPart('test label')).build();
+      expect(label.toString(), 'SemanticsLabel("test label")');
+    });
+
+    test('identical objects are equal', () {
+      final SemanticsLabel label = (SemanticsLabelBuilder()..addPart('test')).build();
+      expect(identical(label, label), isTrue);
+      expect(label == label, isTrue);
+    });
+  });
+
+  group('Edge cases and error handling', () {
+    test('very long labels', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      final String longText = 'A' * 1000;
+
+      builder
+        ..addPart(longText)
+        ..addPart('short');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label.length, 1006); // 1000 + 1 (space) + 5
+      expect(label.label, startsWith('AAAA'));
+      expect(label.label, endsWith(' short'));
+    });
+
+    test('many parts', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+
+      for (int i = 0; i < 100; i++) {
+        builder.addPart('part$i');
+      }
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, startsWith('part0 part1'));
+      expect(label.label, endsWith('part98 part99'));
+      expect(builder.length, 100);
+    });
+
+    test('special characters in separators', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: ' | ');
+      builder
+        ..addPart('first')
+        ..addPart('second')
+        ..addPart('third');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'first | second | third');
+    });
+
+    test('Unicode characters in content', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+      builder
+        ..addPart('Emoji: 😀🎉')
+        ..addPart('Math: ∑∆π')
+        ..addPart('Currency: €£¥');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
+    });
+
+    test('mixed attributed and plain parts with complex attributes', () {
+      final AttributedString complexAttributed = AttributedString(
+        'complex',
+        attributes: <StringAttribute>[
+          SpellOutStringAttribute(range: const TextRange(start: 0, end: 3)),
+          LocaleStringAttribute(range: const TextRange(start: 3, end: 7), locale: const Locale('en')),
+        ],
+      );
+
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder(separator: ' - ');
+      builder
+        ..addPart('start')
+        ..addAttributedPart(complexAttributed)
+        ..addPart('end');
+
+      final SemanticsLabel label = builder.build();
+      expect(label.label, 'start - complex - end');
+      expect(label.attributedLabel!.attributes.length, 2);
+
+      // Verify attribute ranges are correctly adjusted
+      expect(label.attributedLabel!.attributes[0].range, const TextRange(start: 8, end: 11));
+      expect(label.attributedLabel!.attributes[1].range, const TextRange(start: 11, end: 15));
+    });
+  });
 }
 
 class TestRender extends RenderProxyBox {

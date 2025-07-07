@@ -805,6 +805,184 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   }
 }
 
+/// Internal representation of a label part for [SemanticsLabelBuilder].
+class _LabelPart {
+  _LabelPart.plain(this.text, this.textDirection) : attributedString = AttributedString(text);
+  _LabelPart.attributed(this.attributedString, this.textDirection) : text = attributedString.string;
+
+  final String text;
+  final AttributedString attributedString;
+  final TextDirection? textDirection;
+
+  bool get hasAttributes => attributedString.attributes.isNotEmpty;
+}
+
+/// An immutable semantic label that contains both plain and attributed versions.
+///
+/// This class represents the result of concatenating multiple label parts with
+/// proper text direction handling and spacing.
+@immutable
+final class SemanticsLabel {
+  const SemanticsLabel._(this._label, {AttributedString? attributedLabel})
+      : _attributedLabel = attributedLabel;
+
+  final String _label;
+  final AttributedString? _attributedLabel;
+
+  /// The concatenation of text parts supplied using `addPart` and
+  /// `addAttributedPart` invocations.
+  String get label => _label;
+
+  /// The attributed concatenation of text parts supplied using `addPart`
+  /// and `addAttributedPart` invocations.
+  ///
+  /// Returns null if only plain text parts were added via `addPart()`.
+  /// Returns an AttributedString if any attributed parts were added via `addAttributedPart()`.
+  AttributedString? get attributedLabel => _attributedLabel;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SemanticsLabel &&
+        other._label == _label &&
+        other._attributedLabel == _attributedLabel;
+  }
+
+  @override
+  int get hashCode => Object.hash(_label, _attributedLabel);
+
+  @override
+  String toString() => 'SemanticsLabel("$_label")';
+}
+
+/// Builder for creating semantically correct concatenated labels with proper
+/// text direction handling and spacing.
+///
+/// This builder helps address the complexity of concatenating multiple text
+/// parts while handling language-specific nuances like RTL vs LTR text direction,
+/// proper spacing, and attribute preservation.
+///
+/// Example usage:
+/// ```dart
+/// final builder = SemanticsLabelBuilder()
+///   ..addPart('Hello')
+///   ..addPart('world');
+/// final label = builder.build();
+/// print(label.label); // "Hello world"
+/// ```
+///
+/// For more complex scenarios with attributed strings:
+/// ```dart
+/// final builder = SemanticsLabelBuilder()
+///   ..addPart('Welcome')
+///   ..addAttributedPart(AttributedString('Jane', attributes: [
+///     LocaleStringAttribute(range: TextRange(start: 0, end: 4), locale: Locale('en'))
+///   ]));
+/// final label = builder.build();
+/// print(label.label); // "Welcome Jane"
+/// print(label.attributedLabel); // AttributedString with preserved attributes
+/// ```
+final class SemanticsLabelBuilder {
+  /// Creates a new [SemanticsLabelBuilder].
+  ///
+  /// The [separator] is used between text parts (defaults to space).
+  /// The [textDirection] specifies the overall text direction for the concatenated label.
+  SemanticsLabelBuilder({
+    this.separator = ' ',
+    this.textDirection,
+  });
+
+  /// The separator used between text parts.
+  final String separator;
+
+  /// The overall text direction for the concatenated label.
+  final TextDirection? textDirection;
+
+  final List<_LabelPart> _parts = <_LabelPart>[];
+
+  /// Adds a plain string text part.
+  ///
+  /// If [textDirection] is specified, it will be used for this specific part.
+  /// Empty parts are ignored.
+  void addPart(String label, {TextDirection? textDirection}) {
+    if (label.isNotEmpty) {
+      _parts.add(_LabelPart.plain(label, textDirection));
+    }
+  }
+
+  /// Adds an attributed string text part.
+  ///
+  /// If [textDirection] is specified, it will be used for this specific part.
+  /// Empty parts are ignored.
+  void addAttributedPart(AttributedString label, {TextDirection? textDirection}) {
+    if (label.string.isNotEmpty) {
+      _parts.add(_LabelPart.attributed(label, textDirection));
+    }
+  }
+
+  /// Returns true if no parts have been added to this builder.
+  bool get isEmpty => _parts.isEmpty;
+
+  /// Returns the number of parts added to this builder.
+  int get length => _parts.length;
+
+  /// Builds and returns a [SemanticsLabel] from the added parts.
+  ///
+  /// This method concatenates all parts with proper text direction handling
+  /// and spacing. If any attributed parts were added, the result will include
+  /// an [AttributedString] with properly adjusted attribute ranges.
+  SemanticsLabel build() {
+    if (_parts.isEmpty) {
+      return const SemanticsLabel._('');
+    }
+
+    if (_parts.length == 1) {
+      final _LabelPart part = _parts.first;
+      return SemanticsLabel._(
+        part.text,
+        attributedLabel: part.hasAttributes ? part.attributedString : null,
+      );
+    }
+
+    // Concatenate multiple parts with proper text direction handling
+    AttributedString result = _parts.first.attributedString;
+
+    for (int i = 1; i < _parts.length; i++) {
+      final _LabelPart currentPart = _parts[i];
+      final TextDirection? partDirection = currentPart.textDirection ?? textDirection;
+
+      if (separator.isNotEmpty) {
+        result = result + AttributedString(separator);
+      }
+
+      AttributedString partString = currentPart.attributedString;
+      if (textDirection != null && partDirection != null && textDirection != partDirection) {
+        final String directionalEmbedding = switch (partDirection) {
+          TextDirection.rtl => Unicode.RLE,
+          TextDirection.ltr => Unicode.LRE,
+        };
+        partString = AttributedString(directionalEmbedding) + partString + AttributedString(Unicode.PDF);
+      }
+
+      result = result + partString;
+    }
+
+    final bool hasAnyAttributes = _parts.any((_LabelPart part) => part.hasAttributes);
+
+    return SemanticsLabel._(
+      result.string,
+      attributedLabel: hasAnyAttributes ? result : null,
+    );
+  }
+
+  /// Clears all parts from this builder, allowing it to be reused.
+  void clear() {
+    _parts.clear();
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -4393,7 +4571,7 @@ class SemanticsConfiguration {
     _isSemanticBoundary = value;
   }
 
-  /// The locale for widgets in the subtree.
+    /// The locale for widgets in the subtree.
   Locale? get localeForSubtree => _localeForSubtree;
   Locale? _localeForSubtree;
   set localeForSubtree(Locale? value) {
