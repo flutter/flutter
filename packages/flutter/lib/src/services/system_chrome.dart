@@ -46,34 +46,18 @@ enum DeviceOrientation {
   /// in [portraitUp]. Otherwise, the device shows its boot logo in landscape
   /// and this orientation is obtained by rotating the device 90 degrees
   /// clockwise from its boot orientation.
-  ///
-  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
-  /// a device with a display width >= 600 dp, then [portraitUp] is ignored for apps
-  /// running on Android. For more details, see [SystemChrome] docs.
   portraitUp,
 
   /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
-  ///
-  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
-  /// a device with a display width >= 600 dp, then [landscapeLeft] is ignored for apps
-  /// running on Android. For more details, see [SystemChrome] docs.
   landscapeLeft,
 
   /// The orientation that is 180 degrees from [portraitUp].
-  ///
-  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
-  /// a device with a display width >= 600 dp, then [portraitDown] is ignored for apps
-  /// running on Android. For more details, see [SystemChrome] docs.
   portraitDown,
 
   /// The orientation that is 90 degrees clockwise from [portraitUp].
-  ///
-  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
-  /// a device with a display width >= 600 dp, then [landscapeRight] is ignored for apps
-  /// running on Android. For more details, see [SystemChrome] docs.
   landscapeRight,
 }
 
@@ -438,7 +422,8 @@ abstract final class SystemChrome {
   ///
   /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
   /// a device with a display width >= 600 dp, then you cannot set the device
-  /// orientation. For more details see Android 16 docs [here](https://developer.android.com/about/versions/16/behavior-changes-16#ignore-orientation).
+  /// orientation via [SystemChrome.setPreferredOrientations]. For more details see
+  /// Android 16 docs [here](https://developer.android.com/about/versions/16/behavior-changes-16#ignore-orientation).
   ///
   /// Android limits the [orientations](https://developer.android.com/reference/android/R.attr#screenOrientation)
   /// to the following combinations:
