@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -1105,24 +1106,24 @@ void main() {
       },
     );
 
-    testUsingContext("custom-device log reader command", () async {
-      const logLine = 'Hello, from custom device!';
-      final logLineCommand = const <String>['echo', logLine];
-      final expectedLogLines = const <String>[logLine];
+    testUsingContext('custom-device log reader command', () async {
+      const String logLine = 'Hello, from custom device!';
+      final List<String> logLineCommand = const <String>['echo', logLine];
+      final List<String> expectedLogLines = const <String>[logLine];
 
-      final platform = FakePlatform();
-      final processManager = FakeProcessManager.list([
+      final Platform platform = FakePlatform();
+      final ProcessManager processManager = FakeProcessManager.list([
         FakeCommand(command: logLineCommand, stdout: logLine),
       ]);
-      final customDeviceConfig = CustomDeviceConfig.getExampleForPlatform(
+      final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.getExampleForPlatform(
         platform,
       ).copyWith(readLogsCommand: logLineCommand);
-      final customDevice = CustomDevice(
+      final CustomDevice customDevice = CustomDevice(
         config: customDeviceConfig,
         logger: BufferLogger.test(),
         processManager: processManager,
       );
-      final logReader = await customDevice.getLogReader();
+      final DeviceLogReader logReader = await customDevice.getLogReader();
       expect(logReader.logLines, emitsInOrder(expectedLogLines));
     });
   });
