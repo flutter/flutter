@@ -232,7 +232,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       InstallCommand(verboseHelp: verboseHelp),
       LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      MakeHostAppEditableCommand(),
       PackagesCommand(),
       PrecacheCommand(
         verboseHelp: verboseHelp,
