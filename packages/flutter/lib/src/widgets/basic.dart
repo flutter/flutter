@@ -4036,10 +4036,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            onSetSelection: onSetSelection,
            onSetText: onSetText,
            customSemanticsActions: customSemanticsActions,
-           hintOverrides:
-               onTapHint != null || onLongPressHint != null
-                   ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
-                   : null,
+           hintOverrides: onTapHint != null || onLongPressHint != null
+               ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
+               : null,
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
