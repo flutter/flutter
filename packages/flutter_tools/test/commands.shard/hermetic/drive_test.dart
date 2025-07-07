@@ -572,7 +572,9 @@ void main() {
           '--verbose-system-logs',
           '--native-null-assertions',
           '--enable-impeller',
+          '--enable-flutter-gpu',
           '--trace-systrace',
+          '--profile-microtasks',
           '--enable-software-rendering',
           '--skia-deterministic-rendering',
           '--enable-embedder-api',
@@ -589,9 +591,11 @@ void main() {
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
+      expect(options.profileMicrotasks, true);
       expect(options.verboseSystemLogs, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
+      expect(options.enableFlutterGpu, true);
       expect(options.traceSystrace, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);
