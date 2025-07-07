@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Stdin;
-
 import 'package:engine_mcp/server.dart' as engine_mcp;
 import 'package:mcp_dart/mcp_dart.dart';
 
