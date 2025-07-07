@@ -4,10 +4,10 @@
 
 import 'dart:async' show Completer;
 import 'dart:convert' show LineSplitter, utf8;
-import 'dart:io' show Process, ProcessResult;
+import 'dart:io' show Process;
 
-import 'package:process_runner/process_runner.dart';
 import 'package:mcp_dart/mcp_dart.dart';
+import 'package:process_runner/process_runner.dart';
 
 McpServer makeServer({ProcessRunner? processRunner}) {
   processRunner ??= ProcessRunner();
