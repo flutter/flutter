@@ -6,9 +6,11 @@ import 'dart:async' show Completer;
 import 'dart:convert' show LineSplitter, utf8;
 import 'dart:io' show Process, ProcessResult;
 
+import 'package:process_runner/process_runner.dart';
 import 'package:mcp_dart/mcp_dart.dart';
 
-McpServer makeServer() {
+McpServer makeServer({ProcessRunner? processRunner}) {
+  processRunner ??= ProcessRunner();
   final McpServer server = McpServer(
     const Implementation(name: 'engine_mcp', version: '1.0.0'),
     options: const ServerOptions(
@@ -23,10 +25,9 @@ McpServer makeServer() {
       description: 'Get help for the building tool and a list of configs.',
       callback: ({Map<String, dynamic>? args, RequestHandlerExtra? extra}) async {
     try {
-      const String executable = './bin/et';
-      final List<String> arguments = ['build', '--help'];
-      final ProcessResult result = await Process.run(executable, arguments);
-      final String output = result.stdout as String;
+      final List<String> arguments = ['./bin/et', 'build', '--help'];
+      final ProcessRunnerResult result = await processRunner!.runProcess(arguments);
+      final String output = result.stdout;
 
       return CallToolResult(
         content: [
@@ -51,12 +52,11 @@ McpServer makeServer() {
     }, //
     callback: ({Map<String, dynamic>? args, RequestHandlerExtra? extra}) async {
       try {
-        const String executable = './third_party/gn/gn';
         final String config = args!['config'] as String;
-        final List<String> arguments = ['ls', '../out/$config'];
+        final List<String> arguments = ['./third_party/gn/gn', 'ls', '../out/$config'];
 
-        final ProcessResult result = await Process.run(executable, arguments);
-        final String output = result.stdout as String;
+        final ProcessRunnerResult result = await processRunner!.runProcess(arguments);
+        final String output = result.stdout;
 
         return CallToolResult(
           content: [
@@ -91,8 +91,7 @@ McpServer makeServer() {
     try {
       final String config = args!['config'] as String;
       final String? target = args['target'] as String?;
-      const String executable = './bin/et';
-      final List<String> arguments = ['build', '-c', config];
+      final List<String> arguments = ['./bin/et', 'build', '-c', config];
       if (target != null) {
         arguments.add(target);
       }
@@ -102,7 +101,7 @@ McpServer makeServer() {
         completer.complete();
       }
 
-      final Process process = await Process.start(executable, arguments);
+      final Process process = await processRunner!.processManager.start(arguments);
 
       process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(
             (String line) {
