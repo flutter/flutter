@@ -68,8 +68,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
     );
 
     String? abi;
-    for (final dynamic rawFilter in filters!) {
-      final Map<String, dynamic> filter = rawFilter as Map<String, dynamic>;
+    for (final Map<String, Object?> filter in filters!.cast<Map<String, Object?>>()) {
       if (filter['filterType'] == 'ABI') {
         abi = filter['value'] as String?;
         break;

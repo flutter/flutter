@@ -32,9 +32,9 @@ abstract class Project {
   late Directory dir;
 
   String get pubspec;
-  String? get main => null;
-  String? get test => null;
-  String? get generatedFile => null;
+  String get main => '';
+  String get test => '';
+  String get generatedFile => '';
   DeferredComponentsConfig? get deferredComponents => null;
 
   Uri get mainDart => Uri.parse('package:test/main.dart');
@@ -49,16 +49,13 @@ abstract class Project {
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
-    final String? main = this.main;
-    if (main != null) {
+    if (main.isNotEmpty) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main);
     }
-    final String? test = this.test;
-    if (test != null) {
+    if (test.isNotEmpty) {
       writeFile(fileSystem.path.join(dir.path, 'test', 'test.dart'), test);
     }
-    final String? generatedFile = this.generatedFile;
-    if (generatedFile != null) {
+    if (generatedFile.isNotEmpty) {
       writeFile(
         fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'),
         generatedFile,
