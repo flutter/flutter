@@ -587,8 +587,9 @@ class CustomDeviceConfig {
       screenshotCommand: explicitScreenshotCommand
           ? screenshotCommand
           : (screenshotCommand ?? this.screenshotCommand),
-      readLogsCommand:
-          explicitReadLogsCommand ? readLogsCommand : (readLogsCommand ?? this.readLogsCommand),
+      readLogsCommand: explicitReadLogsCommand
+          ? readLogsCommand
+          : (readLogsCommand ?? this.readLogsCommand),
     );
   }
 
