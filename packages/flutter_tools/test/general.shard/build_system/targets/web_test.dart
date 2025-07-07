@@ -1273,6 +1273,76 @@ name: foo
     expect(buildKeys.toSet().length, buildKeys.length);
   });
 
+  test('JsCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
+  });
+
+  test('WasmCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
+  });
+
   test(
     'Generated service worker is empty with none-strategy',
     () => testbed.run(() {
