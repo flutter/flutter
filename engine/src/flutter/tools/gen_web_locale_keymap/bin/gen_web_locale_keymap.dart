@@ -190,16 +190,15 @@ Future<void> main(List<String> rawArguments) async {
     cacheRoot: path.join(packageRoot.path, '.cache'),
   );
 
-  final List<Layout> winLayouts =
-      githubResult.layouts.where((Layout layout) => layout.platform == LayoutPlatform.win).toList();
-  final List<Layout> linuxLayouts =
-      githubResult.layouts
-          .where((Layout layout) => layout.platform == LayoutPlatform.linux)
-          .toList();
-  final List<Layout> darwinLayouts =
-      githubResult.layouts
-          .where((Layout layout) => layout.platform == LayoutPlatform.darwin)
-          .toList();
+  final List<Layout> winLayouts = githubResult.layouts
+      .where((Layout layout) => layout.platform == LayoutPlatform.win)
+      .toList();
+  final List<Layout> linuxLayouts = githubResult.layouts
+      .where((Layout layout) => layout.platform == LayoutPlatform.linux)
+      .toList();
+  final List<Layout> darwinLayouts = githubResult.layouts
+      .where((Layout layout) => layout.platform == LayoutPlatform.darwin)
+      .toList();
 
   // Generate the definition file.
   _writeFileTo(

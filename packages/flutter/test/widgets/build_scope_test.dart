@@ -139,7 +139,11 @@ void main() {
     await tester.pumpWidget(const ProbeWidget(key: Key('b')));
     expect(ProbeWidgetState.buildCount, equals(2));
     await tester.pumpWidget(
-      FlipWidget(key: flipKey, left: Container(), right: const ProbeWidget(key: Key('c'))),
+      FlipWidget(
+        key: flipKey,
+        left: Container(),
+        right: const ProbeWidget(key: Key('c')),
+      ),
     );
     expect(ProbeWidgetState.buildCount, equals(2));
     final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
@@ -162,8 +166,8 @@ void main() {
 
   testWidgets(
     'Setting state during dispose is forbidden',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const BadDisposeWidget());
       expect(tester.takeException(), isNull);
@@ -189,10 +193,16 @@ void main() {
     }
 
     final Widget part1 = Wrapper(
-      child: KeyedSubtree(key: key1, child: StatefulBuilder(builder: builder)),
+      child: KeyedSubtree(
+        key: key1,
+        child: StatefulBuilder(builder: builder),
+      ),
     );
     final Widget part2 = Wrapper(
-      child: KeyedSubtree(key: key2, child: StatefulBuilder(builder: builder)),
+      child: KeyedSubtree(
+        key: key2,
+        child: StatefulBuilder(builder: builder),
+      ),
     );
 
     middle = part2;

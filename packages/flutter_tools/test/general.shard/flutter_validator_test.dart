@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -50,6 +51,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['Artifact.genSnapshot'], exitCode: 1),
       ]),
+      featureFlags: TestFeatureFlags(),
     );
     fileSystem.file(artifacts.getArtifactPath(Artifact.genSnapshot)).createSync(recursive: true);
 
@@ -97,6 +99,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['Artifact.genSnapshot'], exitCode: 1),
       ]),
+      featureFlags: TestFeatureFlags(),
     );
     fileSystem.file(artifacts.getArtifactPath(Artifact.genSnapshot)).createSync(recursive: true);
 
@@ -138,6 +141,7 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
         processManager: FakeProcessManager.empty(),
         flutterRoot: () => '/sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       // gen_snapshot is downloaded on demand, and the doctor should not
@@ -164,6 +168,7 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       processManager: FakeProcessManager.empty(),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -204,6 +209,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -214,6 +220,102 @@ void main() {
         messages: containsAll(const <ValidationMessage>[
           ValidationMessage('Pub download mirror https://example.com/pub'),
           ValidationMessage('Flutter download mirror https://example.com/flutter'),
+        ]),
+      ),
+    );
+  });
+
+  testWithoutContext('FlutterValidator shows enabled (by default) feature flags', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
+    final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Artifacts artifacts = Artifacts.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: platform,
+      flutterVersion: () => flutterVersion,
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: const FakeFlutterFeatures(<Feature>[
+        emitUnicornEmojisDefaultTrue,
+      ], enabled: true),
+    );
+
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+        validationType: ValidationType.success,
+        statusInfo: 'Channel master, 1.0.0, on Windows, locale en_US.UTF-8',
+        messages: containsAll(const <ValidationMessage>[
+          ValidationMessage('Feature flags: emit-unicorn-emojis'),
+        ]),
+      ),
+    );
+  });
+
+  testWithoutContext('FlutterValidator shows enabled (by user) feature flags', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
+    final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Artifacts artifacts = Artifacts.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: platform,
+      flutterVersion: () => flutterVersion,
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: const FakeFlutterFeatures(<Feature>[
+        emitUnicornEmojisDefaultFalse,
+      ], enabled: true),
+    );
+
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+        validationType: ValidationType.success,
+        statusInfo: 'Channel master, 1.0.0, on Windows, locale en_US.UTF-8',
+        messages: containsAll(const <ValidationMessage>[
+          ValidationMessage('Feature flags: emit-unicorn-emojis'),
+        ]),
+      ),
+    );
+  });
+
+  testWithoutContext('FlutterValidator shows disabled (by user) feature flags', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
+    final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Artifacts artifacts = Artifacts.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: platform,
+      flutterVersion: () => flutterVersion,
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: const FakeFlutterFeatures(<Feature>[
+        emitUnicornEmojisDefaultTrue,
+      ], enabled: false),
+    );
+
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+        validationType: ValidationType.success,
+        statusInfo: 'Channel master, 1.0.0, on Windows, locale en_US.UTF-8',
+        messages: containsAll(const <ValidationMessage>[
+          ValidationMessage('Feature flags: no-emit-unicorn-emojis'),
         ]),
       ),
     );
@@ -235,6 +337,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
         flutterRoot: () => '/sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -268,6 +371,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -301,6 +405,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -335,6 +440,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
         flutterRoot: () => '/sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -352,12 +458,11 @@ void main() {
     testWithoutContext('non-standard url', () async {
       final FlutterValidator flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
-        flutterVersion:
-            () => FakeFlutterVersion(
-              frameworkVersion: '1.0.0',
-              branch: 'beta',
-              repositoryUrl: 'https://githubmirror.com/flutter.git',
-            ),
+        flutterVersion: () => FakeFlutterVersion(
+          frameworkVersion: '1.0.0',
+          branch: 'beta',
+          repositoryUrl: 'https://githubmirror.com/flutter.git',
+        ),
         devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
@@ -365,6 +470,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
         flutterRoot: () => 'sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -390,9 +496,8 @@ void main() {
     testWithoutContext('as unknown if upstream is null', () async {
       final FlutterValidator flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
-        flutterVersion:
-            () =>
-                FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta', repositoryUrl: null),
+        flutterVersion: () =>
+            FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta', repositoryUrl: null),
         devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
@@ -400,6 +505,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
         flutterRoot: () => 'sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -435,6 +541,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
         flutterRoot: () => '/sdk/flutter',
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -470,6 +577,7 @@ void main() {
         whichLookup: const <String, File>{},
       ),
       flutterRoot: () => flutterRoot,
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -507,6 +615,7 @@ void main() {
         whichLookup: <String, File>{'flutter': flutterBinary},
       ),
       flutterRoot: () => flutterRoot,
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -545,6 +654,7 @@ void main() {
         whichLookup: <String, File>{'flutter': flutterBinary},
       ),
       flutterRoot: () => flutterRoot,
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -581,6 +691,7 @@ void main() {
         },
       ),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -617,6 +728,7 @@ void main() {
         },
       ),
       flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(
@@ -674,3 +786,26 @@ class FakeThrowingFlutterVersion extends FakeFlutterVersion {
     throw VersionCheckError('version error');
   }
 }
+
+class FakeFlutterFeatures extends FeatureFlags {
+  const FakeFlutterFeatures(this.allFeatures, {required bool enabled}) : _enabled = enabled;
+  final bool _enabled;
+
+  @override
+  final List<Feature> allFeatures;
+
+  @override
+  bool isEnabled(Feature feature) => _enabled;
+}
+
+const Feature emitUnicornEmojisDefaultFalse = Feature(
+  name: 'Emit Unicorn Emojis',
+  configSetting: 'emit-unicorn-emojis',
+  master: FeatureChannelSetting(enabledByDefault: true),
+);
+
+const Feature emitUnicornEmojisDefaultTrue = Feature(
+  name: 'Emit Unicorn Emojis',
+  configSetting: 'emit-unicorn-emojis',
+  master: FeatureChannelSetting(enabledByDefault: true),
+);

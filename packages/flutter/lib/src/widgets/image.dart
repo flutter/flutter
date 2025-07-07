@@ -1174,10 +1174,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     final ImageStream newStream = provider.resolve(
       createLocalImageConfiguration(
         context,
-        size:
-            widget.width != null && widget.height != null
-                ? Size(widget.width!, widget.height!)
-                : null,
+        size: widget.width != null && widget.height != null
+            ? Size(widget.width!, widget.height!)
+            : null,
       ),
     );
     _updateSourceStream(newStream);
@@ -1191,22 +1190,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError:
-            widget.errorBuilder != null || kDebugMode
-                ? (Object error, StackTrace? stackTrace) {
-                  setState(() {
-                    _lastException = error;
-                    _lastStack = stackTrace;
-                  });
-                  assert(() {
-                    if (widget.errorBuilder == null) {
-                      // ignore: only_throw_errors, since we're just proxying the error.
-                      throw error; // Ensures the error message is printed to the console.
-                    }
-                    return true;
-                  }());
-                }
-                : null,
+        onError: widget.errorBuilder != null || kDebugMode
+            ? (Object error, StackTrace? stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+                assert(() {
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
+                    throw error; // Ensures the error message is printed to the console.
+                  }
+                  return true;
+                }());
+              }
+            : null,
       );
     }
     return _imageStreamListener!;

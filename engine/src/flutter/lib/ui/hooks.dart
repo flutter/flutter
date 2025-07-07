@@ -121,10 +121,9 @@ List<DisplayFeature> _decodeDisplayFeatures({
           bounds[rectOffset + 3] / devicePixelRatio,
         ),
         type: DisplayFeatureType.values[type[i]],
-        state:
-            state[i] < DisplayFeatureState.values.length
-                ? DisplayFeatureState.values[state[i]]
-                : DisplayFeatureState.unknown,
+        state: state[i] < DisplayFeatureState.values.length
+            ? DisplayFeatureState.values[state[i]]
+            : DisplayFeatureState.unknown,
       ),
     );
   }

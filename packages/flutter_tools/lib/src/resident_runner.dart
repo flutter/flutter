@@ -142,11 +142,10 @@ class FlutterDevice {
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
-        librariesSpec:
-            globals.fs
-                .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-                .uri
-                .toString(),
+        librariesSpec: globals.fs
+            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+            .uri
+            .toString(),
         packagesPath: buildInfo.packageConfigPath,
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
@@ -381,10 +380,9 @@ class FlutterDevice {
     }
     final Stream<String> logStream;
     if (device is IOSDevice) {
-      logStream =
-          (device! as IOSDevice)
-              .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
-              .logLines;
+      logStream = (device! as IOSDevice)
+          .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
+          .logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
@@ -625,12 +623,11 @@ abstract class ResidentHandlers {
   /// is run instead. On web devices, this only performs a hot restart regardless of
   /// the value of [fullRestart].
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
-    final String mode =
-        isRunningProfile
-            ? 'profile'
-            : isRunningRelease
-            ? 'release'
-            : 'this';
+    final String mode = isRunningProfile
+        ? 'profile'
+        : isRunningRelease
+        ? 'release'
+        : 'this';
     throw Exception('${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode');
   }
 
@@ -990,10 +987,9 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
-       artifactDirectory =
-           dillOutputPath == null
-               ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
-               : globals.fs.file(dillOutputPath).parent,
+       artifactDirectory = dillOutputPath == null
+           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
+           : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
@@ -1558,6 +1554,8 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       return null;
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 

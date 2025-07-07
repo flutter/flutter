@@ -2716,16 +2716,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Text('How are you?'),
             ),
           ),
@@ -2744,18 +2741,17 @@ void main() {
 
         // All platform except Android should show the selection handles when the
         // long press starts.
-        List<FadeTransition> transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        List<FadeTransition> transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         expect(transitions.length, isPlatformAndroid ? 0 : 2);
         FadeTransition? left;
         FadeTransition? right;
@@ -2770,18 +2766,17 @@ void main() {
 
         await gesture.moveTo(textOffsetToPosition(paragraph, 8));
         await tester.pumpAndSettle();
-        transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         // All platform except Android should show the selection handles while doing
         // a long press drag.
         expect(transitions.length, isPlatformAndroid ? 0 : 2);
@@ -2796,18 +2791,17 @@ void main() {
 
         await gesture.up();
         await tester.pumpAndSettle();
-        transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         expect(transitions.length, 2);
         left = transitions[0];
         right = transitions[1];
@@ -2836,16 +2830,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -2912,16 +2903,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3003,16 +2991,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -3091,16 +3076,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3202,16 +3184,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3333,16 +3312,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -5222,14 +5198,15 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (
-                  _,
-                  MagnifierController controller,
-                  ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                ) {
-                  magnifierInfo = localMagnifierInfo;
-                  return fakeMagnifier;
-                },
+                magnifierBuilder:
+                    (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
               ),
               selectionControls: materialTextSelectionControls,
               child: const Text(text),
@@ -5252,8 +5229,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
 
         // Drag the handle around so that the magnifier shows.
-        final TextBox selectionBox =
-            paragraph.getBoxesForSelection(paragraph.selections.first).first;
+        final TextBox selectionBox = paragraph
+            .getBoxesForSelection(paragraph.selections.first)
+            .first;
         final Offset leftHandlePos = globalize(selectionBox.toRect().bottomLeft, paragraph);
         final TestGesture gesture = await tester.startGesture(leftHandlePos);
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 2));
@@ -5339,7 +5317,10 @@ void main() {
         const MaterialApp(
           home: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[SelectionArea(child: Text('row 1')), Text('row 2')],
+            children: <Widget>[
+              SelectionArea(child: Text('row 1')),
+              Text('row 2'),
+            ],
           ),
         ),
       );
@@ -5360,13 +5341,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5420,13 +5399,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5490,13 +5467,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5555,13 +5530,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5690,16 +5663,13 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonLabels =
-                  selectableRegionState.contextMenuButtonItems
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonLabels = selectableRegionState.contextMenuButtonItems
                       .map((ContextMenuButtonItem buttonItem) => buttonItem.label)
                       .toSet();
-              return const SizedBox.shrink();
-            },
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),

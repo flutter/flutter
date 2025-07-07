@@ -105,11 +105,12 @@ object DependencyVersionChecker {
     @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
+    // Non inclusive.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int = 21
+    internal val warnMinSdkVersion: Int = 24
 
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int = 1
+    internal val errorMinSdkVersion: Int = 23
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective

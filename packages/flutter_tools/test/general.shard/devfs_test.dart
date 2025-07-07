@@ -184,8 +184,9 @@ void main() {
     };
 
     /// This output can change based on the host platform.
-    final List<List<int>> expectedEncoded =
-        await osUtils.gzipLevel1Stream(Stream<List<int>>.value(<int>[1, 2, 3, 4, 5])).toList();
+    final List<List<int>> expectedEncoded = await osUtils
+        .gzipLevel1Stream(Stream<List<int>>.value(<int>[1, 2, 3, 4, 5]))
+        .toList();
 
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
@@ -661,26 +662,24 @@ void main() {
 
       await devFS.create();
 
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()
-            ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-              fileSystem.file('lib/foo.dill')
-                ..createSync(recursive: true)
-                ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
-              return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
-            };
-      final FakeBundle bundle =
-          FakeBundle()
-            ..entries['foo.frag'] = AssetBundleEntry(
-              DevFSByteContent(<int>[1, 2, 3, 4]),
-              kind: AssetKind.shader,
-              transformers: const <AssetTransformerEntry>[],
-            )
-            ..entries['not.frag'] = AssetBundleEntry(
-              DevFSByteContent(<int>[1, 2, 3, 4]),
-              kind: AssetKind.regular,
-              transformers: const <AssetTransformerEntry>[],
-            );
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['foo.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.shader,
+          transformers: const <AssetTransformerEntry>[],
+        )
+        ..entries['not.frag'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -724,21 +723,19 @@ void main() {
 
       expect(devFS.didUpdateFontManifest, false);
 
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()
-            ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-              fileSystem.file('lib/foo.dill')
-                ..createSync(recursive: true)
-                ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
-              return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
-            };
-      final FakeBundle bundle =
-          FakeBundle()
-            ..entries['FontManifest.json'] = AssetBundleEntry(
-              DevFSByteContent(<int>[1, 2, 3, 4]),
-              kind: AssetKind.regular,
-              transformers: const <AssetTransformerEntry>[],
-            );
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['FontManifest.json'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -774,10 +771,11 @@ void main() {
             '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
           ],
           onRun: (List<String> command) {
-            final ArgResults argParseResults = (ArgParser()
-                  ..addOption('input', mandatory: true)
-                  ..addOption('output', mandatory: true))
-                .parse(command);
+            final ArgResults argParseResults =
+                (ArgParser()
+                      ..addOption('input', mandatory: true)
+                      ..addOption('output', mandatory: true))
+                    .parse(command);
 
             final File inputFile = fileSystem.file(argParseResults['input']);
             final File outputFile = fileSystem.file(argParseResults['output']);
@@ -813,24 +811,22 @@ void main() {
 
       await devFS.create();
 
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()
-            ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-              fileSystem.file('lib/foo.dill')
-                ..createSync(recursive: true)
-                ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
-              return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
-            };
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
 
-      final FakeBundle bundle =
-          FakeBundle()
-            ..entries['asset.txt'] = AssetBundleEntry(
-              DevFSByteContent(<int>[1, 2, 3, 4]),
-              kind: AssetKind.regular,
-              transformers: const <AssetTransformerEntry>[
-                AssetTransformerEntry(package: 'increment', args: <String>[]),
-              ],
-            );
+      final FakeBundle bundle = FakeBundle()
+        ..entries['asset.txt'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),
@@ -894,24 +890,22 @@ void main() {
 
       await devFS.create();
 
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()
-            ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-              fileSystem.file('lib/foo.dill')
-                ..createSync(recursive: true)
-                ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
-              return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
-            };
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
 
-      final FakeBundle bundle =
-          FakeBundle()
-            ..entries['asset.txt'] = AssetBundleEntry(
-              DevFSByteContent(<int>[1, 2, 3, 4]),
-              kind: AssetKind.regular,
-              transformers: const <AssetTransformerEntry>[
-                AssetTransformerEntry(package: 'increment', args: <String>[]),
-              ],
-            );
+      final FakeBundle bundle = FakeBundle()
+        ..entries['asset.txt'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
 
       final UpdateFSReport report = await devFS.update(
         mainUri: Uri.parse('lib/main.dart'),

@@ -24,7 +24,8 @@ const String htmlSample1 = '''
 </html>
 ''';
 
-const String htmlSample2 = '''
+const String htmlSample2 =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,7 +131,8 @@ const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
 </html>
 ''';
 
-const String htmlSampleLegacyVar = '''
+const String htmlSampleLegacyVar =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -152,7 +154,8 @@ const String htmlSampleLegacyVar = '''
 </html>
 ''';
 
-const String htmlSampleLegacyLoadEntrypoint = '''
+const String htmlSampleLegacyLoadEntrypoint =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,7 +181,8 @@ const String htmlSampleLegacyLoadEntrypoint = '''
 </html>
 ''';
 
-String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) => '''
+String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) =>
+    '''
 <!DOCTYPE html>
 <html>
 <head>

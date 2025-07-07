@@ -1,0 +1,11 @@
+apache2 markdown
+(?s)<!--.*SPDX-License-Identifier: Apache-2\.0\n
+(?s)<!--
+Copyright.*
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+Files in this repository fall under the `Apache-2.0` license.
+
+Full license text of these licenses is available at https://opensource.org/licenses/Apache-2.0

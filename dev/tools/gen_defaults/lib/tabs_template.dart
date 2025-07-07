@@ -14,7 +14,8 @@ class TabsTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}PrimaryDefaultsM3 extends TabBarThemeData {
   _${blockName}PrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);

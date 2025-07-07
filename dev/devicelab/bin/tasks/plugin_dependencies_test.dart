@@ -199,8 +199,8 @@ public class DummyPluginAClass {
         return TaskResult.failure("${flutterPluginsDependenciesFile.path} doesn't exist");
       }
 
-      final String flutterPluginsDependenciesFileContent =
-          flutterPluginsDependenciesFile.readAsStringSync();
+      final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile
+          .readAsStringSync();
 
       final Map<String, dynamic> jsonContent =
           json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
@@ -335,7 +335,8 @@ public class DummyPluginAClass {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

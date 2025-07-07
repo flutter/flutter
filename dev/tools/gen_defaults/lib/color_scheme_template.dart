@@ -31,7 +31,8 @@ class ColorSchemeTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,
   primary: Color(${light('md.sys.color.primary')}),

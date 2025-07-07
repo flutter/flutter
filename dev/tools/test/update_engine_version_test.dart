@@ -136,12 +136,11 @@ void main() {
       localFs.path.join('engine', 'src', '.gn'),
       'DEPS',
     };
-    final Set<String> currentFiles =
-        tmpDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .map((File e) => localFs.path.relative(e.path, from: testRoot.root.path))
-            .toSet();
+    final Set<String> currentFiles = tmpDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((File e) => localFs.path.relative(e.path, from: testRoot.root.path))
+        .toSet();
 
     // If this test failed, print out the current directory structure.
     printOnFailure(

@@ -244,6 +244,7 @@ const String badPlistDataNoExecutable = '''
 
 const String executableName = 'foo';
 
-const String plistData = '''
+const String plistData =
+    '''
 {"CFBundleIdentifier": "fooBundleId", "CFBundleExecutable": "$executableName"}
 ''';

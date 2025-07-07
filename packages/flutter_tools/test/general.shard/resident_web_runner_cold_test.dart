@@ -214,11 +214,10 @@ name: my_app
       expect(result.message, contains('Failed to recompile application.'));
     },
     overrides: <Type, Generator>{
-      BuildSystem:
-          () => TestBuildSystem.list(<BuildResult>[
-            BuildResult(success: true),
-            BuildResult(success: false),
-          ]),
+      BuildSystem: () => TestBuildSystem.list(<BuildResult>[
+        BuildResult(success: true),
+        BuildResult(success: false),
+      ]),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,

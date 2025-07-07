@@ -217,16 +217,15 @@ final RegExp lrZlib = RegExp(
 // ASCII ART PATTERNS
 
 // If these images are found in a file, they are stripped before we look for license patterns.
-final List<List<String>> asciiArtImages =
-    <String>[
-      r'''
+final List<List<String>> asciiArtImages = <String>[
+  r'''
  ___        _
 |_ _|_ __  (_) __ _
  | || '_ \ | |/ _` |
  | || | | || | (_| |
 |___|_| |_|/ |\__,_|
          |__/''',
-    ].map((String image) => image.split('\n')).toList();
+].map((String image) => image.split('\n')).toList();
 
 // FORWARD REFERENCE
 

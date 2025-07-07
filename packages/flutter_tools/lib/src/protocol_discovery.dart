@@ -226,20 +226,18 @@ StreamTransformer<S, S> _throttle<S>({required Duration waitDuration}) {
       final int remainingTime = currentTime - lastExecution!;
 
       // Always send the first event immediately.
-      final int nextExecutionTime =
-          isFirstMessage || remainingTime > waitDuration.inMilliseconds
-              ? 0
-              : waitDuration.inMilliseconds - remainingTime;
-      throttleFuture ??= Future<void>.delayed(
-        Duration(milliseconds: nextExecutionTime),
-      ).whenComplete(() {
-        if (done) {
-          return;
-        }
-        sink.add(latestLine);
-        throttleFuture = null;
-        lastExecution = DateTime.now().millisecondsSinceEpoch;
-      });
+      final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
+          ? 0
+          : waitDuration.inMilliseconds - remainingTime;
+      throttleFuture ??= Future<void>.delayed(Duration(milliseconds: nextExecutionTime))
+          .whenComplete(() {
+            if (done) {
+              return;
+            }
+            sink.add(latestLine);
+            throttleFuture = null;
+            lastExecution = DateTime.now().millisecondsSinceEpoch;
+          });
     },
     handleDone: (EventSink<S> sink) {
       done = true;

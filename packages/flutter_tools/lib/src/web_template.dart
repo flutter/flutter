@@ -36,8 +36,9 @@ class WebTemplate {
 
   static String baseHref(String html) {
     final Element? baseElement = parse(html).querySelector('base');
-    final String? baseHref =
-        baseElement?.attributes == null ? null : baseElement!.attributes['href'];
+    final String? baseHref = baseElement?.attributes == null
+        ? null
+        : baseElement!.attributes['href'];
 
     if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
       return '';
@@ -86,8 +87,9 @@ class WebTemplate {
   }
 
   WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
-    final int lineCount =
-        RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    final int lineCount = RegExp(
+      r'(\r\n|\r|\n)',
+    ).allMatches(_content.substring(0, match.start)).length;
     return WebTemplateWarning(warningText, lineCount + 1);
   }
 

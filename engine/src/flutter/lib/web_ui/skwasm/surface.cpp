@@ -112,9 +112,9 @@ void Surface::_init() {
 
 // Worker thread only
 void Surface::_resizeCanvasToFit(int width, int height) {
-  if (!_surface || width != _canvasWidth || height != _canvasHeight) {
-    _canvasWidth = width;
-    _canvasHeight = height;
+  if (!_surface || width > _canvasWidth || height > _canvasHeight) {
+    _canvasWidth = std::max(width, _canvasWidth);
+    _canvasHeight = std::max(height, _canvasHeight);
     _recreateSurface();
   }
 }
@@ -141,7 +141,7 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
 
   // This is populated by the `captureImageBitmap` call the first time it is
   // passed in.
-  SkwasmObject imageBitmapArray = __builtin_wasm_ref_null_extern();
+  SkwasmObject imagePromiseArray = __builtin_wasm_ref_null_extern();
   for (int i = 0; i < pictureCount; i++) {
     sk_sp<SkPicture> picture = pictures[i];
     SkRect pictureRect = picture->cullRect();
@@ -155,9 +155,11 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
     canvas->drawPicture(picture, &matrix, nullptr);
     _grContext->flush(_surface.get());
-    imageBitmapArray = skwasm_captureImageBitmap(_glContext, imageBitmapArray);
+    imagePromiseArray =
+        skwasm_captureImageBitmap(_glContext, roundedOutRect.width(),
+                                  roundedOutRect.height(), imagePromiseArray);
   }
-  skwasm_postImages(this, imageBitmapArray, rasterStart, callbackId);
+  skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
 }
 
 // Worker thread only

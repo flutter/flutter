@@ -15,7 +15,9 @@ void main() {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(textAlign: alignment))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(textAlign: alignment)),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(CupertinoTextField);
@@ -50,7 +52,9 @@ void main() {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(scrollPhysics: scrollPhysics))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(scrollPhysics: scrollPhysics)),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(CupertinoTextField);
@@ -295,7 +299,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue'))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue')),
+      ),
     );
 
     await tester.enterText(find.byType(CupertinoTextFormFieldRow), 'changedValue');
@@ -312,7 +318,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue'))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue')),
+      ),
     );
 
     expect(find.text('initialValue'), findsOneWidget);

@@ -214,7 +214,8 @@ dependencies {
 ''';
 
   @override
-  String get androidLocalProperties => '''
+  String get androidLocalProperties =>
+      '''
 flutter.sdk=${getFlutterRoot()}
 flutter.buildMode=release
 flutter.versionName=1.0.0

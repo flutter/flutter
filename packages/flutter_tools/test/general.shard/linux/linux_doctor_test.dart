@@ -15,7 +15,8 @@ import '../../src/fake_process_manager.dart';
 FakeCommand _clangPresentCommand(String version) {
   return FakeCommand(
     command: const <String>['clang++', '--version'],
-    stdout: '''
+    stdout:
+        '''
 clang version $version-6+build1
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -29,7 +30,8 @@ InstalledDir: /usr/bin
 FakeCommand _cmakePresentCommand(String version) {
   return FakeCommand(
     command: const <String>['cmake', '--version'],
-    stdout: '''
+    stdout:
+        '''
 cmake version $version
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).

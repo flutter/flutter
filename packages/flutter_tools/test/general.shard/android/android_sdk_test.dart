@@ -316,6 +316,35 @@ void main() {
     );
 
     testUsingContext(
+      'detects spaces in Android SDK path',
+      () {
+        final Directory sdkDir = createSdkDirectory(
+          fileSystem: fileSystem,
+          directoryName: 'flutter_mock_android_sdk with spaces.',
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              '/.tmp_rand0/flutter_mock_android_sdk with spaces.rand0/cmdline-tools/latest/bin/sdkmanager',
+              '--version',
+            ],
+          ),
+        );
+        config.setValue('android-sdk', sdkDir.path);
+
+        final List<String> validationIssues = AndroidSdk.locateAndroidSdk()!
+            .validateSdkWellFormed();
+        expect(validationIssues.first, contains('Android SDK location currently contains spaces'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Config: () => config,
+        Platform: () => FakePlatform(),
+      },
+    );
+
+    testUsingContext(
       'does not throw on sdkmanager version check failure',
       () {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
@@ -510,14 +539,16 @@ void main() {
       late File ld;
       const List<String> versions = <String>['22.1.7171670', '24.0.8215888'];
       for (final String version in versions) {
-        final Directory binDir = sdk.directory
-          .childDirectory('ndk')
-          .childDirectory(version)
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-          .childDirectory('bin')..createSync(recursive: true);
+        final Directory binDir =
+            sdk.directory
+                .childDirectory('ndk')
+                .childDirectory(version)
+                .childDirectory('toolchains')
+                .childDirectory('llvm')
+                .childDirectory('prebuilt')
+                .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+                .childDirectory('bin')
+              ..createSync(recursive: true);
         // Save the last version.
         clang = binDir.childFile('clang$extension')..createSync();
         ar = binDir.childFile('llvm-ar$extension')..createSync();
@@ -541,12 +572,14 @@ void main() {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
         config.setValue('android-sdk', sdkDir.path);
 
-        final Directory binDir = ndkDir
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-          .childDirectory('bin')..createSync(recursive: true);
+        final Directory binDir =
+            ndkDir
+                .childDirectory('toolchains')
+                .childDirectory('llvm')
+                .childDirectory('prebuilt')
+                .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+                .childDirectory('bin')
+              ..createSync(recursive: true);
         final File clang = binDir.childFile('clang$extension')..createSync();
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
@@ -567,12 +600,14 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
       config.setValue('android-ndk', ndkDir.path);
 
-      final Directory binDir = ndkDir
-        .childDirectory('toolchains')
-        .childDirectory('llvm')
-        .childDirectory('prebuilt')
-        .childDirectory(llvmHostDirectoryName[operatingSystem]!)
-        .childDirectory('bin')..createSync(recursive: true);
+      final Directory binDir =
+          ndkDir
+              .childDirectory('toolchains')
+              .childDirectory('llvm')
+              .childDirectory('prebuilt')
+              .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+              .childDirectory('bin')
+            ..createSync(recursive: true);
       final File clang = binDir.childFile('clang$extension')..createSync();
       final File ar = binDir.childFile('llvm-ar$extension')..createSync();
       final File ld = binDir.childFile('ld.lld$extension')..createSync();
@@ -621,9 +656,10 @@ Directory createSdkDirectory({
   required FileSystem fileSystem,
   String buildProp = _buildProp,
   Platform? platform,
+  String directoryName = 'flutter_mock_android_sdk.',
 }) {
   platform ??= globals.platform;
-  final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+  final Directory dir = fileSystem.systemTempDirectory.createTempSync(directoryName);
   final String exe = platform.isWindows ? '.exe' : '';
   final String bat = platform.isWindows ? '.bat' : '';
 

@@ -28,8 +28,9 @@ Future<void> main() async {
         projectDir,
       );
 
-      final String rootPubspec =
-          File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
       final YamlEditor yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['app_with_extensions']);
       File(path.join(rootDir.path, 'pubspec.yaml'))
@@ -54,7 +55,8 @@ Future<void> main() async {
       });
 
       return TaskResult.success(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

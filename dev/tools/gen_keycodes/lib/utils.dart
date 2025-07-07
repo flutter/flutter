@@ -12,8 +12,9 @@ import 'constants.dart';
 
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
-final Directory flutterRoot =
-    Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
+final Directory flutterRoot = Directory(
+  path.dirname(Platform.script.toFilePath()),
+).parent.parent.parent.parent;
 String get dataRoot => testDataRoot ?? _dataRoot;
 String _dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
 
@@ -170,16 +171,16 @@ Map<String, String> parseMapOfString(String jsonString) {
 
 /// Read a Map<String, List<String>> out of its string representation in JSON.
 Map<String, List<String>> parseMapOfListOfString(String jsonString) {
-  final Map<String, List<dynamic>> dynamicMap =
-      (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>)
+      .cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
     return MapEntry<String, List<String>>(key, value.cast<String>());
   });
 }
 
 Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
-  final Map<String, List<dynamic>> dynamicMap =
-      (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>)
+      .cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String?>>((String key, List<dynamic> value) {
     return MapEntry<String, List<String?>>(key, value.cast<String?>());
   });

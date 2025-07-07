@@ -162,10 +162,9 @@ class CupertinoDemoTab1 extends StatelessWidget {
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
             // Left/Right media padding consumed by Tab1RowItem.
-            padding:
-                MediaQuery.of(
-                  context,
-                ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
+            padding: MediaQuery.of(
+              context,
+            ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Tab1RowItem(
@@ -208,13 +207,12 @@ class Tab1RowItem extends StatelessWidget {
         Navigator.of(context).push(
           CupertinoPageRoute<void>(
             title: colorName,
-            builder:
-                (BuildContext context) => Tab1ItemPage(
-                  color: color,
-                  colorName: colorName,
-                  index: index,
-                  randomSeed: randomSeed,
-                ),
+            builder: (BuildContext context) => Tab1ItemPage(
+              color: color,
+              colorName: colorName,
+              index: index,
+              randomSeed: randomSeed,
+            ),
           ),
         );
       },

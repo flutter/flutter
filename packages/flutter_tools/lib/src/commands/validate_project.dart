@@ -31,8 +31,9 @@ class ValidateProject {
   final ProcessManager processManager;
 
   Future<FlutterCommandResult> run() async {
-    final Directory workingDirectory =
-        userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
+    final Directory workingDirectory = userPath.isEmpty
+        ? fileSystem.currentDirectory
+        : fileSystem.directory(userPath);
 
     final FlutterProject project = FlutterProject.fromDirectory(workingDirectory);
     final Map<ProjectValidator, Future<List<ProjectValidatorResult>>> results =

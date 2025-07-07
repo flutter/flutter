@@ -45,6 +45,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         expressionEvaluation: expressionEvaluation,
         additionalCommandArgs: <String>[
           '--verbose',
+          '--no-web-resources-cdn',
           if (useDDCLibraryBundleFormat)
             '--web-experimental-hot-reload'
           else
@@ -139,6 +140,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         script: project.testFilePath,
         additionalCommandArgs: <String>[
           '--verbose',
+          '--no-web-resources-cdn',
           if (useDDCLibraryBundleFormat)
             '--web-experimental-hot-reload'
           else

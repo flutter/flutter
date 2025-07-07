@@ -186,14 +186,13 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     for (final LogicalKeyEntry entry in logicalData.entries) {
       // Letter keys on Windows are not recorded in logical_key_data.g.json,
       // because they are not used by the embedding. Add them manually.
-      final List<int>? keyCodes =
-          entry.windowsValues.isNotEmpty
-              ? entry.windowsValues
-              : (_isAsciiLetter(entry.keyLabel)
-                  ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
-                  : _isDigit(entry.keyLabel)
-                  ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
-                  : null);
+      final List<int>? keyCodes = entry.windowsValues.isNotEmpty
+          ? entry.windowsValues
+          : (_isAsciiLetter(entry.keyLabel)
+                ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
+                : _isDigit(entry.keyLabel)
+                ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
+                : null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -361,15 +360,17 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical keys.
   String get _webLocationMap {
-    final String jsonRaw =
-        File(path.join(dataRoot, 'web_logical_location_mapping.json')).readAsStringSync();
+    final String jsonRaw = File(
+      path.join(dataRoot, 'web_logical_location_mapping.json'),
+    ).readAsStringSync();
     final Map<String, List<String?>> locationMap = parseMapOfListOfNullableString(jsonRaw);
     final OutputLines<String> lines = OutputLines<String>('Web location map');
     locationMap.forEach((String key, List<String?> keyNames) {
       final String keyStrings = keyNames
           .map((String? keyName) {
-            final String? constantName =
-                keyName == null ? null : logicalData.entryByName(keyName).constantName;
+            final String? constantName = keyName == null
+                ? null
+                : logicalData.entryByName(keyName).constantName;
             return constantName != null ? 'LogicalKeyboardKey.$constantName' : 'null';
           })
           .join(', ');

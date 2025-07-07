@@ -88,9 +88,12 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
   std::unique_ptr<ShaderMetadata> metadata = std::make_unique<ShaderMetadata>();
   metadata->name = uniform.name;
   metadata->members.emplace_back(ShaderStructMemberMetadata{
-      .type = GetShaderType(uniform.type),
-      .size = uniform.GetSize(),
-      .byte_length = uniform.bit_width / 8,
+      .type = GetShaderType(uniform.type),  //
+      .size = uniform.dimensions.rows * uniform.dimensions.cols *
+              (uniform.bit_width / 8u),  //
+      .byte_length =
+          (uniform.bit_width / 8u) * uniform.array_elements.value_or(1),  //
+      .array_elements = uniform.array_elements                            //
   });
 
   return metadata;

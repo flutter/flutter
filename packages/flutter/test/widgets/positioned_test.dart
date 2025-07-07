@@ -82,7 +82,10 @@ void main() {
             width: 100.0,
             child: Stack(
               children: <Widget>[
-                PositionedTransition(rect: rect.animate(controller), child: Container(key: key)),
+                PositionedTransition(
+                  rect: rect.animate(controller),
+                  child: Container(key: key),
+                ),
               ],
             ),
           ),

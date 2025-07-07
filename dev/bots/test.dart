@@ -137,10 +137,10 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'android_engine_vulkan_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
-      'android_engine_opengles_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_vulkan_tests': () =>
+          runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
+      'android_engine_opengles_tests': () =>
+          runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -193,10 +193,9 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles =
-      Directory(
-        path.join(_toolsPath, 'test', 'web.shard'),
-      ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(
+    path.join(_toolsPath, 'test', 'web.shard'),
+  ).listSync(recursive: true).whereType<File>().toList();
   final List<String> allTests = <String>[];
   for (final File file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
@@ -221,13 +220,12 @@ Future<void> _runToolHostCrossArchTests() {
 }
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests =
-      Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList();
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+      .toList();
 
   await runDartTest(
     _toolsPath,
@@ -253,13 +251,12 @@ Future<void> _runToolTests() async {
 
 Future<void> _runSnippetsTests() async {
   final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
-  final List<String> allTests =
-      Directory(path.join(snippetsPath, 'test'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList();
+  final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+      .toList();
 
   await runDartTest(
     snippetsPath,
@@ -630,8 +627,8 @@ bool _allTargetsCached(File performanceFile) {
   }
   final Map<String, Object?> data =
       json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
-  final List<Map<String, Object?>> targets =
-      (data['targets']! as List<Object?>).cast<Map<String, Object?>>();
+  final List<Map<String, Object?>> targets = (data['targets']! as List<Object?>)
+      .cast<Map<String, Object?>>();
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);
 }
 

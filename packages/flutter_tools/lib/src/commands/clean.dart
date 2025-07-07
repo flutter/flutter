@@ -81,8 +81,9 @@ class CleanCommand extends FlutterCommand {
     final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
-      final XcodeProjectInfo projectInfo =
-          (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
+        xcodeWorkspace.parent.path,
+      ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
         final String scheme = argResults!['scheme'] as String;
         if (scheme.isEmpty) {

@@ -572,7 +572,9 @@ void main() {
           '--verbose-system-logs',
           '--native-null-assertions',
           '--enable-impeller',
+          '--enable-flutter-gpu',
           '--trace-systrace',
+          '--profile-microtasks',
           '--enable-software-rendering',
           '--skia-deterministic-rendering',
           '--enable-embedder-api',
@@ -589,9 +591,11 @@ void main() {
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
+      expect(options.profileMicrotasks, true);
       expect(options.verboseSystemLogs, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
+      expect(options.enableFlutterGpu, true);
       expect(options.traceSystrace, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);
@@ -621,8 +625,8 @@ void main() {
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
 
-      final Device wirelessDevice =
-          FakeIosDevice()..connectionInterface = DeviceConnectionInterface.wireless;
+      final Device wirelessDevice = FakeIosDevice()
+        ..connectionInterface = DeviceConnectionInterface.wireless;
       fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
       await expectLater(
@@ -662,8 +666,8 @@ void main() {
         throwsToolExit(),
       );
 
-      final Device usbDevice =
-          FakeIosDevice()..connectionInterface = DeviceConnectionInterface.attached;
+      final Device usbDevice = FakeIosDevice()
+        ..connectionInterface = DeviceConnectionInterface.attached;
       fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
       final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -693,8 +697,8 @@ void main() {
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
 
-      final Device wirelessDevice =
-          FakeIosDevice()..connectionInterface = DeviceConnectionInterface.wireless;
+      final Device wirelessDevice = FakeIosDevice()
+        ..connectionInterface = DeviceConnectionInterface.wireless;
       fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
       await expectLater(

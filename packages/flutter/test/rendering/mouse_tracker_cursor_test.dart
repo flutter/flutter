@@ -26,13 +26,12 @@ void main() {
     MethodCallHandler? cursorHandler,
   }) {
     assert(logCursors == null || cursorHandler == null);
-    methodCallHandler =
-        logCursors != null
-            ? (MethodCall call) async {
-              logCursors.add(_CursorUpdateDetails.wrap(call));
-              return;
-            }
-            : cursorHandler;
+    methodCallHandler = logCursors != null
+        ? (MethodCall call) async {
+            logCursors.add(_CursorUpdateDetails.wrap(call));
+            return;
+          }
+        : cursorHandler;
 
     binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
@@ -93,8 +92,9 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder:
-          (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[
+        if (annotation != null) annotation,
+      ],
       logCursors: logCursors,
     );
 
@@ -155,8 +155,9 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder:
-          (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[
+        if (annotation != null) annotation,
+      ],
       logCursors: logCursors,
     );
 
@@ -218,8 +219,9 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder:
-          (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[
+        if (annotation != null) annotation,
+      ],
       logCursors: logCursors,
     );
 
@@ -326,8 +328,9 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder:
-          (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[
+        if (annotation != null) annotation,
+      ],
       logCursors: logCursors,
     );
 
@@ -371,8 +374,9 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder:
-          (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[
+        if (annotation != null) annotation,
+      ],
       logCursors: logCursors,
     );
 

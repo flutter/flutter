@@ -242,13 +242,12 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Column(
-                children:
-                    CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                      context,
-                      <ContextMenuButtonItem>[
-                        ContextMenuButtonItem(label: buttonText, onPressed: () {}),
-                      ],
-                    ).toList(),
+                children: CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                  context,
+                  <ContextMenuButtonItem>[
+                    ContextMenuButtonItem(label: buttonText, onPressed: () {}),
+                  ],
+                ).toList(),
               );
             },
           ),

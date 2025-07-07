@@ -176,7 +176,10 @@ void main() {
         label: 1,
         log: log,
         child: ViewAnchor(
-          view: View(view: FakeView(tester.view), child: SpyRenderWidget(label: 2, log: log)),
+          view: View(
+            view: FakeView(tester.view),
+            child: SpyRenderWidget(label: 2, log: log),
+          ),
           child: SpyRenderWidget(label: 3, log: log),
         ),
       ),
@@ -192,7 +195,10 @@ void main() {
   testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
-        view: View(view: FakeView(tester.view), child: const ColoredBox(color: Colors.green)),
+        view: View(
+          view: FakeView(tester.view),
+          child: const ColoredBox(color: Colors.green),
+        ),
         child: const SizedBox(),
       ),
     );
@@ -239,7 +245,9 @@ void main() {
 
     await tester.pumpWidget(
       wrapWithView: false,
-      ViewCollection(views: <Widget>[View(view: tester.view, child: const SizedBox())]),
+      ViewCollection(
+        views: <Widget>[View(view: tester.view, child: const SizedBox())],
+      ),
     );
     children.clear();
     viewAnchorElement.visitChildren((Element element) {
@@ -301,7 +309,10 @@ void main() {
           builder: (BuildContext context) {
             builderContext = context;
             return ViewAnchor(
-              view: View(view: FakeView(tester.view), child: const ColoredBox(color: Colors.green)),
+              view: View(
+                view: FakeView(tester.view),
+                child: const ColoredBox(color: Colors.green),
+              ),
               child: const SizedBox(),
             );
           },
@@ -318,8 +329,8 @@ void main() {
 
   testWidgets(
     'correctly switches between view configurations',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // Leaking by design as contains deprecated items.
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithView: false,

@@ -25,7 +25,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: FilledButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: FilledButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -113,13 +115,12 @@ void main() {
           body: Center(
             // If the FilledButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.FilledButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : FilledButtonTheme(
-                      data: FilledButtonThemeData(style: themeStyle),
-                      child: child,
-                    ),
+            child: themeStyle == null
+                ? child
+                : FilledButtonTheme(
+                    data: FilledButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );

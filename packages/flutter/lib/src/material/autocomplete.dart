@@ -63,10 +63,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
+    this.focusNode,
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
+    this.textEditingController,
     this.initialValue,
   });
 
@@ -78,6 +80,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// If not provided, will build a standard Material-style text field by
   /// default.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
+
+  /// The [FocusNode] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [textEditingController] must also be
+  /// non-null.
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
   final AutocompleteOnSelected<T>? onSelected;
@@ -102,6 +112,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
+  /// The [TextEditingController] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [focusNode] must also be non-null.
+  final TextEditingController? textEditingController;
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
@@ -123,6 +140,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      focusNode: focusNode,
+      textEditingController: textEditingController,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewOpenDirection: optionsViewOpenDirection,
@@ -241,8 +260,9 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
         if (!mounted) {
           return;
         }
-        final BuildContext? highlightedContext =
-            GlobalObjectKey(widget.options.elementAt(widget.highlightedIndex)).currentContext;
+        final BuildContext? highlightedContext = GlobalObjectKey(
+          widget.options.elementAt(widget.highlightedIndex),
+        ).currentContext;
         if (highlightedContext == null) {
           _scrollController.jumpTo(
             widget.highlightedIndex == 0 ? 0.0 : _scrollController.position.maxScrollExtent,

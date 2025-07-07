@@ -587,15 +587,17 @@ class Switch extends StatelessWidget {
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final SwitchThemeData defaults =
-        theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
+    final SwitchThemeData defaults = theme.useMaterial3
+        ? _SwitchDefaultsM3(context)
+        : _SwitchDefaultsM2(context);
     if (_switchType == _SwitchType.adaptive) {
       final Adaptation<SwitchThemeData> switchAdaptation =
           theme.getAdaptation<SwitchThemeData>() ?? const _SwitchThemeAdaptation();
       switchTheme = switchAdaptation.adapt(theme, switchTheme);
     }
-    final _SwitchConfig switchConfig =
-        theme.useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+    final _SwitchConfig switchConfig = theme.useMaterial3
+        ? _SwitchConfigM3(context)
+        : _SwitchConfigM2();
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize =
         materialTapTargetSize ?? switchTheme.materialTapTargetSize ?? theme.materialTapTargetSize;
@@ -833,8 +835,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            final _SwitchConfig config =
-                Theme.of(context).useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+            final _SwitchConfig config = Theme.of(context).useMaterial3
+                ? _SwitchConfigM3(context)
+                : _SwitchConfigM2();
             final double trackInnerStart = config.trackHeight / 2.0;
             final double trackInnerEnd = config.trackWidth - trackInnerStart;
             final double trackInnerLength = trackInnerEnd - trackInnerStart;
@@ -848,8 +851,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
             return trackInnerLength;
         }
       case _SwitchType.material:
-        final _SwitchConfig config =
-            Theme.of(context).useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+        final _SwitchConfig config = Theme.of(context).useMaterial3
+            ? _SwitchConfigM3(context)
+            : _SwitchConfigM2();
         final double trackInnerStart = config.trackHeight / 2.0;
         final double trackInnerEnd = config.trackWidth - trackInnerStart;
         final double trackInnerLength = trackInnerEnd - trackInnerStart;
@@ -1014,8 +1018,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         switchTheme.overlayColor?.resolve(focusedStates) ??
         (applyCupertinoTheme
             ? HSLColor.fromColor(
-              cupertinoPrimaryColor.withOpacity(0.80),
-            ).withLightness(0.69).withSaturation(0.835).toColor()
+                cupertinoPrimaryColor.withOpacity(0.80),
+              ).withLightness(0.69).withSaturation(0.835).toColor()
             : null) ??
         defaults.overlayColor!.resolve(focusedStates)!;
 
@@ -1057,14 +1061,13 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
               defaults.mouseCursor!.resolve(states)!;
         });
 
-    final double effectiveActiveThumbRadius =
-        effectiveActiveIcon == null
-            ? switchConfig.activeThumbRadius
-            : switchConfig.thumbRadiusWithIcon;
+    final double effectiveActiveThumbRadius = effectiveActiveIcon == null
+        ? switchConfig.activeThumbRadius
+        : switchConfig.thumbRadiusWithIcon;
     final double effectiveInactiveThumbRadius =
         effectiveInactiveIcon == null && widget.inactiveThumbImage == null
-            ? switchConfig.inactiveThumbRadius
-            : switchConfig.thumbRadiusWithIcon;
+        ? switchConfig.inactiveThumbRadius
+        : switchConfig.thumbRadiusWithIcon;
     final double effectiveSplashRadius =
         widget.splashRadius ?? switchTheme.splashRadius ?? defaults.splashRadius!;
 
@@ -1084,54 +1087,53 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
             onFocusChange: widget.onFocusChange,
             autofocus: widget.autofocus,
             size: widget.size,
-            painter:
-                _painter
-                  ..position = position
-                  ..reaction = reaction
-                  ..reactionFocusFade = reactionFocusFade
-                  ..reactionHoverFade = reactionHoverFade
-                  ..inactiveReactionColor = effectiveInactivePressedOverlayColor
-                  ..reactionColor = effectiveActivePressedOverlayColor
-                  ..hoverColor = effectiveHoverOverlayColor
-                  ..focusColor = effectiveFocusOverlayColor
-                  ..splashRadius = effectiveSplashRadius
-                  ..downPosition = downPosition
-                  ..isFocused = states.contains(MaterialState.focused)
-                  ..isHovered = states.contains(MaterialState.hovered)
-                  ..activeColor = effectiveActiveThumbColor
-                  ..inactiveColor = effectiveInactiveThumbColor
-                  ..activePressedColor = effectiveActivePressedThumbColor
-                  ..inactivePressedColor = effectiveInactivePressedThumbColor
-                  ..activeThumbImage = widget.activeThumbImage
-                  ..onActiveThumbImageError = widget.onActiveThumbImageError
-                  ..inactiveThumbImage = widget.inactiveThumbImage
-                  ..onInactiveThumbImageError = widget.onInactiveThumbImageError
-                  ..activeTrackColor = effectiveActiveTrackColor
-                  ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
-                  ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
-                  ..inactiveTrackColor = effectiveInactiveTrackColor
-                  ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
-                  ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
-                  ..configuration = createLocalImageConfiguration(context)
-                  ..isInteractive = isInteractive
-                  ..trackInnerLength = _trackInnerLength
-                  ..textDirection = Directionality.of(context)
-                  ..surfaceColor = theme.colorScheme.surface
-                  ..inactiveThumbRadius = effectiveInactiveThumbRadius
-                  ..activeThumbRadius = effectiveActiveThumbRadius
-                  ..pressedThumbRadius = switchConfig.pressedThumbRadius
-                  ..thumbOffset = switchConfig.thumbOffset
-                  ..trackHeight = switchConfig.trackHeight
-                  ..trackWidth = switchConfig.trackWidth
-                  ..activeIconColor = effectiveActiveIconColor
-                  ..inactiveIconColor = effectiveInactiveIconColor
-                  ..activeIcon = effectiveActiveIcon
-                  ..inactiveIcon = effectiveInactiveIcon
-                  ..iconTheme = IconTheme.of(context)
-                  ..thumbShadow = switchConfig.thumbShadow
-                  ..transitionalThumbSize = switchConfig.transitionalThumbSize
-                  ..positionController = positionController
-                  ..isCupertino = isCupertino,
+            painter: _painter
+              ..position = position
+              ..reaction = reaction
+              ..reactionFocusFade = reactionFocusFade
+              ..reactionHoverFade = reactionHoverFade
+              ..inactiveReactionColor = effectiveInactivePressedOverlayColor
+              ..reactionColor = effectiveActivePressedOverlayColor
+              ..hoverColor = effectiveHoverOverlayColor
+              ..focusColor = effectiveFocusOverlayColor
+              ..splashRadius = effectiveSplashRadius
+              ..downPosition = downPosition
+              ..isFocused = states.contains(MaterialState.focused)
+              ..isHovered = states.contains(MaterialState.hovered)
+              ..activeColor = effectiveActiveThumbColor
+              ..inactiveColor = effectiveInactiveThumbColor
+              ..activePressedColor = effectiveActivePressedThumbColor
+              ..inactivePressedColor = effectiveInactivePressedThumbColor
+              ..activeThumbImage = widget.activeThumbImage
+              ..onActiveThumbImageError = widget.onActiveThumbImageError
+              ..inactiveThumbImage = widget.inactiveThumbImage
+              ..onInactiveThumbImageError = widget.onInactiveThumbImageError
+              ..activeTrackColor = effectiveActiveTrackColor
+              ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
+              ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
+              ..inactiveTrackColor = effectiveInactiveTrackColor
+              ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
+              ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
+              ..configuration = createLocalImageConfiguration(context)
+              ..isInteractive = isInteractive
+              ..trackInnerLength = _trackInnerLength
+              ..textDirection = Directionality.of(context)
+              ..surfaceColor = theme.colorScheme.surface
+              ..inactiveThumbRadius = effectiveInactiveThumbRadius
+              ..activeThumbRadius = effectiveActiveThumbRadius
+              ..pressedThumbRadius = switchConfig.pressedThumbRadius
+              ..thumbOffset = switchConfig.thumbOffset
+              ..trackHeight = switchConfig.trackHeight
+              ..trackWidth = switchConfig.trackWidth
+              ..activeIconColor = effectiveActiveIconColor
+              ..inactiveIconColor = effectiveInactiveIconColor
+              ..activeIcon = effectiveActiveIcon
+              ..inactiveIcon = effectiveInactiveIcon
+              ..iconTheme = IconTheme.of(context)
+              ..thumbShadow = switchConfig.thumbShadow
+              ..transitionalThumbSize = switchConfig.transitionalThumbSize
+              ..positionController = positionController
+              ..isCupertino = isCupertino,
           ),
         ),
       ),
@@ -1556,20 +1558,18 @@ class _SwitchPainter extends ToggleablePainter {
         _pressedInactiveThumbRadius = inactiveThumbRadius;
       }
     }
-    final Size inactiveThumbSize =
-        isCupertino
-            ? Size(
-              _pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!,
-              _pressedInactiveThumbRadius! * 2,
-            )
-            : Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
-    final Size activeThumbSize =
-        isCupertino
-            ? Size(
-              _pressedActiveThumbRadius! * 2 + _pressedThumbExtension!,
-              _pressedActiveThumbRadius! * 2,
-            )
-            : Size.fromRadius(_pressedActiveThumbRadius ?? activeThumbRadius);
+    final Size inactiveThumbSize = isCupertino
+        ? Size(
+            _pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!,
+            _pressedInactiveThumbRadius! * 2,
+          )
+        : Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
+    final Size activeThumbSize = isCupertino
+        ? Size(
+            _pressedActiveThumbRadius! * 2 + _pressedThumbExtension!,
+            _pressedActiveThumbRadius! * 2,
+          )
+        : Size.fromRadius(_pressedActiveThumbRadius ?? activeThumbRadius);
     Animation<Size> thumbSizeAnimation(bool isForward) {
       List<TweenSequenceItem<Size>> thumbSizeSequence;
       if (isForward) {
@@ -1647,8 +1647,8 @@ class _SwitchPainter extends ToggleablePainter {
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
     final Color? trackOutlineColor =
         inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
-            ? null
-            : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+        ? null
+        : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
     final double? trackOutlineWidth = lerpDouble(
       inactiveTrackOutlineWidth,
       activeTrackOutlineWidth,
@@ -1674,8 +1674,9 @@ class _SwitchPainter extends ToggleablePainter {
 
     final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
 
-    final ImageErrorListener? thumbErrorListener =
-        currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
+    final ImageErrorListener? thumbErrorListener = currentValue < 0.5
+        ? onInactiveThumbImageError
+        : onActiveThumbImageError;
 
     final Paint paint = Paint()..color = trackColor;
 
@@ -1762,11 +1763,10 @@ class _SwitchPainter extends ToggleablePainter {
         Radius.circular(trackRadius),
       );
 
-      final Paint outlinePaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = trackOutlineWidth ?? 2.0
-            ..color = trackOutlineColor;
+      final Paint outlinePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = trackOutlineWidth ?? 2.0
+        ..color = trackOutlineColor;
 
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
@@ -1774,11 +1774,10 @@ class _SwitchPainter extends ToggleablePainter {
     if (isCupertino) {
       if (isFocused) {
         final RRect focusedOutline = trackRRect.inflate(1.75);
-        final Paint focusedPaint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..color = focusColor
-              ..strokeWidth = _kCupertinoFocusTrackOutline;
+        final Paint focusedPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..color = focusColor
+          ..strokeWidth = _kCupertinoFocusTrackOutline;
         canvas.drawRRect(focusedOutline, focusedPaint);
       }
       canvas.clipRRect(trackRRect);

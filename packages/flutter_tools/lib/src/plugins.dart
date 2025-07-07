@@ -76,11 +76,12 @@ class Plugin {
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
-    if (pluginYaml != null && pluginYaml['platforms'] != null) {
+    if (pluginYaml?['platforms'] != null) {
+      // SAFETY: Assumes that validatePluginYaml(pluginYaml) has been called.
       return Plugin._fromMultiPlatformYaml(
         name,
         path,
-        pluginYaml,
+        pluginYaml!,
         flutterConstraint,
         dependencies,
         fileSystem,
@@ -110,11 +111,10 @@ class Plugin {
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
-    assert(pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
+    // SAFETY: This constructor is only invoked from .fromYaml, which validates.
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
-
     assert(
-      _validateMultiPlatformYaml(platformsYaml).isEmpty,
+      _validateMultiPlatformYaml(parentMap: pluginYaml).isEmpty,
       'Invalid multi-platform plugin specification $name.',
     );
 
@@ -303,20 +303,26 @@ class Plugin {
     }
 
     if (usesNewPluginFormat) {
-      if (yaml['platforms'] != null && yaml['platforms'] is! YamlMap) {
-        const String errorMessage =
-            'flutter.plugin.platforms should be a map with the platform name as the key';
-        return <String>[errorMessage];
-      }
-      return _validateMultiPlatformYaml(yaml['platforms'] as YamlMap?);
+      return _validateMultiPlatformYaml(parentMap: yaml);
     } else {
       return _validateLegacyYaml(yaml);
     }
   }
 
-  static List<String> _validateMultiPlatformYaml(YamlMap? yaml) {
+  static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
+    final Object? platforms = parentMap['platforms'];
+    if (platforms is! YamlMap?) {
+      const String errorMessage =
+          'flutter.plugin.platforms should be a map with the platform name as the key';
+      return <String>[errorMessage];
+    }
+    if (platforms == null) {
+      return <String>['Invalid "platforms" specification.'];
+    }
+    final YamlMap yaml = platforms;
+
     bool isInvalid(String key, bool Function(YamlMap) validate) {
-      if (!yaml!.containsKey(key)) {
+      if (!yaml.containsKey(key)) {
         return false;
       }
       final dynamic yamlValue = yaml[key];
@@ -329,9 +335,6 @@ class Plugin {
       return !validate(yamlValue);
     }
 
-    if (yaml == null) {
-      return <String>['Invalid "platforms" specification.'];
-    }
     return <String>[
       if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate))
         'Invalid "android" plugin specification.',

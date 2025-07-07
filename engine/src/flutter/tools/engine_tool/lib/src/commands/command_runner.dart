@@ -14,6 +14,7 @@ import 'format_command.dart';
 import 'lint_command.dart';
 import 'query_command.dart';
 import 'run_command.dart';
+import 'stamp_command.dart';
 import 'test_command.dart';
 
 const int _usageLineLength = 100;
@@ -55,6 +56,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
         help: help,
         usageLineLength: _usageLineLength,
       ),
+      StampCommand(environment: environment),
     ];
     commands.forEach(addCommand);
 

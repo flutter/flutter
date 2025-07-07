@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'dropdown_menu.dart';
-import 'input_decorator.dart';
 import 'menu_style.dart';
 
 /// A [FormField] that contains a [DropdownMenu].
@@ -49,7 +48,8 @@ class DropdownMenuFormField<T> extends FormField<T> {
     TextInputType? keyboardType,
     TextStyle? textStyle,
     TextAlign textAlign = TextAlign.start,
-    InputDecorationTheme? inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,

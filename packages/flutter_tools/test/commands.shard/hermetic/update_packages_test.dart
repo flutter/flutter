@@ -264,9 +264,10 @@ void main() {
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
           (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-            ..dependencies['typed_data'] = HostedDependency(
-              version: VersionConstraint.parse('^1.1.1'),
-            )).dependencies,
+                ..dependencies['typed_data'] = HostedDependency(
+                  version: VersionConstraint.parse('^1.1.1'),
+                ))
+              .dependencies,
         );
       },
       overrides: <Type, Generator>{
@@ -287,9 +288,10 @@ void main() {
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
           (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-            ..dependencies['vector_math'] = HostedDependency(
-              version: VersionConstraint.parse('2.0.9'),
-            )).dependencies,
+                ..dependencies['vector_math'] = HostedDependency(
+                  version: VersionConstraint.parse('2.0.9'),
+                ))
+              .dependencies,
         );
       },
       overrides: <Type, Generator>{
@@ -311,9 +313,10 @@ void main() {
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
           (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-            ..dependencies['vector_math'] = HostedDependency(
-              version: VersionConstraint.parse('^2.0.9'),
-            )).dependencies,
+                ..dependencies['vector_math'] = HostedDependency(
+                  version: VersionConstraint.parse('^2.0.9'),
+                ))
+              .dependencies,
         );
       },
       overrides: <Type, Generator>{

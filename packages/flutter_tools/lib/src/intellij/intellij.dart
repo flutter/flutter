@@ -99,16 +99,15 @@ class IntelliJPlugins {
         return null;
       }
       // Collect the files with a file suffix of .jar/.zip that contains the plugin.xml file
-      final List<File> pluginJarFiles =
-          _fileSystem
-              .directory(_fileSystem.path.join(pluginsPath, packageName, 'lib'))
-              .listSync()
-              .whereType<File>()
-              .where((File file) {
-                final String fileExt = _fileSystem.path.extension(file.path);
-                return fileExt == '.jar' || fileExt == '.zip';
-              })
-              .toList();
+      final List<File> pluginJarFiles = _fileSystem
+          .directory(_fileSystem.path.join(pluginsPath, packageName, 'lib'))
+          .listSync()
+          .whereType<File>()
+          .where((File file) {
+            final String fileExt = _fileSystem.path.extension(file.path);
+            return fileExt == '.jar' || fileExt == '.zip';
+          })
+          .toList();
 
       if (pluginJarFiles.isEmpty) {
         return null;

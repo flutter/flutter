@@ -55,7 +55,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           DummyWidget(child: DummyWidget(key: GlobalObjectKey(0))),
-          DummyWidget(key: Key('x'), child: DummyWidget(key: GlobalObjectKey(0))),
+          DummyWidget(
+            key: Key('x'),
+            child: DummyWidget(key: GlobalObjectKey(0)),
+          ),
         ],
       ),
     );

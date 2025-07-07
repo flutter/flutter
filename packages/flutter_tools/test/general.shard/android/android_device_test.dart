@@ -78,8 +78,7 @@ void main() {
     // The format is [ABI, ABI list]: expected target platform.
     final Map<List<String>, TargetPlatform> values = <List<String>, TargetPlatform>{
       <String>['x86_64', 'unknown']: TargetPlatform.android_x64,
-      // The default ABI is arm32
-      <String>['???', 'unknown']: TargetPlatform.android_arm,
+      <String>['armeabi-v7a', 'unknown']: TargetPlatform.android_arm,
       <String>['arm64-v8a', 'arm64-v8a,']: TargetPlatform.android_arm64,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
       <String>['arm64-v8a', 'arm']: TargetPlatform.android_arm,
@@ -106,8 +105,7 @@ void main() {
     // The format is [ABI, ABI list]: expected release mode support.
     final Map<List<String>, bool> values = <List<String>, bool>{
       <String>['x86_64', 'unknown']: true,
-      // The default ABI is arm32
-      <String>['???', 'unknown']: true,
+      <String>['armeabi-v7a', 'unknown']: true,
       <String>['arm64-v8a', 'arm64-v8a,']: true,
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
       <String>['arm64-v8a', 'arm']: true,
@@ -180,6 +178,17 @@ void main() {
     expect(await device.isLocalEmulator, true);
   });
 
+  testWithoutContext('isSupported is false for x86 devices', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [x86]',
+      ),
+    ]);
+    final AndroidDevice device = setUpAndroidDevice(processManager: processManager);
+    expect(await device.isSupported(), false);
+  });
+
   testWithoutContext('isSupportedForProject is true on module project', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml')
@@ -235,8 +244,8 @@ flutter:
         ),
       ]),
       id: 'emulator-5555',
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
     expect(await device.emulatorId, equals('dummyEmulatorId'));
@@ -307,8 +316,8 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]',
         ),
       ]),
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeUnresponsiveAndroidConsoleSocket(),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeUnresponsiveAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);
@@ -322,8 +331,8 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]',
         ),
       ]),
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeDisconnectingAndroidConsoleSocket(),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeDisconnectingAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);

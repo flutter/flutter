@@ -36,9 +36,14 @@ void main() {
     );
     expect(
       ShapeDecoration.fromBoxDecoration(
-        BoxDecoration(shape: BoxShape.circle, border: Border.all(color: colorG)),
+        BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: colorG),
+        ),
       ),
-      const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: colorG))),
+      const ShapeDecoration(
+        shape: CircleBorder(side: BorderSide(color: colorG)),
+      ),
     );
     expect(
       ShapeDecoration.fromBoxDecoration(BoxDecoration(border: Border.all(color: colorR))),

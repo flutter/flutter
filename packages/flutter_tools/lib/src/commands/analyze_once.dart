@@ -107,12 +107,12 @@ class AnalyzeOnce extends AnalyzeBase {
 
       // collect results
       timer = Stopwatch()..start();
-      final String message =
-          items.length > 1
-              ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
-              : fileSystem.path.basename(items.first);
-      progress =
-          argResults['preamble'] == true ? logger.startProgress('Analyzing $message...') : null;
+      final String message = items.length > 1
+          ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
+          : fileSystem.path.basename(items.first);
+      progress = argResults['preamble'] == true
+          ? logger.startProgress('Analyzing $message...')
+          : null;
 
       await analysisCompleter.future;
     } finally {

@@ -1099,8 +1099,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
     if (event.has('getCoalescedEvents')) {
-      final List<DomPointerEvent> coalescedEvents =
-          event.getCoalescedEvents().cast<DomPointerEvent>();
+      final List<DomPointerEvent> coalescedEvents = event
+          .getCoalescedEvents()
+          .cast<DomPointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In
       // that case, we also fallback to using the original event.
       if (coalescedEvents.isNotEmpty) {

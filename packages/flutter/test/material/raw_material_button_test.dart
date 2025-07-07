@@ -553,15 +553,14 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),

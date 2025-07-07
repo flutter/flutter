@@ -940,14 +940,13 @@ class _CallbackHookProvider<T> {
           stack: stack,
           library: 'widget library',
           context: ErrorDescription('while invoking the callback for $runtimeType'),
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<_CallbackHookProvider<T>>(
-                  'The $runtimeType that invoked the callback was',
-                  this,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<_CallbackHookProvider<T>>(
+              'The $runtimeType that invoked the callback was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ),
       );
       return defaultValue;
@@ -1207,10 +1206,9 @@ class _BackButtonListenerState extends State<BackButtonListener> {
       'The parent router must have a backButtonDispatcher to use this widget',
     );
 
-    dispatcher =
-        rootBackDispatcher!.createChildBackButtonDispatcher()
-          ..addCallback(widget.onBackButtonPressed)
-          ..takePriority();
+    dispatcher = rootBackDispatcher!.createChildBackButtonDispatcher()
+      ..addCallback(widget.onBackButtonPressed)
+      ..takePriority();
     super.didChangeDependencies();
   }
 

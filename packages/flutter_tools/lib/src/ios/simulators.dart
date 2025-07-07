@@ -413,7 +413,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     if (!globals.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
@@ -432,8 +432,8 @@ class IOSSimulator extends Device {
   String? _supportMessage;
 
   @override
-  String supportMessage() {
-    if (isSupported()) {
+  Future<String> supportMessage() async {
+    if (await isSupported()) {
       return 'Supported';
     }
 
@@ -584,13 +584,13 @@ class IOSSimulator extends Device {
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
         : globals.fs.path.join(
-          globals.fsUtils.homeDirPath!,
-          'Library',
-          'Logs',
-          'CoreSimulator',
-          id,
-          'system.log',
-        );
+            globals.fsUtils.homeDirPath!,
+            'Library',
+            'Logs',
+            'CoreSimulator',
+            id,
+            'system.log',
+          );
   }
 
   @override

@@ -144,8 +144,11 @@ void testMain() {
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
         // Send a click off center
+        // Use fractional coordinates to avoid triggering assistive technology detection logic.
+        // The platform dispatcher's _isIntegerCoordinateNavigation() method
+        // detects assistive technology clicks by checking for integer coordinates.
         placeholder!.dispatchEvent(
-          createDomMouseEvent('click', <Object?, Object?>{'clientX': 0, 'clientY': 0}),
+          createDomMouseEvent('click', <Object?, Object?>{'clientX': 0.5, 'clientY': 0.5}),
         );
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 

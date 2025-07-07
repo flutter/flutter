@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
@@ -15,15 +16,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
+import '../widgets/web_platform_view_registry_utils.dart';
 import '_test_http_request.dart';
 
 late final ui.Image testImage;
 
 void runTests() {
   _TestBinding.ensureInitialized();
+  late FakePlatformViewRegistry fakePlatformViewRegistry;
 
   setUpAll(() async {
     testImage = await createTestImage();
+    fakePlatformViewRegistry = FakePlatformViewRegistry();
+    ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
   });
 
   tearDown(() {
@@ -32,12 +37,15 @@ void runTests() {
     _TestBinding.instance.overrideCodec = null;
   });
 
+  tearDownAll(() {
+    ui_web.debugOverridePlatformViewRegistry(null);
+  });
+
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -55,10 +63,9 @@ void runTests() {
   testWidgets('loads an image from the network with unsuccessful HTTP code', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 404
-          ..mockEvent = MockEvent('error', web.Event('test error'));
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 404
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -80,11 +87,10 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with empty response', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('successful load'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('successful load'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -102,11 +108,10 @@ void runTests() {
   testWidgets('When strategy is default, emits an error if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return failingRequest.getMock() as web_shim.XMLHttpRequest;
@@ -146,11 +151,10 @@ void runTests() {
   testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -199,11 +203,10 @@ void runTests() {
   testWidgets(
     'When strategy is .fallback, emits an error if the image is cross-origin but fails to decode',
     (WidgetTester tester) async {
-      final TestHttpRequest failingRequest =
-          TestHttpRequest()
-            ..status = 500
-            ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-            ..response = (Uint8List.fromList(<int>[])).buffer;
+      final TestHttpRequest failingRequest = TestHttpRequest()
+        ..status = 500
+        ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+        ..response = (Uint8List.fromList(<int>[])).buffer;
       final TestImgElement testImg = TestImgElement();
 
       httpRequestFactory = () {
@@ -249,11 +252,10 @@ void runTests() {
   testWidgets('When strategy is .prefer, emits an WebImageInfo if the image is same-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -302,11 +304,10 @@ void runTests() {
   testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -375,11 +376,10 @@ void runTests() {
   });
 
   testWidgets('Does not crash when disposed between frames', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -410,6 +410,64 @@ void runTests() {
     secondFrameLock.complete();
     expect(imageCache.currentSize, 0);
     // The test passes if there are no crashes.
+  });
+
+  testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
+    final TestImgElement testImg = TestImgElement();
+    // Give the test img naturalHeight and naturalWidth so it can be hit by a
+    // tap gesture.
+    testImg
+      ..src = _uniqueUrl(tester.testDescription)
+      ..naturalWidth = 10
+      ..naturalHeight = 10;
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    final Key containerKey = UniqueKey();
+    int taps = 0;
+
+    await tester.pumpWidget(
+      GestureDetector(
+        onTap: () => taps++,
+        child: Container(
+          key: containerKey,
+          width: 200,
+          height: 200,
+          // Add a color to make it a visible container. This ensures that
+          // GestureDetector's default hit test behavior works.
+          color: const Color(0xFF00FF00),
+          child: Image(image: imageProvider),
+        ),
+      ),
+    );
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    expect(taps, isZero);
+    await tester.tap(find.byKey(containerKey), warnIfMissed: false);
+    expect(taps, 1);
+  });
+
+  testWidgets('Creates an <img> with width and height set', (WidgetTester tester) async {
+    final TestImgElement testImg = TestImgElement();
+    testImg.src = _uniqueUrl(tester.testDescription);
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
+    final web.HTMLImageElement imgElement =
+        imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, testImg.src);
+    expect(imgElement.style.width, '100%');
+    expect(imgElement.style.height, '100%');
   });
 }
 

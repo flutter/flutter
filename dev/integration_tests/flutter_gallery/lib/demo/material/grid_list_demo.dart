@@ -121,10 +121,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       onScaleEnd: _handleOnScaleEnd,
       child: ClipRect(
         child: Transform(
-          transform:
-              Matrix4.identity()
-                ..translate(_offset.dx, _offset.dy)
-                ..scale(_scale),
+          transform: Matrix4.identity()
+            ..translate(_offset.dx, _offset.dy)
+            ..scale(_scale),
           child: Image.asset(
             widget.photo!.assetName!,
             package: widget.photo!.assetPackage,
@@ -156,7 +155,10 @@ class GridDemoPhotoItem extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(title: Text(photo.title!)),
             body: SizedBox.expand(
-              child: Hero(tag: photo.tag!, child: GridPhotoViewer(photo: photo)),
+              child: Hero(
+                tag: photo.tag!,
+                child: GridPhotoViewer(photo: photo),
+              ),
             ),
           );
         },
@@ -323,21 +325,20 @@ class GridListDemoState extends State<GridListDemo> {
           MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
-            itemBuilder:
-                (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.imageOnly,
-                    child: Text('Image only'),
-                  ),
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.oneLine,
-                    child: Text('One line'),
-                  ),
-                  const PopupMenuItem<GridDemoTileStyle>(
-                    value: GridDemoTileStyle.twoLine,
-                    child: Text('Two line'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.imageOnly,
+                child: Text('Image only'),
+              ),
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.oneLine,
+                child: Text('One line'),
+              ),
+              const PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.twoLine,
+                child: Text('Two line'),
+              ),
+            ],
           ),
         ],
       ),
@@ -353,18 +354,17 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children:
-                    photos.map<Widget>((Photo photo) {
-                      return GridDemoPhotoItem(
-                        photo: photo,
-                        tileStyle: _tileStyle,
-                        onBannerTap: (Photo photo) {
-                          setState(() {
-                            photo.isFavorite = !photo.isFavorite;
-                          });
-                        },
-                      );
-                    }).toList(),
+                children: photos.map<Widget>((Photo photo) {
+                  return GridDemoPhotoItem(
+                    photo: photo,
+                    tileStyle: _tileStyle,
+                    onBannerTap: (Photo photo) {
+                      setState(() {
+                        photo.isFavorite = !photo.isFavorite;
+                      });
+                    },
+                  );
+                }).toList(),
               ),
             ),
           ),

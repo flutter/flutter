@@ -137,8 +137,8 @@ class _SnapTriggerState extends State<_SnapTrigger> {
   // Called when the sliver starts or ends scrolling.
   void isScrollingListener() {
     assert(position != null);
-    final _RenderSliverFloatingHeader? renderer =
-        context.findAncestorRenderObjectOfType<_RenderSliverFloatingHeader>();
+    final _RenderSliverFloatingHeader? renderer = context
+        .findAncestorRenderObjectOfType<_RenderSliverFloatingHeader>();
     renderer?.isScrollingUpdate(position!);
   }
 
@@ -217,12 +217,13 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
         _ => true,
       };
       if (headerIsPartiallyVisible) {
-        snapController ??= AnimationController(vsync: vsync!)..addListener(() {
-          if (effectiveScrollOffset != snapAnimation.value) {
-            effectiveScrollOffset = snapAnimation.value;
-            markNeedsLayout();
-          }
-        });
+        snapController ??= AnimationController(vsync: vsync!)
+          ..addListener(() {
+            if (effectiveScrollOffset != snapAnimation.value) {
+              effectiveScrollOffset = snapAnimation.value;
+              markNeedsLayout();
+            }
+          });
         snapController!.duration = switch (direction) {
           ScrollDirection.forward => animationStyle?.duration ?? const Duration(milliseconds: 300),
           _ => animationStyle?.reverseDuration ?? const Duration(milliseconds: 300),

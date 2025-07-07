@@ -61,8 +61,9 @@ Future<void> processPodsIfNeeded(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
-    final FlutterDarwinPlatform platform =
-        xcodeProject is IosProject ? FlutterDarwinPlatform.ios : FlutterDarwinPlatform.macos;
+    final FlutterDarwinPlatform platform = xcodeProject is IosProject
+        ? FlutterDarwinPlatform.ios
+        : FlutterDarwinPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }

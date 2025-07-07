@@ -168,8 +168,9 @@ class _DefaultUsage implements Usage {
             _kFlutterUA,
             settingsName,
             version,
-            documentDirectory:
-                configDirOverride != null ? globals.fs.directory(configDirOverride) : null,
+            documentDirectory: configDirOverride != null
+                ? globals.fs.directory(configDirOverride)
+                : null,
           );
         });
       } on Exception catch (e) {
@@ -249,8 +250,9 @@ class _DefaultUsage implements Usage {
 
     _analytics.sendScreenView(
       command,
-      parameters:
-          CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(
+        localTime: formatDateTime(_clock.now()),
+      ).merge(parameters).toMap(),
     );
   }
 
@@ -271,8 +273,9 @@ class _DefaultUsage implements Usage {
       parameter,
       label: label,
       value: value,
-      parameters:
-          CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(
+        localTime: formatDateTime(_clock.now()),
+      ).merge(parameters).toMap(),
     );
   }
 

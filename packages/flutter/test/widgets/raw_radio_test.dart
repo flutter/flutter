@@ -94,14 +94,7 @@ void main() {
       );
     }
 
-    Object? error;
-    try {
-      await tester.pumpWidget(buildWidget());
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error, isA<AssertionError>());
+    await expectLater(() => tester.pumpWidget(buildWidget()), throwsAssertionError);
   });
 }
 
@@ -111,7 +104,8 @@ class TestRegistry<T> extends RadioGroupRegistry<T> {
   T? groupValue;
 
   @override
-  ValueChanged<T?> get onChanged => (T? newValue) => groupValue = newValue;
+  ValueChanged<T?> get onChanged =>
+      (T? newValue) => groupValue = newValue;
 
   @override
   void registerClient(RadioClient<T> radio) => clients.add(radio);

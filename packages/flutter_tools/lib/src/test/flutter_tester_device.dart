@@ -44,8 +44,9 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.fontConfigManager,
     required this.nativeAssetsBuilder,
   }) : assert(!debuggingOptions.startPaused || enableVmService),
-       _gotProcessVmServiceUri =
-           enableVmService ? Completer<Uri?>() : (Completer<Uri?>()..complete());
+       _gotProcessVmServiceUri = enableVmService
+           ? Completer<Uri?>()
+           : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -111,6 +112,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         '--enable-impeller'
       else ...<String>['--enable-software-rendering', '--skia-deterministic-rendering'],
+      if (debuggingOptions.enableFlutterGpu) '--enable-flutter-gpu',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
@@ -126,10 +128,9 @@ class FlutterTesterTestDevice extends TestDevice {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest =
-        platform.environment.containsKey('FLUTTER_TEST')
-            ? platform.environment['FLUTTER_TEST']!
-            : 'true';
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']!
+        : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
@@ -298,10 +299,9 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   String toString() {
-    final String status =
-        _process != null
-            ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
-            : 'not started';
+    final String status = _process != null
+        ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
+        : 'not started';
     return 'Flutter Tester ($status) for test $id';
   }
 

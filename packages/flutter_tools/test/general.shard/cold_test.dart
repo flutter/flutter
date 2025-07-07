@@ -26,10 +26,9 @@ void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
       'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    final FakeDevice device =
-        FakeDevice()
-          ..supportsHotReload = true
-          ..supportsHotRestart = false;
+    final FakeDevice device = FakeDevice()
+      ..supportsHotReload = true
+      ..supportsHotRestart = false;
 
     final List<FlutterDevice> devices = <FlutterDevice>[
       TestFlutterDevice(
@@ -42,12 +41,11 @@ void main() {
       ),
     ];
 
-    final int exitCode =
-        await ColdRunner(
-          devices,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          target: 'main.dart',
-        ).attach();
+    final int exitCode = await ColdRunner(
+      devices,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
+    ).attach();
     expect(exitCode, 2);
   });
 
@@ -87,13 +85,12 @@ void main() {
       final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
-      final int result =
-          await ColdRunner(
-            devices,
-            applicationBinary: applicationBinary,
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            target: 'main.dart',
-          ).run();
+      final int result = await ColdRunner(
+        devices,
+        applicationBinary: applicationBinary,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+      ).run();
 
       expect(result, 1);
     });
@@ -105,14 +102,13 @@ void main() {
         final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
         final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result =
-            await ColdRunner(
-              devices,
-              applicationBinary: applicationBinary,
-              debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-              target: 'main.dart',
-              traceStartup: true,
-            ).run();
+        final int result = await ColdRunner(
+          devices,
+          applicationBinary: applicationBinary,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
+          traceStartup: true,
+        ).run();
 
         expect(result, 0);
         expect(
@@ -139,14 +135,13 @@ void main() {
         final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
         final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result =
-            await ColdRunner(
-              devices,
-              applicationBinary: applicationBinary,
-              debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-              target: 'main.dart',
-              traceStartup: true,
-            ).run();
+        final int result = await ColdRunner(
+          devices,
+          applicationBinary: applicationBinary,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
+          traceStartup: true,
+        ).run();
 
         expect(result, 0);
         expect(
@@ -195,7 +190,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
 class FakeDevice extends Fake implements Device {
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool supportsHotReload = false;

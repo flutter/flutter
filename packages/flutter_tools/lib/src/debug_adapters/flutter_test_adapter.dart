@@ -136,8 +136,8 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     // Check for valid flutter_tools JSON output (1) first.
     final Map<String, Object?>? flutterPayload =
         jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
-            ? jsonData.first as Map<String, Object?>
-            : null;
+        ? jsonData.first as Map<String, Object?>
+        : null;
     final Object? event = flutterPayload?['event'];
     final Object? params = flutterPayload?['params'];
 

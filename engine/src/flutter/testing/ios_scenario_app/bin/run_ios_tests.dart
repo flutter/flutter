@@ -171,37 +171,36 @@ final class _ToolFailure implements Exception {
   String toString() => message;
 }
 
-final _args =
-    ArgParser()
-      ..addFlag('help', abbr: 'h', help: 'Prints usage information.', negatable: false)
-      ..addOption(
-        'device-name',
-        help: 'The name of the iOS simulator device to use.',
-        defaultsTo: 'iPhone SE (3rd generation)',
-      )
-      ..addOption(
-        'device-identifier',
-        help: 'The identifier of the iOS simulator device to use.',
-        defaultsTo: 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation',
-      )
-      ..addOption(
-        'os-runtime',
-        help: 'The OS runtime of the iOS simulator device to use.',
-        defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
-      )
-      ..addOption(
-        'os-version',
-        help: 'The OS version of the iOS simulator device to use.',
-        defaultsTo: '18.2',
-      )
-      ..addOption(
-        'dump-xcresult-on-failure',
-        help:
-            'The path to dump the xcresult bundle to if the test fails.\n\n'
-            'Defaults to the environment variable FLUTTER_TEST_OUTPUTS_DIR, '
-            'otherwise to a randomly generated temporary directory.',
-        defaultsTo: io.Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'],
-      );
+final _args = ArgParser()
+  ..addFlag('help', abbr: 'h', help: 'Prints usage information.', negatable: false)
+  ..addOption(
+    'device-name',
+    help: 'The name of the iOS simulator device to use.',
+    defaultsTo: 'iPhone SE (3rd generation)',
+  )
+  ..addOption(
+    'device-identifier',
+    help: 'The identifier of the iOS simulator device to use.',
+    defaultsTo: 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation',
+  )
+  ..addOption(
+    'os-runtime',
+    help: 'The OS runtime of the iOS simulator device to use.',
+    defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-18-2',
+  )
+  ..addOption(
+    'os-version',
+    help: 'The OS version of the iOS simulator device to use.',
+    defaultsTo: '18.2',
+  )
+  ..addOption(
+    'dump-xcresult-on-failure',
+    help:
+        'The path to dump the xcresult bundle to if the test fails.\n\n'
+        'Defaults to the environment variable FLUTTER_TEST_OUTPUTS_DIR, '
+        'otherwise to a randomly generated temporary directory.',
+    defaultsTo: io.Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'],
+  );
 
 void _ensureSimulatorsRotateAutomaticallyForPlatformViewRotationTest() {
   // Can also be set via Simulator Device > Rotate Device Automatically.

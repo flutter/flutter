@@ -32,22 +32,20 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
-  FileSystem:
-      () => MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
-      ),
+  FileSystem: () => MemoryFileSystem(
+    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+  ),
   ProcessManager: () => FakeProcessManager.any(),
-  Logger:
-      () => BufferLogger(
-        terminal: AnsiTerminal(
-          stdio: globals.stdio,
-          platform: globals.platform,
-        ), // Danger, using real stdio.
-        outputPreferences: OutputPreferences.test(),
-      ), // Allows reading logs and prevents stdout.
+  Logger: () => BufferLogger(
+    terminal: AnsiTerminal(
+      stdio: globals.stdio,
+      platform: globals.platform,
+    ), // Danger, using real stdio.
+    outputPreferences: OutputPreferences.test(),
+  ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-  OutputPreferences:
-      () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
+  OutputPreferences: () =>
+      OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => TestUsage(), // prevent addition of analytics from burdening test mocks
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
@@ -124,28 +122,30 @@ class TestBed {
           name: 'testbed',
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
-            createTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration duration,
-              void Function() timer,
-            ) {
-              final Timer result = parent.createTimer(zone, duration, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
-            createPeriodicTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration period,
-              void Function(Timer) timer,
-            ) {
-              final Timer result = parent.createPeriodicTimer(zone, period, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
+            createTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration duration,
+                  void Function() timer,
+                ) {
+                  final Timer result = parent.createTimer(zone, duration, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
+            createPeriodicTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration period,
+                  void Function(Timer) timer,
+                ) {
+                  final Timer result = parent.createPeriodicTimer(zone, period, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
           ),
           body: () async {
             Cache.flutterRoot = '';

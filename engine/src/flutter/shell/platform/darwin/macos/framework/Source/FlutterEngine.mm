@@ -645,6 +645,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     switches.push_back("--enable-impeller=true");
   }
 
+  if (_project.enableFlutterGPU ||
+      std::find(switches.begin(), switches.end(), "--enable-flutter-gpu=true") != switches.end()) {
+    switches.push_back("--enable-flutter-gpu=true");
+  }
+
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 

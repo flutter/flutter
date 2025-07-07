@@ -274,11 +274,10 @@ abstract class RunOutputTask {
           ready.complete();
         }
       });
-      final Stream<String> runStderr =
-          run.stderr
-              .transform<String>(utf8.decoder)
-              .transform<String>(const LineSplitter())
-              .asBroadcastStream();
+      final Stream<String> runStderr = run.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .asBroadcastStream();
       runStderr.listen((String line) => print('run:stderr: $line'));
       runStderr.skipWhile(isExpectedStderr).listen((String line) => stderr.add(line));
       unawaited(

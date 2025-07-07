@@ -11,10 +11,9 @@ import 'package:ui/ui.dart' as ui;
 import '../testing.dart';
 import 'platform_location.dart';
 
-UrlStrategy _realDefaultUrlStrategy =
-    debugEmulateFlutterTesterEnvironment
-        ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
-        : const HashUrlStrategy();
+UrlStrategy _realDefaultUrlStrategy = TestEnvironment.instance.defaultToTestUrlStrategy
+    ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
+    : const HashUrlStrategy();
 
 UrlStrategy get _defaultUrlStrategy => debugDefaultUrlStrategyOverride ?? _realDefaultUrlStrategy;
 

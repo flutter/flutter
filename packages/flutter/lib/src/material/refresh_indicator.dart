@@ -650,10 +650,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
               axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
               sizeFactor: _positionFactor, // This is what brings it down.
               child: Padding(
-                padding:
-                    _isIndicatorAtTop!
-                        ? EdgeInsets.only(top: widget.displacement)
-                        : EdgeInsets.only(bottom: widget.displacement),
+                padding: _isIndicatorAtTop!
+                    ? EdgeInsets.only(top: widget.displacement)
+                    : EdgeInsets.only(bottom: widget.displacement),
                 child: Align(
                   alignment: _isIndicatorAtTop! ? Alignment.topCenter : Alignment.bottomCenter,
                   child: ScaleTransition(

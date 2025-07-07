@@ -243,10 +243,11 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
 
     // Verify caching works correctly.
@@ -285,10 +286,11 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
 
     // Verify caching works correctly.
@@ -319,7 +321,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(edgeDevice.isSupported(), true);
+    expect(await edgeDevice.isSupported(), true);
     expect(await edgeDevice.sdkNameAndVersion, '');
 
     final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
@@ -330,7 +332,7 @@ void main() {
       platform: platform,
     );
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'unknown');
   });
 

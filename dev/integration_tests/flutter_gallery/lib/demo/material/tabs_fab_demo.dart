@@ -137,8 +137,9 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         title: const Text('FAB per tab'),
         bottom: TabBar(
           controller: _controller,
-          tabs:
-              _allPages.map<Widget>((_Page page) => Tab(text: page.label!.toUpperCase())).toList(),
+          tabs: _allPages
+              .map<Widget>((_Page page) => Tab(text: page.label!.toUpperCase()))
+              .toList(),
         ),
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),

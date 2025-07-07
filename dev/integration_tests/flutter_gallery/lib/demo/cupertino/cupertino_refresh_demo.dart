@@ -154,17 +154,16 @@ class _ListItem extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: 38.0,
-            child:
-                called!
-                    ? Align(
-                      alignment: Alignment.topCenter,
-                      child: Icon(
-                        CupertinoIcons.phone_solid,
-                        color: CupertinoColors.inactiveGray.resolveFrom(context),
-                        size: 18.0,
-                      ),
-                    )
-                    : null,
+            child: called!
+                ? Align(
+                    alignment: Alignment.topCenter,
+                    child: Icon(
+                      CupertinoIcons.phone_solid,
+                      color: CupertinoColors.inactiveGray.resolveFrom(context),
+                      size: 18.0,
+                    ),
+                  )
+                : null,
           ),
           Expanded(
             child: Container(

@@ -153,8 +153,10 @@ class NavigationDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int totalNumberOfDestinations =
-        children.whereType<NavigationDrawerDestination>().toList().length;
+    final int totalNumberOfDestinations = children
+        .whereType<NavigationDrawerDestination>()
+        .toList()
+        .length;
 
     int destinationIndex = 0;
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
@@ -262,8 +264,9 @@ class NavigationDrawerDestination extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final Animation<double> animation =
-        _NavigationDrawerDestinationInfo.of(context).selectedAnimation;
+    final Animation<double> animation = _NavigationDrawerDestinationInfo.of(
+      context,
+    ).selectedAnimation;
 
     return _NavigationDestinationBuilder(
       buildIcon: (BuildContext context) {
@@ -295,10 +298,9 @@ class NavigationDrawerDestination extends StatelessWidget {
             defaults.labelTextStyle!.resolve(enabled ? unselectedState : disabledState);
 
         return DefaultTextStyle(
-          style:
-              animation.isForwardOrCompleted
-                  ? effectiveSelectedLabelTextStyle!
-                  : effectiveUnselectedLabelTextStyle!,
+          style: animation.isForwardOrCompleted
+              ? effectiveSelectedLabelTextStyle!
+              : effectiveUnselectedLabelTextStyle!,
           child: label,
         );
       },
@@ -588,8 +590,8 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// Used by widgets that are implementing a navigation destination info to
   /// get information like the selected animation and destination number.
   static _NavigationDrawerDestinationInfo of(BuildContext context) {
-    final _NavigationDrawerDestinationInfo? result =
-        context.dependOnInheritedWidgetOfExactType<_NavigationDrawerDestinationInfo>();
+    final _NavigationDrawerDestinationInfo? result = context
+        .dependOnInheritedWidgetOfExactType<_NavigationDrawerDestinationInfo>();
     assert(
       result != null,
       'Navigation destinations need a _NavigationDrawerDestinationInfo parent, '

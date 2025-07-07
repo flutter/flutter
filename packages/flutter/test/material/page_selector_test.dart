@@ -272,13 +272,12 @@ void main() {
     addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
 
-    final Iterable<Element> indicatorElements =
-        find
-            .descendant(
-              of: find.byType(TabPageSelector),
-              matching: find.byType(TabPageSelectorIndicator),
-            )
-            .evaluate();
+    final Iterable<Element> indicatorElements = find
+        .descendant(
+          of: find.byType(TabPageSelector),
+          matching: find.byType(TabPageSelectorIndicator),
+        )
+        .evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
     for (final Element indicatorElement in indicatorElements) {

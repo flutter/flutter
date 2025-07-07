@@ -53,8 +53,8 @@ void main() {
         child: ListView.builder(
           restorationId: 'list',
           cacheExtent: 0,
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -70,8 +70,8 @@ void main() {
           cacheExtent: 0,
           itemCount: 50,
           separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -123,8 +123,8 @@ void main() {
           restorationId: 'grid',
           cacheExtent: 0,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -250,8 +250,8 @@ void main() {
       TestHarness(
         child: PageView.builder(
           restorationId: 'pager',
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );

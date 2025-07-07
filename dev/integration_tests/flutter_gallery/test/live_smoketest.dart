@@ -50,8 +50,9 @@ Future<void> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    final List<String> allDemoTitles =
-        kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
+    final List<String> allDemoTitles = kAllGalleryDemos
+        .map((GalleryDemo demo) => demo.title)
+        .toList();
     if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles)) {
       fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
     }

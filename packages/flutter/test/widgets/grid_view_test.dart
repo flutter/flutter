@@ -25,8 +25,8 @@ void main() {
             stateSetter = setState;
             return GridView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -64,16 +64,15 @@ void main() {
         child: GridView.count(
           dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -135,16 +134,15 @@ void main() {
         child: GridView.extent(
           dragStartBehavior: DragStartBehavior.down,
           maxCrossAxisExtent: 200.0,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );

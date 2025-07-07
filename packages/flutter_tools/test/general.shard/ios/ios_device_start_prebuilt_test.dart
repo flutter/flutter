@@ -533,6 +533,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
+            '--profile-microtasks',
             '--verbose-logging',
             '--purge-persistent-cache',
             '--enable-impeller=false',
@@ -585,6 +586,7 @@ void main() {
         traceSystrace: true,
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
+        profileMicrotasks: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,
@@ -953,10 +955,8 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery:
-              () => FakeMDnsVmServiceDiscovery(
-                allowthrowOnMissingLocalNetworkPermissionsError: false,
-              ),
+          MDnsVmServiceDiscovery: () =>
+              FakeMDnsVmServiceDiscovery(allowthrowOnMissingLocalNetworkPermissionsError: false),
         },
       );
 

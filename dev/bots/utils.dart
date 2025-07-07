@@ -44,14 +44,14 @@ final bool _isRandomizationOff =
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
 final String green = hasColor ? '\x1B[32m' : ''; // section titles, commands
-final String yellow =
-    hasColor
-        ? '\x1B[33m'
-        : ''; // indications that a test was skipped (usually renders orange or brown)
+final String yellow = hasColor
+    ? '\x1B[33m'
+    : ''; // indications that a test was skipped (usually renders orange or brown)
 final String cyan = hasColor ? '\x1B[36m' : ''; // paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // clocks
-final String gray =
-    hasColor ? '\x1B[30m' : ''; // subtle decorative items (usually renders as dark gray)
+final String gray = hasColor
+    ? '\x1B[30m'
+    : ''; // subtle decorative items (usually renders as dark gray)
 final String white = hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
 final String reset = hasColor ? '\x1B[0m' : '';
 
@@ -570,8 +570,9 @@ Future<void> runFlutterTest(
 
   args.addAll(tests);
 
-  final OutputMode outputMode =
-      outputChecker == null && printOutput ? OutputMode.print : OutputMode.capture;
+  final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
 
   final CommandResult result = await runCommand(
     flutter,
@@ -693,8 +694,9 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // Lastly, compute the indices of the items in buckets[index].
   // We derive this from the toal number items in previous buckets and the number
   // of items in this bucket.
-  final int numberOfItemsInPreviousBuckets =
-      subShardIndex == 0 ? 0 : buckets.sublist(0, subShardIndex - 1).sum;
+  final int numberOfItemsInPreviousBuckets = subShardIndex == 0
+      ? 0
+      : buckets.sublist(0, subShardIndex - 1).sum;
   final int start = numberOfItemsInPreviousBuckets;
   final int end = start + buckets[subShardIndex - 1];
 

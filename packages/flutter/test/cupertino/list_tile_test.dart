@@ -10,7 +10,9 @@ void main() {
     const Widget title = Text('CupertinoListTile');
 
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoListTile(title: title))),
+      const CupertinoApp(
+        home: Center(child: CupertinoListTile(title: title)),
+      ),
     );
 
     expect(tester.widget<Text>(find.byType(Text)), title);
@@ -22,7 +24,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), subtitle: subtitle)),
+        home: Center(
+          child: CupertinoListTile(title: Icon(CupertinoIcons.add), subtitle: subtitle),
+        ),
       ),
     );
 
@@ -50,7 +54,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), trailing: trailing)),
+        home: Center(
+          child: CupertinoListTile(title: Icon(CupertinoIcons.add), trailing: trailing),
+        ),
       ),
     );
 
@@ -65,7 +71,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(leading: leading, title: Text('CupertinoListTile'))),
+        home: Center(
+          child: CupertinoListTile(leading: leading, title: Text('CupertinoListTile')),
+        ),
       ),
     );
 
@@ -232,10 +240,9 @@ void main() {
                     title: const Text('CupertinoListTile'),
                     backgroundColor: backgroundColor,
                     backgroundColorActivated: backgroundColorActivated,
-                    onTap:
-                        () => Navigator.of(context).push(
-                          CupertinoPageRoute<Widget>(builder: (BuildContext context) => secondPage),
-                        ),
+                    onTap: () => Navigator.of(context).push(
+                      CupertinoPageRoute<Widget>(builder: (BuildContext context) => secondPage),
+                    ),
                   ),
                 ),
               ),
@@ -507,10 +514,9 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoListTile(
                 title: const Text(''),
-                onTap:
-                    () => setState(() {
-                      value = !value;
-                    }),
+                onTap: () => setState(() {
+                  value = !value;
+                }),
                 leading: CupertinoSwitch(value: value, onChanged: (_) {}),
                 trailing: CupertinoSwitch(value: value, onChanged: (_) {}),
               );

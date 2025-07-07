@@ -703,6 +703,7 @@ void main() {
         dartFlags: 'c',
         deviceVmServicePort: 1234,
         enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
         enableDartProfiling: false,
         enableEmbedderApi: true,
       );
@@ -716,6 +717,7 @@ void main() {
       expect(deserialized.dartFlags, original.dartFlags);
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
       expect(deserialized.enableImpeller, original.enableImpeller);
+      expect(deserialized.enableFlutterGpu, original.enableFlutterGpu);
       expect(deserialized.enableDartProfiling, original.enableDartProfiling);
       expect(deserialized.enableEmbedderApi, original.enableEmbedderApi);
     });
@@ -740,6 +742,7 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
+          profileMicrotasks: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
@@ -772,6 +775,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
+            '--profile-microtasks',
             '--verbose-logging',
             '--purge-persistent-cache',
             '--route=/test',
@@ -909,6 +913,7 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
+          profileMicrotasks: true,
           purgePersistentCache: true,
           verboseSystemLogs: true,
           enableImpeller: ImpellerStatus.disabled,
@@ -941,6 +946,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
+            '--profile-microtasks',
             '--verbose-logging',
             '--purge-persistent-cache',
             '--route=/test',
@@ -1072,7 +1078,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
   bool? isAlwaysSupportedForProjectOverride;
 
   @override
-  bool isDeviceSupportedForProject(Device device) {
+  Future<bool> isDeviceSupportedForProject(Device device) async {
     return isAlwaysSupportedForProjectOverride ?? super.isDeviceSupportedForProject(device);
   }
 }

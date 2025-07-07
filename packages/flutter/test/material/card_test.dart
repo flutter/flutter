@@ -11,7 +11,12 @@ void main() {
   testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -34,7 +39,12 @@ void main() {
   testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card.filled())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card.filled()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -54,7 +64,12 @@ void main() {
   testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card.outlined())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card.outlined()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);

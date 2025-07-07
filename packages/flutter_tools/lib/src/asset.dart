@@ -17,12 +17,12 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'license_collector.dart';
+import 'package_graph.dart';
 import 'project.dart';
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -264,8 +264,9 @@ class ManifestAssetBundle implements AssetBundle {
         kind: AssetKind.regular,
         transformers: const <AssetTransformerEntry>[],
       );
-      final ByteData emptyAssetManifest =
-          const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
+      final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
+        <dynamic, dynamic>{},
+      )!;
       entries[_kAssetManifestBinFilename] = AssetBundleEntry(
         DevFSByteContent(
           emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
@@ -342,7 +343,6 @@ class ManifestAssetBundle implements AssetBundle {
     final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
       flutterProject,
       packageConfig,
-      _fileSystem,
     );
     final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Dependency dependency in transitiveDependencies) {
@@ -798,14 +798,14 @@ class ManifestAssetBundle implements AssetBundle {
         entries[main] = <String>[for (final _Asset variant in variants) variant.entryUri.path];
       });
     }
-    final List<_Asset> sortedKeys =
-        entries.keys.toList()
-          ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final List<_Asset> sortedKeys = entries.keys.toList()
+      ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
       final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
       final List<String> rawEntryVariantsPaths = entries[main]!;
-      final List<String> decodedEntryVariantPaths =
-          rawEntryVariantsPaths.map((String value) => Uri.decodeFull(value)).toList();
+      final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
+          .map((String value) => Uri.decodeFull(value))
+          .toList();
       manifest[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return manifest;
@@ -1100,10 +1100,9 @@ class ManifestAssetBundle implements AssetBundle {
     for (final String path in cache.variantsFor(assetFile.path)) {
       final String relativePath = _fileSystem.path.relative(path, from: asset.baseDir);
       final Uri relativeUri = _fileSystem.path.toUri(relativePath);
-      final Uri? entryUri =
-          asset.symbolicPrefixUri == null
-              ? relativeUri
-              : asset.symbolicPrefixUri?.resolveUri(relativeUri);
+      final Uri? entryUri = asset.symbolicPrefixUri == null
+          ? relativeUri
+          : asset.symbolicPrefixUri?.resolveUri(relativeUri);
       if (entryUri != null) {
         variants.add(
           _Asset(
@@ -1166,10 +1165,9 @@ class ManifestAssetBundle implements AssetBundle {
           '${flavorsWrappedWithQuotes.join(', ')}.';
     }
 
-    final _Asset? preExistingAsset =
-        previouslyParsedAssets
-            .where((_Asset other) => other.entryUri == newAsset.entryUri)
-            .firstOrNull;
+    final _Asset? preExistingAsset = previouslyParsedAssets
+        .where((_Asset other) => other.entryUri == newAsset.entryUri)
+        .firstOrNull;
 
     if (preExistingAsset == null || preExistingAsset.hasEquivalentFlavorsWith(newAsset)) {
       return;
@@ -1226,12 +1224,11 @@ class ManifestAssetBundle implements AssetBundle {
 
     return _Asset(
       baseDir: assetsBaseDir,
-      entryUri:
-          packageName == null
-              ? assetUri // Asset from the current application.
-              : Uri(
-                pathSegments: <String>['packages', packageName, ...assetUri.pathSegments],
-              ), // Asset from, and declared in $packageName.
+      entryUri: packageName == null
+          ? assetUri // Asset from the current application.
+          : Uri(
+              pathSegments: <String>['packages', packageName, ...assetUri.pathSegments],
+            ), // Asset from, and declared in $packageName.
       relativeUri: assetUri,
       package: attributedPackage,
       originUri: originUri,
@@ -1406,15 +1403,14 @@ class _AssetDirectoryCache {
       return _cache[assetPath]!;
     }
     if (!_variantsPerFolder.containsKey(directoryName)) {
-      _variantsPerFolder[directoryName] =
-          _fileSystem
-              .directory(directoryName)
-              .listSync()
-              .whereType<Directory>()
-              .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
-              .expand((Directory dir) => dir.listSync())
-              .whereType<File>()
-              .toList();
+      _variantsPerFolder[directoryName] = _fileSystem
+          .directory(directoryName)
+          .listSync()
+          .whereType<Directory>()
+          .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
+          .expand((Directory dir) => dir.listSync())
+          .whereType<File>()
+          .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directoryName]!;

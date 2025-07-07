@@ -269,10 +269,12 @@ class BuildInfo {
   /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
   DdcModuleFormat get ddcModuleFormat {
-    final DdcModuleFormat moduleFormat =
-        webEnableHotReload ? DdcModuleFormat.ddc : DdcModuleFormat.amd;
-    final DdcModuleFormat? parsedFormat =
-        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+    final DdcModuleFormat moduleFormat = webEnableHotReload
+        ? DdcModuleFormat.ddc
+        : DdcModuleFormat.amd;
+    final DdcModuleFormat? parsedFormat = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
+      extraFrontEndOptions,
+    ).ddcModuleFormat;
     if (parsedFormat != null && moduleFormat != parsedFormat) {
       throw Exception(
         'Unsupported option combination:\n'
@@ -287,8 +289,9 @@ class BuildInfo {
   /// DDC or the associated flag isn't present.
   bool get canaryFeatures {
     final bool canaryEnabled = webEnableHotReload;
-    final bool? parsedCanary =
-        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+    final bool? parsedCanary = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
+      extraFrontEndOptions,
+    ).canaryFeatures;
     if (parsedCanary != null && canaryEnabled != parsedCanary) {
       throw Exception(
         'Unsupported option combination:\n'
@@ -482,8 +485,10 @@ String? validatedBuildNumberForPlatform(
     if (tmpBuildNumber.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildNumber
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
@@ -533,8 +538,10 @@ String? validatedBuildNameForPlatform(
     if (tmpBuildName.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildName
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 3) {
       segments.add('0');
     }
@@ -585,7 +592,8 @@ enum TargetPlatform {
   // and [AndroidArch].
   android_arm,
   android_arm64,
-  android_x64;
+  android_x64,
+  unsupported;
 
   String get fuchsiaArchForTargetPlatform {
     switch (this) {
@@ -605,6 +613,7 @@ enum TargetPlatform {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
@@ -627,9 +636,13 @@ enum TargetPlatform {
       case TargetPlatform.ios:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Unexpected target platform $this');
     }
   }
+
+  static Never throwUnsupportedTarget() =>
+      throw UnsupportedError('Target platform is unsupported.');
 }
 
 /// iOS and macOS target device architecture.
@@ -749,6 +762,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
     TargetPlatform.tester => 'flutter-tester',
     TargetPlatform.web_javascript => 'web-javascript',
     TargetPlatform.android => 'android',
+    TargetPlatform.unsupported => 'unsupported',
   };
 }
 
@@ -787,8 +801,9 @@ DarwinArch getCurrentDarwinArch() {
   return switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => DarwinArch.arm64,
     HostPlatform.darwin_x64 => DarwinArch.x86_64,
-    final HostPlatform unsupported =>
-      throw Exception('Unsupported Darwin host platform "$unsupported"'),
+    final HostPlatform unsupported => throw Exception(
+      'Unsupported Darwin host platform "$unsupported"',
+    ),
   };
 }
 
@@ -864,8 +879,9 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch =
-      (targetPlatform == null) ? _getCurrentHostPlatformArchName() : targetPlatform.simpleName;
+  final String arch = (targetPlatform == null)
+      ? _getCurrentHostPlatformArchName()
+      : targetPlatform.simpleName;
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }

@@ -261,11 +261,10 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path =
-      Path()
-        ..fillType = PathFillType.evenOdd
-        ..addRect(outerRect)
-        ..addRect(innerRect);
+  final Path path = Path()
+    ..fillType = PathFillType.evenOdd
+    ..addRect(outerRect)
+    ..addRect(innerRect);
   final Paint paint = Paint()..color = color;
   canvas.drawPath(path, paint);
 }

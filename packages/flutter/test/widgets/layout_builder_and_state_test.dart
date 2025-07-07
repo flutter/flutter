@@ -47,7 +47,9 @@ void main() {
   testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (
     WidgetTester tester,
   ) async {
-    final Widget inner = Wrapper(child: StatefulWrapper(key: GlobalKey(), child: Container()));
+    final Widget inner = Wrapper(
+      child: StatefulWrapper(key: GlobalKey(), child: Container()),
+    );
     await tester.pumpWidget(
       FlipWidget(
         left: LayoutBuilder(

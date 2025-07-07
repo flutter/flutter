@@ -25,9 +25,8 @@ void main() {
               slivers: <Widget>[
                 SliverAnimatedGrid(
                   initialItemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext context, int index, Animation<double> animation) =>
-                          Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 100.0,
                     mainAxisSpacing: 10.0,
@@ -181,11 +180,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -263,11 +261,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -330,11 +327,10 @@ void main() {
         ),
       );
 
-      double itemScale(int index) =>
-          tester
-              .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
-              .scale
-              .value;
+      double itemScale(int index) => tester
+          .widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false))
+          .scale
+          .value;
       double itemLeft(int index) =>
           tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) =>
@@ -522,8 +518,11 @@ void main() {
         );
 
         // get all list entries in order
-        final List<Text> listEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> listEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the list is rendered in the correct order
         expect(listEntries[0].data, equals('item 0'));
@@ -546,8 +545,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // get all list entries in order
-        final List<Text> reorderedListEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> reorderedListEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
         expect(reorderedListEntries[0].data, equals('item 3'));

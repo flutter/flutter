@@ -89,6 +89,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required List<Widget> children,
@@ -98,10 +99,9 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent > 0),
        assert(squeeze > 0),
-       childDelegate =
-           looping
-               ? ListWheelChildLoopingListDelegate(children: children)
-               : ListWheelChildListDelegate(children: children);
+       childDelegate = looping
+           ? ListWheelChildLoopingListDelegate(children: children)
+           : ListWheelChildListDelegate(children: children);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -129,6 +129,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
@@ -187,13 +188,19 @@ class CupertinoPicker extends StatefulWidget {
   /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
 
-  /// An option callback when the currently centered item changes.
+  /// The behavior of reporting the selected item index.
   ///
-  /// Value changes when the item closest to the center changes.
+  /// This determines when the [onSelectedItemChanged] callback is called.
   ///
-  /// This can be called during scrolls and during ballistic flings. To get the
-  /// value only when the scrolling settles, use a [NotificationListener],
-  /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
+
+  /// Called when the selected item changes.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
@@ -267,6 +274,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         if (index != _lastHapticIndex) {
           _lastHapticIndex = index;
           HapticFeedback.selectionClick();
+          SystemSound.play(SystemSoundType.tick);
         }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -357,6 +365,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: widget.onSelectedItemChanged,
                 dragStartBehavior: DragStartBehavior.down,
+                changeReportingBehavior: widget.changeReportingBehavior,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
                   onTappedChild: _handleChildTap,
@@ -369,7 +378,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       ),
     );
 
-    return DecoratedBox(decoration: BoxDecoration(color: resolvedBackgroundColor), child: result);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolvedBackgroundColor),
+      child: result,
+    );
   }
 }
 

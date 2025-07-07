@@ -63,11 +63,10 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
     }
 
     // Make sure there is at least one test target.
-    final testTargets =
-        buildTargets
-            .whereType<ExecutableBuildTarget>()
-            .where((ExecutableBuildTarget t) => t.testOnly)
-            .toList();
+    final testTargets = buildTargets
+        .whereType<ExecutableBuildTarget>()
+        .where((ExecutableBuildTarget t) => t.testOnly)
+        .toList();
 
     if (testTargets.isEmpty) {
       environment.logger.error('No test targets found');

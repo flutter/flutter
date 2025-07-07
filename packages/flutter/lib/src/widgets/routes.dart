@@ -431,8 +431,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
         nextRoute.canTransitionFrom(this)) {
       final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
-        final Animation<double> currentTrain =
-            (current is TrainHoppingAnimation ? current.currentTrain : current)!;
+        final Animation<double> currentTrain = (current is TrainHoppingAnimation
+            ? current.currentTrain
+            : current)!;
         final Animation<double> nextTrain = nextRoute._animation!;
         if (currentTrain.value == nextTrain.value || !nextTrain.isAnimating) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
@@ -1201,19 +1202,18 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               ),
                             );
                           },
-                          child:
-                              _page ??= RepaintBoundary(
-                                key: widget.route._subtreeKey, // immutable
-                                child: Builder(
-                                  builder: (BuildContext context) {
-                                    return widget.route.buildPage(
-                                      context,
-                                      widget.route.animation!,
-                                      widget.route.secondaryAnimation!,
-                                    );
-                                  },
-                                ),
-                              ),
+                          child: _page ??= RepaintBoundary(
+                            key: widget.route._subtreeKey, // immutable
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return widget.route.buildPage(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1933,8 +1933,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       _offstage = value;
     });
     _animationProxy!.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
-    _secondaryAnimationProxy!.parent =
-        _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
+    _secondaryAnimationProxy!.parent = _offstage
+        ? kAlwaysDismissedAnimation
+        : super.secondaryAnimation;
     changedInternalState();
   }
 
@@ -2252,9 +2253,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       barrier = BackdropFilter(filter: filter!, child: barrier);
     }
     barrier = IgnorePointer(
-      ignoring:
-          !animation!
-              .isForwardOrCompleted, // changedInternalState is called when animation.status updates
+      ignoring: !animation!
+          .isForwardOrCompleted, // changedInternalState is called when animation.status updates
       child: barrier, // dismissed is possible when doing a manual pop gesture
     );
     if (semanticsDismissible && barrierDismissible) {

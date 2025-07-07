@@ -59,10 +59,9 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(isScrolling ? 'Scrolling' : 'Not Scrolling'),
-          backgroundColor:
-              isScrolling
-                  ? Colors.green[800]!.withOpacity(.85)
-                  : Colors.redAccent[700]!.withOpacity(.85),
+          backgroundColor: isScrolling
+              ? Colors.green[800]!.withOpacity(.85)
+              : Colors.redAccent[700]!.withOpacity(.85),
         ),
         // ListView.builder works very similarly to this example with
         // CustomScrollView & SliverList.

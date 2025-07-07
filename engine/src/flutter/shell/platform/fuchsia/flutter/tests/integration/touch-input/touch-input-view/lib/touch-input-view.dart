@@ -51,11 +51,10 @@ class TestApp {
     canvas.drawRect(windowBounds, paint);
     // Build the scene
     final picture = recorder.endRecording();
-    final sceneBuilder =
-        SceneBuilder()
-          ..pushClipRect(physicalBounds)
-          ..addPicture(Offset.zero, picture)
-          ..pop();
+    final sceneBuilder = SceneBuilder()
+      ..pushClipRect(physicalBounds)
+      ..addPicture(Offset.zero, picture)
+      ..pop();
     window.render(sceneBuilder.build());
   }
 
@@ -83,19 +82,18 @@ class TestApp {
     required int timeReceived,
   }) {
     print('touch-input-view reporting touch input to TouchInputListener');
-    final message =
-        utf8
-            .encode(
-              json.encode({
-                'method': 'TouchInputListener.ReportTouchInput',
-                'local_x': localX,
-                'local_y': localY,
-                'time_received': timeReceived,
-                'component_name': 'touch-input-view',
-              }),
-            )
-            .buffer
-            .asByteData();
+    final message = utf8
+        .encode(
+          json.encode({
+            'method': 'TouchInputListener.ReportTouchInput',
+            'local_x': localX,
+            'local_y': localY,
+            'time_received': timeReceived,
+            'component_name': 'touch-input-view',
+          }),
+        )
+        .buffer
+        .asByteData();
     PlatformDispatcher.instance.sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }

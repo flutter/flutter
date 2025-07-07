@@ -91,7 +91,9 @@ class NotifierLayoutDelegate extends SingleChildLayoutDelegate {
 }
 
 Widget buildFrame(SingleChildLayoutDelegate delegate) {
-  return Center(child: CustomSingleChildLayout(delegate: delegate, child: Container()));
+  return Center(
+    child: CustomSingleChildLayout(delegate: delegate, child: Container()),
+  );
 }
 
 void main() {

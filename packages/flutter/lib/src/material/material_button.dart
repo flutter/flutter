@@ -12,8 +12,6 @@
 /// @docImport 'text_theme.dart';
 library;
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

@@ -91,10 +91,9 @@ class AndroidDevice extends Device {
   @override
   // Wirelessly paired Android devices should have `adb-tls-connect` in the id.
   // Source: https://android.googlesource.com/platform/packages/modules/adb/+/f4ba8d73079b99532069dbe888a58167b8723d6c/adb_mdns.h#30
-  DeviceConnectionInterface get connectionInterface =>
-      id.contains('adb-tls-connect')
-          ? DeviceConnectionInterface.wireless
-          : DeviceConnectionInterface.attached;
+  DeviceConnectionInterface get connectionInterface => id.contains('adb-tls-connect')
+      ? DeviceConnectionInterface.wireless
+      : DeviceConnectionInterface.attached;
 
   late final Future<Map<String, String>> _properties = () async {
     Map<String, String> properties = <String, String>{};
@@ -193,7 +192,8 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-    switch (await _getProperty('ro.product.cpu.abi')) {
+    final String? abi = await _getProperty('ro.product.cpu.abi');
+    switch (abi) {
       case 'arm64-v8a':
         // Perform additional verification for 64 bit ABI. Some devices,
         // like the Kindle Fire 8, misreport the abilist. We might not
@@ -205,10 +205,12 @@ class AndroidDevice extends Device {
         } else {
           return TargetPlatform.android_arm;
         }
+      case 'armeabi-v7a':
+        return TargetPlatform.android_arm;
       case 'x86_64':
         return TargetPlatform.android_x64;
       default:
-        return TargetPlatform.android_arm;
+        return TargetPlatform.unsupported;
     }
   }();
 
@@ -230,6 +232,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
+      case TargetPlatform.unsupported:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -552,6 +555,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.unsupported:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -642,6 +646,7 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
       if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
+      if (debuggingOptions.profileMicrotasks) ...<String>['--ez', 'profile-microtasks', 'true'],
       if (debuggingOptions.purgePersistentCache) ...<String>[
         '--ez',
         'purge-persistent-cache',
@@ -657,6 +662,7 @@ class AndroidDevice extends Device {
         'enable-impeller',
         'false',
       ],
+      if (debuggingOptions.enableFlutterGpu) ...<String>['--ez', 'enable-flutter-gpu', 'true'],
       if (debuggingOptions.enableVulkanValidation) ...<String>[
         '--ez',
         'enable-vulkan-validation',
@@ -851,7 +857,16 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async {
+    final TargetPlatform platform = await targetPlatform;
+    return switch (platform) {
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 => true,
+      _ => false,
+    };
+  }
 
   @override
   bool get supportsScreenshot => true;
@@ -1271,11 +1286,10 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
 
     String stdout;
     try {
-      stdout =
-          _processUtils
-              .runSync(<String>[_adbPath, '-s', _deviceId, 'forward', '--list'], throwOnError: true)
-              .stdout
-              .trim();
+      stdout = _processUtils
+          .runSync(<String>[_adbPath, '-s', _deviceId, 'forward', '--list'], throwOnError: true)
+          .stdout
+          .trim();
     } on ProcessException catch (error) {
       _logger.printError('Failed to list forwarded ports: $error.');
       return ports;
