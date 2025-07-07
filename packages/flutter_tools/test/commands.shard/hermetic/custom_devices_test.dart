@@ -1111,13 +1111,12 @@ void main() {
       final List<String> logLineCommand = const <String>['echo', logLine];
       final List<String> expectedLogLines = const <String>[logLine];
 
-      final Platform platform = FakePlatform();
       final ProcessManager processManager = FakeProcessManager.list([
         FakeCommand(command: logLineCommand, stdout: logLine),
       ]);
-      final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.getExampleForPlatform(
-        platform,
-      ).copyWith(readLogsCommand: logLineCommand);
+      final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.exampleUnix.copyWith(
+        readLogsCommand: logLineCommand,
+      );
       final CustomDevice customDevice = CustomDevice(
         config: customDeviceConfig,
         logger: BufferLogger.test(),
