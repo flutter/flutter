@@ -1108,10 +1108,10 @@ void main() {
 
     testUsingContext('custom-device log reader command', () async {
       const String logLine = 'Hello, from custom device!';
-      final List<String> logLineCommand = const <String>['echo', logLine];
-      final List<String> expectedLogLines = const <String>[logLine];
+      const List<String> logLineCommand = const <String>['echo', logLine];
+      const List<String> expectedLogLines = const <String>[logLine];
 
-      final ProcessManager processManager = FakeProcessManager.list([
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: logLineCommand, stdout: logLine),
       ]);
       final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.exampleUnix.copyWith(
