@@ -130,34 +130,21 @@ void main() {
 
       expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
 
-      final List<String> featureNames =
-          featureFlags.allFeatures.map((Feature feature) => feature.name).toList();
-      final List<String> testFeatureNames =
-          testFeatureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+      final List<String> featureNames = featureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+      final List<String> testFeatureNames = testFeatureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
 
       expect(featureNames, unorderedEquals(testFeatureNames));
-    });
-
-    testUsingContext('Feature runtime IDs are valid', () {
-      // Verify features' runtime IDs can be encoded into a Dart define.
-      final RegExp runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
-      assert(runtimeIdPattern.hasMatch('multi_window'));
-      assert(!runtimeIdPattern.hasMatch('multi-window'));
-
-      final Iterable<String> runtimeIds =
-          featureFlags.allFeatures.map((Feature feature) => feature.runtimeId).nonNulls;
-
-      expect(
-        runtimeIds,
-        everyElement(matches(runtimeIdPattern)),
-        reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
-      );
     });
   });
 
   group('Linux Destkop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterLinuxDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterLinuxDesktopFeature));
     });
 
     test('can be configured', () {
@@ -174,8 +161,9 @@ void main() {
   });
 
   group('MacOS Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterMacOSDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterMacOSDesktopFeature));
     });
 
     test('can be configured', () {
@@ -192,8 +180,9 @@ void main() {
   });
 
   group('Windows Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWindowsDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWindowsDesktopFeature));
     });
 
     test('can be configured', () {
@@ -210,8 +199,9 @@ void main() {
   });
 
   group('Web', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWebFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWebFeature));
     });
 
     test('can be configured', () {
@@ -228,8 +218,9 @@ void main() {
   });
 
   group('Android', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterAndroidFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterAndroidFeature));
     });
 
     test('can be configured', () {
@@ -246,8 +237,9 @@ void main() {
   });
 
   group('iOS', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterIOSFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterIOSFeature));
     });
 
     test('can be configured', () {
@@ -314,8 +306,9 @@ void main() {
   });
 
   group('CLI Animations', () {
-    test('is always enabled', () {
+    testUsingContext('is always enabled', () {
       expect(cliAnimation, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(cliAnimation));
     });
 
     test('can be disabled by TERM=dumb', () {
@@ -476,4 +469,7 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
 
   @override
   List<Feature> get allConfigurableFeatures => throw UnimplementedError();
+
+  @override
+  Iterable<Feature> get allEnabledFeatures => throw UnimplementedError();
 }

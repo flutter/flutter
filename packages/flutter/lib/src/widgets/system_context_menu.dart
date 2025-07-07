@@ -163,8 +163,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
     if (widget.items.isNotEmpty) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final List<IOSSystemContextMenuItemData> itemDatas =
-          widget.items.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+      final List<IOSSystemContextMenuItemData> itemDatas = widget.items
+          .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+          .toList();
       _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 

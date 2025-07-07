@@ -628,11 +628,11 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
 
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
         MediaQuery.onOffSwitchLabelsOf(context)
-            ? (
-              CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
-              CupertinoDynamicColor.resolve(widget.offLabelColor ?? _kOffLabelColor, context),
-            )
-            : null;
+        ? (
+            CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
+            CupertinoDynamicColor.resolve(widget.offLabelColor ?? _kOffLabelColor, context),
+          )
+        : null;
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -708,49 +708,48 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
             onFocusChange: widget.onFocusChange,
             autofocus: widget.autofocus,
             size: _kSwitchSize,
-            painter:
-                _painter
-                  ..position = position
-                  ..reaction = reaction
-                  ..reactionFocusFade = reactionFocusFade
-                  ..reactionHoverFade = reactionHoverFade
-                  ..focusColor = CupertinoDynamicColor.resolve(
-                    widget.focusColor ??
-                        HSLColor.fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
-                            .withLightness(kCupertinoFocusColorBrightness)
-                            .withSaturation(kCupertinoFocusColorSaturation)
-                            .toColor(),
-                    context,
-                  )
-                  ..downPosition = downPosition
-                  ..isFocused = states.contains(WidgetState.focused)
-                  ..isHovered = states.contains(WidgetState.hovered)
-                  ..activeColor = effectiveActiveThumbColor
-                  ..inactiveColor = effectiveInactiveThumbColor
-                  ..activePressedColor = effectiveActivePressedThumbColor
-                  ..onOffLabelColors = onOffLabelColors
-                  ..inactivePressedColor = effectiveInactivePressedThumbColor
-                  ..activeThumbImage = widget.activeThumbImage
-                  ..onActiveThumbImageError = widget.onActiveThumbImageError
-                  ..inactiveThumbImage = widget.inactiveThumbImage
-                  ..onInactiveThumbImageError = widget.onInactiveThumbImageError
-                  ..activeTrackColor = effectiveActiveTrackColor
-                  ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
-                  ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
-                  ..inactiveTrackColor = effectiveInactiveTrackColor
-                  ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
-                  ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
-                  ..configuration = createLocalImageConfiguration(context)
-                  ..isInteractive = isInteractive
-                  ..trackInnerLength = _trackInnerLength
-                  ..textDirection = Directionality.of(context)
-                  ..activeIconColor = effectiveActiveIconColor
-                  ..inactiveIconColor = effectiveInactiveIconColor
-                  ..activeIcon = effectiveActiveIcon
-                  ..inactiveIcon = effectiveInactiveIcon
-                  ..iconTheme = IconTheme.of(context)
-                  ..surfaceColor = theme.scaffoldBackgroundColor
-                  ..positionController = positionController,
+            painter: _painter
+              ..position = position
+              ..reaction = reaction
+              ..reactionFocusFade = reactionFocusFade
+              ..reactionHoverFade = reactionHoverFade
+              ..focusColor = CupertinoDynamicColor.resolve(
+                widget.focusColor ??
+                    HSLColor.fromColor(activeColor.withOpacity(kCupertinoFocusColorOpacity))
+                        .withLightness(kCupertinoFocusColorBrightness)
+                        .withSaturation(kCupertinoFocusColorSaturation)
+                        .toColor(),
+                context,
+              )
+              ..downPosition = downPosition
+              ..isFocused = states.contains(WidgetState.focused)
+              ..isHovered = states.contains(WidgetState.hovered)
+              ..activeColor = effectiveActiveThumbColor
+              ..inactiveColor = effectiveInactiveThumbColor
+              ..activePressedColor = effectiveActivePressedThumbColor
+              ..onOffLabelColors = onOffLabelColors
+              ..inactivePressedColor = effectiveInactivePressedThumbColor
+              ..activeThumbImage = widget.activeThumbImage
+              ..onActiveThumbImageError = widget.onActiveThumbImageError
+              ..inactiveThumbImage = widget.inactiveThumbImage
+              ..onInactiveThumbImageError = widget.onInactiveThumbImageError
+              ..activeTrackColor = effectiveActiveTrackColor
+              ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
+              ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
+              ..inactiveTrackColor = effectiveInactiveTrackColor
+              ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
+              ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
+              ..configuration = createLocalImageConfiguration(context)
+              ..isInteractive = isInteractive
+              ..trackInnerLength = _trackInnerLength
+              ..textDirection = Directionality.of(context)
+              ..activeIconColor = effectiveActiveIconColor
+              ..inactiveIconColor = effectiveInactiveIconColor
+              ..activeIcon = effectiveActiveIcon
+              ..inactiveIcon = effectiveInactiveIcon
+              ..iconTheme = IconTheme.of(context)
+              ..surfaceColor = theme.scaffoldBackgroundColor
+              ..positionController = positionController,
           ),
         ),
       ),
@@ -1064,8 +1063,8 @@ class _SwitchPainter extends ToggleablePainter {
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
     final Color? trackOutlineColor =
         inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
-            ? null
-            : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+        ? null
+        : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
     final double? trackOutlineWidth = lerpDouble(
       inactiveTrackOutlineWidth,
       activeTrackOutlineWidth,
@@ -1092,8 +1091,9 @@ class _SwitchPainter extends ToggleablePainter {
 
     final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
 
-    final ImageErrorListener? thumbErrorListener =
-        currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
+    final ImageErrorListener? thumbErrorListener = currentValue < 0.5
+        ? onInactiveThumbImageError
+        : onActiveThumbImageError;
 
     final Paint paint = Paint()..color = trackColor;
 
@@ -1148,18 +1148,16 @@ class _SwitchPainter extends ToggleablePainter {
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
-      final Paint onLabelPaint =
-          Paint()
-            ..color = onLabelColor.withOpacity(onLabelOpacity)
-            ..style = PaintingStyle.fill;
+      final Paint onLabelPaint = Paint()
+        ..color = onLabelColor.withOpacity(onLabelOpacity)
+        ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       // Draws 'O' label.
-      final Paint offLabelPaint =
-          Paint()
-            ..color = offLabelColor.withOpacity(offLabelOpacity)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = _kOffLabelWidth;
+      final Paint offLabelPaint = Paint()
+        ..color = offLabelColor.withOpacity(offLabelOpacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _kOffLabelWidth;
       canvas.drawCircle(offLabelOffset, _kOffLabelRadius, offLabelPaint);
     }
     _paintThumbWith(
@@ -1226,22 +1224,20 @@ class _SwitchPainter extends ToggleablePainter {
         const Radius.circular(trackRadius),
       );
 
-      final Paint outlinePaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = trackOutlineWidth ?? 2.0
-            ..color = trackOutlineColor;
+      final Paint outlinePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = trackOutlineWidth ?? 2.0
+        ..color = trackOutlineColor;
 
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
 
     if (isFocused) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
-      final Paint focusedPaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = focusColor
-            ..strokeWidth = 3.5;
+      final Paint focusedPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = 3.5;
       canvas.drawRRect(focusedOutline, focusedPaint);
     }
     canvas.clipRRect(trackRRect);

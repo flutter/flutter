@@ -21,12 +21,11 @@ const bool kProfileMode = bool.fromEnvironment('dart.vm.profile');
 const bool kDebugMode = !kReleaseMode && !kProfileMode;
 
 /// Returns mode of the app is running in as a string.
-String get buildMode =>
-    kReleaseMode
-        ? 'release'
-        : kProfileMode
-        ? 'profile'
-        : 'debug';
+String get buildMode => kReleaseMode
+    ? 'release'
+    : kProfileMode
+    ? 'profile'
+    : 'debug';
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as

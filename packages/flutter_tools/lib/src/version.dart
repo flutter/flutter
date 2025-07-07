@@ -229,8 +229,9 @@ abstract class FlutterVersion {
 
   @override
   String toString() {
-    final String versionText =
-        frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
+    final String versionText = frameworkVersion == kUnknownFrameworkVersion
+        ? ''
+        : ' $frameworkVersion';
     final String flutterText =
         'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText =
@@ -729,15 +730,14 @@ class VersionUpstreamValidator {
     }
 
     // Strip `.git` suffix before comparing the remotes
-    final List<String> sanitizedStandardRemotes =
-        <String>[
-          // If `FLUTTER_GIT_URL` is set, use that as standard remote.
-          if (flutterGit != null)
-            flutterGit
-          // Else use the predefined standard remotes.
-          else
-            ..._standardRemotes,
-        ].map((String remote) => stripDotGit(remote)).toList();
+    final List<String> sanitizedStandardRemotes = <String>[
+      // If `FLUTTER_GIT_URL` is set, use that as standard remote.
+      if (flutterGit != null)
+        flutterGit
+      // Else use the predefined standard remotes.
+      else
+        ..._standardRemotes,
+    ].map((String remote) => stripDotGit(remote)).toList();
 
     final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
 
