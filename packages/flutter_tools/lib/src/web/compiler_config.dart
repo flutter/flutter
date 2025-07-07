@@ -202,4 +202,10 @@ class WasmCompilerConfig extends WebCompilerConfig {
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'dryRun': dryRun,
+  };
 }
