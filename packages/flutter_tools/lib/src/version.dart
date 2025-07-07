@@ -11,6 +11,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
+import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
@@ -1348,21 +1349,5 @@ final class FlutterEngineStampFromFile {
       return null;
     }
     return null;
-  }
-}
-
-/// Simple "X (months|days|hours|minutes) ago" converter.
-extension on Duration {
-  String ago() {
-    if (inDays > 31) {
-      return '${inDays ~/ 31} months ago';
-    }
-    if (inDays > 1) {
-      return '$inDays days ago';
-    }
-    if (inHours > 1) {
-      return '$inHours hours ago';
-    }
-    return '$inMinutes minutes ago';
   }
 }
