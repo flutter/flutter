@@ -155,7 +155,7 @@ public class PlatformViewsControllerTest {
       shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
       minSdk = 29,
       maxSdk = 34)
-  public void itPassesSurfaceLifecyleResetInBackgroundOnApi34() {
+  public void itPassesSurfaceLifecyleResetInBackgroundLeqApi34() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
     platformViewsController.setFlutterJNI(jni);
