@@ -401,23 +401,22 @@ class CanvasKitRenderer implements Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebParagraphStyle()
-          : CkParagraphStyle(
-            textAlign: textAlign,
-            textDirection: textDirection,
-            maxLines: maxLines,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            height: height,
-            textHeightBehavior: textHeightBehavior,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            strutStyle: strutStyle,
-            ellipsis: ellipsis,
-            locale: locale,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebParagraphStyle()
+      : CkParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle,
+          ellipsis: ellipsis,
+          locale: locale,
+        );
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -430,20 +429,19 @@ class CanvasKitRenderer implements Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebStrutStyle()
-          : CkStrutStyle(
-            fontFamily: fontFamily,
-            fontFamilyFallback: fontFamilyFallback,
-            fontSize: fontSize,
-            height: height,
-            leadingDistribution: leadingDistribution,
-            leading: leading,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            forceStrutHeight: forceStrutHeight,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebStrutStyle()
+      : CkStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        );
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
@@ -459,8 +457,9 @@ class CanvasKitRenderer implements Renderer {
     );
     final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
     final RenderQueue renderQueue = rasterizer.queue;
-    final FrameTimingRecorder? recorder =
-        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.

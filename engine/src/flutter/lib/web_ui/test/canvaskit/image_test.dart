@@ -58,16 +58,14 @@ void testMain() {
       disposedImage = image;
     };
 
-    final ui.Image image1 =
-        await _createImage()
-          ..dispose();
+    final ui.Image image1 = await _createImage()
+      ..dispose();
 
     expect(onDisposeInvokedCount, 1);
     expect(disposedImage, image1);
 
-    final ui.Image image2 =
-        await _createImage()
-          ..dispose();
+    final ui.Image image2 = await _createImage()
+      ..dispose();
 
     expect(onDisposeInvokedCount, 2);
     expect(disposedImage, image2);
@@ -187,12 +185,14 @@ void testMain() {
       await domWindow.createImageBitmap(createBlankDomImageData(4, 4)),
     );
 
-    final SkImage skImage1 =
-        canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(
+      k4x4PngImage,
+    )!.makeImageAtCurrentFrame();
     final CkImage image1 = CkImage(skImage1, imageSource: imageSource);
 
-    final SkImage skImage2 =
-        canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final SkImage skImage2 = canvasKit.MakeAnimatedImageFromEncoded(
+      k4x4PngImage,
+    )!.makeImageAtCurrentFrame();
     final CkImage image2 = CkImage(skImage2, imageSource: imageSource);
 
     final CkImage image3 = image1.clone();

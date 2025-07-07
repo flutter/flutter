@@ -55,10 +55,9 @@ Future<BrowserInstallation> getOrInstallChrome(
 
   ChromeInstaller? installer;
   try {
-    installer =
-        requestedVersion == 'latest'
-            ? await ChromeInstaller.latest()
-            : ChromeInstaller(version: requestedVersion);
+    installer = requestedVersion == 'latest'
+        ? await ChromeInstaller.latest()
+        : ChromeInstaller(version: requestedVersion);
 
     if (installer.isInstalled) {
       infoLog.writeln(

@@ -59,8 +59,9 @@ class SkwasmPaint implements ui.Paint {
   /// If `invertColors` is true or `colorFilter` is not null, sets the
   /// appropriate Skia color filter. Otherwise, does nothing.
   void _maybeSetEffectiveColorFilter(Pointer<RawPaint> handle) {
-    final nativeFilter =
-        _colorFilter != null ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!) : null;
+    final nativeFilter = _colorFilter != null
+        ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!)
+        : null;
     if (invertColors) {
       if (nativeFilter != null) {
         final composedFilter = SkwasmColorFilter.composed(_invertColorFilter, nativeFilter);

@@ -425,18 +425,16 @@ Future<void> testMain() async {
       'screen',
       js_util.jsify(<Object?, Object?>{
         'orientation': <Object?, Object?>{
-          'lock':
-              (String lockType) {
-                lockCalls.add(lockType);
-                if (simulateError) {
-                  throw Error();
-                }
-                return Future<JSNumber>.value(0.toJS).toJS;
-              }.toJS,
-          'unlock':
-              () {
-                unlockCount += 1;
-              }.toJS,
+          'lock': (String lockType) {
+            lockCalls.add(lockType);
+            if (simulateError) {
+              throw Error();
+            }
+            return Future<JSNumber>.value(0.toJS).toJS;
+          }.toJS,
+          'unlock': () {
+            unlockCount += 1;
+          }.toJS,
         },
       }),
     );
@@ -571,10 +569,9 @@ Future<void> testMain() async {
   });
 
   test('in full-page mode, Flutter window replaces viewport meta tags', () {
-    final DomHTMLMetaElement existingMeta =
-        createDomHTMLMetaElement()
-          ..name = 'viewport'
-          ..content = 'foo=bar';
+    final DomHTMLMetaElement existingMeta = createDomHTMLMetaElement()
+      ..name = 'viewport'
+      ..content = 'foo=bar';
     domDocument.head!.append(existingMeta);
     expect(existingMeta.isConnected, isTrue);
 
@@ -756,10 +753,9 @@ Future<void> testMain() async {
 
     setUp(() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
-      host =
-          createDomHTMLDivElement()
-            ..style.width = '640px'
-            ..style.height = '480px';
+      host = createDomHTMLDivElement()
+        ..style.width = '640px'
+        ..style.height = '480px';
       domDocument.body!.append(host);
     });
 

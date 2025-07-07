@@ -93,8 +93,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathArcToRotated(
       handle,
       radius.x,
@@ -116,8 +117,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathRelativeArcToRotated(
       handle,
       radius.x,
