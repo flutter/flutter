@@ -116,8 +116,8 @@ class BuildWebCommand extends BuildSubCommand {
       'wasm-dry-run',
       defaultsTo: true,
       help:
-          'Compiles wasm in dry run mode during JS only compilations. Defaults to true. Use '
-          '--no-wasm-dry-run to suppress warnings.',
+          'Compiles wasm in dry run mode during JS only compilations. '
+          'Disable to suppress warnings.',
     );
     argParser.addFlag(
       'no-frequency-based-minification',
