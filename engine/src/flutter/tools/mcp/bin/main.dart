@@ -1,3 +1,5 @@
+import 'dart:io' show Process, ProcessResult;
+
 import 'package:mcp_dart/mcp_dart.dart';
 
 void main() async {
@@ -10,6 +12,26 @@ void main() async {
       ),
     ),
   );
+
+  server.tool('build_help', description: 'Get help for the building tool and a list of configs.',
+      callback: ({Map<String, dynamic>? args, RequestHandlerExtra? extra}) async {
+    try {
+      const String executable = './bin/et';
+      final List<String> arguments = ['build', '--help'];
+      final ProcessResult result = await Process.run(executable, arguments);
+      final String output = result.stdout as String;
+
+      return CallToolResult(
+        content: [
+          TextContent(
+            text: output,
+          ),
+        ],
+      );
+    } catch (ex) {
+      return CallToolResult.fromContent(content: [TextContent(text: ex.toString())], isError: true);
+    }
+  });
 
   server.tool(
     'calculate',
