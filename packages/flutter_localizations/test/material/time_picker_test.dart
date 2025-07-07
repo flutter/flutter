@@ -20,15 +20,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
     final Finder hourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourControl',
     );
@@ -108,15 +105,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
     final Finder hourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourControl',
     );
@@ -196,15 +190,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
     final Finder hourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourControl',
     );
@@ -289,15 +280,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
     final Finder hourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourControl',
     );
@@ -386,15 +374,12 @@ void main() {
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
     );
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[
@@ -474,15 +459,12 @@ void main() {
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
     );
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[

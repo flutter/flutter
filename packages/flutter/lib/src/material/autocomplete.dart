@@ -260,8 +260,9 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
         if (!mounted) {
           return;
         }
-        final BuildContext? highlightedContext =
-            GlobalObjectKey(widget.options.elementAt(widget.highlightedIndex)).currentContext;
+        final BuildContext? highlightedContext = GlobalObjectKey(
+          widget.options.elementAt(widget.highlightedIndex),
+        ).currentContext;
         if (highlightedContext == null) {
           _scrollController.jumpTo(
             widget.highlightedIndex == 0 ? 0.0 : _scrollController.position.maxScrollExtent,

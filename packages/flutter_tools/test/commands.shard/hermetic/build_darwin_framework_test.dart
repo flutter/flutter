@@ -36,9 +36,11 @@ void main() {
       environment: <String, String>{'FLUTTER_STORAGE_BASE_URL': storageBaseUrl},
     );
 
-    outputDirectory = memoryFileSystem.systemTempDirectory
-      .createTempSync('flutter_build_framework_test_output.')
-      .childDirectory('Debug')..createSync();
+    outputDirectory =
+        memoryFileSystem.systemTempDirectory
+            .createTempSync('flutter_build_framework_test_output.')
+            .childDirectory('Debug')
+          ..createSync();
   });
 
   group('build ios-framework', () {

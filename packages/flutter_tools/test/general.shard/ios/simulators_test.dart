@@ -1254,8 +1254,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext(
       'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
       () async {
-        final List<IOSSimulatorRuntime> runtimes =
-            await simulatorUtilsBadSimctl.getAvailableIOSRuntimes();
+        final List<IOSSimulatorRuntime> runtimes = await simulatorUtilsBadSimctl
+            .getAvailableIOSRuntimes();
 
         expect(runtimes, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1402,6 +1402,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           traceAllowlist: 'foo,bar',
           traceSkiaAllowlist: 'skia.a,skia.b',
           endlessTraceBuffer: true,
+          profileMicrotasks: true,
           verboseSystemLogs: true,
           purgePersistentCache: true,
           dartFlags: '--baz',
@@ -1427,6 +1428,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             '--trace-allowlist="foo,bar"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
+            '--profile-microtasks',
             '--verbose-logging',
             '--purge-persistent-cache',
             '--enable-impeller=false',

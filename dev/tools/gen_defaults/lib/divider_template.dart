@@ -8,7 +8,8 @@ class DividerTemplate extends TokenTemplate {
   const DividerTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends DividerThemeData {
   const _${blockName}DefaultsM3(this.context) : super(
     space: 16,

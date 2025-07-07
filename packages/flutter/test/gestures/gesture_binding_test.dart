@@ -129,7 +129,10 @@ void main() {
 
   test('Pointer cancel events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[ui.PointerData(change: ui.PointerChange.down), ui.PointerData()],
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(),
+      ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
@@ -176,8 +179,10 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -191,8 +196,10 @@ void main() {
     ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: <ui.PointerData>[ui.PointerData(change: ui.PointerChange.add, device: 24)],
     );
-    List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 1);
     expect(events[0], isA<PointerAddedEvent>());
@@ -270,8 +277,10 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -306,8 +315,10 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -352,8 +363,10 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -410,8 +423,10 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events =
-          PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(
+        packet.data,
+        (int viewId) => devicePixelRatio,
+      ).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -466,8 +481,10 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data,
+      (int viewId) => devicePixelRatio,
+    ).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -522,8 +539,10 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events =
-          PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(
+        packet.data,
+        (int viewId) => devicePixelRatio,
+      ).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -616,8 +635,10 @@ void main() {
       return viewId / 10.0;
     }
 
-    final List<PointerEvent> events =
-        PointerEventConverter.expand(data, devicePixelRatioGetter).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      data,
+      devicePixelRatioGetter,
+    ).toList();
 
     final List<int> expectedViewIds = List<int>.generate(10, (int index) => startID + index);
     expect(viewIds, expectedViewIds);

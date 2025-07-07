@@ -151,8 +151,9 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  final String websocketUrl =
-      host.type == InternetAddressType.IPv4 ? 'ws://${host.address}' : 'ws://[${host.address}]';
+  final String websocketUrl = host.type == InternetAddressType.IPv4
+      ? 'ws://${host.address}'
+      : 'ws://[${host.address}]';
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
@@ -327,10 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
-      compilerFactory:
-          () =>
-              compiler ??
-              TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () =>
+          compiler ?? TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,

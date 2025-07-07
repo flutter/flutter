@@ -1266,8 +1266,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   void _cacheKeepAlives() {
-    final List<RenderBox> remainingChildren =
-        _children.values.toSet().difference(_activeChildrenForLayoutPass.values.toSet()).toList();
+    final List<RenderBox> remainingChildren = _children.values
+        .toSet()
+        .difference(_activeChildrenForLayoutPass.values.toSet())
+        .toList();
     for (final RenderBox child in remainingChildren) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
       if (childParentData.keepAlive) {

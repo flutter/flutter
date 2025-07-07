@@ -2939,10 +2939,9 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
 
-    final String? debugTransformLabel =
-        _debugTransformLabel.isNotEmpty
-            ? _debugTransformLabel
-            : _debugKnownTransforms[constraintsTransform];
+    final String? debugTransformLabel = _debugTransformLabel.isNotEmpty
+        ? _debugTransformLabel
+        : _debugKnownTransforms[constraintsTransform];
 
     if (debugTransformLabel != null) {
       properties.add(DiagnosticsProperty<String>('constraints transform', debugTransformLabel));
@@ -4127,10 +4126,9 @@ class Stack extends MultiChildRenderObjectWidget {
         debugCheckHasDirectionality(
           context,
           why: "to resolve the 'alignment' argument",
-          hint:
-              alignment == AlignmentDirectional.topStart
-                  ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
-                  : null,
+          hint: alignment == AlignmentDirectional.topStart
+              ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
+              : null,
           alternative:
               "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
         ),
@@ -6361,8 +6359,9 @@ class RawImage extends LeafRenderObjectWidget {
       repeat: repeat,
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
-      textDirection:
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+      textDirection: matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null,
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
@@ -6390,8 +6389,9 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection =
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
+      ..textDirection = matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
       ..filterQuality = filterQuality;
@@ -6496,8 +6496,8 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    final DefaultAssetBundle? result =
-        context.dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
+    final DefaultAssetBundle? result = context
+        .dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
     return result?.bundle ?? rootBundle;
   }
 
@@ -7399,6 +7399,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Set<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     ui.SemanticsInputType? inputType,
+    Locale? localeForSubtree,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7406,6 +7407,7 @@ class Semantics extends SingleChildRenderObjectWidget {
          explicitChildNodes: explicitChildNodes,
          excludeSemantics: excludeSemantics,
          blockUserActions: blockUserActions,
+         localeForSubtree: localeForSubtree,
          properties: SemanticsProperties(
            enabled: enabled,
            checked: checked,
@@ -7470,10 +7472,9 @@ class Semantics extends SingleChildRenderObjectWidget {
            onSetSelection: onSetSelection,
            onSetText: onSetText,
            customSemanticsActions: customSemanticsActions,
-           hintOverrides:
-               onTapHint != null || onLongPressHint != null
-                   ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
-                   : null,
+           hintOverrides: onTapHint != null || onLongPressHint != null
+               ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
+               : null,
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
@@ -7489,8 +7490,13 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.explicitChildNodes = false,
     this.excludeSemantics = false,
     this.blockUserActions = false,
+    this.localeForSubtree,
     required this.properties,
-  });
+  }) : assert(
+         localeForSubtree == null || container,
+         'To assign locale for subtree, this widget needs to be a '
+         'container',
+       );
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -7522,6 +7528,11 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// This setting is often used in combination with [SemanticsConfiguration.isSemanticBoundary]
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
+
+  /// The [Locale] for widgets in the subtree.
+  ///
+  /// If null, the subtree will inherit the locale form ancestor widget.
+  final Locale? localeForSubtree;
 
   /// Whether to replace all child semantics with this node.
   ///
@@ -7575,6 +7586,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       excludeSemantics: excludeSemantics,
       blockUserActions: blockUserActions,
       properties: properties,
+      localeForSubtree: localeForSubtree,
       textDirection: _getTextDirection(context),
     );
   }
@@ -7612,7 +7624,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..excludeSemantics = excludeSemantics
       ..blockUserActions = blockUserActions
       ..properties = properties
-      ..textDirection = _getTextDirection(context);
+      ..textDirection = _getTextDirection(context)
+      ..localeForSubtree = localeForSubtree;
   }
 
   @override
