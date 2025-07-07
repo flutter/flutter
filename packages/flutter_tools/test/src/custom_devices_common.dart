@@ -16,10 +16,9 @@ void writeCustomDevicesConfigFile(
   final File file = dir.childFile('.flutter_custom_devices.json');
   file.writeAsStringSync(
     jsonEncode(<String, dynamic>{
-      'custom-devices':
-          configs != null
-              ? configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
-              : json,
+      'custom-devices': configs != null
+          ? configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+          : json,
     }),
   );
 }

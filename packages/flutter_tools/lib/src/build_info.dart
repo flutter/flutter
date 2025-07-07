@@ -269,10 +269,12 @@ class BuildInfo {
   /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
   DdcModuleFormat get ddcModuleFormat {
-    final DdcModuleFormat moduleFormat =
-        webEnableHotReload ? DdcModuleFormat.ddc : DdcModuleFormat.amd;
-    final DdcModuleFormat? parsedFormat =
-        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+    final DdcModuleFormat moduleFormat = webEnableHotReload
+        ? DdcModuleFormat.ddc
+        : DdcModuleFormat.amd;
+    final DdcModuleFormat? parsedFormat = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
+      extraFrontEndOptions,
+    ).ddcModuleFormat;
     if (parsedFormat != null && moduleFormat != parsedFormat) {
       throw Exception(
         'Unsupported option combination:\n'
@@ -287,8 +289,9 @@ class BuildInfo {
   /// DDC or the associated flag isn't present.
   bool get canaryFeatures {
     final bool canaryEnabled = webEnableHotReload;
-    final bool? parsedCanary =
-        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+    final bool? parsedCanary = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
+      extraFrontEndOptions,
+    ).canaryFeatures;
     if (parsedCanary != null && canaryEnabled != parsedCanary) {
       throw Exception(
         'Unsupported option combination:\n'
@@ -482,8 +485,10 @@ String? validatedBuildNumberForPlatform(
     if (tmpBuildNumber.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildNumber
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
@@ -533,8 +538,10 @@ String? validatedBuildNameForPlatform(
     if (tmpBuildName.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildName
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 3) {
       segments.add('0');
     }
@@ -794,8 +801,9 @@ DarwinArch getCurrentDarwinArch() {
   return switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => DarwinArch.arm64,
     HostPlatform.darwin_x64 => DarwinArch.x86_64,
-    final HostPlatform unsupported =>
-      throw Exception('Unsupported Darwin host platform "$unsupported"'),
+    final HostPlatform unsupported => throw Exception(
+      'Unsupported Darwin host platform "$unsupported"',
+    ),
   };
 }
 
@@ -871,8 +879,9 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch =
-      (targetPlatform == null) ? _getCurrentHostPlatformArchName() : targetPlatform.simpleName;
+  final String arch = (targetPlatform == null)
+      ? _getCurrentHostPlatformArchName()
+      : targetPlatform.simpleName;
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
@@ -1013,12 +1022,6 @@ const String kFlavor = 'Flavor';
 /// Environment variable of the flavor to be set in dartDefines to be accessed
 /// by the `appFlavor` service.
 const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
-
-/// Environment variable of the enabled feature flags to be set in the
-/// dartDefines.
-///
-/// This tells the framework which features are on.
-const String kEnabledFeatureFlags = 'FLUTTER_ENABLED_FEATURE_FLAGS';
 
 /// The Xcode configuration used to build the project.
 const String kXcodeConfiguration = 'Configuration';

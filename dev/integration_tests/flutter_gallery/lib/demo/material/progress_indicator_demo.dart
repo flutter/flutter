@@ -29,17 +29,18 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
-      reverseCurve: Curves.fastOutSlowIn,
-    )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
-        _controller.forward();
-      } else if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      }
-    });
+    _animation =
+        CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+          reverseCurve: Curves.fastOutSlowIn,
+        )..addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.dismissed) {
+            _controller.forward();
+          } else if (status == AnimationStatus.completed) {
+            _controller.reverse();
+          }
+        });
   }
 
   @override
@@ -93,15 +94,14 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       ),
     ];
     return Column(
-      children:
-          indicators
-              .map<Widget>(
-                (Widget c) => Container(
-                  margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                  child: c,
-                ),
-              )
-              .toList(),
+      children: indicators
+          .map<Widget>(
+            (Widget c) => Container(
+              margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+              child: c,
+            ),
+          )
+          .toList(),
     );
   }
 
