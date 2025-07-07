@@ -468,8 +468,9 @@ String generateDDCLibraryBundleMainModule({
   // Chrome in CI seems to hang when there are too many requests at once, so we
   // limit the max number of script requests for that environment.
   // https://github.com/flutter/flutter/issues/169574
-  final String setMaxRequests =
-      isCi ? r'window.$dartLoader.loadConfig.maxRequestPoolSize = 100;' : '';
+  final String setMaxRequests = isCi
+      ? r'window.$dartLoader.loadConfig.maxRequestPoolSize = 100;'
+      : '';
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
@@ -670,15 +671,14 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 }
 
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
-  final String serviceWorkerSettings =
-      includeServiceWorkerSettings
-          ? '''
+  final String serviceWorkerSettings = includeServiceWorkerSettings
+      ? '''
 {
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
 }'''
-          : '';
+      : '';
   return '''
 {{flutter_js}}
 {{flutter_build_config}}

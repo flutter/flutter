@@ -171,14 +171,13 @@ void main() {
         Logger: () => logger,
         OperatingSystemUtils: () => os,
         Platform: () => macPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreter(
-              buildSettings: const <String, String>{
-                'WRAPPER_NAME': 'My Super Awesome App.app',
-                'DEVELOPMENT_TEAM': '3333CCCC33',
-              },
-              projectInfo: projectInfo,
-            ),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(
+          buildSettings: const <String, String>{
+            'WRAPPER_NAME': 'My Super Awesome App.app',
+            'DEVELOPMENT_TEAM': '3333CCCC33',
+          },
+          projectInfo: projectInfo,
+        ),
         Xcode: () => xcode,
         Analytics: () => fakeAnalytics,
       },
@@ -483,8 +482,8 @@ void main() {
         ProcessManager: () => processManager,
         FileSystem: () => fileSystem,
         Logger: () => logger,
-        OperatingSystemUtils:
-            () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        OperatingSystemUtils: () =>
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         Platform: () => macPlatform,
         Pub: () => const ThrowingPub(),
         XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,

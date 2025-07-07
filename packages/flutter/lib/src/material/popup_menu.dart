@@ -409,16 +409,16 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final PopupMenuThemeData defaults =
-        theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
+    final PopupMenuThemeData defaults = theme.useMaterial3
+        ? _PopupMenuDefaultsM3(context)
+        : _PopupMenuDefaultsM2(context);
     final Set<MaterialState> states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
 
-    TextStyle style =
-        theme.useMaterial3
-            ? (widget.labelTextStyle?.resolve(states) ??
-                popupMenuTheme.labelTextStyle?.resolve(states)! ??
-                defaults.labelTextStyle!.resolve(states)!)
-            : (widget.textStyle ?? popupMenuTheme.textStyle ?? defaults.textStyle!);
+    TextStyle style = theme.useMaterial3
+        ? (widget.labelTextStyle?.resolve(states) ??
+              popupMenuTheme.labelTextStyle?.resolve(states)! ??
+              defaults.labelTextStyle!.resolve(states)!)
+        : (widget.textStyle ?? popupMenuTheme.textStyle ?? defaults.textStyle!);
 
     if (!widget.enabled && !theme.useMaterial3) {
       style = style.copyWith(color: theme.disabledColor);
@@ -443,7 +443,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
-      item = IconTheme.merge(data: IconThemeData(opacity: isDark ? 0.5 : 0.38), child: item);
+      item = IconTheme.merge(
+        data: IconThemeData(opacity: isDark ? 0.5 : 0.38),
+        child: item,
+      );
     }
 
     return MergeSemantics(
@@ -578,14 +581,13 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(duration: _fadeDuration, vsync: this)
-          ..value = widget.checked ? 1.0 : 0.0
-          ..addListener(
-            () => setState(() {
-              /* animation changed */
-            }),
-          );
+    _controller = AnimationController(duration: _fadeDuration, vsync: this)
+      ..value = widget.checked ? 1.0 : 0.0
+      ..addListener(
+        () => setState(() {
+          /* animation changed */
+        }),
+      );
   }
 
   @override
@@ -609,8 +611,9 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   Widget buildChild() {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final PopupMenuThemeData defaults =
-        theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
+    final PopupMenuThemeData defaults = theme.useMaterial3
+        ? _PopupMenuDefaultsM3(context)
+        : _PopupMenuDefaultsM2(context);
     final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
     final MaterialStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
@@ -705,8 +708,9 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
     final List<Widget> children = <Widget>[];
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final PopupMenuThemeData defaults =
-        theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
+    final PopupMenuThemeData defaults = theme.useMaterial3
+        ? _PopupMenuDefaultsM3(context)
+        : _PopupMenuDefaultsM2(context);
 
     for (int i = 0; i < widget.route.items.length; i += 1) {
       final CurvedAnimation opacity = _opacities[i];

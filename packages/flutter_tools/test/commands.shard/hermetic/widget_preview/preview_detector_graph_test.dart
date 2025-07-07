@@ -17,10 +17,8 @@ import 'utils/preview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-WidgetPreviewSourceFile withUpdatedSource(WidgetPreviewSourceFile original, String source) => (
-  path: original.path,
-  source: source,
-);
+WidgetPreviewSourceFile withUpdatedSource(WidgetPreviewSourceFile original, String source) =>
+    (path: original.path, source: source);
 
 void main() {
   initializeTestPreviewDetectorState();
@@ -108,10 +106,8 @@ part of 'lib.dart';
         // and libraries that depend on it have errors.
         await expectHasErrors(
           project: project,
-          changeOperation:
-              () => project.writeFile(
-                withUpdatedSource(libPart1, '${libPart1.source}\ninvalid-symbol;'),
-              ),
+          changeOperation: () =>
+              project.writeFile(withUpdatedSource(libPart1, '${libPart1.source}\ninvalid-symbol;')),
           filesWithErrors: <WidgetPreviewSourceFile>{main, lib},
         );
 
@@ -239,11 +235,8 @@ void bar() => null;
         // errors.
         await expectHasErrors(
           project: project,
-          changeOperation:
-              () => project.writeFile((
-                path: main.path,
-                source: "import '${baz.path}';\n${main.source}",
-              )),
+          changeOperation: () =>
+              project.writeFile((path: main.path, source: "import '${baz.path}';\n${main.source}")),
           filesWithErrors: <WidgetPreviewSourceFile>{main, baz},
         );
 

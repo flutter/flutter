@@ -48,17 +48,16 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     String apptStdout;
     try {
-      apptStdout =
-          processUtils
-              .runSync(<String>[
-                aaptPath,
-                'dump',
-                'xmltree',
-                apk.path,
-                'AndroidManifest.xml',
-              ], throwOnError: true)
-              .stdout
-              .trim();
+      apptStdout = processUtils
+          .runSync(<String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+            apk.path,
+            'AndroidManifest.xml',
+          ], throwOnError: true)
+          .stdout
+          .trim();
     } on ProcessException catch (error) {
       logger.printError('Failed to extract manifest from APK: $error.');
       return null;
@@ -421,8 +420,9 @@ class ApkManifestData {
       logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;
     }
-    final int? versionCode =
-        versionCodeAttr.value == null ? null : int.tryParse(versionCodeAttr.value!.substring(11));
+    final int? versionCode = versionCodeAttr.value == null
+        ? null
+        : int.tryParse(versionCodeAttr.value!.substring(11));
     if (versionCode == null) {
       logger.printError('Error running $packageName. Manifest versionCode invalid');
       return null;

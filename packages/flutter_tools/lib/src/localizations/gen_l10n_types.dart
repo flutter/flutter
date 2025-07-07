@@ -370,28 +370,27 @@ class Message {
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
 
-      localePlaceholders[bundle.locale] =
-          templateBundle.locale == bundle.locale
-              ? templatePlaceholders
-              : _placeholders(bundle.resources, resourceId, false);
+      localePlaceholders[bundle.locale] = templateBundle.locale == bundle.locale
+          ? templatePlaceholders
+          : _placeholders(bundle.resources, resourceId, false);
 
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {
-        validPlaceholders =
-            templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+        validPlaceholders = templatePlaceholders.entries
+            .map((MapEntry<String, Placeholder> e) => e.key)
+            .toList();
       }
       try {
-        parsedMessages[bundle.locale] =
-            translation == null
-                ? null
-                : Parser(
-                  resourceId,
-                  bundle.file.basename,
-                  translation,
-                  useEscaping: useEscaping,
-                  placeholders: validPlaceholders,
-                  logger: logger,
-                ).parse();
+        parsedMessages[bundle.locale] = translation == null
+            ? null
+            : Parser(
+                resourceId,
+                bundle.file.basename,
+                translation,
+                useEscaping: useEscaping,
+                placeholders: validPlaceholders,
+                logger: logger,
+              ).parse();
       } on L10nParserException catch (error) {
         logger?.printError(error.toString());
         // Treat it as an untranslated message in case we can't parse.
@@ -744,10 +743,9 @@ class AppResourceBundleCollection {
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      final List<String> localeStrings =
-          listOfCorrespondingLocales.map((LocaleInfo locale) {
-            return locale.toString();
-          }).toList();
+      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
+        return locale.toString();
+      }).toList();
       if (!localeStrings.contains(language)) {
         throw L10nException(
           'Arb file for a fallback, $language, does not exist, even though \n'

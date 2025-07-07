@@ -149,10 +149,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Transform(
-          transform:
-              Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateX(math.pi / 4),
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(math.pi / 4),
           child: Center(
             child: SizedBox(
               width: 200,
