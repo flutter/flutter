@@ -178,25 +178,27 @@
 
 // NOLINTBEGIN(google-objc-function-naming)
 
-int64_t FlutterCreateRegularWindow(int64_t engine_id, const FlutterWindowCreationRequest* request) {
+int64_t InternalFlutter_WindowController_CreateRegularWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request) {
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   [engine enableMultiView];
   return [engine.windowController createRegularWindow:request];
 }
 
-void FlutterDestroyWindow(int64_t engine_id, void* window) {
+void InternalFlutter_Window_Destroy(int64_t engine_id, void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   [engine.windowController destroyWindow:w];
 }
 
-void* FlutterGetWindowHandle(int64_t engine_id, FlutterViewIdentifier view_id) {
+void* InternalFlutter_Window_GetHandle(int64_t engine_id, FlutterViewIdentifier view_id) {
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   FlutterViewController* controller = [engine viewControllerForIdentifier:view_id];
   return (__bridge void*)controller.view.window;
 }
 
-FlutterWindowSize FlutterGetWindowContentSize(void* window) {
+FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   return {
       .width = w.frame.size.width,
@@ -204,17 +206,17 @@ FlutterWindowSize FlutterGetWindowContentSize(void* window) {
   };
 }
 
-void FlutterSetWindowContentSize(void* window, const FlutterWindowSizing* size) {
+void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSizing* size) {
   NSWindow* w = (__bridge NSWindow*)window;
   [w flutterSetContentSize:*size];
 }
 
-void FlutterSetWindowTitle(void* window, const char* title) {
+void InternalFlutter_Window_SetTitle(void* window, const char* title) {
   NSWindow* w = (__bridge NSWindow*)window;
   w.title = [NSString stringWithUTF8String:title];
 }
 
-void FlutterWindowSetMaximized(void* window, bool maximized) {
+void InternalFlutter_Window_SetMaximized(void* window, bool maximized) {
   NSWindow* w = (__bridge NSWindow*)window;
   if (maximized & !w.isZoomed) {
     [w zoom:nil];
@@ -223,27 +225,27 @@ void FlutterWindowSetMaximized(void* window, bool maximized) {
   }
 }
 
-bool FlutterWindowIsMaximized(void* window) {
+bool InternalFlutter_Window_IsMaximized(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   return w.isZoomed;
 }
 
-void FlutterWindowMinimize(void* window) {
+void InternalFlutter_Window_Minimize(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   [w miniaturize:nil];
 }
 
-void FlutterWindowUnminimize(void* window) {
+void InternalFlutter_Window_Unminimize(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   [w deminiaturize:nil];
 }
 
-bool FlutterWindowIsMinimized(void* window) {
+bool InternalFlutter_Window_IsMinimized(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   return w.isMiniaturized;
 }
 
-void FlutterWindowSetFullScreen(void* window, bool fullScreen) {
+void InternalFlutter_Window_SetFullScreen(void* window, bool fullScreen) {
   NSWindow* w = (__bridge NSWindow*)window;
   bool isFullScreen = (w.styleMask & NSWindowStyleMaskFullScreen) != 0;
   if (fullScreen && !isFullScreen) {
@@ -253,12 +255,12 @@ void FlutterWindowSetFullScreen(void* window, bool fullScreen) {
   }
 }
 
-bool FlutterWindowIsFullScreen(void* window) {
+bool InternalFlutter_Window_IsFullScreen(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   return (w.styleMask & NSWindowStyleMaskFullScreen) != 0;
 }
 
-void FlutterWindowActivate(void* window) {
+void InternalFlutter_Window_Activate(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   [NSApplication.sharedApplication activateIgnoringOtherApps:YES];
   [w makeKeyAndOrderFront:nil];

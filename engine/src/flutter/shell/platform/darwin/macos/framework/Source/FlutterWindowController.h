@@ -51,46 +51,48 @@ extern "C" {
 // NOLINTBEGIN(google-objc-function-naming)
 
 FLUTTER_DARWIN_EXPORT
-int64_t FlutterCreateRegularWindow(int64_t engine_id, const FlutterWindowCreationRequest* request);
+int64_t InternalFlutter_WindowController_CreateRegularWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterDestroyWindow(int64_t engine_id, void* window);
+void InternalFlutter_Window_Destroy(int64_t engine_id, void* window);
 
 FLUTTER_DARWIN_EXPORT
-void* FlutterGetWindowHandle(int64_t engine_id, FlutterViewIdentifier view_id);
+void* InternalFlutter_Window_GetHandle(int64_t engine_id, FlutterViewIdentifier view_id);
 
 FLUTTER_DARWIN_EXPORT
-FlutterWindowSize FlutterGetWindowContentSize(void* window);
+FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterSetWindowContentSize(void* window, const FlutterWindowSizing* size);
+void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSizing* size);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterSetWindowTitle(void* window, const char* title);
+void InternalFlutter_Window_SetTitle(void* window, const char* title);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterWindowSetMaximized(void* window, bool maximized);
+void InternalFlutter_Window_SetMaximized(void* window, bool maximized);
 
 FLUTTER_DARWIN_EXPORT
-bool FlutterWindowIsMaximized(void* window);
+bool InternalFlutter_Window_IsMaximized(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterWindowMinimize(void* window);
+void InternalFlutter_Window_Minimize(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterWindowUnminimize(void* window);
+void InternalFlutter_Window_Unminimize(void* window);
 
 FLUTTER_DARWIN_EXPORT
-bool FlutterWindowIsMinimized(void* window);
+bool InternalFlutter_Window_IsMinimized(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterWindowSetFullScreen(void* window, bool fullScreen);
+void InternalFlutter_Window_SetFullScreen(void* window, bool fullScreen);
 
 FLUTTER_DARWIN_EXPORT
-bool FlutterWindowIsFullScreen(void* window);
+bool InternalFlutter_Window_IsFullScreen(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterWindowActivate(void* window);
+void InternalFlutter_Window_Activate(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

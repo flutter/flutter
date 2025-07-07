@@ -67,7 +67,7 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
 
   {
     IsolateScope isolate_scope(isolate());
-    int64_t handle = FlutterCreateRegularWindow(engineId, &request);
+    int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
     EXPECT_EQ(handle, 1);
 
     FlutterViewController* viewController = [engine viewControllerForIdentifier:handle];
@@ -109,7 +109,7 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
       FML_DCHECK(isolate.has_value());
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       IsolateScope isolateScope(*isolate);
-      int64_t handle = FlutterCreateRegularWindow(engineId, &request);
+      int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
       EXPECT_EQ(handle, 1);
     }
 
@@ -130,15 +130,15 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   int64_t engine_id = reinterpret_cast<int64_t>(engine);
 
   IsolateScope isolate_scope(isolate());
-  int64_t handle = FlutterCreateRegularWindow(engine_id, &request);
+  int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
   FlutterViewController* viewController = [engine viewControllerForIdentifier:handle];
 
-  FlutterDestroyWindow(engine_id, (__bridge void*)viewController.view.window);
+  InternalFlutter_Window_Destroy(engine_id, (__bridge void*)viewController.view.window);
   viewController = [engine viewControllerForIdentifier:handle];
   EXPECT_EQ(viewController, nil);
 }
 
-TEST_F(FlutterWindowControllerTest, FlutterGetWindowHandle) {
+TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
   FlutterWindowCreationRequest request{
       .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
@@ -149,10 +149,10 @@ TEST_F(FlutterWindowControllerTest, FlutterGetWindowHandle) {
   int64_t engine_id = reinterpret_cast<int64_t>(engine);
 
   IsolateScope isolate_scope(isolate());
-  int64_t handle = FlutterCreateRegularWindow(engine_id, &request);
+  int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
   FlutterViewController* viewController = [engine viewControllerForIdentifier:handle];
 
-  void* window_handle = FlutterGetWindowHandle(engine_id, handle);
+  void* window_handle = InternalFlutter_Window_GetHandle(engine_id, handle);
   EXPECT_EQ(window_handle, (__bridge void*)viewController.view.window);
 }
 
@@ -167,7 +167,7 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   int64_t engine_id = reinterpret_cast<int64_t>(engine);
 
   IsolateScope isolate_scope(isolate());
-  int64_t handle = FlutterCreateRegularWindow(engine_id, &request);
+  int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
 
   FlutterViewController* viewController = [engine viewControllerForIdentifier:handle];
   NSWindow* window = viewController.view.window;
@@ -177,17 +177,17 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   EXPECT_EQ(window.miniaturized, NO);
   EXPECT_EQ(window.styleMask & NSWindowStyleMaskFullScreen, 0u);
 
-  FlutterWindowSetMaximized(windowHandle, true);
+  InternalFlutter_Window_SetMaximized(windowHandle, true);
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
   EXPECT_EQ(window.zoomed, YES);
 
-  FlutterWindowSetMaximized(windowHandle, false);
+  InternalFlutter_Window_SetMaximized(windowHandle, false);
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
   EXPECT_EQ(window.zoomed, NO);
 
   // FullScreen toggle does not seem to work when the application is not run from a bundle.
 
-  FlutterWindowMinimize(windowHandle);
+  InternalFlutter_Window_Minimize(windowHandle);
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
   EXPECT_EQ(window.miniaturized, YES);
 }
