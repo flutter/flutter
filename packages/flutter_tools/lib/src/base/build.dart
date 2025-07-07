@@ -161,8 +161,17 @@ class AOTSnapshotter {
     }
 
     final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
+    final bool isIOS = platform == TargetPlatform.ios;
     if (targetingApplePlatform) {
-      genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-macho-dylib', '--macho=$aotSharedLibrary']);
+      genSnapshotArgs.addAll(<String>[
+        '--snapshot_kind=app-aot-macho-dylib',
+        '--macho=$aotSharedLibrary',
+        // When the minimum version is updated, remember to update
+        // template MinimumOSVersion.
+        // https://github.com/flutter/flutter/pull/62902
+        if (isIOS) '--macho-min-os-version=${FlutterDarwinPlatform.ios.deploymentTarget()}',
+        if (!isIOS) '--macho-min-os-version=${FlutterDarwinPlatform.macos.deploymentTarget()}',
+      ]);
     } else {
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
     }
@@ -230,7 +239,7 @@ class AOTSnapshotter {
     if (targetingApplePlatform) {
       return _buildFramework(
         appleArch: darwinArch!,
-        isIOS: platform == TargetPlatform.ios,
+        isIOS: isIOS,
         sdkRoot: sdkRoot,
         snapshotPath: aotSharedLibrary,
         outputPath: outputDir.path,
@@ -263,11 +272,6 @@ class AOTSnapshotter {
     final commonBuildOptions = <String>[
       '-arch',
       targetArch,
-      if (isIOS)
-        // When the minimum version is updated, remember to update
-        // template MinimumOSVersion.
-        // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
     ];
 
