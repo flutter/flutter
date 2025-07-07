@@ -4533,7 +4533,7 @@ class SemanticsConfiguration {
     _isSemanticBoundary = value;
   }
 
-    /// The locale for widgets in the subtree.
+  /// The locale for widgets in the subtree.
   Locale? get localeForSubtree => _localeForSubtree;
   Locale? _localeForSubtree;
   set localeForSubtree(Locale? value) {
