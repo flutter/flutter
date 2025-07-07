@@ -220,10 +220,9 @@ abstract class FlutterVersion {
   // TODO(fujino): calculate this relative to frameworkCommitDate for
   // _FlutterVersionFromFile so we don't need a git call.
   late final String frameworkAge = _getTimeSinceCommit();
-  late final String engineAge =
-      engineBuildDate != null
-          ? _clock.now().difference(DateTime.parse(engineBuildDate!)).ago()
-          : _getTimeSinceCommit(revision: engineRevision);
+  late final String engineAge = engineBuildDate != null
+      ? _clock.now().difference(DateTime.parse(engineBuildDate!)).ago()
+      : _getTimeSinceCommit(revision: engineRevision);
 
   void ensureVersionFile();
 
