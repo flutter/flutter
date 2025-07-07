@@ -45,14 +45,13 @@ Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async
 }
 
 Future<void> run(List<String> args) async {
-  final ArgParser parser =
-      ArgParser()
-        ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
-        ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
-        ..addOption(_kOptionManifest, help: 'The manifest file')
-        ..addOption(_kOptionAssetManifestOut)
-        ..addOption(_kOptionComponentName)
-        ..addOption(_kOptionDepfile);
+  final ArgParser parser = ArgParser()
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
+    ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
+    ..addOption(_kOptionManifest, help: 'The manifest file')
+    ..addOption(_kOptionAssetManifestOut)
+    ..addOption(_kOptionComponentName)
+    ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     globals.printError('Missing option! All options must be specified.');

@@ -210,25 +210,21 @@ name: my_app
           final FakeDevice device = FakeDevice();
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          final OperationResult result =
-              await HotRunner(
-                devices,
-                debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-                target: 'main.dart',
-                devtoolsHandler: createNoOpHandler,
-                reassembleHelper:
-                    (
-                      List<FlutterDevice?> flutterDevices,
-                      Map<FlutterDevice?, List<FlutterView>> viewCache,
-                      void Function(String message)? onSlow,
-                      String reloadMessage,
-                    ) async => ReassembleResult(
-                      <FlutterView?, FlutterVmService?>{null: null},
-                      false,
-                      true,
-                    ),
-                analytics: fakeAnalytics,
-              ).restart();
+          final OperationResult result = await HotRunner(
+            devices,
+            debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+            target: 'main.dart',
+            devtoolsHandler: createNoOpHandler,
+            reassembleHelper:
+                (
+                  List<FlutterDevice?> flutterDevices,
+                  Map<FlutterDevice?, List<FlutterView>> viewCache,
+                  void Function(String message)? onSlow,
+                  String reloadMessage,
+                ) async =>
+                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+            analytics: fakeAnalytics,
+          ).restart();
           expect(result.isOk, false);
           expect(result.message, 'setupHotReload failed');
           expect(failingTestingConfig.updateDevFSCompleteCalled, false);
@@ -324,15 +320,14 @@ name: my_app
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
 
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => UpdateFSReport(
-                success: true,
-                invalidatedSourcesCount: 2,
-                syncedBytes: 4,
-                scannedSourcesCount: 8,
-                compileDuration: const Duration(seconds: 16),
-                transferDuration: const Duration(seconds: 32),
-              );
+          fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 2,
+            syncedBytes: 4,
+            scannedSourcesCount: 8,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
           final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
             stopwatches: <String, Stopwatch>{
@@ -396,15 +391,14 @@ name: my_app
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
 
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => UpdateFSReport(
-                success: true,
-                invalidatedSourcesCount: 6,
-                syncedBytes: 8,
-                scannedSourcesCount: 16,
-                compileDuration: const Duration(seconds: 16),
-                transferDuration: const Duration(seconds: 32),
-              );
+          fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
           final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
             stopwatches: <String, Stopwatch>{
@@ -417,15 +411,15 @@ name: my_app
 
           (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-          final OperationResult result =
-              await HotRunner(
-                devices,
-                debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-                target: 'main.dart',
-                devtoolsHandler: createNoOpHandler,
-                stopwatchFactory: fakeStopwatchFactory,
-                analytics: fakeAnalytics,
-                reloadSourcesHelper: (
+          final OperationResult result = await HotRunner(
+            devices,
+            debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+            target: 'main.dart',
+            devtoolsHandler: createNoOpHandler,
+            stopwatchFactory: fakeStopwatchFactory,
+            analytics: fakeAnalytics,
+            reloadSourcesHelper:
+                (
                   HotRunner hotRunner,
                   List<FlutterDevice?> flutterDevices,
                   bool? pause,
@@ -442,18 +436,15 @@ name: my_app
                   firstReloadDetails['receivedProceduresCount'] = 5;
                   return OperationResult.ok;
                 },
-                reassembleHelper:
-                    (
-                      List<FlutterDevice?> flutterDevices,
-                      Map<FlutterDevice?, List<FlutterView>> viewCache,
-                      void Function(String message)? onSlow,
-                      String reloadMessage,
-                    ) async => ReassembleResult(
-                      <FlutterView?, FlutterVmService?>{null: null},
-                      false,
-                      true,
-                    ),
-              ).restart();
+            reassembleHelper:
+                (
+                  List<FlutterDevice?> flutterDevices,
+                  Map<FlutterDevice?, List<FlutterView>> viewCache,
+                  void Function(String message)? onSlow,
+                  String reloadMessage,
+                ) async =>
+                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+          ).restart();
 
           expect(result.isOk, true);
           expect(
@@ -504,8 +495,8 @@ name: my_app
           final FakeDevice device = FakeDevice();
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => throw Exception('updateDevFS failed');
+          fakeFlutterDevice.updateDevFSReportCallback = () async =>
+              throw Exception('updateDevFS failed');
 
           final HotRunner runner = HotRunner(
             devices,
@@ -548,8 +539,8 @@ name: my_app
           final FakeDevice device = FakeDevice();
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => throw Exception('updateDevFS failed');
+          fakeFlutterDevice.updateDevFSReportCallback = () async =>
+              throw Exception('updateDevFS failed');
 
           final HotRunner runner = HotRunner(
             devices,

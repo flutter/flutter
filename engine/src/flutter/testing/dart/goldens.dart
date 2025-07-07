@@ -36,10 +36,9 @@ class ImageComparer {
     final Map<String, String> dimensions = <String, String>{
       'impeller_enabled': impellerEnabled.toString(),
     };
-    final SkiaGoldClient client =
-        SkiaGoldClient.isAvailable() && _useSkiaGold
-            ? SkiaGoldClient(workDirectory, dimensions: dimensions, verbose: verbose)
-            : _FakeSkiaGoldClient(workDirectory, dimensions, verbose: verbose);
+    final SkiaGoldClient client = SkiaGoldClient.isAvailable() && _useSkiaGold
+        ? SkiaGoldClient(workDirectory, dimensions: dimensions, verbose: verbose)
+        : _FakeSkiaGoldClient(workDirectory, dimensions, verbose: verbose);
 
     await client.auth();
     return ImageComparer._(client: client);

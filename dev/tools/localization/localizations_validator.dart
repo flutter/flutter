@@ -65,8 +65,9 @@ void validateEnglishLocalizations(File file) {
     }
 
     final dynamic atResourceValue = bundle[atResourceId];
-    final Map<String, dynamic>? atResource =
-        atResourceValue is Map<String, dynamic> ? atResourceValue : null;
+    final Map<String, dynamic>? atResource = atResourceValue is Map<String, dynamic>
+        ? atResourceValue
+        : null;
     if (atResource == null) {
       errorMessages.writeln('A map value was not specified for $atResourceId');
       continue;

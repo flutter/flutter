@@ -671,20 +671,18 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if ((event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) &&
         _shouldTrackMoveEvent(event.pointer)) {
-      final Offset delta =
-          (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
-      final Offset localDelta =
-          (event is PointerMoveEvent)
-              ? event.localDelta
-              : (event as PointerPanZoomUpdateEvent).localPanDelta;
-      final Offset position =
-          (event is PointerMoveEvent)
-              ? event.position
-              : (event.position + (event as PointerPanZoomUpdateEvent).pan);
-      final Offset localPosition =
-          (event is PointerMoveEvent)
-              ? event.localPosition
-              : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
+      final Offset delta = (event is PointerMoveEvent)
+          ? event.delta
+          : (event as PointerPanZoomUpdateEvent).panDelta;
+      final Offset localDelta = (event is PointerMoveEvent)
+          ? event.localDelta
+          : (event as PointerPanZoomUpdateEvent).localPanDelta;
+      final Offset position = (event is PointerMoveEvent)
+          ? event.position
+          : (event.position + (event as PointerPanZoomUpdateEvent).pan);
+      final Offset localPosition = (event is PointerMoveEvent)
+          ? event.localPosition
+          : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
       _lastPosition = OffsetPair(local: localPosition, global: position);
       final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
       switch (_state) {
@@ -693,8 +691,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           _lastPendingEventTimestamp = event.timeStamp;
           _lastTransform = event.transform;
           final Offset movedLocally = _getDeltaForDetails(localDelta);
-          final Matrix4? localToGlobalTransform =
-              event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+          final Matrix4? localToGlobalTransform = event.transform == null
+              ? null
+              : Matrix4.tryInvert(event.transform!);
           _globalDistanceMoved +=
               PointerEvent.transformDeltaViaPositions(
                 transform: localToGlobalTransform,
@@ -887,10 +886,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       debugReport = () => 'Could not estimate velocity.';
     } else {
       details = considerFling(estimate, tracker.kind);
-      debugReport =
-          (details != null)
-              ? () => '$estimate; fling at ${details!.velocity}.'
-              : () => '$estimate; judged to not be a fling.';
+      debugReport = (details != null)
+          ? () => '$estimate; fling at ${details!.velocity}.'
+          : () => '$estimate; judged to not be a fling.';
     }
     details ??= DragEndDetails(
       primaryVelocity: 0.0,

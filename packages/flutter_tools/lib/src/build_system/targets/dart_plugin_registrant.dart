@@ -51,8 +51,9 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String? platformName = environment.defines[kTargetPlatform];
-    final TargetPlatform? targetPlatform =
-        platformName == null ? null : getTargetPlatformForName(platformName);
+    final TargetPlatform? targetPlatform = platformName == null
+        ? null
+        : getTargetPlatformForName(platformName);
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.
