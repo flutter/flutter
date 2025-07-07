@@ -64,10 +64,10 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     controller.value = 0.5;
     bool didReceiveCallback = false;
-    final ProxyAnimation animation =
-        ProxyAnimation()..addListener(() {
-          didReceiveCallback = true;
-        });
+    final ProxyAnimation animation = ProxyAnimation()
+      ..addListener(() {
+        didReceiveCallback = true;
+      });
     expect(didReceiveCallback, isFalse);
     animation.parent = controller;
     expect(didReceiveCallback, isTrue);
@@ -123,11 +123,10 @@ void main() {
   test('TrainHoppingAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            TrainHoppingAnimation(
-              const AlwaysStoppedAnimation<double>(1),
-              const AlwaysStoppedAnimation<double>(1),
-            ).dispose(),
+        () => TrainHoppingAnimation(
+          const AlwaysStoppedAnimation<double>(1),
+          const AlwaysStoppedAnimation<double>(1),
+        ).dispose(),
         TrainHoppingAnimation,
       ),
       areCreateAndDispose,
@@ -477,14 +476,13 @@ FlutterError
   test('$CurvedAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            CurvedAnimation(
-              parent: AnimationController(
-                duration: const Duration(milliseconds: 100),
-                vsync: const TestVSync(),
-              ),
-              curve: Curves.linear,
-            ).dispose(),
+        () => CurvedAnimation(
+          parent: AnimationController(
+            duration: const Duration(milliseconds: 100),
+            vsync: const TestVSync(),
+          ),
+          curve: Curves.linear,
+        ).dispose(),
         CurvedAnimation,
       ),
       areCreateAndDispose,

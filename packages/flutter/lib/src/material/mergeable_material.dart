@@ -292,10 +292,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void didUpdateWidget(MergeableMaterial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys =
-        oldWidget.children.map<LocalKey>((MergeableMaterialItem child) => child.key).toSet();
-    final Set<LocalKey> newKeys =
-        widget.children.map<LocalKey>((MergeableMaterialItem child) => child.key).toSet();
+    final Set<LocalKey> oldKeys = oldWidget.children
+        .map<LocalKey>((MergeableMaterialItem child) => child.key)
+        .toSet();
+    final Set<LocalKey> newKeys = widget.children
+        .map<LocalKey>((MergeableMaterialItem child) => child.key)
+        .toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
 
@@ -491,20 +493,18 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     Radius endRadius = Radius.zero;
 
     if (index > 0 && _children[index - 1] is MaterialGap) {
-      startRadius =
-          Radius.lerp(
-            Radius.zero,
-            cardRadius,
-            _animationTuples[_children[index - 1].key]!.startAnimation.value,
-          )!;
+      startRadius = Radius.lerp(
+        Radius.zero,
+        cardRadius,
+        _animationTuples[_children[index - 1].key]!.startAnimation.value,
+      )!;
     }
     if (index < _children.length - 2 && _children[index + 1] is MaterialGap) {
-      endRadius =
-          Radius.lerp(
-            Radius.zero,
-            cardRadius,
-            _animationTuples[_children[index + 1].key]!.endAnimation.value,
-          )!;
+      endRadius = Radius.lerp(
+        Radius.zero,
+        cardRadius,
+        _animationTuples[_children[index + 1].key]!.endAnimation.value,
+      )!;
     }
 
     if (widget.mainAxis == Axis.vertical) {

@@ -76,7 +76,8 @@ class WidgetPreviewProject {
   String get packageName => 'foo';
 
   /// The initial contents of the pubspec.yaml for the project.
-  String get pubspecContents => '''
+  String get pubspecContents =>
+      '''
 name: $packageName
 
 ${inWorkspace ? 'resolution: workspace' : ''}

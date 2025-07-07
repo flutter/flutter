@@ -51,11 +51,10 @@ class OpacityPeepholeCase {
   }) : this.forAnimation(
          route: route,
          name: name,
-         builder:
-             (Animation<double> animation) => AnimatedBuilder(
-               animation: animation,
-               builder: (BuildContext context, Widget? child) => builder(animation.value),
-             ),
+         builder: (Animation<double> animation) => AnimatedBuilder(
+           animation: animation,
+           builder: (BuildContext context, Widget? child) => builder(animation.value),
+         ),
        );
 
   OpacityPeepholeCase.forAnimation({

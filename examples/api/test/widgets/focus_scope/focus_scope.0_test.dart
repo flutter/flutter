@@ -8,13 +8,10 @@ import 'package:flutter_api_samples/widgets/focus_scope/focus_scope.0.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  bool hasFocus(WidgetTester tester, IconData icon) =>
-      tester
-          .widget<IconButton>(
-            find.ancestor(of: find.byIcon(icon), matching: find.byType(IconButton)),
-          )
-          .focusNode!
-          .hasFocus;
+  bool hasFocus(WidgetTester tester, IconData icon) => tester
+      .widget<IconButton>(find.ancestor(of: find.byIcon(icon), matching: find.byType(IconButton)))
+      .focusNode!
+      .hasFocus;
 
   testWidgets('The focus is restricted to the foreground', (WidgetTester tester) async {
     await tester.pumpWidget(const example.FocusScopeExampleApp());

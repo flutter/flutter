@@ -1337,11 +1337,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         (theme.useMaterial3
             ? _ChipDefaultsM3(context, widget.isEnabled)
             : ChipThemeData.fromDefaults(
-              brightness: brightness,
-              secondaryColor:
-                  brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
-              labelStyle: theme.textTheme.bodyLarge!,
-            ));
+                brightness: brightness,
+                secondaryColor: brightness == Brightness.dark
+                    ? Colors.tealAccent[200]!
+                    : theme.primaryColor,
+                labelStyle: theme.textTheme.bodyLarge!,
+              ));
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
 
@@ -1376,10 +1377,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       statesController.value,
     );
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
-    final Widget? avatar =
-        iconTheme != null && hasAvatar
-            ? IconTheme.merge(data: chipDefaults.iconTheme!.merge(iconTheme), child: widget.avatar!)
-            : widget.avatar;
+    final Widget? avatar = iconTheme != null && hasAvatar
+        ? IconTheme.merge(data: chipDefaults.iconTheme!.merge(iconTheme), child: widget.avatar!)
+        : widget.avatar;
 
     /// The chip at text scale 1 starts with 8px on each side and as text scaling
     /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
@@ -1388,12 +1388,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double defaultFontSize = effectiveLabelStyle.fontSize ?? 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-    final EdgeInsetsGeometry defaultLabelPadding =
-        EdgeInsets.lerp(
-          const EdgeInsets.symmetric(horizontal: 8.0),
-          const EdgeInsets.symmetric(horizontal: 4.0),
-          clampDouble(effectiveTextScale - 1.0, 0.0, 1.0),
-        )!;
+    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(effectiveTextScale - 1.0, 0.0, 1.0),
+    )!;
 
     final EdgeInsetsGeometry labelPadding =
         widget.labelPadding ??
@@ -1418,12 +1417,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
-        onHover:
-            canTap
-                ? (bool value) {
-                  statesController.update(WidgetState.hovered, value);
-                }
-                : null,
+        onHover: canTap
+            ? (bool value) {
+                statesController.update(WidgetState.hovered, value);
+              }
+            : null,
         mouseCursor: widget.mouseCursor,
         hoverColor: (widget.color ?? chipTheme.color) == null ? null : Colors.transparent,
         customBorder: resolvedShape,
@@ -2133,18 +2131,17 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
 
-    paintColor =
-        checkmarkAnimation.status == AnimationStatus.reverse
-            ? fadeTween.evaluate(checkmarkAnimation)
-            : paintColor;
+    paintColor = checkmarkAnimation.status == AnimationStatus.reverse
+        ? fadeTween.evaluate(checkmarkAnimation)
+        : paintColor;
 
-    final Paint paint =
-        Paint()
-          ..color = paintColor!
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _kCheckmarkStrokeWidth * avatar.size.height / 24.0;
-    final double t =
-        checkmarkAnimation.status == AnimationStatus.reverse ? 1.0 : checkmarkAnimation.value;
+    final Paint paint = Paint()
+      ..color = paintColor!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _kCheckmarkStrokeWidth * avatar.size.height / 24.0;
+    final double t = checkmarkAnimation.status == AnimationStatus.reverse
+        ? 1.0
+        : checkmarkAnimation.value;
     if (t == 0.0) {
       // Nothing to draw.
       return;
@@ -2175,10 +2172,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     if (isDrawingCheckmark) {
       if (theme.showAvatar) {
         final Rect avatarRect = _boxRect(avatar).shift(offset);
-        final Paint darkenPaint =
-            Paint()
-              ..color = selectionScrimTween.evaluate(checkmarkAnimation)!
-              ..blendMode = BlendMode.srcATop;
+        final Paint darkenPaint = Paint()
+          ..color = selectionScrimTween.evaluate(checkmarkAnimation)!
+          ..blendMode = BlendMode.srcATop;
         final Path path = avatarBorder!.getOuterPath(avatarRect);
         context.canvas.drawPath(path, darkenPaint);
       }
@@ -2317,11 +2313,10 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           () {
             // Draws a rect around the tap targets to help with visualizing where
             // they really are.
-            final Paint outlinePaint =
-                Paint()
-                  ..color = const Color(0xff800000)
-                  ..strokeWidth = 1.0
-                  ..style = PaintingStyle.stroke;
+            final Paint outlinePaint = Paint()
+              ..color = const Color(0xff800000)
+              ..strokeWidth = 1.0
+              ..style = PaintingStyle.stroke;
             if (deleteIconShowing) {
               context.canvas.drawRect(_deleteButtonRect.shift(offset), outlinePaint);
             }

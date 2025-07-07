@@ -82,25 +82,24 @@ class WebDriverService extends DriverService {
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
-      debuggingOptions:
-          buildInfo.isRelease
-              ? DebuggingOptions.disabled(
-                buildInfo,
-                port: debuggingOptions.port,
-                hostname: debuggingOptions.hostname,
-                webRenderer: debuggingOptions.webRenderer,
-                webUseWasm: debuggingOptions.webUseWasm,
-                webHeaders: debuggingOptions.webHeaders,
-              )
-              : DebuggingOptions.enabled(
-                buildInfo,
-                port: debuggingOptions.port,
-                hostname: debuggingOptions.hostname,
-                disablePortPublication: debuggingOptions.disablePortPublication,
-                webRenderer: debuggingOptions.webRenderer,
-                webUseWasm: debuggingOptions.webUseWasm,
-                webHeaders: debuggingOptions.webHeaders,
-              ),
+      debuggingOptions: buildInfo.isRelease
+          ? DebuggingOptions.disabled(
+              buildInfo,
+              port: debuggingOptions.port,
+              hostname: debuggingOptions.hostname,
+              webRenderer: debuggingOptions.webRenderer,
+              webUseWasm: debuggingOptions.webUseWasm,
+              webHeaders: debuggingOptions.webHeaders,
+            )
+          : DebuggingOptions.enabled(
+              buildInfo,
+              port: debuggingOptions.port,
+              hostname: debuggingOptions.hostname,
+              disablePortPublication: debuggingOptions.disablePortPublication,
+              webRenderer: debuggingOptions.webRenderer,
+              webUseWasm: debuggingOptions.webUseWasm,
+              webHeaders: debuggingOptions.webHeaders,
+            ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,

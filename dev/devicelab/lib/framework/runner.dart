@@ -240,17 +240,17 @@ Future<TaskResult> runTask(
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
     print('[$taskName] Connected to VM server.');
-    isolateParams =
-        isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
+    isolateParams = isolateParams == null
+        ? <String, String>{}
+        : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
     final VmService service = result.vmService;
     final String isolateId = result.isolate.id!;
-    final Map<String, dynamic> taskResultJson =
-        (await service.callServiceExtension(
-          'ext.cocoonRunTask',
-          args: isolateParams,
-          isolateId: isolateId,
-        )).json!;
+    final Map<String, dynamic> taskResultJson = (await service.callServiceExtension(
+      'ext.cocoonRunTask',
+      args: isolateParams,
+      isolateId: isolateId,
+    )).json!;
     // Notify the task process that the task result has been received and it
     // can proceed to shutdown.
     await _acknowledgeTaskResultReceived(service: service, isolateId: isolateId);

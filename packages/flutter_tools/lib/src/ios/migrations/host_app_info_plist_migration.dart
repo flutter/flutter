@@ -35,7 +35,8 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 </dict>
 </plist>
 ''';
-      const String plistWithKey = '''
+      const String plistWithKey =
+          '''
 	<key>$_kDisableMinimumFrameDurationKey</key>
 	<true/>
 </dict>
@@ -50,7 +51,8 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 </dict>
 </plist>
 ''';
-      const String plistWithKey = '''
+      const String plistWithKey =
+          '''
 	<key>$_kIndirectInputEventsKey</key>
 	<true/>
 </dict>

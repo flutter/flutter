@@ -47,16 +47,18 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
       '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
-    final String expectedMessage =
-        webDevice == WebDevice.webServer ? 'Recompile complete' : 'Reloaded application';
+    final String expectedMessage = webDevice == WebDevice.webServer
+        ? 'Recompile complete'
+        : 'Reloaded application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
 
-      final String rootPubspec =
-          File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
       final YamlEditor yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
       File(

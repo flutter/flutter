@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('DrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: DrawerButton(), drawer: Drawer())),
+      const MaterialApp(
+        home: Scaffold(body: DrawerButton(), drawer: Drawer()),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -110,7 +112,9 @@ void main() {
 
   testWidgets('DrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: DrawerButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: DrawerButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(
@@ -139,7 +143,9 @@ void main() {
   testWidgets('DrawerButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: DrawerButton()))),
+      const MaterialApp(
+        home: Material(child: Center(child: DrawerButton())),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -173,7 +179,9 @@ void main() {
 
   testWidgets('EndDrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: EndDrawerButton(), endDrawer: Drawer())),
+      const MaterialApp(
+        home: Scaffold(body: EndDrawerButton(), endDrawer: Drawer()),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -190,7 +198,9 @@ void main() {
   testWidgets('EndDrawerButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: EndDrawerButton()))),
+      const MaterialApp(
+        home: Material(child: Center(child: EndDrawerButton())),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -223,7 +233,9 @@ void main() {
 
   testWidgets('EndDrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: EndDrawerButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: EndDrawerButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(

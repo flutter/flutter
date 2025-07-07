@@ -16,8 +16,8 @@ class ZDChannel {
   }
 
   static int _write(ZDHandle channel, ByteData data, List<ZDHandle> handles) {
-    final Pointer<zircon_dart_handle_list_t> handleList =
-        zirconFFIBindings!.zircon_dart_handle_list_create();
+    final Pointer<zircon_dart_handle_list_t> handleList = zirconFFIBindings!
+        .zircon_dart_handle_list_create();
     handles.forEach((ZDHandle handle) {
       zirconFFIBindings!.zircon_dart_handle_list_append(handleList, handle._ptr);
     });

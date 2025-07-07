@@ -59,25 +59,24 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
           _data[index].isExpanded = isExpanded;
         });
       },
-      children:
-          _data.map<ExpansionPanel>((Item item) {
-            return ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return ListTile(title: Text(item.headerValue));
-              },
-              body: ListTile(
-                title: Text(item.expandedValue),
-                subtitle: const Text('To delete this panel, tap the trash can icon'),
-                trailing: const Icon(Icons.delete),
-                onTap: () {
-                  setState(() {
-                    _data.removeWhere((Item currentItem) => item == currentItem);
-                  });
-                },
-              ),
-              isExpanded: item.isExpanded,
-            );
-          }).toList(),
+      children: _data.map<ExpansionPanel>((Item item) {
+        return ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return ListTile(title: Text(item.headerValue));
+          },
+          body: ListTile(
+            title: Text(item.expandedValue),
+            subtitle: const Text('To delete this panel, tap the trash can icon'),
+            trailing: const Icon(Icons.delete),
+            onTap: () {
+              setState(() {
+                _data.removeWhere((Item currentItem) => item == currentItem);
+              });
+            },
+          ),
+          isExpanded: item.isExpanded,
+        );
+      }).toList(),
     );
   }
 }

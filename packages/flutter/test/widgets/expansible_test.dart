@@ -13,11 +13,10 @@ void main() {
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder:
-              (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
+          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+            onTap: controller.isExpanded ? controller.collapse : controller.expand,
+            child: const Text('Header'),
+          ),
         ),
       ),
     );
@@ -46,11 +45,10 @@ void main() {
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder:
-              (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
+          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+            onTap: controller.isExpanded ? controller.collapse : controller.expand,
+            child: const Text('Header'),
+          ),
         ),
       ),
     );
@@ -86,10 +84,10 @@ void main() {
             children: <Widget>[
               Expansible(
                 controller: controller,
-                bodyBuilder:
-                    (BuildContext context, Animation<double> animation) => const Text('Body'),
-                headerBuilder:
-                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                    const Text('Body'),
+                headerBuilder: (BuildContext context, Animation<double> animation) =>
+                    GestureDetector(
                       onTap: controller.isExpanded ? controller.collapse : controller.expand,
                       child: const Text('Header'),
                     ),
@@ -117,19 +115,14 @@ void main() {
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder:
-              (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
-          expansibleBuilder: (
-            BuildContext context,
-            Widget header,
-            Widget body,
-            Animation<double> animation,
-          ) {
-            return header;
-          },
+          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+            onTap: controller.isExpanded ? controller.collapse : controller.expand,
+            child: const Text('Header'),
+          ),
+          expansibleBuilder:
+              (BuildContext context, Widget header, Widget body, Animation<double> animation) {
+                return header;
+              },
         ),
       ),
     );
@@ -170,22 +163,20 @@ void main() {
               Expansible(
                 controller: controller1,
                 maintainState: false,
-                bodyBuilder:
-                    (BuildContext context, Animation<double> animation) =>
-                        const Text('Maintaining State'),
-                headerBuilder:
-                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                    const Text('Maintaining State'),
+                headerBuilder: (BuildContext context, Animation<double> animation) =>
+                    GestureDetector(
                       onTap: controller1.isExpanded ? controller1.collapse : controller1.expand,
                       child: const Text('Header'),
                     ),
               ),
               Expansible(
                 controller: controller2,
-                bodyBuilder:
-                    (BuildContext context, Animation<double> animation) =>
-                        const Text('Discarding State'),
-                headerBuilder:
-                    (BuildContext context, Animation<double> animation) => GestureDetector(
+                bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                    const Text('Discarding State'),
+                headerBuilder: (BuildContext context, Animation<double> animation) =>
+                    GestureDetector(
                       onTap: controller2.isExpanded ? controller2.collapse : controller2.expand,
                       child: const Text('Header'),
                     ),
@@ -215,14 +206,12 @@ void main() {
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
-          bodyBuilder:
-              (BuildContext context, Animation<double> animation) =>
-                  const SizedBox(height: 50.0, child: Placeholder()),
-          headerBuilder:
-              (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
+          bodyBuilder: (BuildContext context, Animation<double> animation) =>
+              const SizedBox(height: 50.0, child: Placeholder()),
+          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+            onTap: controller.isExpanded ? controller.collapse : controller.expand,
+            child: const Text('Header'),
+          ),
         ),
       ),
     );

@@ -183,8 +183,8 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      FlutterVersion:
-          () => FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
+      FlutterVersion: () =>
+          FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
       Logger: () => logger,
       ProcessManager: () => processManager,
     },
@@ -262,12 +262,11 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      FlutterVersion:
-          () => FakeFlutterVersion(
-            branch: 'beta',
-            frameworkVersion: startingTag,
-            engineRevision: 'engine',
-          ),
+      FlutterVersion: () => FakeFlutterVersion(
+        branch: 'beta',
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      ),
       Logger: () => logger,
       ProcessManager: () => processManager,
     },

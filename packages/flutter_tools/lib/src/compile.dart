@@ -255,8 +255,9 @@ class KernelCompiler {
     required PackageConfig packageConfig,
     String? nativeAssets,
   }) async {
-    final TargetPlatform? platform =
-        targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc
+        ? TargetPlatform.web_javascript
+        : null;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
@@ -281,8 +282,9 @@ class KernelCompiler {
 
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
-    final File? dartPluginRegistrant =
-        checkDartPluginRegistry ? buildDir?.parent.childFile('dart_plugin_registrant.dart') : null;
+    final File? dartPluginRegistrant = checkDartPluginRegistry
+        ? buildDir?.parent.childFile('dart_plugin_registrant.dart')
+        : null;
 
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
@@ -817,8 +819,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? additionalSourceUri,
     String? nativeAssetsUri,
   }) async {
-    final TargetPlatform? platform =
-        (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
+        ? TargetPlatform.web_javascript
+        : null;
     late final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
       commandToStartFrontendServer = <String>[

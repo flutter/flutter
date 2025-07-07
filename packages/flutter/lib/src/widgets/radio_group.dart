@@ -143,16 +143,16 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
     if (_radios.length < 2) {
       return;
     }
-    final FocusNode? currentFocus =
-        _radios.firstWhereOrNull((RadioClient<T> radio) => radio.focusNode.hasFocus)?.focusNode;
+    final FocusNode? currentFocus = _radios
+        .firstWhereOrNull((RadioClient<T> radio) => radio.focusNode.hasFocus)
+        ?.focusNode;
     if (currentFocus == null) {
       // The focused node is either a non interactive radio or other controls.
       return;
     }
-    final List<FocusNode> sorted =
-        ReadingOrderTraversalPolicy.sort(
-          _radios.map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
-        ).toList();
+    final List<FocusNode> sorted = ReadingOrderTraversalPolicy.sort(
+      _radios.map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
+    ).toList();
     final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
 
     final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
@@ -315,11 +315,10 @@ class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
 
     // Nodes that are not selected AND not currently focused, since we can't
     // remove the focused node from the sorted result.
-    final Set<FocusNode> nodeToSkip =
-        radios
-            .where((RadioClient<T> radio) => selected != radio && radio.focusNode != currentNode)
-            .map<FocusNode>((RadioClient<T> radio) => radio.focusNode)
-            .toSet();
+    final Set<FocusNode> nodeToSkip = radios
+        .where((RadioClient<T> radio) => selected != radio && radio.focusNode != currentNode)
+        .map<FocusNode>((RadioClient<T> radio) => radio.focusNode)
+        .toSet();
     final Iterable<FocusNode> skipsNonSelected = descendants.where(
       (FocusNode node) => !nodeToSkip.contains(node),
     );

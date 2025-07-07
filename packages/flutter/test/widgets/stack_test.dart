@@ -25,7 +25,10 @@ void main() {
 
   testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Center(child: Stack())),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Stack()),
+      ),
     );
   });
 
@@ -211,7 +214,10 @@ void main() {
 
   testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Center(child: IndexedStack())),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IndexedStack()),
+      ),
     );
   });
 
@@ -548,7 +554,10 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: IndexedStack(children: children)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(children: children),
+      ),
     );
 
     await tester.tap(find.text('hiddenChild', skipOffstage: false), warnIfMissed: false);
@@ -977,8 +986,8 @@ void main() {
 
   testWidgets(
     'Stack error messages',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const Stack());
       final String exception = tester.takeException().toString();

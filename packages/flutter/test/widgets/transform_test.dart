@@ -234,7 +234,10 @@ void main() {
 
   testWidgets('Transform.rotate', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2.0, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2.0,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
@@ -345,7 +348,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(tester.layers, hasLength(3));
@@ -355,7 +361,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(
@@ -387,7 +396,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(
@@ -419,7 +431,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Transform.rotate(angle: 3 * math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: 3 * math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(

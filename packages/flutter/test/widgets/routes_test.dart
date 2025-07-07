@@ -554,13 +554,10 @@ void main() {
                     Navigator.of(context).push<void>(
                       PageRouteBuilder<void>(
                         settings: settings,
-                        pageBuilder: (
-                          BuildContext context,
-                          Animation<double> input,
-                          Animation<double> out,
-                        ) {
-                          return const Text('Page Two');
-                        },
+                        pageBuilder:
+                            (BuildContext context, Animation<double> input, Animation<double> out) {
+                              return const Text('Page Two');
+                            },
                       ),
                     );
                   },
@@ -608,13 +605,10 @@ void main() {
                     Navigator.of(context).push<void>(
                       PageRouteBuilder<void>(
                         settings: settings,
-                        pageBuilder: (
-                          BuildContext context,
-                          Animation<double> input,
-                          Animation<double> out,
-                        ) {
-                          return const Text('Page Two');
-                        },
+                        pageBuilder:
+                            (BuildContext context, Animation<double> input, Animation<double> out) {
+                              return const Text('Page Two');
+                            },
                         // modified value, default PageRouteBuilder reverse transition duration should be 300ms.
                         reverseTransitionDuration: const Duration(milliseconds: 150),
                       ),
@@ -1540,20 +1534,14 @@ void main() {
                         // durations to proceed.
                         transitionDuration: const Duration(days: 1),
                         reverseTransitionDuration: const Duration(days: 1),
-                        pageBuilder: (
-                          _,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return Container(key: containerKey, color: Colors.green);
-                        },
-                        transitionBuilder: (
-                          BuildContext context,
-                          Animation<double> animation,
-                          Widget child,
-                        ) {
-                          return child;
-                        },
+                        pageBuilder:
+                            (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                              return Container(key: containerKey, color: Colors.green);
+                            },
+                        transitionBuilder:
+                            (BuildContext context, Animation<double> animation, Widget child) {
+                              return child;
+                            },
                       ),
                     );
                   },
@@ -1617,26 +1605,20 @@ void main() {
                         },
                         transitionDuration: const Duration(days: 1),
                         reverseTransitionDuration: const Duration(days: 1),
-                        pageBuilder: (
-                          _,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return Container(key: containerKey, color: Colors.green);
-                        },
-                        transitionBuilder: (
-                          BuildContext context,
-                          Animation<double> animation,
-                          Widget child,
-                        ) {
-                          return FractionalTranslation(
-                            translation: Tween<Offset>(
-                              begin: const Offset(0.0, 1.0),
-                              end: Offset.zero,
-                            ).evaluate(animation),
-                            child: child, // child is the value returned by pageBuilder
-                          );
-                        },
+                        pageBuilder:
+                            (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                              return Container(key: containerKey, color: Colors.green);
+                            },
+                        transitionBuilder:
+                            (BuildContext context, Animation<double> animation, Widget child) {
+                              return FractionalTranslation(
+                                translation: Tween<Offset>(
+                                  begin: const Offset(0.0, 1.0),
+                                  end: Offset.zero,
+                                ).evaluate(animation),
+                                child: child, // child is the value returned by pageBuilder
+                              );
+                            },
                       ),
                     );
                   },
@@ -2526,7 +2508,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+        MaterialApp(
+          navigatorKey: navigator,
+          home: Builder(builder: buildCounter),
+        ),
       );
 
       expect(buildCount, 1);
@@ -2555,7 +2540,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+        MaterialApp(
+          navigatorKey: navigator,
+          home: Builder(builder: buildCounter),
+        ),
       );
 
       expect(buildCount, 1);
@@ -2584,7 +2572,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+        MaterialApp(
+          navigatorKey: navigator,
+          home: Builder(builder: buildCounter),
+        ),
       );
 
       expect(buildCount, 1);
@@ -2613,7 +2604,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+        MaterialApp(
+          navigatorKey: navigator,
+          home: Builder(builder: buildCounter),
+        ),
       );
 
       expect(buildCount, 1);
@@ -3066,13 +3060,14 @@ class _RestorableDialogTestWidget extends StatelessWidget {
   @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return const AlertDialog(title: Text('Alert!'));
-      },
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return const AlertDialog(title: Text('Alert!'));
+          },
     );
   }
 

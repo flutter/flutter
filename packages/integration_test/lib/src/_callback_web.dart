@@ -137,13 +137,12 @@ class _WebCallbackManager implements CallbackManager {
   Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
     final Map<String, String> response = <String, String>{
-      'message':
-          allTestsPassed
-              ? Response.allTestsPassed(data: testRunner.reportData).toJson()
-              : Response.someTestsFailed(
-                testRunner.failureMethodsDetails,
-                data: testRunner.reportData,
-              ).toJson(),
+      'message': allTestsPassed
+          ? Response.allTestsPassed(data: testRunner.reportData).toJson()
+          : Response.someTestsFailed(
+              testRunner.failureMethodsDetails,
+              data: testRunner.reportData,
+            ).toJson(),
     };
     return <String, dynamic>{'isError': false, 'response': response};
   }

@@ -783,10 +783,9 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
-    final Object? initialValue =
-        hasSerializedValue
-            ? property.fromPrimitives(bucket!.read<Object>(restorationId))
-            : property.createDefaultValue();
+    final Object? initialValue = hasSerializedValue
+        ? property.fromPrimitives(bucket!.read<Object>(restorationId))
+        : property.createDefaultValue();
 
     if (!property.isRegistered) {
       property._register(restorationId, this);

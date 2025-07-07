@@ -54,32 +54,31 @@ const List<String> expectedEntitlements = <String>[
 /// This list should be kept in sync with the actual contents of Flutter's
 /// cache.
 List<String> binariesWithEntitlements(String flutterRoot) {
-  final List<String> binaries =
-      <String>[
-        'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
-        'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
-        'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
-        'artifacts/engine/android-arm64-release/darwin-x64/gen_snapshot',
-        'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
-        'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
-        'artifacts/engine/darwin-x64-profile/gen_snapshot',
-        'artifacts/engine/darwin-x64-profile/gen_snapshot_arm64',
-        'artifacts/engine/darwin-x64-profile/gen_snapshot_x64',
-        'artifacts/engine/darwin-x64-release/gen_snapshot',
-        'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
-        'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
-        'artifacts/engine/darwin-x64/flutter_tester',
-        'artifacts/engine/darwin-x64/gen_snapshot',
-        'artifacts/engine/darwin-x64/gen_snapshot_arm64',
-        'artifacts/engine/darwin-x64/gen_snapshot_x64',
-        'artifacts/engine/ios-profile/gen_snapshot_arm64',
-        'artifacts/engine/ios-release/gen_snapshot_arm64',
-        'artifacts/engine/ios/gen_snapshot_arm64',
-        'dart-sdk/bin/dart',
-        'dart-sdk/bin/dartaotruntime',
-        'dart-sdk/bin/utils/gen_snapshot',
-        'dart-sdk/bin/utils/wasm-opt',
-      ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+  final List<String> binaries = <String>[
+    'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-arm64-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
+    'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64-profile/gen_snapshot_x64',
+    'artifacts/engine/darwin-x64-release/gen_snapshot',
+    'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
+    'artifacts/engine/darwin-x64/flutter_tester',
+    'artifacts/engine/darwin-x64/gen_snapshot',
+    'artifacts/engine/darwin-x64/gen_snapshot_arm64',
+    'artifacts/engine/darwin-x64/gen_snapshot_x64',
+    'artifacts/engine/ios-profile/gen_snapshot_arm64',
+    'artifacts/engine/ios-release/gen_snapshot_arm64',
+    'artifacts/engine/ios/gen_snapshot_arm64',
+    'dart-sdk/bin/dart',
+    'dart-sdk/bin/dartaotruntime',
+    'dart-sdk/bin/utils/gen_snapshot',
+    'dart-sdk/bin/utils/wasm-opt',
+  ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 
   presignedBinariesWithEntitlements(flutterRoot).forEach(binaries.add);
 
@@ -91,28 +90,27 @@ List<String> binariesWithEntitlements(String flutterRoot) {
 /// This list should be kept in sync with the actual contents of Flutter's
 /// cache.
 List<String> binariesWithoutEntitlements(String flutterRoot) {
-  final List<String> binaries =
-      <String>[
-        'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-        'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-        'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-        'artifacts/engine/darwin-x64/font-subset',
-        'artifacts/engine/darwin-x64/impellerc',
-        'artifacts/engine/darwin-x64/libpath_ops.dylib',
-        'artifacts/engine/darwin-x64/libtessellator.dylib',
-        'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-        'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-        'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-        'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-        'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-        'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-        'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+  final List<String> binaries = <String>[
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/font-subset',
+    'artifacts/engine/darwin-x64/impellerc',
+    'artifacts/engine/darwin-x64/libpath_ops.dylib',
+    'artifacts/engine/darwin-x64/libtessellator.dylib',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+  ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 
   presignedBinariesWithoutEntitlements(flutterRoot).forEach(binaries.add);
 
@@ -348,8 +346,10 @@ Future<List<String>> findBinaryPaths(
     '-type',
     'f',
   ]);
-  final List<String> allFiles =
-      (result.stdout as String).split('\n').where((String s) => s.isNotEmpty).toList();
+  final List<String> allFiles = (result.stdout as String)
+      .split('\n')
+      .where((String s) => s.isNotEmpty)
+      .toList();
 
   await Future.forEach(allFiles, (String filePath) async {
     if (await isBinary(filePath, processManager: processManager)) {
@@ -373,8 +373,9 @@ Future<List<String>> findXcframeworksPaths(
     '-name',
     '*xcframework',
   ]);
-  final List<String> allXcframeworkPaths =
-      LineSplitter.split(result.stdout as String).where((String s) => s.isNotEmpty).toList();
+  final List<String> allXcframeworkPaths = LineSplitter.split(
+    result.stdout as String,
+  ).where((String s) => s.isNotEmpty).toList();
   for (final String path in allXcframeworkPaths) {
     print('Found: $path\n');
   }

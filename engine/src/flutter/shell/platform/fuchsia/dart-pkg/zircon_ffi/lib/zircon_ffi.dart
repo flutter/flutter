@@ -110,8 +110,8 @@ class ZirconFFIBindings {
   late final _zircon_dart_handle_free_ptr = _lookup<ffi.NativeFunction<_c_zircon_dart_handle_free>>(
     'zircon_dart_handle_free',
   );
-  late final _dart_zircon_dart_handle_free _zircon_dart_handle_free =
-      _zircon_dart_handle_free_ptr.asFunction<_dart_zircon_dart_handle_free>();
+  late final _dart_zircon_dart_handle_free _zircon_dart_handle_free = _zircon_dart_handle_free_ptr
+      .asFunction<_dart_zircon_dart_handle_free>();
 
   int zircon_dart_handle_pair_attach_finalizer(
     Object object,
@@ -126,9 +126,8 @@ class ZirconFFIBindings {
         'zircon_dart_handle_pair_attach_finalizer',
       );
   late final _dart_zircon_dart_handle_pair_attach_finalizer
-  _zircon_dart_handle_pair_attach_finalizer =
-      _zircon_dart_handle_pair_attach_finalizer_ptr
-          .asFunction<_dart_zircon_dart_handle_pair_attach_finalizer>();
+  _zircon_dart_handle_pair_attach_finalizer = _zircon_dart_handle_pair_attach_finalizer_ptr
+      .asFunction<_dart_zircon_dart_handle_pair_attach_finalizer>();
 
   int zircon_dart_handle_attach_finalizer(
     Object object,

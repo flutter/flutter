@@ -277,11 +277,10 @@ class Container extends StatelessWidget {
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".',
        ),
-       constraints =
-           (width != null || height != null)
-               ? constraints?.tighten(width: width, height: height) ??
-                   BoxConstraints.tightFor(width: width, height: height)
-               : constraints;
+       constraints = (width != null || height != null)
+           ? constraints?.tighten(width: width, height: height) ??
+                 BoxConstraints.tightFor(width: width, height: height)
+           : constraints;
 
   /// The [child] contained by the container.
   ///

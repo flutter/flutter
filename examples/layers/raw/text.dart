@@ -39,17 +39,15 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
-  final Float64List deviceTransform =
-      Float64List(16)
-        ..[0] = devicePixelRatio
-        ..[5] = devicePixelRatio
-        ..[10] = 1.0
-        ..[15] = 1.0;
-  final ui.SceneBuilder sceneBuilder =
-      ui.SceneBuilder()
-        ..pushTransform(deviceTransform)
-        ..addPicture(ui.Offset.zero, picture)
-        ..pop();
+  final Float64List deviceTransform = Float64List(16)
+    ..[0] = devicePixelRatio
+    ..[5] = devicePixelRatio
+    ..[10] = 1.0
+    ..[15] = 1.0;
+  final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+    ..pushTransform(deviceTransform)
+    ..addPicture(ui.Offset.zero, picture)
+    ..pop();
   return sceneBuilder.build();
 }
 
@@ -95,12 +93,11 @@ void main() {
   // which time we can apply styling that affects the entire paragraph, such as
   // left, right, or center alignment. Once built, the contents of the paragraph
   // cannot be altered, but sizing and positioning information can be updated.
-  paragraph =
-      builder.build()
-        // Next, we supply a width that the text is permitted to occupy and we ask
-        // the paragraph to the visual position of each its glyphs as well as its
-        // overall size, subject to its sizing constraints.
-        ..layout(const ui.ParagraphConstraints(width: 180.0));
+  paragraph = builder.build()
+    // Next, we supply a width that the text is permitted to occupy and we ask
+    // the paragraph to the visual position of each its glyphs as well as its
+    // overall size, subject to its sizing constraints.
+    ..layout(const ui.ParagraphConstraints(width: 180.0));
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.PlatformDispatcher.instance

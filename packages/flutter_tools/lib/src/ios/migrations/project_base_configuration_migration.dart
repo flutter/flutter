@@ -47,12 +47,14 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     final String profileIdentifier = match?.group(3) ?? '249021D3217E4FDB00AE95B9';
 
     // Debug
-    final String debugBaseConfigurationOriginal = '''
+    final String debugBaseConfigurationOriginal =
+        '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 ''';
-    final String debugBaseConfigurationReplacement = '''
+    final String debugBaseConfigurationReplacement =
+        '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 ''';
@@ -62,12 +64,14 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     );
 
     // Profile
-    final String profileBaseConfigurationOriginal = '''
+    final String profileBaseConfigurationOriginal =
+        '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final String profileBaseConfigurationReplacement = '''
+    final String profileBaseConfigurationReplacement =
+        '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 ''';
@@ -77,12 +81,14 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     );
 
     // Release
-    final String releaseBaseConfigurationOriginal = '''
+    final String releaseBaseConfigurationOriginal =
+        '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final String releaseBaseConfigurationReplacement = '''
+    final String releaseBaseConfigurationReplacement =
+        '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 ''';

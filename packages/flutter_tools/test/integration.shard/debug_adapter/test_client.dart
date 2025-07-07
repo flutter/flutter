@@ -237,11 +237,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionAdded(String extension) =>
       serviceExtensionAddedEvents.firstWhere(
         (Map<String, Object?> body) => body['extensionRPC'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension added event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension added event before stream closed',
+        ),
       );
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
@@ -249,11 +247,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) =>
       serviceExtensionStateChangedEvents.firstWhere(
         (Map<String, Object?> body) => body['extension'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension state changed event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension state changed event before stream closed',
+        ),
       );
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
@@ -376,13 +372,13 @@ extension DapTestClientExtension on DapTestClient {
     //  https://github.com/flutter/flutter/issues/120015
     return skipInitialPubGetOutput
         ? output
-            .skipWhile(
-              (OutputEventBody output) =>
-                  output.output.startsWith('Running "flutter pub get"') ||
-                  output.output.startsWith('Resolving dependencies') ||
-                  output.output.startsWith('Got dependencies'),
-            )
-            .toList()
+              .skipWhile(
+                (OutputEventBody output) =>
+                    output.output.startsWith('Running "flutter pub get"') ||
+                    output.output.startsWith('Resolving dependencies') ||
+                    output.output.startsWith('Got dependencies'),
+              )
+              .toList()
         : output;
   }
 
@@ -403,8 +399,8 @@ extension DapTestClientExtension on DapTestClient {
     assert(start == null || launch == null, 'Only one of "start" or "launch" may be provided');
 
     final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
-    final Future<List<Map<String, Object?>>> testNotificationEventsFuture =
-        testNotificationEvents.toList();
+    final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents
+        .toList();
 
     if (start != null) {
       await start();
@@ -471,7 +467,10 @@ extension DapTestClientExtension on DapTestClient {
   /// Clears breakpoints in the file at [filePath].
   Future<void> clearBreakpoints(String filePath) async {
     await sendRequest(
-      SetBreakpointsArguments(source: Source(path: filePath), breakpoints: <SourceBreakpoint>[]),
+      SetBreakpointsArguments(
+        source: Source(path: filePath),
+        breakpoints: <SourceBreakpoint>[],
+      ),
     );
   }
 }

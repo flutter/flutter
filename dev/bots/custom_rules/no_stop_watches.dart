@@ -85,9 +85,9 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     return classElement.library.isDartCore
         ? classElement.name == 'Stopwatch'
         : _isStopwatchClassElementCache.putIfAbsent(
-          classElement,
-          () => _checkIfImplementsStopwatchRecursively(classElement),
-        );
+            classElement,
+            () => _checkIfImplementsStopwatchRecursively(classElement),
+          );
   }
 
   bool _isInternal(LibraryElement libraryElement) {
@@ -124,8 +124,9 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) =>
-        !_implementsStopwatch(classElement),
+      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(
+        classElement,
+      ),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {

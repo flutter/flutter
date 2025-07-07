@@ -59,8 +59,9 @@ class BundleBuilder {
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion:
-          globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+      engineVersion: globals.artifacts!.usesLocalArtifacts
+          ? null
+          : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: getNameForTargetPlatform(platform),
@@ -77,10 +78,9 @@ class BundleBuilder {
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
-    final Target target =
-        buildInfo.mode == BuildMode.debug
-            ? globals.buildTargets.copyFlutterBundle
-            : globals.buildTargets.releaseCopyFlutterBundle;
+    final Target target = buildInfo.mode == BuildMode.debug
+        ? globals.buildTargets.copyFlutterBundle
+        : globals.buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
@@ -211,12 +211,11 @@ Future<void> writeBundle(
             case AssetKind.font:
               break;
             case AssetKind.shader:
-              doCopy =
-                  !await shaderCompiler.compileShader(
-                    input: input,
-                    outputPath: file.path,
-                    targetPlatform: targetPlatform,
-                  );
+              doCopy = !await shaderCompiler.compileShader(
+                input: input,
+                outputPath: file.path,
+                targetPlatform: targetPlatform,
+              );
           }
           if (doCopy) {
             input.copySync(file.path);

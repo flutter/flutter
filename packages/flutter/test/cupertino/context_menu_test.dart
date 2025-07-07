@@ -127,7 +127,9 @@ void main() {
       // Measure the child in the scene with no CupertinoContextMenu.
       final Widget child = getChild();
       await tester.pumpWidget(
-        CupertinoApp(home: CupertinoPageScaffold(child: Center(child: child))),
+        CupertinoApp(
+          home: CupertinoPageScaffold(child: Center(child: child)),
+        ),
       );
       final Rect childRect = tester.getRect(find.byWidget(child));
 
@@ -196,17 +198,14 @@ void main() {
                   child: Navigator(
                     onGenerateRoute: (RouteSettings settings) {
                       return CupertinoPageRoute<void>(
-                        builder:
-                            (BuildContext context) => Align(
-                              child: CupertinoContextMenu(
-                                actions: const <CupertinoContextMenuAction>[
-                                  CupertinoContextMenuAction(
-                                    child: Text('CupertinoContextMenuAction'),
-                                  ),
-                                ],
-                                child: child,
-                              ),
-                            ),
+                        builder: (BuildContext context) => Align(
+                          child: CupertinoContextMenu(
+                            actions: const <CupertinoContextMenuAction>[
+                              CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+                            ],
+                            child: child,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -383,12 +382,11 @@ void main() {
         ),
       );
 
-      final Widget child =
-          find
-              .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
-              .evaluate()
-              .single
-              .widget;
+      final Widget child = find
+          .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
+          .evaluate()
+          .single
+          .widget;
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(
         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
@@ -860,26 +858,25 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return ListView(
-                  children:
-                      items
-                          .map(
-                            (int index) => CupertinoContextMenu(
-                              actions: <CupertinoContextMenuAction>[
-                                CupertinoContextMenuAction(
-                                  child: const Text('DELETE'),
-                                  onPressed: () {
-                                    setState(() {
-                                      items.remove(index);
-                                      Navigator.of(context).pop();
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                              child: Text('Item $index'),
+                  children: items
+                      .map(
+                        (int index) => CupertinoContextMenu(
+                          actions: <CupertinoContextMenuAction>[
+                            CupertinoContextMenuAction(
+                              child: const Text('DELETE'),
+                              onPressed: () {
+                                setState(() {
+                                  items.remove(index);
+                                  Navigator.of(context).pop();
+                                });
+                                Navigator.of(context).pop();
+                              },
                             ),
-                          )
-                          .toList(),
+                          ],
+                          child: Text('Item $index'),
+                        ),
+                      )
+                      .toList(),
                 );
               },
             ),
@@ -1174,9 +1171,8 @@ void main() {
                   onTap: () {
                     Navigator.of(context).push(
                       CupertinoPageRoute<Widget>(
-                        builder:
-                            (BuildContext context) =>
-                                const CupertinoPageScaffold(child: Text(page)),
+                        builder: (BuildContext context) =>
+                            const CupertinoPageScaffold(child: Text(page)),
                       ),
                     );
                   },
@@ -1224,15 +1220,14 @@ void main() {
           builder: (BuildContext context, StateSetter stateSetter) {
             setState = stateSetter;
             return Center(
-              child:
-                  ctxMenuRemoved
-                      ? const SizedBox()
-                      : CupertinoContextMenu(
-                        actions: <Widget>[
-                          CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
-                        ],
-                        child: child,
-                      ),
+              child: ctxMenuRemoved
+                  ? const SizedBox()
+                  : CupertinoContextMenu(
+                      actions: <Widget>[
+                        CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+                      ],
+                      child: child,
+                    ),
             );
           },
         ),
@@ -1270,10 +1265,9 @@ void main() {
       CupertinoApp(
         home: GridView.count(
           crossAxisCount: 3,
-          children:
-              children.map((Widget child) {
-                return CupertinoContextMenu(actions: getActions(), child: child);
-              }).toList(),
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
         ),
       ),
     );
@@ -1314,10 +1308,9 @@ void main() {
       CupertinoApp(
         home: GridView.count(
           crossAxisCount: 3,
-          children:
-              children.map((Widget child) {
-                return CupertinoContextMenu(actions: getActions(), child: child);
-              }).toList(),
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
         ),
       ),
     );

@@ -24,11 +24,10 @@ class _LinkTextSpan extends TextSpan {
   _LinkTextSpan({super.style, required String url, String? text})
     : super(
         text: text ?? url,
-        recognizer:
-            TapGestureRecognizer()
-              ..onTap = () {
-                launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-              },
+        recognizer: TapGestureRecognizer()
+          ..onTap = () {
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          },
       );
 }
 

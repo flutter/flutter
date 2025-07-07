@@ -92,23 +92,27 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
-      final String tempBuildDir =
-          globals.fs.systemTempDirectory.createTempSync('flutter_test.').absolute.uri.toFilePath();
-      final WebMemoryFS result = await WebTestCompiler(
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        config: globals.config,
-      ).initialize(
-        projectDirectory: flutterProject!.directory,
-        testOutputDir: tempBuildDir,
-        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
-        buildInfo: debuggingOptions.buildInfo,
-        webRenderer: debuggingOptions.webRenderer,
-        useWasm: debuggingOptions.webUseWasm,
-      );
+      final String tempBuildDir = globals.fs.systemTempDirectory
+          .createTempSync('flutter_test.')
+          .absolute
+          .uri
+          .toFilePath();
+      final WebMemoryFS result =
+          await WebTestCompiler(
+            logger: globals.logger,
+            fileSystem: globals.fs,
+            platform: globals.platform,
+            artifacts: globals.artifacts!,
+            processManager: globals.processManager,
+            config: globals.config,
+          ).initialize(
+            projectDirectory: flutterProject!.directory,
+            testOutputDir: tempBuildDir,
+            testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
+            buildInfo: debuggingOptions.buildInfo,
+            webRenderer: debuggingOptions.webRenderer,
+            useWasm: debuggingOptions.webUseWasm,
+          );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
@@ -148,8 +152,9 @@ interface class FlutterTestRunner {
       ..add('--')
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
-    final InternetAddressType serverType =
-        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+    final InternetAddressType serverType = debuggingOptions.ipv6
+        ? InternetAddressType.IPv6
+        : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
@@ -282,8 +287,9 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     final Map<String, String> testImports = <String, String>{};
     final Set<String> seenTestConfigPaths = <String>{};
     for (final Uri path in paths) {
-      final String sanitizedPath =
-          !path.path.endsWith('?') ? path.path : path.path.substring(0, path.path.length - 1);
+      final String sanitizedPath = !path.path.endsWith('?')
+          ? path.path
+          : path.path.substring(0, path.path.length - 1);
       final String sanitizedImport = pathToImport(sanitizedPath);
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
@@ -723,10 +729,9 @@ class SpawnPlugin extends PlatformPlugin {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest =
-        globals.platform.environment.containsKey('FLUTTER_TEST')
-            ? globals.platform.environment['FLUTTER_TEST']!
-            : 'true';
+    final String flutterTest = globals.platform.environment.containsKey('FLUTTER_TEST')
+        ? globals.platform.environment['FLUTTER_TEST']!
+        : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,

@@ -23,14 +23,13 @@ RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester
 Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
   final RenderEditable renderEditable = _findRenderEditable(tester);
 
-  final List<TextSelectionPoint> endpoints =
-      renderEditable
-          .getEndpointsForSelection(TextSelection.collapsed(offset: offset))
-          .map<TextSelectionPoint>(
-            (TextSelectionPoint point) =>
-                TextSelectionPoint(renderEditable.localToGlobal(point.point), point.direction),
-          )
-          .toList();
+  final List<TextSelectionPoint> endpoints = renderEditable
+      .getEndpointsForSelection(TextSelection.collapsed(offset: offset))
+      .map<TextSelectionPoint>(
+        (TextSelectionPoint point) =>
+            TextSelectionPoint(renderEditable.localToGlobal(point.point), point.direction),
+      )
+      .toList();
 
   return endpoints[0].point + const Offset(0.0, -2.0);
 }
@@ -53,8 +52,9 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
 
-    final TextEditingController controller =
-        tester.firstWidget<TextField>(find.byType(TextField)).controller!;
+    final TextEditingController controller = tester
+        .firstWidget<TextField>(find.byType(TextField))
+        .controller!;
 
     final TextSelection selection = controller.selection;
     final RenderEditable renderEditable = _findRenderEditable(tester);

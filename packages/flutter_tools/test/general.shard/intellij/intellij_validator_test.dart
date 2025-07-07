@@ -39,8 +39,11 @@ void main() {
     createIntellijFlutterPluginJar('plugins/flutter-intellij.jar', fileSystem);
     createIntellijDartPluginJar('plugins/Dart/lib/Dart.jar', fileSystem);
 
-    final ValidationResult result =
-        await IntelliJValidatorTestTarget('', 'path/to/intellij', fileSystem).validate();
+    final ValidationResult result = await IntelliJValidatorTestTarget(
+      '',
+      'path/to/intellij',
+      fileSystem,
+    ).validate();
     expect(result.type, ValidationType.partial);
     expect(result.statusInfo, 'version test.test.test');
     expect(result.messages, const <ValidationMessage>[
@@ -323,29 +326,28 @@ void main() {
         stdout: '$ultimateRandomLocation\n$ceRandomLocation',
       ),
     ]);
-    final Iterable<IntelliJValidatorOnMac> validators =
-        IntelliJValidator.installedValidators(
-          fileSystem: fileSystem,
-          platform: macPlatform,
-          userMessages: UserMessages(),
-          processManager: processManager,
-          plistParser: FakePlistParser(<String, String>{
-            PlistParser.kCFBundleShortVersionStringKey: '2020.10',
-            PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
-          }),
-          logger: BufferLogger.test(),
-        ).whereType<IntelliJValidatorOnMac>();
+    final Iterable<IntelliJValidatorOnMac> validators = IntelliJValidator.installedValidators(
+      fileSystem: fileSystem,
+      platform: macPlatform,
+      userMessages: UserMessages(),
+      processManager: processManager,
+      plistParser: FakePlistParser(<String, String>{
+        PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+        PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
+      }),
+      logger: BufferLogger.test(),
+    ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
 
-    final IntelliJValidatorOnMac ce =
-        validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IdeaIC').single;
+    final IntelliJValidatorOnMac ce = validators
+        .where((IntelliJValidatorOnMac validator) => validator.id == 'IdeaIC')
+        .single;
     expect(ce.title, 'IntelliJ IDEA Community Edition');
     expect(ce.installPath, ceRandomLocation);
 
-    final IntelliJValidatorOnMac ultimate =
-        validators
-            .where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea')
-            .single;
+    final IntelliJValidatorOnMac ultimate = validators
+        .where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea')
+        .single;
     expect(ultimate.title, 'IntelliJ IDEA Ultimate Edition');
     expect(ultimate.installPath, ultimateRandomLocation);
   });
@@ -572,7 +574,8 @@ void createIntellijFlutterPluginJar(
   FileSystem fileSystem, {
   String version = '0.1.3',
 }) {
-  final String intellijFlutterPluginXml = '''
+  final String intellijFlutterPluginXml =
+      '''
 <idea-plugin version="2">
   <id>io.flutter</id>
   <name>Flutter</name>

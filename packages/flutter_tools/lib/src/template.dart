@@ -397,10 +397,9 @@ class Template {
 
         // Use a copy of the context,
         // since the original is used in rendering other templates.
-        final Map<String, Object?> localContext =
-            finalDestinationFile.path.endsWith('.yaml')
-                ? _createEscapedContextCopy(context)
-                : context;
+        final Map<String, Object?> localContext = finalDestinationFile.path.endsWith('.yaml')
+            ? _createEscapedContextCopy(context)
+            : context;
 
         final String renderedContents = _templateRenderer.renderString(
           templateContents,
@@ -438,12 +437,9 @@ Map<String, Object?> _createEscapedContextCopy(Map<String, Object?> context) {
 
 String _escapeKotlinKeywords(String androidIdentifier) {
   final List<String> segments = androidIdentifier.split('.');
-  final List<String> correctedSegments =
-      segments
-          .map(
-            (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment,
-          )
-          .toList();
+  final List<String> correctedSegments = segments
+      .map((String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment)
+      .toList();
   return correctedSegments.join('.');
 }
 

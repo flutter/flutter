@@ -121,8 +121,9 @@ class FakeCommand {
     Encoding? encoding,
     io.ProcessStartMode? mode,
   ) {
-    final List<dynamic> matchers =
-        this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
+    final List<dynamic> matchers = this.command
+        .map((Pattern x) => x is String ? x : matches(x))
+        .toList();
     expect(command, matchers);
     if (processStartMode != null) {
       expect(mode, processStartMode);

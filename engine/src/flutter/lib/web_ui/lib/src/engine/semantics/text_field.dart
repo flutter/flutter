@@ -246,8 +246,9 @@ class SemanticTextField extends SemanticRole {
   }
 
   void _initializeEditableElement() {
-    editableElement =
-        semanticsObject.flags.isMultiline ? _createMultiLineField() : _createSingleLineField();
+    editableElement = semanticsObject.flags.isMultiline
+        ? _createMultiLineField()
+        : _createSingleLineField();
     _updateEnabledState();
 
     // On iOS, even though the semantic text field is transparent, the cursor

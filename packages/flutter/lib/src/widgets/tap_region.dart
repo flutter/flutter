@@ -272,8 +272,10 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
 
     // A child was hit, so we need to call onTapOutside / onTapUpOutside for
     // those regions or groups of regions that were not hit.
-    final Set<RenderTapRegion> hitRegions =
-        _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
+    final Set<RenderTapRegion> hitRegions = _getRegionsHit(
+      _registeredRegions,
+      result.path,
+    ).cast<RenderTapRegion>().toSet();
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
     final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{

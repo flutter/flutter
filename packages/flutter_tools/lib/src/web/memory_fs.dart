@@ -29,8 +29,9 @@ class WebMemoryFS {
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
     final Uint8List metadataBytes = metadataFile.readAsBytesSync();
-    final Map<String, dynamic> manifest =
-        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()))!;
+    final Map<String, dynamic> manifest = castStringKeyedMap(
+      json.decode(manifestFile.readAsStringSync()),
+    )!;
     for (final String filePath in manifest.keys) {
       final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath])!;
       final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();

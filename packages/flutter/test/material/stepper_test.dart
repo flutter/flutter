@@ -1112,15 +1112,14 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Set up a getter to examine the MacGuffin's color
-    Color getColor() =>
-        tester
-            .widget<ColoredBox>(
-              find.descendant(
-                of: find.byKey(const Key('tappable-color')),
-                matching: find.byType(ColoredBox),
-              ),
-            )
-            .color;
+    Color getColor() => tester
+        .widget<ColoredBox>(
+          find.descendant(
+            of: find.byKey(const Key('tappable-color')),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .color;
 
     // We are on step 1
     expect(find.text('Step 2 Content'), findsNothing);

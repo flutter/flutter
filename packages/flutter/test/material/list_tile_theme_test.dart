@@ -84,11 +84,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -119,11 +118,10 @@ void main() {
       isThreeLine: true,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -270,12 +268,9 @@ void main() {
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
-    ShapeBorder inkWellBorder() =>
-        tester
-            .widget<InkWell>(
-              find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)),
-            )
-            .customBorder!;
+    ShapeBorder inkWellBorder() => tester
+        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
+        .customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -785,12 +780,9 @@ void main() {
     // Start drawer animation.
     await tester.pump();
 
-    final ShapeBorder? inkWellBorder =
-        tester
-            .widget<InkWell>(
-              find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)),
-            )
-            .customBorder;
+    final ShapeBorder? inkWellBorder = tester
+        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
+        .customBorder;
     // Test shape.
     expect(inkWellBorder, shapeBorder);
   });
@@ -1118,10 +1110,9 @@ void main() {
     Widget buildFrame({bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            isThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: isThreeLine))
-                : null,
+        theme: isThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: isThreeLine))
+            : null,
         home: Material(
           child: ListView(
             children: const <Widget>[

@@ -116,8 +116,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      compilerFactory:
-          () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () =>
+          TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       flutterTesterBinPath: flutterTesterBinPath,
       fileSystem: _fileSystem,
       logger: _logger,
@@ -287,8 +287,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcLibraryBundleDartSdkJsArtifactMap
-            : kAmdDartSdkJsArtifactMap;
+        ? kDdcLibraryBundleDartSdkJsArtifactMap
+        : kAmdDartSdkJsArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
@@ -300,8 +300,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-            ? kDdcLibraryBundleDartSdkJsMapArtifactMap
-            : kAmdDartSdkJsMapArtifactMap;
+        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
+        : kAmdDartSdkJsMapArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 

@@ -59,11 +59,10 @@ class InkHighlight extends InteractiveInkFeature {
 
        _textDirection = textDirection,
        _rectCallback = rectCallback {
-    _alphaController =
-        AnimationController(duration: fadeDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..addStatusListener(_handleAlphaStatusChanged)
-          ..forward();
+    _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged)
+      ..forward();
     _alpha = _alphaController.drive(IntTween(begin: 0, end: color.alpha));
 
     controller.addInkFeature(this);

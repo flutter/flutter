@@ -275,19 +275,18 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       print('Filtering suites...');
     }
     final List<SuiteFilter> filters = suiteFilters;
-    final List<TestSuite> filteredSuites =
-        config.testSuites.where((TestSuite suite) {
-          for (final SuiteFilter filter in filters) {
-            final SuiteFilterResult result = filter.filterSuite(suite);
-            if (!result.isAccepted) {
-              if (isVerbose) {
-                print('  ${suite.name.ansiCyan} rejected for reason: ${result.rejectReason}');
-              }
-              return false;
-            }
+    final List<TestSuite> filteredSuites = config.testSuites.where((TestSuite suite) {
+      for (final SuiteFilter filter in filters) {
+        final SuiteFilterResult result = filter.filterSuite(suite);
+        if (!result.isAccepted) {
+          if (isVerbose) {
+            print('  ${suite.name.ansiCyan} rejected for reason: ${result.rejectReason}');
           }
-          return true;
-        }).toList();
+          return false;
+        }
+      }
+      return true;
+    }).toList();
     return filteredSuites;
   }
 

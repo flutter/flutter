@@ -63,8 +63,8 @@ void main() {
       final FakeSocket fakeSocket = FakeSocket();
       fakeServerSocket.controller.add(fakeSocket);
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
 
       DaemonMessage message = await broadcastOutput.first;
 
@@ -130,8 +130,8 @@ void main() {
         createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async => fakeServerSocket,
       );
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
 
       final Future<int> result = portForwarder.forward(300);
 
@@ -274,8 +274,8 @@ void main() {
       fakeServerSocket.controller.add(fakeSocket1);
       fakeServerSocket.controller.add(fakeSocket2);
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
 
       final DaemonMessage message1 = await broadcastOutput.first;
 
@@ -368,10 +368,9 @@ void main() {
       late FakePrebuiltApplicationPackage applicationPackage;
       const List<int> fileContent = <int>[100, 120, 140];
       setUp(() {
-        fileSystem =
-            MemoryFileSystem.test()
-              ..directory('dir').createSync()
-              ..file('dir/foo').writeAsBytesSync(fileContent);
+        fileSystem = MemoryFileSystem.test()
+          ..directory('dir').createSync()
+          ..file('dir/foo').writeAsBytesSync(fileContent);
         applicationPackage = FakePrebuiltApplicationPackage(fileSystem.file('dir/foo'));
       });
 
@@ -384,8 +383,8 @@ void main() {
         );
         final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
-        final Stream<DaemonMessage> broadcastOutput =
-            serverDaemonConnection.incomingCommands.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+            .asBroadcastStream();
 
         final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
@@ -423,8 +422,8 @@ void main() {
           );
           final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
-          final Stream<DaemonMessage> broadcastOutput =
-              serverDaemonConnection.incomingCommands.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+              .asBroadcastStream();
 
           final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
@@ -487,8 +486,8 @@ void main() {
           );
           final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
-          final Stream<DaemonMessage> broadcastOutput =
-              serverDaemonConnection.incomingCommands.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+              .asBroadcastStream();
 
           final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
@@ -662,8 +661,8 @@ void main() {
         devicePortForwarder: devicePortForwarder,
       );
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
@@ -721,8 +720,8 @@ void main() {
           devicePortForwarder: devicePortForwarder,
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            serverDaemonConnection.incomingCommands.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+            .asBroadcastStream();
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
@@ -822,8 +821,8 @@ void main() {
           localDds: localDds,
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            serverDaemonConnection.incomingCommands.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+            .asBroadcastStream();
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
@@ -880,8 +879,8 @@ void main() {
       // Start listening on the stream to trigger sending the request.
       discovery.uris.listen(uriCompleter.complete);
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
       final DaemonMessage startMessage = await broadcastOutput.first;
       expect(startMessage.data['id'], isNotNull);
       expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
@@ -925,8 +924,8 @@ void main() {
       // Start listening on the stream to trigger sending the request.
       discovery.uris.listen(uriCompleter.complete);
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
       final DaemonMessage startMessage = await broadcastOutput.first;
       expect(startMessage.data['id'], isNotNull);
       expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
@@ -970,8 +969,8 @@ void main() {
         // Start listening on the stream to trigger sending the request.
         discovery.uris.listen(uriCompleter.complete);
 
-        final Stream<DaemonMessage> broadcastOutput =
-            serverDaemonConnection.incomingCommands.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+            .asBroadcastStream();
         final DaemonMessage startMessage = await broadcastOutput.first;
         expect(startMessage.data['id'], isNotNull);
         expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
@@ -1011,8 +1010,8 @@ void main() {
       // Start listening on the stream to trigger sending the request.
       final Future<Uri> uriFuture = discovery.uris.first;
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
       final DaemonMessage startMessage = await broadcastOutput.first;
       expect(startMessage.data['id'], isNotNull);
       expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
@@ -1049,8 +1048,8 @@ void main() {
       // Start listening on the stream to trigger sending the request.
       final Future<Uri> uriFuture = discovery.uris.first;
 
-      final Stream<DaemonMessage> broadcastOutput =
-          serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
       final DaemonMessage startMessage = await broadcastOutput.first;
       expect(startMessage.data['id'], isNotNull);
       expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');

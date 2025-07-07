@@ -494,12 +494,11 @@ class NavigationDestination extends StatelessWidget {
         final EdgeInsetsGeometry labelPadding =
             info.labelPadding ?? navigationBarTheme.labelPadding ?? defaults.labelPadding!;
 
-        final TextStyle? textStyle =
-            enabled
-                ? animation.isForwardOrCompleted
-                    ? effectiveSelectedLabelTextStyle
-                    : effectiveUnselectedLabelTextStyle
-                : effectiveDisabledLabelTextStyle;
+        final TextStyle? textStyle = enabled
+            ? animation.isForwardOrCompleted
+                  ? effectiveSelectedLabelTextStyle
+                  : effectiveUnselectedLabelTextStyle
+            : effectiveDisabledLabelTextStyle;
 
         return Padding(
           padding: labelPadding,
@@ -757,8 +756,8 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// Used by widgets that are implementing a navigation destination info to
   /// get information like the selected animation and destination number.
   static _NavigationDestinationInfo of(BuildContext context) {
-    final _NavigationDestinationInfo? result =
-        context.dependOnInheritedWidgetOfExactType<_NavigationDestinationInfo>();
+    final _NavigationDestinationInfo? result = context
+        .dependOnInheritedWidgetOfExactType<_NavigationDestinationInfo>();
     assert(
       result != null,
       'Navigation destinations need a _NavigationDestinationInfo parent, '
@@ -842,12 +841,11 @@ class NavigationIndicator extends StatelessWidget {
         // The scale should be 0 when the animation is unselected, as soon as
         // the animation starts, the scale jumps to 40%, and then animates to
         // 100% along a curve.
-        final double scale =
-            animation.isDismissed
-                ? 0.0
-                : Tween<double>(begin: .4, end: 1.0).transform(
-                  CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value),
-                );
+        final double scale = animation.isDismissed
+            ? 0.0
+            : Tween<double>(begin: .4, end: 1.0).transform(
+                CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value),
+              );
 
         return Transform(
           alignment: Alignment.center,
@@ -1016,21 +1014,20 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return Semantics(enabled: enabled, button: true, child: child);
       },
-      child:
-          kIsWeb
-              ? child
-              : Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  child,
-                  Semantics(
-                    label: localizations.tabLabel(
-                      tabIndex: destinationInfo.index + 1,
-                      tabCount: destinationInfo.totalNumberOfDestinations,
-                    ),
+      child: kIsWeb
+          ? child
+          : Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                child,
+                Semantics(
+                  label: localizations.tabLabel(
+                    tabIndex: destinationInfo.index + 1,
+                    tabCount: destinationInfo.totalNumberOfDestinations,
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
     );
   }
 }

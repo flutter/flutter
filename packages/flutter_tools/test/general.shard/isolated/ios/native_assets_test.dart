@@ -50,103 +50,94 @@ void main() {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              const FakeCommand(
-                command: <Pattern>[
-                  'lipo',
-                  '-create',
-                  '-output',
-                  '/build/native_assets/ios/bar.framework/bar',
-                  'arm64/libbar.dylib',
-                  'x64/libbar.dylib',
-                ],
-              ),
-              FakeCommand(
-                command: const <Pattern>[
-                  'otool',
-                  '-D',
-                  '/build/native_assets/ios/bar.framework/bar',
-                ],
-                stdout: <String>[
-                  '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
-                  '@rpath/libbar.dylib',
-                  '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
-                  '@rpath/libbar.dylib',
-                ].join('\n'),
-              ),
-              const FakeCommand(
-                command: <Pattern>[
-                  'lipo',
-                  '-create',
-                  '-output',
-                  '/build/native_assets/ios/buz.framework/buz',
-                  'arm64/libbuz.dylib',
-                  'x64/libbuz.dylib',
-                ],
-              ),
-              FakeCommand(
-                command: const <Pattern>[
-                  'otool',
-                  '-D',
-                  '/build/native_assets/ios/buz.framework/buz',
-                ],
-                stdout: <String>[
-                  '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
-                  '@rpath/libbuz.dylib',
-                  '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
-                  '@rpath/libbuz.dylib',
-                ].join('\n'),
-              ),
-              const FakeCommand(
-                command: <Pattern>[
-                  'install_name_tool',
-                  '-id',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  '@rpath/buz.framework/buz',
-                  '/build/native_assets/ios/bar.framework/bar',
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
-                  '/build/native_assets/ios/bar.framework',
-                ],
-              ),
-              const FakeCommand(
-                command: <Pattern>[
-                  'install_name_tool',
-                  '-id',
-                  '@rpath/buz.framework/buz',
-                  '-change',
-                  '@rpath/libbar.dylib',
-                  '@rpath/bar.framework/bar',
-                  '-change',
-                  '@rpath/libbuz.dylib',
-                  '@rpath/buz.framework/buz',
-                  '/build/native_assets/ios/buz.framework/buz',
-                ],
-              ),
-              FakeCommand(
-                command: <Pattern>[
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  if (buildMode == BuildMode.debug) '--timestamp=none',
-                  '/build/native_assets/ios/buz.framework',
-                ],
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/bar.framework/bar',
+              'arm64/libbar.dylib',
+              'x64/libbar.dylib',
+            ],
+          ),
+          FakeCommand(
+            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/bar.framework/bar'],
+            stdout: <String>[
+              '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
+              '@rpath/libbar.dylib',
+              '/build/native_assets/ios/bar.framework/bar (architecture arm64):',
+              '@rpath/libbar.dylib',
+            ].join('\n'),
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/ios/buz.framework/buz',
+              'arm64/libbuz.dylib',
+              'x64/libbuz.dylib',
+            ],
+          ),
+          FakeCommand(
+            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/buz.framework/buz'],
+            stdout: <String>[
+              '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
+              '@rpath/libbuz.dylib',
+              '/build/native_assets/ios/buz.framework/buz (architecture arm64):',
+              '@rpath/libbuz.dylib',
+            ].join('\n'),
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbar.dylib',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
+              '/build/native_assets/ios/bar.framework/bar',
+            ],
+          ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug) '--timestamp=none',
+              '/build/native_assets/ios/bar.framework',
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@rpath/buz.framework/buz',
+              '-change',
+              '@rpath/libbar.dylib',
+              '@rpath/bar.framework/bar',
+              '-change',
+              '@rpath/libbuz.dylib',
+              '@rpath/buz.framework/buz',
+              '/build/native_assets/ios/buz.framework/buz',
+            ],
+          ),
+          FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              if (buildMode == BuildMode.debug) '--timestamp=none',
+              '/build/native_assets/ios/buz.framework',
+            ],
+          ),
+        ]),
       },
       () async {
         if (const LocalPlatform().isWindows) {
@@ -155,8 +146,9 @@ void main() {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
-        final Uri nonFlutterTesterAssetUri =
-            environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
         await packageConfig.parent.create();
         await packageConfig.create();
 
@@ -176,20 +168,16 @@ void main() {
         ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          onBuild:
-              (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                codeAssets:
-                    buildMode == BuildMode.debug
-                        ? codeAssets(input.config.code.targetOS, input.config.code)
-                        : <CodeAsset>[],
-              ),
-          onLink:
-              (LinkInput input) =>
-                  buildMode == BuildMode.debug
-                      ? null
-                      : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                        codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                      ),
+          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: buildMode == BuildMode.debug
+                ? codeAssets(input.config.code.targetOS, input.config.code)
+                : <CodeAsset>[],
+          ),
+          onLink: (LinkInput input) => buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                ),
         );
         final Map<String, String> environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,

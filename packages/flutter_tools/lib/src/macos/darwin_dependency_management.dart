@@ -75,11 +75,8 @@ class DarwinDependencyManagement {
     if (_project.isModule) {
       return;
     }
-    final (
-      :int totalCount,
-      :int swiftPackageCount,
-      :int podCount,
-    ) = await _evaluatePluginsAndPrintWarnings(platform: platform, xcodeProject: xcodeProject);
+    final (:int totalCount, :int swiftPackageCount, :int podCount) =
+        await _evaluatePluginsAndPrintWarnings(platform: platform, xcodeProject: xcodeProject);
 
     final bool useCocoapods;
     if (xcodeProject.usesSwiftPackageManager) {

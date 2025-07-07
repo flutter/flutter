@@ -254,8 +254,8 @@ class NavigationDrawerTheme extends InheritedTheme {
   /// NavigationDrawerThemeData theme = NavigationDrawerTheme.of(context);
   /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
-    final NavigationDrawerTheme? navigationDrawerTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
+    final NavigationDrawerTheme? navigationDrawerTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
     return navigationDrawerTheme?.data ?? Theme.of(context).navigationDrawerTheme;
   }
 

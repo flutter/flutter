@@ -1851,10 +1851,9 @@ class TextStyle {
   @override
   String toString() {
     final List<String>? fontFamilyFallback = _fontFamilyFallback;
-    final String heightText =
-        _encoded[0] & 0x02000 == 0x02000
-            ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
-            : 'unspecified';
+    final String heightText = _encoded[0] & 0x02000 == 0x02000
+        ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
+        : 'unspecified';
     return 'TextStyle('
         'color: ${_encoded[0] & 0x00002 == 0x00002 ? Color(_encoded[1]) : "unspecified"}, '
         'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? TextDecoration._(_encoded[2]) : "unspecified"}, '
@@ -3764,8 +3763,10 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   }).then((_) => _sendFontChangeMessage());
 }
 
-final ByteData _fontChangeMessage =
-    utf8.encode(json.encode(<String, Object?>{'type': 'fontsChange'})).buffer.asByteData();
+final ByteData _fontChangeMessage = utf8
+    .encode(json.encode(<String, Object?>{'type': 'fontsChange'}))
+    .buffer
+    .asByteData();
 
 FutureOr<void> _sendFontChangeMessage() async {
   const String kSystemChannelName = 'flutter/system';

@@ -201,10 +201,9 @@ flutter:
         globals.fs
             .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
             .createSync(recursive: true);
-        final File pubspec =
-            globals.fs.file('pubspec.yaml')
-              ..createSync()
-              ..writeAsStringSync(r'''
+        final File pubspec = globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -329,13 +328,12 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle =
-            AssetBundleFactory.defaultInstance(
-              logger: globals.logger,
-              fileSystem: globals.fs,
-              platform: globals.platform,
-              splitDeferredAssets: true,
-            ).createBundle();
+        final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+          logger: globals.logger,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          splitDeferredAssets: true,
+        ).createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
@@ -440,13 +438,12 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle =
-            AssetBundleFactory.defaultInstance(
-              logger: globals.logger,
-              fileSystem: globals.fs,
-              platform: globals.platform,
-              splitDeferredAssets: true,
-            ).createBundle();
+        final AssetBundle bundle = AssetBundleFactory.defaultInstance(
+          logger: globals.logger,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          splitDeferredAssets: true,
+        ).createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
@@ -936,29 +933,28 @@ flutter:
       overrides: <Type, Generator>{
         Artifacts: () => artifacts,
         FileSystem: () => fileSystem,
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              FakeCommand(
-                command: <String>[
-                  impellerc,
-                  '--sksl',
-                  '--runtime-stage-gles',
-                  '--runtime-stage-gles3',
-                  '--runtime-stage-vulkan',
-                  '--iplr',
-                  '--sl=$outputPath',
-                  '--spirv=$outputPath.spirv',
-                  '--input=/$shaderPath',
-                  '--input-type=frag',
-                  '--include=/$assetsPath',
-                  '--include=$shaderLibDir',
-                ],
-                onRun: (_) {
-                  fileSystem.file(outputPath).createSync(recursive: true);
-                  fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-                },
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--runtime-stage-gles',
+              '--runtime-stage-gles3',
+              '--runtime-stage-vulkan',
+              '--iplr',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=/$shaderPath',
+              '--input-type=frag',
+              '--include=/$assetsPath',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        ]),
       },
     );
 
@@ -1000,27 +996,26 @@ flutter:
       overrides: <Type, Generator>{
         Artifacts: () => artifacts,
         FileSystem: () => fileSystem,
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              FakeCommand(
-                command: <String>[
-                  impellerc,
-                  '--sksl',
-                  '--iplr',
-                  '--json',
-                  '--sl=$outputPath',
-                  '--spirv=$outputPath.spirv',
-                  '--input=/$shaderPath',
-                  '--input-type=frag',
-                  '--include=/$assetsPath',
-                  '--include=$shaderLibDir',
-                ],
-                onRun: (_) {
-                  fileSystem.file(outputPath).createSync(recursive: true);
-                  fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-                },
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=/$shaderPath',
+              '--input-type=frag',
+              '--include=/$assetsPath',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        ]),
       },
     );
 

@@ -281,7 +281,7 @@ If a file already exists at the backup location, it will be overwritten.
     logger.printStatus(
       wasBackedUp
           ? 'Successfully reset the custom devices config file and created a '
-              'backup at "$configBackupPath".'
+                'backup at "$configBackupPath".'
           : 'Successfully reset the custom devices config file.',
     );
     return FlutterCommandResult.success();
@@ -554,11 +554,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<bool> askApplyConfig({bool hasErrorsOrWarnings = false}) {
     return askForBool(
       'apply',
-      description:
-          hasErrorsOrWarnings
-              ? 'Warnings or errors exist in custom device. '
-                  'Would you like to add the custom device to the config anyway?'
-              : 'Would you like to add the custom device to the config now?',
+      description: hasErrorsOrWarnings
+          ? 'Warnings or errors exist in custom device. '
+                'Would you like to add the custom device to the config anyway?'
+          : 'Would you like to add the custom device to the config now?',
       defaultsTo: !hasErrorsOrWarnings,
     );
   }
@@ -585,60 +584,58 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     inputs = StreamQueue<String>(nonClosingKeystrokes.stream);
 
-    final String id =
-        (await askForString(
-          'id',
-          description:
-              'Please enter the id you want to device to have. Must contain only '
-              'alphanumeric or underscore characters.',
-          example: 'pi',
-          validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
-        ))!;
+    final String id = (await askForString(
+      'id',
+      description:
+          'Please enter the id you want to device to have. Must contain only '
+          'alphanumeric or underscore characters.',
+      example: 'pi',
+      validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
+    ))!;
 
-    final String label =
-        (await askForString(
-          'label',
-          description:
-              'Please enter the label of the device, which is a slightly more verbose '
-              'name for the device.',
-          example: 'Raspberry Pi',
-        ))!;
+    final String label = (await askForString(
+      'label',
+      description:
+          'Please enter the label of the device, which is a slightly more verbose '
+          'name for the device.',
+      example: 'Raspberry Pi',
+    ))!;
 
-    final String sdkNameAndVersion =
-        (await askForString('SDK name and version', example: 'Raspberry Pi 4 Model B+'))!;
+    final String sdkNameAndVersion = (await askForString(
+      'SDK name and version',
+      example: 'Raspberry Pi 4 Model B+',
+    ))!;
 
     final bool enabled = await askForBool('enabled', description: 'Should the device be enabled?');
 
-    final String targetStr =
-        (await askForString(
-          'target',
-          description: 'Please enter the hostname or IPv4/v6 address of the device.',
-          example: 'raspberrypi',
-          validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s),
-        ))!;
+    final String targetStr = (await askForString(
+      'target',
+      description: 'Please enter the hostname or IPv4/v6 address of the device.',
+      example: 'raspberrypi',
+      validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s),
+    ))!;
 
     final InternetAddress? targetIp = InternetAddress.tryParse(targetStr);
     final bool useIp = targetIp != null;
     final bool ipv6 = useIp && targetIp.type == InternetAddressType.IPv6;
-    final InternetAddress loopbackIp =
-        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopbackIp = ipv6
+        ? InternetAddress.loopbackIPv6
+        : InternetAddress.loopbackIPv4;
 
-    final String username =
-        (await askForString(
-          'username',
-          description: 'Please enter the username used for ssh-ing into the remote device.',
-          example: 'pi',
-          defaultsTo: 'no username',
-        ))!;
+    final String username = (await askForString(
+      'username',
+      description: 'Please enter the username used for ssh-ing into the remote device.',
+      example: 'pi',
+      defaultsTo: 'no username',
+    ))!;
 
-    final String remoteRunDebugCommand =
-        (await askForString(
-          'run command',
-          description:
-              'Please enter the command executed on the remote device for starting '
-              r'the app. "/tmp/${appName}" is the path to the asset bundle.',
-          example: r'flutter-pi /tmp/${appName}',
-        ))!;
+    final String remoteRunDebugCommand = (await askForString(
+      'run command',
+      description:
+          'Please enter the command executed on the remote device for starting '
+          r'the app. "/tmp/${appName}" is the path to the asset bundle.',
+      example: r'flutter-pi /tmp/${appName}',
+    ))!;
 
     final bool usePortForwarding = await askForBool(
       'use port forwarding',
@@ -650,14 +647,12 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           'not using port forwarding.',
     );
 
-    final String screenshotCommand =
-        (await askForString(
-          'screenshot command',
-          description: 'Enter the command executed on the remote device for taking a screenshot.',
-          example:
-              r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
-          defaultsTo: 'no screenshotting support',
-        ))!;
+    final String screenshotCommand = (await askForString(
+      'screenshot command',
+      description: 'Enter the command executed on the remote device for taking a screenshot.',
+      example: r"fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \n\t'",
+      defaultsTo: 'no screenshotting support',
+    ))!;
 
     // SSH expects IPv6 addresses to use the bracket syntax like URIs do too,
     // but the IPv6 the user enters is a raw IPv6 address, so we need to wrap it.
@@ -706,27 +701,25 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         remoteRunDebugCommand,
       ],
 
-      forwardPortCommand:
-          usePortForwarding
-              ? <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-o',
-                'ExitOnForwardFailure=yes',
-                if (ipv6) '-6',
-                '-L',
-                '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
-                sshTarget,
-                "echo 'Port forwarding success'; read",
-              ]
-              : null,
+      forwardPortCommand: usePortForwarding
+          ? <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-o',
+              'ExitOnForwardFailure=yes',
+              if (ipv6) '-6',
+              '-L',
+              '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
+              sshTarget,
+              "echo 'Port forwarding success'; read",
+            ]
+          : null,
       forwardPortSuccessRegex: usePortForwarding ? RegExp('Port forwarding success') : null,
 
-      screenshotCommand:
-          screenshotCommand.isNotEmpty
-              ? <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, screenshotCommand]
-              : null,
+      screenshotCommand: screenshotCommand.isNotEmpty
+          ? <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, screenshotCommand]
+          : null,
     );
 
     if (_platform.isWindows) {

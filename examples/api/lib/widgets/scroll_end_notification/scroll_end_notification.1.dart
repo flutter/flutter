@@ -85,8 +85,8 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     }
     if (notification is ScrollEndNotification) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        final RenderSliver? sliver =
-            alignedItemKey.currentContext?.findAncestorRenderObjectOfType<RenderSliver>();
+        final RenderSliver? sliver = alignedItemKey.currentContext
+            ?.findAncestorRenderObjectOfType<RenderSliver>();
         if (sliver != null && sliver.geometry != null) {
           maybeAutoScrollAlignedItem(sliver);
         }

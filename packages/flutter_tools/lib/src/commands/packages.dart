@@ -161,8 +161,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> subArgs =
-        argResults!.rest.toList()..removeWhere((String arg) => arg == '--');
+    final List<String> subArgs = argResults!.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
     await pub.interactively(
       <String>[_commandName, ...subArgs],
       context: context,
@@ -407,18 +407,20 @@ class PackagesGetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  late final Future<List<Plugin>> _pluginsFound =
-      (() async {
-        final FlutterProject? rootProject = _rootProject;
-        if (rootProject == null) {
-          return <Plugin>[];
-        }
+  late final Future<List<Plugin>> _pluginsFound = (() async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return <Plugin>[];
+    }
 
-        return findPlugins(rootProject, throwOnError: false);
-      })();
+    return findPlugins(rootProject, throwOnError: false);
+  })();
 
-  late final String? _androidEmbeddingVersion =
-      _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
+  late final String? _androidEmbeddingVersion = _rootProject?.android
+      .getEmbeddingVersion()
+      .toString()
+      .split('.')
+      .last;
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.

@@ -262,31 +262,32 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense); // intentionally a duplicate
 
-    final File packageConfigFile = fileSystem.file('package_config.json')..writeAsStringSync(
-      json.encode(<String, Object>{
-        'configVersion': 2,
-        'packages': <Object>[
-          <String, Object>{
-            'name': 'foo',
-            'rootUri': 'file:///foo/',
-            'packageUri': 'lib/',
-            'languageVersion': '2.2',
-          },
-          <String, Object>{
-            'name': 'bar',
-            'rootUri': 'file:///bar/',
-            'packageUri': 'lib/',
-            'languageVersion': '2.2',
-          },
-          <String, Object>{
-            'name': 'fizz',
-            'rootUri': 'file:///fizz/',
-            'packageUri': 'lib/',
-            'languageVersion': '2.2',
-          },
-        ],
-      }),
-    );
+    final File packageConfigFile = fileSystem.file('package_config.json')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'foo',
+              'rootUri': 'file:///foo/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2',
+            },
+            <String, Object>{
+              'name': 'bar',
+              'rootUri': 'file:///bar/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2',
+            },
+            <String, Object>{
+              'name': 'fizz',
+              'rootUri': 'file:///fizz/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2',
+            },
+          ],
+        }),
+      );
     final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
     final LicenseResult result = licenseCollector.obtainLicenses(
       packageConfig,
@@ -318,25 +319,26 @@ void main() {
     fileSystem.file('foo.txt').writeAsStringSync('foo.txt');
     fileSystem.file('bar.txt').writeAsStringSync('bar.txt');
 
-    final File packageConfigFile = fileSystem.file('package_config.json')..writeAsStringSync(
-      json.encode(<String, Object>{
-        'configVersion': 2,
-        'packages': <Object>[
-          <String, Object>{
-            'name': 'foo',
-            'rootUri': 'file:///foo/',
-            'packageUri': 'lib/',
-            'languageVersion': '2.2',
-          },
-          <String, Object>{
-            'name': 'bar',
-            'rootUri': 'file:///bar/',
-            'packageUri': 'lib/',
-            'languageVersion': '2.2',
-          },
-        ],
-      }),
-    );
+    final File packageConfigFile = fileSystem.file('package_config.json')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'foo',
+              'rootUri': 'file:///foo/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2',
+            },
+            <String, Object>{
+              'name': 'bar',
+              'rootUri': 'file:///bar/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2',
+            },
+          ],
+        }),
+      );
     final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
     final LicenseResult result = licenseCollector.obtainLicenses(
       packageConfig,
@@ -367,19 +369,20 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(_kMitLicense);
 
-      final File packageConfigFile = fileSystem.file('package_config.json')..writeAsStringSync(
-        json.encode(<String, Object>{
-          'configVersion': 2,
-          'packages': <Object>[
-            <String, Object>{
-              'name': 'foo',
-              'rootUri': 'file:///foo/',
-              'packageUri': 'lib/',
-              'languageVersion': '2.2',
-            },
-          ],
-        }),
-      );
+      final File packageConfigFile = fileSystem.file('package_config.json')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'foo',
+                'rootUri': 'file:///foo/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+            ],
+          }),
+        );
       final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
 
       final LicenseResult licenseResult = licenseCollector.obtainLicenses(
@@ -411,19 +414,20 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[0xFFFE]);
 
-      final File packageConfigFile = fileSystem.file('package_config.json')..writeAsStringSync(
-        json.encode(<String, Object>{
-          'configVersion': 2,
-          'packages': <Object>[
-            <String, Object>{
-              'name': 'foo',
-              'rootUri': 'file:///foo/',
-              'packageUri': 'lib/',
-              'languageVersion': '2.2',
-            },
-          ],
-        }),
-      );
+      final File packageConfigFile = fileSystem.file('package_config.json')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'foo',
+                'rootUri': 'file:///foo/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+            ],
+          }),
+        );
       final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
 
       final LicenseResult licenseResult = licenseCollector.obtainLicenses(

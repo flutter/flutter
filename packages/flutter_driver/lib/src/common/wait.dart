@@ -194,10 +194,11 @@ class CombinedCondition extends SerializableWaitCondition {
   @override
   Map<String, String> serialize() {
     final Map<String, String> jsonMap = super.serialize();
-    final List<Map<String, String>> jsonConditions =
-        conditions.map((SerializableWaitCondition condition) {
-          return condition.serialize();
-        }).toList();
+    final List<Map<String, String>> jsonConditions = conditions.map((
+      SerializableWaitCondition condition,
+    ) {
+      return condition.serialize();
+    }).toList();
     jsonMap['conditions'] = json.encode(jsonConditions);
     return jsonMap;
   }
@@ -211,9 +212,8 @@ SerializableWaitCondition _deserialize(Map<String, String> json) {
     'FirstFrameRasterizedCondition' => FirstFrameRasterized.deserialize(json),
     'NoPendingPlatformMessagesCondition' => NoPendingPlatformMessages.deserialize(json),
     'CombinedCondition' => CombinedCondition.deserialize(json),
-    final String condition =>
-      throw SerializationException(
-        'Unsupported wait condition $condition in the JSON string $json',
-      ),
+    final String condition => throw SerializationException(
+      'Unsupported wait condition $condition in the JSON string $json',
+    ),
   };
 }

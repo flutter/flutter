@@ -20,7 +20,8 @@ class TimePickerTemplate extends TokenTemplate {
   static const String variant = '';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   _${blockName}DefaultsM3(this.context, { this.entryMode = TimePickerEntryMode.dial });
 

@@ -98,10 +98,9 @@ class RenderDecoratedSliver extends RenderProxySliver {
     }
     // In the case where the child sliver has infinite scroll extent, the decoration
     // should only extend down to the bottom cache extent.
-    final double cappedMainAxisExtent =
-        child!.geometry!.scrollExtent.isInfinite
-            ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
-            : child!.geometry!.scrollExtent;
+    final double cappedMainAxisExtent = child!.geometry!.scrollExtent.isInfinite
+        ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
+        : child!.geometry!.scrollExtent;
     final (Size childSize, Offset scrollOffset) = switch (constraints.axis) {
       Axis.horizontal => (
         Size(cappedMainAxisExtent, constraints.crossAxisExtent),

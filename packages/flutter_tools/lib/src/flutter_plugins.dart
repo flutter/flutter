@@ -82,8 +82,9 @@ Future<Plugin?> _pluginFromPackage(
     return null;
   }
   final String? flutterConstraintText = (pubspec['environment'] as YamlMap?)?['flutter'] as String?;
-  final semver.VersionConstraint? flutterConstraint =
-      flutterConstraintText == null ? null : semver.VersionConstraint.parse(flutterConstraintText);
+  final semver.VersionConstraint? flutterConstraint = flutterConstraintText == null
+      ? null
+      : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap? dependencies = pubspec['dependencies'] as YamlMap?;
   globals.printTrace('Found plugin $name at $packageRootPath');
@@ -721,7 +722,8 @@ const String _dartPluginRegisterWith = r'''
 
 // TODO(egarciad): Evaluate merging the web and non-web plugin registry templates.
 // https://github.com/flutter/flutter/issues/80406
-const String _dartPluginRegistryForNonWebTemplate = '''
+const String _dartPluginRegistryForNonWebTemplate =
+    '''
 //
 // Generated file. Do not edit.
 // This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
@@ -1026,8 +1028,9 @@ Future<void> _writeWebPluginRegistrant(
 
   final File pluginFile = destination.childFile('web_plugin_registrant.dart');
 
-  final String template =
-      webPlugins.isEmpty ? _noopDartPluginRegistryTemplate : _dartPluginRegistryTemplate;
+  final String template = webPlugins.isEmpty
+      ? _noopDartPluginRegistryTemplate
+      : _dartPluginRegistryTemplate;
 
   await _renderTemplateToFile(template, context, pluginFile, globals.templateRenderer);
 }
@@ -1097,12 +1100,11 @@ void handleSymlinkException(
       // just by enabling developer mode; before that it requires running the
       // terminal as Administrator.
       // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-      final String instructions =
-          (version != null && version >= Version(10, 0, 14972))
-              ? 'Please enable Developer Mode in your system settings. Run\n'
-                  '  start ms-settings:developers\n'
-                  'to open settings.'
-              : 'You must build from a terminal run as administrator.';
+      final String instructions = (version != null && version >= Version(10, 0, 14972))
+          ? 'Please enable Developer Mode in your system settings. Run\n'
+                '  start ms-settings:developers\n'
+                'to open settings.'
+          : 'You must build from a terminal run as administrator.';
       throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
     }
     // ERROR_INVALID_FUNCTION, trying to link across drives, which is not supported
@@ -1350,8 +1352,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 }) {
   final Map<String, List<Plugin>> resolution = _resolvePluginImplementations(
     plugins,
-    pluginResolutionType:
-        selectDartPluginsOnly ? _PluginResolutionType.dart : _PluginResolutionType.nativeOrDart,
+    pluginResolutionType: selectDartPluginsOnly
+        ? _PluginResolutionType.dart
+        : _PluginResolutionType.nativeOrDart,
   );
   return resolution.entries.expand((MapEntry<String, List<Plugin>> entry) {
     return entry.value.map((Plugin plugin) {
@@ -1448,8 +1451,9 @@ _resolvePluginImplementationsByPlatform(
     );
 
     if (defaultImplPluginName != null) {
-      final Plugin? defaultPackage =
-          plugins.where((Plugin plugin) => plugin.name == defaultImplPluginName).firstOrNull;
+      final Plugin? defaultPackage = plugins
+          .where((Plugin plugin) => plugin.name == defaultImplPluginName)
+          .firstOrNull;
       if (defaultPackage != null) {
         if (_hasPluginInlineImpl(
           defaultPackage,
@@ -1511,9 +1515,8 @@ _resolvePluginImplementationsByPlatform(
   }
 
   // Sort the plugins by name to keep ordering stable in generated files.
-  final List<Plugin> pluginImplementations =
-      pluginResolution.values.toList()
-        ..sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  final List<Plugin> pluginImplementations = pluginResolution.values.toList()
+    ..sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
   return (pluginImplementations, hasPluginPubspecError, hasResolutionError);
 }
 
@@ -1636,8 +1639,8 @@ bool _isEligibleDartSelfImpl(Plugin plugin, String platformKey) {
   final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
   final semver.Version? minFlutterVersion =
       flutterConstraint != null && flutterConstraint is semver.VersionRange
-          ? flutterConstraint.min
-          : null;
+      ? flutterConstraint.min
+      : null;
   final bool hasMinVersionForImplementsRequirement =
       minFlutterVersion != null && minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
   return !isDesktop || hasMinVersionForImplementsRequirement;
@@ -1687,8 +1690,8 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
       final Iterable<Plugin> implementingPackage = directDependencies.where(
         (Plugin plugin) => plugin.implementsPackage != null && plugin.implementsPackage!.isNotEmpty,
       );
-      final Set<Plugin> appFacingPackage =
-          directDependencies.toSet()..removeAll(implementingPackage);
+      final Set<Plugin> appFacingPackage = directDependencies.toSet()
+        ..removeAll(implementingPackage);
       if (implementingPackage.length == 1 && appFacingPackage.length == 1) {
         return (implementingPackage.first, null);
       }

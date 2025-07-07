@@ -90,12 +90,11 @@ import 'package:ui/ui.dart' as ui;
 
   test('Check JavaScript access', () async {
     final Directory webUiLibDir = Directory('lib/web_ui/lib');
-    final List<File> dartFiles =
-        webUiLibDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((File file) => file.path.endsWith('.dart'))
-            .toList();
+    final List<File> dartFiles = webUiLibDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) => file.path.endsWith('.dart'))
+        .toList();
 
     expect(dartFiles, isNotEmpty);
 
