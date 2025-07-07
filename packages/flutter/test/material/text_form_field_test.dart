@@ -34,7 +34,11 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -106,7 +110,11 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -248,7 +256,11 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset startBlah1 = textOffsetToPosition(tester, 0);
@@ -366,7 +378,11 @@ void main() {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(textAlign: alignment)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(textAlign: alignment)),
+        ),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -381,7 +397,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scrollPhysics: scrollPhysics))),
+        home: Material(
+          child: Center(child: TextFormField(scrollPhysics: scrollPhysics)),
+        ),
       ),
     );
 
@@ -397,7 +415,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(textAlignVertical: textAlignVertical))),
+        home: Material(
+          child: Center(child: TextFormField(textAlignVertical: textAlignVertical)),
+        ),
       ),
     );
 
@@ -411,7 +431,9 @@ void main() {
   testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(textInputAction: TextInputAction.next))),
+        home: Material(
+          child: Center(child: TextFormField(textInputAction: TextInputAction.next)),
+        ),
       ),
     );
 
@@ -427,7 +449,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(onEditingComplete: onEditingComplete))),
+        home: Material(
+          child: Center(child: TextFormField(onEditingComplete: onEditingComplete)),
+        ),
       ),
     );
 
@@ -619,14 +643,10 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              buildCounter: (
-                BuildContext context, {
-                int? currentLength,
-                int? maxLength,
-                bool? isFocused,
-              }) {
-                return Text('$currentLength of $maxLength');
-              },
+              buildCounter:
+                  (BuildContext context, {int? currentLength, int? maxLength, bool? isFocused}) {
+                    return Text('$currentLength of $maxLength');
+                  },
               maxLength: 10,
             ),
           ),
@@ -829,7 +849,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(initialValue: 'initialValue'))),
+        home: Material(
+          child: Center(child: TextFormField(initialValue: 'initialValue')),
+        ),
       ),
     );
 
@@ -851,7 +873,11 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(controller: controller)),
+        ),
+      ),
     );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
@@ -869,7 +895,11 @@ void main() {
   testWidgets("didChange resets the text field's value to empty when passed null", (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField())),
+      ),
+    );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
     await tester.pump();
@@ -888,7 +918,11 @@ void main() {
   testWidgets("reset resets the text field's value to empty when initialValue is null", (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField())),
+      ),
+    );
 
     await tester.enterText(find.byType(TextFormField), 'changedValue');
     await tester.pump();
@@ -907,7 +941,9 @@ void main() {
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(initialValue: 'initialValue'))),
+        home: Material(
+          child: Center(child: TextFormField(initialValue: 'initialValue')),
+        ),
       ),
     );
 
@@ -1056,7 +1092,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scrollController: scrollController))),
+        home: Material(
+          child: Center(child: TextFormField(scrollController: scrollController)),
+        ),
       ),
     );
 
@@ -1148,7 +1186,11 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextFormField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextFormField(controller: controller)),
+          ),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -1248,13 +1290,14 @@ void main() {
 
   testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
     final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
-      magnifierBuilder: (
-        BuildContext context,
-        MagnifierController controller,
-        ValueNotifier<MagnifierInfo> notifier,
-      ) {
-        return const Placeholder();
-      },
+      magnifierBuilder:
+          (
+            BuildContext context,
+            MagnifierController controller,
+            ValueNotifier<MagnifierInfo> notifier,
+          ) {
+            return const Placeholder();
+          },
     );
 
     await tester.pumpWidget(
@@ -1277,7 +1320,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(undoController: undoController))),
+        home: Material(
+          child: Center(child: TextFormField(undoController: undoController)),
+        ),
       ),
     );
 
@@ -1335,7 +1380,11 @@ void main() {
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(clipBehavior: clipBehavior)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(clipBehavior: clipBehavior)),
+        ),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -1350,7 +1399,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(scribbleEnabled: scribbleEnabled))),
+        home: Material(
+          child: Center(child: TextFormField(scribbleEnabled: scribbleEnabled)),
+        ),
       ),
     );
 
@@ -1366,7 +1417,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(canRequestFocus: canRequestFocus))),
+        home: Material(
+          child: Center(child: TextFormField(canRequestFocus: canRequestFocus)),
+        ),
       ),
     );
 
@@ -1444,7 +1497,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextFormField(dragStartBehavior: dragStartBehavior))),
+        home: Material(
+          child: Center(child: TextFormField(dragStartBehavior: dragStartBehavior)),
+        ),
       ),
     );
 
@@ -1459,7 +1514,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextFormField(onTapAlwaysCalled: true)))),
+      MaterialApp(
+        home: Material(child: Center(child: TextFormField(onTapAlwaysCalled: true))),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(TextField);
@@ -1467,6 +1524,20 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.onTapAlwaysCalled, isTrue);
+  });
+
+  testWidgets('Passes hintLocales to hintLocales TextField', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('fr', 'FR')];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextFormField(hintLocales: hintLocales)),
+        ),
+      ),
+    );
+
+    final TextField textFieldWidget = tester.widget(find.byType(TextField));
+    expect(textFieldWidget.hintLocales, hintLocales);
   });
 
   testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
@@ -1670,7 +1741,9 @@ void main() {
           wrapWithView: false,
           View(
             view: tester.view,
-            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+            child: MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
           ),
         );
 

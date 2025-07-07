@@ -26,19 +26,18 @@ void main(List<String> arguments) {
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
-  final ArgParser argParser =
-      ArgParser()
-        ..addFlag(
-          'gradle-generation',
-          help: 'Re-generate gradle files in each processed directory.',
-          defaultsTo: true,
-        )
-        ..addFlag(
-          'exclusion',
-          help:
-              'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
-          defaultsTo: true,
-        );
+  final ArgParser argParser = ArgParser()
+    ..addFlag(
+      'gradle-generation',
+      help: 'Re-generate gradle files in each processed directory.',
+      defaultsTo: true,
+    )
+    ..addFlag(
+      'exclusion',
+      help:
+          'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
+      defaultsTo: true,
+    );
 
   ArgResults args;
   try {
@@ -59,16 +58,14 @@ void main(List<String> arguments) {
 
   const FileSystem fileSystem = LocalFileSystem();
 
-  final Directory repoRoot =
-      (() {
-        final String repoRootPath =
-            exec('git', const <String>['rev-parse', '--show-toplevel']).trim();
-        final Directory repoRoot = fileSystem.directory(repoRootPath);
-        if (!repoRoot.existsSync()) {
-          throw StateError("Expected $repoRoot to exist but it didn't!");
-        }
-        return repoRoot;
-      })();
+  final Directory repoRoot = (() {
+    final String repoRootPath = exec('git', const <String>['rev-parse', '--show-toplevel']).trim();
+    final Directory repoRoot = fileSystem.directory(repoRootPath);
+    if (!repoRoot.existsSync()) {
+      throw StateError("Expected $repoRoot to exist but it didn't!");
+    }
+    return repoRoot;
+  })();
 
   final Iterable<Directory> androidDirectories = discoverAndroidDirectories(repoRoot);
 

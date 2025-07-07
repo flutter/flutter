@@ -136,23 +136,21 @@ void main() {
       final GlobalKey containerKey2 = GlobalKey();
       const String kHeroTag = 'hero';
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (_) => Scaffold(
-              key: containerKey1,
-              body: const ColoredBox(
-                color: Color(0xff00ffff),
-                child: Hero(tag: kHeroTag, child: Text('Home')),
-              ),
-            ),
-        '/settings':
-            (_) => Scaffold(
-              key: containerKey2,
-              body: Container(
-                padding: const EdgeInsets.all(100.0),
-                color: const Color(0xffff00ff),
-                child: const Hero(tag: kHeroTag, child: Text('Settings')),
-              ),
-            ),
+        '/': (_) => Scaffold(
+          key: containerKey1,
+          body: const ColoredBox(
+            color: Color(0xff00ffff),
+            child: Hero(tag: kHeroTag, child: Text('Home')),
+          ),
+        ),
+        '/settings': (_) => Scaffold(
+          key: containerKey2,
+          body: Container(
+            padding: const EdgeInsets.all(100.0),
+            color: const Color(0xffff00ff),
+            child: const Hero(tag: kHeroTag, child: Text('Settings')),
+          ),
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));

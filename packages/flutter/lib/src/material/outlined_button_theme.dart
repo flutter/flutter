@@ -112,8 +112,8 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
-    final OutlinedButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
+    final OutlinedButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 

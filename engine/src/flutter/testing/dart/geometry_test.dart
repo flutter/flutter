@@ -247,13 +247,12 @@ void main() {
   });
 
   test('RRect.scaleRadii() properly constrained radii should remain unchanged', () {
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          topLeft: const Radius.circular(0.5),
-          topRight: const Radius.circular(0.25),
-          bottomRight: const Radius.elliptical(0.25, 0.75),
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      topLeft: const Radius.circular(0.5),
+      topRight: const Radius.circular(0.25),
+      bottomRight: const Radius.elliptical(0.25, 0.75),
+    ).scaleRadii();
 
     // check sides
     expect(rrect.left, 1.0);
@@ -273,13 +272,12 @@ void main() {
   });
 
   test('RRect.scaleRadii() sum of radii that exceed side length should properly scale', () {
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          topLeft: const Radius.circular(5000.0),
-          topRight: const Radius.circular(2500.0),
-          bottomRight: const Radius.elliptical(2500.0, 7500.0),
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      topLeft: const Radius.circular(5000.0),
+      topRight: const Radius.circular(2500.0),
+      bottomRight: const Radius.elliptical(2500.0, 7500.0),
+    ).scaleRadii();
 
     // check sides
     expect(rrect.left, 1.0);

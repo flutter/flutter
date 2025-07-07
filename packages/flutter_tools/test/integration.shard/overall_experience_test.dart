@@ -36,10 +36,9 @@ void main() {
   testWithoutContext(
     'flutter run writes and clears pidfile appropriately',
     () async {
-      final String tempDirectory =
-          fileSystem.systemTempDirectory
-              .createTempSync('flutter_overall_experience_test.')
-              .resolveSymbolicLinksSync();
+      final String tempDirectory = fileSystem.systemTempDirectory
+          .createTempSync('flutter_overall_experience_test.')
+          .resolveSymbolicLinksSync();
       final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
       final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
       bool? existsDuringTest;
@@ -79,10 +78,9 @@ void main() {
   );
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
@@ -177,10 +175,9 @@ void main() {
   }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
       'dev',
@@ -291,10 +288,9 @@ void main() {
       'integration_tests',
       'ui',
     );
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
