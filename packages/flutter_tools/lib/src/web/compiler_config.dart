@@ -146,7 +146,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
-    this.minify = true,
+    this.minify,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
