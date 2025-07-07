@@ -1738,11 +1738,6 @@ public class PlatformViewsControllerTest {
                   }
 
                   @Override
-                  public Surface getForcedNewSurface() {
-                    return null;
-                  }
-
-                  @Override
                   public boolean handlesCropAndRotation() {
                     return false;
                   }
