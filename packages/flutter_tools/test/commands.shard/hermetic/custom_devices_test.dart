@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -1103,6 +1104,27 @@ void main() {
         );
       },
     );
+
+    testUsingContext("custom-device log reader command", () async {
+      const logLine = 'Hello, from custom device!';
+      final logLineCommand = const <String>['echo', logLine];
+      final expectedLogLines = const <String>[logLine];
+
+      final platform = FakePlatform();
+      final processManager = FakeProcessManager.list([
+        FakeCommand(command: logLineCommand, stdout: logLine),
+      ]);
+      final customDeviceConfig = CustomDeviceConfig.getExampleForPlatform(
+        platform,
+      ).copyWith(readLogsCommand: logLineCommand);
+      final customDevice = CustomDevice(
+        config: customDeviceConfig,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+      );
+      final logReader = await customDevice.getLogReader();
+      expect(logReader.logLines, emitsInOrder(expectedLogLines));
+    });
   });
 
   group('windows', () {
