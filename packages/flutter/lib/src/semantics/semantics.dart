@@ -807,51 +807,35 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
 
 /// Internal representation of a label part for [SemanticsLabelBuilder].
 class _LabelPart {
-  _LabelPart.plain(this.text, this.textDirection) : attributedString = AttributedString(text);
-  _LabelPart.attributed(this.attributedString, this.textDirection) : text = attributedString.string;
+  _LabelPart(this.text, this.textDirection);
 
   final String text;
-  final AttributedString attributedString;
   final TextDirection? textDirection;
-
-  bool get hasAttributes => attributedString.attributes.isNotEmpty;
 }
 
-/// An immutable semantic label that contains both plain and attributed versions.
+/// An immutable semantic label that contains the concatenated text.
 ///
 /// This class represents the result of concatenating multiple label parts with
 /// proper text direction handling and spacing.
 @immutable
 final class SemanticsLabel {
-  const SemanticsLabel._(this._label, {AttributedString? attributedLabel})
-      : _attributedLabel = attributedLabel;
+  const SemanticsLabel._(this._label);
 
   final String _label;
-  final AttributedString? _attributedLabel;
 
-  /// The concatenation of text parts supplied using `addPart` and
-  /// `addAttributedPart` invocations.
+  /// The concatenation of text parts supplied using `addPart` invocations.
   String get label => _label;
-
-  /// The attributed concatenation of text parts supplied using `addPart`
-  /// and `addAttributedPart` invocations.
-  ///
-  /// Returns null if only plain text parts were added via `addPart()`.
-  /// Returns an AttributedString if any attributed parts were added via `addAttributedPart()`.
-  AttributedString? get attributedLabel => _attributedLabel;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is SemanticsLabel &&
-        other._label == _label &&
-        other._attributedLabel == _attributedLabel;
+    return other is SemanticsLabel && other._label == _label;
   }
 
   @override
-  int get hashCode => Object.hash(_label, _attributedLabel);
+  int get hashCode => _label.hashCode;
 
   @override
   String toString() => 'SemanticsLabel("$_label")';
@@ -861,8 +845,8 @@ final class SemanticsLabel {
 /// text direction handling and spacing.
 ///
 /// This builder helps address the complexity of concatenating multiple text
-/// parts while handling language-specific nuances like RTL vs LTR text direction,
-/// proper spacing, and attribute preservation.
+/// parts while handling language-specific nuances like RTL vs LTR text direction
+/// and proper spacing.
 ///
 /// Example usage:
 /// ```dart
@@ -873,16 +857,13 @@ final class SemanticsLabel {
 /// print(label.label); // "Hello world"
 /// ```
 ///
-/// For more complex scenarios with attributed strings:
+/// For multilingual text with proper RTL support:
 /// ```dart
-/// final builder = SemanticsLabelBuilder()
-///   ..addPart('Welcome')
-///   ..addAttributedPart(AttributedString('Jane', attributes: [
-///     LocaleStringAttribute(range: TextRange(start: 0, end: 4), locale: Locale('en'))
-///   ]));
+/// final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
+///   ..addPart('Welcome', textDirection: TextDirection.ltr)
+///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
 /// final label = builder.build();
-/// print(label.label); // "Welcome Jane"
-/// print(label.attributedLabel); // AttributedString with preserved attributes
+/// print(label.label); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
 /// ```
 final class SemanticsLabelBuilder {
   /// Creates a new [SemanticsLabelBuilder].
@@ -902,23 +883,13 @@ final class SemanticsLabelBuilder {
 
   final List<_LabelPart> _parts = <_LabelPart>[];
 
-  /// Adds a plain string text part.
+  /// Adds a text part.
   ///
   /// If [textDirection] is specified, it will be used for this specific part.
   /// Empty parts are ignored.
   void addPart(String label, {TextDirection? textDirection}) {
     if (label.isNotEmpty) {
-      _parts.add(_LabelPart.plain(label, textDirection));
-    }
-  }
-
-  /// Adds an attributed string text part.
-  ///
-  /// If [textDirection] is specified, it will be used for this specific part.
-  /// Empty parts are ignored.
-  void addAttributedPart(AttributedString label, {TextDirection? textDirection}) {
-    if (label.string.isNotEmpty) {
-      _parts.add(_LabelPart.attributed(label, textDirection));
+      _parts.add(_LabelPart(label, textDirection));
     }
   }
 
@@ -931,8 +902,7 @@ final class SemanticsLabelBuilder {
   /// Builds and returns a [SemanticsLabel] from the added parts.
   ///
   /// This method concatenates all parts with proper text direction handling
-  /// and spacing. If any attributed parts were added, the result will include
-  /// an [AttributedString] with properly adjusted attribute ranges.
+  /// and spacing.
   SemanticsLabel build() {
     if (_parts.isEmpty) {
       return const SemanticsLabel._('');
@@ -940,41 +910,34 @@ final class SemanticsLabelBuilder {
 
     if (_parts.length == 1) {
       final _LabelPart part = _parts.first;
-      return SemanticsLabel._(
-        part.text,
-        attributedLabel: part.hasAttributes ? part.attributedString : null,
-      );
+      return SemanticsLabel._(part.text);
     }
 
     // Concatenate multiple parts with proper text direction handling
-    AttributedString result = _parts.first.attributedString;
+    final StringBuffer buffer = StringBuffer();
+    buffer.write(_parts.first.text);
 
     for (int i = 1; i < _parts.length; i++) {
       final _LabelPart currentPart = _parts[i];
       final TextDirection? partDirection = currentPart.textDirection ?? textDirection;
 
       if (separator.isNotEmpty) {
-        result = result + AttributedString(separator);
+        buffer.write(separator);
       }
 
-      AttributedString partString = currentPart.attributedString;
+      String partText = currentPart.text;
       if (textDirection != null && partDirection != null && textDirection != partDirection) {
         final String directionalEmbedding = switch (partDirection) {
           TextDirection.rtl => Unicode.RLE,
           TextDirection.ltr => Unicode.LRE,
         };
-        partString = AttributedString(directionalEmbedding) + partString + AttributedString(Unicode.PDF);
+        partText = directionalEmbedding + partText + Unicode.PDF;
       }
 
-      result = result + partString;
+      buffer.write(partText);
     }
 
-    final bool hasAnyAttributes = _parts.any((_LabelPart part) => part.hasAttributes);
-
-    return SemanticsLabel._(
-      result.string,
-      attributedLabel: hasAnyAttributes ? result : null,
-    );
+    return SemanticsLabel._(buffer.toString());
   }
 
   /// Clears all parts from this builder, allowing it to be reused.
