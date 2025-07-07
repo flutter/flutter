@@ -663,8 +663,8 @@ class AnimationController extends Animation<double>
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       final Duration directionDuration =
           (_direction == _AnimationDirection.reverse && reverseDuration != null)
-              ? reverseDuration!
-              : this.duration!;
+          ? reverseDuration!
+          : this.duration!;
       simulationDuration = directionDuration * remainingFraction;
     } else if (target == value) {
       // Already at target, don't animate.
@@ -676,10 +676,9 @@ class AnimationController extends Animation<double>
         _value = clampDouble(target, lowerBound, upperBound);
         notifyListeners();
       }
-      _status =
-          (_direction == _AnimationDirection.forward)
-              ? AnimationStatus.completed
-              : AnimationStatus.dismissed;
+      _status = (_direction == _AnimationDirection.forward)
+          ? AnimationStatus.completed
+          : AnimationStatus.dismissed;
       _checkStatusChanged();
       return TickerFuture.complete();
     }
@@ -747,10 +746,9 @@ class AnimationController extends Animation<double>
 
   void _directionSetter(_AnimationDirection direction) {
     _direction = direction;
-    _status =
-        (_direction == _AnimationDirection.forward)
-            ? AnimationStatus.forward
-            : AnimationStatus.reverse;
+    _status = (_direction == _AnimationDirection.forward)
+        ? AnimationStatus.forward
+        : AnimationStatus.reverse;
     _checkStatusChanged();
   }
 
@@ -783,10 +781,9 @@ class AnimationController extends Animation<double>
   }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
-    final double target =
-        velocity < 0.0
-            ? lowerBound - _kFlingTolerance.distance
-            : upperBound + _kFlingTolerance.distance;
+    final double target = velocity < 0.0
+        ? lowerBound - _kFlingTolerance.distance
+        : upperBound + _kFlingTolerance.distance;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     final double scale = switch (behavior) {
       // This is arbitrary (it was chosen because it worked for the drawer widget).
@@ -871,10 +868,9 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = Duration.zero;
     _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
-    _status =
-        (_direction == _AnimationDirection.forward)
-            ? AnimationStatus.forward
-            : AnimationStatus.reverse;
+    _status = (_direction == _AnimationDirection.forward)
+        ? AnimationStatus.forward
+        : AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
   }
@@ -953,10 +949,9 @@ class AnimationController extends Animation<double>
     assert(elapsedInSeconds >= 0.0);
     _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
-      _status =
-          (_direction == _AnimationDirection.forward)
-              ? AnimationStatus.completed
-              : AnimationStatus.dismissed;
+      _status = (_direction == _AnimationDirection.forward)
+          ? AnimationStatus.completed
+          : AnimationStatus.dismissed;
       stop(canceled: false);
     }
     notifyListeners();
@@ -1022,11 +1017,10 @@ class _RepeatingSimulation extends Simulation {
     this.count,
   ) : assert(count == null || count > 0, 'Count shall be greater than zero if not null'),
       _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
-      _initialT =
-          (max == min)
-              ? 0.0
-              : ((clampDouble(initialValue, min, max) - min) / (max - min)) *
-                  (period.inMicroseconds / Duration.microsecondsPerSecond) {
+      _initialT = (max == min)
+          ? 0.0
+          : ((clampDouble(initialValue, min, max) - min) / (max - min)) *
+                (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
   }

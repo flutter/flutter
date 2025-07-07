@@ -65,12 +65,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
     }
     String text;
     try {
-      text =
-          (await _processUtils.run(<String>[
-            _androidSdk!.adbPath!,
-            'devices',
-            '-l',
-          ], throwOnError: true)).stdout.trim();
+      text = (await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: true)).stdout.trim();
     } on ProcessException catch (exception) {
       throwToolExit(
         'Unable to run "adb", check your Android SDK installation and '

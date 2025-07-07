@@ -22,7 +22,8 @@ class HotReloadProject extends Project {
   ''';
 
   @override
-  String get main => '''
+  String get main =>
+      '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';

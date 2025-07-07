@@ -127,7 +127,12 @@ void main() {
     final GlobalKey keyB = GlobalKey();
 
     await tester.pumpWidget(
-      Column(children: <Widget>[Container(key: keyA, child: a), Container(key: keyB, child: b)]),
+      Column(
+        children: <Widget>[
+          Container(key: keyA, child: a),
+          Container(key: keyB, child: b),
+        ],
+      ),
     );
 
     TestWidgetState first, second;
@@ -143,7 +148,12 @@ void main() {
     expect(second.syncedState, equals(0x42));
 
     await tester.pumpWidget(
-      Column(children: <Widget>[Container(key: keyA, child: a), Container(key: keyB, child: b)]),
+      Column(
+        children: <Widget>[
+          Container(key: keyA, child: a),
+          Container(key: keyB, child: b),
+        ],
+      ),
     );
 
     first = tester.state(find.byWidget(a));
@@ -161,7 +171,12 @@ void main() {
     // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
     await tester.pumpWidget(
-      Column(children: <Widget>[Container(key: keyA, child: b), Container(key: keyB, child: a)]),
+      Column(
+        children: <Widget>[
+          Container(key: keyA, child: b),
+          Container(key: keyB, child: a),
+        ],
+      ),
     );
 
     first = tester.state(find.byWidget(b));

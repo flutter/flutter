@@ -374,7 +374,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
         final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
+        final Widget body = ClipRect(
+          child: Align(heightFactor: _heightFactor.value, child: child),
+        );
         return widget.expansibleBuilder(context, header, body, _animationController);
       },
       child: shouldRemoveBody ? null : result,

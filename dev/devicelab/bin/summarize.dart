@@ -65,22 +65,21 @@ Future<void> main(List<String> rawArgs) async {
 }
 
 /// Command-line options for the `summarize.dart` command.
-final ArgParser _argParser =
-    ArgParser()
-      ..addFlag(
-        kAsciiTableOpt,
-        defaultsTo: true,
-        help: 'Prints the summary in a table formatted nicely for terminal output.',
-      )
-      ..addFlag(
-        kTabTableOpt,
-        defaultsTo: true,
-        help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
-      )
-      ..addFlag(
-        kRawSummaryOpt,
-        defaultsTo: true,
-        help:
-            'Prints all per-run data collected by the A/B test formatted with\n'
-            'tabs for easy spreadsheet entry.',
-      );
+final ArgParser _argParser = ArgParser()
+  ..addFlag(
+    kAsciiTableOpt,
+    defaultsTo: true,
+    help: 'Prints the summary in a table formatted nicely for terminal output.',
+  )
+  ..addFlag(
+    kTabTableOpt,
+    defaultsTo: true,
+    help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
+  )
+  ..addFlag(
+    kRawSummaryOpt,
+    defaultsTo: true,
+    help:
+        'Prints all per-run data collected by the A/B test formatted with\n'
+        'tabs for easy spreadsheet entry.',
+  );

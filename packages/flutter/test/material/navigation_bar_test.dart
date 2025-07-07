@@ -975,10 +975,9 @@ void main() {
 
     await tester.pumpWidget(buildNavigationBar());
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -1133,9 +1132,9 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..rrect()
-            ..rrect()
-            ..circle(color: hoverColor))
+              ..rrect()
+              ..rrect()
+              ..circle(color: hoverColor))
           : (paints..circle(color: hoverColor)),
     );
 
@@ -1147,12 +1146,12 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle()
-            ..circle(color: pressedColor))
+              ..circle()
+              ..circle()
+              ..circle(color: pressedColor))
           : (paints
-            ..circle()
-            ..circle(color: pressedColor)),
+              ..circle()
+              ..circle(color: pressedColor)),
     );
 
     await gesture.up();
@@ -1167,11 +1166,11 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle(color: focusColor))
+              ..circle()
+              ..circle(color: focusColor))
           : (paints
-            ..circle()
-            ..circle(color: focusColor)),
+              ..circle()
+              ..circle(color: focusColor)),
     );
   });
 
@@ -1695,8 +1694,11 @@ void main() {
       ),
     );
 
-    final double safeAreaBottomPadding =
-        tester.widget<Padding>(find.byType(Padding).first).padding.resolve(textDirection).bottom;
+    final double safeAreaBottomPadding = tester
+        .widget<Padding>(find.byType(Padding).first)
+        .padding
+        .resolve(textDirection)
+        .bottom;
     expect(safeAreaBottomPadding, equals(0));
   });
 }

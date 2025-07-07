@@ -33,7 +33,8 @@ void main() {
 
   testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 arb-dir: arb
 template-arb-file: example.arb
 output-localization-file: bar
@@ -69,7 +70,8 @@ nullable-getter: false
 
   testWithoutContext('parseLocalizationsOptions refuses synthetic-package: true', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 arb-dir: arb
 synthetic-package: true
 template-arb-file: example.arb
@@ -97,7 +99,8 @@ nullable-getter: false
 
   testWithoutContext('parseLocalizationsOptions warns on synthetic-package: false', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 arb-dir: arb
 synthetic-package: false
 template-arb-file: example.arb
@@ -130,7 +133,8 @@ nullable-getter: false
     'parseLocalizationsOptions handles preferredSupportedLocales as list',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+      final File configFile = fileSystem.file('l10n.yaml')
+        ..writeAsStringSync('''
 preferred-supported-locales: ['en_US', 'de']
 ''');
 
@@ -149,7 +153,8 @@ preferred-supported-locales: ['en_US', 'de']
     'parseLocalizationsOptions throws exception on invalid yaml configuration',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+      final File configFile = fileSystem.file('l10n.yaml')
+        ..writeAsStringSync('''
 use-deferred-loading: string
 ''');
 
@@ -167,7 +172,8 @@ use-deferred-loading: string
 
   testWithoutContext('parseLocalizationsOptions tool exits on malformed Yaml', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 template-arb-file: {name}_en.arb
 ''');
 

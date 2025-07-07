@@ -439,8 +439,8 @@ class TestPushLayerPaintingContext extends PaintingContext {
 
 // Absorbs errors that don't have "overflowed" in their error details.
 void absorbOverflowedErrors() {
-  final Iterable<FlutterErrorDetails> errorDetails =
-      TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
+  final Iterable<FlutterErrorDetails> errorDetails = TestRenderingFlutterBinding.instance
+      .takeAllFlutterErrorDetails();
   final Iterable<FlutterErrorDetails> filtered = errorDetails.where((FlutterErrorDetails details) {
     return !details.toString().contains('overflowed');
   });
@@ -451,8 +451,8 @@ void absorbOverflowedErrors() {
 
 // Reports any FlutterErrors.
 void expectNoFlutterErrors() {
-  final Iterable<FlutterErrorDetails> errorDetails =
-      TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
+  final Iterable<FlutterErrorDetails> errorDetails = TestRenderingFlutterBinding.instance
+      .takeAllFlutterErrorDetails();
   errorDetails.forEach(FlutterError.reportError);
 }
 

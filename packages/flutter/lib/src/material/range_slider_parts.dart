@@ -422,8 +422,9 @@ mixin BaseRangeSliderTrackShape {
     assert(sliderTheme.overlayShape != null);
     assert(sliderTheme.trackHeight != null);
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
-    final double overlayWidth =
-        sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double overlayWidth = sliderTheme.overlayShape!
+        .getPreferredSize(isEnabled, isDiscrete)
+        .width;
     double trackHeight = sliderTheme.trackHeight!;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
@@ -752,14 +753,14 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
       TextDirection.ltr => startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx,
       TextDirection.rtl => endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx,
     };
-    final Color? begin =
-        isBetweenThumbs
-            ? sliderTheme.disabledActiveTickMarkColor
-            : sliderTheme.disabledInactiveTickMarkColor;
-    final Color? end =
-        isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
-    final Paint paint =
-        Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final Color? begin = isBetweenThumbs
+        ? sliderTheme.disabledActiveTickMarkColor
+        : sliderTheme.disabledInactiveTickMarkColor;
+    final Color? end = isBetweenThumbs
+        ? sliderTheme.activeTickMarkColor
+        : sliderTheme.inactiveTickMarkColor;
+    final Paint paint = Paint()
+      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius =
@@ -848,24 +849,24 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
     if (isOnTop ?? false) {
-      final Paint strokePaint =
-          Paint()
-            ..color = sliderTheme.overlappingShapeStrokeColor!
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = sliderTheme.overlappingShapeStrokeColor!
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawCircle(center, radius, strokePaint);
     }
 
     final Color color = colorTween.evaluate(enableAnimation)!;
 
-    final double evaluatedElevation =
-        isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;
-    final Path shadowPath =
-        Path()..addArc(
-          Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius),
-          0,
-          math.pi * 2,
-        );
+    final double evaluatedElevation = isPressed!
+        ? elevationTween.evaluate(activationAnimation)
+        : elevation;
+    final Path shadowPath = Path()
+      ..addArc(
+        Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius),
+        0,
+        math.pi * 2,
+      );
 
     bool paintShadows = true;
     assert(() {
@@ -1225,8 +1226,9 @@ class HandleRangeSliderThumbShape extends RangeSliderThumbShape {
     final Color color = colorTween.evaluate(enableAnimation)!;
     final Canvas canvas = context.canvas;
 
-    final Size thumbSize =
-        sliderTheme.thumbSize!.resolve(<WidgetState>{})!; // This is resolved in the paint method.
+    final Size thumbSize = sliderTheme.thumbSize!.resolve(
+      <WidgetState>{},
+    )!; // This is resolved in the paint method.
     final RRect rrect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: thumbSize.width, height: thumbSize.height),
       Radius.circular(thumbSize.shortestSide / 2),
@@ -1308,10 +1310,9 @@ class RoundedRectRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
-      strokePaintColor:
-          isOnTop!
-              ? sliderTheme.overlappingShapeStrokeColor
-              : sliderTheme.valueIndicatorStrokeColor,
+      strokePaintColor: isOnTop!
+          ? sliderTheme.overlappingShapeStrokeColor
+          : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -1381,10 +1382,9 @@ class DropRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape 
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
-      strokePaintColor:
-          isOnTop!
-              ? sliderTheme.overlappingShapeStrokeColor
-              : sliderTheme.valueIndicatorStrokeColor,
+      strokePaintColor: isOnTop!
+          ? sliderTheme.overlappingShapeStrokeColor
+          : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -1490,11 +1490,10 @@ class _RoundedRectSliderValueIndicatorPathPainter {
 
     final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawRRect(rrect, strokePaint);
     }
 
@@ -1622,19 +1621,17 @@ class _DropSliderValueIndicatorPathPainter {
     final RRect borderRect = adjustedBorderRadius
         .resolve(labelPainter.textDirection)
         .toRRect(upperRect);
-    final Path trianglePath =
-        Path()
-          ..lineTo(-_triangleHeight, -_triangleHeight)
-          ..lineTo(_triangleHeight, -_triangleHeight)
-          ..close();
+    final Path trianglePath = Path()
+      ..lineTo(-_triangleHeight, -_triangleHeight)
+      ..lineTo(_triangleHeight, -_triangleHeight)
+      ..close();
     trianglePath.addRRect(borderRect);
 
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawPath(trianglePath, strokePaint);
     }
 

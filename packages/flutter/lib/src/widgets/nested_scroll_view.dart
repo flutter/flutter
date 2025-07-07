@@ -332,8 +332,8 @@ class NestedScrollView extends StatefulWidget {
   /// For sample code showing how to use this method, see the [NestedScrollView]
   /// documentation.
   static SliverOverlapAbsorberHandle sliverOverlapAbsorberHandleFor(BuildContext context) {
-    final _InheritedNestedScrollView? target =
-        context.dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
+    final _InheritedNestedScrollView? target = context
+        .dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
     assert(
       target != null,
       'NestedScrollView.sliverOverlapAbsorberHandleFor must be called with a context that contains a NestedScrollView.',
@@ -1272,14 +1272,13 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // artificially set using the scroll controller.
     final double min = delta < 0.0 ? -double.infinity : math.min(minScrollExtent, pixels);
     // The logic for max is equivalent but on the other side.
-    final double max =
-        delta > 0.0
-            ? double.infinity
-            // If pixels < 0.0, then we are currently in overscroll. The max should be
-            // 0.0, representing the end of the overscrolled portion.
-            : pixels < 0.0
-            ? 0.0
-            : math.max(maxScrollExtent, pixels);
+    final double max = delta > 0.0
+        ? double.infinity
+        // If pixels < 0.0, then we are currently in overscroll. The max should be
+        // 0.0, representing the end of the overscrolled portion.
+        : pixels < 0.0
+        ? 0.0
+        : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
     final double newPixels = clampDouble(pixels - delta, min, max);
     final double clampedDelta = newPixels - pixels;
@@ -1940,11 +1939,10 @@ class RenderSliverOverlapInjector extends RenderSliver {
   void debugPaint(PaintingContext context, Offset offset) {
     assert(() {
       if (debugPaintSizeEnabled) {
-        final Paint paint =
-            Paint()
-              ..color = const Color(0xFFCC9933)
-              ..strokeWidth = 3.0
-              ..style = PaintingStyle.stroke;
+        final Paint paint = Paint()
+          ..color = const Color(0xFFCC9933)
+          ..strokeWidth = 3.0
+          ..style = PaintingStyle.stroke;
         Offset start, end, delta;
         switch (constraints.axis) {
           case Axis.vertical:

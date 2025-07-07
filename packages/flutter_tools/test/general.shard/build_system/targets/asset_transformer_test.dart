@@ -21,10 +21,9 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
-    final File asset =
-        fileSystem.file('asset.txt')
-          ..createSync()
-          ..writeAsStringSync('hello world');
+    final File asset = fileSystem.file('asset.txt')
+      ..createSync()
+      ..writeAsStringSync('hello world');
     const String outputPath = 'output.txt';
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -40,12 +39,13 @@ void main() {
           'my_option_value',
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output')
-                ..addFlag('foo', abbr: 'f')
-                ..addOption('my_option'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output')
+                    ..addFlag('foo', abbr: 'f')
+                    ..addOption('my_option'))
+                  .parse(args);
 
           fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
         },
@@ -102,10 +102,11 @@ void main() {
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
           ],
           onRun: (List<String> args) {
-            final ArgResults parsedArgs = (ArgParser()
-                  ..addOption('input')
-                  ..addOption('output'))
-                .parse(args);
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
             fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
           },
           exitCode: 1,
@@ -216,10 +217,9 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
 
-    final File asset =
-        fileSystem.file('asset.txt')
-          ..createSync()
-          ..writeAsStringSync('ABC');
+    final File asset = fileSystem.file('asset.txt')
+      ..createSync()
+      ..writeAsStringSync('ABC');
     const String outputPath = 'output.txt';
 
     final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
@@ -233,10 +233,11 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
           '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
           final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
           fileSystem.file(parsedArgs['output'])
@@ -253,10 +254,11 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
           '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
           final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
           final StringBuffer outputContents = StringBuffer();
@@ -309,10 +311,9 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
       final FileSystem fileSystem = MemoryFileSystem();
       final Artifacts artifacts = Artifacts.test();
 
-      final File asset =
-          fileSystem.file('asset.txt')
-            ..createSync()
-            ..writeAsStringSync('ABC');
+      final File asset = fileSystem.file('asset.txt')
+        ..createSync()
+        ..writeAsStringSync('ABC');
       const String outputPath = 'output.txt';
 
       final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
@@ -326,13 +327,15 @@ Transformation failed, but I forgot to exit with a non-zero code.''');
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
           ],
           onRun: (List<String> args) {
-            final ArgResults parsedArgs = (ArgParser()
-                  ..addOption('input')
-                  ..addOption('output'))
-                .parse(args);
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
 
-            final String inputFileContents =
-                fileSystem.file(parsedArgs['input']).readAsStringSync();
+            final String inputFileContents = fileSystem
+                .file(parsedArgs['input'])
+                .readAsStringSync();
             fileSystem.file(parsedArgs['output'])
               ..createSync()
               ..writeAsStringSync(inputFileContents.toLowerCase());

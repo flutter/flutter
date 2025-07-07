@@ -73,10 +73,9 @@ void _updateGeneratedXcodePropertiesFile({
 
   final String newContent = buffer.toString();
 
-  final File generatedXcodePropertiesFile =
-      useMacOSConfig
-          ? project.macos.generatedXcodePropertiesFile
-          : project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+      ? project.macos.generatedXcodePropertiesFile
+      : project.ios.generatedXcodePropertiesFile;
 
   if (!generatedXcodePropertiesFile.existsSync()) {
     generatedXcodePropertiesFile.createSync(recursive: true);
@@ -111,10 +110,9 @@ void _updateGeneratedEnvironmentVariablesScript({
     }
   }
 
-  final File generatedModuleBuildPhaseScript =
-      useMacOSConfig
-          ? project.macos.generatedEnvironmentVariableExportScript
-          : project.ios.generatedEnvironmentVariableExportScript;
+  final File generatedModuleBuildPhaseScript = useMacOSConfig
+      ? project.macos.generatedEnvironmentVariableExportScript
+      : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');

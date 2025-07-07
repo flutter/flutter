@@ -875,8 +875,8 @@ set(BINARY_NAME "fizz_bar")
       ProcessManager: () => processManager,
       Platform: () => linuxPlatform,
       FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils:
-          () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+      OperatingSystemUtils: () =>
+          CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       Analytics: () => fakeAnalytics,
     },
   );

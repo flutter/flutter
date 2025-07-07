@@ -870,10 +870,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    final AndroidOverscrollIndicator indicator =
-        Theme.of(context).useMaterial3
-            ? AndroidOverscrollIndicator.stretch
-            : AndroidOverscrollIndicator.glow;
+    final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
+        ? AndroidOverscrollIndicator.stretch
+        : AndroidOverscrollIndicator.glow;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

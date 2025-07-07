@@ -3005,8 +3005,8 @@ class TestDeviceManager extends DeviceManager {
   void setDeviceToWaitFor(IOSDevice device, DeviceConnectionInterface connectionInterface) {
     final XCDeviceEventInterface eventInterface =
         connectionInterface == DeviceConnectionInterface.wireless
-            ? XCDeviceEventInterface.wifi
-            : XCDeviceEventInterface.usb;
+        ? XCDeviceEventInterface.wifi
+        : XCDeviceEventInterface.usb;
     iosDiscoverer.xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
       XCDeviceEvent.attach,
       eventInterface,

@@ -43,7 +43,10 @@ class _OffstageExampleState extends State<OffstageExample> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Offstage(offstage: _offstage, child: FlutterLogo(key: _key, size: 150.0)),
+        Offstage(
+          offstage: _offstage,
+          child: FlutterLogo(key: _key, size: 150.0),
+        ),
         Text('Flutter logo is offstage: $_offstage'),
         ElevatedButton(
           child: const Text('Toggle Offstage Value'),

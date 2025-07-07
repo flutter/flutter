@@ -161,63 +161,62 @@ class Java {
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
-  late final Version? version =
-      (() {
-        if (!canRun()) {
-          return null;
-        }
+  late final Version? version = (() {
+    if (!canRun()) {
+      return null;
+    }
 
-        final RunResult result = _processUtils.runSync(<String>[
-          binaryPath,
-          '--version',
-        ], environment: environment);
-        if (result.exitCode != 0) {
-          _logger.printTrace(
-            'java --version failed: exitCode: ${result.exitCode}'
-            ' stdout: ${result.stdout} stderr: ${result.stderr}',
-          );
-          return null;
-        }
-        final String rawVersionOutput = result.stdout;
-        final List<String> versionLines = rawVersionOutput.split('\n');
-        // Should look something like 'openjdk 19.0.2 2023-01-17'.
-        final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+    final RunResult result = _processUtils.runSync(<String>[
+      binaryPath,
+      '--version',
+    ], environment: environment);
+    if (result.exitCode != 0) {
+      _logger.printTrace(
+        'java --version failed: exitCode: ${result.exitCode}'
+        ' stdout: ${result.stdout} stderr: ${result.stderr}',
+      );
+      return null;
+    }
+    final String rawVersionOutput = result.stdout;
+    final List<String> versionLines = rawVersionOutput.split('\n');
+    // Should look something like 'openjdk 19.0.2 2023-01-17'.
+    final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
-        // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
-        final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
-        final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
-        if (matches.isEmpty) {
-          // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
-          final RegExp secondJdkVersionRegex = RegExp(
-            r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d',
-          );
-          final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
-          if (match != null) {
-            return Version.parse(match.namedGroup('version'));
-          }
-          _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-          return null;
-        }
-        final String? version = matches.first.namedGroup('version');
-        if (version == null || version.split('_').isEmpty) {
-          _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-          return null;
-        }
+    // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
+    final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
+    final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
+    if (matches.isEmpty) {
+      // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
+      final RegExp secondJdkVersionRegex = RegExp(
+        r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d',
+      );
+      final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
+      if (match != null) {
+        return Version.parse(match.namedGroup('version'));
+      }
+      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    final String? version = matches.first.namedGroup('version');
+    if (version == null || version.split('_').isEmpty) {
+      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
 
-        // Trim away _d+ from versions 1.8 and below.
-        final String versionWithoutBuildInfo = version.split('_').first;
+    // Trim away _d+ from versions 1.8 and below.
+    final String versionWithoutBuildInfo = version.split('_').first;
 
-        final Version? parsedVersion = Version.parse(versionWithoutBuildInfo);
-        if (parsedVersion == null) {
-          return null;
-        }
-        return Version.withText(
-          parsedVersion.major,
-          parsedVersion.minor,
-          parsedVersion.patch,
-          longVersionText,
-        );
-      })();
+    final Version? parsedVersion = Version.parse(versionWithoutBuildInfo);
+    if (parsedVersion == null) {
+      return null;
+    }
+    return Version.withText(
+      parsedVersion.major,
+      parsedVersion.minor,
+      parsedVersion.patch,
+      longVersionText,
+    );
+  })();
 
   bool canRun() {
     return _processManager.canRun(binaryPath);

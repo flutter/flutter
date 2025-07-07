@@ -533,8 +533,8 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder =
-        SceneBuilder()..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+    final SceneBuilder builder = SceneBuilder()
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
 
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
 
@@ -553,10 +553,9 @@ class PlatformViewClipRectMultipleClipsScenario extends Scenario
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder =
-        SceneBuilder()
-          ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
-          ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+    final SceneBuilder builder = SceneBuilder()
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
 
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
 
@@ -581,10 +580,9 @@ class PlatformViewClipRectAfterMovedScenario extends Scenario with _BasePlatform
   @override
   void onBeginFrame(Duration duration) {
     final Matrix4 translateMatrix = Matrix4.identity()..translate(0.0, _y);
-    final SceneBuilder builder =
-        SceneBuilder()
-          ..pushTransform(translateMatrix.storage)
-          ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+    final SceneBuilder builder = SceneBuilder()
+      ..pushTransform(translateMatrix.storage)
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
 
     addPlatformView(
       _numberOfFrames == 10 ? 10000 : id,
@@ -632,11 +630,10 @@ class PlatformViewClipRectAfterMovedMultipleClipsScenario extends Scenario
   @override
   void onBeginFrame(Duration duration) {
     final Matrix4 translateMatrix = Matrix4.identity()..translate(0.0, _y);
-    final SceneBuilder builder =
-        SceneBuilder()
-          ..pushTransform(translateMatrix.storage)
-          ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
-          ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+    final SceneBuilder builder = SceneBuilder()
+      ..pushTransform(translateMatrix.storage)
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400))
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
 
     addPlatformView(
       _numberOfFrames == 10 ? 10000 : id,
@@ -783,13 +780,12 @@ class PlatformViewClipPathScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
     final SceneBuilder builder = SceneBuilder()..pushClipPath(path);
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
@@ -804,18 +800,16 @@ class PlatformViewClipPathMultipleClipsScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
-    final SceneBuilder builder =
-        SceneBuilder()
-          ..pushClipPath(path)
-          ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
+    final SceneBuilder builder = SceneBuilder()
+      ..pushClipPath(path)
+      ..pushClipRect(const Rect.fromLTRB(200, 200, 600, 600));
 
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
     finishBuilder(builder);
@@ -829,11 +823,10 @@ class PlatformViewClipRectWithTransformScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder.pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
@@ -858,11 +851,10 @@ class PlatformViewClipRectWithTransformMultipleClipsScenario extends PlatformVie
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder
@@ -889,11 +881,10 @@ class PlatformViewClipRRectWithTransformScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder.pushClipRRect(
@@ -927,11 +918,10 @@ class PlatformViewClipRRectWithTransformMultipleClipsScenario extends PlatformVi
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder
@@ -969,11 +959,10 @@ class PlatformViewLargeClipRRectWithTransformScenario extends PlatformViewScenar
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder.pushClipRRect(
@@ -1008,11 +997,10 @@ class PlatformViewLargeClipRRectWithTransformMultipleClipsScenario extends Platf
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     builder
@@ -1049,20 +1037,18 @@ class PlatformViewClipPathWithTransformScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
     builder.pushClipPath(path);
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
@@ -1085,20 +1071,18 @@ class PlatformViewClipPathWithTransformMultipleClipsScenario extends PlatformVie
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
     builder
       ..pushClipPath(path)
@@ -1364,13 +1348,12 @@ class TwoPlatformViewClipPath extends Scenario with _BasePlatformViewScenarioMix
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
     builder.pushOffset(0, 600);
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
     builder.pushClipPath(path);
 
@@ -1385,13 +1368,12 @@ class TwoPlatformViewClipPath extends Scenario with _BasePlatformViewScenarioMix
     builder.pop();
 
     // Use a different path to differentiate from the 1st clip path.
-    final Path path2 =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(100, 150, 100, 400)
-          ..lineTo(350, 350)
-          ..cubicTo(400, 300, 300, 200, 350, 200)
-          ..close();
+    final Path path2 = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(100, 150, 100, 400)
+      ..lineTo(350, 350)
+      ..cubicTo(400, 300, 300, 200, 350, 200)
+      ..close();
 
     builder.pushClipPath(path2);
 
@@ -1424,13 +1406,12 @@ class TwoPlatformViewClipPathMultipleClips extends Scenario with _BasePlatformVi
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
     builder.pushOffset(0, 600);
-    final Path path =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(50, 250, 100, 400)
-          ..lineTo(350, 400)
-          ..cubicTo(400, 300, 300, 200, 350, 100)
-          ..close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
 
     builder
       ..pushClipPath(path)
@@ -1448,13 +1429,12 @@ class TwoPlatformViewClipPathMultipleClips extends Scenario with _BasePlatformVi
     builder.pop();
 
     // Use a different path to differentiate from the 1st clip path.
-    final Path path2 =
-        Path()
-          ..moveTo(100, 100)
-          ..quadraticBezierTo(100, 150, 100, 400)
-          ..lineTo(350, 350)
-          ..cubicTo(400, 300, 300, 200, 350, 200)
-          ..close();
+    final Path path2 = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(100, 150, 100, 400)
+      ..lineTo(350, 350)
+      ..cubicTo(400, 300, 300, 200, 350, 200)
+      ..close();
 
     builder
       ..pushClipPath(path2)
@@ -1482,11 +1462,10 @@ class PlatformViewTransformScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final Matrix4 matrix4 =
-        Matrix4.identity()
-          ..rotateZ(1)
-          ..scale(0.5, 0.5, 1.0)
-          ..translate(1000.0, 100.0);
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
 
     final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
     addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);

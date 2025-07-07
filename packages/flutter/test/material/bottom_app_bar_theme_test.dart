@@ -36,11 +36,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomAppBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -57,11 +56,10 @@ void main() {
       padding: EdgeInsets.all(8),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'color: ${const Color(0xffff0000)}',
@@ -102,8 +100,9 @@ void main() {
     final RenderBox renderBox = tester.renderObject<RenderBox>(find.byType(BottomAppBar));
     expect(renderBox.size.height, themeData.height);
 
-    final bool hasFab =
-        Scaffold.of(tester.element(find.byType(BottomAppBar))).hasFloatingActionButton;
+    final bool hasFab = Scaffold.of(
+      tester.element(find.byType(BottomAppBar)),
+    ).hasFloatingActionButton;
     if (hasFab) {
       expect(widget.clipper.toString(), '_BottomAppBarClipper');
     } else {
@@ -366,7 +365,13 @@ Widget _withTheme({
   bool useMaterial3 = true,
 }) {
   Widget babWidget = const BottomAppBar(
-    child: Row(children: <Widget>[Icon(Icons.add), Expanded(child: SizedBox()), Icon(Icons.add)]),
+    child: Row(
+      children: <Widget>[
+        Icon(Icons.add),
+        Expanded(child: SizedBox()),
+        Icon(Icons.add),
+      ],
+    ),
   );
   if (localBABTheme != null) {
     babWidget = BottomAppBarTheme(data: localBABTheme, child: babWidget);

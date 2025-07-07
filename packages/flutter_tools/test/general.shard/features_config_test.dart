@@ -33,10 +33,9 @@ void main() {
     }
 
     final BufferLogger logger = BufferLogger.test();
-    final FlutterManifest? flutterManifest =
-        projectManifest != null
-            ? FlutterManifest.createFromString(projectManifest, logger: logger)
-            : FlutterManifest.empty(logger: logger);
+    final FlutterManifest? flutterManifest = projectManifest != null
+        ? FlutterManifest.createFromString(projectManifest, logger: logger)
+        : FlutterManifest.empty(logger: logger);
     if (flutterManifest == null) {
       fail(logger.errorText);
     }

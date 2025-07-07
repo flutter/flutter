@@ -661,8 +661,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(findRoute('route5'), findsOneWidget);
 
-    final Route<Object> route =
-        ModalRoute.of(tester.element(find.text('Route: route3', skipOffstage: false)))!;
+    final Route<Object> route = ModalRoute.of(
+      tester.element(find.text('Route: route3', skipOffstage: false)),
+    )!;
     expect(route.settings.name, 'route3');
     tester.state<NavigatorState>(find.byType(Navigator)).removeRoute(route);
     await tester.pumpAndSettle();
@@ -685,8 +686,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Return value: null'), findsOneWidget);
 
-    final RestorableRouteFuture<int> routeFuture =
-        tester.state<RouteFutureWidgetState>(find.byType(RouteFutureWidget)).routeFuture;
+    final RestorableRouteFuture<int> routeFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget))
+        .routeFuture;
     expect(routeFuture.route, isNull);
     expect(routeFuture.isPresent, isFalse);
     expect(routeFuture.enabled, isFalse);
@@ -701,10 +703,9 @@ void main() {
     await tester.restartAndRestore();
 
     expect(find.text('Route: Foo'), findsOneWidget);
-    final RestorableRouteFuture<int> restoredRouteFuture =
-        tester
-            .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget, skipOffstage: false))
-            .routeFuture;
+    final RestorableRouteFuture<int> restoredRouteFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget, skipOffstage: false))
+        .routeFuture;
     expect(restoredRouteFuture.route!.settings.name, 'Foo');
     expect(restoredRouteFuture.isPresent, isTrue);
     expect(restoredRouteFuture.enabled, isTrue);
@@ -729,8 +730,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Return value: null'), findsOneWidget);
 
-    final RestorableRouteFuture<int> routeFuture =
-        tester.state<RouteFutureWidgetState>(find.byType(RouteFutureWidget)).routeFuture;
+    final RestorableRouteFuture<int> routeFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget))
+        .routeFuture;
     expect(routeFuture.route, isNull);
     expect(routeFuture.isPresent, isFalse);
     expect(routeFuture.enabled, isFalse);
@@ -1071,8 +1073,8 @@ void main() {
 
   testWidgets(
     'Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1194,16 +1196,15 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
         }
         return false;
       },
-      pages:
-          _routes.value.isEmpty
-              ? const <Page<Object?>>[]
-              : _routes.value.split(',').map((String name) {
-                if (name.startsWith('r-')) {
-                  name = name.substring(2);
-                  return TestPage(name: name, restorationId: name, key: ValueKey<String>(name));
-                }
-                return TestPage(name: name, key: ValueKey<String>(name));
-              }).toList(),
+      pages: _routes.value.isEmpty
+          ? const <Page<Object?>>[]
+          : _routes.value.split(',').map((String name) {
+              if (name.startsWith('r-')) {
+                name = name.substring(2);
+                return TestPage(name: name, restorationId: name, key: ValueKey<String>(name));
+              }
+              return TestPage(name: name, key: ValueKey<String>(name));
+            }).toList(),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<int>(
           settings: settings,

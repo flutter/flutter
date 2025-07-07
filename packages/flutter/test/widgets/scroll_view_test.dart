@@ -72,20 +72,15 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  onTap: () {
-                    log.add(state);
-                  },
-                  dragStartBehavior: DragStartBehavior.down,
-                  child: Container(
-                    height: 200.0,
-                    color: const Color(0xFF0000FF),
-                    child: Text(state),
-                  ),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              onTap: () {
+                log.add(state);
+              },
+              dragStartBehavior: DragStartBehavior.down,
+              child: Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -120,17 +115,16 @@ void main() {
         child: ListView(
           padding: EdgeInsets.zero,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -358,17 +352,16 @@ void main() {
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -436,17 +429,16 @@ void main() {
           padding: EdgeInsets.zero,
           crossAxisCount: 2,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -475,17 +467,16 @@ void main() {
           padding: EdgeInsets.zero,
           maxCrossAxisExtent: 300,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -550,17 +541,16 @@ void main() {
       textFieldBoilerplate(
         child: ListView(
           padding: EdgeInsets.zero,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -699,17 +689,16 @@ void main() {
         child: GridView(
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -775,17 +764,16 @@ void main() {
         child: GridView.count(
           padding: EdgeInsets.zero,
           crossAxisCount: 2,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -813,17 +801,16 @@ void main() {
         child: GridView.extent(
           padding: EdgeInsets.zero,
           maxCrossAxisExtent: 300,
-          children:
-              focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
+          children: focusNodes.map((FocusNode focusNode) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -881,10 +868,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children:
-              kStates.take(n).map<Widget>((String state) {
-                return Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state));
-              }).toList(),
+          children: kStates.take(n).map<Widget>((String state) {
+            return Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state));
+          }).toList(),
         ),
       );
     }
@@ -1008,10 +994,9 @@ void main() {
           },
           child: ListView(
             controller: controller,
-            children:
-                kStates.map<Widget>((String state) {
-                  return SizedBox(height: 200.0, child: Text(state));
-                }).toList(),
+            children: kStates.map<Widget>((String state) {
+              return SizedBox(height: 200.0, child: Text(state));
+            }).toList(),
           ),
         ),
       ),
@@ -1788,10 +1773,9 @@ void main() {
               Expanded(
                 child: ListView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  children:
-                      list.map((int i) {
-                        return Container(height: 50);
-                      }).toList(),
+                  children: list.map((int i) {
+                    return Container(height: 50);
+                  }).toList(),
                 ),
               ),
             ],

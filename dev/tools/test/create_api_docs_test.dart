@@ -574,9 +574,9 @@ void main() {
             }
             publishRoot.childDirectory('flutter').childFile('index.html').createSync();
 
-            final Directory widgetsDir = publishRoot
-              .childDirectory('flutter')
-              .childDirectory('widgets')..createSync(recursive: true);
+            final Directory widgetsDir =
+                publishRoot.childDirectory('flutter').childDirectory('widgets')
+                  ..createSync(recursive: true);
             widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
 <pre id="longSnippet1">
   <code class="language-dart">
@@ -585,8 +585,9 @@ void main() {
 </pre>
 ''');
             expect(publishRoot.childDirectory('flutter').existsSync(), isTrue);
-            (widgetsDir.childDirectory('ModalRoute')
-              ..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
+            (widgetsDir.childDirectory(
+              'ModalRoute',
+            )..createSync(recursive: true)).childFile('barrierColor.html').writeAsStringSync('''
 <pre id="sample-code">
   <code class="language-dart">
     class FooClass {
@@ -611,7 +612,8 @@ void main() {
 }
 
 const String branchName = 'stable';
-const String testVersionInfo = '''
+const String testVersionInfo =
+    '''
 {
   "frameworkVersion": "2.5.0",
   "channel": "$branchName",

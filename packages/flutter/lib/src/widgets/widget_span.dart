@@ -453,9 +453,8 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
     return result.addWithPaintTransform(
       transform: Matrix4.diagonal3Values(scale, scale, 1.0),
       position: position,
-      hitTest:
-          (BoxHitTestResult result, Offset transformedOffset) =>
-              child.hitTest(result, position: transformedOffset),
+      hitTest: (BoxHitTestResult result, Offset transformedOffset) =>
+          child.hitTest(result, position: transformedOffset),
     );
   }
 }

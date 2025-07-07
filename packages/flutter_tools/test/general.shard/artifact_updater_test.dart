@@ -87,9 +87,9 @@ void main() {
       operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
         desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
         entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
-        nestedWithoutEntitlementsFile = outputDirectory
-          .childDirectory('dir')
-          .childFile('without_entitlements.txt')..createSync(recursive: true);
+        nestedWithoutEntitlementsFile =
+            outputDirectory.childDirectory('dir').childFile('without_entitlements.txt')
+              ..createSync(recursive: true);
         unsignedBinariesFile = outputDirectory.childFile('unsigned_binaries.txt')..createSync();
       };
       final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -542,9 +542,9 @@ void main() {
         allowedBaseUrls: <String>['http://test.zip'],
       );
 
-      final Directory errorDirectory = fileSystem.currentDirectory
-        .childDirectory('out')
-        .childDirectory('test')..createSync(recursive: true);
+      final Directory errorDirectory =
+          fileSystem.currentDirectory.childDirectory('out').childDirectory('test')
+            ..createSync(recursive: true);
       handler.addError(
         errorDirectory,
         FileSystemOp.delete,

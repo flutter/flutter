@@ -17,13 +17,16 @@ void main() {
   ) async {
     await tester.pumpWidget(const MaterialApp(home: PhysicalModel(color: Colors.red)));
 
-    final RenderPhysicalModel renderPhysicalModel =
-        tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects
+        .whereType<RenderPhysicalModel>()
+        .first;
 
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red)),
+      const MaterialApp(
+        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red),
+      ),
     );
 
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
@@ -34,12 +37,16 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: PhysicalShape(color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder())),
+        home: PhysicalShape(
+          color: Colors.red,
+          clipper: ShapeBorderClipper(shape: CircleBorder()),
+        ),
       ),
     );
 
-    final RenderPhysicalShape renderPhysicalShape =
-        tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
+    final RenderPhysicalShape renderPhysicalShape = tester.allRenderObjects
+        .whereType<RenderPhysicalShape>()
+        .first;
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 

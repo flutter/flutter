@@ -176,18 +176,17 @@ final class BuildPlan {
           'suitable build when targeting (via "et run") a flutter app.\n'
           '\n'
           '${environment.verbose ? ''
-                  'Since verbose mode was selected, both local development '
-                  'configurations and configurations that are typically only '
-                  'used on CI will be visible, including possible duplicates.' : ''
-                  'Configurations include (use --verbose for more details):'}',
+                    'Since verbose mode was selected, both local development '
+                    'configurations and configurations that are typically only '
+                    'used on CI will be visible, including possible duplicates.' : ''
+                    'Configurations include (use --verbose for more details):'}',
       allowed: [for (final config in builds) mangleConfigName(environment, config.name)]..sort(),
-      allowedHelp:
-          environment.verbose
-              ? {
-                for (final config in builds)
-                  mangleConfigName(environment, config.name): config.description,
-              }
-              : null,
+      allowedHelp: environment.verbose
+          ? {
+              for (final config in builds)
+                mangleConfigName(environment, config.name): config.description,
+            }
+          : null,
     );
 
     // Add --lto.

@@ -270,8 +270,9 @@ class FrameTimingSummarizer {
     'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
     'frame_count': frameBuildTime.length,
     'frame_build_times': frameBuildTime.map<int>((Duration datum) => datum.inMicroseconds).toList(),
-    'frame_rasterizer_times':
-        frameRasterizerTime.map<int>((Duration datum) => datum.inMicroseconds).toList(),
+    'frame_rasterizer_times': frameRasterizerTime
+        .map<int>((Duration datum) => datum.inMicroseconds)
+        .toList(),
     'new_gen_gc_count': newGenGCCount,
     'old_gen_gc_count': oldGenGCCount,
   };

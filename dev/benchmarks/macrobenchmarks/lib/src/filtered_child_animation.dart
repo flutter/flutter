@@ -106,29 +106,26 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     Widget Function(BuildContext, Widget?) builder;
     switch (filterType) {
       case FilterType.opacity:
-        builder =
-            (BuildContext context, Widget? child) =>
-                Opacity(opacity: (_controller.value * 2.0 - 1.0).abs(), child: child);
+        builder = (BuildContext context, Widget? child) =>
+            Opacity(opacity: (_controller.value * 2.0 - 1.0).abs(), child: child);
       case FilterType.rotateTransform:
-        builder =
-            (BuildContext context, Widget? child) => Transform(
-              transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
-              alignment: Alignment.center,
-              filterQuality: FilterQuality.low,
-              child: child,
-            );
+        builder = (BuildContext context, Widget? child) => Transform(
+          transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
+          alignment: Alignment.center,
+          filterQuality: FilterQuality.low,
+          child: child,
+        );
       case FilterType.rotateFilter:
-        builder =
-            (BuildContext context, Widget? child) => ImageFiltered(
-              imageFilter: ImageFilter.matrix(
-                (Matrix4.identity()
-                      ..translate(_childCenter.dx, _childCenter.dy)
-                      ..rotateZ(_controller.value * 2.0 * pi)
-                      ..translate(-_childCenter.dx, -_childCenter.dy))
-                    .storage,
-              ),
-              child: child,
-            );
+        builder = (BuildContext context, Widget? child) => ImageFiltered(
+          imageFilter: ImageFilter.matrix(
+            (Matrix4.identity()
+                  ..translate(_childCenter.dx, _childCenter.dy)
+                  ..rotateZ(_controller.value * 2.0 * pi)
+                  ..translate(-_childCenter.dx, -_childCenter.dy))
+                .storage,
+          ),
+          child: child,
+        );
     }
     return RepaintBoundary(
       child: AnimatedBuilder(

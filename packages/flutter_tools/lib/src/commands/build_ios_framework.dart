@@ -427,7 +427,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final String licenseSource = license.readAsStringSync();
       final String artifactsMode = FlutterDarwinPlatform.ios.artifactName(mode);
 
-      final String podspecContents = '''
+      final String podspecContents =
+          '''
 Pod::Spec.new do |s|
   s.name                  = '${FlutterDarwinPlatform.ios.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
@@ -520,8 +521,9 @@ end
           processManager: globals.processManager,
           platform: globals.platform,
           analytics: globals.analytics,
-          engineVersion:
-              globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+          engineVersion: globals.artifacts!.usesLocalArtifacts
+              ? null
+              : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );
         Target target;
@@ -619,8 +621,9 @@ end
         '$simulatorConfiguration-${XcodeSdk.IPhoneSimulator.platformName}',
       );
 
-      final Iterable<Directory> products =
-          iPhoneBuildConfiguration.listSync(followLinks: false).whereType<Directory>();
+      final Iterable<Directory> products = iPhoneBuildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
       for (final Directory builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;

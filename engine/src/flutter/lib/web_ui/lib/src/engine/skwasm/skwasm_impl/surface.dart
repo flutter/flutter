@@ -89,8 +89,9 @@ class SkwasmSurface {
 
   Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
       withStackScope((StackScope scope) async {
-        final Pointer<PictureHandle> pictureHandles =
-            scope.allocPointerArray(pictures.length).cast<PictureHandle>();
+        final Pointer<PictureHandle> pictureHandles = scope
+            .allocPointerArray(pictures.length)
+            .cast<PictureHandle>();
         for (int i = 0; i < pictures.length; i++) {
           pictureHandles[i] = pictures[i].handle;
         }

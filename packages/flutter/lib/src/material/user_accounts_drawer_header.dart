@@ -40,19 +40,18 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children:
-                (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
-                  return Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
-                    child: Semantics(
-                      container: true,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                        child: SizedBox.fromSize(size: otherAccountsPicturesSize, child: picture),
-                      ),
-                    ),
-                  );
-                }).toList(),
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
+                child: Semantics(
+                  container: true,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: SizedBox.fromSize(size: otherAccountsPicturesSize, child: picture),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         Positioned(
@@ -97,15 +96,16 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-      reverseCurve: Curves.fastOutSlowIn.flipped,
-    )..addListener(
-      () => setState(() {
-        // [animation]'s value has changed here.
-      }),
-    );
+    _animation =
+        CurvedAnimation(
+          parent: _controller,
+          curve: Curves.fastOutSlowIn,
+          reverseCurve: Curves.fastOutSlowIn.flipped,
+        )..addListener(
+          () => setState(() {
+            // [animation]'s value has changed here.
+          }),
+        );
   }
 
   @override
@@ -182,10 +182,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                     child: Icon(
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
-                      semanticLabel:
-                          widget.isOpen
-                              ? localizations.hideAccountsLabel
-                              : localizations.showAccountsLabel,
+                      semanticLabel: widget.isOpen
+                          ? localizations.hideAccountsLabel
+                          : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -227,12 +226,14 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
-    final String? bottomLine =
-        hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
+    final String? bottomLine = hasChild(accountEmail)
+        ? accountEmail
+        : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize =
-          iconSize == null ? size : Size(size.width - iconSize.width, size.height);
+      final Size constraintSize = iconSize == null
+          ? size
+          : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center

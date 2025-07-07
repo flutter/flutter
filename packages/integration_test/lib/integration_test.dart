@@ -370,14 +370,12 @@ https://docs.flutter.dev/testing/integration-tests
 
     final vm.Timeline timeline = await traceTimeline(action, streams: <String>['GC']);
 
-    final int oldGenGCCount =
-        timeline.traceEvents!.where((vm.TimelineEvent event) {
-          return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
-        }).length;
-    final int newGenGCCount =
-        timeline.traceEvents!.where((vm.TimelineEvent event) {
-          return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
-        }).length;
+    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+    }).length;
+    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+    }).length;
     return _GarbageCollectionInfo(oldCount: oldGenGCCount, newCount: newGenGCCount);
   }
 

@@ -59,11 +59,10 @@ class MyApp {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
     // Build the scene
     final picture = recorder.endRecording();
-    final sceneBuilder =
-        SceneBuilder()
-          ..pushClipRect(physicalBounds)
-          ..addPicture(Offset.zero, picture)
-          ..pop();
+    final sceneBuilder = SceneBuilder()
+      ..pushClipRect(physicalBounds)
+      ..addPicture(Offset.zero, picture)
+      ..pop();
     window.render(sceneBuilder.build());
   }
 

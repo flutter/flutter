@@ -361,11 +361,10 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -439,11 +438,10 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -533,8 +531,9 @@ void main() {
         editableTextState.textEditingValue.selection,
       ),
     );
-    final List<IOSSystemContextMenuItemData> defaultItemDatas =
-        defaultItems.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+    final List<IOSSystemContextMenuItemData> defaultItemDatas = defaultItems
+        .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+        .toList();
 
     expect(defaultItemDatas, isNotEmpty);
 

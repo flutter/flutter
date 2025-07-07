@@ -527,16 +527,16 @@ void main() {
 
     expect(find.text('Title'), findsNWidgets(2)); // Though only one is visible.
 
-    List<Element> titles =
-        tester.elementList(find.text('Title')).toList()..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
-        });
+    List<Element> titles = tester.elementList(find.text('Title')).toList()
+      ..sort((Element a, Element b) {
+        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+      });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity =
-          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity = element
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -552,16 +552,16 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    titles =
-        tester.elementList(find.text('Title')).toList()..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
-        });
+    titles = tester.elementList(find.text('Title')).toList()
+      ..sort((Element a, Element b) {
+        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+      });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity =
-          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity = element
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -662,30 +662,27 @@ void main() {
       expect(find.text('Middle'), findsOneWidget);
 
       // Initially (in expanded state) middle widget is not visible.
-      RenderAnimatedOpacity middleOpacity =
-          tester
-              .element(find.text('Middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      RenderAnimatedOpacity middleOpacity = tester
+          .element(find.text('Middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       expect(middleOpacity.opacity.value, 0.0);
 
       scrollController.jumpTo(600.0);
       await tester.pumpAndSettle();
 
       // Middle widget is visible when nav bar is collapsed.
-      middleOpacity =
-          tester
-              .element(find.text('Middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      middleOpacity = tester
+          .element(find.text('Middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       expect(middleOpacity.opacity.value, 1.0);
 
       scrollController.jumpTo(0.0);
       await tester.pumpAndSettle();
 
       // Middle widget is not visible when nav bar is again expanded.
-      middleOpacity =
-          tester
-              .element(find.text('Middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      middleOpacity = tester
+          .element(find.text('Middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       expect(middleOpacity.opacity.value, 0.0);
     },
   );
@@ -718,8 +715,9 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(find.text('Different title'), findsOneWidget);
 
-    RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    RenderAnimatedOpacity largeTitleOpacity = tester
+        .element(find.text('Title'))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title initially visible.
     expect(largeTitleOpacity.opacity.value, 1.0);
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
@@ -737,8 +735,9 @@ void main() {
     await tester.pump(); // Once to trigger the opacity animation.
     await tester.pump(const Duration(milliseconds: 300));
 
-    largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    largeTitleOpacity = tester
+        .element(find.text('Title'))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title no longer visible.
     expect(largeTitleOpacity.opacity.value, 0.0);
 
@@ -2211,8 +2210,9 @@ void main() {
 
     expect(controller.offset, 0.0);
 
-    final Finder largeTitleFinder =
-        find.ancestor(of: find.text('Large title').first, matching: find.byType(Padding)).first;
+    final Finder largeTitleFinder = find
+        .ancestor(of: find.text('Large title').first, matching: find.byType(Padding))
+        .first;
     final Finder bottomFinder = find.byType(Placeholder);
 
     // The persistent navigation bar, large title, and search field are all
@@ -2267,8 +2267,9 @@ void main() {
       ),
     );
 
-    final Finder largeTitleFinder =
-        find.ancestor(of: find.text('Large title').first, matching: find.byType(Padding)).first;
+    final Finder largeTitleFinder = find
+        .ancestor(of: find.text('Large title').first, matching: find.byType(Padding))
+        .first;
     final Finder bottomFinder = find.byType(Placeholder);
 
     // The persistent navigation bar, large title, and search field are all
@@ -2389,10 +2390,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
       // The middle widget is initially invisible.
       expect(renderOpacity?.opacity.value, 0.0);
@@ -2436,10 +2436,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
       expect(renderOpacity?.opacity.value, 0.0);
       expect(scrollController.offset, 0.0);
@@ -2488,10 +2487,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       final Finder bottomFinder = find.byType(Placeholder);
 
       expect(renderOpacity?.opacity.value, 0.0);
@@ -2554,10 +2552,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       final Finder bottomFinder = find.byType(Placeholder);
 
       expect(renderOpacity?.opacity.value, 0.0);
@@ -2624,10 +2621,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       final Finder bottomFinder = find.byType(Placeholder);
 
       expect(renderOpacity?.opacity.value, 0.0);
@@ -2689,10 +2685,9 @@ void main() {
         ),
       );
 
-      final RenderAnimatedOpacity? renderOpacity =
-          tester
-              .element(find.text('middle'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity? renderOpacity = tester
+          .element(find.text('middle'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
       expect(renderOpacity?.opacity.value, 0.0);
       expect(scrollController.offset, 0.0);
@@ -2772,10 +2767,12 @@ void main() {
     );
 
     final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
-    final Finder largeTitleFinder =
-        find.ancestor(of: find.text('Large title').first, matching: find.byType(Padding)).first;
-    final Finder middleFinder =
-        find.ancestor(of: find.text('middle').first, matching: find.byType(Padding)).first;
+    final Finder largeTitleFinder = find
+        .ancestor(of: find.text('Large title').first, matching: find.byType(Padding))
+        .first;
+    final Finder middleFinder = find
+        .ancestor(of: find.text('middle').first, matching: find.byType(Padding))
+        .first;
 
     // Initially, all widgets are visible.
     expect(find.byIcon(CupertinoIcons.person_2), findsOneWidget);
@@ -2963,15 +2960,13 @@ void main() {
       );
 
       // Initially, all widgets are visible.
-      final RenderAnimatedOpacity largeTitleOpacity =
-          tester
-              .element(find.text('Large title'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity largeTitleOpacity = tester
+          .element(find.text('Large title'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       // The opacity of the decoy 'Cancel' button, which is always semi-transparent.
-      final RenderOpacity decoyCancelOpacity =
-          tester
-              .element(find.widgetWithText(CupertinoButton, 'Cancel'))
-              .findAncestorRenderObjectOfType<RenderOpacity>()!;
+      final RenderOpacity decoyCancelOpacity = tester
+          .element(find.widgetWithText(CupertinoButton, 'Cancel'))
+          .findAncestorRenderObjectOfType<RenderOpacity>()!;
 
       expect(largeTitleOpacity.opacity.value, 1.0);
       expect(decoyCancelOpacity.opacity, 0.4);
@@ -2997,10 +2992,9 @@ void main() {
       expect(decoyCancelOpacity.opacity, 0.4);
 
       // The opacity of the tappable 'Cancel' button.
-      final RenderAnimatedOpacity cancelOpacity =
-          tester
-              .element(find.widgetWithText(CupertinoButton, 'Cancel'))
-              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity cancelOpacity = tester
+          .element(find.widgetWithText(CupertinoButton, 'Cancel'))
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
 
       expect(cancelOpacity.opacity.value, 1.0);
 

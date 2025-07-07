@@ -241,10 +241,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewAnalytics.initializeLaunchStopwatch();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold =
-        customPreviewScaffoldOutput != null
-            ? fs.directory(customPreviewScaffoldOutput)
-            : rootProject.widgetPreviewScaffold;
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+        ? fs.directory(customPreviewScaffoldOutput)
+        : rootProject.widgetPreviewScaffold;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.

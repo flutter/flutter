@@ -90,12 +90,11 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Paint paint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = color
-          ..colorFilter = filter
-          ..invertColors = true;
+    final Paint paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color
+      ..colorFilter = filter
+      ..invertColors = true;
     context.canvas.drawRect(offset & size, paint);
   }
 }

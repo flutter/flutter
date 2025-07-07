@@ -50,10 +50,9 @@ class _SearchBarAppState extends State<SearchBarApp> {
               },
             ),
             Center(
-              child:
-                  controller.text.isEmpty
-                      ? const Text('No item selected')
-                      : Text('Selected item: ${controller.value.text}'),
+              child: controller.text.isEmpty
+                  ? const Text('No item selected')
+                  : Text('Selected item: ${controller.value.text}'),
             ),
           ],
         ),

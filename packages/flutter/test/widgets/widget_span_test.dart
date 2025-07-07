@@ -51,11 +51,10 @@ void main() {
       return textScaleFactor;
     }
 
-    final List<double> textScaleFactors =
-        WidgetSpan.extractFromInlineSpan(
-          span,
-          const _QuadraticScaler(),
-        ).map(effectiveTextScaleFactorFromWidget).toList();
+    final List<double> textScaleFactors = WidgetSpan.extractFromInlineSpan(
+      span,
+      const _QuadraticScaler(),
+    ).map(effectiveTextScaleFactorFromWidget).toList();
 
     expect(textScaleFactors, <double>[
       0, // a

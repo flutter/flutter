@@ -36,7 +36,8 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
       return;
     }
 
-    final String copyNativeAssetsCommand = '''
+    final String copyNativeAssetsCommand =
+        '''
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")

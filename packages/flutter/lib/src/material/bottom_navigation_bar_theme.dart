@@ -330,8 +330,8 @@ class BottomNavigationBarTheme extends InheritedWidget {
   /// BottomNavigationBarThemeData theme = BottomNavigationBarTheme.of(context);
   /// ```
   static BottomNavigationBarThemeData of(BuildContext context) {
-    final BottomNavigationBarTheme? bottomNavTheme =
-        context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
+    final BottomNavigationBarTheme? bottomNavTheme = context
+        .dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
     return bottomNavTheme?.data ?? Theme.of(context).bottomNavigationBarTheme;
   }
 

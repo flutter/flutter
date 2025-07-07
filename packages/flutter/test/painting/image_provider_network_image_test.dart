@@ -198,15 +198,16 @@ void main() {
         expect(await caughtError.future, true);
       },
       zoneSpecification: ZoneSpecification(
-        handleUncaughtError: (
-          Zone zone,
-          ZoneDelegate zoneDelegate,
-          Zone parent,
-          Object error,
-          StackTrace stackTrace,
-        ) {
-          uncaught = true;
-        },
+        handleUncaughtError:
+            (
+              Zone zone,
+              ZoneDelegate zoneDelegate,
+              Zone parent,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              uncaught = true;
+            },
       ),
     );
     expect(uncaught, false);

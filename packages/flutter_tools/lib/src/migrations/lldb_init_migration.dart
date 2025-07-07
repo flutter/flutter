@@ -242,10 +242,9 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       throw Exception('Failed to find $action for the Scheme in ${schemeFile.path}.');
     }
     final XmlNode actionNode = nodes.first;
-    final XmlAttribute? lldbInitFile =
-        actionNode.attributes
-            .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
-            .firstOrNull;
+    final XmlAttribute? lldbInitFile = actionNode.attributes
+        .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
+        .firstOrNull;
     return lldbInitFile?.value;
   }
 

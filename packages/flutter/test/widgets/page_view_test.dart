@@ -27,8 +27,8 @@ void main() {
             stateSetter = setState;
             return PageView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -190,20 +190,15 @@ void main() {
         textDirection: TextDirection.ltr,
         child: PageView(
           dragStartBehavior: DragStartBehavior.down,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: Container(
-                    height: 200.0,
-                    color: const Color(0xFF0000FF),
-                    child: Text(state),
-                  ),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );

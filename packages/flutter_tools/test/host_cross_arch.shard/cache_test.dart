@@ -49,11 +49,10 @@ HostPlatform _identifyMacBinaryArch(String path) {
 
 final String _flutterRootPath = getFlutterRoot();
 final Directory _flutterRoot = fileSystem.directory(_flutterRootPath);
-final File _dartBinary =
-    _flutterRoot
-        .childDirectory('bin')
-        .childDirectory('cache')
-        .childDirectory('dart-sdk')
-        .childDirectory('bin')
-        .childFile('dart')
-        .absolute;
+final File _dartBinary = _flutterRoot
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childDirectory('dart-sdk')
+    .childDirectory('bin')
+    .childFile('dart')
+    .absolute;

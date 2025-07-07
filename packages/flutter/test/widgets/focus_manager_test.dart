@@ -249,8 +249,9 @@ void main() {
       final FocusNode focusNode = FocusNode(debugLabel: 'Label');
       addTearDown(focusNode.dispose);
       focusNode.debugFillProperties(builder);
-      final List<String> description =
-          builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties
+          .map((DiagnosticsNode n) => n.toString())
+          .toList();
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
@@ -1575,8 +1576,9 @@ void main() {
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope Label');
       addTearDown(scope.dispose);
       scope.debugFillProperties(builder);
-      final List<String> description =
-          builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
+      final List<String> description = builder.properties
+          .map((DiagnosticsNode n) => n.toString())
+          .toList();
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
@@ -1687,7 +1689,9 @@ void main() {
       addTearDown(node2.dispose);
 
       await tester.pumpWidget(
-        FocusScope(child: Focus(autofocus: true, focusNode: node1, child: const Placeholder())),
+        FocusScope(
+          child: Focus(autofocus: true, focusNode: node1, child: const Placeholder()),
+        ),
       );
       await tester.pump();
       expect(node1.hasPrimaryFocus, isTrue);
@@ -1716,7 +1720,10 @@ void main() {
         ),
       );
       await tester.pumpWidget(
-        FocusScope(node: scopeNode, child: const Focus(child: Placeholder())),
+        FocusScope(
+          node: scopeNode,
+          child: const Focus(child: Placeholder()),
+        ),
       );
 
       await tester.pump();
@@ -2224,7 +2231,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
-        child: Column(children: <Widget>[Focus(focusNode: nodeB, child: const Text('b'))]),
+        child: Column(
+          children: <Widget>[Focus(focusNode: nodeB, child: const Text('b'))],
+        ),
       ),
     );
 
@@ -2306,10 +2315,9 @@ void main() {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode child1 =
-          debugFocusChanges
-              ? FocusNode(debugLabel: 'child1')
-              : _LoggingTestFocusNode(debugLabel: 'child1');
+      final FocusNode child1 = debugFocusChanges
+          ? FocusNode(debugLabel: 'child1')
+          : _LoggingTestFocusNode(debugLabel: 'child1');
       final FocusAttachment child1Attachment = child1.attach(context);
       parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
       child1Attachment.reparent(parent: parent1);

@@ -263,13 +263,12 @@ void main() {
 
       LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('keys: Key A + Key B'));
@@ -657,13 +656,12 @@ void main() {
 
         const SingleActivator(LogicalKeyboardKey.keyA).debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Key A'));
@@ -677,13 +675,12 @@ void main() {
           includeRepeats: false,
         ).debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(2));
         expect(description[0], equals('keys: Key A'));
@@ -701,13 +698,12 @@ void main() {
           meta: true,
         ).debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Control + Alt + Meta + Shift + Key A'));
@@ -1119,21 +1115,18 @@ void main() {
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyA): const ActivateIntent(),
-          LogicalKeySet(
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.arrowRight,
-          ): const DirectionalFocusIntent(TraversalDirection.right),
+          LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):
+              const DirectionalFocusIntent(TraversalDirection.right),
         },
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(
@@ -1155,13 +1148,12 @@ void main() {
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('shortcuts: <Debug Label>'));
@@ -1177,13 +1169,12 @@ void main() {
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(
@@ -1205,13 +1196,12 @@ void main() {
 
       Shortcuts.manager(manager: testManager, child: const SizedBox()).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(
@@ -1253,10 +1243,9 @@ void main() {
                     builder: (BuildContext context, StateSetter setState) {
                       return Checkbox(
                         value: value,
-                        onChanged:
-                            (bool? newValue) => setState(() {
-                              value = newValue;
-                            }),
+                        onChanged: (bool? newValue) => setState(() {
+                          value = newValue;
+                        }),
                         focusColor: Colors.orange[500],
                       );
                     },
@@ -1551,13 +1540,12 @@ void main() {
 
         const CharacterActivator('A').debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals("character: 'A'"));
@@ -1568,13 +1556,12 @@ void main() {
 
         const CharacterActivator('A', includeRepeats: false).debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(2));
         expect(description[0], equals("character: 'A'"));
@@ -1586,13 +1573,12 @@ void main() {
 
         const CharacterActivator('A', control: true, meta: true).debugFillProperties(builder);
 
-        final List<String> description =
-            builder.properties
-                .where((DiagnosticsNode node) {
-                  return !node.isFiltered(DiagnosticLevel.info);
-                })
-                .map((DiagnosticsNode node) => node.toString())
-                .toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals("character: Control + Meta + 'A'"));

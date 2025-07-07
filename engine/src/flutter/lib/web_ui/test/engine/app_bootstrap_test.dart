@@ -124,10 +124,9 @@ void testMain() {
       final Object maybeApp = await promiseToFuture<Object>(
         callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
       );
-      final int viewId =
-          callMethod<num>(maybeApp, 'addView', <dynamic>[
-            jsify(<String, Object?>{'hostElement': createDomElement('div')}),
-          ]).toInt();
+      final int viewId = callMethod<num>(maybeApp, 'addView', <dynamic>[
+        jsify(<String, Object?>{'hostElement': createDomElement('div')}),
+      ]).toInt();
       expect(bootstrap.viewManager[viewId], isNotNull);
 
       callMethod<Object>(maybeApp, 'removeView', <Object>[viewId]);

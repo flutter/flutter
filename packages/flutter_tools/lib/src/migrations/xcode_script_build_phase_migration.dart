@@ -41,12 +41,14 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
 
     String newProjectContents = originalProjectContents;
     for (final String scriptIdentifierLine in scriptIdentifierLinesToMigrate) {
-      final String scriptBuildPhaseOriginal = '''
+      final String scriptBuildPhaseOriginal =
+          '''
 		$scriptIdentifierLine = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 ''';
-      final String scriptBuildPhaseReplacement = '''
+      final String scriptBuildPhaseReplacement =
+          '''
 		$scriptIdentifierLine = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

@@ -51,7 +51,8 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
 ''';
 
     /// Relevant template: templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
-    final String linkerFlags = '''
+    final String linkerFlags =
+        '''
 
 if (ANDROID)
   # Support Android 15 16k page size.

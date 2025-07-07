@@ -116,13 +116,11 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
           });
         },
         treeNodeBuilder: _treeNodeBuilder,
-        treeRowExtentBuilder: (
-          TreeSliverNode<Object?> node,
-          SliverLayoutDimensions layoutDimensions,
-        ) {
-          // This gives more space to parent nodes.
-          return node.children.isNotEmpty ? 60.0 : 50.0;
-        },
+        treeRowExtentBuilder:
+            (TreeSliverNode<Object?> node, SliverLayoutDimensions layoutDimensions) {
+              // This gives more space to parent nodes.
+              return node.children.isNotEmpty ? 60.0 : 50.0;
+            },
         // No internal indentation, the custom treeNodeBuilder applies its
         // own indentation to decorate in the indented space.
         indentation: TreeSliverIndentationType.none,

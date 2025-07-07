@@ -458,10 +458,9 @@ class _DismissibleState extends State<Dismissible>
     _moveAnimation = _moveController.drive(
       Tween<Offset>(
         begin: Offset.zero,
-        end:
-            _directionIsXAxis
-                ? Offset(end, widget.crossAxisEndOffset)
-                : Offset(widget.crossAxisEndOffset, end),
+        end: _directionIsXAxis
+            ? Offset(end, widget.crossAxisEndOffset)
+            : Offset(widget.crossAxisEndOffset, end),
       ),
     );
   }
@@ -507,10 +506,9 @@ class _DismissibleState extends State<Dismissible>
       _handleMoveCompleted();
       return;
     }
-    final double flingVelocity =
-        _directionIsXAxis
-            ? details.velocity.pixelsPerSecond.dx
-            : details.velocity.pixelsPerSecond.dy;
+    final double flingVelocity = _directionIsXAxis
+        ? details.velocity.pixelsPerSecond.dx
+        : details.velocity.pixelsPerSecond.dy;
     switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
@@ -585,10 +583,9 @@ class _DismissibleState extends State<Dismissible>
         widget.onDismissed!(direction);
       }
     } else {
-      _resizeController =
-          AnimationController(duration: widget.resizeDuration, vsync: this)
-            ..addListener(_handleResizeProgressChanged)
-            ..addStatusListener((AnimationStatus status) => updateKeepAlive());
+      _resizeController = AnimationController(duration: widget.resizeDuration, vsync: this)
+        ..addListener(_handleResizeProgressChanged)
+        ..addStatusListener((AnimationStatus status) => updateKeepAlive());
       _resizeController!.forward();
       setState(() {
         _sizePriorToCollapse = context.size;

@@ -27,7 +27,10 @@ class KeepAliveExampleApp extends StatelessWidget {
           addSemanticIndexes: false,
           itemCount: 100,
           itemBuilder: (BuildContext context, int index) {
-            return KeepAlive(keepAlive: index.isEven, child: _KeepAliveItem(index: index));
+            return KeepAlive(
+              keepAlive: index.isEven,
+              child: _KeepAliveItem(index: index),
+            );
           },
         ),
       ),

@@ -68,8 +68,8 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
-    final TimelineTask timelineTask =
-        TimelineTask()..start('Platform Channel send $channel$postfix');
+    final TimelineTask timelineTask = TimelineTask()
+      ..start('Platform Channel send $channel$postfix');
     final ByteData? result;
     try {
       result = await proxy.send(channel, message);
@@ -149,12 +149,11 @@ void _debugRecordUpStream(
   String codecTypeName,
   ByteData? bytes,
 ) {
-  final _PlatformChannelStats stats =
-      _profilePlatformChannelsStats[name] ??= _PlatformChannelStats(
-        name,
-        codecTypeName,
-        channelTypeName,
-      );
+  final _PlatformChannelStats stats = _profilePlatformChannelsStats[name] ??= _PlatformChannelStats(
+    name,
+    codecTypeName,
+    channelTypeName,
+  );
   stats.addUpStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
 }
@@ -165,12 +164,11 @@ void _debugRecordDownStream(
   String codecTypeName,
   ByteData? bytes,
 ) {
-  final _PlatformChannelStats stats =
-      _profilePlatformChannelsStats[name] ??= _PlatformChannelStats(
-        name,
-        codecTypeName,
-        channelTypeName,
-      );
+  final _PlatformChannelStats stats = _profilePlatformChannelsStats[name] ??= _PlatformChannelStats(
+    name,
+    codecTypeName,
+    channelTypeName,
+  );
   stats.addDownStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
 }
@@ -227,10 +225,10 @@ class BasicMessageChannel<T> {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
-          result,
-          runtimeType.toString(), // ignore: no_runtimetype_tostring
-          codec.runtimeType.toString(),
-        )
+            result,
+            runtimeType.toString(), // ignore: no_runtimetype_tostring
+            codec.runtimeType.toString(),
+          )
         : result;
   }
 
@@ -322,10 +320,10 @@ class MethodChannel {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
-          result,
-          runtimeType.toString(), // ignore: no_runtimetype_tostring
-          codec.runtimeType.toString(),
-        )
+            result,
+            runtimeType.toString(), // ignore: no_runtimetype_tostring
+            codec.runtimeType.toString(),
+          )
         : result;
   }
 
@@ -353,14 +351,13 @@ class MethodChannel {
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, {required bool missingOk, dynamic arguments}) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
-    final ByteData? result =
-        shouldProfilePlatformChannels
-            ? await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(
-              name,
-              '#$method',
-              input,
-            )
-            : await binaryMessenger.send(name, input);
+    final ByteData? result = shouldProfilePlatformChannels
+        ? await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(
+            name,
+            '#$method',
+            input,
+          )
+        : await binaryMessenger.send(name, input);
     if (result == null) {
       if (missingOk) {
         return null;

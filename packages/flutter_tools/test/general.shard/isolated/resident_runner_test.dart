@@ -42,14 +42,13 @@ void main() {
         sdkNameAndVersion: 'Macos',
       );
       final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-      final FakeFlutterDevice flutterDevice =
-          FakeFlutterDevice()
-            ..testUri = testUri
-            ..vmServiceHost = (() => fakeVmServiceHost)
-            ..device = device
-            ..fakeDevFS = devFS
-            ..targetPlatform = TargetPlatform.darwin
-            ..generator = residentCompiler;
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+        ..testUri = testUri
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..device = device
+        ..fakeDevFS = devFS
+        ..targetPlatform = TargetPlatform.darwin
+        ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);

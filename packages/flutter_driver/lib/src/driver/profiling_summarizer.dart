@@ -109,8 +109,9 @@ class ProfilingSummarizer {
   double computePercentile(ProfileType profileType, double percentile) {
     final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
-    final List<double> doubles =
-        events.map((TimelineEvent e) => _getProfileValue(profileType, e)).toList();
+    final List<double> doubles = events
+        .map((TimelineEvent e) => _getProfileValue(profileType, e))
+        .toList();
     return findPercentile(doubles, percentile);
   }
 

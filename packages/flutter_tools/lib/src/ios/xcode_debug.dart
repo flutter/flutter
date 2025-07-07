@@ -415,18 +415,12 @@ class XcodeDebug {
         return;
       }
       final XmlNode launchAction = nodes.first;
-      final XmlAttribute? debuggerIdentifier =
-          launchAction.attributes
-              .where(
-                (XmlAttribute attribute) => attribute.localName == 'selectedDebuggerIdentifier',
-              )
-              .firstOrNull;
-      final XmlAttribute? launcherIdentifier =
-          launchAction.attributes
-              .where(
-                (XmlAttribute attribute) => attribute.localName == 'selectedLauncherIdentifier',
-              )
-              .firstOrNull;
+      final XmlAttribute? debuggerIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) => attribute.localName == 'selectedDebuggerIdentifier')
+          .firstOrNull;
+      final XmlAttribute? launcherIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) => attribute.localName == 'selectedLauncherIdentifier')
+          .firstOrNull;
       if (debuggerIdentifier == null ||
           launcherIdentifier == null ||
           !debuggerIdentifier.value.contains('LLDB') ||

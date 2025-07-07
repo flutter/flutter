@@ -21,8 +21,8 @@ void main() {
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary =
-                    context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
+                containerThroughBoundary = context
+                    .dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
                 containerStoppedAtBoundary =
                     LookupBoundary.dependOnInheritedWidgetOfExactType<MyInheritedWidget>(context);
                 return const SizedBox.expand();
@@ -75,8 +75,8 @@ void main() {
               value: 1,
               child: Builder(
                 builder: (BuildContext context) {
-                  containerThroughBoundary =
-                      context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
+                  containerThroughBoundary = context
+                      .dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
                   containerStoppedAtBoundary =
                       LookupBoundary.dependOnInheritedWidgetOfExactType<MyInheritedWidget>(context);
                   return const SizedBox.expand();
@@ -161,7 +161,9 @@ void main() {
 
         // Widget is moved, didChangeDependencies is called, but dependency is still not found due to boundary.
         await tester.pumpWidget(
-          SizedBox(child: MyInheritedWidget(value: 2, child: LookupBoundary(child: widgetTree))),
+          SizedBox(
+            child: MyInheritedWidget(value: 2, child: LookupBoundary(child: widgetTree)),
+          ),
         );
         expect(inheritedWidget, isNull);
         expect(
@@ -250,8 +252,8 @@ void main() {
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary =
-                    context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
+                containerThroughBoundary = context
+                    .getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
                 containerStoppedAtBoundary =
                     LookupBoundary.getElementForInheritedWidgetOfExactType<MyInheritedWidget>(
                       context,
@@ -308,8 +310,8 @@ void main() {
               value: 1,
               child: Builder(
                 builder: (BuildContext context) {
-                  containerThroughBoundary =
-                      context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
+                  containerThroughBoundary = context
+                      .getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
                   containerStoppedAtBoundary =
                       LookupBoundary.getElementForInheritedWidgetOfExactType<MyInheritedWidget>(
                         context,
@@ -385,7 +387,9 @@ void main() {
 
       // Widget is moved, didChangeDependencies is called, but dependency is still not found due to boundary.
       await tester.pumpWidget(
-        SizedBox(child: MyInheritedWidget(value: 2, child: LookupBoundary(child: widgetTree))),
+        SizedBox(
+          child: MyInheritedWidget(value: 2, child: LookupBoundary(child: widgetTree)),
+        ),
       );
       expect(
         tester
@@ -605,8 +609,8 @@ void main() {
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary =
-                    context.findAncestorStateOfType<MyStatefulContainerState>();
+                containerThroughBoundary = context
+                    .findAncestorStateOfType<MyStatefulContainerState>();
                 containerStoppedAtBoundary =
                     LookupBoundary.findAncestorStateOfType<MyStatefulContainerState>(context);
                 return const SizedBox.expand();
@@ -636,8 +640,8 @@ void main() {
                 key: innerContainerKey,
                 child: Builder(
                   builder: (BuildContext context) {
-                    containerThroughBoundary =
-                        context.findAncestorStateOfType<MyStatefulContainerState>();
+                    containerThroughBoundary = context
+                        .findAncestorStateOfType<MyStatefulContainerState>();
                     containerStoppedAtBoundary =
                         LookupBoundary.findAncestorStateOfType<MyStatefulContainerState>(context);
                     return const SizedBox.expand();
@@ -683,8 +687,8 @@ void main() {
           child: DidChangeDependencySpy(
             key: globalKey,
             onDidChangeDependencies: (BuildContext context) {
-              containerThroughBoundary =
-                  context.findAncestorStateOfType<MyStatefulContainerState>();
+              containerThroughBoundary = context
+                  .findAncestorStateOfType<MyStatefulContainerState>();
               containerStoppedAtBoundary =
                   LookupBoundary.findAncestorStateOfType<MyStatefulContainerState>(context);
               containerStoppedAtBoundaryUnfulfilled =
@@ -736,8 +740,8 @@ void main() {
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary =
-                    context.findRootAncestorStateOfType<MyStatefulContainerState>();
+                containerThroughBoundary = context
+                    .findRootAncestorStateOfType<MyStatefulContainerState>();
                 containerStoppedAtBoundary =
                     LookupBoundary.findRootAncestorStateOfType<MyStatefulContainerState>(context);
                 return const SizedBox.expand();
@@ -767,8 +771,8 @@ void main() {
               child: MyStatefulContainer(
                 child: Builder(
                   builder: (BuildContext context) {
-                    containerThroughBoundary =
-                        context.findRootAncestorStateOfType<MyStatefulContainerState>();
+                    containerThroughBoundary = context
+                        .findRootAncestorStateOfType<MyStatefulContainerState>();
                     containerStoppedAtBoundary =
                         LookupBoundary.findRootAncestorStateOfType<MyStatefulContainerState>(
                           context,
@@ -816,8 +820,8 @@ void main() {
           child: DidChangeDependencySpy(
             key: globalKey,
             onDidChangeDependencies: (BuildContext context) {
-              containerThroughBoundary =
-                  context.findRootAncestorStateOfType<MyStatefulContainerState>();
+              containerThroughBoundary = context
+                  .findRootAncestorStateOfType<MyStatefulContainerState>();
               containerStoppedAtBoundary =
                   LookupBoundary.findRootAncestorStateOfType<MyStatefulContainerState>(context);
               containerStoppedAtBoundaryUnfulfilled =
@@ -905,8 +909,8 @@ void main() {
                 key: innerPaddingKey,
                 child: Builder(
                   builder: (BuildContext context) {
-                    paddingThroughBoundary =
-                        context.findAncestorRenderObjectOfType<RenderPadding>();
+                    paddingThroughBoundary = context
+                        .findAncestorRenderObjectOfType<RenderPadding>();
                     paddingStoppedAtBoundary =
                         LookupBoundary.findAncestorRenderObjectOfType<RenderPadding>(context);
                     return const SizedBox.expand();
@@ -1073,7 +1077,10 @@ void main() {
           key: root,
           children: <Widget>[
             LookupBoundary(key: child1, child: Container()),
-            Container(key: child2, child: LookupBoundary(child: Container())),
+            Container(
+              key: child2,
+              child: LookupBoundary(child: Container()),
+            ),
             Container(key: child3),
           ],
         ),

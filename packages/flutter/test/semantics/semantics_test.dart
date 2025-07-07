@@ -43,19 +43,17 @@ void main() {
     test('getSemanticsData includes tags', () {
       final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
 
-      final SemanticsNode node =
-          SemanticsNode()
-            ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
-            ..tags = tags;
+      final SemanticsNode node = SemanticsNode()
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..tags = tags;
 
       expect(node.getSemanticsData().tags, tags);
 
       tags.add(tag3);
 
-      final SemanticsConfiguration config =
-          SemanticsConfiguration()
-            ..isSemanticBoundary = true
-            ..isMergingSemanticsOfDescendants = true;
+      final SemanticsConfiguration config = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
 
       node.updateWith(
         config: config,
@@ -177,20 +175,18 @@ void main() {
     test('provides the correct isMergedIntoParent value', () {
       final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
       final SemanticsNode node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
-      final SemanticsNode node11 =
-          SemanticsNode()..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
-      final SemanticsNode node12 =
-          SemanticsNode()..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node11 = SemanticsNode()
+        ..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node12 = SemanticsNode()
+        ..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
 
-      final SemanticsConfiguration noMergeConfig =
-          SemanticsConfiguration()
-            ..isSemanticBoundary = true
-            ..isMergingSemanticsOfDescendants = false;
+      final SemanticsConfiguration noMergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = false;
 
-      final SemanticsConfiguration mergeConfig =
-          SemanticsConfiguration()
-            ..isSemanticBoundary = true
-            ..isMergingSemanticsOfDescendants = true;
+      final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
 
       node1.updateWith(
         config: noMergeConfig,
@@ -247,10 +243,9 @@ void main() {
       root
         ..rect = visibleRect
         ..updateWith(
-          config:
-              SemanticsConfiguration()
-                ..isSemanticBoundary = true
-                ..isMergingSemanticsOfDescendants = true,
+          config: SemanticsConfiguration()
+            ..isSemanticBoundary = true
+            ..isMergingSemanticsOfDescendants = true,
           childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
         );
       expect(owner.sendSemanticsUpdate, returnsNormally);
@@ -259,10 +254,9 @@ void main() {
       root
         ..rect = visibleRect
         ..updateWith(
-          config:
-              SemanticsConfiguration()
-                ..isSemanticBoundary = true
-                ..isMergingSemanticsOfDescendants = false,
+          config: SemanticsConfiguration()
+            ..isSemanticBoundary = true
+            ..isMergingSemanticsOfDescendants = false,
           childrenInInversePaintOrder: <SemanticsNode>[child..rect = visibleRect],
         );
       expect(owner.sendSemanticsUpdate, returnsNormally);
@@ -271,10 +265,9 @@ void main() {
       root
         ..rect = invisibleRect
         ..updateWith(
-          config:
-              SemanticsConfiguration()
-                ..isSemanticBoundary = true
-                ..isMergingSemanticsOfDescendants = true,
+          config: SemanticsConfiguration()
+            ..isSemanticBoundary = true
+            ..isMergingSemanticsOfDescendants = true,
           childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
         );
       expect(
@@ -301,10 +294,9 @@ void main() {
       root
         ..rect = visibleRect
         ..updateWith(
-          config:
-              SemanticsConfiguration()
-                ..isSemanticBoundary = true
-                ..isMergingSemanticsOfDescendants = false,
+          config: SemanticsConfiguration()
+            ..isSemanticBoundary = true
+            ..isMergingSemanticsOfDescendants = false,
           childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
         );
       expect(
@@ -332,10 +324,9 @@ void main() {
     test('mutate existing semantic node list errors', () {
       final SemanticsNode node = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
 
-      final SemanticsConfiguration config =
-          SemanticsConfiguration()
-            ..isSemanticBoundary = true
-            ..isMergingSemanticsOfDescendants = true;
+      final SemanticsConfiguration config = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
 
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
@@ -428,14 +419,13 @@ void main() {
           isSemanticBoundary: true,
           child: TestRender(
             hasLongPressAction: true,
-            child:
-                middle = TestRender(
-                  hasScrollLeftAction: true,
-                  child: TestRender(
-                    hasScrollRightAction: true,
-                    child: TestRender(hasScrollUpAction: true, isSemanticBoundary: true),
-                  ),
-                ),
+            child: middle = TestRender(
+              hasScrollLeftAction: true,
+              child: TestRender(
+                hasScrollRightAction: true,
+                child: TestRender(hasScrollUpAction: true, isSemanticBoundary: true),
+              ),
+            ),
           ),
         );
 
@@ -617,8 +607,8 @@ void main() {
       ],
     );
 
-    final SemanticsNode rootComplex =
-        SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+    final SemanticsNode rootComplex = SemanticsNode()
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
@@ -734,24 +724,22 @@ void main() {
       '   headingLevel: 0\n',
     );
 
-    final SemanticsConfiguration config =
-        SemanticsConfiguration()
-          ..isSemanticBoundary = true
-          ..isMergingSemanticsOfDescendants = true
-          ..onScrollUp = () {}
-          ..onLongPress = () {}
-          ..onShowOnScreen = () {}
-          ..isChecked = false
-          ..isSelected = true
-          ..isButton = true
-          ..label = 'Use all the properties'
-          ..textDirection = TextDirection.rtl
-          ..sortKey = const OrdinalSortKey(1.0);
-    final SemanticsNode allProperties =
-        SemanticsNode()
-          ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
-          ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
-          ..updateWith(config: config);
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true
+      ..onScrollUp = () {}
+      ..onLongPress = () {}
+      ..onShowOnScreen = () {}
+      ..isChecked = false
+      ..isSelected = true
+      ..isButton = true
+      ..label = 'Use all the properties'
+      ..textDirection = TextDirection.rtl
+      ..sortKey = const OrdinalSortKey(1.0);
+    final SemanticsNode allProperties = SemanticsNode()
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
+      ..updateWith(config: config);
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -777,10 +765,9 @@ void main() {
       'label: "Use all the properties", textDirection: rtl)',
     );
 
-    final SemanticsNode scaled =
-        SemanticsNode()
-          ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
-          ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
+    final SemanticsNode scaled = SemanticsNode()
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
       'SemanticsNode#3\n'
@@ -795,18 +782,16 @@ void main() {
   });
 
   test('blocked actions debug properties', () {
-    final SemanticsConfiguration config =
-        SemanticsConfiguration()
-          ..isBlockingUserActions = true
-          ..onScrollUp = () {}
-          ..onLongPress = () {}
-          ..onShowOnScreen = () {}
-          ..onDidGainAccessibilityFocus = () {};
-    final SemanticsNode blocked =
-        SemanticsNode()
-          ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
-          ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
-          ..updateWith(config: config);
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..isBlockingUserActions = true
+      ..onScrollUp = () {}
+      ..onLongPress = () {}
+      ..onShowOnScreen = () {}
+      ..onDidGainAccessibilityFocus = () {};
+    final SemanticsNode blocked = SemanticsNode()
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
+      ..updateWith(config: config);
     expect(
       blocked.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -920,11 +905,10 @@ void main() {
     final SemanticsNode root = SemanticsNode.root(owner: owner)
       ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     final SemanticsNode merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final SemanticsConfiguration mergeConfig =
-        SemanticsConfiguration()
-          ..isSemanticBoundary = true
-          ..isMergingSemanticsOfDescendants = true
-          ..onTap = () => tapped = true;
+    final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true
+      ..onTap = () => tapped = true;
     final SemanticsConfiguration rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
 
     merged.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
@@ -935,8 +919,8 @@ void main() {
   });
 
   test('Tags show up in debug properties', () {
-    final SemanticsNode actionNode =
-        SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+    final SemanticsNode actionNode = SemanticsNode()
+      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 
     expect(actionNode.toStringDeep(), contains('\n   tags: RenderViewport.twoPane\n'));
   });

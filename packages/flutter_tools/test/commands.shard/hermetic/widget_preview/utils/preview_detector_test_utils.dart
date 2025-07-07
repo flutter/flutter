@@ -81,12 +81,11 @@ Future<void> expectHasErrors({
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
-    onChangeDetected:
-        (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
-          project: project,
-          graph: updated,
-          expectedFilesWithErrors: filesWithErrors,
-        ),
+    onChangeDetected: (PreviewDependencyGraph updated) => expectPreviewDependencyGraphIsWellFormed(
+      project: project,
+      graph: updated,
+      expectedFilesWithErrors: filesWithErrors,
+    ),
     changeOperation: changeOperation,
   );
 }

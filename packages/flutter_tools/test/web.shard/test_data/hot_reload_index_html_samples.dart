@@ -167,7 +167,8 @@ found in the LICENSE file. -->
 ''';
 
 // Generates the scaffolding of an index.html file, with a configurable `initScript`.
-String _generateFlutterJsIndexHtml(String initScript) => '''
+String _generateFlutterJsIndexHtml(String initScript) =>
+    '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be

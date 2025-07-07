@@ -70,8 +70,9 @@ class GenSnapshot {
     Artifact genSnapshotArtifact;
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
-      genSnapshotArtifact =
-          darwinArch == DarwinArch.arm64 ? Artifact.genSnapshotArm64 : Artifact.genSnapshotX64;
+      genSnapshotArtifact = darwinArch == DarwinArch.arm64
+          ? Artifact.genSnapshotArm64
+          : Artifact.genSnapshotX64;
     } else {
       genSnapshotArtifact = Artifact.genSnapshot;
     }

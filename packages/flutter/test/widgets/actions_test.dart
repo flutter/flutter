@@ -590,9 +590,8 @@ void main() {
         Actions(
           actions: <Type, Action<Intent>>{TestIntent: action1, SecondTestIntent: action2},
           child: ActionListener(
-            listener:
-                (Action<Intent> action) =>
-                    enabledChanged = action.isEnabled(const ThirdTestIntent()),
+            listener: (Action<Intent> action) =>
+                enabledChanged = action.isEnabled(const ThirdTestIntent()),
             action: action2,
             child: Actions(
               actions: <Type, Action<Intent>>{ThirdTestIntent: action3},
@@ -1100,13 +1099,12 @@ void main() {
       // ignore: invalid_use_of_protected_member
       const TestIntent().debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, isEmpty);
     });
@@ -1120,13 +1118,12 @@ void main() {
         child: Container(),
       ).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(
@@ -1145,13 +1142,12 @@ void main() {
         child: Container(key: const ValueKey<String>('baz')),
       ).debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) {
-                return !node.isFiltered(DiagnosticLevel.info);
-              })
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(

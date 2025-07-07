@@ -16,10 +16,9 @@ void main() {
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
-      child:
-          boundary = RenderRepaintBoundary(
-            child: inner = RenderDecoratedBox(decoration: const BoxDecoration()),
-          ),
+      child: boundary = RenderRepaintBoundary(
+        child: inner = RenderDecoratedBox(decoration: const BoxDecoration()),
+      ),
     );
     layout(root, phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
@@ -254,8 +253,8 @@ void main() {
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
     void expectTransform(RenderObject leader) {
       final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
-      final Matrix4 expected =
-          Matrix4.identity()..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 expected = Matrix4.identity()
+        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
       final Matrix4 transformed = Matrix4.identity();
       leaderLayer.applyTransform(null, transformed);
       expect(transformed, expected);

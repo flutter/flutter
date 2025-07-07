@@ -102,10 +102,9 @@ void testMain() {
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      final Matrix4 scaleMatrix =
-          Matrix4.identity()
-            ..scale(5, 5)
-            ..translate(100, 100);
+      final Matrix4 scaleMatrix = Matrix4.identity()
+        ..scale(5, 5)
+        ..translate(100, 100);
       sb.pushTransform(scaleMatrix.toFloat64());
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
@@ -933,21 +932,21 @@ void testMain() {
       await createPlatformView(1, 'test-view');
       await createPlatformView(2, 'test-view');
 
-      final LayerSceneBuilder sb =
-          LayerSceneBuilder()
-            ..pushOffset(0, 0)
-            ..addPlatformView(0, width: 10, height: 10)
-            ..addPlatformView(1, width: 10, height: 10)
-            ..addPlatformView(2, width: 10, height: 10)
-            ..pop();
+      final LayerSceneBuilder sb = LayerSceneBuilder()
+        ..pushOffset(0, 0)
+        ..addPlatformView(0, width: 10, height: 10)
+        ..addPlatformView(1, width: 10, height: 10)
+        ..addPlatformView(2, width: 10, height: 10)
+        ..pop();
 
       await renderScene(sb.build());
 
       _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView, _platformView]);
 
       expect(() {
-        final HtmlViewEmbedder embedder =
-            (renderer as CanvasKitRenderer).debugGetRasterizerForView(implicitView)!.viewEmbedder;
+        final HtmlViewEmbedder embedder = (renderer as CanvasKitRenderer)
+            .debugGetRasterizerForView(implicitView)!
+            .viewEmbedder;
         // The following line used to cause a "Concurrent modification during iteration"
         embedder.dispose();
       }, returnsNormally);
@@ -1122,13 +1121,13 @@ void testMain() {
       await renderScene(scene);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView, _platformView, _overlay]);
 
-      final Rendering rendering =
-          CanvasKitRenderer.instance
-              .debugGetRasterizerForView(implicitView)!
-              .viewEmbedder
-              .debugActiveRendering;
-      final List<int> picturesPerCanvas =
-          rendering.canvases.map((RenderingRenderCanvas canvas) => canvas.pictures.length).toList();
+      final Rendering rendering = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)!
+          .viewEmbedder
+          .debugActiveRendering;
+      final List<int> picturesPerCanvas = rendering.canvases
+          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .toList();
       expect(picturesPerCanvas, <int>[1, 2]);
     });
 
@@ -1358,13 +1357,13 @@ void testMain() {
       ]);
 
       // The second-to-last canvas should have all the extra pictures.
-      final Rendering rendering =
-          CanvasKitRenderer.instance
-              .debugGetRasterizerForView(implicitView)!
-              .viewEmbedder
-              .debugActiveRendering;
-      final List<int> numPicturesPerCanvas =
-          rendering.canvases.map((RenderingRenderCanvas canvas) => canvas.pictures.length).toList();
+      final Rendering rendering = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)!
+          .viewEmbedder
+          .debugActiveRendering;
+      final List<int> numPicturesPerCanvas = rendering.canvases
+          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .toList();
       expect(numPicturesPerCanvas, <int>[1, 1, 1, 1, 1, 1, 12, 1]);
 
       // It should also work when the maximum canvases is just one.
@@ -1419,15 +1418,13 @@ void testMain() {
       ]);
 
       // The last canvas should have all the pictures.
-      final Rendering secondRendering =
-          CanvasKitRenderer.instance
-              .debugGetRasterizerForView(implicitView)!
-              .viewEmbedder
-              .debugActiveRendering;
-      final List<int> picturesPerCanvasInSecondRendering =
-          secondRendering.canvases
-              .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
-              .toList();
+      final Rendering secondRendering = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)!
+          .viewEmbedder
+          .debugActiveRendering;
+      final List<int> picturesPerCanvasInSecondRendering = secondRendering.canvases
+          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .toList();
       expect(picturesPerCanvasInSecondRendering, <int>[19]);
       debugOverrideJsConfiguration(null);
     });
@@ -1479,11 +1476,10 @@ const Map<String, _EmbeddedViewMarker> _tagToViewMarker = <String, _EmbeddedView
 
 void _expectSceneMatches(List<_EmbeddedViewMarker> expectedMarkers, {String? reason}) {
   // Convert the scene elements to its corresponding array of _EmbeddedViewMarker
-  final List<_EmbeddedViewMarker> sceneElements =
-      sceneHost.children
-          .where((DomElement element) => element.tagName != 'svg')
-          .map((DomElement element) => _tagToViewMarker[element.tagName.toLowerCase()]!)
-          .toList();
+  final List<_EmbeddedViewMarker> sceneElements = sceneHost.children
+      .where((DomElement element) => element.tagName != 'svg')
+      .map((DomElement element) => _tagToViewMarker[element.tagName.toLowerCase()]!)
+      .toList();
 
   expect(sceneElements, expectedMarkers, reason: reason);
 }

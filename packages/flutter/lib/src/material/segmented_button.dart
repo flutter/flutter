@@ -309,16 +309,16 @@ class SegmentedButton<T> extends StatefulWidget {
   }) {
     final MaterialStateProperty<Color?>? overlayColorProp =
         (foregroundColor == null && selectedForegroundColor == null && overlayColor == null)
-            ? null
-            : switch (overlayColor) {
-              (final Color overlayColor) when overlayColor.value == 0 =>
-                const MaterialStatePropertyAll<Color?>(Colors.transparent),
-              _ => _SegmentedButtonDefaultsM3.resolveStateColor(
-                foregroundColor,
-                selectedForegroundColor,
-                overlayColor,
-              ),
-            };
+        ? null
+        : switch (overlayColor) {
+            (final Color overlayColor) when overlayColor.value == 0 =>
+              const MaterialStatePropertyAll<Color?>(Colors.transparent),
+            _ => _SegmentedButtonDefaultsM3.resolveStateColor(
+              foregroundColor,
+              selectedForegroundColor,
+              overlayColor,
+            ),
+          };
     return TextButton.styleFrom(
       textStyle: textStyle,
       shadowColor: shadowColor,
@@ -474,10 +474,9 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       final Set<T> pressedSegment = <T>{segmentValue};
       late final Set<T> updatedSelection;
       if (toggle) {
-        updatedSelection =
-            widget.selected.contains(segmentValue)
-                ? widget.selected.difference(pressedSegment)
-                : widget.selected.union(pressedSegment);
+        updatedSelection = widget.selected.contains(segmentValue)
+            ? widget.selected.difference(pressedSegment)
+            : widget.selected.union(pressedSegment);
       } else {
         updatedSelection = pressedSegment;
       }
@@ -540,46 +539,46 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final ButtonStyle segmentThemeStyle = segmentStyleFor(
       theme.style,
     ).merge(segmentStyleFor(defaults.style));
-    final Widget? selectedIcon =
-        widget.showSelectedIcon
-            ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
-            : null;
+    final Widget? selectedIcon = widget.showSelectedIcon
+        ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
+        : null;
 
     Widget buttonFor(ButtonSegment<T> segment) {
       final Widget label = segment.label ?? segment.icon ?? const SizedBox.shrink();
       final bool segmentSelected = widget.selected.contains(segment.value);
-      final Widget? icon =
-          (segmentSelected && widget.showSelectedIcon)
-              ? selectedIcon
-              : segment.label != null
-              ? segment.icon
-              : null;
+      final Widget? icon = (segmentSelected && widget.showSelectedIcon)
+          ? selectedIcon
+          : segment.label != null
+          ? segment.icon
+          : null;
       final MaterialStatesController controller = statesControllers.putIfAbsent(
         segment,
         () => MaterialStatesController(),
       );
       controller.update(MaterialState.selected, segmentSelected);
 
-      final Widget button =
-          icon != null
-              ? TextButton.icon(
-                style: segmentStyle,
-                statesController: controller,
-                onPressed:
-                    (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
-                icon: icon,
-                label: label,
-              )
-              : TextButton(
-                style: segmentStyle,
-                statesController: controller,
-                onPressed:
-                    (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
-                child: label,
-              );
+      final Widget button = icon != null
+          ? TextButton.icon(
+              style: segmentStyle,
+              statesController: controller,
+              onPressed: (_enabled && segment.enabled)
+                  ? () => _handleOnPressed(segment.value)
+                  : null,
+              icon: icon,
+              label: label,
+            )
+          : TextButton(
+              style: segmentStyle,
+              statesController: controller,
+              onPressed: (_enabled && segment.enabled)
+                  ? () => _handleOnPressed(segment.value)
+                  : null,
+              child: label,
+            );
 
-      final Widget buttonWithTooltip =
-          segment.tooltip != null ? Tooltip(message: segment.tooltip, child: button) : button;
+      final Widget buttonWithTooltip = segment.tooltip != null
+          ? Tooltip(message: segment.tooltip, child: button)
+          : button;
 
       return MergeSemantics(
         child: Semantics(
@@ -1072,10 +1071,9 @@ class _RenderSegmentedButton<T> extends RenderBox
 
       // Paint the divider between this segment and the previous one.
       if (previousChild != null) {
-        final BorderSide divider =
-            segments[index - 1].enabled || segments[index].enabled
-                ? enabledBorder.side.copyWith(strokeAlign: 0.0)
-                : disabledBorder.side.copyWith(strokeAlign: 0.0);
+        final BorderSide divider = segments[index - 1].enabled || segments[index].enabled
+            ? enabledBorder.side.copyWith(strokeAlign: 0.0)
+            : disabledBorder.side.copyWith(strokeAlign: 0.0);
         if (direction == Axis.horizontal) {
           final Offset top = Offset(dividerPos, borderRect.top);
           final Offset bottom = Offset(dividerPos, borderRect.bottom);

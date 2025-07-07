@@ -107,8 +107,11 @@ void main() {
     final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5)!;
     expect(shadow4.blurRadius, equals(2.0));
 
-    List<BoxShadow> shadowList =
-        BoxShadow.lerpList(<BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
+    List<BoxShadow> shadowList = BoxShadow.lerpList(
+      <BoxShadow>[shadow2, shadow1],
+      <BoxShadow>[shadow3],
+      0.5,
+    )!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
     shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
@@ -132,8 +135,11 @@ void main() {
     final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25)!;
     final BoxShadow shadow4 = BoxShadow.lerp(null, shadow1, 0.25)!;
     final BoxShadow shadow5 = BoxShadow.lerp(shadow1, shadow2, 0.25)!;
-    final BoxShadow shadow6 =
-        BoxShadow.lerp(const BoxShadow(blurStyle: BlurStyle.solid), shadow2, 0.25)!;
+    final BoxShadow shadow6 = BoxShadow.lerp(
+      const BoxShadow(blurStyle: BlurStyle.solid),
+      shadow2,
+      0.25,
+    )!;
 
     expect(shadow1.blurStyle, equals(BlurStyle.normal));
     expect(shadow2.blurStyle, equals(BlurStyle.outer));
@@ -142,8 +148,11 @@ void main() {
     expect(shadow5.blurStyle, equals(BlurStyle.outer));
     expect(shadow6.blurStyle, equals(BlurStyle.solid));
 
-    List<BoxShadow> shadowList =
-        BoxShadow.lerpList(<BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
+    List<BoxShadow> shadowList = BoxShadow.lerpList(
+      <BoxShadow>[shadow2, shadow1],
+      <BoxShadow>[shadow3],
+      0.5,
+    )!;
     expect(shadowList[0].blurStyle, equals(BlurStyle.outer));
     expect(shadowList[1].blurStyle, equals(BlurStyle.normal));
 

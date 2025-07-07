@@ -161,37 +161,35 @@ final class HeaderGuardCheck {
 
 final Engine? _engine = Engine.tryFindWithin(p.dirname(p.fromUri(io.Platform.script)));
 
-final ArgParser _parser =
-    ArgParser()
-      ..addFlag('fix', help: 'Automatically fixes most header guards.')
-      ..addOption(
-        'root',
-        abbr: 'r',
-        help: 'Path to the engine source root.',
-        valueHelp: 'path/to/engine/src',
-        defaultsTo: _engine?.srcDir.path,
-      )
-      ..addMultiOption(
-        'include',
-        abbr: 'i',
-        help: 'Paths to include in the check.',
-        valueHelp: 'path/to/dir/or/file (relative to the engine root)',
-        defaultsTo: <String>[],
-      )
-      ..addMultiOption(
-        'exclude',
-        abbr: 'e',
-        help: 'Paths to exclude from the check.',
-        valueHelp: 'path/to/dir/or/file (relative to the engine root)',
-        defaultsTo:
-            _engine != null
-                ? <String>[
-                  'engine/src/build',
-                  'engine/src/flutter/build',
-                  'engine/src/flutter/buildtools',
-                  'engine/src/flutter/impeller/compiler/code_gen_template.h',
-                  'engine/src/flutter/prebuilts',
-                  'engine/src/flutter/third_party',
-                ]
-                : null,
-      );
+final ArgParser _parser = ArgParser()
+  ..addFlag('fix', help: 'Automatically fixes most header guards.')
+  ..addOption(
+    'root',
+    abbr: 'r',
+    help: 'Path to the engine source root.',
+    valueHelp: 'path/to/engine/src',
+    defaultsTo: _engine?.srcDir.path,
+  )
+  ..addMultiOption(
+    'include',
+    abbr: 'i',
+    help: 'Paths to include in the check.',
+    valueHelp: 'path/to/dir/or/file (relative to the engine root)',
+    defaultsTo: <String>[],
+  )
+  ..addMultiOption(
+    'exclude',
+    abbr: 'e',
+    help: 'Paths to exclude from the check.',
+    valueHelp: 'path/to/dir/or/file (relative to the engine root)',
+    defaultsTo: _engine != null
+        ? <String>[
+            'engine/src/build',
+            'engine/src/flutter/build',
+            'engine/src/flutter/buildtools',
+            'engine/src/flutter/impeller/compiler/code_gen_template.h',
+            'engine/src/flutter/prebuilts',
+            'engine/src/flutter/third_party',
+          ]
+        : null,
+  );

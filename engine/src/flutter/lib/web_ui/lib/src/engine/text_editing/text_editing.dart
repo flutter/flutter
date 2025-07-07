@@ -458,15 +458,17 @@ class AutofillInfo {
   }) {
     final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
     final List<dynamic>? hintsList = autofill.tryList('hints');
-    final String? firstHint =
-        (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;
+    final String? firstHint = (hintsList == null || hintsList.isEmpty)
+        ? null
+        : hintsList.first as String;
     final EditingState editingState = EditingState.fromFrameworkMessage(
       autofill.readJson('editingValue'),
     );
     return AutofillInfo(
       uniqueIdentifier: uniqueIdentifier,
-      autofillHint:
-          (firstHint != null) ? BrowserAutofillHints.instance.flutterToEngine(firstHint) : null,
+      autofillHint: (firstHint != null)
+          ? BrowserAutofillHints.instance.flutterToEngine(firstHint)
+          : null,
       editingState: editingState,
       placeholder: autofill.tryString('hintText'),
       textCapitalization: textCapitalization,
@@ -631,8 +633,9 @@ class TextEditingDeltaState {
           lastEditingState!.baseOffset > lastEditingState.extentOffset;
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.
-      newTextEditingDeltaState.deltaStart =
-          isPreviousSelectionInverted ? lastEditingState.extentOffset : lastEditingState.baseOffset;
+      newTextEditingDeltaState.deltaStart = isPreviousSelectionInverted
+          ? lastEditingState.extentOffset
+          : lastEditingState.baseOffset;
     }
 
     // If we are composing then set the delta range to the composing region we
@@ -1041,10 +1044,9 @@ class InputConfiguration {
       textCapitalization = TextCapitalizationConfig.fromInputConfiguration(
         flutterInputConfiguration.readString('textCapitalization'),
       ),
-      autofill =
-          flutterInputConfiguration.containsKey('autofill')
-              ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
-              : null,
+      autofill = flutterInputConfiguration.containsKey('autofill')
+          ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
+          : null,
       autofillGroup = EngineAutofillForm.fromFrameworkMessage(
         flutterInputConfiguration.tryInt('viewId') ?? kImplicitViewId,
         flutterInputConfiguration.tryJson('autofill'),
@@ -1517,8 +1519,9 @@ abstract class DefaultTextEditingStrategy
     if (inputType != null) {
       final bool isSelectionInverted =
           lastEditingState!.baseOffset > lastEditingState!.extentOffset;
-      final int deltaOffset =
-          isSelectionInverted ? lastEditingState!.baseOffset : lastEditingState!.extentOffset;
+      final int deltaOffset = isSelectionInverted
+          ? lastEditingState!.baseOffset
+          : lastEditingState!.extentOffset;
       if (inputType.contains('delete')) {
         // The deltaStart is set in handleChange because there is where we get access
         // to the new selection baseOffset which is our new deltaStart.
@@ -2442,8 +2445,9 @@ class EditableTextStyle {
     final int? fontWeightIndex = flutterStyle['fontWeightIndex'] as int?;
 
     // Convert [fontWeightIndex] to its CSS equivalent value.
-    final String fontWeight =
-        fontWeightIndex != null ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex) : 'normal';
+    final String fontWeight = fontWeightIndex != null
+        ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
+        : 'normal';
 
     // Also convert [textAlignIndex] and [textDirectionIndex] to their
     // corresponding enum values in [ui.TextAlign] and [ui.TextDirection]

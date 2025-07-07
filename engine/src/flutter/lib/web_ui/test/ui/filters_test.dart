@@ -249,12 +249,11 @@ Future<void> testMain() async {
     final ui.Paint grey = ui.Paint()..color = const ui.Color.fromARGB(255, 127, 127, 127);
     final ui.Paint unblurredFill = ui.Paint()..shader = gradient;
     final ui.Paint blurredFill = ui.Paint.from(unblurredFill)..imageFilter = filter;
-    final ui.Paint unblurredStroke =
-        ui.Paint.from(unblurredFill)
-          ..style = ui.PaintingStyle.stroke
-          ..strokeCap = ui.StrokeCap.round
-          ..strokeJoin = ui.StrokeJoin.round
-          ..strokeWidth = 10;
+    final ui.Paint unblurredStroke = ui.Paint.from(unblurredFill)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeCap = ui.StrokeCap.round
+      ..strokeJoin = ui.StrokeJoin.round
+      ..strokeWidth = 10;
     final ui.Paint blurredStroke = ui.Paint.from(unblurredStroke)..imageFilter = filter;
     final ui.Image image = makeCheckerBoard(20, 20);
     const ui.Rect imageBounds = ui.Rect.fromLTRB(0, 0, 20, 20);

@@ -1042,8 +1042,8 @@ mixin WidgetsBinding
   }
 
   Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) async {
-    final Map<String?, Object?>? arguments =
-        (methodCall.arguments as Map<Object?, Object?>?)?.cast<String?, Object?>();
+    final Map<String?, Object?>? arguments = (methodCall.arguments as Map<Object?, Object?>?)
+        ?.cast<String?, Object?>();
     return switch (methodCall.method) {
       'startBackGesture' => _handleStartBackGesture(arguments!),
       'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
@@ -1578,12 +1578,11 @@ void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
 }
 
 String _debugDumpAppString() {
-  const String mode =
-      kDebugMode
-          ? 'DEBUG MODE'
-          : kReleaseMode
-          ? 'RELEASE MODE'
-          : 'PROFILE MODE';
+  const String mode = kDebugMode
+      ? 'DEBUG MODE'
+      : kReleaseMode
+      ? 'RELEASE MODE'
+      : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.rootElement != null) {

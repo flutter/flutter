@@ -651,8 +651,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     final Map<String, Object?>? payload =
         jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
-            ? jsonData.first as Map<String, Object?>
-            : null;
+        ? jsonData.first as Map<String, Object?>
+        : null;
 
     if (payload == null) {
       // JSON didn't match expected format for Flutter responses, so treat as

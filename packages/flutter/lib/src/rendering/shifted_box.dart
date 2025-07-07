@@ -484,11 +484,10 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
       final Paint paint;
       if (child != null && !child!.size.isEmpty) {
         final Path path;
-        paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.0
-              ..color = const Color(0xFFFFFF00);
+        paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFFFF00);
         path = Path();
         final BoxParentData childParentData = child!.parentData! as BoxParentData;
         if (childParentData.offset.dy > 0.0) {

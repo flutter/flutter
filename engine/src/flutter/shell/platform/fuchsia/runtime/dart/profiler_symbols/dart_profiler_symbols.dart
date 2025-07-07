@@ -35,7 +35,8 @@ Future<void> main(List<String> args) async {
     help: "Path to the ELF file to extract symbols from",
   );
   parser.addOption("output", help: "Path to output symbol table");
-  final usage = """
+  final usage =
+      """
 Usage: dart_profiler_symbols.dart [options]
 
 Options:

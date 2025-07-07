@@ -160,25 +160,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         timestamp: 0,
         bytes: base64.encode(utf8.encode('  And this is an error ')),
       );
-      final FlutterVmService vmService =
-          FakeVmServiceHost(
-            requests: <VmServiceExpectation>[
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Debug'},
-              ),
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Stdout'},
-              ),
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Stderr'},
-              ),
-              FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-              FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-            ],
-          ).vmService;
+      final FlutterVmService vmService = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stdout'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stderr'},
+          ),
+          FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+          FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+        ],
+      ).vmService;
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -213,25 +212,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           timestamp: 0,
           bytes: base64.encode(utf8.encode('  And this is an error ')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           useSyslog: false,
           iMobileDevice: IMobileDevice(
@@ -457,23 +455,22 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           majorSdkVersion: 13,
         );
 
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+          ],
+        ).vmService;
 
         await logReader.provideVmService(vmService);
 
@@ -502,23 +499,22 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         iosDeployDebugger.debuggerAttached = true;
         logReader.debuggerStream = iosDeployDebugger;
 
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+          ],
+        ).vmService;
 
         await logReader.provideVmService(vmService);
 
@@ -692,25 +688,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           useSyslog: false,
           iMobileDevice: IMobileDevice(
@@ -745,25 +740,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,

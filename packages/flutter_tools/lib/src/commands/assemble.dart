@@ -347,10 +347,9 @@ class AssembleCommand extends FlutterCommand {
       target!,
       _environment,
       buildSystemConfig: BuildSystemConfig(
-        resourcePoolSize:
-            argumentResults.wasParsed('resource-pool-size')
-                ? int.tryParse(stringArg('resource-pool-size')!)
-                : null,
+        resourcePoolSize: argumentResults.wasParsed('resource-pool-size')
+            ? int.tryParse(stringArg('resource-pool-size')!)
+            : null,
       ),
     );
     if (!result.success) {

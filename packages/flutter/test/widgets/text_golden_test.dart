@@ -70,10 +70,9 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..shader = linearGradient,
+              foreground: Paint()
+                ..color = black
+                ..shader = linearGradient,
             ),
           ),
         ),
@@ -93,11 +92,10 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = 2.0,
+              foreground: Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0,
             ),
           ),
         ),
@@ -117,12 +115,11 @@ void main() {
             'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              foreground:
-                  Paint()
-                    ..color = black
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = 2.0
-                    ..shader = linearGradient,
+              foreground: Paint()
+                ..color = black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 2.0
+                ..shader = linearGradient,
             ),
           ),
         ),

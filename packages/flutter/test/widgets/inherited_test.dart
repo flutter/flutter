@@ -154,8 +154,8 @@ void main() {
               value: 3,
               child: Builder(
                 builder: (BuildContext context) {
-                  final ValueInherited v =
-                      context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                  final ValueInherited v = context
+                      .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
                   log.add('a: ${v.value}');
                   return const Text('', textDirection: TextDirection.ltr);
                 },
@@ -166,8 +166,8 @@ void main() {
             value: 2,
             child: Builder(
               builder: (BuildContext context) {
-                final ValueInherited v =
-                    context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                final ValueInherited v = context
+                    .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
                 log.add('b: ${v.value}');
                 return const Text('', textDirection: TextDirection.ltr);
               },
@@ -217,8 +217,8 @@ void main() {
                 key: key,
                 child: Builder(
                   builder: (BuildContext context) {
-                    final ValueInherited v =
-                        context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                    final ValueInherited v = context
+                        .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
                     log.add('a: ${v.value}');
                     return const Text('', textDirection: TextDirection.ltr);
                   },
@@ -232,8 +232,8 @@ void main() {
               key: key,
               child: Builder(
                 builder: (BuildContext context) {
-                  final ValueInherited v =
-                      context.dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+                  final ValueInherited v = context
+                      .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
                   log.add('b: ${v.value}');
                   return const Text('', textDirection: TextDirection.ltr);
                 },
@@ -286,9 +286,15 @@ void main() {
         child: FlipWidget(
           left: ValueInherited(
             value: 2,
-            child: ValueInherited(value: 3, child: Container(key: key, child: child)),
+            child: ValueInherited(
+              value: 3,
+              child: Container(key: key, child: child),
+            ),
           ),
-          right: ValueInherited(value: 2, child: Container(key: key, child: child)),
+          right: ValueInherited(
+            value: 2,
+            child: Container(key: key, child: child),
+          ),
         ),
       ),
     );
@@ -331,7 +337,10 @@ void main() {
       await tester.pumpWidget(
         ValueInherited(
           value: 2,
-          child: FlipWidget(left: ValueInherited(value: 3, child: child), right: child),
+          child: FlipWidget(
+            left: ValueInherited(value: 3, child: child),
+            right: child,
+          ),
         ),
       );
 
@@ -366,8 +375,8 @@ void main() {
         key: GlobalKey(),
         child: Builder(
           builder: (BuildContext context) {
-            final ValueInherited? widget =
-                context.dependOnInheritedWidgetOfExactType<ValueInherited>();
+            final ValueInherited? widget = context
+                .dependOnInheritedWidgetOfExactType<ValueInherited>();
             inheritedValue = widget?.value;
             return Container();
           },
@@ -545,7 +554,10 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
-          return Theme(data: ThemeData(cardTheme: cardThemeData), child: const ThemedCard());
+          return Theme(
+            data: ThemeData(cardTheme: cardThemeData),
+            child: const ThemedCard(),
+          );
         },
       ),
     );

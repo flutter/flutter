@@ -386,11 +386,10 @@ void testMain() {
     const int expectedPlatformViewId = 1234;
 
     int? injectedViewId;
-    final DomManager stubDomManager =
-        StubDomManager()
-          ..injectPlatformViewOverride = (int viewId) {
-            injectedViewId = viewId;
-          };
+    final DomManager stubDomManager = StubDomManager()
+      ..injectPlatformViewOverride = (int viewId) {
+        injectedViewId = viewId;
+      };
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView()..dom = stubDomManager);
 
     final PlatformView platformView = PlatformView(

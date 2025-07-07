@@ -54,8 +54,8 @@ class TaskResult {
     if (success) {
       final List<String> benchmarkScoreKeys =
           (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();
-      final List<String> detailFiles =
-          (json['detailFiles'] as List<dynamic>? ?? <String>[]).cast<String>();
+      final List<String> detailFiles = (json['detailFiles'] as List<dynamic>? ?? <String>[])
+          .cast<String>();
       return TaskResult.success(
         json['data'] as Map<String, dynamic>?,
         benchmarkScoreKeys: benchmarkScoreKeys,

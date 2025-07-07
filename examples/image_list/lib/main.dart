@@ -90,10 +90,9 @@ class MyHttpOverrides extends HttpOverrides {
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
 
-  final SecurityContext serverContext =
-      SecurityContext()
-        ..useCertificateChainBytes(certificate.codeUnits)
-        ..usePrivateKeyBytes(privateKey.codeUnits);
+  final SecurityContext serverContext = SecurityContext()
+    ..useCertificateChainBytes(certificate.codeUnits)
+    ..usePrivateKeyBytes(privateKey.codeUnits);
 
   final HttpServer httpServer = await HttpServer.bindSecure('localhost', 0, serverContext);
   final int port = httpServer.port;
@@ -176,8 +175,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     final List<Completer<bool>> completers = <Completer<bool>>[
       for (int i = 0; i < images; i++) Completer<bool>(),
     ];
-    final List<Future<bool>> futures =
-        completers.map((Completer<bool> completer) => completer.future).toList();
+    final List<Future<bool>> futures = completers
+        .map((Completer<bool> completer) => completer.future)
+        .toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
       debugPrint(

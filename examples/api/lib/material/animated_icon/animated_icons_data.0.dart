@@ -54,10 +54,9 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample>
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2))
-          ..forward()
-          ..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))
+      ..forward()
+      ..repeat(reverse: true);
     animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
   }
 
@@ -72,26 +71,25 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample>
     return Scaffold(
       body: GridView(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-        children:
-            iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
-              return Card(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      AnimatedIcon(
-                        icon: entry.value,
-                        progress: animation,
-                        size: 72.0,
-                        semanticLabel: entry.key,
-                      ),
-                      const SizedBox(height: 8.0),
-                      Text(entry.key),
-                    ],
+        children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
+          return Card(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  AnimatedIcon(
+                    icon: entry.value,
+                    progress: animation,
+                    size: 72.0,
+                    semanticLabel: entry.key,
                   ),
-                ),
-              );
-            }).toList(),
+                  const SizedBox(height: 8.0),
+                  Text(entry.key),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

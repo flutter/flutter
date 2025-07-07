@@ -215,7 +215,8 @@ class DebugMacOSFramework extends Target {
     );
 
     outputFile.createSync(recursive: true);
-    final File debugApp = environment.buildDir.childFile('debug_app.cc')..writeAsStringSync(r'''
+    final File debugApp = environment.buildDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode!.clang(<String>[
@@ -400,9 +401,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
 
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment.outputDir.childDirectory('App.framework');
-    final Directory outputDirectory = frameworkRootDirectory
-      .childDirectory('Versions')
-      .childDirectory('A')..createSync(recursive: true);
+    final Directory outputDirectory =
+        frameworkRootDirectory.childDirectory('Versions').childDirectory('A')
+          ..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir

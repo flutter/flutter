@@ -77,10 +77,9 @@ void main() {
     const String kChromeDeviceId = 'chrome-id';
     final FakeDevice fakeChromeDevice = FakeDevice('chrome', kChromeDeviceId)
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-    fakeDeviceManager =
-        FakeDeviceManager()
-          ..addAttachedDevice(fakeChromeDevice)
-          ..specifiedDeviceId = kChromeDeviceId;
+    fakeDeviceManager = FakeDeviceManager()
+      ..addAttachedDevice(fakeChromeDevice)
+      ..specifiedDeviceId = kChromeDeviceId;
 
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: MemoryFileSystem.test(),
@@ -226,15 +225,14 @@ void main() {
         DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -252,15 +250,14 @@ void main() {
         DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -308,15 +305,14 @@ List<_i1.WidgetPreview> previews() => [
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         DeviceManager: () => fakeDeviceManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -349,15 +345,14 @@ List<_i1.WidgetPreview> previews() => [
         DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -371,15 +366,14 @@ List<_i1.WidgetPreview> previews() => [
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         DeviceManager: () => fakeDeviceManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -426,15 +420,14 @@ List<_i1.WidgetPreview> previews() => [
         Analytics: () => fakeAnalytics,
         DeviceManager: () => fakeDeviceManager,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });

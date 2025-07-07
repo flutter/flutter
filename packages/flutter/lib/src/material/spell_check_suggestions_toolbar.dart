@@ -153,10 +153,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
-          style:
-              buttonItem.type == ContextMenuButtonType.delete
-                  ? const TextStyle(color: Colors.blue)
-                  : null,
+          style: buttonItem.type == ContextMenuButtonType.delete
+              ? const TextStyle(color: Colors.blue)
+              : null,
         ),
       );
 
@@ -164,7 +163,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         return button;
       }
       return DecoratedBox(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey)),
+        ),
         child: button,
       );
     }).toList();

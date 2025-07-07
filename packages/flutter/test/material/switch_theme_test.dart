@@ -48,11 +48,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -72,11 +71,10 @@ void main() {
       padding: EdgeInsets.all(4.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'thumbColor: WidgetStatePropertyAll(${const Color(0xfffffff0)})');
     expect(description[1], 'trackColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})');
@@ -866,7 +864,9 @@ void main() {
     Widget buildSwitch({required bool active}) {
       return MaterialApp(
         theme: themeData,
-        home: Scaffold(body: Switch(value: active, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(value: active, onChanged: (_) {}),
+        ),
       );
     }
 
@@ -922,7 +922,9 @@ void main() {
     Widget buildSwitch({required bool active}) {
       return MaterialApp(
         theme: themeData,
-        home: Scaffold(body: Switch(value: active, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(value: active, onChanged: (_) {}),
+        ),
       );
     }
 
@@ -1056,7 +1058,9 @@ void main() {
     Widget buildSwitch({EdgeInsets? padding}) {
       return MaterialApp(
         theme: ThemeData(switchTheme: SwitchThemeData(padding: padding)),
-        home: Scaffold(body: Center(child: Switch(value: true, onChanged: (_) {}))),
+        home: Scaffold(
+          body: Center(child: Switch(value: true, onChanged: (_) {})),
+        ),
       );
     }
 

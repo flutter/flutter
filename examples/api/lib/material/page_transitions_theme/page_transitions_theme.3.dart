@@ -61,10 +61,9 @@ class HomePage extends StatelessWidget {
                     final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],
                     );
-                    final String message =
-                        index.isEven
-                            ? 'Hello hooman! My name is Kitten $index'
-                            : "What's up hooman! My name is Kitten $index";
+                    final String message = index.isEven
+                        ? 'Hello hooman! My name is Kitten $index'
+                        : "What's up hooman! My name is Kitten $index";
                     return ListTile(
                       leading: avatar,
                       title: kittenName,
@@ -73,12 +72,11 @@ class HomePage extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<SecondPage>(
-                            builder:
-                                (BuildContext context) => SecondPage(
-                                  kittenName: kittenName,
-                                  avatar: avatar,
-                                  message: message,
-                                ),
+                            builder: (BuildContext context) => SecondPage(
+                              kittenName: kittenName,
+                              avatar: avatar,
+                              message: message,
+                            ),
                           ),
                         );
                       },

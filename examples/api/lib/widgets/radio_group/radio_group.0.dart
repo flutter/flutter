@@ -99,8 +99,14 @@ class GenreRadioGroupState extends State<GenreRadioGroup> {
             title: Text('Metal'),
             leading: Radio<Genre>(toggleable: true, value: Genre.metal),
           ),
-          const ListTile(title: Text('Jazz'), leading: Radio<Genre>(value: Genre.jazz)),
-          const ListTile(title: Text('Blues'), leading: Radio<Genre>(value: Genre.blues)),
+          const ListTile(
+            title: Text('Jazz'),
+            leading: Radio<Genre>(value: Genre.jazz),
+          ),
+          const ListTile(
+            title: Text('Blues'),
+            leading: Radio<Genre>(value: Genre.blues),
+          ),
         ],
       ),
     );

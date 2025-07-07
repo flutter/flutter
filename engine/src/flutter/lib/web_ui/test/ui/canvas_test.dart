@@ -226,10 +226,9 @@ Future<void> testMain() async {
       final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
       const ui.Rect clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
       const ui.Rect clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
-      final ui.Path clip =
-          ui.Path()
-            ..addRect(clipRawBounds)
-            ..addOval(clipRawBounds);
+      final ui.Path clip = ui.Path()
+        ..addRect(clipRawBounds)
+        ..addOval(clipRawBounds);
       canvas.clipPath(clip);
 
       // Save initial return values for testing restored values

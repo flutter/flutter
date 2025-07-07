@@ -293,19 +293,18 @@ class AndroidSdk {
     // Next look for the highest version of the command-line tools
     final Directory cmdlineToolsDir = directory.childDirectory('cmdline-tools');
     if (cmdlineToolsDir.existsSync()) {
-      final List<Version> cmdlineTools =
-          cmdlineToolsDir
-              .listSync()
-              .whereType<Directory>()
-              .map((Directory subDirectory) {
-                try {
-                  return Version.parse(subDirectory.basename);
-                } on Exception {
-                  return null;
-                }
-              })
-              .whereType<Version>()
-              .toList();
+      final List<Version> cmdlineTools = cmdlineToolsDir
+          .listSync()
+          .whereType<Directory>()
+          .map((Directory subDirectory) {
+            try {
+              return Version.parse(subDirectory.basename);
+            } on Exception {
+              return null;
+            }
+          })
+          .whereType<Version>()
+          .toList();
       cmdlineTools.sort();
 
       for (final Version cmdlineToolsVersion in cmdlineTools.reversed) {
@@ -454,75 +453,72 @@ class AndroidSdk {
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
     if (buildToolsDir.existsSync()) {
-      buildTools =
-          buildToolsDir
-              .listSync()
-              .map((FileSystemEntity entity) {
-                try {
-                  return Version.parse(entity.basename);
-                } on Exception {
-                  return null;
-                }
-              })
-              .whereType<Version>()
-              .toList();
+      buildTools = buildToolsDir
+          .listSync()
+          .map((FileSystemEntity entity) {
+            try {
+              return Version.parse(entity.basename);
+            } on Exception {
+              return null;
+            }
+          })
+          .whereType<Version>()
+          .toList();
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions =
-        _platforms
-            .map<AndroidSdkVersion?>((Directory platformDir) {
-              final String platformName = platformDir.basename;
-              int platformVersion;
+    _sdkVersions = _platforms
+        .map<AndroidSdkVersion?>((Directory platformDir) {
+          final String platformName = platformDir.basename;
+          int platformVersion;
 
-              try {
-                final Match? numberedVersion = _numberedAndroidPlatformRe.firstMatch(platformName);
-                if (numberedVersion != null) {
-                  platformVersion = int.parse(numberedVersion.group(1)!);
-                } else {
-                  final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
-                  final Iterable<Match> versionMatches =
-                      const LineSplitter()
-                          .convert(buildProps)
-                          .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
-                          .whereType<Match>();
+          try {
+            final Match? numberedVersion = _numberedAndroidPlatformRe.firstMatch(platformName);
+            if (numberedVersion != null) {
+              platformVersion = int.parse(numberedVersion.group(1)!);
+            } else {
+              final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
+              final Iterable<Match> versionMatches = const LineSplitter()
+                  .convert(buildProps)
+                  .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
+                  .whereType<Match>();
 
-                  if (versionMatches.isEmpty) {
-                    return null;
-                  }
-
-                  final String? versionString = versionMatches.first.group(1);
-                  if (versionString == null) {
-                    return null;
-                  }
-                  platformVersion = int.parse(versionString);
-                }
-              } on Exception {
+              if (versionMatches.isEmpty) {
                 return null;
               }
 
-              Version? buildToolsVersion = Version.primary(
-                buildTools.where((Version version) {
-                  return version.major == platformVersion;
-                }).toList(),
-              );
-
-              buildToolsVersion ??= Version.primary(buildTools);
-
-              if (buildToolsVersion == null) {
+              final String? versionString = versionMatches.first.group(1);
+              if (versionString == null) {
                 return null;
               }
+              platformVersion = int.parse(versionString);
+            }
+          } on Exception {
+            return null;
+          }
 
-              return AndroidSdkVersion._(
-                this,
-                sdkLevel: platformVersion,
-                platformName: platformName,
-                buildToolsVersion: buildToolsVersion,
-                fileSystem: fileSystem ?? globals.fs,
-              );
-            })
-            .whereType<AndroidSdkVersion>()
-            .toList();
+          Version? buildToolsVersion = Version.primary(
+            buildTools.where((Version version) {
+              return version.major == platformVersion;
+            }).toList(),
+          );
+
+          buildToolsVersion ??= Version.primary(buildTools);
+
+          if (buildToolsVersion == null) {
+            return null;
+          }
+
+          return AndroidSdkVersion._(
+            this,
+            sdkLevel: platformVersion,
+            platformName: platformName,
+            buildToolsVersion: buildToolsVersion,
+            fileSystem: fileSystem ?? globals.fs,
+          );
+        })
+        .whereType<AndroidSdkVersion>()
+        .toList();
 
     _sdkVersions.sort();
 

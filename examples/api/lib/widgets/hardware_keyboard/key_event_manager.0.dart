@@ -11,7 +11,11 @@ import 'package:flutter/services.dart';
 /// Flutter code sample for [KeyEventManager.keyMessageHandler].
 
 void main() {
-  runApp(const MaterialApp(home: Scaffold(body: Center(child: FallbackDemo()))));
+  runApp(
+    const MaterialApp(
+      home: Scaffold(body: Center(child: FallbackDemo())),
+    ),
+  );
 }
 
 class FallbackDemo extends StatefulWidget {

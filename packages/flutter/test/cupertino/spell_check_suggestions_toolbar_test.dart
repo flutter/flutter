@@ -20,10 +20,9 @@ void main() {
             home: Center(
               child: CupertinoSpellCheckSuggestionsToolbar(
                 anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
-                buttonItems:
-                    suggestions.map((String string) {
-                      return ContextMenuButtonItem(onPressed: () {}, label: string);
-                    }).toList(),
+                buttonItems: suggestions.map((String string) {
+                  return ContextMenuButtonItem(onPressed: () {}, label: string);
+                }).toList(),
               ),
             ),
           ),

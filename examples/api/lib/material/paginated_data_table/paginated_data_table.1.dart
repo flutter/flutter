@@ -11,12 +11,12 @@ class MyDataSource extends DataTableSource {
 
   late List<List<Comparable<Object>>> sortedData;
   void setData(List<List<Comparable<Object>>> rawData, int sortColumn, bool sortAscending) {
-    sortedData =
-        rawData.toList()..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
-          final Comparable<Object> cellA = a[_displayIndexToRawIndex[sortColumn]];
-          final Comparable<Object> cellB = b[_displayIndexToRawIndex[sortColumn]];
-          return cellA.compareTo(cellB) * (sortAscending ? 1 : -1);
-        });
+    sortedData = rawData.toList()
+      ..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
+        final Comparable<Object> cellA = a[_displayIndexToRawIndex[sortColumn]];
+        final Comparable<Object> cellB = b[_displayIndexToRawIndex[sortColumn]];
+        return cellA.compareTo(cellB) * (sortAscending ? 1 : -1);
+      });
     notifyListeners();
   }
 

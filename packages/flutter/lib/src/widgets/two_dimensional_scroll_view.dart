@@ -185,11 +185,10 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       hitTestBehavior: hitTestBehavior,
     );
 
-    final Widget scrollableResult =
-        effectivePrimary
-            // Further descendant ScrollViews will not inherit the same PrimaryScrollController
-            ? PrimaryScrollController.none(child: scrollable)
-            : scrollable;
+    final Widget scrollableResult = effectivePrimary
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
 
     final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
         keyboardDismissBehavior ??

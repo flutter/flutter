@@ -186,7 +186,8 @@ void main() {
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
-      stdout: '''
+      stdout:
+          '''
       TARGET_BUILD_DIR=build/ios/Release-iphoneos
       WRAPPER_NAME=Runner.app
       $stdout
@@ -262,8 +263,10 @@ void main() {
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
-      final bool supported =
-          BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+      final bool supported = BuildIOSCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+      ).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),
@@ -298,18 +301,17 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Pub: ThrowingPub.new,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            xattrCommand,
-            setUpFakeXcodeBuildHandler(
-              onRun: (_) {
-                fileSystem
-                    .directory('build/ios/Release-iphoneos/Runner.app')
-                    .createSync(recursive: true);
-              },
-            ),
-            setUpRsyncCommand(),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        setUpRsyncCommand(),
+      ]),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -370,19 +372,18 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            xattrCommand,
-            setUpFakeXcodeBuildHandler(
-              disablePortPublication: true,
-              onRun: (_) {
-                fileSystem
-                    .directory('build/ios/Release-iphoneos/Runner.app')
-                    .createSync(recursive: true);
-              },
-            ),
-            setUpRsyncCommand(),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(
+          disablePortPublication: true,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        setUpRsyncCommand(),
+      ]),
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -408,18 +409,17 @@ void main() {
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            xattrCommand,
-            setUpFakeXcodeBuildHandler(
-              onRun: (_) {
-                fileSystem
-                    .directory('build/ios/Release-iphoneos/Runner.app')
-                    .createSync(recursive: true);
-              },
-            ),
-            setUpRsyncCommand(),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        setUpRsyncCommand(),
+      ]),
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -617,11 +617,10 @@ void main() {
           },
         ),
         setUpRsyncCommand(
-          onRun:
-              (_) =>
-                  fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
-                    ..createSync(recursive: true)
-                    ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
+          onRun: (_) =>
+              fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+                ..createSync(recursive: true)
+                ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
         ),
       ]);
       createMinimalMockProjectFiles();
@@ -683,26 +682,22 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              xattrCommand,
-              setUpFakeXcodeBuildHandler(
-                onRun: (_) {
-                  fileSystem
-                      .directory('build/ios/Release-iphoneos/Runner.app')
-                      .createSync(recursive: true);
-                },
-              ),
-              setUpRsyncCommand(
-                onRun:
-                    (_) =>
-                        fileSystem.file(
-                            'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App',
-                          )
-                          ..createSync(recursive: true)
-                          ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrCommand,
+          setUpFakeXcodeBuildHandler(
+            onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            },
+          ),
+          setUpRsyncCommand(
+            onRun: (_) =>
+                fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
+          ),
+        ]),
         Platform: () => macosPlatform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -739,41 +734,36 @@ void main() {
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              xattrCommand,
-              setUpFakeXcodeBuildHandler(
-                onRun: (_) {
-                  fileSystem
-                      .directory('build/ios/Release-iphoneos/Runner.app')
-                      .createSync(recursive: true);
-                },
-              ),
-              setUpRsyncCommand(
-                onRun:
-                    (_) =>
-                        fileSystem.file(
-                            'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App',
-                          )
-                          ..createSync(recursive: true)
-                          ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrCommand,
+          setUpFakeXcodeBuildHandler(
+            onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            },
+          ),
+          setUpRsyncCommand(
+            onRun: (_) =>
+                fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0)),
+          ),
+        ]),
         Platform: () => macosPlatform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        FlutterProjectFactory:
-            () => FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
-        PlistParser:
-            () => PlistParser(
-              fileSystem: fileSystem,
-              logger: BufferLogger.test(),
-              processManager: FakeProcessManager.list(<FakeCommand>[
-                plutilCommand,
-                plutilCommand,
-                plutilCommand,
-              ]),
-            ),
+        FlutterProjectFactory: () =>
+            FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        PlistParser: () => PlistParser(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            plutilCommand,
+            plutilCommand,
+            plutilCommand,
+          ]),
+        ),
         Pub: ThrowingPub.new,
         Analytics: () => fakeAnalytics,
       },
@@ -1244,8 +1234,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
       },
     );
 
@@ -1271,23 +1261,20 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              xattrCommand,
-              setUpFakeXcodeBuildHandler(
-                exitCode: 1,
-                stdout: '''
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrCommand,
+          setUpFakeXcodeBuildHandler(
+            exitCode: 1,
+            stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-                onRun: (_) {
-                  fileSystem.systemTempDirectory
-                      .childDirectory(_xcBundleDirectoryPath)
-                      .createSync();
-                },
-              ),
-              setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
-              setUpRsyncCommand(),
-            ]),
+            onRun: (_) {
+              fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+            },
+          ),
+          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpRsyncCommand(),
+        ]),
         Pub: ThrowingPub.new,
         EnvironmentType: () => EnvironmentType.physical,
         Platform: () => macosPlatform,
@@ -1331,8 +1318,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
       },
     );
 
@@ -1374,8 +1361,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
       },
     );
 
@@ -1424,8 +1411,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
       },
     );
   });

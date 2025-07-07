@@ -506,10 +506,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     assert(debugCheckHasMaterial(context));
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
-    final CheckboxThemeData defaults =
-        Theme.of(context).useMaterial3
-            ? _CheckboxDefaultsM3(context)
-            : _CheckboxDefaultsM2(context);
+    final CheckboxThemeData defaults = Theme.of(context).useMaterial3
+        ? _CheckboxDefaultsM3(context)
+        : _CheckboxDefaultsM2(context);
     final MaterialTapTargetSize effectiveMaterialTapTargetSize =
         widget.materialTapTargetSize ??
         checkboxTheme.materialTapTargetSize ??
@@ -598,18 +597,17 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     if (downPosition != null) {
-      effectiveHoverOverlayColor =
-          states.contains(MaterialState.selected)
-              ? effectiveActivePressedOverlayColor
-              : effectiveInactivePressedOverlayColor;
-      effectiveFocusOverlayColor =
-          states.contains(MaterialState.selected)
-              ? effectiveActivePressedOverlayColor
-              : effectiveInactivePressedOverlayColor;
+      effectiveHoverOverlayColor = states.contains(MaterialState.selected)
+          ? effectiveActivePressedOverlayColor
+          : effectiveInactivePressedOverlayColor;
+      effectiveFocusOverlayColor = states.contains(MaterialState.selected)
+          ? effectiveActivePressedOverlayColor
+          : effectiveInactivePressedOverlayColor;
     }
 
-    final Set<MaterialState> checkStates =
-        widget.isError ? (states..add(MaterialState.error)) : states;
+    final Set<MaterialState> checkStates = widget.isError
+        ? (states..add(MaterialState.error))
+        : states;
     final Color effectiveCheckColor =
         widget.checkColor ??
         checkboxTheme.checkColor?.resolve(checkStates) ??
@@ -627,28 +625,27 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         size: size,
-        painter:
-            _painter
-              ..position = position
-              ..reaction = reaction
-              ..reactionFocusFade = reactionFocusFade
-              ..reactionHoverFade = reactionHoverFade
-              ..inactiveReactionColor = effectiveInactivePressedOverlayColor
-              ..reactionColor = effectiveActivePressedOverlayColor
-              ..hoverColor = effectiveHoverOverlayColor
-              ..focusColor = effectiveFocusOverlayColor
-              ..splashRadius = effectiveSplashRadius
-              ..downPosition = downPosition
-              ..isFocused = states.contains(MaterialState.focused)
-              ..isHovered = states.contains(MaterialState.hovered)
-              ..activeColor = effectiveActiveColor
-              ..inactiveColor = effectiveInactiveColor
-              ..checkColor = effectiveCheckColor
-              ..value = value
-              ..previousValue = _previousValue
-              ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
-              ..activeSide = activeSide
-              ..inactiveSide = inactiveSide,
+        painter: _painter
+          ..position = position
+          ..reaction = reaction
+          ..reactionFocusFade = reactionFocusFade
+          ..reactionHoverFade = reactionHoverFade
+          ..inactiveReactionColor = effectiveInactivePressedOverlayColor
+          ..reactionColor = effectiveActivePressedOverlayColor
+          ..hoverColor = effectiveHoverOverlayColor
+          ..focusColor = effectiveFocusOverlayColor
+          ..splashRadius = effectiveSplashRadius
+          ..downPosition = downPosition
+          ..isFocused = states.contains(MaterialState.focused)
+          ..isHovered = states.contains(MaterialState.hovered)
+          ..activeColor = effectiveActiveColor
+          ..inactiveColor = effectiveInactiveColor
+          ..checkColor = effectiveCheckColor
+          ..value = value
+          ..previousValue = _previousValue
+          ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
+          ..activeSide = activeSide
+          ..inactiveSide = inactiveSide,
       ),
     );
   }

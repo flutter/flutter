@@ -90,8 +90,8 @@ class SelectionContainer extends StatefulWidget {
   /// the [BuildContext] or the immediate [SelectionContainer] is not
   /// enabled.
   static SelectionRegistrar? maybeOf(BuildContext context) {
-    final SelectionRegistrarScope? scope =
-        context.dependOnInheritedWidgetOfExactType<SelectionRegistrarScope>();
+    final SelectionRegistrarScope? scope = context
+        .dependOnInheritedWidgetOfExactType<SelectionRegistrarScope>();
     return scope?.registrar;
   }
 

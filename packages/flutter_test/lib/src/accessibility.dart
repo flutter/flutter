@@ -429,8 +429,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
     if (widget is Text) {
       final TextStyle? style = widget.style;
-      final TextStyle effectiveTextStyle =
-          style == null || style.inherit ? defaultTextStyle.style.merge(widget.style) : style;
+      final TextStyle effectiveTextStyle = style == null || style.inherit
+          ? defaultTextStyle.style.merge(widget.style)
+          : style;
       isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
       fontSize = effectiveTextStyle.fontSize;
     } else if (widget is EditableText) {
@@ -616,13 +617,12 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 
       // Obtain a previously rendered image or render one for a new view.
       await tester.binding.runAsync(() async {
-        image =
-            images[view] ??= await layer.toImage(
-              renderView.paintBounds,
-              // Needs to be the same pixel ratio otherwise our dimensions
-              // won't match the last transform layer.
-              pixelRatio: 1 / view.devicePixelRatio,
-            );
+        image = images[view] ??= await layer.toImage(
+          renderView.paintBounds,
+          // Needs to be the same pixel ratio otherwise our dimensions
+          // won't match the last transform layer.
+          pixelRatio: 1 / view.devicePixelRatio,
+        );
         byteData = byteDatas[view] ??= (await image.toByteData())!;
       });
 

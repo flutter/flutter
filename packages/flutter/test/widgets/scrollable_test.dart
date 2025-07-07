@@ -26,8 +26,9 @@ Future<void> pumpTest(
   await tester.pumpWidget(
     MaterialApp(
       scrollBehavior: const NoScrollbarBehavior().copyWith(
-        dragDevices:
-            enableMouseDrag ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values} : null,
+        dragDevices: enableMouseDrag
+            ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+            : null,
         pointerAxisModifiers: axisModifier,
       ),
       theme: ThemeData(platform: platform),
@@ -752,10 +753,9 @@ void main() {
       return tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
-            physics:
-                canDrag
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
+            physics: canDrag
+                ? const AlwaysScrollableScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
             slivers: <Widget>[
               SliverToBoxAdapter(
                 child: SizedBox(height: 2000, child: GestureDetector(onTap: () {})),
@@ -999,8 +999,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final ScrollPosition position =
-          Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+      final ScrollPosition position = Scrollable.of(
+        find.byType(SizedBox).evaluate().first,
+      ).position;
 
       expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1644,10 +1645,9 @@ void main() {
 
     expect(getScrollOffset(tester), 200);
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    String types(ScrollPhysics? value) =>
-        value!.parent == null
-            ? '${value.runtimeType}'
-            : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(scrollable.resolvedPhysics),
@@ -1669,13 +1669,10 @@ void main() {
                     scrollBehavior: const MaterialScrollBehavior().copyWith(
                       dragDevices: <ui.PointerDeviceKind>{if (enable) ui.PointerDeviceKind.mouse},
                     ),
-                    viewportBuilder:
-                        (BuildContext context, ViewportOffset position) => Viewport(
-                          offset: position,
-                          slivers: const <Widget>[
-                            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-                          ],
-                        ),
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                    ),
                   ),
                   floatingActionButton: FloatingActionButton(
                     onPressed: () {
@@ -1732,13 +1729,10 @@ void main() {
                   body: Scrollable(
                     physics: const ScrollPhysics(),
                     scrollBehavior: scrollBehavior,
-                    viewportBuilder:
-                        (BuildContext context, ViewportOffset position) => Viewport(
-                          offset: position,
-                          slivers: const <Widget>[
-                            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-                          ],
-                        ),
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                    ),
                   ),
                   floatingActionButton: FloatingActionButton(
                     onPressed: () {

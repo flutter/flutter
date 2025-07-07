@@ -265,8 +265,9 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create file at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(<String>[delegate.parent.path]),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(<String>[delegate.parent.path]),
     );
   }
 
@@ -398,8 +399,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -427,8 +429,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () async => wrap(await delegate.create(recursive: recursive)),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 

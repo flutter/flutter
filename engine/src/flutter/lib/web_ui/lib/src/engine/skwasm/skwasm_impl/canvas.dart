@@ -339,8 +339,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
     final RawRect rawRects = scope.convertRectsToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertColorArrayToNative(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertColorArrayToNative(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(
@@ -369,8 +370,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
     final RawRect rawRects = scope.convertDoublesToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertIntsToUint32Native(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertIntsToUint32Native(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(

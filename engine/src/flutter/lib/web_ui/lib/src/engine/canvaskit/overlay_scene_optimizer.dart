@@ -175,8 +175,9 @@ Rendering createOptimizedRendering(
       final int viewId = renderObject.viewId;
       final RenderingPlatformView platformView = RenderingPlatformView(viewId);
       if (PlatformViewManager.instance.isVisible(viewId)) {
-        final ui.Rect platformViewBounds =
-            cachedComputedRects[viewId] = computePlatformViewBounds(paramsForViews[viewId]!);
+        final ui.Rect platformViewBounds = cachedComputedRects[viewId] = computePlatformViewBounds(
+          paramsForViews[viewId]!,
+        );
 
         if (debugOverlayOptimizationBounds) {
           platformView.debugComputedBounds = platformViewBounds;

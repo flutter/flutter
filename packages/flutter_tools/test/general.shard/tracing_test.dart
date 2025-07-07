@@ -66,29 +66,28 @@ void main() {
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameBuiltEventName,
-                    'ts': 2,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameRasterizedEventName,
-                    'ts': 3,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameBuiltEventName,
+                'ts': 2,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameRasterizedEventName,
+                'ts': 3,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -152,12 +151,11 @@ void main() {
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -243,21 +241,20 @@ void main() {
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -283,21 +280,20 @@ void main() {
       requests: <FakeVmServiceRequest>[
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -330,29 +326,28 @@ void main() {
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameBuiltEventName,
-                    'ts': 2,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameRasterizedEventName,
-                    'ts': 3,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameBuiltEventName,
+                'ts': 2,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameRasterizedEventName,
+                'ts': 3,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',

@@ -99,10 +99,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -327,10 +326,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -350,10 +348,9 @@ name: foo
     'WebEntrypointTarget generates a plugin registrant for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -375,10 +372,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform on windows',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
 
         environment.defines[kHasWebPlugins] = 'true';
@@ -409,10 +405,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -441,10 +436,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -464,10 +458,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version from a package config',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         globals.fs.file(globals.fs.path.join('pubspec.yaml')).writeAsStringSync('name: foo\n');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
@@ -488,10 +481,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and without init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -1192,11 +1184,9 @@ name: foo
                           environment.buildDir.childFile('main.dart.wasm').absolute.path,
                           environment.buildDir.childFile('main.dart').absolute.path,
                         ],
-                        onRun:
-                            (_) =>
-                                outputJsFile
-                                  ..createSync()
-                                  ..writeAsStringSync('foo'),
+                        onRun: (_) => outputJsFile
+                          ..createSync()
+                          ..writeAsStringSync('foo'),
                       ),
                     );
 

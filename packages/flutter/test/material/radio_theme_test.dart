@@ -43,11 +43,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, const <String>[]);
   });
@@ -64,11 +63,10 @@ void main() {
       backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -381,7 +379,9 @@ void main() {
             splashRadius: splashRadius,
           ),
         ),
-        home: Scaffold(body: Radio<int>(value: active ? 1 : 0, groupValue: 1, onChanged: (_) {})),
+        home: Scaffold(
+          body: Radio<int>(value: active ? 1 : 0, groupValue: 1, onChanged: (_) {}),
+        ),
       );
     }
 

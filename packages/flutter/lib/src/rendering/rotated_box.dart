@@ -90,11 +90,10 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child != null) {
       child!.layout(_isVertical ? constraints.flipped : constraints, parentUsesSize: true);
       size = _isVertical ? Size(child!.size.height, child!.size.width) : child!.size;
-      _paintTransform =
-          Matrix4.identity()
-            ..translateByDouble(size.width / 2.0, size.height / 2.0, 0, 1)
-            ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
-            ..translateByDouble(-child!.size.width / 2.0, -child!.size.height / 2.0, 0, 1);
+      _paintTransform = Matrix4.identity()
+        ..translateByDouble(size.width / 2.0, size.height / 2.0, 0, 1)
+        ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
+        ..translateByDouble(-child!.size.width / 2.0, -child!.size.height / 2.0, 0, 1);
     } else {
       size = constraints.smallest;
     }

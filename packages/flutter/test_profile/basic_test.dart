@@ -10,7 +10,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Center(child: Text('Hello World')))),
+      const MaterialApp(
+        home: Scaffold(body: Center(child: Text('Hello World'))),
+      ),
     );
 
     expect(tester.takeException(), isNull);

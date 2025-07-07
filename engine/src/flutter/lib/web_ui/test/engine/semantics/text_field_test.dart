@@ -147,8 +147,9 @@ void testMain() {
       final logger = SemanticsActionLogger();
       createTextFieldSemantics(value: 'hello');
 
-      final textField =
-          owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!;
+      final textField = owner().semanticsHost.querySelector(
+        'input[data-semantics-role="text-field"]',
+      )!;
 
       expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
 

@@ -43,7 +43,8 @@ void main() {
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
-    final String dotPackagesSrc = '''
+    final String dotPackagesSrc =
+        '''
 {
   "configVersion": 2,
   "packages": [
@@ -75,22 +76,21 @@ void main() {
   }
 
   setUp(() {
-    tempDir =
-        fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
+    tempDir = fileSystem.systemTempDirectory
+        .createTempSync('flutter_analyze_once_test_1.')
+        .absolute;
     projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
     final String projectWithErrors = fileSystem.path.join(tempDir.path, 'flutter_project_errors');
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
       ..createSync(recursive: true)
       ..writeAsStringSync(pubspecYamlSrc);
     createDotPackages(projectPath);
-    libMain =
-        fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(mainDartSrc);
-    errorFile =
-        fileSystem.file(fileSystem.path.join(projectWithErrors, 'other', 'error.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r"""import 'package:flutter/material.dart""");
+    libMain = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(mainDartSrc);
+    errorFile = fileSystem.file(fileSystem.path.join(projectWithErrors, 'other', 'error.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r"""import 'package:flutter/material.dart""");
   });
 
   tearDown(() {
@@ -127,10 +127,9 @@ void main() {
   });
 
   testWithoutContext('passing more than one file success', () async {
-    final File secondFile =
-        fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'second.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('');
+    final File secondFile = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'second.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path, secondFile.path],
       statusTextContains: <String>['No issues found!'],

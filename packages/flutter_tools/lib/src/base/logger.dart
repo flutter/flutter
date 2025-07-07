@@ -727,18 +727,17 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
-    final String windowsMessage =
-        terminal.supportsEmoji
-            ? message
-            : message
-                .replaceAll('🔥', '')
-                .replaceAll('🖼️', '')
-                .replaceAll('✗', 'X')
-                .replaceAll('✓', '√')
-                .replaceAll('🔨', '')
-                .replaceAll('💪', '')
-                .replaceAll('⚠️', '!')
-                .replaceAll('✏️', '');
+    final String windowsMessage = terminal.supportsEmoji
+        ? message
+        : message
+              .replaceAll('🔥', '')
+              .replaceAll('🖼️', '')
+              .replaceAll('✗', 'X')
+              .replaceAll('✓', '√')
+              .replaceAll('🔨', '')
+              .replaceAll('💪', '')
+              .replaceAll('⚠️', '!')
+              .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }

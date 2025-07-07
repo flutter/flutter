@@ -153,15 +153,16 @@ void main() async {
       final Harvester harvester = await Harvester.create(
         tempDirectory,
         stderr,
-        addImageToSkiaGold: (
-          String testName,
-          io.File goldenFile, {
-          required int screenshotSize,
-          double differentPixelsRate = 0.01,
-          int pixelColorDelta = 0,
-        }) async {
-          addImgCalls.add('$testName $screenshotSize $differentPixelsRate $pixelColorDelta');
-        },
+        addImageToSkiaGold:
+            (
+              String testName,
+              io.File goldenFile, {
+              required int screenshotSize,
+              double differentPixelsRate = 0.01,
+              int pixelColorDelta = 0,
+            }) async {
+              addImgCalls.add('$testName $screenshotSize $differentPixelsRate $pixelColorDelta');
+            },
       );
       await harvest(harvester);
       expect(addImgCalls, <String>['test_name_1.png 10000 0.01 0', 'test_name_2.png 40000 0.02 1']);

@@ -23,10 +23,9 @@ void drawHelloWorld(ui.FlutterView view) {
   canvas.drawParagraph(paragraph, ui.Offset.zero);
 
   final ui.Picture picture = recorder.endRecording();
-  final ui.SceneBuilder sceneBuilder =
-      ui.SceneBuilder()
-        ..addPicture(ui.Offset.zero, picture)
-        ..pop();
+  final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+    ..addPicture(ui.Offset.zero, picture)
+    ..pop();
 
   view.render(sceneBuilder.build());
 }

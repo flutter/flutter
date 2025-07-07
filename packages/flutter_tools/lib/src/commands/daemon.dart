@@ -201,10 +201,9 @@ class Daemon {
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
         logger: globals.logger,
       ),
-      notifyingLogger:
-          (globals.logger is NotifyingLogger)
-              ? globals.logger as NotifyingLogger
-              : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+      notifyingLogger: (globals.logger is NotifyingLogger)
+          ? globals.logger as NotifyingLogger
+          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
       logToStdout: true,
     );
     return daemon;
@@ -463,8 +462,9 @@ class DaemonDomain extends Domain {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         globals.fs.directory(projectRoot),
       );
-      final Set<SupportedPlatform> supportedPlatforms =
-          flutterProject.getSupportedPlatforms().toSet();
+      final Set<SupportedPlatform> supportedPlatforms = flutterProject
+          .getSupportedPlatforms()
+          .toSet();
 
       void handlePlatformType(PlatformType platform) {
         final List<Map<String, Object>> reasons = <Map<String, Object>>[];
@@ -891,10 +891,9 @@ class AppDomain extends Domain {
     int? debounceDurationOverrideMs,
     Future<OperationResult> Function() action,
   ) {
-    final Duration debounceDuration =
-        debounce
-            ? Duration(milliseconds: debounceDurationOverrideMs ?? _hotReloadDebounceDurationMs)
-            : Duration.zero;
+    final Duration debounceDuration = debounce
+        ? Duration(milliseconds: debounceDurationOverrideMs ?? _hotReloadDebounceDurationMs)
+        : Duration.zero;
 
     return operationQueue.queueAndDebounce(
       operationType,
@@ -915,8 +914,9 @@ class AppDomain extends Domain {
   Future<Map<String, Object?>> callServiceExtension(Map<String, Object?> args) async {
     final String? appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName')!;
-    final Map<String, Object?>? params =
-        args['params'] == null ? <String, Object?>{} : castStringKeyedMap(args['params']);
+    final Map<String, Object?>? params = args['params'] == null
+        ? <String, Object?>{}
+        : castStringKeyedMap(args['params']);
 
     final AppInstance? app = _getApp(appId);
     if (app == null) {
@@ -1072,8 +1072,9 @@ class DeviceDomain extends Domain {
   /// Return a list of the current devices, discarding existing cache of devices.
   Future<List<Map<String, Object?>>> discoverDevices(Map<String, Object?> args) async {
     final int? timeoutInMilliseconds = _getIntArg(args, 'timeoutInMilliseconds');
-    final Duration? timeout =
-        timeoutInMilliseconds != null ? Duration(milliseconds: timeoutInMilliseconds) : null;
+    final Duration? timeout = timeoutInMilliseconds != null
+        ? Duration(milliseconds: timeoutInMilliseconds)
+        : null;
 
     // Calling `discoverDevices()` and `_deviceToMap()` in parallel for better performance.
     final List<List<Device>> devicesListList = await Future.wait(<Future<List<Device>>>[
@@ -1167,8 +1168,9 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
     final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
-    final ApplicationPackage? applicationPackage =
-        applicationPackageId != null ? _applicationPackages[applicationPackageId] : null;
+    final ApplicationPackage? applicationPackage = applicationPackageId != null
+        ? _applicationPackages[applicationPackageId]
+        : null;
     final String id = '${deviceId}_${_id++}';
 
     final DeviceLogReader logReader = await device.getLogReader(app: applicationPackage);
@@ -1681,8 +1683,8 @@ class ProxyDomain extends Domain {
     if (!await file.exists()) {
       return null;
     }
-    final List<Map<String, Object?>> deltaJson =
-        (args['delta']! as List<Object?>).cast<Map<String, Object?>>();
+    final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>)
+        .cast<Map<String, Object?>>();
     final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
     final bool result = await _fileTransfer.rebuildFile(file, delta, binary!);
     return result;

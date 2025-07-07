@@ -520,14 +520,16 @@ tasks.register("clean", Delete) {
         'delete and note when FlutterMultiDexApplication.java is present',
         () async {
           // Write a blank string to the FlutterMultiDexApplication.java file.
-          final File flutterMultiDexApplication = project.hostAppGradleRoot
-            .childDirectory('src')
-            .childDirectory('main')
-            .childDirectory('java')
-            .childDirectory('io')
-            .childDirectory('flutter')
-            .childDirectory('app')
-            .childFile('FlutterMultiDexApplication.java')..createSync(recursive: true);
+          final File flutterMultiDexApplication =
+              project.hostAppGradleRoot
+                  .childDirectory('src')
+                  .childDirectory('main')
+                  .childDirectory('java')
+                  .childDirectory('io')
+                  .childDirectory('flutter')
+                  .childDirectory('app')
+                  .childFile('FlutterMultiDexApplication.java')
+                ..createSync(recursive: true);
           flutterMultiDexApplication.writeAsStringSync('');
 
           await migration.migrate();

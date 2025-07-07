@@ -781,8 +781,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._register(this);
 
     final Widget child = Semantics(
-      validationResult:
-          hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid,
+      validationResult: hasError
+          ? SemanticsValidationResult.invalid
+          : SemanticsValidationResult.valid,
       child: widget.builder(this),
     );
 

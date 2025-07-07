@@ -14,7 +14,8 @@ class NavigationDrawerTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

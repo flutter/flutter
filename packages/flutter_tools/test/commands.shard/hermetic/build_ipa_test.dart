@@ -291,8 +291,10 @@ void main() {
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
-      final bool supported =
-          BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+      final bool supported = BuildIOSArchiveCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+      ).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),
@@ -466,8 +468,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building debugging IPA'));
@@ -478,8 +481,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -520,8 +523,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building release-testing IPA'));
@@ -532,8 +536,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -574,8 +578,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building App Store IPA'));
@@ -586,8 +591,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -618,8 +623,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
     },
   );
 
@@ -660,8 +665,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building enterprise IPA'));
@@ -672,8 +678,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -704,8 +710,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
     },
   );
 
@@ -879,8 +885,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -938,8 +945,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -997,8 +1005,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));

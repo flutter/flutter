@@ -206,8 +206,9 @@ class CommandHelpOption {
 
     bool wrap = false;
     final int maxWidth = math.max(_outputPreferences.wrapColumn, maxLineWidth);
-    final int adjustedMessageLength =
-        _platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length;
+    final int adjustedMessageLength = _platform.stdoutSupportsAnsi
+        ? _rawMessageLength + 1
+        : message.length;
     int width = maxWidth - adjustedMessageLength;
     final String parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {

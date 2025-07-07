@@ -53,7 +53,9 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]))),
+      MaterialApp(
+        home: Material(child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2])),
+      ),
     );
 
     entry2.remove();

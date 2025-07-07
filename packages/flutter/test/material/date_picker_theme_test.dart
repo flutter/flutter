@@ -471,11 +471,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -485,11 +484,10 @@ void main() {
 
     datePickerTheme.debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -715,8 +713,9 @@ void main() {
     expect(selectDate.style?.fontSize, datePickerTheme.headerHelpStyle?.fontSize);
     expect(headerMaterial.color, datePickerTheme.headerBackgroundColor);
 
-    final InputDecoration inputDecoration =
-        tester.widget<TextField>(find.byType(TextField)).decoration!;
+    final InputDecoration inputDecoration = tester
+        .widget<TextField>(find.byType(TextField))
+        .decoration!;
     expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
 
     final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
@@ -1260,8 +1259,9 @@ void main() {
     await tester.pumpWidget(buildFrame());
 
     // Find container whose child is text 2025.
-    final Finder yearContainer =
-        find.ancestor(of: find.text('2025'), matching: find.byType(Container)).first;
+    final Finder yearContainer = find
+        .ancestor(of: find.text('2025'), matching: find.byType(Container))
+        .first;
 
     expect(
       tester.renderObject(yearContainer),

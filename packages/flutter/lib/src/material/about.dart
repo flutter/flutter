@@ -307,15 +307,14 @@ void showLicensePage({
   );
   Navigator.of(context, rootNavigator: useRootNavigator).push(
     MaterialPageRoute<void>(
-      builder:
-          (BuildContext context) => themes.wrap(
-            LicensePage(
-              applicationName: applicationName,
-              applicationVersion: applicationVersion,
-              applicationIcon: applicationIcon,
-              applicationLegalese: applicationLegalese,
-            ),
-          ),
+      builder: (BuildContext context) => themes.wrap(
+        LicensePage(
+          applicationName: applicationName,
+          applicationVersion: applicationVersion,
+          applicationIcon: applicationIcon,
+          applicationLegalese: applicationLegalese,
+        ),
+      ),
     ),
   );
 }
@@ -1424,14 +1423,13 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       builder: (BuildContext c) {
         return BlockSemantics(
           child: _MasterPage(
-            leading:
-                Navigator.of(context).canPop()
-                    ? BackButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    )
-                    : null,
+            leading: Navigator.of(context).canPop()
+                ? BackButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                : null,
             title: widget.title,
             masterViewBuilder: widget.masterViewBuilder,
           ),
@@ -1458,13 +1456,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.lateral;
     return _MasterDetailScaffold(
       actionBuilder: (_, _) => const <Widget>[],
-      detailPageBuilder:
-          (BuildContext context, Object? args, ScrollController? scrollController) =>
-              widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
+      detailPageBuilder: (BuildContext context, Object? args, ScrollController? scrollController) =>
+          widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
       detailPageFABlessGutterWidth: widget.detailPageFABlessGutterWidth,
       initialArguments: _cachedDetailArguments,
-      masterViewBuilder:
-          (BuildContext context, bool isLateral) => widget.masterViewBuilder(context, isLateral),
+      masterViewBuilder: (BuildContext context, bool isLateral) =>
+          widget.masterViewBuilder(context, isLateral),
       title: widget.title,
     );
   }
@@ -1601,15 +1598,14 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
               valueListenable: _detailArguments,
               builder: (BuildContext context, Object? value, Widget? child) {
                 return AnimatedSwitcher(
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) =>
-                          const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
-                            null,
-                            null,
-                            animation,
-                            null,
-                            child,
-                          ),
+                  transitionBuilder: (Widget child, Animation<double> animation) =>
+                      const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
+                        null,
+                        null,
+                        animation,
+                        null,
+                        child,
+                      ),
                   duration: const Duration(milliseconds: 500),
                   child: SizedBox.expand(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
@@ -1630,16 +1626,15 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
   ConstrainedBox _masterPanel(BuildContext context, {bool needsScaffold = false}) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: masterViewWidth),
-      child:
-          needsScaffold
-              ? Scaffold(
-                appBar: AppBar(
-                  title: widget.title,
-                  actions: widget.actionBuilder!(context, _ActionLevel.top),
-                ),
-                body: widget.masterViewBuilder(context, true),
-              )
-              : widget.masterViewBuilder(context, true),
+      child: needsScaffold
+          ? Scaffold(
+              appBar: AppBar(
+                title: widget.title,
+                actions: widget.actionBuilder!(context, _ActionLevel.top),
+              ),
+              body: widget.masterViewBuilder(context, true),
+            )
+          : widget.masterViewBuilder(context, true),
     );
   }
 }

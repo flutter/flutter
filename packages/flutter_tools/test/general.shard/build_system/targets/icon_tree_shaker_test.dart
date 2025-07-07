@@ -287,10 +287,9 @@ void main() {
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     resetFontSubsetInvocation(stdinSink: stdinSink);
 
-    final File notAFont =
-        fileSystem.file('input/foo/bar.txt')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('I could not think of a better string');
+    final File notAFont = fileSystem.file('input/foo/bar.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('I could not think of a better string');
     final bool subsetted = await iconTreeShaker.subsetFont(
       input: notAFont,
       outputPath: outputPath,

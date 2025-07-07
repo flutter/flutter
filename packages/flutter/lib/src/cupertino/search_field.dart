@@ -442,10 +442,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -535,10 +534,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     );
     final IconThemeData prefixIconThemeData = IconThemeData(
       color: iconColor,
-      size:
-          _scaledIconSize >= _kMaxPrefixIconSize && _effectiveFocusNode.hasFocus
-              ? 0.0
-              : _scaledIconSize,
+      size: _scaledIconSize >= _kMaxPrefixIconSize && _effectiveFocusNode.hasFocus
+          ? 0.0
+          : _scaledIconSize,
     );
 
     final Widget prefix = Opacity(

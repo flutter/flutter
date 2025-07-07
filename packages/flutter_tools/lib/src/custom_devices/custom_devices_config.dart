@@ -27,13 +27,12 @@ class CustomDevicesConfig {
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
-       _configLoader =
-           (() => Config.managed(
-             _kCustomDevicesConfigName,
-             fileSystem: fileSystem,
-             logger: logger,
-             platform: platform,
-           ));
+       _configLoader = (() => Config.managed(
+         _kCustomDevicesConfigName,
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+       ));
 
   @visibleForTesting
   CustomDevicesConfig.test({
@@ -44,13 +43,12 @@ class CustomDevicesConfig {
   }) : _platform = platform ?? FakePlatform(),
        _fileSystem = fileSystem,
        _logger = logger,
-       _configLoader =
-           (() => Config.test(
-             name: _kCustomDevicesConfigName,
-             directory: directory,
-             logger: logger,
-             managed: true,
-           ));
+       _configLoader = (() => Config.test(
+         name: _kCustomDevicesConfigName,
+         directory: directory,
+         logger: logger,
+         managed: true,
+       ));
 
   static const String _kCustomDevicesConfigName = 'custom_devices.json';
   static const String _kCustomDevicesConfigKey = 'custom-devices';
@@ -81,14 +79,13 @@ class CustomDevicesConfig {
   }
 
   String get _defaultSchema {
-    final Uri uri =
-        _fileSystem
-            .directory(Cache.flutterRoot)
-            .childDirectory('packages')
-            .childDirectory('flutter_tools')
-            .childDirectory('static')
-            .childFile('custom-devices.schema.json')
-            .uri;
+    final Uri uri = _fileSystem
+        .directory(Cache.flutterRoot)
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .childDirectory('static')
+        .childFile('custom-devices.schema.json')
+        .uri;
 
     // otherwise it won't contain the Uri schema, so the file:// at the start
     // will be missing

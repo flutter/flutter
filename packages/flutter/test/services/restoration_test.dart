@@ -186,10 +186,10 @@ void main() {
         return result.future;
       });
       int listenerCount = 0;
-      final RestorationManager manager =
-          RestorationManager()..addListener(() {
-            listenerCount++;
-          });
+      final RestorationManager manager = RestorationManager()
+        ..addListener(() {
+          listenerCount++;
+        });
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
       bool rootBucketResolved = false;

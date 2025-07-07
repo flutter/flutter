@@ -485,10 +485,9 @@ class _RawViewElement extends RenderTreeRootElement {
         stack: stack,
         library: 'widgets library',
         context: ErrorDescription('building $this'),
-        informationCollector:
-            !kDebugMode
-                ? null
-                : () => <DiagnosticsNode>[DiagnosticsDebugCreator(DebugCreator(this))],
+        informationCollector: !kDebugMode
+            ? null
+            : () => <DiagnosticsNode>[DiagnosticsDebugCreator(DebugCreator(this))],
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

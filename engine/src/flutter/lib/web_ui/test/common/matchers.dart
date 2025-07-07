@@ -269,8 +269,10 @@ class HtmlPatternMatcher extends Matcher {
     final List<String> mismatches = <String>[];
     matchState['mismatches'] = mismatches;
 
-    final html.Element element =
-        html.parseFragment((object as DomElement).outerHTML).children.single;
+    final html.Element element = html
+        .parseFragment((object as DomElement).outerHTML)
+        .children
+        .single;
     _matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }

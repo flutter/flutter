@@ -654,7 +654,10 @@ void main() {
               SliverFixedExtentList(
                 itemExtent: 150,
                 delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return Semantics(label: index.toString(), child: Container(color: Colors.amber));
+                  return Semantics(
+                    label: index.toString(),
+                    child: Container(color: Colors.amber),
+                  );
                 }, childCount: 5),
               ),
               SliverFillRemaining(
@@ -1025,7 +1028,10 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Semantics(label: index.toString(), child: Container(color: Colors.amber));
+                return Semantics(
+                  label: index.toString(),
+                  child: Container(color: Colors.amber),
+                );
               }, childCount: 5),
             ),
             SliverFillRemaining(

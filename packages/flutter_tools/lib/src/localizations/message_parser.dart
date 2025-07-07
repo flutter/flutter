@@ -287,8 +287,9 @@ class Parser {
           final String matchedBrace = match.group(0)!;
           if (useRelaxedLexer) {
             final Match? whitespaceMatch = whitespace.matchAsPrefix(messageString, match.end);
-            final int endOfWhitespace =
-                whitespaceMatch?.group(0) == null ? match.end : whitespaceMatch!.end;
+            final int endOfWhitespace = whitespaceMatch?.group(0) == null
+                ? match.end
+                : whitespaceMatch!.end;
             final Match? identifierMatch = alphanumeric.matchAsPrefix(
               messageString,
               endOfWhitespace,

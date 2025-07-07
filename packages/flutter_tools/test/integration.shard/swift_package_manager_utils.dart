@@ -263,15 +263,14 @@ class SwiftPackageManagerUtils {
     return SwiftPackageManagerPlugin(
       platform: platform,
       pluginName: (platform == 'ios') ? 'integration_test' : 'integration_test_macos',
-      pluginPath:
-          (platform == 'ios')
-              ? fileSystem.path.join(flutterRoot, 'packages', 'integration_test')
-              : fileSystem.path.join(
-                flutterRoot,
-                'packages',
-                'integration_test',
-                'integration_test_macos',
-              ),
+      pluginPath: (platform == 'ios')
+          ? fileSystem.path.join(flutterRoot, 'packages', 'integration_test')
+          : fileSystem.path.join(
+              flutterRoot,
+              'packages',
+              'integration_test',
+              'integration_test_macos',
+            ),
       className: 'IntegrationTestPlugin',
     );
   }

@@ -47,8 +47,8 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle =
-          TestRenderingFlutterBinding.instance.ensureSemantics();
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance
+          .ensureSemantics();
       TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
         ++semanticsUpdateCount;
       });
@@ -129,8 +129,8 @@ void main() {
     layout(platformViewRenderBox);
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    viewController.pointTransformer =
-        (Offset offset) => platformViewRenderBox.globalToLocal(offset);
+    viewController.pointTransformer = (Offset offset) =>
+        platformViewRenderBox.globalToLocal(offset);
 
     FakeAsync().run((FakeAsync async) {
       // Put one pointer down.

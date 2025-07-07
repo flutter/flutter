@@ -9,22 +9,19 @@ Future<void> main() async {
   final FlutterDriver driver = await FlutterDriver.connect();
   await integrationDriver(
     driver: driver,
-    onScreenshot: (
-      String screenshotName,
-      List<int> screenshotBytes, [
-      Map<String, Object?>? args,
-    ]) async {
-      // Return false if the screenshot is invalid.
-      // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
+    onScreenshot:
+        (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
+          // Return false if the screenshot is invalid.
+          // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
 
-      // Here is an example of using an argument that was passed in via the
-      // optional 'args' Map.
-      if (args != null) {
-        final String? someArgumentValue = args['someArgumentKey'] as String?;
-        return someArgumentValue != null;
-      }
-      return true;
-    },
+          // Here is an example of using an argument that was passed in via the
+          // optional 'args' Map.
+          if (args != null) {
+            final String? someArgumentValue = args['someArgumentKey'] as String?;
+            return someArgumentValue != null;
+          }
+          return true;
+        },
     writeResponseOnFailure: true,
   );
 }

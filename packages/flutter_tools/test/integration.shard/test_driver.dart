@@ -66,8 +66,9 @@ abstract final class FlutterTestDriver {
   String lastTime = '';
   void _debugPrint(String message, {String topic = ''}) {
     const int maxLength = 2500;
-    final String truncatedMessage =
-        message.length > maxLength ? '${message.substring(0, maxLength)}...' : message;
+    final String truncatedMessage = message.length > maxLength
+        ? '${message.substring(0, maxLength)}...'
+        : message;
     final String line = '${topic.padRight(10)} $truncatedMessage';
     _allMessages.add(line);
     final int timeInSeconds = DateTime.now().difference(startTime).inSeconds;

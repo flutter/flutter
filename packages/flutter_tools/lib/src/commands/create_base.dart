@@ -336,8 +336,9 @@ mixin CreateBase on FlutterCommand {
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
-    final String pluginClass =
-        pluginDartClass.endsWith('Plugin') ? pluginDartClass : '${pluginDartClass}Plugin';
+    final String pluginClass = pluginDartClass.endsWith('Plugin')
+        ? pluginDartClass
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String pluginClassLowerCamelCase =
@@ -553,21 +554,22 @@ mixin CreateBase on FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
 
     // Each segment must start with a letter.
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
-    final List<String> prefixedSegments =
-        segments.map((String segment) {
-          if (!segmentPatternRegex.hasMatch(segment)) {
-            return 'u$segment';
-          }
-          return segment;
-        }).toList();
+    final List<String> prefixedSegments = segments.map((String segment) {
+      if (!segmentPatternRegex.hasMatch(segment)) {
+        return 'u$segment';
+      }
+      return segment;
+    }).toList();
     return prefixedSegments.join('.');
   }
 
@@ -591,8 +593,10 @@ mixin CreateBase on FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }

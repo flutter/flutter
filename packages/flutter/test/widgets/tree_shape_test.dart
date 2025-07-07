@@ -52,10 +52,14 @@ void main() {
 
   testWidgets(
     'A View cannot be a child of a render object widget',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      await tester.pumpWidget(Center(child: View(view: FakeView(tester.view), child: Container())));
+      await tester.pumpWidget(
+        Center(
+          child: View(view: FakeView(tester.view), child: Container()),
+        ),
+      );
 
       expect(
         tester.takeException(),
@@ -70,11 +74,13 @@ void main() {
 
   testWidgets(
     'The child of a ViewAnchor cannot be a View',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        ViewAnchor(child: View(view: FakeView(tester.view), child: Container())),
+        ViewAnchor(
+          child: View(view: FakeView(tester.view), child: Container()),
+        ),
       );
 
       expect(
@@ -116,7 +122,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      ViewAnchor(view: const ColoredBox(color: Colors.red), child: Container()),
+      ViewAnchor(
+        view: const ColoredBox(color: Colors.red),
+        child: Container(),
+      ),
     );
 
     expect(
@@ -232,7 +241,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithView: false,
-      ViewCollection(views: <Widget>[View(view: tester.view, child: Container())]),
+      ViewCollection(
+        views: <Widget>[View(view: tester.view, child: Container())],
+      ),
     );
 
     expect(tester.takeException(), isNull);
@@ -240,7 +251,9 @@ void main() {
 
   testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ViewCollection(views: <Widget>[View(view: FakeView(tester.view), child: Container())]),
+      ViewCollection(
+        views: <Widget>[View(view: FakeView(tester.view), child: Container())],
+      ),
     );
 
     expect(
@@ -351,8 +364,14 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(view: greenView, child: ColoredBox(color: Colors.green, child: globalKeyChild)),
-          View(view: redView, child: const ColoredBox(color: Colors.red)),
+          View(
+            view: greenView,
+            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+          ),
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
         ],
       ),
     );
@@ -375,8 +394,14 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(view: greenView, child: const ColoredBox(color: Colors.green)),
-          View(view: redView, child: ColoredBox(color: Colors.red, child: globalKeyChild)),
+          View(
+            view: greenView,
+            child: const ColoredBox(color: Colors.green),
+          ),
+          View(
+            view: redView,
+            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+          ),
         ],
       ),
     );
@@ -420,8 +445,14 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(view: greenView, child: const ColoredBox(color: Colors.green)),
-          View(view: redView, child: ColoredBox(color: Colors.red, child: globalKeyChild)),
+          View(
+            view: greenView,
+            child: const ColoredBox(color: Colors.green),
+          ),
+          View(
+            view: redView,
+            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+          ),
         ],
       ),
     );
@@ -444,8 +475,14 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(view: greenView, child: ColoredBox(color: Colors.green, child: globalKeyChild)),
-          View(view: redView, child: const ColoredBox(color: Colors.red)),
+          View(
+            view: greenView,
+            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+          ),
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
         ],
       ),
     );
@@ -478,7 +515,11 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(key: greenKey, view: greenView, child: const ColoredBox(color: Colors.green)),
+          View(
+            key: greenKey,
+            view: greenView,
+            child: const ColoredBox(color: Colors.green),
+          ),
           View(
             key: redKey,
             view: redView,
@@ -537,7 +578,11 @@ void main() {
             view: greenView,
             child: ColoredBox(color: Colors.green, child: globalKeyChild),
           ),
-          View(key: redKey, view: redView, child: const ColoredBox(color: Colors.red)),
+          View(
+            key: redKey,
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
         ],
       ),
     );
@@ -593,7 +638,9 @@ void main() {
             view: View(
               key: viewKey,
               view: FakeView(tester.view),
-              child: SizedBox(child: ColoredBox(key: childKey, color: Colors.green)),
+              child: SizedBox(
+                child: ColoredBox(key: childKey, color: Colors.green),
+              ),
             ),
             child: const SizedBox(),
           ),
@@ -606,7 +653,10 @@ void main() {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          SizedBox(key: key1, child: ColoredBox(key: childKey, color: Colors.green)),
+          SizedBox(
+            key: key1,
+            child: ColoredBox(key: childKey, color: Colors.green),
+          ),
           ViewAnchor(key: key2, child: const SizedBox()),
           ViewAnchor(
             key: key3,
@@ -627,7 +677,9 @@ void main() {
             view: View(
               key: viewKey,
               view: FakeView(tester.view),
-              child: SizedBox(child: ColoredBox(key: childKey, color: Colors.green)),
+              child: SizedBox(
+                child: ColoredBox(key: childKey, color: Colors.green),
+              ),
             ),
             child: const SizedBox(),
           ),
@@ -658,7 +710,9 @@ void main() {
             view: View(
               key: viewKey,
               view: FakeView(tester.view),
-              child: SizedBox(child: ColoredBox(key: childKey, color: Colors.green)),
+              child: SizedBox(
+                child: ColoredBox(key: childKey, color: Colors.green),
+              ),
             ),
             child: const SizedBox(),
           ),
@@ -678,7 +732,10 @@ void main() {
             view: View(key: viewKey, view: FakeView(tester.view), child: const SizedBox()),
             child: const SizedBox(),
           ),
-          SizedBox(key: key4, child: ColoredBox(key: childKey, color: Colors.green)),
+          SizedBox(
+            key: key4,
+            child: ColoredBox(key: childKey, color: Colors.green),
+          ),
         ],
       ),
     );
@@ -692,7 +749,9 @@ void main() {
             view: View(
               key: viewKey,
               view: FakeView(tester.view),
-              child: SizedBox(child: ColoredBox(key: childKey, color: Colors.green)),
+              child: SizedBox(
+                child: ColoredBox(key: childKey, color: Colors.green),
+              ),
             ),
             child: const SizedBox(),
           ),
@@ -739,7 +798,9 @@ void main() {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.green,
-        child: ViewAnchor(child: ColoredBox(color: Colors.red, child: globalKeyChild)),
+        child: ViewAnchor(
+          child: ColoredBox(color: Colors.red, child: globalKeyChild),
+        ),
       ),
     );
     expect(findsColoredBox(Colors.green), findsOneWidget);
@@ -766,7 +827,10 @@ void main() {
       ColoredBox(
         color: Colors.green,
         child: ViewAnchor(
-          view: View(view: anchorView, child: const ColoredBox(color: Colors.yellow)),
+          view: View(
+            view: anchorView,
+            child: const ColoredBox(color: Colors.yellow),
+          ),
           child: const ColoredBox(color: Colors.red),
         ),
       ),
@@ -794,8 +858,14 @@ void main() {
       wrapWithView: false,
       ViewCollection(
         views: <Widget>[
-          View(view: redView, child: const ColoredBox(color: Colors.red)),
-          View(view: greenView, child: const ColoredBox(color: Colors.green)),
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
+          View(
+            view: greenView,
+            child: const ColoredBox(color: Colors.green),
+          ),
         ],
       ),
     );
@@ -807,7 +877,12 @@ void main() {
     await tester.pumpWidget(
       wrapWithView: false,
       ViewCollection(
-        views: <Widget>[View(view: redView, child: const ColoredBox(color: Colors.red))],
+        views: <Widget>[
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
+        ],
       ),
     );
 

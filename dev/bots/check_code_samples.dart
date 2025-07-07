@@ -200,23 +200,22 @@ class SampleChecker {
   }
 
   List<File> getFiles(Directory directory, [Pattern? filenamePattern]) {
-    final List<File> filenames =
-        directory
-            .listSync(recursive: true)
-            .map((FileSystemEntity entity) {
-              if (entity is File) {
-                return entity;
-              } else {
-                return null;
-              }
-            })
-            .where(
-              (File? filename) =>
-                  filename != null &&
-                  (filenamePattern == null || filename.absolute.path.contains(filenamePattern)),
-            )
-            .map<File>((File? s) => s!)
-            .toList();
+    final List<File> filenames = directory
+        .listSync(recursive: true)
+        .map((FileSystemEntity entity) {
+          if (entity is File) {
+            return entity;
+          } else {
+            return null;
+          }
+        })
+        .where(
+          (File? filename) =>
+              filename != null &&
+              (filenamePattern == null || filename.absolute.path.contains(filenamePattern)),
+        )
+        .map<File>((File? s) => s!)
+        .toList();
     return filenames;
   }
 

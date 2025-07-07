@@ -42,16 +42,15 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     BuildResult? result = buildResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final BuildInputBuilder input =
-          BuildInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupBuildInput()
-            ..config.setupBuild(linkingEnabled: linkingEnabled);
+      final BuildInputBuilder input = BuildInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupBuildInput()
+        ..config.setupBuild(linkingEnabled: linkingEnabled);
       for (final ProtocolExtension extension in extensions) {
         extension.setupBuildInput(input);
       }
@@ -71,15 +70,14 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final LinkInputBuilder input =
-          LinkInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
+      final LinkInputBuilder input = LinkInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
       for (final ProtocolExtension extension in extensions) {
         extension.setupLinkInput(input);
       }

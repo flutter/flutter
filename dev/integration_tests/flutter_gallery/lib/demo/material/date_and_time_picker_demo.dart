@@ -29,10 +29,9 @@ class _InputDropdown extends StatelessWidget {
             Text(valueText!, style: valueStyle),
             Icon(
               Icons.arrow_drop_down,
-              color:
-                  Theme.brightnessOf(context) == Brightness.light
-                      ? Colors.grey.shade700
-                      : Colors.white70,
+              color: Theme.brightnessOf(context) == Brightness.light
+                  ? Colors.grey.shade700
+                  : Colors.white70,
             ),
           ],
         ),
@@ -196,10 +195,9 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                       _activity = newValue;
                     });
                   },
-                  items:
-                      _allActivities.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(value: value, child: Text(value));
-                      }).toList(),
+                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(value: value, child: Text(value));
+                  }).toList(),
                 ),
               ),
             ],

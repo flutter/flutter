@@ -47,8 +47,9 @@ void main() {
 
   testWithoutContext('abiFilters provided by the user take precedence over the default', () async {
     final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-    final String buildGradleContents =
-        projectDir.childFile('android/app/build.gradle.kts').readAsStringSync();
+    final String buildGradleContents = projectDir
+        .childFile('android/app/build.gradle.kts')
+        .readAsStringSync();
 
     // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
     final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
@@ -132,12 +133,11 @@ bool _checkLibIsInApk(
     throw StateError('SDK path not found in local.properties');
   }
 
-  final String apkAnalyzer =
-      fileSystem
-          .directory(sdkPath)
-          .childDirectory('cmdline-tools/latest/bin')
-          .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
-          .path;
+  final String apkAnalyzer = fileSystem
+      .directory(sdkPath)
+      .childDirectory('cmdline-tools/latest/bin')
+      .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
+      .path;
 
   final File apkFile = appDir
       .childDirectory('build/app/outputs/apk/${buildMode.cliName}')

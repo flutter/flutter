@@ -97,8 +97,9 @@ class FileSystemUtils {
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
-    String? path =
-        _platform.isWindows ? _platform.environment['USERPROFILE'] : _platform.environment['HOME'];
+    String? path = _platform.isWindows
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }

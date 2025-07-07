@@ -41,11 +41,10 @@ void main() {
 
     final StreamController<String> stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
-    final Stream<Map<String, Object?>> stream =
-        stdout.stream
-            .map<Map<String, Object?>?>(parseFlutterResponse)
-            .where((Map<String, Object?>? value) => value != null)
-            .cast<Map<String, Object?>>();
+    final Stream<Map<String, Object?>> stream = stdout.stream
+        .map<Map<String, Object?>?>(parseFlutterResponse)
+        .where((Map<String, Object?>? value) => value != null)
+        .cast<Map<String, Object?>>();
 
     final [
       Map<String, Object?> connectedEvent,
@@ -104,10 +103,9 @@ void main() {
       '[${jsonEncode(<String, dynamic>{'id': 2, 'method': 'device.getDevices'})}]',
     );
     // Skip other device.added events that may fire (desktop/web devices).
-    response =
-        (await stream.firstWhere(
-          (Map<String, Object?>? response) => response!['event'] != 'device.added',
-        ))!;
+    response = (await stream.firstWhere(
+      (Map<String, Object?>? response) => response!['event'] != 'device.added',
+    ))!;
     expect(response['id'], 2);
     expect(response['error'], isNull);
 

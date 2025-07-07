@@ -84,12 +84,11 @@ Future<void> main() async {
 
           // Ensure that release builds have no reference to the dev dependency plugin and make sure
           // that it is included with expected transitive dependencies for debug, profile builds.
-          final bool appIncludesDevDependencyAsExpected =
-              isTestingReleaseMode
-                  ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
-                  : appDependencies.contains(
-                    regExpToMatchDevDependencyPluginWithTransitiveDependencies,
-                  );
+          final bool appIncludesDevDependencyAsExpected = isTestingReleaseMode
+              ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
+              : appDependencies.contains(
+                  regExpToMatchDevDependencyPluginWithTransitiveDependencies,
+                );
           if (!appIncludesDevDependencyAsExpected) {
             throw TaskResult.failure(
               'Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin as a dependency of the app built in $buildMode mode but did${isTestingReleaseMode ? '' : ' not'}.',

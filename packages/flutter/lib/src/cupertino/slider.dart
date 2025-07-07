@@ -384,11 +384,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
            height: _kSliderHeight,
          ),
        ) {
-    _drag =
-        HorizontalDragGestureRecognizer()
-          ..onStart = _handleDragStart
-          ..onUpdate = _handleDragUpdate
-          ..onEnd = _handleDragEnd;
+    _drag = HorizontalDragGestureRecognizer()
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd;
     _position = AnimationController(
       value: value,
       duration: _kDiscreteTransitionDuration,

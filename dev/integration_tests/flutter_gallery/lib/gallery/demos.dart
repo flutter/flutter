@@ -569,8 +569,9 @@ List<GalleryDemo> _buildGalleryDemos() {
 
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
 
-final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
-    kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
+final Set<GalleryDemoCategory> kAllGalleryDemoCategories = kAllGalleryDemos
+    .map<GalleryDemoCategory>((GalleryDemo demo) => demo.category)
+    .toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(

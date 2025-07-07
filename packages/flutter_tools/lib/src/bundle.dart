@@ -30,9 +30,8 @@ String getDefaultCachedKernelPath({
   Config? config,
 }) {
   final StringBuffer buffer = StringBuffer();
-  final List<String> cacheFrontEndOptions =
-      extraFrontEndOptions.toList()
-        ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
+  final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
+    ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
   String buildPrefix = '';

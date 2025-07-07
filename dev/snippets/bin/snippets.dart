@@ -201,8 +201,9 @@ void main(List<String> argList) {
   final String serial = args[_kSerialOption] as String? ?? '';
   late String id;
   File? output;
-  final Directory outputDirectory =
-      filesystem.directory(args[_kOutputDirectoryOption]! as String).absolute;
+  final Directory outputDirectory = filesystem
+      .directory(args[_kOutputDirectoryOption]! as String)
+      .absolute;
 
   if (args[_kOutputOption] != null) {
     id = path.basenameWithoutExtension(args[_kOutputOption]! as String);
@@ -239,8 +240,9 @@ void main(List<String> argList) {
   }
   output.parent.createSync(recursive: true);
 
-  final int? sourceLine =
-      environment['SOURCE_LINE'] != null ? int.tryParse(environment['SOURCE_LINE']!) : null;
+  final int? sourceLine = environment['SOURCE_LINE'] != null
+      ? int.tryParse(environment['SOURCE_LINE']!)
+      : null;
   final String sourcePath = environment['SOURCE_PATH'] ?? 'unknown.dart';
   final SnippetDartdocParser sampleParser = SnippetDartdocParser(filesystem);
   final SourceElement element = sampleParser.parseFromDartdocToolFile(

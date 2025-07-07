@@ -68,10 +68,9 @@ void main() {
     'writeBundle applies transformations to any assets that have them defined',
     () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final File asset =
-          fileSystem.file('my-asset.txt')
-            ..createSync()
-            ..writeAsBytesSync(<int>[1, 2, 3]);
+      final File asset = fileSystem.file('my-asset.txt')
+        ..createSync()
+        ..writeAsBytesSync(<int>[1, 2, 3]);
       final Artifacts artifacts = Artifacts.test();
 
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -84,10 +83,11 @@ void main() {
             '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt',
           ],
           onRun: (List<String> command) {
-            final ArgResults argParseResults = (ArgParser()
-                  ..addOption('input', mandatory: true)
-                  ..addOption('output', mandatory: true))
-                .parse(command);
+            final ArgResults argParseResults =
+                (ArgParser()
+                      ..addOption('input', mandatory: true)
+                      ..addOption('output', mandatory: true))
+                    .parse(command);
 
             final File inputFile = fileSystem.file(argParseResults['input']);
             final File outputFile = fileSystem.file(argParseResults['output']);
@@ -102,15 +102,14 @@ void main() {
         ),
       ]);
 
-      final FakeAssetBundle bundle =
-          FakeAssetBundle()
-            ..entries['my-asset.txt'] = AssetBundleEntry(
-              DevFSFileContent(asset),
-              kind: AssetKind.regular,
-              transformers: const <AssetTransformerEntry>[
-                AssetTransformerEntry(package: 'increment', args: <String>[]),
-              ],
-            );
+      final FakeAssetBundle bundle = FakeAssetBundle()
+        ..entries['my-asset.txt'] = AssetBundleEntry(
+          DevFSFileContent(asset),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
 
       final Directory bundleDir = fileSystem.directory(
         getAssetBuildDirectory(Config.test(), fileSystem),

@@ -37,18 +37,20 @@ class _FilterTest extends StatelessWidget {
                     height: tileHeight,
                     width: tileWidth,
                     child: ColoredBox(
-                      color:
-                          HSVColor.fromAHSV(
-                            0.5 + a / 8,
-                            h * 45,
-                            0.5 + s / 8,
-                            0.5 + b / 8,
-                          ).toColor(),
+                      color: HSVColor.fromAHSV(
+                        0.5 + a / 8,
+                        h * 45,
+                        0.5 + s / 8,
+                        0.5 + b / 8,
+                      ).toColor(),
                     ),
                   ),
           Padding(
             padding: const EdgeInsets.all(32),
-            child: CupertinoTheme(data: CupertinoThemeData(brightness: brightness), child: _child),
+            child: CupertinoTheme(
+              data: CupertinoThemeData(brightness: brightness),
+              child: _child,
+            ),
           ),
         ],
       ),

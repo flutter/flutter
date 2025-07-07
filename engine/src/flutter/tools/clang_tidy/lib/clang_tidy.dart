@@ -160,10 +160,9 @@ class ClangTidy {
 
     final List<Object?> buildCommandsData =
         jsonDecode(options.buildCommandsPath.readAsStringSync()) as List<Object?>;
-    final List<List<Object?>> shardBuildCommandsData =
-        options.shardCommandsPaths
-            .map((io.File file) => jsonDecode(file.readAsStringSync()) as List<Object?>)
-            .toList();
+    final List<List<Object?>> shardBuildCommandsData = options.shardCommandsPaths
+        .map((io.File file) => jsonDecode(file.readAsStringSync()) as List<Object?>)
+        .toList();
     final List<Command> changedFileBuildCommands = await getLintCommandsForFiles(
       buildCommandsData,
       filesOfInterest,

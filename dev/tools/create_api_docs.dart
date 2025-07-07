@@ -101,12 +101,11 @@ Future<void> main(List<String> arguments) async {
 
   // The place to find customization files and configuration files for docs
   // generation.
-  final Directory docsRoot =
-      FlutterInformation.instance
-          .getFlutterRoot()
-          .childDirectory('dev')
-          .childDirectory('docs')
-          .absolute;
+  final Directory docsRoot = FlutterInformation.instance
+      .getFlutterRoot()
+      .childDirectory('dev')
+      .childDirectory('docs')
+      .absolute;
   final ArgParser argParser = _createArgsParser(
     publishDefault: docsRoot.childDirectory('doc').path,
   );
@@ -1212,13 +1211,12 @@ class FlutterInformation {
       // that flutter command, otherwise use the first one in the PATH.
       String flutterCommand;
       if (platform.environment['FLUTTER_ROOT'] != null) {
-        flutterCommand =
-            filesystem
-                .directory(platform.environment['FLUTTER_ROOT'])
-                .childDirectory('bin')
-                .childFile('flutter')
-                .absolute
-                .path;
+        flutterCommand = filesystem
+            .directory(platform.environment['FLUTTER_ROOT'])
+            .childDirectory('bin')
+            .childFile('flutter')
+            .absolute
+            .path;
       } else {
         flutterCommand = 'flutter';
       }

@@ -18,11 +18,10 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return ListView(
               controller: controller,
-              children:
-                  List<Widget>.generate(
-                    10,
-                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
-                  ).toList(),
+              children: List<Widget>.generate(
+                10,
+                (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+              ).toList(),
             );
           },
         ),
@@ -79,11 +78,10 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return ListView(
               controller: controller,
-              children:
-                  List<Widget>.generate(
-                    10,
-                    (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
-                  ).toList(),
+              children: List<Widget>.generate(
+                10,
+                (int i) => SizedBox(height: listItemHeight, child: Text('Page$index-Item$i')),
+              ).toList(),
             );
           },
         ),

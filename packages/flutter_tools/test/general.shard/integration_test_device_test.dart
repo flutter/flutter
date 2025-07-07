@@ -90,19 +90,20 @@ void main() {
     );
 
     originalDdsLauncher = ddsLauncherCallback;
-    ddsLauncherCallback = ({
-      required Uri remoteVmServiceUri,
-      Uri? serviceUri,
-      bool enableAuthCodes = true,
-      bool serveDevTools = false,
-      Uri? devToolsServerAddress,
-      bool enableServicePortFallback = false,
-      List<String> cachedUserTags = const <String>[],
-      String? dartExecutable,
-      String? google3WorkspaceRoot,
-    }) async {
-      return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
-    };
+    ddsLauncherCallback =
+        ({
+          required Uri remoteVmServiceUri,
+          Uri? serviceUri,
+          bool enableAuthCodes = true,
+          bool serveDevTools = false,
+          Uri? devToolsServerAddress,
+          bool enableServicePortFallback = false,
+          List<String> cachedUserTags = const <String>[],
+          String? dartExecutable,
+          String? google3WorkspaceRoot,
+        }) async {
+          return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
+        };
   });
 
   tearDown(() {
@@ -132,19 +133,18 @@ void main() {
     },
     overrides: <Type, Generator>{
       ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-      VMServiceConnector:
-          () =>
-              (
-                Uri httpUri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                io.CompressionOptions? compression,
-                Device? device,
-                Logger? logger,
-              }) async => fakeVmServiceHost.vmService,
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
     },
   );
 
@@ -158,19 +158,18 @@ void main() {
     },
     overrides: <Type, Generator>{
       ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-      VMServiceConnector:
-          () =>
-              (
-                Uri httpUri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                io.CompressionOptions? compression,
-                Device? device,
-                Logger? logger,
-              }) async => fakeVmServiceHost.vmService,
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
     },
   );
 
@@ -193,18 +192,17 @@ void main() {
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
     },
     overrides: <Type, Generator>{
-      VMServiceConnector:
-          () =>
-              (
-                Uri httpUri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                io.CompressionOptions? compression,
-                Device? device,
-              }) async => fakeVmServiceHost.vmService,
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+          }) async => fakeVmServiceHost.vmService,
     },
   );
 
@@ -227,18 +225,17 @@ void main() {
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
     },
     overrides: <Type, Generator>{
-      VMServiceConnector:
-          () =>
-              (
-                Uri httpUri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                io.CompressionOptions? compression,
-                Device? device,
-              }) async => fakeVmServiceHost.vmService,
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+          }) async => fakeVmServiceHost.vmService,
     },
   );
 
@@ -251,19 +248,18 @@ void main() {
     },
     overrides: <Type, Generator>{
       ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-      VMServiceConnector:
-          () =>
-              (
-                Uri httpUri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                io.CompressionOptions? compression,
-                Device? device,
-                Logger? logger,
-              }) async => fakeVmServiceHost.vmService,
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
     },
   );
 }

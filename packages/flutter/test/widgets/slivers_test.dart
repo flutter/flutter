@@ -56,18 +56,16 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
 }
 
 void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
-  final List<Offset> actualPositions =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
-  final List<bool> actualVisibles =
-      tester
-          .renderObjectList<RenderSliverToBoxAdapter>(
-            find.byType(SliverToBoxAdapter, skipOffstage: false),
-          )
-          .map<bool>((RenderSliverToBoxAdapter target) => target.geometry!.visible)
-          .toList();
+  final List<Offset> actualPositions = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
+  final List<bool> actualVisibles = tester
+      .renderObjectList<RenderSliverToBoxAdapter>(
+        find.byType(SliverToBoxAdapter, skipOffstage: false),
+      )
+      .map<bool>((RenderSliverToBoxAdapter target) => target.geometry!.visible)
+      .toList();
   expect(actualPositions, equals(idealPositions));
   expect(actualVisibles, equals(idealVisibles));
 }
@@ -290,8 +288,9 @@ void main() {
                       childCount: replace ? 7 : 6,
                       findChildIndexCallback: (Key key) {
                         final int item = (key as ValueKey<int>).value;
-                        final int index =
-                            replace ? replacedItems.indexOf(item) : items.indexOf(item);
+                        final int index = replace
+                            ? replacedItems.indexOf(item)
+                            : items.indexOf(item);
                         return index >= 0 ? index : null;
                       },
                     ),
@@ -495,7 +494,9 @@ void main() {
     bool skip = true;
     Widget buildItem(BuildContext context, int index) {
       return !skip || index.isEven
-          ? Card(child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))))
+          ? Card(
+              child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+            )
           : Container();
     }
 
@@ -735,7 +736,10 @@ void main() {
       ],
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery(data: const MediaQueryData(), child: CustomScrollView(slivers: slivers)),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(slivers: slivers),
+        ),
       ),
     );
   }

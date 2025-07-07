@@ -323,8 +323,8 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final DummyFlutterCommand command =
-            DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final DummyFlutterCommand command = DummyFlutterCommand()
+          ..addDevToolsOptions(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
           '--${FlutterCommand.kDevToolsServerAddress}',
@@ -341,8 +341,8 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final DummyFlutterCommand command =
-            DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final DummyFlutterCommand command = DummyFlutterCommand()
+          ..addDevToolsOptions(verboseHelp: false);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
           'dummy',
@@ -423,11 +423,10 @@ void main() {
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           ProcessInfo: () => processInfo,
-          Signals:
-              () => FakeSignals(
-                subForSigTerm: signalUnderTest,
-                exitSignals: <ProcessSignal>[signalUnderTest],
-              ),
+          Signals: () => FakeSignals(
+            subForSigTerm: signalUnderTest,
+            exitSignals: <ProcessSignal>[signalUnderTest],
+          ),
           SystemClock: () => clock,
           Analytics: () => fakeAnalytics,
         },
@@ -466,11 +465,10 @@ void main() {
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           ProcessInfo: () => processInfo,
-          Signals:
-              () => FakeSignals(
-                subForSigTerm: signalUnderTest,
-                exitSignals: <ProcessSignal>[signalUnderTest],
-              ),
+          Signals: () => FakeSignals(
+            subForSigTerm: signalUnderTest,
+            exitSignals: <ProcessSignal>[signalUnderTest],
+          ),
         },
       );
     });
@@ -620,8 +618,8 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -638,8 +636,8 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -656,8 +654,8 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1284,8 +1282,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1316,8 +1314,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1347,8 +1345,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1400,8 +1398,8 @@ flutter:
             );
           },
           overrides: <Type, Generator>{
-            DeviceManager:
-                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+            DeviceManager: () =>
+                FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
             Platform: () => FakePlatform(),
             Cache: () => Cache.test(processManager: FakeProcessManager.any()),
             FileSystem: () {
@@ -1431,14 +1429,12 @@ flutter:
           await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
         },
         overrides: <Type, Generator>{
-          DeviceManager:
-              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
-          Platform:
-              () =>
-                  FakePlatform()
-                    ..environment = <String, String>{
-                      'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
-                    },
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          Platform: () => FakePlatform()
+            ..environment = <String, String>{
+              'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
+            },
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           FileSystem: () {
             final MemoryFileSystem fileSystem = MemoryFileSystem.test();

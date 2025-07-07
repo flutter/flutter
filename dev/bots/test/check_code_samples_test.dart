@@ -47,14 +47,12 @@ void main() {
   }) {
     final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')
       ..createSync(recursive: true);
-    final File fooExample =
-        examplesLib.childFile('foo_example.0.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// Example for foo');
-    final File barExample =
-        examplesLib.childFile('bar_example.0.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// Example for bar');
+    final File fooExample = examplesLib.childFile('foo_example.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('// Example for foo');
+    final File barExample = examplesLib.childFile('bar_example.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('// Example for bar');
     if (missingLinks) {
       examplesLib.childFile('missing_example.0.dart')
         ..createSync(recursive: true)
@@ -75,10 +73,9 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('// test for foo example');
     }
-    final Directory flutterPackage = packages
-      .childDirectory('flutter')
-      .childDirectory('lib')
-      .childDirectory('src')..createSync(recursive: true);
+    final Directory flutterPackage =
+        packages.childDirectory('flutter').childDirectory('lib').childDirectory('src')
+          ..createSync(recursive: true);
     if (malformedLinks) {
       writeLink(
         source: flutterPackage.childDirectory('layer').childFile('foo.dart'),
@@ -115,12 +112,14 @@ void main() {
     examples = flutterRoot.childDirectory('examples').childDirectory('api')
       ..createSync(recursive: true);
     packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);
-    dartUIPath = flutterRoot
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childDirectory('pkg')
-      .childDirectory('sky_engine')
-      .childDirectory('lib')..createSync(recursive: true);
+    dartUIPath =
+        flutterRoot
+            .childDirectory('bin')
+            .childDirectory('cache')
+            .childDirectory('pkg')
+            .childDirectory('sky_engine')
+            .childDirectory('lib')
+          ..createSync(recursive: true);
     checker = SampleChecker(
       examples: examples,
       packages: packages,
@@ -136,17 +135,18 @@ void main() {
     final String result = await capture(() async {
       success = checker.checkCodeSamples();
     }, shouldHaveErrors: true);
-    final String lines = <String>[
-          '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-          '║ The following examples are not linked from any source file API doc comments:',
-          '║   examples/api/lib/layer/missing_example.0.dart',
-          '║ Either link them to a source file API doc comment, or remove them.',
-          '╚═══════════════════════════════════════════════════════════════════════════════',
-        ]
-        .map((String line) {
-          return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-        })
-        .join('\n');
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following examples are not linked from any source file API doc comments:',
+              '║   examples/api/lib/layer/missing_example.0.dart',
+              '║ Either link them to a source file API doc comment, or remove them.',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
     expect(result, equals('$lines\n'));
     expect(success, equals(false));
   });
@@ -190,16 +190,17 @@ void main() {
     final String result = await capture(() async {
       success = checker.checkCodeSamples();
     }, shouldHaveErrors: true);
-    final String lines = <String>[
-          '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-          '║ The following example test files are missing:',
-          '║   examples/api/test/layer/bar_example.0_test.dart',
-          '╚═══════════════════════════════════════════════════════════════════════════════',
-        ]
-        .map((String line) {
-          return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-        })
-        .join('\n');
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following example test files are missing:',
+              '║   examples/api/test/layer/bar_example.0_test.dart',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
     expect(result, equals('$lines\n'));
     expect(success, equals(false));
   });
@@ -228,12 +229,11 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     expect(
       hasError,
       shouldHaveErrors,
-      reason:
-          buffer.isEmpty
-              ? '(No output to report.)'
-              : hasError
-              ? 'Unexpected errors:\n$buffer'
-              : 'Unexpected success:\n$buffer',
+      reason: buffer.isEmpty
+          ? '(No output to report.)'
+          : hasError
+          ? 'Unexpected errors:\n$buffer'
+          : 'Unexpected success:\n$buffer',
     );
   } finally {
     print = oldPrint;

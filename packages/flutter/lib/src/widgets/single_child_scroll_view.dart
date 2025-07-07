@@ -254,8 +254,9 @@ class SingleChildScrollView extends StatelessWidget {
         primary ??
         controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
-    final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : controller;
 
     Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,

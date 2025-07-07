@@ -757,10 +757,9 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
           );
 
           final Rect viewRect = _rectTween.evaluate(curvedAnimation!)!;
-          final double topPadding =
-              showFullScreenView
-                  ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
-                  : 0.0;
+          final double topPadding = showFullScreenView
+              ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
+              : 0.0;
 
           viewFadeOnIntervalCurve ??= CurvedAnimation(
             parent: animation,
@@ -1027,10 +1026,9 @@ class _ViewContentState extends State<_ViewContent> {
         dividerTheme.color ??
         viewDefaults.dividerColor!;
     final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
-    final BoxConstraints? headerConstraints =
-        effectiveHeaderHeight == null
-            ? null
-            : BoxConstraints.tightFor(height: effectiveHeaderHeight);
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+        ? null
+        : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle =
         widget.viewHeaderTextStyle ?? viewTheme.headerTextStyle ?? viewDefaults.headerTextStyle;
     final TextStyle? effectiveHintStyle =
@@ -1069,8 +1067,9 @@ class _ViewContentState extends State<_ViewContent> {
             maxHeight: _viewRect.height,
           ),
           child: Padding(
-            padding:
-                widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
+            padding: widget.showFullScreenView
+                ? EdgeInsets.zero
+                : (effectivePadding ?? EdgeInsets.zero),
             child: Material(
               clipBehavior: Clip.antiAlias,
               shape: effectiveShape,
@@ -1099,8 +1098,8 @@ class _ViewContentState extends State<_ViewContent> {
                                 headerConstraints ??
                                 (widget.showFullScreenView
                                     ? BoxConstraints(
-                                      minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
-                                    )
+                                        minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
+                                      )
                                     : null),
                             padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(
                               effectiveBarPadding,
@@ -1133,26 +1132,24 @@ class _ViewContentState extends State<_ViewContent> {
                           result.isNotEmpty) ...<Widget>[
                         FadeTransition(opacity: viewDividerFadeCurve, child: viewDivider),
                         Flexible(
-                          fit:
-                              (effectiveShrinkWrap && !widget.showFullScreenView)
-                                  ? FlexFit.loose
-                                  : FlexFit.tight,
+                          fit: (effectiveShrinkWrap && !widget.showFullScreenView)
+                              ? FlexFit.loose
+                              : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
-                            child:
-                                widget.viewBuilder == null
-                                    ? MediaQuery.removePadding(
-                                      context: context,
-                                      removeTop: true,
-                                      child: ListView(
-                                        padding: EdgeInsets.only(
-                                          bottom: MediaQuery.viewInsetsOf(context).bottom,
-                                        ),
-                                        shrinkWrap: effectiveShrinkWrap,
-                                        children: result.toList(),
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      padding: EdgeInsets.only(
+                                        bottom: MediaQuery.viewInsetsOf(context).bottom,
                                       ),
-                                    )
-                                    : widget.viewBuilder!(result),
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
                           ),
                         ),
                       ],
@@ -1660,15 +1657,14 @@ class _SearchBarState extends State<SearchBar> {
       );
     }
 
-    final List<Widget>? trailing =
-        widget.trailing
-            ?.map(
-              (Widget trailing) => IconTheme.merge(
-                data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
-                child: trailing,
-              ),
-            )
-            .toList();
+    final List<Widget>? trailing = widget.trailing
+        ?.map(
+          (Widget trailing) => IconTheme.merge(
+            data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+            child: trailing,
+          ),
+        )
+        .toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,

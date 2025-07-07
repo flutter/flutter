@@ -30,7 +30,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -1070,15 +1072,14 @@ void main() {
                 ),
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),
@@ -1268,19 +1269,18 @@ void main() {
                         textDirection: textDirection,
                         child: Scaffold(
                           body: Center(
-                            child:
-                                icon == null
-                                    ? ElevatedButton(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      child: const Text('button', key: labelKey),
-                                    )
-                                    : ElevatedButton.icon(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      icon: icon,
-                                      label: const Text('button', key: labelKey),
-                                    ),
+                            child: icon == null
+                                ? ElevatedButton(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    child: const Text('button', key: labelKey),
+                                  )
+                                : ElevatedButton.icon(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    icon: icon,
+                                    label: const Text('button', key: labelKey),
+                                  ),
                           ),
                         ),
                       ),
@@ -1298,14 +1298,12 @@ void main() {
 
             // Compute expected padding, and check.
 
-            final double expectedStart =
-                icon != null
-                    ? paddingWithIconStart[textScaleFactor]!
-                    : paddingWithoutIconStart[textScaleFactor]!;
-            final double expectedEnd =
-                icon != null
-                    ? paddingWithIconEnd[textScaleFactor]!
-                    : paddingWithoutIconEnd[textScaleFactor]!;
+            final double expectedStart = icon != null
+                ? paddingWithIconStart[textScaleFactor]!
+                : paddingWithoutIconStart[textScaleFactor]!;
+            final double expectedEnd = icon != null
+                ? paddingWithIconEnd[textScaleFactor]!
+                : paddingWithoutIconEnd[textScaleFactor]!;
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
               expectedStart,
               0,
@@ -1320,11 +1318,13 @@ void main() {
 
             final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
             final Rect labelBounds = globalBounds(labelRenderBox);
-            final RenderBox? iconRenderBox =
-                icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final RenderBox? iconRenderBox = icon == null
+                ? null
+                : tester.renderObject<RenderBox>(find.byKey(iconKey));
             final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
-            final Rect childBounds =
-                icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
+            final Rect childBounds = icon == null
+                ? labelBounds
+                : labelBounds.expandToInclude(iconBounds!);
 
             // We measure the `InkResponse` descendant of the button
             // element, because the button has a larger `RenderBox`
@@ -1358,10 +1358,9 @@ void main() {
 
             // Check the gap between the icon and the label
             if (icon != null) {
-              final double gapWidth =
-                  textDirection == TextDirection.ltr
-                      ? labelBounds.left - iconBounds!.right
-                      : iconBounds!.left - labelBounds.right;
+              final double gapWidth = textDirection == TextDirection.ltr
+                  ? labelBounds.left - iconBounds!.right
+                  : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1391,7 +1390,9 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
-              body: Center(child: ElevatedButton(onPressed: () {}, child: const Text('text'))),
+              body: Center(
+                child: ElevatedButton(onPressed: () {}, child: const Text('text')),
+              ),
             );
           },
         ),
@@ -1641,7 +1642,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
+          home: Center(
+            child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       );
 
@@ -1666,7 +1669,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -2004,19 +2009,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? ElevatedButton(
-                    statesController: controller,
-                    onPressed: () {},
-                    child: const Text('button'),
-                  )
-                  : ElevatedButton.icon(
-                    statesController: controller,
-                    onPressed: () {},
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? ElevatedButton(
+                  statesController: controller,
+                  onPressed: () {},
+                  child: const Text('button'),
+                )
+              : ElevatedButton.icon(
+                  statesController: controller,
+                  onPressed: () {},
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2073,19 +2077,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? ElevatedButton(
-                    statesController: controller,
-                    onPressed: null,
-                    child: const Text('button'),
-                  )
-                  : ElevatedButton.icon(
-                    statesController: controller,
-                    onPressed: null,
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? ElevatedButton(
+                  statesController: controller,
+                  onPressed: null,
+                  child: const Text('button'),
+                )
+              : ElevatedButton.icon(
+                  statesController: controller,
+                  onPressed: null,
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2256,22 +2259,16 @@ void main() {
             body: Center(
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundBuilder: (
-                    BuildContext context,
-                    Set<MaterialState> states,
-                    Widget? child,
-                  ) {
-                    backgroundStates = states;
-                    return child!;
-                  },
-                  foregroundBuilder: (
-                    BuildContext context,
-                    Set<MaterialState> states,
-                    Widget? child,
-                  ) {
-                    foregroundStates = states;
-                    return child!;
-                  },
+                  backgroundBuilder:
+                      (BuildContext context, Set<MaterialState> states, Widget? child) {
+                        backgroundStates = states;
+                        return child!;
+                      },
+                  foregroundBuilder:
+                      (BuildContext context, Set<MaterialState> states, Widget? child) {
+                        foregroundStates = states;
+                        return child!;
+                      },
                 ),
                 onPressed: () {},
                 focusNode: focusNode,

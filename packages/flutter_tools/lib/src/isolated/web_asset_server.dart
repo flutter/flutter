@@ -226,10 +226,9 @@ class WebAssetServer implements AssetReader {
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
-          final SecurityContext serverContext =
-              SecurityContext()
-                ..useCertificateChain(tlsCertPath)
-                ..usePrivateKey(tlsCertKeyPath);
+          final SecurityContext serverContext = SecurityContext()
+            ..useCertificateChain(tlsCertPath)
+            ..usePrivateKey(tlsCertKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
@@ -334,36 +333,35 @@ class WebAssetServer implements AssetReader {
         return chromium.chromeConnection;
       },
       toolConfiguration: ToolConfiguration(
-        loadStrategy:
-            ddcModuleSystem
-                ? FrontendServerDdcLibraryBundleStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      fileSystem.file(entrypoint).absolute.uri,
-                    ),
+        loadStrategy: ddcModuleSystem
+            ? FrontendServerDdcLibraryBundleStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    fileSystem.file(entrypoint).absolute.uri,
                   ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                  hotReloadSourcesUri: server._baseUri!.replace(
-                    pathSegments: List<String>.from(server._baseUri!.pathSegments)
-                      ..add(_reloadScriptsFileName),
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+                hotReloadSourcesUri: server._baseUri!.replace(
+                  pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                    ..add(_reloadScriptsFileName),
+                ),
+              ).strategy
+            : FrontendServerRequireStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    fileSystem.file(entrypoint).absolute.uri,
                   ),
-                ).strategy
-                : FrontendServerRequireStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      fileSystem.file(entrypoint).absolute.uri,
-                    ),
-                  ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                ).strategy,
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+              ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
@@ -695,15 +693,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     }
 
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    final Directory dartSdkParent =
-        fileSystem
-            .directory(
-              globals.artifacts!.getArtifactPath(
-                Artifact.engineDartSdkPath,
-                platform: TargetPlatform.web_javascript,
-              ),
-            )
-            .parent;
+    final Directory dartSdkParent = fileSystem
+        .directory(
+          globals.artifacts!.getArtifactPath(
+            Artifact.engineDartSdkPath,
+            platform: TargetPlatform.web_javascript,
+          ),
+        )
+        .parent;
     final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
       return dartSdkFile;
@@ -718,14 +715,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsArtifactMap
+        : kAmdDartSdkJsArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
+        : kAmdDartSdkJsMapArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 

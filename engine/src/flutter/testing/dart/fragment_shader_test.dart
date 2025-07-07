@@ -233,15 +233,14 @@ void main() async {
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
-    final FragmentShader shader =
-        program.fragmentShader()
-          ..setFloat(0, 0.0)
-          ..setFloat(1, 0.25)
-          ..setFloat(2, 0.75)
-          ..setFloat(3, 0.0)
-          ..setFloat(4, 0.0)
-          ..setFloat(5, 0.0)
-          ..setFloat(6, 1.0);
+    final FragmentShader shader = program.fragmentShader()
+      ..setFloat(0, 0.0)
+      ..setFloat(1, 0.25)
+      ..setFloat(2, 0.75)
+      ..setFloat(3, 0.0)
+      ..setFloat(4, 0.0)
+      ..setFloat(5, 0.0)
+      ..setFloat(6, 1.0);
 
     final ByteData renderedBytes = (await _imageByteDataFromShader(shader: shader))!;
 
@@ -495,8 +494,10 @@ void _expectFragmentShadersRenderGreen(Map<String, FragmentProgram> programs) {
 }
 
 Future<void> _expectShaderRendersColor(Shader shader, Color color) async {
-  final ByteData renderedBytes =
-      (await _imageByteDataFromShader(shader: shader, imageDimension: _shaderImageDimension))!;
+  final ByteData renderedBytes = (await _imageByteDataFromShader(
+    shader: shader,
+    imageDimension: _shaderImageDimension,
+  ))!;
   for (final int c in renderedBytes.buffer.asUint32List()) {
     expect(toHexString(c), toHexString(color.value));
   }

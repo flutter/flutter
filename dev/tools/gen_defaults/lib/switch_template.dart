@@ -13,7 +13,8 @@ class SwitchTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SwitchThemeData {
   _${blockName}DefaultsM3(this.context);
 

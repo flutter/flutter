@@ -29,7 +29,10 @@ class HeroExample extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: 20.0),
           ListTile(
-            leading: const Hero(tag: 'hero-rectangle', child: BoxWidget(size: Size(50.0, 50.0))),
+            leading: const Hero(
+              tag: 'hero-rectangle',
+              child: BoxWidget(size: Size(50.0, 50.0)),
+            ),
             onTap: () => _gotoDetailsPage(context),
             title: const Text('Tap on the icon to view hero animation transition.'),
           ),
@@ -41,13 +44,15 @@ class HeroExample extends StatelessWidget {
   void _gotoDetailsPage(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            (BuildContext context) => Scaffold(
-              appBar: AppBar(title: const Text('Second Page')),
-              body: const Center(
-                child: Hero(tag: 'hero-rectangle', child: BoxWidget(size: Size(200.0, 200.0))),
-              ),
+        builder: (BuildContext context) => Scaffold(
+          appBar: AppBar(title: const Text('Second Page')),
+          body: const Center(
+            child: Hero(
+              tag: 'hero-rectangle',
+              child: BoxWidget(size: Size(200.0, 200.0)),
             ),
+          ),
+        ),
       ),
     );
   }

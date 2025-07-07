@@ -277,10 +277,9 @@ void main() {
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
         // We expect a clip to precede the drawImageRect call.
-        final List<Invocation> commands =
-            canvas.invocations.where((Invocation invocation) {
-              return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
-            }).toList();
+        final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+          return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
+        }).toList();
         if (expectClip) {
           // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
@@ -682,8 +681,9 @@ void main() {
 
     const Size imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls =
-        canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final List<Invocation> calls = canvas.invocations
+        .where((Invocation call) => call.memberName == #drawImageRect)
+        .toList();
     final Set<Rect> tileRects = <Rect>{};
 
     expect(calls, hasLength(2));
@@ -726,8 +726,9 @@ void main() {
 
     const Size imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls =
-        canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final List<Invocation> calls = canvas.invocations
+        .where((Invocation call) => call.memberName == #drawImageRect)
+        .toList();
     final Set<Rect> tileRects = <Rect>{};
 
     expect(calls, hasLength(2));

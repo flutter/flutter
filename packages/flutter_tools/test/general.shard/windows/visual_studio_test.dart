@@ -137,8 +137,9 @@ void setMockVswhereResponse(
   fileSystem.file(clPath).createSync(recursive: true);
   final String finalResponse =
       responseOverride ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
-  final List<String> requirementArguments =
-      requiredComponents == null ? <String>[] : <String>['-requires', ...requiredComponents];
+  final List<String> requirementArguments = requiredComponents == null
+      ? <String>[]
+      : <String>['-requires', ...requiredComponents];
 
   processManager.addCommand(
     FakeCommand(
@@ -296,13 +297,12 @@ void setMockSdkRegResponse(
       r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
   const String registryKey = r'InstallationFolder';
   const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
-  final String stdout =
-      registryPresent
-          ? '''
+  final String stdout = registryPresent
+      ? '''
 $registryPath
     $registryKey    REG_SZ    $installationPath
 '''
-          : '''
+      : '''
 
 ERROR: The system was unable to find the specified registry key or value.
 ''';

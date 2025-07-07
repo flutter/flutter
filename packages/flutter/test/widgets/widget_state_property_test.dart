@@ -78,33 +78,30 @@ void main() {
     );
 
     // Using `0.0` interpolation value.
-    TextStyle textStyle =
-        WidgetStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          0.0,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    TextStyle textStyle = WidgetStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 14.0);
 
     // Using `0.5` interpolation value.
-    textStyle =
-        WidgetStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          0.5,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    textStyle = WidgetStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.5,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 17.0);
 
     // Using `1.0` interpolation value.
-    textStyle =
-        WidgetStateProperty.lerp<TextStyle?>(
-          textStyle1,
-          textStyle2,
-          1.0,
-          TextStyle.lerp,
-        )!.resolve(enabled)!;
+    textStyle = WidgetStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      1.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
     expect(textStyle.fontSize, 20.0);
   });
 
@@ -117,8 +114,11 @@ void main() {
     );
 
     // Using `0.0` interpolation value.
-    BorderSide borderSide =
-        WidgetStateBorderSide.lerp(borderSide1, borderSide2, 0.0)!.resolve(enabled)!;
+    BorderSide borderSide = WidgetStateBorderSide.lerp(
+      borderSide1,
+      borderSide2,
+      0.0,
+    )!.resolve(enabled)!;
     expect(borderSide.color, isSameColorAs(const Color(0xffff0000)));
     expect(borderSide.width, 4.0);
 

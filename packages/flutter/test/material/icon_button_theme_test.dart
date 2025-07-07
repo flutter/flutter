@@ -26,7 +26,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+          body: Center(
+            child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+          ),
         ),
       ),
     );
@@ -108,10 +110,12 @@ void main() {
           body: Center(
             // If the IconButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.iconButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : IconButtonTheme(data: IconButtonThemeData(style: themeStyle), child: child),
+            child: themeStyle == null
+                ? child
+                : IconButtonTheme(
+                    data: IconButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );

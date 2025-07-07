@@ -955,10 +955,8 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery:
-              () => FakeMDnsVmServiceDiscovery(
-                allowthrowOnMissingLocalNetworkPermissionsError: false,
-              ),
+          MDnsVmServiceDiscovery: () =>
+              FakeMDnsVmServiceDiscovery(allowthrowOnMissingLocalNetworkPermissionsError: false),
         },
       );
 

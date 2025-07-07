@@ -17,13 +17,12 @@ enum ServiceWorkerStrategy implements CliEnum {
   @override
   String get cliName => kebabCase(name);
 
-  static ServiceWorkerStrategy fromCliName(String? value) =>
-      value == null
-          ? ServiceWorkerStrategy.offlineFirst
-          : values.singleWhere(
-            (ServiceWorkerStrategy element) => element.cliName == value,
-            orElse: () => throw ArgumentError.value(value, 'value', 'Not supported.'),
-          );
+  static ServiceWorkerStrategy fromCliName(String? value) => value == null
+      ? ServiceWorkerStrategy.offlineFirst
+      : values.singleWhere(
+          (ServiceWorkerStrategy element) => element.cliName == value,
+          orElse: () => throw ArgumentError.value(value, 'value', 'Not supported.'),
+        );
 
   @override
   String get helpText => switch (this) {

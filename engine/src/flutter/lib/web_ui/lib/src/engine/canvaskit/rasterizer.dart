@@ -132,8 +132,11 @@ abstract class DisplayCanvas {
 
 /// Encapsulates a request to render a [ui.Scene]. Contains the scene to render
 /// and a [Completer] which completes when the scene has been rendered.
-typedef RenderRequest =
-    ({ui.Scene scene, Completer<void> completer, FrameTimingRecorder? recorder});
+typedef RenderRequest = ({
+  ui.Scene scene,
+  Completer<void> completer,
+  FrameTimingRecorder? recorder,
+});
 
 /// A per-view queue of render requests. Only contains the current render
 /// request and the next render request. If a new render request is made before

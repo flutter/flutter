@@ -100,19 +100,17 @@ Future<void> testMain() async {
       Float32List.fromList(<double>[30.0, 20.0, 200.0, 20.0]),
       nullStrokePaint,
     );
-    final ui.Paint strokePaint1 =
-        ui.Paint()
-          ..strokeWidth = 1.0
-          ..color = const ui.Color(0xff0000ff);
+    final ui.Paint strokePaint1 = ui.Paint()
+      ..strokeWidth = 1.0
+      ..color = const ui.Color(0xff0000ff);
     canvas.drawRawPoints(
       ui.PointMode.lines,
       Float32List.fromList(<double>[30.0, 30.0, 200.0, 30.0]),
       strokePaint1,
     );
-    final ui.Paint strokePaint3 =
-        ui.Paint()
-          ..strokeWidth = 3.0
-          ..color = const ui.Color(0xff00a000);
+    final ui.Paint strokePaint3 = ui.Paint()
+      ..strokeWidth = 3.0
+      ..color = const ui.Color(0xff00a000);
     canvas.drawRawPoints(
       ui.PointMode.lines,
       Float32List.fromList(<double>[30.0, 40.0, 200.0, 40.0]),

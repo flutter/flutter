@@ -16,15 +16,16 @@ void main() {
     final File source = fileSystem.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = fileSystem.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = fileSystem.file('metadata')..writeAsStringSync('{}');
-    final File manifest = fileSystem.file('manifest')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.js': <String, Object>{
-          'code': <int>[0, source.lengthSync()],
-          'sourcemap': <int>[0, 2],
-          'metadata': <int>[0, 2],
-        },
-      }),
-    );
+    final File manifest = fileSystem.file('manifest')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.js': <String, Object>{
+            'code': <int>[0, source.lengthSync()],
+            'sourcemap': <int>[0, 2],
+            'metadata': <int>[0, 2],
+          },
+        }),
+      );
     final WebMemoryFS webMemoryFS = WebMemoryFS();
     webMemoryFS.write(source, manifest, sourcemap, metadata);
 

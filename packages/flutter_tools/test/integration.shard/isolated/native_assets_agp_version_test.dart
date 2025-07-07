@@ -83,7 +83,8 @@ void main() {
               r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}',
             );
             final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)![0]!;
-            final String appBuildGradleSegmentDefiningFlavors = '''
+            final String appBuildGradleSegmentDefiningFlavors =
+                '''
     $buildTypesBlock
 
     flavorDimensions += "mode"

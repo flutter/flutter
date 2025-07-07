@@ -306,8 +306,8 @@ class TreeSliverController {
   /// add a [Builder] widget, which provides a new scope with a
   /// [BuildContext] that is "under" the [TreeSliver].
   static TreeSliverController of(BuildContext context) {
-    final _TreeSliverState<Object?>? result =
-        context.findAncestorStateOfType<_TreeSliverState<Object?>>();
+    final _TreeSliverState<Object?>? result = context
+        .findAncestorStateOfType<_TreeSliverState<Object?>>();
     if (result != null) {
       return result.controller;
     }
@@ -565,17 +565,16 @@ class TreeSliver<T> extends StatefulWidget {
             node: node,
             child: SizedBox.square(
               dimension: 30.0,
-              child:
-                  node.children.isNotEmpty
-                      ? AnimatedRotation(
-                        key: ValueKey<int>(index),
-                        turns: node.isExpanded ? 0.25 : 0.0,
-                        duration: animationDuration,
-                        curve: animationCurve,
-                        // Renders a unicode right-facing arrow. >
-                        child: const Icon(IconData(0x25BA), size: 14),
-                      )
-                      : null,
+              child: node.children.isNotEmpty
+                  ? AnimatedRotation(
+                      key: ValueKey<int>(index),
+                      turns: node.isExpanded ? 0.25 : 0.0,
+                      duration: animationDuration,
+                      curve: animationCurve,
+                      // Renders a unicode right-facing arrow. >
+                      child: const Icon(IconData(0x25BA), size: 14),
+                    )
+                  : null,
             ),
           ),
           // Spacer
@@ -592,8 +591,11 @@ class TreeSliver<T> extends StatefulWidget {
 }
 
 // Used in _SliverTreeState for code simplicity.
-typedef _AnimationRecord =
-    ({AnimationController controller, CurvedAnimation animation, UniqueKey key});
+typedef _AnimationRecord = ({
+  AnimationController controller,
+  CurvedAnimation animation,
+  UniqueKey key,
+});
 
 class _TreeSliverState<T> extends State<TreeSliver<T>>
     with TickerProviderStateMixin, TreeSliverStateMixin<T> {

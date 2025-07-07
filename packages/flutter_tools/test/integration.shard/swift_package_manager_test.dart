@@ -138,14 +138,12 @@ void main() {
               "\n  s.dependency '${integrationTestPlugin.pluginName}'\n\nend",
             ),
           );
-          final String pluginClassFileName =
-              iosLanguage == 'swift'
-                  ? '${createdSwiftPMPlugin.className}.swift'
-                  : '${createdSwiftPMPlugin.className}.m';
-          final String pluginClassFileImport =
-              iosLanguage == 'swift'
-                  ? 'import ${integrationTestPlugin.pluginName}'
-                  : '@import ${integrationTestPlugin.pluginName};';
+          final String pluginClassFileName = iosLanguage == 'swift'
+              ? '${createdSwiftPMPlugin.className}.swift'
+              : '${createdSwiftPMPlugin.className}.m';
+          final String pluginClassFileImport = iosLanguage == 'swift'
+              ? 'import ${integrationTestPlugin.pluginName}'
+              : '@import ${integrationTestPlugin.pluginName};';
           final File pluginClassFile = fileSystem
               .directory(createdSwiftPMPlugin.pluginPath)
               .childDirectory(platformName)

@@ -429,22 +429,21 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double fractionOverscrolled =
         1.0 - _lastMetrics!.extentInside / _lastMetrics!.viewportDimension;
     final double safeMinLength = math.min(minLength, _traversableTrackExtent);
-    final double newMinLength =
-        (_beforeExtent > 0 && _afterExtent > 0)
-            // Thumb extent is no smaller than minLength if scrolling normally.
-            ? safeMinLength
-            // User is overscrolling. Thumb extent can be less than minLength
-            // but no smaller than minOverscrollLength. We can't use the
-            // fractionVisible to produce intermediate values between minLength and
-            // minOverscrollLength when the user is transitioning from regular
-            // scrolling to overscrolling, so we instead use the percentage of the
-            // content that is still in the viewport to determine the size of the
-            // thumb. iOS behavior appears to have the thumb reach its minimum size
-            // with ~20% of overscroll. We map the percentage of minLength from
-            // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
-            // values for the thumb that range between minLength and the smallest
-            // possible value, minOverscrollLength.
-            : safeMinLength * (1.0 - clampDouble(fractionOverscrolled, 0.0, 0.2) / 0.2);
+    final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
+        // Thumb extent is no smaller than minLength if scrolling normally.
+        ? safeMinLength
+        // User is overscrolling. Thumb extent can be less than minLength
+        // but no smaller than minOverscrollLength. We can't use the
+        // fractionVisible to produce intermediate values between minLength and
+        // minOverscrollLength when the user is transitioning from regular
+        // scrolling to overscrolling, so we instead use the percentage of the
+        // content that is still in the viewport to determine the size of the
+        // thumb. iOS behavior appears to have the thumb reach its minimum size
+        // with ~20% of overscroll. We map the percentage of minLength from
+        // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
+        // values for the thumb that range between minLength and the smallest
+        // possible value, minOverscrollLength.
+        : safeMinLength * (1.0 - clampDouble(fractionOverscrolled, 0.0, 0.2) / 0.2);
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
@@ -673,10 +672,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double maxFraction = _lastMetrics!.maxScrollExtent / scrollableExtent;
     final double minFraction = _lastMetrics!.minScrollExtent / scrollableExtent;
 
-    final double fractionPast =
-        (scrollableExtent > 0)
-            ? clampDouble(_lastMetrics!.pixels / scrollableExtent, minFraction, maxFraction)
-            : 0;
+    final double fractionPast = (scrollableExtent > 0)
+        ? clampDouble(_lastMetrics!.pixels / scrollableExtent, minFraction, maxFraction)
+        : 0;
 
     return fractionPast * (_traversableTrackExtent - _thumbExtent);
   }
@@ -686,10 +684,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
     final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
 
-    final double fractionPast =
-        (scrollableExtent > 0)
-            ? clampDouble((metrics.pixels - metrics.minScrollExtent) / scrollableExtent, 0.0, 1.0)
-            : 0;
+    final double fractionPast = (scrollableExtent > 0)
+        ? clampDouble((metrics.pixels - metrics.minScrollExtent) / scrollableExtent, 0.0, 1.0)
+        : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) *
         (_traversableTrackExtent - thumbExtent);
@@ -1452,8 +1449,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final ScrollController? scrollController = _effectiveScrollController;
     final bool tryPrimary = widget.controller == null;
-    final String controllerForError =
-        tryPrimary ? 'PrimaryScrollController' : 'provided ScrollController';
+    final String controllerForError = tryPrimary
+        ? 'PrimaryScrollController'
+        : 'provided ScrollController';
 
     String when = '';
     if (widget.thumbVisibility ?? false) {
@@ -1468,7 +1466,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       scrollController != null,
       'A ScrollController is required when $when. '
       '${tryPrimary ? 'The Scrollbar was not provided a ScrollController, '
-              'and attempted to use the PrimaryScrollController, but none was found.' : ''}',
+                'and attempted to use the PrimaryScrollController, but none was found.' : ''}',
     );
     assert(() {
       if (!scrollController!.hasClients) {
@@ -1548,10 +1546,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
-      ..trackColor =
-          _showTrack ? widget.trackColor ?? const Color(0x08000000) : const Color(0x00000000)
-      ..trackBorderColor =
-          _showTrack ? widget.trackBorderColor ?? const Color(0x1a000000) : const Color(0x00000000)
+      ..trackColor = _showTrack
+          ? widget.trackColor ?? const Color(0x08000000)
+          : const Color(0x00000000)
+      ..trackBorderColor = _showTrack
+          ? widget.trackBorderColor ?? const Color(0x1a000000)
+          : const Color(0x00000000)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
@@ -2131,10 +2131,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // direction taken into account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     assert(_cachedController != null);
-    double delta =
-        _cachedController!.position.axis == Axis.horizontal
-            ? event.scrollDelta.dx
-            : event.scrollDelta.dy;
+    double delta = _cachedController!.position.axis == Axis.horizontal
+        ? event.scrollDelta.dx
+        : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(_cachedController!.position.axisDirection)) {
       delta *= -1;
