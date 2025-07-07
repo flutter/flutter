@@ -14,7 +14,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 /// An interface to the Dart analysis server.
 class AnalysisServer {
@@ -139,7 +139,7 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
-    if (line.startsWith(kVMServiceMessageRegExp)) {
+    if (line.startsWith(globals.kVMServiceMessageRegExp)) {
       return;
     }
 
