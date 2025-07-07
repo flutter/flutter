@@ -141,8 +141,9 @@ class Header extends StatelessWidget {
         color: opacity == 0 ? colorScheme.surfaceContainer : colorScheme.surfaceContainerLowest,
         shape: LinearBorder.bottom(
           side: BorderSide(
-            color:
-                opacity == 0 ? colorScheme.surfaceContainer : colorScheme.surfaceContainerHighest,
+            color: opacity == 0
+                ? colorScheme.surfaceContainer
+                : colorScheme.surfaceContainerHighest,
           ),
         ),
       ),

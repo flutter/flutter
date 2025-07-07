@@ -666,12 +666,10 @@ class FlutterBuildSystem extends BuildSystem {
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
-      inputFiles:
-          buildInstance.inputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
-      outputFiles:
-          buildInstance.outputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
+      inputFiles: buildInstance.inputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
@@ -771,8 +769,8 @@ class FlutterBuildSystem extends BuildSystem {
       // edited .last_config or deleted .dart_tool.
       return;
     }
-    final List<String> lastOutputs =
-        (json.decode(outputsFile.readAsStringSync()) as List<Object?>).cast<String>();
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
+        .cast<String>();
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);

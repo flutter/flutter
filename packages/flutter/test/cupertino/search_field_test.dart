@@ -77,7 +77,9 @@ void main() {
     final TextEditingController controller = TextEditingController(text: 'initial');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
     );
 
     expect(
@@ -106,7 +108,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
     );
 
     controller.text = 'controller text';
@@ -176,7 +180,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
     );
 
     expect(
@@ -197,7 +203,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
     );
 
     expect(
@@ -326,7 +334,9 @@ void main() {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSearchTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
     );
 
     controller.text = 'text entry';
@@ -410,7 +420,9 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(child: CupertinoSearchTextField(controller: controller, onSuffixTap: () {})),
+        home: Center(
+          child: CupertinoSearchTextField(controller: controller, onSuffixTap: () {}),
+        ),
       ),
     );
 
@@ -720,14 +732,13 @@ void main() {
     final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
     expect(searchTextFieldFinder, findsOneWidget);
 
-    final double initialPadding =
-        tester
-            .widget<CupertinoTextField>(
-              find.descendant(of: searchTextFieldFinder, matching: find.byType(CupertinoTextField)),
-            )
-            .padding
-            .resolve(direction)
-            .top;
+    final double initialPadding = tester
+        .widget<CupertinoTextField>(
+          find.descendant(of: searchTextFieldFinder, matching: find.byType(CupertinoTextField)),
+        )
+        .padding
+        .resolve(direction)
+        .top;
     expect(initialPadding, equals(8.0));
 
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
