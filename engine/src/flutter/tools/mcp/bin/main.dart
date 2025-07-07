@@ -15,7 +15,7 @@ void main() async {
     ),
   );
 
-  server.tool('build_help', description: 'Get help for the building tool and a list of configs.',
+  server.tool('engine_build_help', description: 'Get help for the building tool and a list of configs.',
       callback: ({Map<String, dynamic>? args, RequestHandlerExtra? extra}) async {
     try {
       const String executable = './bin/et';
@@ -36,7 +36,7 @@ void main() async {
   });
 
   server.tool(
-    'list_targets',
+    'engine_list_targets',
     description: 'Lists build targets for a given config.', //
     inputSchemaProperties: {
       'config': {
@@ -73,7 +73,7 @@ void main() async {
     },
   );
 
-  server.tool('build',
+  server.tool('engine_build',
       description: 'Build an engine target. This is potentially a long running process.', //
       inputSchemaProperties: {
         'config': {'type': 'string'},
