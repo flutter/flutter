@@ -78,7 +78,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private FlutterJNI flutterJNI = null;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
-  @Nullable private TextureRegistry textureRegistry;
+  @VisibleForTesting @Nullable TextureRegistry textureRegistry;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
