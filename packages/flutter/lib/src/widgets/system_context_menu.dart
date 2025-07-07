@@ -126,6 +126,11 @@ class SystemContextMenu extends StatefulWidget {
 
   /// Whether the given field supports showing the system context menu.
   ///
+  /// Currently [SystemContextMenu] is only supported with an active
+  /// [TextInputConnection]. In cases where this isn't possible, such as in a
+  /// read-only field, fall back to using a Flutter-rendered context menu like
+  /// [AdaptiveTextSelectionToolbar].
+  ///
   /// See also:
   ///
   ///  * [isSupported], which is used by this method and determines whether the
