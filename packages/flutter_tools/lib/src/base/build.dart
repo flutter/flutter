@@ -161,16 +161,18 @@ class AOTSnapshotter {
     }
 
     final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
-    final bool isIOS = platform == TargetPlatform.ios;
     if (targetingApplePlatform) {
+      // When the minimum version is updated, remember to update
+      // template MinimumOSVersion.
+      // https://github.com/flutter/flutter/pull/62902
+      final String minOSVersion =
+          platform == TargetPlatform.ios
+              ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
+              : FlutterDarwinPlatform.macos.deploymentTarget().toString();
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
-        // When the minimum version is updated, remember to update
-        // template MinimumOSVersion.
-        // https://github.com/flutter/flutter/pull/62902
-        if (isIOS) '--macho-min-os-version=${FlutterDarwinPlatform.ios.deploymentTarget()}',
-        if (!isIOS) '--macho-min-os-version=${FlutterDarwinPlatform.macos.deploymentTarget()}',
+        '--macho-min-os-version=$minOSVersion',
       ]);
     } else {
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
@@ -239,7 +241,7 @@ class AOTSnapshotter {
     if (targetingApplePlatform) {
       return _buildFramework(
         appleArch: darwinArch!,
-        isIOS: isIOS,
+        isIOS: platform == TargetPlatform.ios,
         sdkRoot: sdkRoot,
         snapshotPath: aotSharedLibrary,
         outputPath: outputDir.path,
