@@ -3,3 +3,5 @@ environment:
   sdk: '^3.0.0'
 dependencies:
   mcp_dart: ^0.5.3
+dev_dependencies:
+  test: any
