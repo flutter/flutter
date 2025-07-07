@@ -19,3 +19,9 @@ dart workspace.
 ```json
 { "jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": { "name": "engine_build", "arguments": { "config": "host_profile_arm64", "target": "//flutter/tools/licenses_cpp"} } }
 ```
+
+You can test it through gemini too with the following:
+```sh
+cd //engine/src/flutter
+gemini -p "what impellerc targets are there for host_debug_unopt_arm64?"
+```
