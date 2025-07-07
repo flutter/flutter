@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode, utf8;
 
 import 'package:engine_mcp/server.dart' as engine_mcp;
 import 'package:mcp_dart/mcp_dart.dart';
@@ -28,10 +28,13 @@ void main() {
     final List<int> outputBytes = await responseFuture;
     final String outputString = utf8.decode(outputBytes);
 
-    expect(outputString, contains('"jsonrpc":"2.0"'));
-    expect(outputString, contains('"id":1'));
-    expect(outputString, contains('"result"'));
-    expect(outputString, contains('"tools"'));
+    final Map<String, dynamic> json = jsonDecode(outputString) as Map<String, dynamic>;
+
+    expect(json['jsonrpc'], equals('2.0'), reason: outputString);
+    expect(json['id'], equals(1), reason: outputString);
+    expect(json.containsKey('result'), isTrue);
+    // ignore: avoid_dynamic_calls
+    expect(json['result']['tools'], isNotEmpty, reason: outputString);
 
     await inputController.close();
     await server.close();
