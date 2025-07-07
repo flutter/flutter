@@ -939,7 +939,7 @@ void main() {
   testWithoutContext('respects custom user data directory flag', () async {
     const String customUserDataDir = '/custom/chrome/data/dir';
     processManager.addCommand(
-      FakeCommand(
+      const FakeCommand(
         command: <String>[
           'example_chrome',
           '--user-data-dir=$customUserDataDir',
