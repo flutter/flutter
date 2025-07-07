@@ -893,6 +893,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                              shareSelectedText:[self textInRange:_selectedTextRange]];
 }
 
+- (void)handleTranslateAction {
+  NSLog(@"[FlutterTextInputPlugin] Translate menu item clicked");
+  NSString* selectedText = [self textInRange:_selectedTextRange];
+  NSLog(@"[FlutterTextInputPlugin] Selected text for translation: %@", selectedText);
+  
+  [self.textInputDelegate flutterTextInputView:self
+        onTranslateMenuActionWithTextInputClient:_textInputClient];
+}
+
 // DFS algorithm to search a UICommand from the menu tree.
 - (UICommand*)searchCommandWithSelector:(SEL)selector
                                 element:(UIMenuElement*)element API_AVAILABLE(ios(16.0)) {
@@ -998,6 +1007,17 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                  encodedItem:encodedItem];
     }
   }
+  
+  // Hardcoded Translate menu item for testing
+  NSLog(@"[FlutterTextInputPlugin] Adding hardcoded Translate menu item");
+  UICommand* translateCommand = [UICommand commandWithTitle:@"Translate"
+                                                      image:nil
+                                                     action:@selector(handleTranslateAction)
+                                               propertyList:@{@"type": @"translate", 
+                                                              @"id": @"translate_hardcoded"}];
+  [items addObject:translateCommand];
+  NSLog(@"[FlutterTextInputPlugin] Total menu items: %lu", (unsigned long)items.count);
+  
   return [UIMenu menuWithChildren:items];
 }
 
@@ -1016,6 +1036,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)showEditMenuWithTargetRect:(CGRect)targetRect
                              items:(NSArray<NSDictionary*>*)items API_AVAILABLE(ios(16.0)) {
+  NSLog(@"[FlutterTextInputPlugin] showEditMenuWithTargetRect called");
+  NSLog(@"[FlutterTextInputPlugin] Menu items from Framework: %lu", (unsigned long)items.count);
+  NSLog(@"[FlutterTextInputPlugin] Target rect: %@", NSStringFromCGRect(targetRect));
+  
   _editMenuTargetRect = targetRect;
   _editMenuItems = items;
   UIEditMenuConfiguration* config =
