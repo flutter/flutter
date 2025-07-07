@@ -108,7 +108,7 @@ public class PlatformViewsControllerTest {
   @Test
   @Config(
       shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
-      sdk = 35)
+      minSdk = 35)
   public void itRemovesPlatformViewBeforeDiposeIsCalled() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
@@ -153,7 +153,8 @@ public class PlatformViewsControllerTest {
   @Test
   @Config(
       shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
-      sdk = 34)
+      minSdk = 29,
+      maxSdk = 34)
   public void itPassesSurfaceLifecyleResetInBackgroundOnApi34() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
