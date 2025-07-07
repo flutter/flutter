@@ -222,10 +222,9 @@ void main() {
       httpAddress: Uri.parse('http://localhost:1234'),
     );
 
-    final FakeFlutterDevice device =
-        FakeFlutterDevice()
-          ..vmService = fakeVmServiceHost.vmService
-          ..targetPlatform = TargetPlatform.web_javascript;
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService
+      ..targetPlatform = TargetPlatform.web_javascript;
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[device]);
   });

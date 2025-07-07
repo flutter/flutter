@@ -16,7 +16,8 @@ class SnackbarTemplate extends TokenTemplate {
   final String tokenGroup;
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SnackBarThemeData {
     _${blockName}DefaultsM3(this.context);
 

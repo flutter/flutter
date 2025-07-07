@@ -8,7 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can call setState from didUpdateWidget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: WidgetUnderTest(text: 'hello')),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetUnderTest(text: 'hello'),
+      ),
     );
 
     expect(find.text('hello'), findsOneWidget);
@@ -20,7 +23,10 @@ void main() {
     expect(state.didUpdateWidgetCalled, 0);
 
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: WidgetUnderTest(text: 'world')),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetUnderTest(text: 'world'),
+      ),
     );
 
     expect(find.text('world'), findsOneWidget);

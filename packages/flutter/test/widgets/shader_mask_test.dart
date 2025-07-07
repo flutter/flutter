@@ -57,12 +57,11 @@ void main() {
         child: Align(
           alignment: Alignment.bottomRight,
           child: ShaderMask(
-            shaderCallback:
-                (Rect bounds) => const RadialGradient(
-                  radius: 0.05,
-                  colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
-                  tileMode: TileMode.mirror,
-                ).createShader(bounds),
+            shaderCallback: (Rect bounds) => const RadialGradient(
+              radius: 0.05,
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
+              tileMode: TileMode.mirror,
+            ).createShader(bounds),
             child: Container(width: 100, height: 100, color: const Color(0xFFFFFFFF)),
           ),
         ),
@@ -83,12 +82,11 @@ void main() {
         child: Align(
           alignment: Alignment.topLeft,
           child: ShaderMask(
-            shaderCallback:
-                (Rect bounds) => const RadialGradient(
-                  radius: 0.05,
-                  colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
-                  tileMode: TileMode.mirror,
-                ).createShader(bounds),
+            shaderCallback: (Rect bounds) => const RadialGradient(
+              radius: 0.05,
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
+              tileMode: TileMode.mirror,
+            ).createShader(bounds),
             child: Container(width: 100, height: 100, color: const Color(0xFFFFFFFF)),
           ),
         ),

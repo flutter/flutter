@@ -173,10 +173,12 @@ void main() {
       final File entitlements = environment.outputDir.childFile('entitlements.txt');
       final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
       final File unsignedBinaries = environment.outputDir.childFile('unsigned_binaries.txt');
-      final File nestedEntitlements = environment.outputDir
-        .childDirectory('first_level')
-        .childDirectory('second_level')
-        .childFile('entitlements.txt')..createSync(recursive: true);
+      final File nestedEntitlements =
+          environment.outputDir
+              .childDirectory('first_level')
+              .childDirectory('second_level')
+              .childFile('entitlements.txt')
+            ..createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -547,8 +549,8 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 

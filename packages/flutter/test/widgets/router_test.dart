@@ -379,29 +379,27 @@ void main() {
             Text(Uri.decodeComponent(information!.uri.toString())),
             Router<RouteInformation>(
               backButtonDispatcher: innerDispatcher1,
-              routerDelegate:
-                  innerDelegate1 = SimpleRouterDelegate(
-                    builder: (BuildContext context, RouteInformation? innerInformation) {
-                      return Container();
-                    },
-                    onPopRoute: () {
-                      provider.value = RouteInformation(uri: Uri.parse('popped inner1'));
-                      return SynchronousFuture<bool>(true);
-                    },
-                  ),
+              routerDelegate: innerDelegate1 = SimpleRouterDelegate(
+                builder: (BuildContext context, RouteInformation? innerInformation) {
+                  return Container();
+                },
+                onPopRoute: () {
+                  provider.value = RouteInformation(uri: Uri.parse('popped inner1'));
+                  return SynchronousFuture<bool>(true);
+                },
+              ),
             ),
             Router<RouteInformation>(
               backButtonDispatcher: innerDispatcher2,
-              routerDelegate:
-                  innerDelegate2 = SimpleRouterDelegate(
-                    builder: (BuildContext context, RouteInformation? innerInformation) {
-                      return Container();
-                    },
-                    onPopRoute: () {
-                      provider.value = RouteInformation(uri: Uri.parse('popped inner2'));
-                      return SynchronousFuture<bool>(true);
-                    },
-                  ),
+              routerDelegate: innerDelegate2 = SimpleRouterDelegate(
+                builder: (BuildContext context, RouteInformation? innerInformation) {
+                  return Container();
+                },
+                onPopRoute: () {
+                  provider.value = RouteInformation(uri: Uri.parse('popped inner2'));
+                  return SynchronousFuture<bool>(true);
+                },
+              ),
             ),
           ],
         );
@@ -543,47 +541,37 @@ void main() {
       buildBoilerPlate(
         Router<RouteInformation>(
           backButtonDispatcher: outerDispatcher,
-          routerDelegate:
-              outerDelegate = SimpleRouterDelegate(
-                builder: (BuildContext context, RouteInformation? information) {
-                  // Creates the sub-router.
-                  return Router<RouteInformation>(
-                    backButtonDispatcher: innerDispatcher1,
-                    routerDelegate:
-                        innerDelegate1 = SimpleRouterDelegate(
-                          builder: (BuildContext context, RouteInformation? innerInformation) {
-                            return Router<RouteInformation>(
-                              backButtonDispatcher: innerDispatcher2,
-                              routerDelegate:
-                                  innerDelegate2 = SimpleRouterDelegate(
-                                    builder: (
-                                      BuildContext context,
-                                      RouteInformation? innerInformation,
-                                    ) {
-                                      return Router<RouteInformation>(
-                                        backButtonDispatcher: innerDispatcher3,
-                                        routerDelegate:
-                                            innerDelegate3 = SimpleRouterDelegate(
-                                              onPopRoute: () {
-                                                isPopped = true;
-                                                return SynchronousFuture<bool>(true);
-                                              },
-                                              builder: (
-                                                BuildContext context,
-                                                RouteInformation? innerInformation,
-                                              ) {
-                                                return Container();
-                                              },
-                                            ),
-                                      );
-                                    },
-                                  ),
-                            );
-                          },
-                        ),
-                  );
-                },
-              ),
+          routerDelegate: outerDelegate = SimpleRouterDelegate(
+            builder: (BuildContext context, RouteInformation? information) {
+              // Creates the sub-router.
+              return Router<RouteInformation>(
+                backButtonDispatcher: innerDispatcher1,
+                routerDelegate: innerDelegate1 = SimpleRouterDelegate(
+                  builder: (BuildContext context, RouteInformation? innerInformation) {
+                    return Router<RouteInformation>(
+                      backButtonDispatcher: innerDispatcher2,
+                      routerDelegate: innerDelegate2 = SimpleRouterDelegate(
+                        builder: (BuildContext context, RouteInformation? innerInformation) {
+                          return Router<RouteInformation>(
+                            backButtonDispatcher: innerDispatcher3,
+                            routerDelegate: innerDelegate3 = SimpleRouterDelegate(
+                              onPopRoute: () {
+                                isPopped = true;
+                                return SynchronousFuture<bool>(true);
+                              },
+                              builder: (BuildContext context, RouteInformation? innerInformation) {
+                                return Container();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1158,27 +1146,26 @@ void main() {
     addTearDown(provider.dispose);
     provider.value = RouteInformation(uri: Uri.parse('initial'));
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
-    final SimpleRouterDelegate routerDelegate =
-        SimpleRouterDelegate()
-          ..builder = (BuildContext context, RouteInformation? information) {
-            // Creates the sub-router.
-            return Column(
-              children: <Widget>[
-                Text(Uri.decodeComponent(information!.uri.toString())),
-                BackButtonListener(
-                  child: Container(),
-                  onBackButtonPressed: () {
-                    provider.value = RouteInformation(uri: Uri.parse('first callback'));
-                    return SynchronousFuture<bool>(true);
-                  },
-                ),
-              ],
-            );
-          }
-          ..onPopRoute = () {
-            provider.value = RouteInformation(uri: Uri.parse('popped outer'));
-            return SynchronousFuture<bool>(true);
-          };
+    final SimpleRouterDelegate routerDelegate = SimpleRouterDelegate()
+      ..builder = (BuildContext context, RouteInformation? information) {
+        // Creates the sub-router.
+        return Column(
+          children: <Widget>[
+            Text(Uri.decodeComponent(information!.uri.toString())),
+            BackButtonListener(
+              child: Container(),
+              onBackButtonPressed: () {
+                provider.value = RouteInformation(uri: Uri.parse('first callback'));
+                return SynchronousFuture<bool>(true);
+              },
+            ),
+          ],
+        );
+      }
+      ..onPopRoute = () {
+        provider.value = RouteInformation(uri: Uri.parse('popped outer'));
+        return SynchronousFuture<bool>(true);
+      };
     addTearDown(routerDelegate.dispose);
 
     await tester.pumpWidget(
@@ -1234,27 +1221,26 @@ void main() {
     addTearDown(provider.dispose);
     provider.value = RouteInformation(uri: Uri.parse('initial'));
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
-    final SimpleRouterDelegate routerDelegate =
-        SimpleRouterDelegate()
-          ..builder = (BuildContext context, RouteInformation? information) {
-            // Creates the sub-router.
-            return Column(
-              children: <Widget>[
-                Text(Uri.decodeComponent(information!.uri.toString())),
-                BackButtonListener(
-                  child: Container(),
-                  onBackButtonPressed: () {
-                    provider.value = RouteInformation(uri: Uri.parse('first callback'));
-                    return SynchronousFuture<bool>(true);
-                  },
-                ),
-              ],
-            );
-          }
-          ..onPopRoute = () {
-            provider.value = RouteInformation(uri: Uri.parse('popped outer'));
-            return SynchronousFuture<bool>(true);
-          };
+    final SimpleRouterDelegate routerDelegate = SimpleRouterDelegate()
+      ..builder = (BuildContext context, RouteInformation? information) {
+        // Creates the sub-router.
+        return Column(
+          children: <Widget>[
+            Text(Uri.decodeComponent(information!.uri.toString())),
+            BackButtonListener(
+              child: Container(),
+              onBackButtonPressed: () {
+                provider.value = RouteInformation(uri: Uri.parse('first callback'));
+                return SynchronousFuture<bool>(true);
+              },
+            ),
+          ],
+        );
+      }
+      ..onPopRoute = () {
+        provider.value = RouteInformation(uri: Uri.parse('popped outer'));
+        return SynchronousFuture<bool>(true);
+      };
     addTearDown(routerDelegate.dispose);
 
     await tester.pumpWidget(
@@ -1409,32 +1395,31 @@ void main() {
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
     late StateSetter setState;
     String location = 'first callback';
-    final SimpleRouterDelegate routerDelegate =
-        SimpleRouterDelegate()
-          ..builder = (BuildContext context, RouteInformation? information) {
-            // Creates the sub-router.
-            return Column(
-              children: <Widget>[
-                Text(Uri.decodeComponent(information!.uri.toString())),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setter) {
-                    setState = setter;
-                    return BackButtonListener(
-                      child: Container(),
-                      onBackButtonPressed: () {
-                        provider.value = RouteInformation(uri: Uri.parse(location));
-                        return SynchronousFuture<bool>(true);
-                      },
-                    );
+    final SimpleRouterDelegate routerDelegate = SimpleRouterDelegate()
+      ..builder = (BuildContext context, RouteInformation? information) {
+        // Creates the sub-router.
+        return Column(
+          children: <Widget>[
+            Text(Uri.decodeComponent(information!.uri.toString())),
+            StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return BackButtonListener(
+                  child: Container(),
+                  onBackButtonPressed: () {
+                    provider.value = RouteInformation(uri: Uri.parse(location));
+                    return SynchronousFuture<bool>(true);
                   },
-                ),
-              ],
-            );
-          }
-          ..onPopRoute = () {
-            provider.value = RouteInformation(uri: Uri.parse('popped outer'));
-            return SynchronousFuture<bool>(true);
-          };
+                );
+              },
+            ),
+          ],
+        );
+      }
+      ..onPopRoute = () {
+        provider.value = RouteInformation(uri: Uri.parse('popped outer'));
+        return SynchronousFuture<bool>(true);
+      };
     addTearDown(routerDelegate.dispose);
 
     await tester.pumpWidget(
@@ -1464,9 +1449,8 @@ void main() {
   ) async {
     final List<RouteInformation> reportedRouteInformation = <RouteInformation>[];
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(
-      onRouterReport:
-          (RouteInformation info, RouteInformationReportingType type) =>
-              reportedRouteInformation.add(info),
+      onRouterReport: (RouteInformation info, RouteInformationReportingType type) =>
+          reportedRouteInformation.add(info),
     )..value = RouteInformation(uri: Uri.parse('/home'));
     addTearDown(provider.dispose);
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(

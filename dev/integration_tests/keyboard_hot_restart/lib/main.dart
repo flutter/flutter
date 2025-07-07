@@ -54,6 +54,8 @@ class MyHomePage extends StatelessWidget {
 
     keyboardVisible = insets.bottom > 0;
 
-    return const Scaffold(body: Center(child: TextField(autofocus: forceKeyboard)));
+    return const Scaffold(
+      body: Center(child: TextField(autofocus: forceKeyboard)),
+    );
   }
 }

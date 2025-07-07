@@ -180,22 +180,19 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
     // Adjust the magnifier position so that it never exists outside the horizontal
     // padding.
-    final Offset adjustedMagnifierPosition =
-        MagnifierController.shiftWithinBounds(
-          bounds: Rect.fromLTRB(
-            screenRect.left + widget.horizontalScreenEdgePadding,
-            // iOS doesn't reposition for Y, so we should expand the threshold
-            // so we can send the whole magnifier out of bounds if need be.
-            screenRect.top -
-                (CupertinoMagnifier.kDefaultSize.height +
-                    CupertinoMagnifier.kMagnifierAboveFocalPoint),
-            screenRect.right - widget.horizontalScreenEdgePadding,
-            screenRect.bottom +
-                (CupertinoMagnifier.kDefaultSize.height +
-                    CupertinoMagnifier.kMagnifierAboveFocalPoint),
-          ),
-          rect: rawMagnifierPosition & CupertinoMagnifier.kDefaultSize,
-        ).topLeft;
+    final Offset adjustedMagnifierPosition = MagnifierController.shiftWithinBounds(
+      bounds: Rect.fromLTRB(
+        screenRect.left + widget.horizontalScreenEdgePadding,
+        // iOS doesn't reposition for Y, so we should expand the threshold
+        // so we can send the whole magnifier out of bounds if need be.
+        screenRect.top -
+            (CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint),
+        screenRect.right - widget.horizontalScreenEdgePadding,
+        screenRect.bottom +
+            (CupertinoMagnifier.kDefaultSize.height + CupertinoMagnifier.kMagnifierAboveFocalPoint),
+      ),
+      rect: rawMagnifierPosition & CupertinoMagnifier.kDefaultSize,
+    ).topLeft;
 
     setState(() {
       _currentAdjustedMagnifierPosition = adjustedMagnifierPosition;
@@ -351,12 +348,11 @@ class CupertinoMagnifier extends StatelessWidget {
     focalPointOffset += additionalFocalPointOffset;
 
     return Transform.translate(
-      offset:
-          Offset.lerp(
-            const Offset(0, -kMagnifierAboveFocalPoint),
-            Offset.zero,
-            inOutAnimation?.value ?? 1,
-          )!,
+      offset: Offset.lerp(
+        const Offset(0, -kMagnifierAboveFocalPoint),
+        Offset.zero,
+        inOutAnimation?.value ?? 1,
+      )!,
       child: RawMagnifier(
         size: size,
         focalPointOffset: focalPointOffset,

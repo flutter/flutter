@@ -357,10 +357,9 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme!.valueIndicatorColor!,
-      strokePaintColor:
-          isOnTop!
-              ? sliderTheme.overlappingShapeStrokeColor
-              : sliderTheme.valueIndicatorStrokeColor,
+      strokePaintColor: isOnTop!
+          ? sliderTheme.overlappingShapeStrokeColor
+          : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -460,11 +459,10 @@ class _RectangularSliderValueIndicatorPathPainter {
       rectHeight,
     );
 
-    final Path trianglePath =
-        Path()
-          ..lineTo(-_triangleHeight, -_triangleHeight)
-          ..lineTo(_triangleHeight, -_triangleHeight)
-          ..close();
+    final Path trianglePath = Path()
+      ..lineTo(-_triangleHeight, -_triangleHeight)
+      ..lineTo(_triangleHeight, -_triangleHeight)
+      ..close();
     final Paint fillPaint = Paint()..color = backgroundPaintColor;
     final RRect upperRRect = RRect.fromRectAndRadius(
       upperRect,
@@ -478,11 +476,10 @@ class _RectangularSliderValueIndicatorPathPainter {
     canvas.translate(center.dx, center.dy - _bottomTipYOffset);
     canvas.scale(scale, scale);
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawPath(trianglePath, strokePaint);
     }
     canvas.drawPath(trianglePath, fillPaint);
@@ -792,10 +789,9 @@ class _PaddleSliderValueIndicatorPathPainter {
 
     final double bottomNeckTriangleHypotenuse =
         _bottomNeckRadius + _bottomLobeRadius / overallScale;
-    final double rightBottomNeckCenterY =
-        -math.sqrt(
-          math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(_rightBottomNeckCenterX, 2),
-        );
+    final double rightBottomNeckCenterY = -math.sqrt(
+      math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(_rightBottomNeckCenterX, 2),
+    );
     final double rightBottomNeckAngleEnd =
         math.pi + math.atan(rightBottomNeckCenterY / _rightBottomNeckCenterX);
     final Path path = Path()..moveTo(_middleNeckWidth / 2, rightBottomNeckCenterY);
@@ -879,11 +875,10 @@ class _PaddleSliderValueIndicatorPathPainter {
               rightCenter.dx + _topLobeRadius,
               rightCenter.dy + _topLobeRadius,
             );
-            final Paint outlinePaint =
-                Paint()
-                  ..color = const Color(0xffff0000)
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 1.0;
+            final Paint outlinePaint = Paint()
+              ..color = const Color(0xffff0000)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.0;
             canvas.drawRect(valueRect, outlinePaint);
             return true;
           }(),
@@ -907,11 +902,10 @@ class _PaddleSliderValueIndicatorPathPainter {
     _addArc(path, neckRightCenter + neckStretch, _topNeckRadius, rightNeckArcAngle, math.pi);
 
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawPath(path, strokePaint);
     }
 

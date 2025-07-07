@@ -61,8 +61,9 @@ void main() {
     });
 
     testWithoutContext('listenToEvent can receive the right events', () async {
-      final Future<List<DaemonEventData>> events =
-          daemonConnection.listenToEvent('event1').toList();
+      final Future<List<DaemonEventData>> events = daemonConnection
+          .listenToEvent('event1')
+          .toList();
 
       daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'event': 'event1', 'params': '1'}));
       daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'event': 'event2', 'params': '2'}));

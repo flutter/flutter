@@ -560,10 +560,9 @@ class CupertinoDatePicker extends StatefulWidget {
         }
       case _PickerColumnType.month:
         for (int i = 1; i <= 12; i++) {
-          final String month =
-              standaloneMonth
-                  ? localizations.datePickerStandaloneMonth(i)
-                  : localizations.datePickerMonth(i);
+          final String month = standaloneMonth
+              ? localizations.datePickerStandaloneMonth(i)
+              : localizations.datePickerMonth(i);
           longTexts.add(month);
         }
       case _PickerColumnType.year:
@@ -867,10 +866,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             return null;
           }
 
-          final String dateText =
-              rangeStart == DateTime(now.year, now.month, now.day)
-                  ? localizations.todayLabel
-                  : localizations.datePickerMediumDate(rangeStart);
+          final String dateText = rangeStart == DateTime(now.year, now.month, now.day)
+              ? localizations.todayLabel
+              : localizations.datePickerMediumDate(rangeStart);
 
           return itemPositioningBuilder(context, Text(dateText, style: _themeTextStyle(context)));
         },
@@ -1157,10 +1155,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     ];
 
     // Swap the hours and minutes if RTL to ensure they are in the correct position.
-    final List<_ColumnBuilder> pickerBuilders =
-        Directionality.of(context) == TextDirection.rtl
-            ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
-            : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
+    final List<_ColumnBuilder> pickerBuilders = Directionality.of(context) == TextDirection.rtl
+        ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
+        : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
     // Adds time separator column if the picker is showing time separator.
     if (widget.showTimeSeparator) {
@@ -1254,8 +1251,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -1411,8 +1409,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(31, (int index) {
           final int day = index + 1;
-          final int? dayOfWeek =
-              widget.showDayOfWeek ? DateTime(selectedYear, selectedMonth, day).weekday : null;
+          final int? dayOfWeek = widget.showDayOfWeek
+              ? DateTime(selectedYear, selectedMonth, day).weekday
+              : null;
           final bool isInvalidDay =
               (day > daysInCurrentMonth) ||
               (widget.minimumDate?.year == selectedYear &&
@@ -1470,10 +1469,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           final bool isInvalidMonth =
               (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month) ||
               (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
-          final String monthName =
-              (widget.mode == CupertinoDatePickerMode.monthYear)
-                  ? localizations.datePickerStandaloneMonth(month)
-                  : localizations.datePickerMonth(month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear)
+              ? localizations.datePickerStandaloneMonth(month)
+              : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
@@ -1690,8 +1688,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -1834,10 +1833,9 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           final bool isInvalidMonth =
               (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month) ||
               (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
-          final String monthName =
-              (widget.mode == CupertinoDatePickerMode.monthYear)
-                  ? localizations.datePickerStandaloneMonth(month)
-                  : localizations.datePickerMonth(month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear)
+              ? localizations.datePickerStandaloneMonth(month)
+              : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
@@ -2037,8 +2035,9 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
       );
     }
 
-    final double maxPickerWidth =
-        totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth
+        ? totalColumnWidths
+        : _kPickerWidth;
 
     return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
@@ -2461,10 +2460,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       selectionOverlay: selectionOverlay,
       children: List<Widget>.generate(24, (int index) {
         final String label = localizations.timerPickerHourLabel(index) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerHour(index) + label
-                : label + localizations.timerPickerHour(index);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerHour(index) + label
+            : label + localizations.timerPickerHour(index);
 
         return Semantics(
           label: semanticsLabel,
@@ -2531,10 +2529,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
         final int minute = index * widget.minuteInterval;
         final String label = localizations.timerPickerMinuteLabel(minute) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerMinute(minute) + label
-                : label + localizations.timerPickerMinute(minute);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerMinute(minute) + label
+            : label + localizations.timerPickerMinute(minute);
 
         return Semantics(
           label: semanticsLabel,
@@ -2600,10 +2597,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
         final int second = index * widget.secondInterval;
         final String label = localizations.timerPickerSecondLabel(second) ?? '';
-        final String semanticsLabel =
-            textDirectionFactor == 1
-                ? localizations.timerPickerSecond(second) + label
-                : label + localizations.timerPickerSecond(second);
+        final String semanticsLabel = textDirectionFactor == 1
+            ? localizations.timerPickerSecond(second) + label
+            : label + localizations.timerPickerSecond(second);
 
         return Semantics(
           label: semanticsLabel,

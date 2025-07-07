@@ -120,21 +120,21 @@ class Theme extends StatelessWidget {
   /// * [IconTheme.of], that returns [ThemeData.iconTheme] from the closest [Theme] or
   ///   [IconThemeData.fallback] if there is no [IconTheme] ancestor.
   static ThemeData of(BuildContext context) {
-    final _InheritedTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(
       context,
       MaterialLocalizations,
     );
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
-    final InheritedCupertinoTheme? inheritedCupertinoTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedCupertinoTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     final ThemeData theme =
         inheritedTheme?.theme.data ??
         (inheritedCupertinoTheme != null
             ? CupertinoBasedMaterialThemeData(
-              themeData: inheritedCupertinoTheme.theme.data,
-            ).materialTheme
+                themeData: inheritedCupertinoTheme.theme.data,
+              ).materialTheme
             : _kFallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
@@ -155,8 +155,8 @@ class Theme extends StatelessWidget {
   }
 
   CupertinoThemeData _inheritedCupertinoThemeData(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return (inheritedTheme?.theme.data ?? MaterialBasedCupertinoThemeData(materialTheme: data))
         .resolveFrom(context);
   }
@@ -174,8 +174,8 @@ class Theme extends StatelessWidget {
   /// * [ThemeData.brightness], the property that takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Material widgets.
   static Brightness brightnessOf(BuildContext context) {
-    final _InheritedTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
@@ -192,8 +192,8 @@ class Theme extends StatelessWidget {
   /// * [brightnessOf], which return a default value if no valid [InheritedTheme] or
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final _InheritedTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 

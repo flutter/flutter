@@ -51,11 +51,8 @@ void main() {
       );
 
       final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch:
-            () => dap.client.launch(
-              cwd: project.dir.path,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+        launch: () =>
+            dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -80,13 +77,12 @@ void main() {
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                noDebug: true,
-                toolArgs: <String>['-d', 'flutter-tester'],
-                sendLogsToClient: true,
-              ),
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            sendLogsToClient: true,
+          ),
         ),
       ], eagerError: true);
 
@@ -96,10 +92,9 @@ void main() {
 
       // Ensure logs contain both the app.stop request and the result.
       final List<Event> logEvents = await logEventsFuture;
-      final List<String> logMessages =
-          logEvents
-              .map((Event l) => (l.body! as Map<String, Object?>)['message']! as String)
-              .toList();
+      final List<String> logMessages = logEvents
+          .map((Event l) => (l.body! as Map<String, Object?>)['message']! as String)
+          .toList();
       expect(
         logMessages,
         containsAll(<Matcher>[
@@ -120,22 +115,20 @@ void main() {
       await Future.wait(<Future<void>>[
         dap.client.event('terminated'),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                noDebug: true,
-                toolArgs: <String>['--not-a-valid-flag'],
-                sendLogsToClient: true,
-              ),
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['--not-a-valid-flag'],
+            sendLogsToClient: true,
+          ),
         ),
       ], eagerError: true);
 
       // Ensure logs contain the expected error message.
       final List<Event> logEvents = await logEventsFuture;
-      final List<String> logMessages =
-          logEvents
-              .map((Event l) => (l.body! as Map<String, Object?>)['message']! as String)
-              .toList();
+      final List<String> logMessages = logEvents
+          .map((Event l) => (l.body! as Map<String, Object?>)['message']! as String)
+          .toList();
       expect(
         logMessages,
         contains(
@@ -156,12 +149,11 @@ void main() {
       );
 
       final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch:
-            () => dap.client.launch(
-              cwd: project.dir.path,
-              noDebug: true,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+        launch: () => dap.client.launch(
+          cwd: project.dir.path,
+          noDebug: true,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -208,11 +200,8 @@ void main() {
       await project.setUpIn(tempDir);
 
       final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
-        launch:
-            () => dap.client.launch(
-              cwd: project.dir.path,
-              toolArgs: <String>['-d', 'flutter-tester'],
-            ),
+        launch: () =>
+            dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
       );
 
       final String output = _uniqueOutputLines(outputEvents);
@@ -336,23 +325,21 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                noDebug: true,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
         ),
       ], eagerError: true);
 
       // Capture the next two output events that we expect to be the Reload
       // notification and then topLevelFunction being printed again.
-      final Future<List<String>> outputEventsFuture =
-          dap.client.stdoutOutput
-              // But skip any topLevelFunctions that come before the reload.
-              .skipWhile((String output) => output.startsWith('topLevelFunction'))
-              .take(2)
-              .toList();
+      final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the reload.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
 
       await dap.client.hotReload();
 
@@ -362,12 +349,11 @@ The relevant error-causing widget was:
       ], allowExtras: true);
 
       // Repeat the test for hot reload with custom syntax.
-      final Future<List<String>> customOutputEventsFuture =
-          dap.client.stdoutOutput
-              // But skip any topLevelFunctions that come before the reload.
-              .skipWhile((String output) => output.startsWith('topLevelFunction'))
-              .take(2)
-              .toList();
+      final Future<List<String>> customOutputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the reload.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
 
       await dap.client.customSyntaxHotReload();
 
@@ -397,12 +383,11 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                noDebug: true,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
         ),
       ], eagerError: true);
 
@@ -446,8 +431,10 @@ The relevant error-causing widget was:
       final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
       expect(eventKinds, <String>['progressStart', 'progressEnd']);
 
-      final List<Map<String, Object?>> eventBodies =
-          progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final List<Map<String, Object?>> eventBodies = progressEvents
+          .map((Event event) => event.body)
+          .cast<Map<String, Object?>>()
+          .toList();
       final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
       final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
@@ -467,23 +454,21 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                noDebug: true,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
         ),
       ], eagerError: true);
 
       // Capture the next two output events that we expect to be the Restart
       // notification and then topLevelFunction being printed again.
-      final Future<List<String>> outputEventsFuture =
-          dap.client.stdoutOutput
-              // But skip any topLevelFunctions that come before the restart.
-              .skipWhile((String output) => output.startsWith('topLevelFunction'))
-              .take(2)
-              .toList();
+      final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the restart.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
 
       await dap.client.hotRestart();
 
@@ -524,8 +509,10 @@ The relevant error-causing widget was:
       final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
       expect(eventKinds, <String>['progressStart', 'progressEnd']);
 
-      final List<Map<String, Object?>> eventBodies =
-          progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final List<Map<String, Object?>> eventBodies = progressEvents
+          .map((Event event) => event.body)
+          .cast<Map<String, Object?>>()
+          .toList();
       final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
       final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
@@ -550,11 +537,8 @@ The relevant error-causing widget was:
             .then((StoppedEventBody event) => originalThreadId = event.threadId!),
         dap.client.start(
           exceptionPauseMode: 'All', // Ensure we stop on all exceptions
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () =>
+              dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
         ),
       ], eagerError: true);
 
@@ -595,11 +579,8 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () =>
+              dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
         ),
       ], eagerError: true);
 
@@ -630,11 +611,8 @@ The relevant error-causing widget was:
       await Future.wait(<Future<void>>[
         appStartFuture,
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () =>
+              dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
         ),
       ], eagerError: true);
 
@@ -654,11 +632,8 @@ The relevant error-causing widget was:
       await Future.wait(<Future<void>>[
         dap.client.event('flutter.appStarted'),
         dap.client.start(
-          launch:
-              () => dap.client.launch(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-              ),
+          launch: () =>
+              dap.client.launch(cwd: project.dir.path, toolArgs: <String>['-d', 'flutter-tester']),
         ),
       ], eagerError: true);
 
@@ -690,21 +665,19 @@ The relevant error-causing widget was:
             (String output) => output.startsWith('topLevelFunction'),
           ),
           dap.client.start(
-            launch:
-                () => dap.client.launch(
-                  cwd: project.dir.path,
-                  debugSdkLibraries: true,
-                  toolArgs: <String>['-d', 'flutter-tester'],
-                ),
+            launch: () => dap.client.launch(
+              cwd: project.dir.path,
+              debugSdkLibraries: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
           ),
         ], eagerError: true);
 
         // Add a breakpoint to the `print()` line and hit it.
         unawaited(dap.client.setBreakpoint(breakpointFilePath, breakpointLine));
-        int stoppedThreadId =
-            (await dap.client.stoppedEvents.firstWhere(
-              (StoppedEventBody e) => e.reason == 'breakpoint',
-            )).threadId!;
+        int stoppedThreadId = (await dap.client.stoppedEvents.firstWhere(
+          (StoppedEventBody e) => e.reason == 'breakpoint',
+        )).threadId!;
 
         // Step into `print()` and wait for the next stop.
         unawaited(dap.client.stepIn(stoppedThreadId));
@@ -712,12 +685,11 @@ The relevant error-causing widget was:
 
         // Fetch the top stack frame and ensure it's been mapped to a local file
         // correctly.
-        final StackFrame topFrame =
-            (await dap.client.getValidStack(
-              stoppedThreadId,
-              startFrame: 0,
-              numFrames: 1,
-            )).stackFrames.single;
+        final StackFrame topFrame = (await dap.client.getValidStack(
+          stoppedThreadId,
+          startFrame: 0,
+          numFrames: 1,
+        )).stackFrames.single;
         expect(topFrame.source!.name, 'dart:core/print.dart');
         // We should have a resolved path ending with the path to the print library.
         expect(topFrame.source!.path, endsWith(expectedPrintLibraryPath));
@@ -755,21 +727,19 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.attach(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-                vmServiceUri: vmServiceUri.toString(),
-              ),
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
         ),
       ], eagerError: true);
 
       // Capture the "Reloaded" output and events immediately after.
-      final Future<List<String>> outputEventsFuture =
-          dap.client.stdoutOutput
-              .skipWhile((String output) => !output.startsWith('Reloaded'))
-              .take(4)
-              .toList();
+      final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
+          .skipWhile((String output) => !output.startsWith('Reloaded'))
+          .take(4)
+          .toList();
 
       // Perform the reload, and expect we get the Reloaded output followed
       // by printed output, to ensure the app is running again.
@@ -793,12 +763,11 @@ The relevant error-causing widget was:
             (String output) => output.startsWith('topLevelFunction'),
           ),
           dap.client.start(
-            launch:
-                () => dap.client.attach(
-                  cwd: project.dir.path,
-                  toolArgs: <String>['-d', 'flutter-tester'],
-                  vmServiceUri: vmServiceUri.toString(),
-                ),
+            launch: () => dap.client.attach(
+              cwd: project.dir.path,
+              toolArgs: <String>['-d', 'flutter-tester'],
+              vmServiceUri: vmServiceUri.toString(),
+            ),
           ),
         ], eagerError: true);
 
@@ -822,12 +791,11 @@ The relevant error-causing widget was:
           (String output) => output.startsWith('topLevelFunction'),
         ),
         dap.client.start(
-          launch:
-              () => dap.client.attach(
-                cwd: project.dir.path,
-                toolArgs: <String>['-d', 'flutter-tester'],
-                vmServiceUri: vmServiceUri.toString(),
-              ),
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
         ),
       ], eagerError: true);
 

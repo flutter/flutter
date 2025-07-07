@@ -381,13 +381,13 @@ class RenderLimitedBox extends RenderProxyBox {
   BoxConstraints _limitConstraints(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.minWidth,
-      maxWidth:
-          constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
+      maxWidth: constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : constraints.constrainWidth(maxWidth),
       minHeight: constraints.minHeight,
-      maxHeight:
-          constraints.hasBoundedHeight
-              ? constraints.maxHeight
-              : constraints.constrainHeight(maxHeight),
+      maxHeight: constraints.hasBoundedHeight
+          ? constraints.maxHeight
+          : constraints.constrainHeight(maxHeight),
     );
   }
 
@@ -708,14 +708,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 
   BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
     return constraints.tighten(
-      width:
-          constraints.hasTightWidth
-              ? null
-              : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
-      height:
-          stepHeight == null
-              ? null
-              : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
+      width: constraints.hasTightWidth
+          ? null
+          : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
+      height: stepHeight == null
+          ? null
+          : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
     );
   }
 
@@ -1507,24 +1505,26 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      _debugPaint ??=
-          Paint()
-            ..shader = ui.Gradient.linear(
-              Offset.zero,
-              const Offset(10.0, 10.0),
-              <Color>[
-                const Color(0x00000000),
-                const Color(0xFFFF00FF),
-                const Color(0xFFFF00FF),
-                const Color(0x00000000),
-              ],
-              <double>[0.25, 0.25, 0.75, 0.75],
-              TileMode.repeated,
-            )
-            ..strokeWidth = 2.0
-            ..style = PaintingStyle.stroke;
+      _debugPaint ??= Paint()
+        ..shader = ui.Gradient.linear(
+          Offset.zero,
+          const Offset(10.0, 10.0),
+          <Color>[
+            const Color(0x00000000),
+            const Color(0xFFFF00FF),
+            const Color(0xFFFF00FF),
+            const Color(0x00000000),
+          ],
+          <double>[0.25, 0.25, 0.75, 0.75],
+          TileMode.repeated,
+        )
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
       _debugText ??= TextPainter(
-        text: const TextSpan(text: '✂', style: TextStyle(color: Color(0xFFFF00FF), fontSize: 14.0)),
+        text: const TextSpan(
+          text: '✂',
+          style: TextStyle(color: Color(0xFFFF00FF), fontSize: 14.0),
+        ),
         textDirection: TextDirection.rtl, // doesn't matter, it's one character
       )..layout();
       return true;
@@ -2689,10 +2689,9 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
-        final Matrix4 effectiveTransform =
-            Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-              ..multiply(transform)
-              ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
+        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+          ..multiply(transform)
+          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
@@ -2909,10 +2908,9 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow =
           sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       assert(scaleX.isFinite && scaleY.isFinite);
-      _transform =
-          Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
-            ..scaleByDouble(scaleX, scaleY, 1.0, 1)
-            ..translateByDouble(-sourceRect.left, -sourceRect.top, 0, 1);
+      _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
+        ..scaleByDouble(scaleX, scaleY, 1.0, 1)
+        ..translateByDouble(-sourceRect.left, -sourceRect.top, 0, 1);
       assert(_transform!.storage.every((double value) => value.isFinite));
     }
   }
@@ -3048,10 +3046,9 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
-      offset:
-          transformHitTests
-              ? Offset(translation.dx * size.width, translation.dy * size.height)
-              : null,
+      offset: transformHitTests
+          ? Offset(translation.dx * size.width, translation.dy * size.height)
+          : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
@@ -5090,10 +5087,9 @@ class RenderFollowerLayer extends RenderProxyBox {
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
-    final Offset effectiveLinkedOffset =
-        leaderSize == null
-            ? this.offset
-            : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
+    final Offset effectiveLinkedOffset = leaderSize == null
+        ? this.offset
+        : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     if (layer == null) {
       layer = FollowerLayer(
         link: link,

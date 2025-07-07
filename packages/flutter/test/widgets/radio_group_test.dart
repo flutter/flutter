@@ -16,7 +16,10 @@ void main() {
       Material(
         child: TestRadioGroup<int>(
           child: Column(
-            children: <Widget>[Radio<int>(key: key0, value: 0), Radio<int>(key: key1, value: 1)],
+            children: <Widget>[
+              Radio<int>(key: key0, value: 0),
+              Radio<int>(key: key1, value: 1),
+            ],
           ),
         ),
       ),

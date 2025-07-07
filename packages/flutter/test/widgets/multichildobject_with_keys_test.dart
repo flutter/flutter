@@ -103,8 +103,8 @@ void main() {
 
   testWidgets(
     'Updating a MultiChildRenderObjectElement to have children with duplicated keys throws',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/81541
 

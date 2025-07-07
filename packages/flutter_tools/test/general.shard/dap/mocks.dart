@@ -101,11 +101,10 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// The `method`s of all messages sent to the `flutter run` processes `stdin`
   /// by the debug adapter.
-  List<String> get dapToFlutterRequests =>
-      dapToFlutterMessages
-          .map((Map<String, Object?> message) => message['method'] as String?)
-          .nonNulls
-          .toList();
+  List<String> get dapToFlutterRequests => dapToFlutterMessages
+      .map((Map<String, Object?> message) => message['method'] as String?)
+      .nonNulls
+      .toList();
 
   /// A handler for the 'app.exposeUrl' reverse-request.
   String Function(String)? exposeUrlHandler;

@@ -85,7 +85,8 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     final String partPath = path.replaceAll('.dart', '_part.dart');
     writeFile((
       path: partPath,
-      source: '''
+      source:
+          '''
 part of '$path';
 
 $_previewContainingFileContents
@@ -94,7 +95,8 @@ $_previewContainingFileContents
 
     writeFile((
       path: path,
-      source: '''
+      source:
+          '''
 part '$partPath';
 ''',
     ));
@@ -340,12 +342,13 @@ void main() {
     });
 
     testUsingContext('can detect previews in existing libraries with parts', () async {
-      project = await BasicProjectWithExhaustivePreviews.create(
-          projectRoot: previewDetector.projectRoot,
-          pathsWithPreviews: <String>[],
-          pathsWithoutPreviews: <String>[],
-        )
-        ..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
+      project =
+          await BasicProjectWithExhaustivePreviews.create(
+              projectRoot: previewDetector.projectRoot,
+              pathsWithPreviews: <String>[],
+              pathsWithoutPreviews: <String>[],
+            )
+            ..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
     });

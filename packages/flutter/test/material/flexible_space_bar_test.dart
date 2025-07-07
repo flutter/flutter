@@ -17,7 +17,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
-        home: Scaffold(appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X')))),
+        home: Scaffold(
+          appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X'))),
+        ),
       ),
     );
 
@@ -36,7 +38,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
-          home: Scaffold(appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X')))),
+          home: Scaffold(
+            appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X'))),
+          ),
         ),
       );
 
@@ -1684,7 +1688,10 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
             itemCount: 300,
             itemBuilder: (BuildContext context, int index) {
-              return Card(color: Colors.amber, child: Center(child: Text('$index')));
+              return Card(
+                color: Colors.amber,
+                child: Center(child: Text('$index')),
+              );
             },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),

@@ -96,7 +96,10 @@ void main() {
     final TestResult result = TestResult();
 
     await tester.pumpWidget(
-      MaterialApp(title: 'Scroll Bug', home: NestedScrollableCase(testResult: result)),
+      MaterialApp(
+        title: 'Scroll Bug',
+        home: NestedScrollableCase(testResult: result),
+      ),
     );
 
     // By dragging the scroll view more than the configured touch slop above but less than
@@ -120,7 +123,10 @@ void main() {
     final TestResult result = TestResult();
 
     await tester.pumpWidget(
-      MaterialApp(title: 'Scroll Bug', home: NestedDraggableCase(testResult: result)),
+      MaterialApp(
+        title: 'Scroll Bug',
+        home: NestedDraggableCase(testResult: result),
+      ),
     );
 
     // By dragging the scroll view more than the configured touch slop above but less than

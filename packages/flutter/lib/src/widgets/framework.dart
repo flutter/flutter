@@ -2698,11 +2698,10 @@ final class BuildScope {
         ErrorDescription('while rebuilding dirty elements'),
         e,
         stack,
-        informationCollector:
-            () => <DiagnosticsNode>[
-              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
-              element.describeElement('The element being rebuilt at the time was'),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
+          element.describeElement('The element being rebuilt at the time was'),
+        ],
       );
     }
     if (isTimelineTracked) {
@@ -3106,8 +3105,9 @@ class BuildOwner {
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
   @_debugOnly
-  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations =
-      kDebugMode ? <Element, Map<Element, GlobalKey>>{} : null;
+  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations = kDebugMode
+      ? <Element, Map<Element, GlobalKey>>{}
+      : null;
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -3790,10 +3790,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   static DiagnosticsNode describeElements(String name, Iterable<Element> elements) {
     return DiagnosticsBlock(
       name: name,
-      children:
-          elements
-              .map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element))
-              .toList(),
+      children: elements
+          .map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element))
+          .toList(),
       allowTruncate: true,
     );
   }
@@ -4137,8 +4136,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
         break;
       }
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -4198,8 +4200,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(
         oldChild == newChild ||
@@ -4225,8 +4230,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild =
-          updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      final Element newChild = updateChild(
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild._lifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5180,18 +5188,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
     final Set<InheritedElement>? deps = _dependencies;
     if (deps != null && deps.isNotEmpty) {
-      final List<InheritedElement> sortedDependencies =
-          deps.toList()..sort(
-            (InheritedElement a, InheritedElement b) =>
-                a.toStringShort().compareTo(b.toStringShort()),
-          );
-      final List<DiagnosticsNode> diagnosticsDependencies =
-          sortedDependencies
-              .map(
-                (InheritedElement element) =>
-                    element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse),
-              )
-              .toList();
+      final List<InheritedElement> sortedDependencies = deps.toList()
+        ..sort(
+          (InheritedElement a, InheritedElement b) =>
+              a.toStringShort().compareTo(b.toStringShort()),
+        );
+      final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
+          .map(
+            (InheritedElement element) =>
+                element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse),
+          )
+          .toList();
       properties.add(
         DiagnosticsProperty<Set<InheritedElement>>(
           'dependencies',
@@ -5726,8 +5733,9 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector:
-              () => <DiagnosticsNode>[if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this))],
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
     } finally {
@@ -5744,8 +5752,9 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector:
-              () => <DiagnosticsNode>[if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this))],
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
       _child = updateChild(null, built, slot);

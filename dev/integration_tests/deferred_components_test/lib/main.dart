@@ -69,21 +69,20 @@ class MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget testWidget =
-        libraryFuture == null
-            ? const Text('preload', key: Key('PreloadText'))
-            : FutureBuilder<void>(
-              future: libraryFuture,
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  return postLoadDisplayWidget;
+    final Widget testWidget = libraryFuture == null
+        ? const Text('preload', key: Key('PreloadText'))
+        : FutureBuilder<void>(
+            future: libraryFuture,
+            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
                 }
                 return postLoadDisplayWidget;
-              },
-            );
+              }
+              return postLoadDisplayWidget;
+            },
+          );
     return Scaffold(
       appBar: AppBar(title: const Text('Deferred components test')),
       body: Center(child: testWidget),

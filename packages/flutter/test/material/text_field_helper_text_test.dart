@@ -9,7 +9,9 @@ void main() {
   testWidgets('TextField works correctly when changing helperText', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: TextField(decoration: InputDecoration(helperText: 'Awesome'))),
+        home: Material(
+          child: TextField(decoration: InputDecoration(helperText: 'Awesome')),
+        ),
       ),
     );
     expect(find.text('Awesome'), findsNWidgets(1));
@@ -17,7 +19,9 @@ void main() {
     expect(find.text('Awesome'), findsNWidgets(1));
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: TextField(decoration: InputDecoration(errorText: 'Awesome'))),
+        home: Material(
+          child: TextField(decoration: InputDecoration(errorText: 'Awesome')),
+        ),
       ),
     );
     expect(find.text('Awesome'), findsNWidgets(2));

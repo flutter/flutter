@@ -281,13 +281,12 @@ Future<vm_service.VmService> setUpVmService({
         // from the tool in the response, instead returning the compilation
         // error message in the 'details' property of the returned error object.
         return <String, Object>{
-          kError:
-              vm_service.RPCError.withDetails(
-                'compileExpression',
-                vm_service.RPCErrorKind.kExpressionCompilationError.code,
-                vm_service.RPCErrorKind.kExpressionCompilationError.message,
-                details: e.errorMessage,
-              ).toMap(),
+          kError: vm_service.RPCError.withDetails(
+            'compileExpression',
+            vm_service.RPCErrorKind.kExpressionCompilationError.code,
+            vm_service.RPCErrorKind.kExpressionCompilationError.message,
+            details: e.errorMessage,
+          ).toMap(),
         };
       }
     });
@@ -759,10 +758,9 @@ class FlutterVmService {
     final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.brightnessOverride',
       isolateId: isolateId,
-      args:
-          brightness != null
-              ? <String, String>{'value': brightness.toString()}
-              : <String, String>{},
+      args: brightness != null
+          ? <String, String>{'value': brightness.toString()}
+          : <String, String>{},
     );
     if (result != null && result['value'] is String) {
       return result['value'] == 'Brightness.light' ? Brightness.light : Brightness.dark;

@@ -112,8 +112,9 @@ abstract class DeviceManager {
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
-    final Set<String> wellKnownIds =
-        _platformDiscoverers.expand((DeviceDiscovery discovery) => discovery.wellKnownIds).toSet();
+    final Set<String> wellKnownIds = _platformDiscoverers
+        .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+        .toSet();
     final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
 
     // Process discoverers as they can return results, so if an exact match is
@@ -1333,10 +1334,9 @@ class DebuggingOptions {
         deviceVmServicePort: json['deviceVmServicePort'] as int?,
         disablePortPublication: json['disablePortPublication']! as bool,
         ddsPort: json['ddsPort'] as int?,
-        devToolsServerAddress:
-            json['devToolsServerAddress'] != null
-                ? Uri.parse(json['devToolsServerAddress']! as String)
-                : null,
+        devToolsServerAddress: json['devToolsServerAddress'] != null
+            ? Uri.parse(json['devToolsServerAddress']! as String)
+            : null,
         port: json['port'] as String?,
         hostname: json['hostname'] as String?,
         tlsCertPath: json['tlsCertPath'] as String?,

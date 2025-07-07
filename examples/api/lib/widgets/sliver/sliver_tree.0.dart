@@ -65,26 +65,27 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
           TreeSliver<String>(
             tree: _tree,
             controller: controller,
-            treeNodeBuilder: (
-              BuildContext context,
-              TreeSliverNode<Object?> node,
-              AnimationStyle animationStyle,
-            ) {
-              Widget child = GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  setState(() {
-                    controller.toggleNode(node);
-                    _selectedNode = node as TreeSliverNode<String>;
-                  });
+            treeNodeBuilder:
+                (
+                  BuildContext context,
+                  TreeSliverNode<Object?> node,
+                  AnimationStyle animationStyle,
+                ) {
+                  Widget child = GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      setState(() {
+                        controller.toggleNode(node);
+                        _selectedNode = node as TreeSliverNode<String>;
+                      });
+                    },
+                    child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
+                  );
+                  if (_selectedNode == node as TreeSliverNode<String>) {
+                    child = ColoredBox(color: Colors.purple[100]!, child: child);
+                  }
+                  return child;
                 },
-                child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
-              );
-              if (_selectedNode == node as TreeSliverNode<String>) {
-                child = ColoredBox(color: Colors.purple[100]!, child: child);
-              }
-              return child;
-            },
           ),
         ],
       ),

@@ -44,8 +44,10 @@ flutter:
     - a/bar
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo')),
@@ -88,8 +90,10 @@ flutter:
     - lib/gallery/aaa bbb
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
       final List<AssetsEntry> assets = flutterManifest.assets;
 
       expect(assets, <AssetsEntry>[
@@ -115,8 +119,10 @@ flutter:
         - strawberry
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo'), flavors: const <String>{'apple', 'strawberry'}),

@@ -270,14 +270,13 @@ class SizeAnalyzer {
       emphasis: true,
     );
 
-    final List<_SymbolNode> sortedSymbols =
-        aotSnapshotRoot.children.toList()
-          // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
-          //  which are not interpretable by end users.
-          ..removeWhere(
-            (_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'),
-          )
-          ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
+    final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
+      // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
+      //  which are not interpretable by end users.
+      ..removeWhere(
+        (_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'),
+      )
+      ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
       // Node names will have an extra leading `package:*` name, remove it to
       // avoid extra nesting.

@@ -160,15 +160,14 @@ class _MyMenuBarState extends State<MyMenuBar> {
           // already hidden.
           MenuEntry(
             label: 'Reset Message',
-            onPressed:
-                showingMessage
-                    ? () {
-                      setState(() {
-                        _lastSelection = 'Reset Message';
-                        showingMessage = false;
-                      });
-                    }
-                    : null,
+            onPressed: showingMessage
+                ? () {
+                    setState(() {
+                      _lastSelection = 'Reset Message';
+                      showingMessage = false;
+                    });
+                  }
+                : null,
             shortcut: const SingleActivator(LogicalKeyboardKey.escape),
           ),
           MenuEntry(
@@ -224,6 +223,10 @@ class MenuBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: SafeArea(child: MyMenuBar(message: kMessage))));
+    return const MaterialApp(
+      home: Scaffold(
+        body: SafeArea(child: MyMenuBar(message: kMessage)),
+      ),
+    );
   }
 }

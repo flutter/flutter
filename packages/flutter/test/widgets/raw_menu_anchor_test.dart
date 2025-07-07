@@ -1733,11 +1733,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> properties =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> properties = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(properties, const <String>['has focusNode', 'use nearest overlay']);
   });

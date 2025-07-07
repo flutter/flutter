@@ -88,9 +88,8 @@ Future<double> findCostsForRepo() async {
     flutterDirectory.path,
   ], workingDirectory: flutterDirectory.path);
   double total = 0.0;
-  await for (final String entry in git.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())) {
+  await for (final String entry
+      in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;
@@ -107,9 +106,8 @@ Future<int> findGlobalsForTool() async {
     path.join(flutterDirectory.path, 'packages', 'flutter_tools'),
   ], workingDirectory: flutterDirectory.path);
   int total = 0;
-  await for (final String entry in git.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())) {
+  await for (final String entry
+      in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;

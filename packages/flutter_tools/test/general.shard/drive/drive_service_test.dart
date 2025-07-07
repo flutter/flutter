@@ -438,25 +438,26 @@ FlutterDriverService setUpDriverService({
     ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
-    vmServiceConnector: (
-      Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
-    }) async {
-      if (httpUri.scheme != 'http') {
-        fail('Expected an HTTP scheme, found $httpUri');
-      }
-      if (httpUri.path.endsWith('/ws')) {
-        fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
-      }
-      return vmService!;
-    },
+    vmServiceConnector:
+        (
+          Uri httpUri, {
+          ReloadSources? reloadSources,
+          Restart? restart,
+          CompileExpression? compileExpression,
+          FlutterProject? flutterProject,
+          PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+          io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+          Device? device,
+          required Logger logger,
+        }) async {
+          if (httpUri.scheme != 'http') {
+            fail('Expected an HTTP scheme, found $httpUri');
+          }
+          if (httpUri.path.endsWith('/ws')) {
+            fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
+          }
+          return vmService!;
+        },
   );
 }
 

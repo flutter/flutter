@@ -29,7 +29,9 @@ void main() {
       Theme(
         data: theme,
         child: Material(
-          child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2, onChanged: log.add)),
+          child: Center(
+            child: Radio<int>(key: key, value: 1, groupValue: 2, onChanged: log.add),
+          ),
         ),
       ),
     );
@@ -63,7 +65,9 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: theme,
-        child: Material(child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2))),
+        child: Material(
+          child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2)),
+        ),
       ),
     );
 
@@ -309,7 +313,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(data: theme, child: const Material(child: Radio<int>(value: 1, groupValue: 2))),
+      Theme(
+        data: theme,
+        child: const Material(child: Radio<int>(value: 1, groupValue: 2)),
+      ),
     );
 
     expect(
@@ -358,7 +365,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(data: theme, child: const Material(child: Radio<int>(value: 2, groupValue: 2))),
+      Theme(
+        data: theme,
+        child: const Material(child: Radio<int>(value: 2, groupValue: 2)),
+      ),
     );
 
     expect(
@@ -555,14 +565,13 @@ void main() {
                   child: Radio<int>(
                     key: radioKey,
                     value: 0,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (int? newValue) {
+                            setState(() {
+                              groupValue = newValue;
+                            });
+                          }
+                        : null,
                     focusColor: Colors.orange[500],
                     autofocus: true,
                     focusNode: focusNode,
@@ -651,14 +660,13 @@ void main() {
                   child: Radio<int>(
                     key: radioKey,
                     value: 0,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (int? newValue) {
+                            setState(() {
+                              groupValue = newValue;
+                            });
+                          }
+                        : null,
                     focusColor: Colors.orange[500],
                     autofocus: true,
                     focusNode: focusNode,
@@ -742,14 +750,13 @@ void main() {
                   child: Radio<int>(
                     key: radioKey,
                     value: 0,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (int? newValue) {
+                            setState(() {
+                              groupValue = newValue;
+                            });
+                          }
+                        : null,
                     hoverColor: Colors.orange[500],
                     groupValue: groupValue,
                   ),
@@ -837,14 +844,13 @@ void main() {
                   child: Radio<int>(
                     key: radioKey,
                     value: 0,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (int? newValue) {
+                            setState(() {
+                              groupValue = newValue;
+                            });
+                          }
+                        : null,
                     hoverColor: Colors.orange[500],
                     groupValue: groupValue,
                   ),
@@ -934,14 +940,13 @@ void main() {
                       Radio<int>(
                         key: radioKey0,
                         value: 0,
-                        onChanged:
-                            enabled
-                                ? (int? newValue) {
-                                  setState(() {
-                                    groupValue = newValue;
-                                  });
-                                }
-                                : null,
+                        onChanged: enabled
+                            ? (int? newValue) {
+                                setState(() {
+                                  groupValue = newValue;
+                                });
+                              }
+                            : null,
                         hoverColor: Colors.orange[500],
                         groupValue: groupValue,
                         autofocus: true,
@@ -949,28 +954,26 @@ void main() {
                       Radio<int>(
                         key: radioKey1,
                         value: 1,
-                        onChanged:
-                            enabled
-                                ? (int? newValue) {
-                                  setState(() {
-                                    groupValue = newValue;
-                                  });
-                                }
-                                : null,
+                        onChanged: enabled
+                            ? (int? newValue) {
+                                setState(() {
+                                  groupValue = newValue;
+                                });
+                              }
+                            : null,
                         hoverColor: Colors.orange[500],
                         groupValue: groupValue,
                       ),
                       Radio<int>(
                         key: radioKey2,
                         value: 2,
-                        onChanged:
-                            enabled
-                                ? (int? newValue) {
-                                  setState(() {
-                                    groupValue = newValue;
-                                  });
-                                }
-                                : null,
+                        onChanged: enabled
+                            ? (int? newValue) {
+                                setState(() {
+                                  groupValue = newValue;
+                                });
+                              }
+                            : null,
                         hoverColor: Colors.orange[500],
                         groupValue: groupValue,
                         focusNode: focusNode2,
@@ -1169,14 +1172,13 @@ void main() {
                     key: radioKey,
                     value: 0,
                     fillColor: fillColor,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (int? newValue) {
+                            setState(() {
+                              groupValue = newValue;
+                            });
+                          }
+                        : null,
                     groupValue: groupValue,
                   ),
                 );
@@ -1568,10 +1570,9 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child:
-                show
-                    ? Radio<bool>(key: key, value: true, groupValue: false, onChanged: (_) {})
-                    : Container(),
+            child: show
+                ? Radio<bool>(key: key, value: true, groupValue: false, onChanged: (_) {})
+                : Container(),
           ),
         ),
       );

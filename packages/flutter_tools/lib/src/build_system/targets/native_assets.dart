@@ -39,8 +39,10 @@ abstract class DartBuild extends Target {
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String? runPackageName = packageConfig.packages
+          .where((Package p) => p.root == projectUri)
+          .firstOrNull
+          ?.name;
       if (runPackageName == null) {
         throw StateError(
           'Could not determine run package name. '

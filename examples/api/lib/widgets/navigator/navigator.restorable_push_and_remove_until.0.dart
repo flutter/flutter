@@ -42,12 +42,11 @@ class _RestorablePushAndRemoveUntilExampleState extends State<RestorablePushAndR
     return Scaffold(
       appBar: AppBar(title: const Text('Sample Code')),
       floatingActionButton: FloatingActionButton(
-        onPressed:
-            () => Navigator.restorablePushAndRemoveUntil(
-              context,
-              _myRouteBuilder,
-              ModalRoute.withName('/'),
-            ),
+        onPressed: () => Navigator.restorablePushAndRemoveUntil(
+          context,
+          _myRouteBuilder,
+          ModalRoute.withName('/'),
+        ),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

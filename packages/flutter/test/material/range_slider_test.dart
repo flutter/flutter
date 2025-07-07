@@ -1117,12 +1117,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged =
-        !enabled
-            ? null
-            : (RangeValues newValues) {
-              values = newValues;
-            };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -1418,12 +1417,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<RangeValues>? onChanged =
-            !enabled
-                ? null
-                : (RangeValues newValues) {
-                  values = newValues;
-                };
+        final ValueChanged<RangeValues>? onChanged = !enabled
+            ? null
+            : (RangeValues newValues) {
+                values = newValues;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -2134,11 +2132,10 @@ void main() {
       values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -2174,13 +2171,12 @@ void main() {
         ),
       );
 
-      final RenderObject renderObject =
-          tester.allRenderObjects
-              .where(
-                (RenderObject renderObject) =>
-                    renderObject.runtimeType.toString() == '_RenderRangeSlider',
-              )
-              .first;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       expect(
         renderObject,
@@ -2239,13 +2235,12 @@ void main() {
         ),
       );
 
-      final RenderObject renderObject =
-          tester.allRenderObjects
-              .where(
-                (RenderObject renderObject) =>
-                    renderObject.runtimeType.toString() == '_RenderRangeSlider',
-              )
-              .first;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       //There should no gap between the inactive track and active track.
       expect(
@@ -2285,13 +2280,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame(10));
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where(
-              (RenderObject renderObject) =>
-                  renderObject.runtimeType.toString() == '_RenderRangeSlider',
-            )
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where(
+          (RenderObject renderObject) =>
+              renderObject.runtimeType.toString() == '_RenderRangeSlider',
+        )
+        .first;
 
     // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
     await tester.pumpWidget(buildFrame(15));
@@ -2431,14 +2425,13 @@ void main() {
                       }),
                       values: values,
                       max: 100.0,
-                      onChanged:
-                          enabled
-                              ? (RangeValues newValues) {
-                                setState(() {
-                                  values = newValues;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (RangeValues newValues) {
+                              setState(() {
+                                values = newValues;
+                              });
+                            }
+                          : null,
                       onChangeStart: enabled ? (RangeValues newValues) {} : null,
                       onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                     ),
@@ -2496,14 +2489,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2562,14 +2554,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2634,14 +2625,13 @@ void main() {
 
                       return null;
                     }),
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                     onChangeStart: enabled ? (RangeValues newValues) {} : null,
                     onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                   ),
@@ -2881,13 +2871,13 @@ void main() {
         valueIndicatorBox,
         isVisible
             ? (paints
-              ..path(color: theme.valueIndicatorColor)
-              ..paragraph())
-            : isNot(
-              paints
                 ..path(color: theme.valueIndicatorColor)
-                ..paragraph(),
-            ),
+                ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
       );
       if (dragged) {
         await gesture!.up();
@@ -3321,12 +3311,11 @@ void main() {
     final Color valueIndicatorColor = colorScheme.inverseSurface;
     RangeValues values = const RangeValues(25.0, 75.0);
     Widget buildApp({int? divisions, bool enabled = true}) {
-      final ValueChanged<RangeValues>? onChanged =
-          !enabled
-              ? null
-              : (RangeValues newValues) {
-                values = newValues;
-              };
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
       return MaterialApp(
         home: Material(
           child: Center(

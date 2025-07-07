@@ -2939,10 +2939,9 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
 
-    final String? debugTransformLabel =
-        _debugTransformLabel.isNotEmpty
-            ? _debugTransformLabel
-            : _debugKnownTransforms[constraintsTransform];
+    final String? debugTransformLabel = _debugTransformLabel.isNotEmpty
+        ? _debugTransformLabel
+        : _debugKnownTransforms[constraintsTransform];
 
     if (debugTransformLabel != null) {
       properties.add(DiagnosticsProperty<String>('constraints transform', debugTransformLabel));
@@ -4127,10 +4126,9 @@ class Stack extends MultiChildRenderObjectWidget {
         debugCheckHasDirectionality(
           context,
           why: "to resolve the 'alignment' argument",
-          hint:
-              alignment == AlignmentDirectional.topStart
-                  ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
-                  : null,
+          hint: alignment == AlignmentDirectional.topStart
+              ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction."
+              : null,
           alternative:
               "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
         ),
@@ -6361,8 +6359,9 @@ class RawImage extends LeafRenderObjectWidget {
       repeat: repeat,
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
-      textDirection:
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+      textDirection: matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null,
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
@@ -6390,8 +6389,9 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection =
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
+      ..textDirection = matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
       ..filterQuality = filterQuality;
@@ -6496,8 +6496,8 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    final DefaultAssetBundle? result =
-        context.dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
+    final DefaultAssetBundle? result = context
+        .dependOnInheritedWidgetOfExactType<DefaultAssetBundle>();
     return result?.bundle ?? rootBundle;
   }
 
@@ -7472,10 +7472,9 @@ class Semantics extends SingleChildRenderObjectWidget {
            onSetSelection: onSetSelection,
            onSetText: onSetText,
            customSemanticsActions: customSemanticsActions,
-           hintOverrides:
-               onTapHint != null || onLongPressHint != null
-                   ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
-                   : null,
+           hintOverrides: onTapHint != null || onLongPressHint != null
+               ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
+               : null,
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,

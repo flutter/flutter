@@ -36,7 +36,9 @@ Widget buildFrame({
   // an outer container where we can change the size.
   return Directionality(
     textDirection: textDirection,
-    child: Center(child: SizedBox(width: pageSize.width, height: pageSize.height, child: child)),
+    child: Center(
+      child: SizedBox(width: pageSize.width, height: pageSize.height, child: child),
+    ),
   );
 }
 
@@ -59,7 +61,10 @@ Future<void> pageRight(WidgetTester tester) {
 void main() {
   testWidgets('PageView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: PageView())),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: PageView()),
+      ),
     );
   });
 

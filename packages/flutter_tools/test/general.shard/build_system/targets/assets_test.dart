@@ -275,22 +275,22 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_capitalizer_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              onRun: (List<String> args) {
-                final ArgResults parsedArgs = (ArgParser()
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_capitalizer_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
                       ..addOption('input')
                       ..addOption('output')
                       ..addOption('color')
@@ -298,20 +298,20 @@ flutter:
                       ..addFlag('bbb', abbr: 'b'))
                     .parse(args);
 
-                expect(parsedArgs['aaa'], true);
-                expect(parsedArgs['bbb'], true);
-                expect(parsedArgs['color'], 'green');
+            expect(parsedArgs['aaa'], true);
+            expect(parsedArgs['bbb'], true);
+            expect(parsedArgs['color'], 'green');
 
-                final File input = fileSystem.file(parsedArgs['input'] as String);
-                expect(input, exists);
-                final String inputContents = input.readAsStringSync();
-                expect(inputContents, 'abc');
-                fileSystem.file(parsedArgs['output'])
-                  ..createSync()
-                  ..writeAsStringSync(inputContents.toUpperCase());
-              },
-            ),
-          ]),
+            final File input = fileSystem.file(parsedArgs['input'] as String);
+            expect(input, exists);
+            final String inputContents = input.readAsStringSync();
+            expect(inputContents, 'abc');
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputContents.toUpperCase());
+          },
+        ),
+      ]),
     },
   );
 
@@ -360,23 +360,22 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              exitCode: 1,
-            ),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          exitCode: 1,
+        ),
+      ]),
     },
   );
 
@@ -395,10 +394,11 @@ flutter:
           RegExp('--output=.*'),
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
           final String input = parsedArgs['input'] as String;
           final String output = parsedArgs['output'] as String;
@@ -485,10 +485,11 @@ flutter:
         ],
         onRun: (List<String> args) {
           totalTransformsRunning++;
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
           final String input = parsedArgs['input'] as String;
           final String output = parsedArgs['output'] as String;

@@ -818,12 +818,11 @@ class ToggleButtons extends StatelessWidget {
               alignment: Alignment.center,
               splashFactory: InkRipple.splashFactory,
             ),
-            onPressed:
-                onPressed != null
-                    ? () {
-                      onPressed!(index);
-                    }
-                    : null,
+            onPressed: onPressed != null
+                ? () {
+                    onPressed!(index);
+                  }
+                : null,
             child: children[index],
           ),
         ),
@@ -1327,26 +1326,21 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
     final Rect center = outer.deflate(borderSide.width / 2.0);
     const double sweepAngle = math.pi / 2.0;
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          center,
-          topLeft:
-              (borderRadius.topLeft.x * borderRadius.topLeft.y != 0.0)
-                  ? borderRadius.topLeft
-                  : Radius.zero,
-          topRight:
-              (borderRadius.topRight.x * borderRadius.topRight.y != 0.0)
-                  ? borderRadius.topRight
-                  : Radius.zero,
-          bottomLeft:
-              (borderRadius.bottomLeft.x * borderRadius.bottomLeft.y != 0.0)
-                  ? borderRadius.bottomLeft
-                  : Radius.zero,
-          bottomRight:
-              (borderRadius.bottomRight.x * borderRadius.bottomRight.y != 0.0)
-                  ? borderRadius.bottomRight
-                  : Radius.zero,
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      center,
+      topLeft: (borderRadius.topLeft.x * borderRadius.topLeft.y != 0.0)
+          ? borderRadius.topLeft
+          : Radius.zero,
+      topRight: (borderRadius.topRight.x * borderRadius.topRight.y != 0.0)
+          ? borderRadius.topRight
+          : Radius.zero,
+      bottomLeft: (borderRadius.bottomLeft.x * borderRadius.bottomLeft.y != 0.0)
+          ? borderRadius.bottomLeft
+          : Radius.zero,
+      bottomRight: (borderRadius.bottomRight.x * borderRadius.bottomRight.y != 0.0)
+          ? borderRadius.bottomRight
+          : Radius.zero,
+    ).scaleRadii();
 
     final Rect tlCorner = Rect.fromLTWH(
       rrect.left,

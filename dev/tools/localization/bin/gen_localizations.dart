@@ -240,10 +240,9 @@ String generateArbBasedLocalizationSubclasses({
       }
     }
 
-    final String scriptCodeMessage =
-        scriptCodeCount == 0
-            ? ''
-            : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
+    final String scriptCodeMessage = scriptCodeCount == 0
+        ? ''
+        : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0) {
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
@@ -643,58 +642,55 @@ void main(List<String> rawArgs) {
     removeUndefinedLocalizations(cupertinoLocaleToResources);
   }
 
-  final String? widgetsLocalizations =
-      options.writeToFile || !options.cupertinoOnly
-          ? generateArbBasedLocalizationSubclasses(
-            localeToResources: widgetsLocaleToResources,
-            localeToResourceAttributes: widgetsLocaleToResourceAttributes,
-            generatedClassPrefix: 'WidgetsLocalization',
-            baseClass: 'GlobalWidgetsLocalizations',
-            generateHeader: generateWidgetsHeader,
-            generateConstructor: generateWidgetsConstructor,
-            generateConstructorForCountrySubClass: generateWidgetsConstructorForCountrySubclass,
-            factoryName: widgetsFactoryName,
-            factoryDeclaration: widgetsFactoryDeclaration,
-            callsFactoryWithConst: true,
-            factoryArguments: widgetsFactoryArguments,
-            supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
-            supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
-          )
-          : null;
-  final String? materialLocalizations =
-      options.writeToFile || !options.cupertinoOnly
-          ? generateArbBasedLocalizationSubclasses(
-            localeToResources: materialLocaleToResources,
-            localeToResourceAttributes: materialLocaleToResourceAttributes,
-            generatedClassPrefix: 'MaterialLocalization',
-            baseClass: 'GlobalMaterialLocalizations',
-            generateHeader: generateMaterialHeader,
-            generateConstructor: generateMaterialConstructor,
-            factoryName: materialFactoryName,
-            factoryDeclaration: materialFactoryDeclaration,
-            callsFactoryWithConst: false,
-            factoryArguments: materialFactoryArguments,
-            supportedLanguagesConstant: materialSupportedLanguagesConstant,
-            supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
-          )
-          : null;
-  final String? cupertinoLocalizations =
-      options.writeToFile || !options.materialOnly
-          ? generateArbBasedLocalizationSubclasses(
-            localeToResources: cupertinoLocaleToResources,
-            localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
-            generatedClassPrefix: 'CupertinoLocalization',
-            baseClass: 'GlobalCupertinoLocalizations',
-            generateHeader: generateCupertinoHeader,
-            generateConstructor: generateCupertinoConstructor,
-            factoryName: cupertinoFactoryName,
-            factoryDeclaration: cupertinoFactoryDeclaration,
-            callsFactoryWithConst: false,
-            factoryArguments: cupertinoFactoryArguments,
-            supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
-            supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
-          )
-          : null;
+  final String? widgetsLocalizations = options.writeToFile || !options.cupertinoOnly
+      ? generateArbBasedLocalizationSubclasses(
+          localeToResources: widgetsLocaleToResources,
+          localeToResourceAttributes: widgetsLocaleToResourceAttributes,
+          generatedClassPrefix: 'WidgetsLocalization',
+          baseClass: 'GlobalWidgetsLocalizations',
+          generateHeader: generateWidgetsHeader,
+          generateConstructor: generateWidgetsConstructor,
+          generateConstructorForCountrySubClass: generateWidgetsConstructorForCountrySubclass,
+          factoryName: widgetsFactoryName,
+          factoryDeclaration: widgetsFactoryDeclaration,
+          callsFactoryWithConst: true,
+          factoryArguments: widgetsFactoryArguments,
+          supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
+        )
+      : null;
+  final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly
+      ? generateArbBasedLocalizationSubclasses(
+          localeToResources: materialLocaleToResources,
+          localeToResourceAttributes: materialLocaleToResourceAttributes,
+          generatedClassPrefix: 'MaterialLocalization',
+          baseClass: 'GlobalMaterialLocalizations',
+          generateHeader: generateMaterialHeader,
+          generateConstructor: generateMaterialConstructor,
+          factoryName: materialFactoryName,
+          factoryDeclaration: materialFactoryDeclaration,
+          callsFactoryWithConst: false,
+          factoryArguments: materialFactoryArguments,
+          supportedLanguagesConstant: materialSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+        )
+      : null;
+  final String? cupertinoLocalizations = options.writeToFile || !options.materialOnly
+      ? generateArbBasedLocalizationSubclasses(
+          localeToResources: cupertinoLocaleToResources,
+          localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+          generatedClassPrefix: 'CupertinoLocalization',
+          baseClass: 'GlobalCupertinoLocalizations',
+          generateHeader: generateCupertinoHeader,
+          generateConstructor: generateCupertinoConstructor,
+          factoryName: cupertinoFactoryName,
+          factoryDeclaration: cupertinoFactoryDeclaration,
+          callsFactoryWithConst: false,
+          factoryArguments: cupertinoFactoryArguments,
+          supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+        )
+      : null;
 
   if (options.writeToFile) {
     final File widgetsLocalizationsFile = File(

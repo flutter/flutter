@@ -676,8 +676,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       onPressedChangedByGesture(touchDownSegment);
       onHighlightChangedByGesture(touchDownSegment);
     } else {
-      final T? segment =
-          _hasDraggedTooFar(details) ? null : segmentForXPosition(details.localPosition.dx);
+      final T? segment = _hasDraggedTooFar(details)
+          ? null
+          : segmentForXPosition(details.localPosition.dx);
       onPressedChangedByGesture(segment);
     }
   }

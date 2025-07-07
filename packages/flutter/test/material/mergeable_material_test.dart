@@ -62,7 +62,9 @@ BorderRadius? getBorderRadius(WidgetTester tester, int index) {
 void main() {
   testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SingleChildScrollView(child: MergeableMaterial()))),
+      const MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: MergeableMaterial())),
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));

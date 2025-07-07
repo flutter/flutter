@@ -73,10 +73,9 @@ StreamChannel<Object?> _postMessageChannel() {
     <JSObject>[channel.port2].toJS,
   );
 
-  final JSFunction eventCallback =
-      (web.Event event) {
-        controller.local.sink.add(event.data.dartify());
-      }.toJS;
+  final JSFunction eventCallback = (web.Event event) {
+    controller.local.sink.add(event.data.dartify());
+  }.toJS;
   channel.port1.addEventListener('message'.toJS, eventCallback);
   channel.port1.start();
   controller.local.stream.listen(

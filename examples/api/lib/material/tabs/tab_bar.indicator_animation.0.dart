@@ -68,15 +68,11 @@ class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
                   _tabIndicatorAnimation = styles.first;
                 });
               },
-              segments:
-                  indicatorAnimationSegments.map<ButtonSegment<TabIndicatorAnimation>>((
-                    (TabIndicatorAnimation, String) shirt,
-                  ) {
-                    return ButtonSegment<TabIndicatorAnimation>(
-                      value: shirt.$1,
-                      label: Text(shirt.$2),
-                    );
-                  }).toList(),
+              segments: indicatorAnimationSegments.map<ButtonSegment<TabIndicatorAnimation>>((
+                (TabIndicatorAnimation, String) shirt,
+              ) {
+                return ButtonSegment<TabIndicatorAnimation>(value: shirt.$1, label: Text(shirt.$2));
+              }).toList(),
             ),
             const SizedBox(height: 16),
             const Expanded(

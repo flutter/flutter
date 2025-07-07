@@ -1182,8 +1182,8 @@ class RenderFancyProxyBox extends RenderFancyBox
 }
 
 void expectAssertionError() {
-  final FlutterErrorDetails errorDetails =
-      TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance
+      .takeFlutterErrorDetails()!;
   final bool asserted = errorDetails.toString().contains('Failed assertion');
   if (!asserted) {
     FlutterError.reportError(errorDetails);

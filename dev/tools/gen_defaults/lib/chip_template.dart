@@ -17,7 +17,8 @@ class ChipTemplate extends TokenTemplate {
   static const String variant = '.flat';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(

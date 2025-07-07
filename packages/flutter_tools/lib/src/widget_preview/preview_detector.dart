@@ -148,10 +148,9 @@ class PreviewDetector {
       _dependencyGraph[location] = libraryDetails;
     } else {
       // Why is this working with an empty file system on Linux?
-      final PreviewPath removedLibraryPath =
-          _dependencyGraph.values
-              .firstWhere((LibraryPreviewNode element) => element.files.contains(eventPath))
-              .path;
+      final PreviewPath removedLibraryPath = _dependencyGraph.values
+          .firstWhere((LibraryPreviewNode element) => element.files.contains(eventPath))
+          .path;
       // The library previously had previews that were removed.
       logger.printStatus('Previews removed from $eventPath');
       _dependencyGraph.remove(removedLibraryPath);

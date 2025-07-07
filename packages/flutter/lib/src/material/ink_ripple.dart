@@ -143,10 +143,9 @@ class InkRipple extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, color: color) {
     // Immediately begin fading-in the initial splash.
-    _fadeInController =
-        AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..forward();
+    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..forward();
     _fadeIn = _fadeInController.drive(IntTween(begin: 0, end: color.alpha));
 
     // Controls the splash radius and its center. Starts upon confirm.
@@ -162,10 +161,9 @@ class InkRipple extends InteractiveInkFeature {
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController =
-        AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..addStatusListener(_handleAlphaStatusChanged);
+    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged);
     _fadeOut = _fadeOutController.drive(
       IntTween(begin: color.alpha, end: 0).chain(_fadeOutIntervalTween),
     );
@@ -240,12 +238,11 @@ class InkRipple extends InteractiveInkFeature {
     final Paint paint = Paint()..color = color.withAlpha(alpha);
     final Rect? rect = _clipCallback?.call();
     // Splash moves to the center of the reference box.
-    final Offset center =
-        Offset.lerp(
-          _position,
-          rect != null ? rect.center : referenceBox.size.center(Offset.zero),
-          Curves.ease.transform(_radiusController.value),
-        )!;
+    final Offset center = Offset.lerp(
+      _position,
+      rect != null ? rect.center : referenceBox.size.center(Offset.zero),
+      Curves.ease.transform(_radiusController.value),
+    )!;
     paintInkCircle(
       canvas: canvas,
       transform: transform,

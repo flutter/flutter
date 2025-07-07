@@ -279,10 +279,9 @@ class RestorationManager extends ChangeNotifier {
     }
 
     final RestorationBucket? oldRoot = _rootBucket;
-    _rootBucket =
-        enabled
-            ? RestorationBucket.root(manager: this, rawData: _decodeRestorationData(data))
-            : null;
+    _rootBucket = enabled
+        ? RestorationBucket.root(manager: this, rawData: _decodeRestorationData(data))
+        : null;
     _rootBucketIsValid = true;
     assert(_pendingRootBucket == null || !_pendingRootBucket!.isCompleted);
     _pendingRootBucket?.complete(_rootBucket);

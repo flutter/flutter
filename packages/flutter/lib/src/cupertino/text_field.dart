@@ -1028,31 +1028,31 @@ class CupertinoTextField extends StatefulWidget {
       DiagnosticsProperty<List<String>>(
         'contentCommitMimeTypes',
         contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
-        defaultValue:
-            contentInsertionConfiguration == null
-                ? const <String>[]
-                : kDefaultContentInsertionMimeTypes,
+        defaultValue: contentInsertionConfiguration == null
+            ? const <String>[]
+            : kDefaultContentInsertionMimeTypes,
       ),
     );
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    },
+    magnifierBuilder:
+        (
+          BuildContext context,
+          MagnifierController controller,
+          ValueNotifier<MagnifierInfo> magnifierInfo,
+        ) {
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.android:
+            case TargetPlatform.iOS:
+              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              return null;
+          }
+        },
   );
 
   /// Returns a new [SpellCheckConfiguration] where the given configuration has
@@ -1152,10 +1152,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1331,39 +1330,38 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
       builder: (BuildContext context, TextEditingValue text, Widget? child) {
         final bool hasText = text.text.isNotEmpty;
         final String? placeholderText = widget.placeholder;
-        final Widget? placeholder =
-            placeholderText == null
-                ? null
-                // Make the placeholder invisible when hasText is true.
-                : Visibility(
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  maintainState: true,
-                  visible: !hasText,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: widget.padding,
-                      child: Text(
-                        placeholderText,
-                        // This is to make sure the text field is always tall enough
-                        // to accommodate the first line of the placeholder, so the
-                        // text does not shrink vertically as you type (however in
-                        // rare circumstances, the height may still change when
-                        // there's no placeholder text).
-                        maxLines: hasText ? 1 : widget.maxLines,
-                        overflow: placeholderStyle.overflow,
-                        style: placeholderStyle,
-                        textAlign: widget.textAlign,
-                      ),
+        final Widget? placeholder = placeholderText == null
+            ? null
+            // Make the placeholder invisible when hasText is true.
+            : Visibility(
+                maintainAnimation: true,
+                maintainSize: true,
+                maintainState: true,
+                visible: !hasText,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: widget.padding,
+                    child: Text(
+                      placeholderText,
+                      // This is to make sure the text field is always tall enough
+                      // to accommodate the first line of the placeholder, so the
+                      // text does not shrink vertically as you type (however in
+                      // rare circumstances, the height may still change when
+                      // there's no placeholder text).
+                      maxLines: hasText ? 1 : widget.maxLines,
+                      overflow: placeholderStyle.overflow,
+                      style: placeholderStyle,
+                      textAlign: widget.textAlign,
                     ),
                   ),
-                );
+                ),
+              );
 
         final Widget? prefixWidget =
             _shouldShowAttachment(attachment: widget.prefixMode, hasText: hasText)
-                ? widget.prefix
-                : null;
+            ? widget.prefix
+            : null;
 
         // Show user specified suffix if applicable and fall back to clear button.
         final bool showUserSuffix = _shouldShowAttachment(
@@ -1416,15 +1414,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
-    final AutofillConfiguration autofillConfiguration =
-        autofillHints != null
-            ? AutofillConfiguration(
-              uniqueIdentifier: autofillId,
-              autofillHints: autofillHints,
-              currentEditingValue: _effectiveController.value,
-              hintText: widget.placeholder,
-            )
-            : AutofillConfiguration.disabled;
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: widget.placeholder,
+          )
+        : AutofillConfiguration.disabled;
 
     return _editableText.textInputConfiguration.copyWith(
       autofillConfiguration: autofillConfiguration,
@@ -1518,26 +1515,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
       }
 
-      resolvedBorder =
-          border.runtimeType != Border
-              ? border
-              : Border(
-                top: resolveBorderSide(border.top),
-                left: resolveBorderSide(border.left),
-                bottom: resolveBorderSide(border.bottom),
-                right: resolveBorderSide(border.right),
-              );
+      resolvedBorder = border.runtimeType != Border
+          ? border
+          : Border(
+              top: resolveBorderSide(border.top),
+              left: resolveBorderSide(border.left),
+              bottom: resolveBorderSide(border.bottom),
+              right: resolveBorderSide(border.right),
+            );
     }
 
     // Use the default disabled color only if the box decoration was not set.
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color:
-          enabled
-              ? decorationColor
-              : (widget.decoration == _kDefaultRoundedBorderDecoration
-                  ? disabledColor
-                  : widget.decoration?.color),
+      color: enabled
+          ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+                ? disabledColor
+                : widget.decoration?.color),
     );
 
     final Color selectionColor =
@@ -1634,47 +1629,45 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
 
     return Semantics(
       enabled: enabled,
-      onTap:
-          !enabled || widget.readOnly
-              ? null
-              : () {
-                if (!controller.selection.isValid) {
-                  controller.selection = TextSelection.collapsed(offset: controller.text.length);
-                }
-                _requestKeyboard();
-              },
+      onTap: !enabled || widget.readOnly
+          ? null
+          : () {
+              if (!controller.selection.isValid) {
+                controller.selection = TextSelection.collapsed(offset: controller.text.length);
+              }
+              _requestKeyboard();
+            },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-      onFocus:
-          enabled
-              ? () {
-                assert(
-                  _effectiveFocusNode.canRequestFocus,
-                  'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                  'of this text field cannot gain focus. This likely indicates a bug. '
-                  'If this text field cannot be focused (e.g. because it is not '
-                  'enabled), then its corresponding semantics node must be configured '
-                  'such that the assistive technology cannot request focus on it.',
-                );
+      onFocus: enabled
+          ? () {
+              assert(
+                _effectiveFocusNode.canRequestFocus,
+                'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                'of this text field cannot gain focus. This likely indicates a bug. '
+                'If this text field cannot be focused (e.g. because it is not '
+                'enabled), then its corresponding semantics node must be configured '
+                'such that the assistive technology cannot request focus on it.',
+              );
 
-                if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
-                  _effectiveFocusNode.requestFocus();
-                } else if (!widget.readOnly) {
-                  // If the platform requested focus, that means that previously the
-                  // platform believed that the text field did not have focus (even
-                  // though Flutter's widget system believed otherwise). This likely
-                  // means that the on-screen keyboard is hidden, or more generally,
-                  // there is no current editing session in this field. To correct
-                  // that, keyboard must be requested.
-                  //
-                  // A concrete scenario where this can happen is when the user
-                  // dismisses the keyboard on the web. The editing session is
-                  // closed by the engine, but the text field widget stays focused
-                  // in the framework.
-                  _requestKeyboard();
-                }
+              if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                _effectiveFocusNode.requestFocus();
+              } else if (!widget.readOnly) {
+                // If the platform requested focus, that means that previously the
+                // platform believed that the text field did not have focus (even
+                // though Flutter's widget system believed otherwise). This likely
+                // means that the on-screen keyboard is hidden, or more generally,
+                // there is no current editing session in this field. To correct
+                // that, keyboard must be requested.
+                //
+                // A concrete scenario where this can happen is when the user
+                // dismisses the keyboard on the web. The editing session is
+                // closed by the engine, but the text field widget stays focused
+                // in the framework.
+                _requestKeyboard();
               }
-              : null,
+            }
+          : null,
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,
@@ -1804,17 +1797,17 @@ class _RenderBaselineAlignedStack extends RenderBox
       getBaseline: ChildLayoutHelper.getBaseline,
     );
 
-    final double editableTextBaselineValue =
-        editableText.getDistanceToBaseline(editableTextBaseline)!;
+    final double editableTextBaselineValue = editableText.getDistanceToBaseline(
+      editableTextBaseline,
+    )!;
     final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
       placeholderBaseline,
     );
 
     assert(placeholder != null || placeholderBaselineValue == null);
-    final double placeholderY =
-        placeholderBaselineValue != null
-            ? editableTextBaselineValue - placeholderBaselineValue
-            : 0.0;
+    final double placeholderY = placeholderBaselineValue != null
+        ? editableTextBaselineValue - placeholderBaselineValue
+        : 0.0;
 
     final double offsetYAdjustment = math.max(0, placeholderY);
     editableTextParentData.offset = Offset(0, offsetYAdjustment);
@@ -1856,8 +1849,11 @@ class _RenderBaselineAlignedStack extends RenderBox
 
     final RenderBox editableText = _editableTextChild;
     final Size editableTextSize = layoutChild(editableText, constraints);
-    final double editableTextBaselineValue =
-        getBaseline(editableText, constraints, editableTextBaseline)!;
+    final double editableTextBaselineValue = getBaseline(
+      editableText,
+      constraints,
+      editableTextBaseline,
+    )!;
     final double editableTextDescent = editableTextSize.height - editableTextBaselineValue;
 
     Size? placeholderSize;

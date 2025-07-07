@@ -180,10 +180,9 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     // Configure input from either specified file or stdin.
-    final Stream<List<int>> input =
-        (argResults?.wasParsed('input') ?? false)
-            ? _fileSystem.file(stringArg('input')).openRead()
-            : _stdio.stdin;
+    final Stream<List<int>> input = (argResults?.wasParsed('input') ?? false)
+        ? _fileSystem.file(stringArg('input')).openRead()
+        : _stdio.stdin;
 
     final Map<int, Uint8List> unitSymbols = <int, Uint8List>{
       for (final MapEntry<int, File> entry in _unitDebugInfoPathMap().entries)
@@ -293,10 +292,9 @@ class DwarfSymbolizationService {
     required IOSink output,
     required Map<int, Uint8List> unitSymbols,
   }) async {
-    final UnitSymbolsTransformer unitSymbolsTransformer =
-        _transformer != null
-            ? ((Map<int, Uint8List> m) => _transformer(m[rootLoadingUnitId]!))
-            : _unitsTransformer;
+    final UnitSymbolsTransformer unitSymbolsTransformer = _transformer != null
+        ? ((Map<int, Uint8List> m) => _transformer(m[rootLoadingUnitId]!))
+        : _unitsTransformer;
     final Completer<void> onDone = Completer<void>();
     StreamSubscription<void>? subscription;
     subscription = input
