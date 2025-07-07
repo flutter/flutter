@@ -130,10 +130,12 @@ void main() {
 
       expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
 
-      final List<String> featureNames =
-          featureFlags.allFeatures.map((Feature feature) => feature.name).toList();
-      final List<String> testFeatureNames =
-          testFeatureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+      final List<String> featureNames = featureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+      final List<String> testFeatureNames = testFeatureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
 
       expect(featureNames, unorderedEquals(testFeatureNames));
     });

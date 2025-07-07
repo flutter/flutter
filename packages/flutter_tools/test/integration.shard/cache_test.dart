@@ -166,8 +166,12 @@ Future<void> main(List<String> args) async {
       '--version',
     ]);
     // Parse 'arch' out of a string like '... "os_arch"\n'.
-    final String dartTargetArch =
-        (dartResult.stdout as String).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    final String dartTargetArch = (dartResult.stdout as String)
+        .trim()
+        .split(' ')
+        .last
+        .replaceAll('"', '')
+        .split('_')[1];
     final ProcessResult unameResult = await const LocalProcessManager().run(<String>[
       'uname',
       '-m',

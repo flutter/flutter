@@ -376,14 +376,13 @@ void main() {
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       child: const Text('X'),
-                      onPressed:
-                          () => showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2018),
-                            lastDate: DateTime(2030),
-                            builder: (BuildContext context, Widget? child) => const SizedBox(),
-                          ),
+                      onPressed: () => showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2018),
+                        lastDate: DateTime(2030),
+                        builder: (BuildContext context, Widget? child) => const SizedBox(),
+                      ),
                     );
                   },
                 ),
@@ -415,15 +414,14 @@ void main() {
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       child: const Text('X'),
-                      onPressed:
-                          () => showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2018),
-                            lastDate: DateTime(2030),
-                            barrierDismissible: false,
-                            builder: (BuildContext context, Widget? child) => const SizedBox(),
-                          ),
+                      onPressed: () => showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2018),
+                        lastDate: DateTime(2030),
+                        barrierDismissible: false,
+                        builder: (BuildContext context, Widget? child) => const SizedBox(),
+                      ),
                     );
                   },
                 ),
@@ -453,14 +451,13 @@ void main() {
                 builder: (BuildContext context) {
                   return ElevatedButton(
                     child: const Text('X'),
-                    onPressed:
-                        () => showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2018),
-                          lastDate: DateTime(2030),
-                          builder: (BuildContext context, Widget? child) => const SizedBox(),
-                        ),
+                    onPressed: () => showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      builder: (BuildContext context, Widget? child) => const SizedBox(),
+                    ),
                   );
                 },
               ),
@@ -485,15 +482,14 @@ void main() {
                 builder: (BuildContext context) {
                   return ElevatedButton(
                     child: const Text('X'),
-                    onPressed:
-                        () => showDatePicker(
-                          context: context,
-                          barrierColor: Colors.pink,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2018),
-                          lastDate: DateTime(2030),
-                          builder: (BuildContext context, Widget? child) => const SizedBox(),
-                        ),
+                    onPressed: () => showDatePicker(
+                      context: context,
+                      barrierColor: Colors.pink,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      builder: (BuildContext context, Widget? child) => const SizedBox(),
+                    ),
                   );
                 },
               ),
@@ -517,15 +513,14 @@ void main() {
                 builder: (BuildContext context) {
                   return ElevatedButton(
                     child: const Text('X'),
-                    onPressed:
-                        () => showDatePicker(
-                          context: context,
-                          barrierLabel: 'Custom Label',
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2018),
-                          lastDate: DateTime(2030),
-                          builder: (BuildContext context, Widget? child) => const SizedBox(),
-                        ),
+                    onPressed: () => showDatePicker(
+                      context: context,
+                      barrierLabel: 'Custom Label',
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      builder: (BuildContext context, Widget? child) => const SizedBox(),
+                    ),
                   );
                 },
               ),
@@ -1489,8 +1484,9 @@ void main() {
 
     testWidgets('Default InputDecoration', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
-        final InputDecoration decoration =
-            tester.widget<TextField>(find.byType(TextField)).decoration!;
+        final InputDecoration decoration = tester
+            .widget<TextField>(find.byType(TextField))
+            .decoration!;
         expect(decoration.border, const OutlineInputBorder());
         expect(decoration.filled, false);
         expect(decoration.hintText, 'mm/dd/yyyy');
@@ -2508,8 +2504,9 @@ void main() {
 
       testWidgets('Default InputDecoration', (WidgetTester tester) async {
         await prepareDatePicker(tester, (Future<DateTime?> date) async {
-          final InputDecoration decoration =
-              tester.widget<TextField>(find.byType(TextField)).decoration!;
+          final InputDecoration decoration = tester
+              .widget<TextField>(find.byType(TextField))
+              .decoration!;
           expect(decoration.border, const UnderlineInputBorder());
           expect(decoration.filled, false);
           expect(decoration.hintText, 'mm/dd/yyyy');

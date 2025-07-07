@@ -1081,8 +1081,8 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength =
           originalIndex <= replacementRange.start && originalIndex < replacementRange.end
-              ? 0
-              : replacementString.length;
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
       final int removedLength =
           originalIndex.clamp(replacementRange.start, replacementRange.end) -
@@ -1708,10 +1708,9 @@ TextInputAction _toTextInputAction(String action) {
     'TextInputAction.emergencyCall' => TextInputAction.emergencyCall,
     'TextInputAction.done' => TextInputAction.done,
     'TextInputAction.newline' => TextInputAction.newline,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text input action: $action'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text input action: $action'),
+    ]),
   };
 }
 
@@ -1720,10 +1719,9 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     'FloatingCursorDragState.start' => FloatingCursorDragState.Start,
     'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
     'FloatingCursorDragState.end' => FloatingCursorDragState.End,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text cursor action: $state'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text cursor action: $state'),
+    ]),
   };
 }
 
@@ -1736,10 +1734,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
     encoded['Y'] != null,
     'You must provide a value for the vertical location of the floating cursor.',
   );
-  final Offset offset =
-      state == FloatingCursorDragState.Update
-          ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
-          : Offset.zero;
+  final Offset offset = state == FloatingCursorDragState.Update
+      ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
+      : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1811,8 +1808,8 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel =
-          newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
+      _instance._channel = newChannel
+        ..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1981,14 +1978,13 @@ class TextInput {
           stack: stack,
           library: 'services library',
           context: ErrorDescription('during method call ${call.method}'),
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<MethodCall>(
-                  'call',
-                  call,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<MethodCall>(
+              'call',
+              call,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ),
       );
       rethrow;
@@ -2005,11 +2001,10 @@ class TextInput {
         );
         return;
       case 'TextInputClient.requestElementsInRect':
-        final List<double> args =
-            (methodCall.arguments as List<dynamic>)
-                .cast<num>()
-                .map<double>((num value) => value.toDouble())
-                .toList();
+        final List<double> args = (methodCall.arguments as List<dynamic>)
+            .cast<num>()
+            .map<double>((num value) => value.toDouble())
+            .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
               final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
@@ -2775,8 +2770,9 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
     ServicesBinding.systemContextMenuClient = this;
 
-    final List<Map<String, dynamic>> itemsJson =
-        items.map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json).toList();
+    final List<Map<String, dynamic>> itemsJson = items
+        .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
+        .toList();
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;

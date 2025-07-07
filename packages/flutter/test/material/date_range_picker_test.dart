@@ -485,15 +485,12 @@ void main() {
     await preparePicker(
       tester,
       (Future<DateTimeRange?> range) async {},
-      selectableDayPredicate: (
-        DateTime day,
-        DateTime? selectedStartDate,
-        DateTime? selectedEndDate,
-      ) {
-        expect(selectedStartDate, DateTime(2017, DateTime.january, 13));
-        expect(selectedEndDate, DateTime(2017, DateTime.january, 15));
-        return true;
-      },
+      selectableDayPredicate:
+          (DateTime day, DateTime? selectedStartDate, DateTime? selectedEndDate) {
+            expect(selectedStartDate, DateTime(2017, DateTime.january, 13));
+            expect(selectedEndDate, DateTime(2017, DateTime.january, 15));
+            return true;
+          },
     );
   });
 
@@ -971,16 +968,18 @@ void main() {
 
     testWidgets('Default InputDecoration', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
-        final InputDecoration startDateDecoration =
-            tester.widget<TextField>(find.byType(TextField).first).decoration!;
+        final InputDecoration startDateDecoration = tester
+            .widget<TextField>(find.byType(TextField).first)
+            .decoration!;
         expect(startDateDecoration.border, const OutlineInputBorder());
         expect(startDateDecoration.filled, false);
         expect(startDateDecoration.hintText, 'mm/dd/yyyy');
         expect(startDateDecoration.labelText, 'Start Date');
         expect(startDateDecoration.errorText, null);
 
-        final InputDecoration endDateDecoration =
-            tester.widget<TextField>(find.byType(TextField).last).decoration!;
+        final InputDecoration endDateDecoration = tester
+            .widget<TextField>(find.byType(TextField).last)
+            .decoration!;
         expect(endDateDecoration.border, const OutlineInputBorder());
         expect(endDateDecoration.filled, false);
         expect(endDateDecoration.hintText, 'mm/dd/yyyy');
@@ -1812,16 +1811,18 @@ void main() {
 
       testWidgets('Default InputDecoration', (WidgetTester tester) async {
         await preparePicker(tester, (Future<DateTimeRange?> range) async {
-          final InputDecoration startDateDecoration =
-              tester.widget<TextField>(find.byType(TextField).first).decoration!;
+          final InputDecoration startDateDecoration = tester
+              .widget<TextField>(find.byType(TextField).first)
+              .decoration!;
           expect(startDateDecoration.border, const UnderlineInputBorder());
           expect(startDateDecoration.filled, false);
           expect(startDateDecoration.hintText, 'mm/dd/yyyy');
           expect(startDateDecoration.labelText, 'Start Date');
           expect(startDateDecoration.errorText, null);
 
-          final InputDecoration endDateDecoration =
-              tester.widget<TextField>(find.byType(TextField).last).decoration!;
+          final InputDecoration endDateDecoration = tester
+              .widget<TextField>(find.byType(TextField).last)
+              .decoration!;
           expect(endDateDecoration.border, const UnderlineInputBorder());
           expect(endDateDecoration.filled, false);
           expect(endDateDecoration.hintText, 'mm/dd/yyyy');

@@ -180,12 +180,11 @@ void main() async {
   test('Simple .toImage', () async {
     final Image image = await toImage(
       (Canvas canvas) {
-        final Path circlePath =
-            Path()..addOval(Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
-        final Paint paint =
-            Paint()
-              ..isAntiAlias = false
-              ..style = PaintingStyle.fill;
+        final Path circlePath = Path()
+          ..addOval(Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
+        final Paint paint = Paint()
+          ..isAntiAlias = false
+          ..style = PaintingStyle.fill;
         canvas.drawPath(circlePath, paint);
       },
       100,
@@ -505,10 +504,9 @@ void main() async {
     final Image image = await toImage(
       (Canvas canvas) {
         canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.srcOver);
-        final Paint paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 5;
+        final Paint paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5;
         drawText(canvas, 'Hello World', const Offset(20, 10));
         canvas.drawCircle(const Offset(150, 25), 15, paint..color = const Color(0xFF00FF00));
         drawText(canvas, 'Regular text', const Offset(20, 60));
@@ -777,10 +775,9 @@ void main() async {
     canvas.drawColor(const Color(0xFFE0E0E0), BlendMode.src);
 
     void draw(Rect rect, double x, double y, Color color) {
-      final Paint paint =
-          Paint()
-            ..color = color
-            ..strokeWidth = 5.0;
+      final Paint paint = Paint()
+        ..color = color
+        ..strokeWidth = 5.0;
 
       final Rect tallThin = Rect.fromLTRB(
         min(rect.left, rect.right) - 10,
@@ -1141,10 +1138,9 @@ void main() async {
     final Canvas canvas = Canvas(recorder);
     const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
     const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
-    final Path clip =
-        Path()
-          ..addRect(clipBounds)
-          ..addOval(clipBounds);
+    final Path clip = Path()
+      ..addRect(clipBounds)
+      ..addOval(clipBounds);
     canvas.clipPath(clip);
 
     // Save initial return values for testing restored values
@@ -1184,10 +1180,9 @@ void main() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    final Path clip =
-        Path()
-          ..addRect(clipBounds)
-          ..addOval(clipBounds);
+    final Path clip = Path()
+      ..addRect(clipBounds)
+      ..addOval(clipBounds);
     canvas.clipPath(clip, doAntiAlias: false);
 
     // Save initial return values for testing restored values
@@ -1228,14 +1223,12 @@ void main() async {
     final Canvas canvas = Canvas(recorder);
     const Rect clipBounds1 = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
     const Rect clipBounds2 = Rect.fromLTRB(10.0, 10.0, 20.0, 20.0);
-    final Path clip1 =
-        Path()
-          ..addRect(clipBounds1)
-          ..addOval(clipBounds1);
-    final Path clip2 =
-        Path()
-          ..addRect(clipBounds2)
-          ..addOval(clipBounds2);
+    final Path clip1 = Path()
+      ..addRect(clipBounds1)
+      ..addOval(clipBounds1);
+    final Path clip2 = Path()
+      ..addRect(clipBounds2)
+      ..addOval(clipBounds2);
 
     canvas.save();
     canvas.clipPath(clip1, doAntiAlias: false);
@@ -1352,18 +1345,17 @@ void main() async {
   });
 
   test('Paint, when copied, has equivalent fields', () {
-    final Paint paint =
-        Paint()
-          ..color = const Color(0xFF0000FF)
-          ..strokeWidth = 10.0
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..style = PaintingStyle.stroke
-          ..blendMode = BlendMode.srcOver
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
-          ..filterQuality = FilterQuality.high
-          ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
-          ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
 
     final Paint paintCopy = Paint.from(paint);
     expect(paintCopy.color, equals(const Color(0xFF0000FF)));
@@ -1382,18 +1374,17 @@ void main() async {
   });
 
   test('Paint, when copied, does not mutate the original instance', () {
-    final Paint paint =
-        Paint()
-          ..color = const Color(0xFF0000FF)
-          ..strokeWidth = 10.0
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..style = PaintingStyle.stroke
-          ..blendMode = BlendMode.srcOver
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
-          ..filterQuality = FilterQuality.high
-          ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
-          ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
 
     // Make a copy, and change every field of the copy.
     Paint.from(paint)
@@ -1422,18 +1413,17 @@ void main() async {
   });
 
   test('Paint, when copied, the original changing does not mutate the copy', () {
-    final Paint paint =
-        Paint()
-          ..color = const Color(0xFF0000FF)
-          ..strokeWidth = 10.0
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..style = PaintingStyle.stroke
-          ..blendMode = BlendMode.srcOver
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
-          ..filterQuality = FilterQuality.high
-          ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
-          ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
 
     // Make a copy, and change every field of the original.
     final Paint paintCopy = Paint.from(paint);
@@ -1580,12 +1570,11 @@ void main() async {
     final Paint grey = Paint()..color = const Color.fromARGB(255, 127, 127, 127);
     final Paint unblurredFill = Paint()..shader = gradient;
     final Paint blurredFill = Paint.from(unblurredFill)..imageFilter = filter;
-    final Paint unblurredStroke =
-        Paint.from(unblurredFill)
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..strokeWidth = 10;
+    final Paint unblurredStroke = Paint.from(unblurredFill)
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 10;
     final Paint blurredStroke = Paint.from(unblurredStroke)..imageFilter = filter;
     final Image image = makeCheckerBoard(20, 20);
     const Rect imageBounds = Rect.fromLTRB(0, 0, 20, 20);
