@@ -1701,11 +1701,6 @@ public class PlatformViewsControllerTest {
                   }
 
                   @Override
-                  public Surface getForcedNewSurface() {
-                    return null;
-                  }
-
-                  @Override
                   public boolean handlesCropAndRotation() {
                     return false;
                   }
@@ -1713,41 +1708,7 @@ public class PlatformViewsControllerTest {
                   public void scheduleFrame() {}
                 };
               }
-<<<<<<< HEAD
-
-              @Override
-              public void release() {}
-
-              @Override
-              public int getWidth() {
-                return 0;
-              }
-
-              @Override
-              public int getHeight() {
-                return 0;
-              }
-
-              @Override
-              public void setSize(int width, int height) {}
-
-              @Override
-              public Surface getSurface() {
-                return null;
-              }
-
-              @Override
-              public boolean handlesCropAndRotation() {
-                return false;
-              }
-
-              public void scheduleFrame() {}
-            };
-          }
-        };
-=======
             });
->>>>>>> df21e0b0ab8 ([android] release background image readers on <= Android 14 (#171193))
 
     platformViewsController.attach(context, registry, executor);
 
