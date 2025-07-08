@@ -178,7 +178,8 @@ void main() {
         'For the most up to date stable version of flutter, consider using the "beta" channel '
         'instead. The Flutter "beta" channel enjoys all the same automated testing as the '
         '"stable" channel, but is updated roughly once a month instead of once a quarter.\n'
-        'To change channel, run the "flutter channel beta" command.\n',
+        'To change channel, run the "flutter channel beta" command.\n'
+        'Took 0.0s\n',
       );
     },
     overrides: <Type, Generator>{

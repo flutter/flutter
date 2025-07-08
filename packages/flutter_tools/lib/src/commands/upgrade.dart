@@ -8,6 +8,8 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/time.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
@@ -30,10 +32,9 @@ class UpgradeCommand extends FlutterCommand {
         help: 'Force upgrade the flutter branch, potentially discarding local changes.',
         negatable: false,
       )
-      ..addFlag(
+      ..addOption(
         'continue',
         hide: !verboseHelp,
-        negatable: false,
         help:
             'Trigger the second half of the upgrade flow. This should not be invoked '
             'manually. It is used re-entrantly by the standard upgrade command after '
@@ -69,12 +70,21 @@ class UpgradeCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
+  UpgradePhase _parsePhaseFromContinueArg() {
+    final String? continueArg = stringArg('continue');
+    if (continueArg == null) {
+      return const UpgradePhase.firstHalf();
+    } else {
+      return UpgradePhase.secondHalf(upgradeStartedAt: DateTime.parse(continueArg));
+    }
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() {
     _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
+      _parsePhaseFromContinueArg(),
       force: boolArg('force'),
-      continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(
         globals.processUtils,
@@ -89,37 +99,58 @@ class UpgradeCommand extends FlutterCommand {
   }
 }
 
+@immutable
+sealed class UpgradePhase {
+  const factory UpgradePhase.firstHalf() = _FirstHalf;
+  const factory UpgradePhase.secondHalf({required DateTime upgradeStartedAt}) = _SecondHalf;
+}
+
+final class _FirstHalf implements UpgradePhase {
+  const _FirstHalf();
+}
+
+final class _SecondHalf implements UpgradePhase {
+  const _SecondHalf({required this.upgradeStartedAt});
+
+  /// What time the original `flutter upgrade` command started at.
+  final DateTime upgradeStartedAt;
+}
+
 @visibleForTesting
 class UpgradeCommandRunner {
   String? workingDirectory; // set in runCommand() above
 
-  Future<FlutterCommandResult> runCommand({
+  @visibleForTesting
+  SystemClock clock = const SystemClock();
+
+  Future<FlutterCommandResult> runCommand(
+    UpgradePhase phase, {
     required bool force,
-    required bool continueFlow,
     required bool testFlow,
     required GitTagVersion gitTagVersion,
     required FlutterVersion flutterVersion,
     required bool verifyOnly,
-    Stopwatch Function() stopwatch = Stopwatch.new,
   }) async {
-    final Stopwatch timer = stopwatch()..start();
-    if (!continueFlow) {
-      await runCommandFirstHalf(
-        force: force,
-        gitTagVersion: gitTagVersion,
-        flutterVersion: flutterVersion,
-        testFlow: testFlow,
-        verifyOnly: verifyOnly,
-      );
-    } else {
-      await runCommandSecondHalf(flutterVersion);
+    switch (phase) {
+      case _FirstHalf():
+        await _runCommandFirstHalf(
+          startedAt: clock.now(),
+          force: force,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          testFlow: testFlow,
+          verifyOnly: verifyOnly,
+        );
+      case _SecondHalf(:final DateTime upgradeStartedAt):
+        await _runCommandSecondHalf(flutterVersion);
+        final Duration execution = clock.now().difference(upgradeStartedAt);
+        globals.printStatus('Took ${getElapsedAsMinutesOrSeconds(execution)}');
     }
-    final Duration execution = timer.elapsed;
-    globals.printStatus('Took ${execution.inMinutes} minutes');
     return FlutterCommandResult.success();
   }
 
-  Future<void> runCommandFirstHalf({
+  Future<void> _runCommandFirstHalf({
+    required DateTime startedAt,
     required bool force,
     required GitTagVersion gitTagVersion,
     required FlutterVersion flutterVersion,
@@ -186,7 +217,7 @@ class UpgradeCommandRunner {
     );
     await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {
-      await flutterUpgradeContinue();
+      await flutterUpgradeContinue(startedAt: startedAt);
     }
   }
 
@@ -198,12 +229,14 @@ class UpgradeCommandRunner {
     globals.persistentToolState!.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
   }
 
-  Future<void> flutterUpgradeContinue() async {
+  @visibleForTesting
+  Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
         '--continue',
+        startedAt.toIso8601String(),
         '--no-version-check',
       ],
       workingDirectory: workingDirectory,
@@ -217,7 +250,7 @@ class UpgradeCommandRunner {
 
   // This method should only be called if the upgrade command is invoked
   // re-entrantly with the `--continue` flag
-  Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
+  Future<void> _runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
@@ -244,6 +277,7 @@ class UpgradeCommandRunner {
     }
   }
 
+  @protected
   Future<bool> hasUncommittedChanges() async {
     try {
       final RunResult result = await globals.processUtils.run(
@@ -266,6 +300,7 @@ class UpgradeCommandRunner {
   /// Returns the remote HEAD flutter version.
   ///
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
+  @visibleForTesting
   Future<FlutterVersion> fetchLatestVersion({required FlutterVersion localVersion}) async {
     String revision;
     try {
@@ -327,6 +362,7 @@ class UpgradeCommandRunner {
   /// This is a reset instead of fast forward because if we are on a release
   /// branch with cherry picks, there may not be a direct fast-forward route
   /// to the next release.
+  @visibleForTesting
   Future<void> attemptReset(String newRevision) async {
     try {
       await globals.processUtils.run(
@@ -340,6 +376,7 @@ class UpgradeCommandRunner {
   }
 
   /// Update the user's packages.
+  @protected
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
@@ -355,6 +392,7 @@ class UpgradeCommandRunner {
   }
 
   /// Run flutter doctor in case requirements have changed.
+  @protected
   Future<void> runDoctor() async {
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
