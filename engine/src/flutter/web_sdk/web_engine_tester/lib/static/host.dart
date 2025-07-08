@@ -137,8 +137,9 @@ void main() {
           for (final DomSubscription subscription in _domSubscriptions.remove(message['id'])!) {
             subscription.cancel();
           }
-          for (final StreamSubscription<dynamic> subscription
-              in _streamSubscriptions.remove(message['id'])!) {
+          for (final StreamSubscription<dynamic> subscription in _streamSubscriptions.remove(
+            message['id'],
+          )!) {
             subscription.cancel();
           }
         }
@@ -152,18 +153,16 @@ void main() {
       );
 
       _jsApi = _JSApi(
-        resume:
-            () {
-              if (!domDocument.body!.classList.contains('paused')) {
-                return;
-              }
-              domDocument.body!.classList.remove('paused');
-              serverChannel.sink.add(<String, String>{'command': 'resume'});
-            }.toJS,
-        restartCurrent:
-            () {
-              serverChannel.sink.add(<String, String>{'command': 'restart'});
-            }.toJS,
+        resume: () {
+          if (!domDocument.body!.classList.contains('paused')) {
+            return;
+          }
+          domDocument.body!.classList.remove('paused');
+          serverChannel.sink.add(<String, String>{'command': 'resume'});
+        }.toJS,
+        restartCurrent: () {
+          serverChannel.sink.add(<String, String>{'command': 'restart'});
+        }.toJS,
       );
     },
     (dynamic error, StackTrace stackTrace) {

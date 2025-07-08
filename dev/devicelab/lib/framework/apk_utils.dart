@@ -300,18 +300,6 @@ android {
     });
   }
 
-  Future<void> setMinSdkVersion(int sdkVersion) async {
-    final File buildScript = appBuildFile;
-
-    buildScript.openWrite(mode: FileMode.append).write('''
-android {
-    defaultConfig {
-        minSdk = $sdkVersion
-    }
-}
-    ''');
-  }
-
   Future<void> getPackages() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('pub', options: <String>['get']);

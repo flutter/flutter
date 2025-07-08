@@ -701,10 +701,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final FakeIosProject project = FakeIosProject(fileSystem: MemoryFileSystem.test());
-      final File pbxprojFile =
-          project.xcodeProjectInfoFile
-            ..createSync(recursive: true)
-            ..writeAsStringSync(flutterAssetPbxProjLines);
+      final File pbxprojFile = project.xcodeProjectInfoFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(flutterAssetPbxProjLines);
 
       bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);

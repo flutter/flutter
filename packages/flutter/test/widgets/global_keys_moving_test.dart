@@ -39,7 +39,10 @@ class KeyedWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(key: key1, child: StatefulLeaf(key: key2));
+    return Container(
+      key: key1,
+      child: StatefulLeaf(key: key2),
+    );
   }
 }
 

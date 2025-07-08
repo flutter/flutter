@@ -274,20 +274,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    final Daemon? daemon =
-        boolArg('machine')
-            ? Daemon(
-              DaemonConnection(
-                daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
-                logger: _logger,
-              ),
-              notifyingLogger:
-                  (_logger is NotifyingLogger)
-                      ? _logger
-                      : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
-              logToStdout: true,
-            )
-            : null;
+    final Daemon? daemon = boolArg('machine')
+        ? Daemon(
+            DaemonConnection(
+              daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+              logger: _logger,
+            ),
+            notifyingLogger: (_logger is NotifyingLogger)
+                ? _logger
+                : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
+            logToStdout: true,
+          )
+        : null;
 
     Stream<Uri>? vmServiceUri;
     final bool usesIpv6 = ipv6!;
@@ -346,16 +344,15 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         return uri;
       });
     } else {
-      vmServiceUri =
-          Stream<Uri>.fromFuture(
-            buildVMServiceUri(
-              device,
-              debugUri?.host ?? hostname,
-              debugPort ?? debugUri!.port,
-              hostVmservicePort,
-              debugUri?.path,
-            ),
-          ).asBroadcastStream();
+      vmServiceUri = Stream<Uri>.fromFuture(
+        buildVMServiceUri(
+          device,
+          debugUri?.host ?? hostname,
+          debugPort ?? debugUri!.port,
+          hostVmservicePort,
+          debugUri?.path,
+        ),
+      ).asBroadcastStream();
     }
 
     _terminal.usesTerminalUi = daemon == null;
@@ -488,16 +485,16 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
-          flutterDevices,
-          target: targetFile,
-          debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
-          projectRootPath: stringArg('project-root'),
-          dillOutputPath: stringArg('output-dill'),
-          flutterProject: flutterProject,
-          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-          analytics: analytics,
-        )
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
+            projectRootPath: stringArg('project-root'),
+            dillOutputPath: stringArg('output-dill'),
+            flutterProject: flutterProject,
+            nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            analytics: analytics,
+          )
         : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
   }
 

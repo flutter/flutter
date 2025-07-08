@@ -391,11 +391,10 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
   expect(dylib, exists);
-  final String infoPlist =
-      frameworksFolder
-          .childDirectory('$frameworkName.framework')
-          .childFile('Info.plist')
-          .readAsStringSync();
+  final String infoPlist = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile('Info.plist')
+      .readAsStringSync();
   expect(infoPlist, '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

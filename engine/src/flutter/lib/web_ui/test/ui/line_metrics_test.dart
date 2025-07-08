@@ -22,8 +22,9 @@ Future<void> testMain() async {
 
   test('empty paragraph', () {
     const double fontSize = 10.0;
-    final ui.Paragraph paragraph =
-        ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize)).build();
+    final ui.Paragraph paragraph = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontSize: fontSize),
+    ).build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     expect(paragraph.getLineMetricsAt(0), isNull);
@@ -129,8 +130,8 @@ Future<void> testMain() async {
       ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
     );
     builder.addText(text);
-    final ui.Paragraph paragraph =
-        builder.build()..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
 
     expect(paragraph.maxIntrinsicWidth, text.length * fontSize);
     switch (paragraph.computeLineMetrics()) {

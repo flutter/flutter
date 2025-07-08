@@ -23,21 +23,19 @@ class _GridPaperPainter extends CustomPainter {
     final Paint linePaint = Paint()..color = color;
     final double allDivisions = (divisions * subdivisions).toDouble();
     for (double x = 0.0; x <= size.width; x += interval / allDivisions) {
-      linePaint.strokeWidth =
-          (x % interval == 0.0)
-              ? 1.0
-              : (x % (interval / subdivisions) == 0.0)
-              ? 0.5
-              : 0.25;
+      linePaint.strokeWidth = (x % interval == 0.0)
+          ? 1.0
+          : (x % (interval / subdivisions) == 0.0)
+          ? 0.5
+          : 0.25;
       canvas.drawLine(Offset(x, 0.0), Offset(x, size.height), linePaint);
     }
     for (double y = 0.0; y <= size.height; y += interval / allDivisions) {
-      linePaint.strokeWidth =
-          (y % interval == 0.0)
-              ? 1.0
-              : (y % (interval / subdivisions) == 0.0)
-              ? 0.5
-              : 0.25;
+      linePaint.strokeWidth = (y % interval == 0.0)
+          ? 1.0
+          : (y % (interval / subdivisions) == 0.0)
+          ? 0.5
+          : 0.25;
       canvas.drawLine(Offset(0.0, y), Offset(size.width, y), linePaint);
     }
   }

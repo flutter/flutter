@@ -14,7 +14,8 @@ class PopupMenuTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(elevation: ${elevation('md.comp.menu.container')});

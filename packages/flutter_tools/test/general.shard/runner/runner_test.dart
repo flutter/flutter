@@ -107,17 +107,14 @@ void main() {
         expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -165,17 +162,14 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
         Analytics: () => fakeAnalytics,
         BotDetector: () => const FakeBotDetector(true),
         io.Stdio: () => fakeStdio,
@@ -222,18 +216,15 @@ void main() {
         await completer.future;
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
@@ -296,22 +287,23 @@ void main() {
         expect(sentDetails.command, 'flutter crash');
         expect(sentDetails.error.toString(), 'Exception: an exception % --');
         expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+        expect(
+          await sentDetails.doctorText.text,
+          stringContainsInOrder(<String>['[!] Flutter', 'Dart version 12']),
+          reason: 'Captures flutter doctor -v, which includes Dart version',
+        );
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
@@ -408,19 +400,19 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
-          Platform:
-              () => FakePlatform(
-                environment: <String, String>{
-                  'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                  'FLUTTER_ROOT': '/',
-                },
-              ),
+          Platform: () => FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+              'FLUTTER_ROOT': '/',
+            },
+          ),
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
           CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-          HttpClientFactory: () => () => FakeHttpClient.any(),
+          HttpClientFactory: () =>
+              () => FakeHttpClient.any(),
         },
       );
     });
