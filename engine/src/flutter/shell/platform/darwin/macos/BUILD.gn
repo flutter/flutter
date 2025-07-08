@@ -133,6 +133,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewEngineProvider.h",
     "framework/Source/FlutterViewEngineProvider.mm",
     "framework/Source/FlutterViewProvider.h",
+    "framework/Source/FlutterWindowController.h",
+    "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
   ]
 
@@ -143,8 +145,10 @@ source_set("flutter_framework_source") {
     "//flutter/flow:flow",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
+    "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:availability_version_check",
     "//flutter/shell/platform/darwin/common:framework_common",
@@ -238,6 +242,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/KeyCodeMapTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
+    "framework/source/FlutterWindowControllerTest.mm",
   ]
 
   deps = [
@@ -245,7 +250,9 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_framework_source",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
+    "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/common:test_utils_swift",
     "//flutter/shell/platform/darwin/graphics",

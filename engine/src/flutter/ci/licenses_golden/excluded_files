@@ -435,6 +435,7 @@
 ../../../flutter/shell/platform/windows/task_runner_unittests.cc
 ../../../flutter/shell/platform/windows/testing
 ../../../flutter/shell/platform/windows/text_input_plugin_unittest.cc
+../../../flutter/shell/platform/windows/window_manager_unittests.cc
 ../../../flutter/shell/platform/windows/window_proc_delegate_manager_unittests.cc
 ../../../flutter/shell/platform/windows/window_unittests.cc
 ../../../flutter/shell/platform/windows/windows_lifecycle_manager_unittests.cc

@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_COMMON_GEOMETRY_H_
 
 #include <cmath>
+#include <limits>
+#include <optional>
 
 namespace flutter {
 
@@ -45,6 +47,7 @@ class Size {
   bool operator==(const Size& other) const {
     return width_ == other.width_ && height_ == other.height_;
   }
+  bool operator!=(const Size& other) const { return !(*this == other); }
 
  private:
   double width_ = 0.0;
@@ -76,6 +79,27 @@ class Rect {
  private:
   Point origin_;
   Size size_;
+};
+
+// Encapsulates a min and max size that represents the constraints that some
+// arbitrary box is able to take up.
+class BoxConstraints {
+ public:
+  BoxConstraints() = default;
+  BoxConstraints(const std::optional<Size>& smallest,
+                 const std::optional<Size>& biggest)
+      : smallest_(smallest.value_or(Size(0, 0))),
+        biggest_(
+            biggest.value_or(Size(std::numeric_limits<double>::infinity(),
+                                  std::numeric_limits<double>::infinity()))) {}
+  BoxConstraints(const BoxConstraints& other) = default;
+  Size biggest() const { return biggest_; }
+  Size smallest() const { return smallest_; }
+
+ private:
+  Size smallest_ = Size(0, 0);
+  Size biggest_ = Size(std::numeric_limits<double>::infinity(),
+                       std::numeric_limits<double>::infinity());
 };
 
 }  // namespace flutter

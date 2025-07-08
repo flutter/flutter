@@ -14,7 +14,7 @@
 #include <map>
 #include <unordered_set>
 
-@interface FlutterPlatformViewController : NSViewController
+@interface FlutterPlatformViewController : NSObject
 @end
 
 @interface FlutterPlatformViewController ()
