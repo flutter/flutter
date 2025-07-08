@@ -336,7 +336,6 @@ class WebTestsSuite {
     required String webRenderer,
     required String testAppDirectory,
     String? driver,
-    bool expectFailure = false,
     bool silenceBrowserOutput = false,
     bool expectWriteResponseFile = false,
     String expectResponseFileContent = '',
@@ -373,7 +372,6 @@ class WebTestsSuite {
         ],
         '--no-web-resources-cdn',
       ],
-      expectNonZeroExit: expectFailure,
       workingDirectory: testAppDirectory,
       environment: <String, String>{'FLUTTER_WEB': 'true'},
       removeLine: (String line) {
