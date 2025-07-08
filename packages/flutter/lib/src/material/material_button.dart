@@ -400,7 +400,6 @@ class MaterialButton extends StatelessWidget {
       onLongPress: onLongPress,
       enableFeedback: enableFeedback,
       onHighlightChanged: onHighlightChanged,
-      // TODO(camsim99): (RawMaterialButton): This seems to defer directly to RawMaterialButton so we know that default is not choosing the right cursor either.
       mouseCursor: mouseCursor,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.labelLarge!.copyWith(color: buttonTheme.getTextColor(this)),

@@ -362,12 +362,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(
       widget.constraints,
     );
-    // TODO(camsim99): Will look into RawMaterialButton children, then ultimately detemrine if this
-    // resolves desirably.
     final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       materialStates,
     );
+    print('CAMILLE: RawMaterialButton effectiveMouseCursor is $effectiveMouseCursor');
     final EdgeInsetsGeometry padding = widget.padding
         .add(
           EdgeInsets.only(

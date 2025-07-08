@@ -34,7 +34,6 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
 @immutable
-// TODO(camsim99): Update ScrollableDetails to include input device as needed.
 class ScrollableDetails {
   /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({

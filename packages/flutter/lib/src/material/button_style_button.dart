@@ -379,11 +379,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final ButtonStyle? themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
 
-    // TODO(camsim99: This has to be overriden by ButtonStyleButton children I think. Will look into them.
-    // TODO(camsim99): This method is used to resolve the cursor for ButtonStyleButton.
-    // Widget's ButtonStyle prioritized then the Theme's ButtonStyle ??? then the default value.
-    // TODO(camsim99): Thought -- should we be changing the default value (or do we want it to be
-    // ranked higher than the theme? I guess the question is what priority that I want)
     T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
       final T? widgetValue = getProperty(widgetStyle);
       final T? themeValue = getProperty(themeStyle);
@@ -434,8 +429,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       (ButtonStyle? style) => style?.shape,
     );
 
-    // TODO(camsim99): mouse cursor for ButtonStyleButton determined here. The function we
-    // see is a MaterialPropertyResolver
     final MaterialStateMouseCursor mouseCursor = _MouseCursor((Set<MaterialState> states) {
       return effectiveValue((ButtonStyle? style) {
         print(
@@ -568,7 +561,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         onTap: widget.onPressed,
         onLongPress: widget.onLongPress,
         onHover: widget.onHover,
-        mouseCursor: mouseCursor, // TODO(camsim99): cursor piped here for ButtonStyleButton
+        mouseCursor: mouseCursor,
         enableFeedback: resolvedEnableFeedback,
         focusNode: widget.focusNode,
         canRequestFocus: widget.enabled,

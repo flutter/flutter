@@ -641,7 +641,6 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final MouseCursor? widgetCursor;
   final MaterialStateProperty<MouseCursor?>? themeCursor;
 
-  // TODO(camsim99): (RawMaterialButton) Make sure this resolves as expected (I think clickable may be the culprit if theme doesn't get in the way)
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??

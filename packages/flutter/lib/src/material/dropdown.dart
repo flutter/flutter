@@ -1619,11 +1619,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    // TODO(camsim99): Need to make sure this resolves as desired (may be clickable's fault). Will check children.
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      MaterialStateMouseCursor.clickable,
-      <MaterialState>{if (!_enabled) MaterialState.disabled},
-    );
+    // TODO(camsim99): Figure out if I even need this variable.
+    const MouseCursor effectiveMouseCursor = SystemMouseCursors.basic;
 
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires

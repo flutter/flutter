@@ -427,10 +427,7 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
   static MouseCursor _clickable(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.basic;
-    }
-    return SystemMouseCursors.click;
+    return SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently
