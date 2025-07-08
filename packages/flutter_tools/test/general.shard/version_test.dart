@@ -1424,6 +1424,43 @@ void main() {
     GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
+
+  group('$FlutterEngineStampFromFile', () {
+    late FileSystem fs;
+    const String flutterRoot = '/path/to/flutter';
+
+    setUpAll(() {
+      Cache.disableLocking();
+      VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
+    });
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      fs.directory(flutterRoot).createSync(recursive: true);
+    });
+
+    test('parses expected values', () {
+      final File engineStampFile = fs.file(
+        fs.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
+      )..createSync(recursive: true);
+      engineStampFile.writeAsStringSync(
+        json.encode(<String, Object?>{
+          'build_time_ms': 1751385874000,
+          'git_revision': 'abcdefg',
+          'git_revision_date': '2014-10-02 00:00:00.000Z',
+          'content_hash': 'deadbeef',
+        }),
+      );
+      final FlutterEngineStampFromFile? result = FlutterEngineStampFromFile.tryParseFromFile(
+        engineStampFile,
+      );
+      expect(result, isNotNull);
+      expect(result!.buildDate, DateTime.fromMillisecondsSinceEpoch(1751385874000));
+      expect(result.gitRevision, 'abcdefg');
+      expect(result.gitRevisionDate, DateTime.parse('2014-10-02 00:00:00.000Z'));
+      expect(result.contentHash, 'deadbeef');
+    });
+  });
 }
 
 class FakeCache extends Fake implements Cache {
