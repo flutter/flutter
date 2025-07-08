@@ -285,6 +285,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
+    if (debuggingOptions.profileMicrotasks) {
+      addFlag('profile-microtasks=true');
+    }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
@@ -294,6 +297,9 @@ abstract class DesktopDevice extends Device {
       case ImpellerStatus.disabled:
       case ImpellerStatus.platformDefault:
         addFlag('enable-impeller=false');
+    }
+    if (debuggingOptions.enableFlutterGpu) {
+      addFlag('enable-flutter-gpu=true');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.

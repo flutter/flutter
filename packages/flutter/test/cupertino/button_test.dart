@@ -146,7 +146,9 @@ void main() {
 
   testWidgets('Button child alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: CupertinoButton(onPressed: () {}, child: const Text('button'))),
+      CupertinoApp(
+        home: CupertinoButton(onPressed: () {}, child: const Text('button')),
+      ),
     );
 
     Align align = tester.firstWidget<Align>(
@@ -256,7 +258,9 @@ void main() {
 
   testWidgets('Enabled button animates', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     await tester.tap(find.byType(CupertinoButton));
@@ -291,7 +295,9 @@ void main() {
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     // Keep a "down" gesture on the button
@@ -342,7 +348,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
-        child: Center(child: CupertinoButton(onPressed: () {}, child: const Text('ABC'))),
+        child: Center(
+          child: CupertinoButton(onPressed: () {}, child: const Text('ABC')),
+        ),
       ),
     );
 
@@ -639,7 +647,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me'))),
+        home: Center(
+          child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me')),
+        ),
       ),
     );
 
@@ -668,11 +678,10 @@ void main() {
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final BorderSide defaultFocusBorder = BorderSide(
-      color:
-          HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-              .withLightness(kCupertinoFocusColorBrightness)
-              .withSaturation(kCupertinoFocusColorSaturation)
-              .toColor(),
+      color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
+          .toColor(),
       width: 3.5,
       strokeAlign: BorderSide.strokeAlignOutside,
     );
@@ -868,7 +877,9 @@ void main() {
 
   testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+      boilerplate(
+        child: CupertinoButton(onPressed: () {}, child: const Text('Tap me')),
+      ),
     );
     final TestGesture gesture = await tester.startGesture(
       tester.getTopLeft(find.byType(CupertinoButton)),
@@ -1012,7 +1023,10 @@ void main() {
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 class _ButtonMouseCursor extends WidgetStateMouseCursor {

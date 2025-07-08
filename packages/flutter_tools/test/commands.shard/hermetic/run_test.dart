@@ -1284,9 +1284,11 @@ void main() {
           '--trace-skia',
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
+          '--profile-microtasks',
           '--verbose-system-logs',
           '--native-null-assertions',
           '--enable-impeller',
+          '--enable-flutter-gpu',
           '--enable-vulkan-validation',
           '--trace-systrace',
           '--enable-software-rendering',
@@ -1306,10 +1308,12 @@ void main() {
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
+      expect(options.profileMicrotasks, true);
       expect(options.verboseSystemLogs, true);
       expect(options.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
+      expect(options.enableFlutterGpu, true);
       expect(options.enableVulkanValidation, true);
       expect(options.enableSoftwareRendering, true);
       expect(options.skiaDeterministicRendering, true);

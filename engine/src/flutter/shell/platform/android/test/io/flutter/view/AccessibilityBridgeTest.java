@@ -697,8 +697,8 @@ public class AccessibilityBridgeTest {
     verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("new_node2"));
   }
 
-  @Config(sdk = API_LEVELS.API_21)
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itCanPerformSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -736,8 +736,8 @@ public class AccessibilityBridgeTest {
         .dispatchSemanticsAction(1, AccessibilityBridge.Action.SET_TEXT, expectedText);
   }
 
-  @Config(sdk = API_LEVELS.API_21)
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itCanPredictSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -775,8 +775,8 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.getText().toString(), expectedText);
   }
 
-  @Config(sdk = API_LEVELS.API_21)
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itBuildsAttributedString() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -841,8 +841,8 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.getSpanEnd(spellOutSpan), 9);
   }
 
-  @Config(sdk = API_LEVELS.API_21)
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itSetsTextCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -976,8 +976,8 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.toString(), root.identifier);
   }
 
-  @Config(sdk = API_LEVELS.API_21)
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itCanCreateAccessibilityNodeInfoWithSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -1605,7 +1605,7 @@ public class AccessibilityBridgeTest {
     accessibilityBridge.performAction(
         1, AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY, bundle);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
-    // The seletction should be at the beginning of the third line.
+    // The selection should be at the beginning of the third line.
     assertEquals(nodeInfo.getTextSelectionStart(), 21);
     assertEquals(nodeInfo.getTextSelectionEnd(), 21);
 
@@ -1617,7 +1617,7 @@ public class AccessibilityBridgeTest {
     accessibilityBridge.performAction(
         1, AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, bundle);
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
-    // The seletction should be at the beginning of the second line.
+    // The selection should be at the beginning of the second line.
     assertEquals(nodeInfo.getTextSelectionStart(), 11);
     assertEquals(nodeInfo.getTextSelectionEnd(), 11);
   }

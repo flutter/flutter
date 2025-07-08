@@ -11,6 +11,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
+import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
@@ -191,6 +192,9 @@ abstract class FlutterVersion {
   /// as `FLUTTER_PREBUILT_ENGINE_VERSION=...`, the engine SHA will be _different_ than the [frameworkRevision].
   String get engineRevision;
 
+  /// The hash produced by the source code responsible for engine artifacts being built.
+  String? get engineContentHash;
+
   /// The shorter Git commit SHA of [engineRevision].
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
@@ -217,19 +221,27 @@ abstract class FlutterVersion {
   // TODO(fujino): calculate this relative to frameworkCommitDate for
   // _FlutterVersionFromFile so we don't need a git call.
   late final String frameworkAge = _getTimeSinceCommit();
-  late final String engineAge = _getTimeSinceCommit(revision: engineRevision);
+  late final String engineAge = engineBuildDate != null
+      ? _clock.now().difference(DateTime.parse(engineBuildDate!)).ago()
+      : _getTimeSinceCommit(revision: engineRevision);
 
   void ensureVersionFile();
 
   @override
   String toString() {
-    final String versionText =
-        frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
+    final String versionText = frameworkVersion == kUnknownFrameworkVersion
+        ? ''
+        : ' $frameworkVersion';
     final String flutterText =
         'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText =
         'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
-    String engineText = 'Engine • revision $engineRevisionShort ($engineAge)';
+    String engineText;
+    if (engineContentHash != null) {
+      engineText = 'Engine • hash $engineContentHash (revision $engineRevisionShort) ($engineAge)';
+    } else {
+      engineText = 'Engine • revision $engineRevisionShort ($engineAge)';
+    }
     if (engineCommitDate != null) {
       engineText = '$engineText • $engineCommitDate';
     }
@@ -252,6 +264,8 @@ abstract class FlutterVersion {
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
     if (engineCommitDate != null) 'engineCommitDate': engineCommitDate!,
+    if (engineContentHash != null) 'engineContentHash': engineContentHash!,
+    if (engineBuildDate != null) 'engineBuildDate': engineBuildDate!,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
     'flutterVersion': frameworkVersion,
@@ -269,6 +283,12 @@ abstract class FlutterVersion {
   /// If no date was recorded ([engineCommitDate] is a newly stored field),
   /// the date is omitted, and left `null`.
   String? get engineCommitDate;
+
+  /// A date String describing the [engineRevision] build time.
+  ///
+  /// If no date was recorded ([engineCommitDate] is a newly stored field),
+  /// the date is omitted, and left `null`.
+  String? get engineBuildDate;
 
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
@@ -477,6 +497,8 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.dartSdkVersion,
     required this.devToolsVersion,
     required this.gitTagVersion,
+    required this.engineContentHash,
+    required this.engineBuildDate,
     required super.flutterRoot,
     required super.fs,
   }) : super._();
@@ -499,6 +521,8 @@ class _FlutterVersionFromFile extends FlutterVersion {
         frameworkCommitDate: manifest['frameworkCommitDate']! as String,
         engineRevision: manifest['engineRevision']! as String,
         engineCommitDate: manifest['engineCommitDate'] as String?,
+        engineContentHash: manifest['engineContentHash'] as String?,
+        engineBuildDate: manifest['engineBuildDate'] as String?,
         dartSdkVersion: manifest['dartSdkVersion']! as String,
         devToolsVersion: manifest['devToolsVersion']! as String,
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
@@ -543,7 +567,13 @@ class _FlutterVersionFromFile extends FlutterVersion {
   final String? engineCommitDate;
 
   @override
+  final String? engineBuildDate;
+
+  @override
   final String engineRevision;
+
+  @override
+  final String? engineContentHash;
 
   @override
   final String dartSdkVersion;
@@ -567,6 +597,10 @@ class _FlutterVersionGit extends FlutterVersion {
     required super.fs,
   }) : super._();
 
+  late final FlutterEngineStampFromFile? _engineStamp = FlutterEngineStampFromFile.tryParseFromFile(
+    fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json')),
+  );
+
   @override
   final GitTagVersion gitTagVersion;
 
@@ -580,11 +614,9 @@ class _FlutterVersionGit extends FlutterVersion {
   // operating based on a 'gitRef: ...', which we can assume to be immutable in the context of
   // this invocation (possibly HEAD could change, but gitRef should not).
   @override
-  late final String engineCommitDate = _gitCommitDate(
-    gitRef: engineRevision,
-    lenient: true,
-    workingDirectory: flutterRoot,
-  );
+  late final String engineCommitDate =
+      _engineStamp?.gitRevisionDate.toString() ??
+      _gitCommitDate(gitRef: engineRevision, lenient: true, workingDirectory: flutterRoot);
 
   String? _repositoryUrl;
   @override
@@ -615,7 +647,7 @@ class _FlutterVersionGit extends FlutterVersion {
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   @override
-  String get engineRevision => globals.cache.engineRevision;
+  String get engineRevision => _engineStamp?.gitRevision ?? globals.cache.engineRevision;
 
   @override
   final String frameworkVersion;
@@ -644,6 +676,12 @@ class _FlutterVersionGit extends FlutterVersion {
       newVersionFile.writeAsStringSync(encoder.convert(toJson()));
     }
   }
+
+  @override
+  String? get engineBuildDate => _engineStamp?.buildDate.toString();
+
+  @override
+  String? get engineContentHash => _engineStamp?.contentHash;
 }
 
 void _ensureLegacyVersionFile({
@@ -692,15 +730,14 @@ class VersionUpstreamValidator {
     }
 
     // Strip `.git` suffix before comparing the remotes
-    final List<String> sanitizedStandardRemotes =
-        <String>[
-          // If `FLUTTER_GIT_URL` is set, use that as standard remote.
-          if (flutterGit != null)
-            flutterGit
-          // Else use the predefined standard remotes.
-          else
-            ..._standardRemotes,
-        ].map((String remote) => stripDotGit(remote)).toList();
+    final List<String> sanitizedStandardRemotes = <String>[
+      // If `FLUTTER_GIT_URL` is set, use that as standard remote.
+      if (flutterGit != null)
+        flutterGit
+      // Else use the predefined standard remotes.
+      else
+        ..._standardRemotes,
+    ].map((String remote) => stripDotGit(remote)).toList();
 
     final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
 
@@ -1263,3 +1300,54 @@ const String _newVersionAvailableMessage = '''
 A new version of Flutter is available!
 
 To update to the latest version, run "flutter upgrade".''';
+
+/// Data class for parsing engine_stamp.json.
+@visibleForTesting
+final class FlutterEngineStampFromFile {
+  FlutterEngineStampFromFile._({
+    required this.buildDate,
+    required this.gitRevision,
+    required this.gitRevisionDate,
+    required this.contentHash,
+  });
+
+  /// General time when the engine artifacts were built.
+  final DateTime buildDate;
+
+  /// The git commit sha for these engine artifacts.
+  final String gitRevision;
+
+  /// The date of the [gitRevision] commit.
+  final DateTime gitRevisionDate;
+
+  /// The content-aware hash for this build.
+  ///
+  /// This hash helps uniquely identify engine changes and reduce artifact builds.
+  final String contentHash;
+
+  /// Attempt to parse [jsonFile] for `engine_stamp.json` values.
+  static FlutterEngineStampFromFile? tryParseFromFile(File jsonFile) {
+    final Map<String, Object?> data;
+    try {
+      data = json.decode(jsonFile.readAsStringSync()) as Map<String, Object?>;
+
+      if (data case {
+        'build_time_ms': final int buildTimeMs,
+        'git_revision': final String gitRevision,
+        'git_revision_date': final String gitRevisionDate,
+        'content_hash': final String contentHash,
+      }) {
+        return FlutterEngineStampFromFile._(
+          buildDate: DateTime.fromMillisecondsSinceEpoch(buildTimeMs),
+          gitRevision: gitRevision,
+          gitRevisionDate: DateTime.parse(gitRevisionDate),
+          contentHash: contentHash,
+        );
+      }
+      // ignore: avoid_catches_without_on_clauses
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+}

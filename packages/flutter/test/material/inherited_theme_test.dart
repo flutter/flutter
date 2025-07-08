@@ -52,9 +52,8 @@ void main() {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
                                   // Capture the shadow Theme.
-                                  builder:
-                                      (BuildContext _) =>
-                                          InheritedTheme.captureAll(context, primaryBox),
+                                  builder: (BuildContext _) =>
+                                      InheritedTheme.captureAll(context, primaryBox),
                                 ),
                               );
                             },
@@ -245,8 +244,8 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder:
-                                  (BuildContext _) => InheritedTheme.captureAll(context, banner),
+                              builder: (BuildContext _) =>
+                                  InheritedTheme.captureAll(context, banner),
                             ),
                           );
                         },
@@ -337,8 +336,8 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder:
-                                  (BuildContext _) => InheritedTheme.captureAll(context, divider),
+                              builder: (BuildContext _) =>
+                                  InheritedTheme.captureAll(context, divider),
                             ),
                           );
                         },
@@ -446,8 +445,8 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder:
-                                  (BuildContext _) => InheritedTheme.captureAll(context, listTiles),
+                              builder: (BuildContext _) =>
+                                  InheritedTheme.captureAll(context, listTiles),
                             ),
                           );
                         },
@@ -542,8 +541,8 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow SliderTheme.
-                              builder:
-                                  (BuildContext _) => InheritedTheme.captureAll(context, slider),
+                              builder: (BuildContext _) =>
+                                  InheritedTheme.captureAll(context, slider),
                             ),
                           );
                         },
@@ -638,9 +637,8 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
-                              builder:
-                                  (BuildContext _) =>
-                                      InheritedTheme.captureAll(context, toggleButtons),
+                              builder: (BuildContext _) =>
+                                  InheritedTheme.captureAll(context, toggleButtons),
                             ),
                           );
                         },
