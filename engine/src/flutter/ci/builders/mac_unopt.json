@@ -350,7 +350,6 @@
                 "--prebuilt-dart-sdk",
                 "--mac-cpu",
                 "arm64",
-                "--enable-impeller-3d",
                 "--rbe",
                 "--no-goma",
                 "--xcode-symlinks",

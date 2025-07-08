@@ -199,13 +199,12 @@ void main() {
       },
       overrides: <Type, Generator>{
         // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
-        FeatureFlags:
-            () => TestFeatureFlags(
-              isAndroidEnabled: false,
-              isIOSEnabled: false,
-              isMacOSEnabled: true,
-              isWindowsEnabled: true,
-            ),
+        FeatureFlags: () => TestFeatureFlags(
+          isAndroidEnabled: false,
+          isIOSEnabled: false,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+        ),
       },
     );
 
@@ -222,8 +221,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'error');
         expect(logMessage['message'], 'daemon.logMessage test');
       },
@@ -243,8 +243,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'warning');
         expect(logMessage['message'], 'daemon.logMessage test');
       },
@@ -295,8 +296,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
@@ -527,8 +529,8 @@ void main() {
           'params': <String, Object?>{'deviceId': 'device'},
         }),
       );
-      final Stream<DaemonMessage> broadcastOutput =
-          daemonStreams.outputs.stream.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+          .asBroadcastStream();
       final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(firstResponse.data['id'], 0);
       final String? logReaderId = firstResponse.data['result'] as String?;
@@ -570,8 +572,8 @@ void main() {
           daemon.deviceDomain.addDeviceDiscoverer(discoverer);
           final FakeAndroidDevice device = FakeAndroidDevice();
           discoverer.addDevice(device);
-          final Stream<DaemonMessage> broadcastOutput =
-              daemonStreams.outputs.stream.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+              .asBroadcastStream();
 
           // First upload the application package.
           final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
@@ -665,8 +667,8 @@ void main() {
             },
           }),
         );
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(startResponse.data['id'], 0);
         expect(startResponse.data['error'], isNull);
@@ -796,8 +798,8 @@ void main() {
         expect(result['port'], 1234);
       },
       overrides: <Type, Generator>{
-        DevtoolsLauncher:
-            () => FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
+        DevtoolsLauncher: () =>
+            FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
       },
     );
 
@@ -846,8 +848,8 @@ void main() {
             }),
           );
 
-          final Stream<DaemonMessage> broadcastOutput =
-              daemonStreams.outputs.stream.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+              .asBroadcastStream();
           final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
           expect(firstResponse.data['id'], 0);
           expect(firstResponse.data['result'], isNotNull);
@@ -925,8 +927,8 @@ void main() {
           }),
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(firstResponse.data['id'], 0);
         expect(firstResponse.data['result'], isNotNull);
@@ -938,8 +940,8 @@ void main() {
     testUsingContext('proxy.connect fails if both ipv6 and ipv4 failed', () async {
       final TestIOOverrides ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
-        ioOverrides.connectCallback =
-            (Object? host, int port) => throw const io.SocketException('fail');
+        ioOverrides.connectCallback = (Object? host, int port) =>
+            throw const io.SocketException('fail');
 
         daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
         daemonStreams.inputs.add(
@@ -950,8 +952,8 @@ void main() {
           }),
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(firstResponse.data['id'], 0);
         expect(firstResponse.data['result'], isNull);
@@ -1189,6 +1191,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsStartPaused => true;
 
   @override
+  // ignore: omit_obvious_property_types
   final FakeDartDevelopmentService dds = FakeDartDevelopmentService();
 
   BuildMode? supportsRuntimeModeCalledBuildMode;

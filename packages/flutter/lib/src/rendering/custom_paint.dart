@@ -696,19 +696,17 @@ class RenderCustomPaint extends RenderProxyBox {
       return true;
     }());
 
-    final List<CustomPainterSemantics> backgroundSemantics =
-        _backgroundSemanticsBuilder != null
-            ? _backgroundSemanticsBuilder!(size)
-            : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
+        ? _backgroundSemanticsBuilder!(size)
+        : const <CustomPainterSemantics>[];
     _backgroundSemanticsNodes = _updateSemanticsChildren(
       _backgroundSemanticsNodes,
       backgroundSemantics,
     );
 
-    final List<CustomPainterSemantics> foregroundSemantics =
-        _foregroundSemanticsBuilder != null
-            ? _foregroundSemanticsBuilder!(size)
-            : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
+        ? _foregroundSemanticsBuilder!(size)
+        : const <CustomPainterSemantics>[];
     _foregroundSemanticsNodes = _updateSemanticsChildren(
       _foregroundSemanticsNodes,
       foregroundSemantics,
