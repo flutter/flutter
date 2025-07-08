@@ -3727,6 +3727,11 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// object, for accessibility purposes.
   Rect get semanticBounds;
 
+  /// Wether the semantic bounding box will be clipped by [parent].
+  ///
+  /// Defaults to true,
+  bool get semanticsBoundsClippedByParent => true;
+
   /// Whether the semantics of this render object is dirty and await the update.
   ///
   /// Always returns false in release mode.
@@ -6429,15 +6434,21 @@ final class _SemanticsGeometry {
       }
     }
 
-    Rect rect =
-        semanticsClipRect?.intersect(child.renderObject.semanticBounds) ??
-        child.renderObject.semanticBounds;
+    final bool shouldClip = child.renderObject.semanticsBoundsClippedByParent;
+
+    Rect rect = child.renderObject.semanticBounds;
     bool isRectHidden = false;
-    if (paintClipRect != null) {
-      final Rect paintRect = paintClipRect.intersect(rect);
-      isRectHidden = paintRect.isEmpty && !rect.isEmpty;
-      if (!isRectHidden) {
-        rect = paintRect;
+
+    if (shouldClip) {
+      rect =
+          semanticsClipRect?.intersect(child.renderObject.semanticBounds) ??
+          child.renderObject.semanticBounds;
+      if (paintClipRect != null) {
+        final Rect paintRect = paintClipRect.intersect(rect);
+        isRectHidden = paintRect.isEmpty && !rect.isEmpty;
+        if (!isRectHidden) {
+          rect = paintRect;
+        }
       }
     }
 
