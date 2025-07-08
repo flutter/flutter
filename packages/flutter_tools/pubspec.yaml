@@ -12,12 +12,13 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
   args: 2.7.0
+  build_runner: ^2.5.4
   dds: 5.0.4
   dwds: 24.4.0
   code_builder: 4.10.1
   collection: 1.19.1
   completion: 1.0.1
-  coverage: 1.14.1
+  coverage: 1.15.0
   crypto: 3.0.6
   ffi: 2.1.4
   file: 7.0.1
@@ -45,6 +46,8 @@ dependencies:
   stream_channel: 2.1.4
   shelf_web_socket: 2.0.1
   shelf_static: 1.1.3
+  shelf_router: ^1.1.4
+  shelf_test_handler: ^2.0.2
   pub_semver: 2.2.0
   pool: 1.5.1
   path: 1.9.1
@@ -113,6 +116,7 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.2
+  mockito: ^5.4.6
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -126,4 +130,5 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: kr614i
+
+# PUBSPEC CHECKSUM: p2iphr

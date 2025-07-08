@@ -31,7 +31,8 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web_template.dart';
-
+import 'devfs_config.dart';
+import 'devfs_proxy.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
@@ -134,9 +135,6 @@ class WebAssetServer implements AssetReader {
   /// contains a list of objects each with three fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle. To support embedded libraries, the path should include the
-  /// `baseUri` of the web server.
-  /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///
@@ -188,10 +186,6 @@ class WebAssetServer implements AssetReader {
   /// trace.
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
-    String hostname,
-    int port,
-    String? tlsCertPath,
-    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -200,8 +194,8 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders, {
+    ExpressionCompiler? expressionCompiler, {
+    required DevConfig devConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -216,28 +210,35 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
   }) async {
+    final String effectiveHost = devConfig.host ?? 'localhost';
+    final int effectivePort = devConfig.port ?? 0;
+    final String? effectiveCertPath = devConfig.https?.certPath;
+    final String? effectiveCertKeyPath = devConfig.https?.certKeyPath;
+    final Map<String, String> effectiveHeaders = devConfig.headers;
+    final List<ProxyRule> effectiveProxy = devConfig.proxy;
+
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
       assert(canaryFeatures);
     }
     InternetAddress address;
-    if (hostname == 'any') {
+    if (effectiveHost == 'any') {
       address = InternetAddress.anyIPv4;
     } else {
-      address = (await InternetAddress.lookup(hostname)).first;
+      address = (await InternetAddress.lookup(effectiveHost)).first;
     }
     HttpServer? httpServer;
     const kMaxRetries = 4;
     for (var i = 0; i <= kMaxRetries; i++) {
       try {
-        if (tlsCertPath != null && tlsCertKeyPath != null) {
+        if (effectiveCertPath != null && effectiveCertKeyPath != null) {
           final serverContext = SecurityContext()
-            ..useCertificateChain(tlsCertPath)
-            ..usePrivateKey(tlsCertKeyPath);
-          httpServer = await HttpServer.bindSecure(address, port, serverContext);
+            ..useCertificateChain(effectiveCertPath)
+            ..usePrivateKey(effectiveCertKeyPath);
+          httpServer = await HttpServer.bindSecure(address, effectivePort, serverContext);
         } else {
-          httpServer = await HttpServer.bind(address, port);
+          httpServer = await HttpServer.bind(address, effectivePort);
         }
         break;
       } on SocketException catch (e, s) {
@@ -252,7 +253,7 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
-    for (final MapEntry<String, String> header in extraHeaders.entries) {
+    for (final MapEntry<String, String> header in effectiveHeaders.entries) {
       httpServer.defaultResponseHeaders.add(header.key, header.value);
     }
 
@@ -271,13 +272,13 @@ class WebAssetServer implements AssetReader {
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
     );
-    final int selectedPort = server.selectedPort;
-    var url = '$hostname:$selectedPort';
-    if (hostname == 'any') {
+    final int selectedPort = httpServer.port;
+    var url = '$effectiveHost:$selectedPort';
+    if (effectiveHost == 'any') {
       url = 'localhost:$selectedPort';
     }
     server._baseUri = Uri.http(url, server.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath != null) {
+    if (effectiveCertPath != null && effectiveCertKeyPath != null) {
       server._baseUri = Uri.https(url, server.basePath);
     }
     if (testMode) {
@@ -377,7 +378,7 @@ class WebAssetServer implements AssetReader {
           expressionCompiler: expressionCompiler,
           spawnDds: enableDds,
         ),
-        appMetadata: AppMetadata(hostname: hostname),
+        appMetadata: AppMetadata(hostname: effectiveHost),
       ),
       // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
@@ -386,6 +387,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
+    pipeline = pipeline.addMiddleware(proxyMiddleware(effectiveProxy));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
