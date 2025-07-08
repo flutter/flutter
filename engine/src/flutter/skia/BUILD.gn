@@ -296,7 +296,7 @@ optional("fontmgr_fontconfig") {
 }
 
 optional("fontmgr_fuchsia") {
-  enabled = skia_enable_fontmgr_fuchsia
+  enabled = is_fuchsia
   public_defines = [ "SK_FONTMGR_FUCHSIA_AVAILABLE" ]
 
   deps = []
