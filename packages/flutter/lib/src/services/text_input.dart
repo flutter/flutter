@@ -1968,6 +1968,12 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
+  void _handleHardcodedCustomAction(String actionId) {
+    if (actionId == 'vibrate') {
+      debugPrint('[HARDCODED] Vibrate action triggered');
+    }
+  }
+
   Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
@@ -2118,6 +2124,9 @@ class TextInput {
           firstArg['action'] as String,
           firstArg['data'] == null ? <String, dynamic>{} : firstArg['data'] as Map<String, dynamic>,
         );
+      case 'TextInputClient.performCustomAction':
+        final String customAction = args[1] as String;
+        _handleHardcodedCustomAction(customAction);
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(
           _toTextPoint(_toTextCursorAction(args[1] as String), args[2] as Map<String, dynamic>),
@@ -2773,6 +2782,14 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     final List<Map<String, dynamic>> itemsJson = items
         .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
         .toList();
+    
+    itemsJson.add(<String, dynamic>{
+      'callbackId': 'vibrate'.hashCode,
+      'title': 'Vibrate',
+      'type': 'custom',
+      'id': 'vibrate',
+    });
+    
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
