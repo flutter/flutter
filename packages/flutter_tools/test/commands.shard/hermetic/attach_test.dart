@@ -1038,7 +1038,7 @@ void main() {
 
       setUp(() {
         final FakeDartDevelopmentService fakeDds = FakeDartDevelopmentService();
-        portForwarder = RecordingPortForwarder(hostPort);
+        portForwarder = RecordingPortForwarder(defaultHostPort: 42);
         device = FakeAndroidDevice(id: '1')
           ..portForwarder = portForwarder
           ..dds = fakeDds;
