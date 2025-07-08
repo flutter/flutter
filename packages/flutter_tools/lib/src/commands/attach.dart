@@ -20,7 +20,6 @@ import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
-import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -130,15 +129,8 @@ class AttachCommand extends FlutterCommand {
             'using "--machine" instead.',
         hide: !verboseHelp,
       )
-      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine-friendly format.',
-      );
+      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.');
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
@@ -275,20 +267,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    final Daemon? daemon =
-        boolArg('machine')
-            ? Daemon(
-              DaemonConnection(
-                daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
-                logger: _logger,
-              ),
-              notifyingLogger:
-                  (_logger is NotifyingLogger)
-                      ? _logger
-                      : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
-              logToStdout: true,
-            )
-            : null;
+    final Daemon? daemon = boolArg('machine')
+        ? Daemon(
+            DaemonConnection(
+              daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+              logger: _logger,
+            ),
+            notifyingLogger: (_logger is NotifyingLogger)
+                ? _logger
+                : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
+            logToStdout: true,
+          )
+        : null;
 
     Stream<Uri>? vmServiceUri;
     final bool usesIpv6 = ipv6!;
@@ -347,16 +337,15 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         return uri;
       });
     } else {
-      vmServiceUri =
-          Stream<Uri>.fromFuture(
-            buildVMServiceUri(
-              device,
-              debugUri?.host ?? hostname,
-              debugPort ?? debugUri!.port,
-              hostVmservicePort,
-              debugUri?.path,
-            ),
-          ).asBroadcastStream();
+      vmServiceUri = Stream<Uri>.fromFuture(
+        buildVMServiceUri(
+          device,
+          debugUri?.host ?? hostname,
+          debugPort ?? debugUri!.port,
+          hostVmservicePort,
+          debugUri?.path,
+        ),
+      ).asBroadcastStream();
     }
 
     _terminal.usesTerminalUi = daemon == null;
@@ -447,10 +436,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       }
       rethrow;
     } finally {
-      final List<ForwardedPort> ports = device.portForwarder!.forwardedPorts.toList();
-      for (final ForwardedPort port in ports) {
-        await device.portForwarder!.unforward(port);
-      }
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
@@ -493,16 +478,16 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
-          flutterDevices,
-          target: targetFile,
-          debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
-          projectRootPath: stringArg('project-root'),
-          dillOutputPath: stringArg('output-dill'),
-          flutterProject: flutterProject,
-          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-          analytics: analytics,
-        )
+            flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
+            projectRootPath: stringArg('project-root'),
+            dillOutputPath: stringArg('output-dill'),
+            flutterProject: flutterProject,
+            nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            analytics: analytics,
+          )
         : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
   }
 

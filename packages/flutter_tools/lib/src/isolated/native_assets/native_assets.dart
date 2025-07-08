@@ -122,22 +122,20 @@ Future<DartBuildResult> runFlutterSpecificDartBuild({
   }
 
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
-  final List<Architecture> architectures =
-      flutterTester
-          ? <Architecture>[Architecture.current]
-          : _architecturesForOS(targetPlatform, targetOS, environmentDefines);
-  final DartBuildResult result =
-      architectures.isEmpty
-          ? const DartBuildResult.empty()
-          : await _runDartBuild(
-            environmentDefines: environmentDefines,
-            buildRunner: buildRunner,
-            architectures: architectures,
-            projectUri: projectUri,
-            linkingEnabled: _nativeAssetsLinkingEnabled(buildMode),
-            fileSystem: fileSystem,
-            targetOS: targetOS,
-          );
+  final List<Architecture> architectures = flutterTester
+      ? <Architecture>[Architecture.current]
+      : _architecturesForOS(targetPlatform, targetOS, environmentDefines);
+  final DartBuildResult result = architectures.isEmpty
+      ? const DartBuildResult.empty()
+      : await _runDartBuild(
+          environmentDefines: environmentDefines,
+          buildRunner: buildRunner,
+          architectures: architectures,
+          projectUri: projectUri,
+          linkingEnabled: _nativeAssetsLinkingEnabled(buildMode),
+          fileSystem: fileSystem,
+          targetOS: targetOS,
+        );
   return result;
 }
 
@@ -581,10 +579,9 @@ Future<DartBuildResult> _runDartBuild({
   required OS? targetOS,
   required bool linkingEnabled,
 }) async {
-  final String architectureString =
-      architectures.length == 1
-          ? architectures.single.toString()
-          : architectures.toList().toString();
+  final String architectureString = architectures.length == 1
+      ? architectures.single.toString()
+      : architectures.toList().toString();
 
   globals.logger.printTrace('Building native assets for $targetOS $architectureString.');
   final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[];
@@ -601,24 +598,22 @@ Future<DartBuildResult> _runDartBuild({
     environmentType = null;
   }
 
-  final CCompilerConfig? cCompilerConfig =
-      targetOS == OS.android
-          ? await buildRunner.ndkCCompilerConfig
-          : await buildRunner.cCompilerConfig;
+  final CCompilerConfig? cCompilerConfig = targetOS == OS.android
+      ? await buildRunner.ndkCCompilerConfig
+      : await buildRunner.cCompilerConfig;
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
   assert(codesignIdentity == null || targetOS == OS.iOS || targetOS == OS.macOS);
 
-  final AndroidCodeConfig? androidConfig =
-      targetOS == OS.android
-          ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
-          : null;
-  final IOSCodeConfig? iosConfig =
-      targetOS == OS.iOS
-          ? IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!))
-          : null;
-  final MacOSCodeConfig? macOSConfig =
-      targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
+  final AndroidCodeConfig? androidConfig = targetOS == OS.android
+      ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
+      : null;
+  final IOSCodeConfig? iosConfig = targetOS == OS.iOS
+      ? IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!))
+      : null;
+  final MacOSCodeConfig? macOSConfig = targetOS == OS.macOS
+      ? MacOSCodeConfig(targetVersion: targetMacOSVersion)
+      : null;
   for (final Architecture architecture in architectures) {
     final Target target = Target.fromArchitectureAndOS(architecture, targetOS!);
     final BuildResult? buildResult = await buildRunner.build(
@@ -673,14 +668,13 @@ Future<DartBuildResult> _runDartBuild({
   return DartBuildResult(codeAssets, dependencies.toList());
 }
 
-List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target target) =>
-    assets
-        .where((EncodedAsset asset) => asset.isCodeAsset)
-        .map<FlutterCodeAsset>(
-          (EncodedAsset encodedAsset) =>
-              FlutterCodeAsset(codeAsset: encodedAsset.asCodeAsset, target: target),
-        )
-        .toList();
+List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target target) => assets
+    .where((EncodedAsset asset) => asset.isCodeAsset)
+    .map<FlutterCodeAsset>(
+      (EncodedAsset encodedAsset) =>
+          FlutterCodeAsset(codeAsset: encodedAsset.asCodeAsset, target: target),
+    )
+    .toList();
 
 List<Architecture> _architecturesForOS(
   TargetPlatform targetPlatform,
@@ -733,6 +727,7 @@ Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
+    case TargetPlatform.unsupported:
       throw Exception('Unknown targetPlatform: $targetPlatform.');
   }
 }
@@ -798,6 +793,8 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       }
     case TargetPlatform.web_javascript:
       throw StateError('No dart builds for web yet.');
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 
@@ -825,6 +822,8 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       throwToolExit('Unsupported Android target platform: $targetPlatform.');
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 

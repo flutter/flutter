@@ -189,9 +189,8 @@ class SourceVisitor implements ResolvedFiles {
     );
     if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
-        for (final FileSystemEntity entity in environment.fileSystem
-            .directory(path)
-            .listSync(recursive: true))
+        for (final FileSystemEntity entity
+            in environment.fileSystem.directory(path).listSync(recursive: true))
           if (entity is File) entity,
       ]);
       return;

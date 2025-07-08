@@ -73,12 +73,11 @@ flutter:
           ..createSync(recursive: true)
           ..writeAsStringSync('This is a fake font.');
 
-        final String packageConfigPath =
-            writePackageConfigFiles(
-              directory: fileSystem.directory('main'),
-              mainLibName: 'main',
-              packages: <String, String>{'font': '../font'},
-            ).path;
+        final String packageConfigPath = writePackageConfigFiles(
+          directory: fileSystem.directory('main'),
+          mainLibName: 'main',
+          packages: <String, String>{'font': '../font'},
+        ).path;
         fileSystem.file(manifestPath)
           ..createSync(recursive: true)
           ..writeAsStringSync(r'''

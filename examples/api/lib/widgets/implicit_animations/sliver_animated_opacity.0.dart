@@ -19,7 +19,9 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
-        body: const Center(child: SliverAnimatedOpacityExample(duration: duration, curve: curve)),
+        body: const Center(
+          child: SliverAnimatedOpacityExample(duration: duration, curve: curve),
+        ),
       ),
     );
   }

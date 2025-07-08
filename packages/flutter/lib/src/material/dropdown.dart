@@ -55,15 +55,14 @@ class _DropdownMenuPainter extends CustomPainter {
     this.borderRadius,
     required this.resize,
     required this.getSelectedItemOffset,
-  }) : _painter =
-           BoxDecoration(
-             // If you add an image here, you must provide a real
-             // configuration in the paint() function and you must provide some sort
-             // of onChanged callback here.
-             color: color,
-             borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
-             boxShadow: kElevationToShadow[elevation],
-           ).createBoxPainter(),
+  }) : _painter = BoxDecoration(
+         // If you add an image here, you must provide a real
+         // configuration in the paint() function and you must provide some sort
+         // of onChanged callback here.
+         color: color,
+         borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
+         boxShadow: kElevationToShadow[elevation],
+       ).createBoxPainter(),
        super(repaint: resize);
 
   final Color? color;
@@ -230,10 +229,9 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         onFocusChange: _handleFocusChange,
         // When highlightMode is traditional, the InkWell draws the selected item background color.
         // When highlightMode is touch, insert an Ink to force the selected item background color.
-        child:
-            highlightMode == FocusHighlightMode.touch
-                ? Ink(color: isSelected ? Theme.of(context).focusColor : null, child: child)
-                : child,
+        child: highlightMode == FocusHighlightMode.touch
+            ? Ink(color: isSelected ? Theme.of(context).focusColor : null, child: child)
+            : child,
       );
     }
     child = FadeTransition(opacity: _opacityAnimation, child: child);
@@ -1318,7 +1316,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   _DropdownRoute<T>? _dropdownRoute;
   Orientation? _lastOrientation;
   FocusNode? _internalNode;
-  FocusNode? get focusNode => widget.focusNode ?? _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
@@ -1344,22 +1342,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
-    focusNode?.addListener(_handleFocusChanged);
+    focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
-    focusNode?.removeListener(_handleFocusChanged);
+    focusNode.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
   }
 
   void _handleFocusChanged() {
-    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
       setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
       });
     }
   }
@@ -1374,8 +1372,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusNode == null) {
-      _internalNode ??= _createFocusNode();
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      if (_internalNode != null && widget.focusNode != null) {
+        _internalNode!.dispose();
+        _internalNode = null;
+      }
+
+      if (widget.focusNode == null) {
+        _internalNode ??= _createFocusNode();
+      }
+      _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      focusNode.addListener(_handleFocusChanged);
     }
     _updateSelectedIndex();
   }
@@ -1406,8 +1414,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _handleTap() {
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final EdgeInsetsGeometry menuMargin =
-        ButtonTheme.of(context).alignedDropdown ? _kAlignedMenuMargin : _kUnalignedMenuMargin;
+    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
+        ? _kAlignedMenuMargin
+        : _kUnalignedMenuMargin;
 
     final List<_MenuItem<T>> menuItems = <_MenuItem<T>>[
       for (int index = 0; index < widget.items!.length; index += 1)
@@ -1455,7 +1464,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       barrierDismissible: widget.barrierDismissible,
     );
 
-    focusNode?.requestFocus();
+    focusNode.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
@@ -1528,10 +1537,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // We should explicitly type the items list to be a list of <Widget>,
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
-    final List<Widget> items =
-        widget.selectedItemBuilder == null
-            ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
-            : List<Widget>.of(widget.selectedItemBuilder!(context));
+    final List<Widget> items = widget.selectedItemBuilder == null
+        ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
+        : List<Widget>.of(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1550,8 +1558,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     final EdgeInsetsGeometry padding =
         ButtonTheme.of(context).alignedDropdown && widget._inputDecoration == null
-            ? _kAlignedButtonPadding
-            : _kUnalignedButtonPadding;
+        ? _kAlignedButtonPadding
+        : _kUnalignedButtonPadding;
 
     // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
@@ -1562,14 +1570,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
         alignment: widget.alignment,
-        children:
-            widget.isDense
-                ? items
-                : items.map((Widget item) {
-                  return widget.itemHeight != null
-                      ? SizedBox(height: widget.itemHeight, child: item)
-                      : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
-                }).toList(),
+        children: widget.isDense
+            ? items
+            : items.map((Widget item) {
+                return widget.itemHeight != null
+                    ? SizedBox(height: widget.itemHeight, child: item)
+                    : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
+              }).toList(),
       );
     }
 
@@ -1689,10 +1696,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               isEmpty: widget._isEmpty,
               isFocused: _hasPrimaryFocus,
               isHovering: _isHovering,
-              child:
-                  widget.padding == null
-                      ? result
-                      : Padding(padding: widget.padding!, child: result),
+              child: widget.padding == null
+                  ? result
+                  : Padding(padding: widget.padding!, child: result),
             ),
           ),
         ),
@@ -1814,21 +1820,20 @@ class DropdownButtonFormField<T> extends FormField<T> {
                items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
            final bool isDropdownEnabled = onChanged != null && items != null && items.isNotEmpty;
            // If decoration hintText is provided, use it as the default value for both hint and disabledHint.
-           final Widget? decorationHint =
-               effectiveDecoration.hintText != null ? Text(effectiveDecoration.hintText!) : null;
+           final Widget? decorationHint = effectiveDecoration.hintText != null
+               ? Text(effectiveDecoration.hintText!)
+               : null;
            final Widget? effectiveHint = hint ?? decorationHint;
            final Widget? effectiveDisabledHint = disabledHint ?? effectiveHint;
-           final bool isHintOrDisabledHintAvailable =
-               isDropdownEnabled
-                   ? effectiveHint != null
-                   : effectiveHint != null || effectiveDisabledHint != null;
+           final bool isHintOrDisabledHintAvailable = isDropdownEnabled
+               ? effectiveHint != null
+               : effectiveHint != null || effectiveDisabledHint != null;
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable;
 
            if (field.errorText != null || effectiveDecoration.hintText != null) {
-             final Widget? error =
-                 field.errorText != null && errorBuilder != null
-                     ? errorBuilder(state.context, field.errorText!)
-                     : null;
+             final Widget? error = field.errorText != null && errorBuilder != null
+                 ? errorBuilder(state.context, field.errorText!)
+                 : null;
              final String? errorText = error == null ? field.errorText : null;
              // Clear the decoration hintText because DropdownButton has its own hint logic.
              final String? hintText = effectiveDecoration.hintText != null ? '' : null;

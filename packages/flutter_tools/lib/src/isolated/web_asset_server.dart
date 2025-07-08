@@ -131,11 +131,12 @@ class WebAssetServer implements AssetReader {
   static const String _reloadScriptsFileName = 'reload_scripts.json';
 
   /// Given a list of [modules] that need to be reloaded, writes a file that
-  /// contains a list of objects each with two fields:
+  /// contains a list of objects each with three fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
   /// bundle. To support embedded libraries, the path should include the
   /// `baseUri` of the web server.
+  /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///
@@ -144,6 +145,7 @@ class WebAssetServer implements AssetReader {
   /// [
   ///   {
   ///     "src": "<baseUri>/<file_name>",
+  ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
   /// ]
@@ -160,7 +162,11 @@ class WebAssetServer implements AssetReader {
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
-      moduleToLibrary.add(<String, Object>{'src': moduleUri, 'libraries': libraries});
+      moduleToLibrary.add(<String, Object>{
+        'src': moduleUri,
+        'module': metadata.name,
+        'libraries': libraries,
+      });
     }
     writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
@@ -226,10 +232,9 @@ class WebAssetServer implements AssetReader {
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
-          final SecurityContext serverContext =
-              SecurityContext()
-                ..useCertificateChain(tlsCertPath)
-                ..usePrivateKey(tlsCertKeyPath);
+          final SecurityContext serverContext = SecurityContext()
+            ..useCertificateChain(tlsCertPath)
+            ..usePrivateKey(tlsCertKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
@@ -334,36 +339,35 @@ class WebAssetServer implements AssetReader {
         return chromium.chromeConnection;
       },
       toolConfiguration: ToolConfiguration(
-        loadStrategy:
-            ddcModuleSystem
-                ? FrontendServerDdcLibraryBundleStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      fileSystem.file(entrypoint).absolute.uri,
-                    ),
+        loadStrategy: ddcModuleSystem
+            ? FrontendServerDdcLibraryBundleStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    fileSystem.file(entrypoint).absolute.uri,
                   ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                  hotReloadSourcesUri: server._baseUri!.replace(
-                    pathSegments: List<String>.from(server._baseUri!.pathSegments)
-                      ..add(_reloadScriptsFileName),
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+                hotReloadSourcesUri: server._baseUri!.replace(
+                  pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                    ..add(_reloadScriptsFileName),
+                ),
+              ).strategy
+            : FrontendServerRequireStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    fileSystem.file(entrypoint).absolute.uri,
                   ),
-                ).strategy
-                : FrontendServerRequireStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      fileSystem.file(entrypoint).absolute.uri,
-                    ),
-                  ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                ).strategy,
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+              ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
@@ -695,15 +699,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     }
 
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    final Directory dartSdkParent =
-        fileSystem
-            .directory(
-              globals.artifacts!.getArtifactPath(
-                Artifact.engineDartSdkPath,
-                platform: TargetPlatform.web_javascript,
-              ),
-            )
-            .parent;
+    final Directory dartSdkParent = fileSystem
+        .directory(
+          globals.artifacts!.getArtifactPath(
+            Artifact.engineDartSdkPath,
+            platform: TargetPlatform.web_javascript,
+          ),
+        )
+        .parent;
     final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
       return dartSdkFile;
@@ -718,14 +721,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsArtifactMap
+        : kAmdDartSdkJsArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
+        : kAmdDartSdkJsMapArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 

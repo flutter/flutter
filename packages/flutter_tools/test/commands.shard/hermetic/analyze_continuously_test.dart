@@ -361,4 +361,65 @@ void main() {
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testUsingContext(
+    'AnalysisService --watch does not crash when the VM service is enabled',
+    () async {
+      // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
+      // invoke json.decode(...) on the VM service message.
+      //
+      // Regression test for https://github.com/flutter/flutter/issues/58391.
+      final BufferLogger logger = BufferLogger.test();
+      final Completer<void> completer = Completer<void>();
+      final StreamController<List<int>> stdin = StreamController<List<int>>();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
+          ],
+          stdin: IOSink(stdin.sink),
+          stdout: '''
+The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/
+{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
+{"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
+{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
+''',
+        ),
+      ]);
+
+      final Artifacts artifacts = Artifacts.test();
+      final AnalyzeCommand command = AnalyzeCommand(
+        terminal: Terminal.test(),
+        artifacts: artifacts,
+        logger: logger,
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        processManager: processManager,
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+      );
+
+      await FakeAsync().run((FakeAsync time) async {
+        final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+        commandRunner.addCommand(command);
+        unawaited(commandRunner.run(<String>['analyze', '--watch']));
+
+        while (!logger.statusText.contains('analyzed 1 file')) {
+          time.flushMicrotasks();
+        }
+        completer.complete();
+        return completer.future;
+      });
+
+      expect(logger.statusText, contains('No issues found!'));
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 }

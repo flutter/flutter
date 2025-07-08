@@ -63,10 +63,9 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
     final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
 
     fileCache.initialize();
     fileCache.diffFileList(<File>[file]);
@@ -93,9 +92,10 @@ void main() {
 
   testWithoutContext('FileStore handles changed format', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File cacheFile = fileSystem.file(FileStore.kFileCache)..writeAsStringSync(
-      '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}',
-    );
+    final File cacheFile = fileSystem.file(FileStore.kFileCache)
+      ..writeAsStringSync(
+        '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}',
+      );
     final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
 
     fileCache.initialize();
@@ -107,10 +107,9 @@ void main() {
     final File cacheFile = fileSystem.directory('example').childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
     final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
     fileCache.initialize();
 
     cacheFile.parent.deleteSync(recursive: true);
@@ -169,10 +168,9 @@ void main() {
     final File cacheFile = fileSystem.directory('example').childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
     final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
     fileCache.initialize();
 
     cacheFile.parent.deleteSync(recursive: true);

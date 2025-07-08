@@ -1049,6 +1049,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1760,7 +1761,6 @@ targets:
   - name: Linux web_long_running_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/171025
     properties:
       dependencies: >-
         [
@@ -1784,6 +1784,7 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
+    bringup: true # brittle line numbers https://github.com/flutter/flutter/issues/171725
     timeout: 60
     properties:
       dependencies: >-
@@ -1857,7 +1858,6 @@ targets:
   - name: Linux web_long_running_tests_5_5
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/171025
     properties:
       dependencies: >-
         [
@@ -4293,6 +4293,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6121,6 +6122,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**

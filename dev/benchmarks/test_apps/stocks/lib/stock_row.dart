@@ -45,7 +45,10 @@ class StockRow extends StatelessWidget {
           children: <Widget>[
             Container(
               margin: const EdgeInsets.only(right: 5.0),
-              child: Hero(tag: stock, child: StockArrow(percentChange: stock.percentChange)),
+              child: Hero(
+                tag: stock,
+                child: StockArrow(percentChange: stock.percentChange),
+              ),
             ),
             Expanded(
               child: Row(
