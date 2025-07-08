@@ -325,8 +325,8 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// ProgressIndicatorThemeData theme = ProgressIndicatorTheme.of(context);
   /// ```
   static ProgressIndicatorThemeData of(BuildContext context) {
-    final ProgressIndicatorTheme? progressIndicatorTheme =
-        context.dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
+    final ProgressIndicatorTheme? progressIndicatorTheme = context
+        .dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
     return progressIndicatorTheme?.data ?? Theme.of(context).progressIndicatorTheme;
   }
 

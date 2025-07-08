@@ -124,24 +124,26 @@ void main() {
     final File metadata = globals.fs.file('metadata')..writeAsStringSync('{}');
 
     // Missing ending offset.
-    final File manifestMissingOffset = globals.fs.file('manifestA')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.js': <String, Object>{
-          'code': <int>[0],
-          'sourcemap': <int>[0],
-          'metadata': <int>[0],
-        },
-      }),
-    );
-    final File manifestOutOfBounds = globals.fs.file('manifest')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.js': <String, Object>{
-          'code': <int>[0, 100],
-          'sourcemap': <int>[0],
-          'metadata': <int>[0],
-        },
-      }),
-    );
+    final File manifestMissingOffset = globals.fs.file('manifestA')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.js': <String, Object>{
+            'code': <int>[0],
+            'sourcemap': <int>[0],
+            'metadata': <int>[0],
+          },
+        }),
+      );
+    final File manifestOutOfBounds = globals.fs.file('manifest')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.js': <String, Object>{
+            'code': <int>[0, 100],
+            'sourcemap': <int>[0],
+            'metadata': <int>[0],
+          },
+        }),
+      );
 
     expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
     expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
@@ -151,15 +153,16 @@ void main() {
     final File source = globals.fs.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = globals.fs.file('metadata')..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.js': <String, Object>{
-          'code': <int>[0, source.lengthSync()],
-          'sourcemap': <int>[0, 2],
-          'metadata': <int>[0, 2],
-        },
-      }),
-    );
+    final File manifest = globals.fs.file('manifest')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.js': <String, Object>{
+            'code': <int>[0, source.lengthSync()],
+            'sourcemap': <int>[0, 2],
+            'metadata': <int>[0, 2],
+          },
+        }),
+      );
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer.handleRequest(
@@ -182,15 +185,16 @@ void main() {
     final File source = globals.fs.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = globals.fs.file('metadata')..writeAsStringSync(metadataContents);
-    final File manifest = globals.fs.file('manifest')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.js': <String, Object>{
-          'code': <int>[0, source.lengthSync()],
-          'sourcemap': <int>[0, sourcemap.lengthSync()],
-          'metadata': <int>[0, metadata.lengthSync()],
-        },
-      }),
-    );
+    final File manifest = globals.fs.file('manifest')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.js': <String, Object>{
+            'code': <int>[0, source.lengthSync()],
+            'sourcemap': <int>[0, sourcemap.lengthSync()],
+            'metadata': <int>[0, metadata.lengthSync()],
+          },
+        }),
+      );
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final String? merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
@@ -205,10 +209,9 @@ void main() {
     globals.fs.file('foo.png').createSync();
     globals.fs.currentDirectory = globals.fs.directory('project_directory')..createSync();
 
-    final File source =
-        globals.fs.file(globals.fs.path.join('web', 'foo.png'))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kTransparentImage);
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar////foo.png')),
     );
@@ -231,10 +234,9 @@ void main() {
     globals.fs.file('foo.png').createSync();
     globals.fs.currentDirectory = globals.fs.directory('project_directory')..createSync();
 
-    final File source =
-        globals.fs.file(globals.fs.path.join('web', 'foo.png'))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kTransparentImage);
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar/base/path/foo.png')),
     );
@@ -519,15 +521,16 @@ void main() {
     final File source = globals.fs.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = globals.fs.file('metadata')..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')..writeAsStringSync(
-      json.encode(<String, Object>{
-        '/foo.dart.lib.js': <String, Object>{
-          'code': <int>[0, source.lengthSync()],
-          'sourcemap': <int>[0, 2],
-          'metadata': <int>[0, 2],
-        },
-      }),
-    );
+    final File manifest = globals.fs.file('manifest')
+      ..writeAsStringSync(
+        json.encode(<String, Object>{
+          '/foo.dart.lib.js': <String, Object>{
+            'code': <int>[0, source.lengthSync()],
+            'sourcemap': <int>[0, 2],
+            'metadata': <int>[0, 2],
+          },
+        }),
+      );
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer.handleRequest(
@@ -543,15 +546,16 @@ void main() {
       final File source = globals.fs.file('source')..writeAsStringSync('main() {}');
       final File sourcemap = globals.fs.file('sourcemap')..writeAsStringSync('{}');
       final File metadata = globals.fs.file('metadata')..writeAsStringSync('{}');
-      final File manifest = globals.fs.file('manifest')..writeAsStringSync(
-        json.encode(<String, Object>{
-          '/foo.js': <String, Object>{
-            'code': <int>[0, source.lengthSync()],
-            'sourcemap': <int>[0, 2],
-            'metadata': <int>[0, 2],
-          },
-        }),
-      );
+      final File manifest = globals.fs.file('manifest')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            '/foo.js': <String, Object>{
+              'code': <int>[0, source.lengthSync()],
+              'sourcemap': <int>[0, 2],
+              'metadata': <int>[0, 2],
+            },
+          }),
+        );
       webAssetServer.write(source, manifest, sourcemap, metadata);
       final Response response = await webAssetServer.handleRequest(
         Request('GET', Uri.parse('http://localhost/foo.js')),
@@ -577,10 +581,9 @@ void main() {
       'flutter_assets',
       Uri.encodeFull('abcd象形字.png'),
     );
-    final File source =
-        globals.fs.file(path)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kTransparentImage);
+    final File source = globals.fs.file(path)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer.handleRequest(
       Request(
         'GET',
@@ -601,10 +604,9 @@ void main() {
   });
 
   runInTestbed('serves files from web directory', () async {
-    final File source =
-        globals.fs.file(globals.fs.path.join('web', 'foo.png'))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kTransparentImage);
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar/foo.png')),
     );
@@ -625,10 +627,9 @@ void main() {
     'serves asset files from filesystem with known mime type on Windows',
     () async {
       final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
-      final File source =
-          globals.fs.file(path)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(kTransparentImage);
+      final File source = globals.fs.file(path)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(kTransparentImage);
       final Response response = await webAssetServer.handleRequest(
         Request('GET', Uri.parse('http://foobar/assets/foo.png')),
       );
@@ -650,10 +651,9 @@ void main() {
   runInTestbed(
     'serves Dart files from filesystem on Linux/macOS',
     () async {
-      final File source =
-          globals.fs.file('foo.dart').absolute
-            ..createSync(recursive: true)
-            ..writeAsStringSync('void main() {}');
+      final File source = globals.fs.file('foo.dart').absolute
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
 
       final Response response = await webAssetServer.handleRequest(
         Request('GET', Uri.parse('http://foobar/foo.dart')),
@@ -670,10 +670,9 @@ void main() {
 
   runInTestbed('serves asset files from filesystem with known mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
-    final File source =
-        globals.fs.file(path)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kTransparentImage);
+    final File source = globals.fs.file(path)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
 
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar/assets/foo.png')),
@@ -712,10 +711,9 @@ void main() {
 
   runInTestbed('serves asset files from filesystem with unknown mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo');
-    final File source =
-        globals.fs.file(path)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(List<int>.filled(100, 0));
+    final File source = globals.fs.file(path)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(100, 0));
 
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar/assets/foo')),
@@ -751,10 +749,9 @@ void main() {
       final String path = globals.fs.path.fromUri(
         packages.resolve(Uri.parse('package:flutter_tools/foo.dart')),
       );
-      final File source =
-          globals.fs.file(path)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(<int>[1, 2, 3]);
+      final File source = globals.fs.file(path)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3]);
 
       final Response response = await webAssetServer.handleRequest(
         Request('GET', Uri.parse('http:///packages/flutter_tools/foo.dart')),
@@ -786,8 +783,8 @@ void main() {
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-      final ResidentCompiler residentCompiler =
-          FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
+      final ResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
 
       final WebDevFS webDevFS = WebDevFS(
         hostname: 'localhost',
@@ -832,14 +829,12 @@ void main() {
       globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('GENERATED');
-      final String webPrecompiledCanvaskitSdk =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
-              .path;
-      final String webPrecompiledCanvaskitSdkSourcemaps =
-          globals.artifacts!
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
-              .path;
+      final String webPrecompiledCanvaskitSdk = globals.artifacts!
+          .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
+          .path;
+      final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
+          .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
+          .path;
       globals.fs.file(webPrecompiledCanvaskitSdk)
         ..createSync(recursive: true)
         ..writeAsStringSync('HELLO');

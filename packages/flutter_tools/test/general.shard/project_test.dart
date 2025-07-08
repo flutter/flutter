@@ -294,8 +294,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
@@ -317,8 +317,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
@@ -340,8 +340,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
@@ -357,8 +357,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -373,8 +373,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -390,8 +390,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -409,8 +409,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -438,8 +438,7 @@ void main() {
 
       testUsingContext('Version.json info is correct', () {
         final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-        final FlutterManifest manifest =
-            FlutterManifest.createFromString('''
+        final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
     ''', logger: BufferLogger.test())!;
@@ -547,8 +546,8 @@ dependencies {
               gradleV: '8.0',
               agpV: '7.4.2',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -575,8 +574,8 @@ dependencies {
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -604,8 +603,8 @@ dependencies {
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -637,8 +636,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string
             expect(
@@ -692,8 +691,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -731,8 +730,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -772,8 +771,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -813,8 +812,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -852,8 +851,8 @@ dependencies {
               gradleV: gradleV,
               agpV: '',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -1564,8 +1563,10 @@ plugins {
       _testInMemory('can be replaced', () async {
         final FlutterProject project = await someProject();
         final String originalPubspecContents = project.pubspecFile.readAsStringSync();
-        final FlutterManifest updated =
-            FlutterManifest.createFromString(validPubspecWithDependencies, logger: logger)!;
+        final FlutterManifest updated = FlutterManifest.createFromString(
+          validPubspecWithDependencies,
+          logger: logger,
+        )!;
         // Verifies the pubspec.yaml from [project] is overwritten with the pubspec
         // defined by [updated], both in the [FlutterProject] and on disk.
         expect(project.manifest, isNot(equals(updated)));
@@ -1847,10 +1848,10 @@ resolution: workspace
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
           );
-          mockXcodeProjectInterpreter
-              .buildSettingsByBuildContext[watchBuildContext] = <String, String>{
-            'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
-          };
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+              };
 
           expect(
             await project.ios.containsWatchCompanion(
@@ -1892,11 +1893,11 @@ resolution: workspace
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
           );
-          mockXcodeProjectInterpreter
-              .buildSettingsByBuildContext[watchBuildContext] = <String, String>{
-            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
-            'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
-          };
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+              };
 
           expect(
             await project.ios.containsWatchCompanion(
@@ -2027,7 +2028,8 @@ flutter:
 FakeCommand createKgpVersionCommand(String kgpV) {
   return FakeCommand(
     command: const <String>['./gradlew', 'kgpVersion', '-q'],
-    stdout: '''
+    stdout:
+        '''
 KGP Version: $kgpV
 ''',
   );
@@ -2097,16 +2099,15 @@ void _testInMemory(
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
-      Cache:
-          () => Cache(
-            logger: globals.logger,
-            fileSystem: testFileSystem,
-            osUtils: globals.os,
-            platform: globals.platform,
-            artifacts: <ArtifactSet>[],
-          ),
-      FlutterProjectFactory:
-          () => FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
+      Cache: () => Cache(
+        logger: globals.logger,
+        fileSystem: testFileSystem,
+        osUtils: globals.os,
+        platform: globals.platform,
+        artifacts: <ArtifactSet>[],
+      ),
+      FlutterProjectFactory: () =>
+          FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
       Pub: ThrowingPub.new,
     },
   );
