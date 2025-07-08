@@ -1102,7 +1102,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
   @Config(minSdk = Build.API_LEVELS.API_26)
   public void
-      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryAboveApi26() {
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryAboveApi25() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -1116,9 +1116,12 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Emulate the host and call the method that we expect to be forwarded.
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    // As long as the memory is equal to or above the warning threshold, the warning should be not
+    // be sent.
     verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
 
+    // If the first frame has not ben displayed, the warning should not be sent.
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
     delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
     delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
@@ -1135,14 +1138,18 @@ public class FlutterActivityAndFragmentDelegateTest {
         ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
     // 1 times: once for engine attachment
     verify(renderer, times(1)).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    // First frame is shown show nw the warning should be sent.
     listenerCaptor.getValue().onFlutterUiDisplayed();
 
     verify(mockHost, times(1)).onFlutterUiDisplayed();
 
+    // As long as the memory is equal to or above the warning threshold, the warning should be not
+    // be sent.
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
     verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
 
+    // These are below the threadshold, so each should send a warning (order does not matter).
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
     delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
