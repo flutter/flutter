@@ -40,12 +40,11 @@ class MetalAPIValidationMigrator extends ProjectMigrator {
     const String kValidationString = 'enableGPUValidationMode = "1"';
     return fileContents.replaceFirstMapped(kDebugServiceExtension, (Match match) {
       final String group = match.group(0)!;
-      final int leadingCount =
-          group
-              .split('debugServiceExtension')[0]
-              .codeUnits
-              .where((int codeUnit) => codeUnit == 32)
-              .length;
+      final int leadingCount = group
+          .split('debugServiceExtension')[0]
+          .codeUnits
+          .where((int codeUnit) => codeUnit == 32)
+          .length;
       return '$group${' ' * leadingCount}$kValidationString\n';
     });
   }

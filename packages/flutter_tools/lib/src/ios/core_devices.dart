@@ -546,8 +546,9 @@ class _IOSCoreDeviceConnectionProperties {
     }
     return _IOSCoreDeviceConnectionProperties._(
       authenticationType: data['authenticationType']?.toString(),
-      isMobileDeviceOnly:
-          data['isMobileDeviceOnly'] is bool? ? data['isMobileDeviceOnly'] as bool? : null,
+      isMobileDeviceOnly: data['isMobileDeviceOnly'] is bool?
+          ? data['isMobileDeviceOnly'] as bool?
+          : null,
       lastConnectionDate: data['lastConnectionDate']?.toString(),
       localHostnames: localHostnames,
       pairingState: data['pairingState']?.toString(),
@@ -606,22 +607,24 @@ class IOSCoreDeviceProperties {
   /// }
   factory IOSCoreDeviceProperties.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceProperties._(
-      bootedFromSnapshot:
-          data['bootedFromSnapshot'] is bool? ? data['bootedFromSnapshot'] as bool? : null,
+      bootedFromSnapshot: data['bootedFromSnapshot'] is bool?
+          ? data['bootedFromSnapshot'] as bool?
+          : null,
       bootedSnapshotName: data['bootedSnapshotName']?.toString(),
       bootState: data['bootState']?.toString(),
-      ddiServicesAvailable:
-          data['ddiServicesAvailable'] is bool? ? data['ddiServicesAvailable'] as bool? : null,
+      ddiServicesAvailable: data['ddiServicesAvailable'] is bool?
+          ? data['ddiServicesAvailable'] as bool?
+          : null,
       developerModeStatus: data['developerModeStatus']?.toString(),
-      hasInternalOSBuild:
-          data['hasInternalOSBuild'] is bool? ? data['hasInternalOSBuild'] as bool? : null,
+      hasInternalOSBuild: data['hasInternalOSBuild'] is bool?
+          ? data['hasInternalOSBuild'] as bool?
+          : null,
       name: data['name']?.toString(),
       osBuildUpdate: data['osBuildUpdate']?.toString(),
       osVersionNumber: data['osVersionNumber']?.toString(),
-      rootFileSystemIsWritable:
-          data['rootFileSystemIsWritable'] is bool?
-              ? data['rootFileSystemIsWritable'] as bool?
-              : null,
+      rootFileSystemIsWritable: data['rootFileSystemIsWritable'] is bool?
+          ? data['rootFileSystemIsWritable'] as bool?
+          : null,
       screenViewingURL: data['screenViewingURL']?.toString(),
     );
   }
@@ -724,8 +727,9 @@ class _IOSCoreDeviceHardwareProperties {
       deviceType: data['deviceType']?.toString(),
       ecid: data['ecid'] is int? ? data['ecid'] as int? : null,
       hardwareModel: data['hardwareModel']?.toString(),
-      internalStorageCapacity:
-          data['internalStorageCapacity'] is int? ? data['internalStorageCapacity'] as int? : null,
+      internalStorageCapacity: data['internalStorageCapacity'] is int?
+          ? data['internalStorageCapacity'] as int?
+          : null,
       marketingName: data['marketingName']?.toString(),
       platform: data['platform']?.toString(),
       productType: data['productType']?.toString(),
@@ -813,8 +817,9 @@ class IOSCoreDeviceInstalledApp {
   factory IOSCoreDeviceInstalledApp.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceInstalledApp._(
       appClip: data['appClip'] is bool? ? data['appClip'] as bool? : null,
-      builtByDeveloper:
-          data['builtByDeveloper'] is bool? ? data['builtByDeveloper'] as bool? : null,
+      builtByDeveloper: data['builtByDeveloper'] is bool?
+          ? data['builtByDeveloper'] as bool?
+          : null,
       bundleIdentifier: data['bundleIdentifier']?.toString(),
       bundleVersion: data['bundleVersion']?.toString(),
       defaultApp: data['defaultApp'] is bool? ? data['defaultApp'] as bool? : null,

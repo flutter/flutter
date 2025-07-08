@@ -263,8 +263,9 @@ class CocoaPods {
   }
 
   Future<File> getPodfileTemplate(XcodeBasedProject xcodeProject, Directory runnerProject) async {
-    final String podfileTemplateName =
-        (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
+    final String podfileTemplateName = (xcodeProject is MacOSProject)
+        ? 'Podfile-macos'
+        : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
         Cache.flutterRoot!,

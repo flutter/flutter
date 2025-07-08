@@ -662,13 +662,12 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-        final Archive archive =
-            Archive()
-              ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
-              ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
-              ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
-              ..addFile(ArchiveFile('lib/arm64-v8a/libapp.so', 50, List<int>.filled(50, 0)))
-              ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+        final Archive archive = Archive()
+          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libapp.so', 50, List<int>.filled(50, 0)))
+          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
         fileSystem
             .directory('build')
