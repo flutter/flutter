@@ -450,6 +450,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.analytics.suppressTelemetry();
         }
 
+        // Required to support `flutter --version` before artifacts are cached.
+        await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag =
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
