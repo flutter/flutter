@@ -1255,12 +1255,14 @@ name: foo
       WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
       WasmCompilerConfig(stripWasm: false),
       WasmCompilerConfig(minify: false),
+      WasmCompilerConfig(dryRun: true),
 
       // All properties non-default
       WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: WebRendererMode.canvaskit,
+        dryRun: true,
       ),
     ];
 
