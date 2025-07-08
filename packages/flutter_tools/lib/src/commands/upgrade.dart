@@ -81,10 +81,9 @@ class UpgradeCommand extends FlutterCommand {
         globals.platform,
         workingDirectory: _commandRunner.workingDirectory,
       ),
-      flutterVersion:
-          stringArg('working-directory') == null
-              ? globals.flutterVersion
-              : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
+      flutterVersion: stringArg('working-directory') == null
+          ? globals.flutterVersion
+          : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -304,8 +303,10 @@ class UpgradeCommandRunner {
     }
     // At this point the current checkout should be on HEAD of a branch having
     // an upstream. Check whether this upstream is "standard".
-    final VersionCheckError? error =
-        VersionUpstreamValidator(version: localVersion, platform: globals.platform).run();
+    final VersionCheckError? error = VersionUpstreamValidator(
+      version: localVersion,
+      platform: globals.platform,
+    ).run();
     if (error != null) {
       throwToolExit(
         'Unable to upgrade Flutter: '

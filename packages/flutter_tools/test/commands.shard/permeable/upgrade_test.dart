@@ -41,12 +41,11 @@ void main() {
       realCommandRunner = UpgradeCommandRunner()..workingDirectory = getFlutterRoot();
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
-      fakePlatform =
-          FakePlatform()
-            ..environment = Map<String, String>.unmodifiable(<String, String>{
-              'ENV1': 'irrelevant',
-              'ENV2': 'irrelevant',
-            });
+      fakePlatform = FakePlatform()
+        ..environment = Map<String, String>.unmodifiable(<String, String>{
+          'ENV1': 'irrelevant',
+          'ENV2': 'irrelevant',
+        });
     });
 
     testUsingContext(
@@ -564,8 +563,8 @@ void main() {
             FileSystem: () => fs,
             FlutterVersion: () => FakeFlutterVersion(),
             ProcessManager: () => fakeProcessManager,
-            PersistentToolState:
-                () => PersistentToolState.test(directory: tempDir, logger: testLogger),
+            PersistentToolState: () =>
+                PersistentToolState.test(directory: tempDir, logger: testLogger),
           },
         );
       });

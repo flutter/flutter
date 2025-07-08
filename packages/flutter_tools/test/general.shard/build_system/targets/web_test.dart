@@ -99,10 +99,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -327,10 +326,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -350,10 +348,9 @@ name: foo
     'WebEntrypointTarget generates a plugin registrant for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -375,10 +372,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform on windows',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
 
         environment.defines[kHasWebPlugins] = 'true';
@@ -409,10 +405,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -441,10 +436,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -464,10 +458,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version from a package config',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         globals.fs.file(globals.fs.path.join('pubspec.yaml')).writeAsStringSync('name: foo\n');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
@@ -488,10 +481,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and without init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -1192,11 +1184,9 @@ name: foo
                           environment.buildDir.childFile('main.dart.wasm').absolute.path,
                           environment.buildDir.childFile('main.dart').absolute.path,
                         ],
-                        onRun:
-                            (_) =>
-                                outputJsFile
-                                  ..createSync()
-                                  ..writeAsStringSync('foo'),
+                        onRun: (_) => outputJsFile
+                          ..createSync()
+                          ..writeAsStringSync('foo'),
                       ),
                     );
 
@@ -1281,6 +1271,76 @@ name: foo
 
     // Make sure all the build keys are unique.
     expect(buildKeys.toSet().length, buildKeys.length);
+  });
+
+  test('JsCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
+  });
+
+  test('WasmCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
   });
 
   test(

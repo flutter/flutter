@@ -553,25 +553,24 @@ class CustomDeviceConfig {
       platform: explicitPlatform ? platform : (platform ?? this.platform),
       enabled: enabled ?? this.enabled,
       pingCommand: pingCommand ?? this.pingCommand,
-      pingSuccessRegex:
-          explicitPingSuccessRegex ? pingSuccessRegex : (pingSuccessRegex ?? this.pingSuccessRegex),
-      postBuildCommand:
-          explicitPostBuildCommand ? postBuildCommand : (postBuildCommand ?? this.postBuildCommand),
+      pingSuccessRegex: explicitPingSuccessRegex
+          ? pingSuccessRegex
+          : (pingSuccessRegex ?? this.pingSuccessRegex),
+      postBuildCommand: explicitPostBuildCommand
+          ? postBuildCommand
+          : (postBuildCommand ?? this.postBuildCommand),
       installCommand: installCommand ?? this.installCommand,
       uninstallCommand: uninstallCommand ?? this.uninstallCommand,
       runDebugCommand: runDebugCommand ?? this.runDebugCommand,
-      forwardPortCommand:
-          explicitForwardPortCommand
-              ? forwardPortCommand
-              : (forwardPortCommand ?? this.forwardPortCommand),
-      forwardPortSuccessRegex:
-          explicitForwardPortSuccessRegex
-              ? forwardPortSuccessRegex
-              : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
-      screenshotCommand:
-          explicitScreenshotCommand
-              ? screenshotCommand
-              : (screenshotCommand ?? this.screenshotCommand),
+      forwardPortCommand: explicitForwardPortCommand
+          ? forwardPortCommand
+          : (forwardPortCommand ?? this.forwardPortCommand),
+      forwardPortSuccessRegex: explicitForwardPortSuccessRegex
+          ? forwardPortSuccessRegex
+          : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
+      screenshotCommand: explicitScreenshotCommand
+          ? screenshotCommand
+          : (screenshotCommand ?? this.screenshotCommand),
     );
   }
 

@@ -331,8 +331,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   // key reparenting in the same frame but N is usually a small number.
   void _add(_OverlayEntryLocation child) {
     assert(mounted);
-    final LinkedList<_OverlayEntryLocation> children =
-        _sortedTheaterSiblings ??= LinkedList<_OverlayEntryLocation>();
+    final LinkedList<_OverlayEntryLocation> children = _sortedTheaterSiblings ??=
+        LinkedList<_OverlayEntryLocation>();
     assert(!children.contains(child));
     _OverlayEntryLocation? insertPosition = children.isEmpty ? null : children.last;
     while (insertPosition != null && insertPosition._zOrderIndex > child._zOrderIndex) {
@@ -788,8 +788,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void rearrange(Iterable<OverlayEntry> newEntries, {OverlayEntry? below, OverlayEntry? above}) {
-    final List<OverlayEntry> newEntriesList =
-        newEntries is List<OverlayEntry> ? newEntries : newEntries.toList(growable: false);
+    final List<OverlayEntry> newEntriesList = newEntries is List<OverlayEntry>
+        ? newEntries
+        : newEntries.toList(growable: false);
     assert(_debugVerifyInsertPosition(above, below, newEntries: newEntriesList));
     assert(
       newEntriesList.every(
@@ -1060,10 +1061,9 @@ mixin _RenderTheaterMixin on RenderBox {
     TextBaseline baseline,
   ) {
     final StackParentData childParentData = child.parentData! as StackParentData;
-    final BoxConstraints childConstraints =
-        childParentData.isPositioned
-            ? childParentData.positionedChildConstraints(theaterSize)
-            : nonPositionedChildConstraints;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+        ? childParentData.positionedChildConstraints(theaterSize)
+        : nonPositionedChildConstraints;
     final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
     if (baselineOffset == null) {
       return null;
@@ -1338,10 +1338,9 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size =
-        constraints.biggest.isFinite
-            ? constraints.biggest
-            : _findSizeDeterminingChild().getDryLayout(constraints);
+    final Size size = constraints.biggest.isFinite
+        ? constraints.biggest
+        : _findSizeDeterminingChild().getDryLayout(constraints);
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
@@ -1629,10 +1628,9 @@ class OverlayPortalController {
   int? _zOrderIndex;
   final String? _debugLabel;
 
-  static int _wallTime =
-      kIsWeb
-          ? -9007199254740992 // -2^53
-          : -1 << 63;
+  static int _wallTime = kIsWeb
+      ? -9007199254740992 // -2^53
+      : -1 << 63;
 
   // Returns a unique and monotonically increasing timestamp that represents
   // now.
@@ -2170,10 +2168,9 @@ class _RenderTheaterMarker extends InheritedWidget {
         context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(),
       );
       assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
-      marker =
-          ancestor != null
-              ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
-              : null;
+      marker = ancestor != null
+          ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
+          : null;
     } else {
       marker = context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
     }
@@ -2593,8 +2590,9 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
       final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize =
-          theaterConstraints.biggest.isFinite ? theaterConstraints.biggest : theater.size;
+      final Size boxSize = theaterConstraints.biggest.isFinite
+          ? theaterConstraints.biggest
+          : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
     }
   }

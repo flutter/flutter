@@ -458,12 +458,11 @@ void main() {
     testWithoutContext('non-standard url', () async {
       final FlutterValidator flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
-        flutterVersion:
-            () => FakeFlutterVersion(
-              frameworkVersion: '1.0.0',
-              branch: 'beta',
-              repositoryUrl: 'https://githubmirror.com/flutter.git',
-            ),
+        flutterVersion: () => FakeFlutterVersion(
+          frameworkVersion: '1.0.0',
+          branch: 'beta',
+          repositoryUrl: 'https://githubmirror.com/flutter.git',
+        ),
         devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
@@ -497,9 +496,8 @@ void main() {
     testWithoutContext('as unknown if upstream is null', () async {
       final FlutterValidator flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
-        flutterVersion:
-            () =>
-                FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta', repositoryUrl: null),
+        flutterVersion: () =>
+            FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta', repositoryUrl: null),
         devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
         artifacts: Artifacts.test(),
