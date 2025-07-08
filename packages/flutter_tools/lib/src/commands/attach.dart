@@ -156,10 +156,10 @@ class AttachCommand extends FlutterCommand {
   final FileSystem _fileSystem;
 
   @override
-  final String name = 'attach';
+  final name = 'attach';
 
   @override
-  final String description = r'''
+  final description = r'''
 Attach to a running app.
 
 For attaching to Android or iOS devices, simply using `flutter attach` is
@@ -292,7 +292,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
+    final hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
@@ -401,7 +401,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
         );
-        final Completer<void> onAppStart = Completer<void>.sync();
+        final onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
         unawaited(
           onAppStart.future.whenComplete(() {
@@ -445,7 +445,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       rethrow;
     } finally {
       final List<ForwardedPort> ports = device.portForwarder!.forwardedPorts.toList();
-      for (final ForwardedPort port in ports) {
+      for (final port in ports) {
         await device.portForwarder!.unforward(port);
       }
       // However we exited from the runner, ensure the terminal has line mode
@@ -475,8 +475,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       platform: _platform,
     );
     flutterDevice.vmServiceUris = vmServiceUris;
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+    final flutterDevices = <FlutterDevice>[flutterDevice];
+    final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       enableDds: enableDds,
       ddsPort: ddsPort,

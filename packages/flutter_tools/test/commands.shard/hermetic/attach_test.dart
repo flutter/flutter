@@ -44,12 +44,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  bool stdinHasTerminal = false;
+  var stdinHasTerminal = false;
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  int maxRss = 0;
+  var maxRss = 0;
 }
 
 void main() {
@@ -84,8 +84,8 @@ void main() {
     });
 
     group('with one device and no specified target file', () {
-      const int devicePort = 499;
-      const int hostPort = 42;
+      const devicePort = 499;
+      const hostPort = 42;
       final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
       late FakeDeviceLogReader fakeLogReader;
@@ -109,7 +109,7 @@ void main() {
       testUsingContext(
         'succeeds with iOS device with protocol discovery',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             onGetLogReader: () {
@@ -121,7 +121,7 @@ void main() {
             },
           );
           testDeviceManager.devices = <Device>[device];
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -130,7 +130,7 @@ void main() {
               completer.complete();
             }
           });
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -140,8 +140,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -183,7 +182,7 @@ void main() {
       testUsingContext(
         'restores terminal to singleCharMode == false on command exit',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             onGetLogReader: () {
@@ -195,7 +194,7 @@ void main() {
             },
           );
           testDeviceManager.devices = <Device>[device];
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -204,7 +203,7 @@ void main() {
               completer.complete();
             }
           });
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -217,8 +216,7 @@ void main() {
               };
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -261,12 +259,12 @@ void main() {
       testUsingContext(
         'local engine artifacts are passed to runner',
         () async {
-          const String localEngineSrc = '/path/to/local/engine/src';
-          const String localEngineDir = 'host_debug_unopt';
+          const localEngineSrc = '/path/to/local/engine/src';
+          const localEngineDir = 'host_debug_unopt';
           testFileSystem
               .directory('$localEngineSrc/out/$localEngineDir')
               .createSync(recursive: true);
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             onGetLogReader: () {
@@ -278,7 +276,7 @@ void main() {
             },
           );
           testDeviceManager.devices = <Device>[device];
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -287,7 +285,7 @@ void main() {
               completer.complete();
             }
           });
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -297,8 +295,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          bool passedArtifactTest = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          var passedArtifactTest = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()
             ..hotRunner = hotRunner
             .._artifactTester = (Artifacts artifacts) {
               expect(artifacts, isA<CachedLocalEngineArtifacts>());
@@ -351,7 +349,7 @@ void main() {
       testUsingContext(
         'succeeds with iOS device with mDNS',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             onGetLogReader: () {
@@ -363,7 +361,7 @@ void main() {
             },
           );
           testDeviceManager.devices = <Device>[device];
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -373,8 +371,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -436,13 +433,13 @@ void main() {
       testUsingContext(
         'succeeds with iOS device with mDNS wireless device',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
           );
           testDeviceManager.devices = <Device>[device];
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -452,8 +449,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -524,13 +520,13 @@ void main() {
       testUsingContext(
         'succeeds with iOS device with mDNS wireless device with debug-port',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
           );
           testDeviceManager.devices = <Device>[device];
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -540,8 +536,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -625,13 +620,13 @@ void main() {
       testUsingContext(
         'succeeds with iOS device with mDNS wireless device with debug-url',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
           );
           testDeviceManager.devices = <Device>[device];
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -641,8 +636,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -734,7 +728,7 @@ void main() {
             return fakeLogReader;
           };
           testDeviceManager.devices = <Device>[device];
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -818,12 +812,12 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
 
-          const String filesystemScheme = 'foo';
-          const String filesystemRoot = '/build-output/';
-          const String projectRoot = '/build-output/project-root';
-          const String outputDill = '/tmp/output.dill';
+          const filesystemScheme = 'foo';
+          const filesystemRoot = '/build-output/';
+          const projectRoot = '/build-output/project-root';
+          const outputDill = '/tmp/output.dill';
 
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -834,10 +828,9 @@ void main() {
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          final AttachCommand command = AttachCommand(
+          final command = AttachCommand(
             hotRunnerFactory: hotRunnerFactory,
             stdio: stdio,
             logger: logger,
@@ -885,7 +878,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final AttachCommand command = AttachCommand(
+          final command = AttachCommand(
             stdio: stdio,
             logger: logger,
             terminal: terminal,
@@ -913,7 +906,7 @@ void main() {
       testUsingContext(
         'succeeds when ipv6 is specified and debug-port is not on iOS device',
         () async {
-          final FakeIOSDevice device = FakeIOSDevice(
+          final device = FakeIOSDevice(
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             onGetLogReader: () {
@@ -923,7 +916,7 @@ void main() {
             },
           );
           testDeviceManager.devices = <Device>[device];
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -932,7 +925,7 @@ void main() {
               completer.complete();
             }
           });
-          final FakeHotRunner hotRunner = FakeHotRunner();
+          final hotRunner = FakeHotRunner();
           hotRunner.onAttach =
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -942,8 +935,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -994,7 +986,7 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
 
-          final AttachCommand command = AttachCommand(
+          final command = AttachCommand(
             stdio: stdio,
             logger: logger,
             terminal: terminal,
@@ -1021,13 +1013,13 @@ void main() {
     });
 
     group('forwarding to given port', () {
-      const int devicePort = 499;
-      const int hostPort = 42;
+      const devicePort = 499;
+      const hostPort = 42;
       late RecordingPortForwarder portForwarder;
       late FakeAndroidDevice device;
 
       setUp(() {
-        final FakeDartDevelopmentService fakeDds = FakeDartDevelopmentService();
+        final fakeDds = FakeDartDevelopmentService();
         portForwarder = RecordingPortForwarder(hostPort);
         device = FakeAndroidDevice(id: '1')
           ..portForwarder = portForwarder
@@ -1039,7 +1031,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -1080,7 +1072,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -1122,7 +1114,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -1173,7 +1165,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           final StreamSubscription<String> loggerSubscription = logger.stream.listen((
             String message,
           ) {
@@ -1224,7 +1216,7 @@ void main() {
     testUsingContext(
       'exits when no device connected',
       () async {
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -1249,7 +1241,7 @@ void main() {
     testUsingContext(
       'fails when targeted device is not Android with --device-user',
       () async {
-        final FakeIOSDevice device = FakeIOSDevice();
+        final device = FakeIOSDevice();
         testDeviceManager.devices = <Device>[device];
         expect(
           createTestCommandRunner(
@@ -1276,7 +1268,7 @@ void main() {
     testUsingContext(
       'exits when multiple devices connected',
       () async {
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -1309,11 +1301,11 @@ void main() {
     testUsingContext(
       'Catches service disappeared error',
       () async {
-        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+        final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
           ..onGetLogReader = () => NoOpDeviceLogReader('test');
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
         hotRunner.onAttach =
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -1332,7 +1324,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -1357,11 +1349,11 @@ void main() {
     testUsingContext(
       'Catches "Service connection disposed" error by code',
       () async {
-        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+        final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
           ..onGetLogReader = () => NoOpDeviceLogReader('test');
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
         hotRunner.onAttach =
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -1380,7 +1372,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -1405,11 +1397,11 @@ void main() {
     testUsingContext(
       'Catches "Service connection disposed" error by text',
       () async {
-        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+        final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
           ..onGetLogReader = () => NoOpDeviceLogReader('test');
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
         hotRunner.onAttach =
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
@@ -1428,7 +1420,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -1453,11 +1445,11 @@ void main() {
     testUsingContext(
       'Does not catch generic RPC error',
       () async {
-        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+        final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
           ..onGetLogReader = () => NoOpDeviceLogReader('test');
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
         hotRunner.onAttach =
             (
@@ -1477,7 +1469,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final AttachCommand command = AttachCommand(
+        final command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -1509,7 +1501,7 @@ void main() {
       testUsingContext(
         'to find on iOS Simulator',
         () async {
-          final FakeIOSSimulator device = FakeIOSSimulator();
+          final device = FakeIOSSimulator();
           testDeviceManager.devices = <Device>[device];
           FakeAsync().run((FakeAsync fakeAsync) {
             createTestCommandRunner(
@@ -1551,10 +1543,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool, bool) onAttach;
 
   @override
-  bool exited = false;
+  var exited = false;
 
   @override
-  bool isWaitingForVmService = true;
+  var isWaitingForVmService = true;
 
   @override
   Future<int> attach({
@@ -1573,10 +1565,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   }
 
   @override
-  bool supportsServiceProtocol = false;
+  var supportsServiceProtocol = false;
 
   @override
-  bool stayResident = true;
+  var stayResident = true;
 
   @override
   void printHelp({required bool details, bool reloadIsRestart = false}) {}
@@ -1607,7 +1599,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     String? nativeAssetsYamlFile,
   }) {
     if (_artifactTester != null) {
-      for (final FlutterDevice device in devices) {
+      for (final device in devices) {
         _artifactTester!((device.generator! as DefaultResidentCompiler).artifacts);
       }
     }
@@ -1723,13 +1715,13 @@ class StreamLogger extends Logger {
     return SilentStatus(stopwatch: Stopwatch(), onFinish: onFinish)..start();
   }
 
-  bool _interrupt = false;
+  var _interrupt = false;
 
   void interrupt() {
     _interrupt = true;
   }
 
-  final StreamController<String> _controller = StreamController<String>.broadcast();
+  final _controller = StreamController<String>.broadcast();
 
   void _log(String message) {
     _controller.add(message);
@@ -1772,7 +1764,7 @@ Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logge
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
   Future<void> get done => noopCompleter.future;
-  final Completer<void> noopCompleter = Completer<void>();
+  final noopCompleter = Completer<void>();
 
   @override
   Future<void> startDartDevelopmentService(
@@ -1919,7 +1911,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 
   @override
-  final String name = 'name';
+  final name = 'name';
 
   @override
   String get displayName => name;
@@ -1954,15 +1946,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
 
     if (compatibleWithProtocolDiscovery) {
       return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -1984,7 +1975,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
 class FakeIOSSimulator extends Fake implements IOSSimulator {
   @override
-  final String name = 'name';
+  final name = 'name';
 
   @override
   String get displayName => name;
@@ -2025,15 +2016,14 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
     return mdnsVMServiceDiscoveryForAttach;
   }
 }
@@ -2101,11 +2091,11 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({required super.logger});
-  List<Device> devices = <Device>[];
+  var devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
-    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    final discoverer = FakePollingDeviceDiscovery();
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
@@ -2118,10 +2108,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   final bool stdinHasTerminal;
 
   @override
-  bool usesTerminalUi = false;
+  var usesTerminalUi = false;
 
   @override
-  bool singleCharMode = false;
+  var singleCharMode = false;
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;

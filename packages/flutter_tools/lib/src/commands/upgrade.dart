@@ -18,7 +18,7 @@ import '../version.dart';
 import 'channel.dart';
 
 // The official docs to install Flutter.
-const String _flutterInstallDocs = 'https://flutter.dev/setup';
+const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({required bool verboseHelp, UpgradeCommandRunner? commandRunner})
@@ -58,10 +58,10 @@ class UpgradeCommand extends FlutterCommand {
   final UpgradeCommandRunner _commandRunner;
 
   @override
-  final String name = 'upgrade';
+  final name = 'upgrade';
 
   @override
-  final String description = 'Upgrade your copy of Flutter.';
+  final description = 'Upgrade your copy of Flutter.';
 
   @override
   final String category = FlutterCommandCategory.sdk;
@@ -279,7 +279,7 @@ class UpgradeCommandRunner {
       );
       revision = result.stdout.trim();
     } on Exception catch (e) {
-      final String errorString = e.toString();
+      final errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: Your Flutter checkout is currently not '

@@ -27,7 +27,7 @@ void main() {
 
   testUsingContext('AGP version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(
+    final versionTuple = VersionTuple(
       agpVersion: '7.3.0',
       gradleVersion: '7.5',
       kotlinVersion: '1.7.10',
@@ -44,7 +44,7 @@ void main() {
   testUsingContext('Gradle version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     // Create a new flutter project.
-    final VersionTuple versionTuple = VersionTuple(
+    final versionTuple = VersionTuple(
       agpVersion: '7.3.0',
       gradleVersion: '7.4.1',
       kotlinVersion: '1.7.10',
@@ -60,7 +60,7 @@ void main() {
 
   testUsingContext('Kotlin version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(
+    final versionTuple = VersionTuple(
       agpVersion: '7.4.0',
       gradleVersion: '7.5',
       kotlinVersion: '1.8.0',

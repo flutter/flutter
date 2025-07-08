@@ -41,9 +41,9 @@ void main() {
       final File pubspecFile = projectRoot.childFile('pubspec.yaml');
       final String pubspecString = pubspecFile.readAsStringSync();
 
-      final StringBuffer iosOnlyPubspec = StringBuffer();
-      bool inAndroidSection = false;
-      const String pluginPlatformIndentation = '      ';
+      final iosOnlyPubspec = StringBuffer();
+      var inAndroidSection = false;
+      const pluginPlatformIndentation = '      ';
       for (final String line in pubspecString.split('\n')) {
         // Skip everything in the Android section of the plugin platforms list.
         if (line.startsWith('${pluginPlatformIndentation}android:')) {

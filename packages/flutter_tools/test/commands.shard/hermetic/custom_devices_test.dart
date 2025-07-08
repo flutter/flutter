@@ -27,10 +27,10 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-const String linuxFlutterRoot = '/flutter';
-const String windowsFlutterRoot = r'C:\flutter';
+const linuxFlutterRoot = '/flutter';
+const windowsFlutterRoot = r'C:\flutter';
 
-const String defaultConfigLinux1 = r'''
+const defaultConfigLinux1 = r'''
 {
   "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json",
   "custom-devices": [
@@ -95,7 +95,7 @@ const String defaultConfigLinux1 = r'''
   ]
 }
 ''';
-const String defaultConfigLinux2 = r'''
+const defaultConfigLinux2 = r'''
 {
   "custom-devices": [
     {
@@ -382,7 +382,7 @@ FakeTerminal createFakeTerminalForAddingSshDevice({
 }
 
 void main() {
-  const String featureNotEnabledMessage =
+  const featureNotEnabledMessage =
       'Custom devices feature must be enabled. Enable using `flutter config --enable-custom-devices`.';
 
   setUpAll(() {
@@ -397,7 +397,7 @@ void main() {
     testUsingContext(
       'custom-devices command shows config file in help when feature is enabled',
       () async {
-        final BufferLogger logger = BufferLogger.test();
+        final logger = BufferLogger.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           logger: logger,
@@ -412,7 +412,7 @@ void main() {
     );
 
     testUsingContext('running custom-devices command without arguments prints usage', () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
         logger: logger,
@@ -463,7 +463,7 @@ void main() {
     testUsingContext(
       'custom-devices add command correctly adds ssh device config on linux',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -489,7 +489,7 @@ void main() {
           completes,
         );
 
-        final CustomDevicesConfig config = CustomDevicesConfig.test(
+        final config = CustomDevicesConfig.test(
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
@@ -553,7 +553,7 @@ void main() {
     );
 
     testUsingContext('custom-devices add command correctly adds ipv4 ssh device config', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
         terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -579,7 +579,7 @@ void main() {
         completes,
       );
 
-      final CustomDevicesConfig config = CustomDevicesConfig.test(
+      final config = CustomDevicesConfig.test(
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
@@ -642,7 +642,7 @@ void main() {
     });
 
     testUsingContext('custom-devices add command correctly adds ipv6 ssh device config', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
         terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -667,7 +667,7 @@ void main() {
         completes,
       );
 
-      final CustomDevicesConfig config = CustomDevicesConfig.test(
+      final config = CustomDevicesConfig.test(
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
@@ -737,7 +737,7 @@ void main() {
     testUsingContext(
       'custom-devices add command correctly adds non-forwarding ssh device config',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -762,7 +762,7 @@ void main() {
           completes,
         );
 
-        final CustomDevicesConfig config = CustomDevicesConfig.test(
+        final config = CustomDevicesConfig.test(
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
@@ -816,7 +816,7 @@ void main() {
     testUsingContext(
       'custom-devices add command correctly adds non-screenshotting ssh device config',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -841,7 +841,7 @@ void main() {
           completes,
         );
 
-        final CustomDevicesConfig config = CustomDevicesConfig.test(
+        final config = CustomDevicesConfig.test(
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
@@ -898,9 +898,9 @@ void main() {
     );
 
     testUsingContext('custom-devices delete command deletes device and creates backup', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
 
-      final CustomDevicesConfig config = CustomDevicesConfig.test(
+      final config = CustomDevicesConfig.test(
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
@@ -932,9 +932,9 @@ void main() {
     testUsingContext(
       'custom-devices delete command without device argument throws tool exit',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final fs = MemoryFileSystem.test();
 
-        final CustomDevicesConfig config = CustomDevicesConfig.test(
+        final config = CustomDevicesConfig.test(
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
@@ -968,8 +968,8 @@ void main() {
     testUsingContext(
       'custom-devices list command throws tool exit when config contains errors',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final BufferLogger logger = BufferLogger.test();
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
 
         fs.file('.flutter_custom_devices.json').writeAsStringSync('{"custom-devices": {}}');
 
@@ -993,7 +993,7 @@ void main() {
     );
 
     testUsingContext('custom-devices list command prints message when no devices found', () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
         logger: logger,
@@ -1008,8 +1008,8 @@ void main() {
     });
 
     testUsingContext('custom-devices list command lists all devices', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
 
       CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
         ..add(
@@ -1039,8 +1039,8 @@ void main() {
     });
 
     testUsingContext('custom-devices reset correctly backs up the config file', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
 
       CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
         ..add(
@@ -1083,8 +1083,8 @@ void main() {
     testUsingContext(
       "custom-devices reset outputs correct msg when config file didn't exist",
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final BufferLogger logger = BufferLogger.test();
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           logger: logger,
@@ -1111,7 +1111,7 @@ void main() {
     testUsingContext(
       'custom-devices add command correctly adds ssh device config on windows',
       () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
@@ -1137,7 +1137,7 @@ void main() {
           completes,
         );
 
-        final CustomDevicesConfig config = CustomDevicesConfig.test(
+        final config = CustomDevicesConfig.test(
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
