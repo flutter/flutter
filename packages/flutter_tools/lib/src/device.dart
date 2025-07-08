@@ -17,6 +17,7 @@ import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
+import 'isolated/devfs_config.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -948,10 +949,6 @@ class DebuggingOptions {
     this.deviceVmServicePort,
     this.ddsPort,
     this.devToolsServerAddress,
-    this.hostname,
-    this.port,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -960,7 +957,6 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
-    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
@@ -979,16 +975,13 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
+    this.devConfig = const DevConfig(),
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(
     this.buildInfo, {
     this.dartEntrypointArgs = const <String>[],
-    this.port,
-    this.hostname,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -997,7 +990,6 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webLaunchUrl,
-    this.webHeaders = const <String, String>{},
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
@@ -1009,6 +1001,7 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
+    this.devConfig = const DevConfig(),
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1067,10 +1060,6 @@ class DebuggingOptions {
     required this.disablePortPublication,
     required this.ddsPort,
     required this.devToolsServerAddress,
-    required this.port,
-    required this.hostname,
-    required this.tlsCertPath,
-    required this.tlsCertKeyPath,
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
@@ -1079,7 +1068,6 @@ class DebuggingOptions {
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
-    required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
     required this.webUseWasm,
@@ -1098,6 +1086,8 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    // ignore: unused_element_parameter
+    this.devConfig,
   });
 
   final bool debuggingEnabled;
@@ -1126,10 +1116,6 @@ class DebuggingOptions {
   final bool disablePortPublication;
   final int? ddsPort;
   final Uri? devToolsServerAddress;
-  final String? port;
-  final String? hostname;
-  final String? tlsCertPath;
-  final String? tlsCertKeyPath;
   final bool? webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
@@ -1145,6 +1131,7 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
+  final DevConfig? devConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1169,9 +1156,6 @@ class DebuggingOptions {
 
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
-
-  /// Allow developers to add custom headers to web server
-  final Map<String, String> webHeaders;
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
@@ -1268,10 +1252,6 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
-    'port': port,
-    'hostname': hostname,
-    'tlsCertPath': tlsCertPath,
-    'tlsCertKeyPath': tlsCertKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1281,7 +1261,6 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
-    'webHeaders': webHeaders,
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1337,10 +1316,6 @@ class DebuggingOptions {
         devToolsServerAddress: json['devToolsServerAddress'] != null
             ? Uri.parse(json['devToolsServerAddress']! as String)
             : null,
-        port: json['port'] as String?,
-        hostname: json['hostname'] as String?,
-        tlsCertPath: json['tlsCertPath'] as String?,
-        tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
         webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
         webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
         webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
@@ -1349,7 +1324,6 @@ class DebuggingOptions {
         webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-        webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         webLaunchUrl: json['webLaunchUrl'] as String?,
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
