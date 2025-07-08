@@ -14,7 +14,7 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 /// The rest of the tools code should use this class instead of looking up
 /// features directly. To facilitate rolls to google3 and other clients, all
 /// flags should be provided with a default implementation here. Clients that
-/// use this class should extent instead of implement, so that new flags are
+/// use this class should extend instead of implement, so that new flags are
 /// picked up automatically.
 abstract class FeatureFlags {
   /// const constructor so that subclasses can be const.
@@ -78,6 +78,12 @@ abstract class FeatureFlags {
   /// [Feature.configSetting] is not `null`.
   Iterable<Feature> get allConfigurableFeatures {
     return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
+
+  /// All Flutter feature flags that are enabled.
+  // This member is overriden in google3.
+  Iterable<Feature> get allEnabledFeatures {
+    return allFeatures.where(isEnabled);
   }
 }
 

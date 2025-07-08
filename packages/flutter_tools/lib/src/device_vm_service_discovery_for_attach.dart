@@ -36,15 +36,14 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
     required bool ipv6,
     required Logger logger,
   }) {
-    _protocolDiscovery =
-        (() async => ProtocolDiscovery.vmService(
-          await logReader,
-          portForwarder: portForwarder,
-          ipv6: ipv6,
-          devicePort: devicePort,
-          hostPort: hostPort,
-          logger: logger,
-        ))();
+    _protocolDiscovery = (() async => ProtocolDiscovery.vmService(
+      await logReader,
+      portForwarder: portForwarder,
+      ipv6: ipv6,
+      devicePort: devicePort,
+      hostPort: hostPort,
+      logger: logger,
+    ))();
   }
 
   late final Future<ProtocolDiscovery> _protocolDiscovery;

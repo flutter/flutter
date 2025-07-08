@@ -16,12 +16,14 @@ import 'mocks.dart';
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
   final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
-  final FileSystemStyle fsStyle =
-      platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
+  final FileSystemStyle fsStyle = platform.isWindows
+      ? FileSystemStyle.windows
+      : FileSystemStyle.posix;
 
   group('flutter test adapter', () {
-    final String expectedFlutterExecutable =
-        platform.isWindows ? r'C:\fake\flutter\bin\flutter.bat' : '/fake/flutter/bin/flutter';
+    final String expectedFlutterExecutable = platform.isWindows
+        ? r'C:\fake\flutter\bin\flutter.bat'
+        : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
       Cache.flutterRoot = platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';

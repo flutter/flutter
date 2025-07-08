@@ -13,7 +13,8 @@ class BadgeTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends BadgeThemeData {
   _${blockName}DefaultsM3(this.context) : super(
     smallSize: ${getToken("md.comp.badge.size")},
