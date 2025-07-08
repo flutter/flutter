@@ -36,6 +36,7 @@ const String templateDefaultGradleVersion = '8.12';
 //  * ndkVersion constant in this file
 //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
 const String templateAndroidGradlePluginVersion = '8.9.1';
 const String templateAndroidGradlePluginVersionForModule = '8.9.1';
