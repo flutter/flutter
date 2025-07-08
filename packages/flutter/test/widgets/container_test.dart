@@ -732,6 +732,33 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Container with BorderRadiusDirectional and no Directionality throws a detailed error',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadiusDirectional.all(Radius.circular(1.0)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          '''
+No TextDirection found.
+To resolve BorderRadiusDirectional properties, it must be provided with a TextDirection.
+This error usually occurs when BorderRadiusDirectional is used in a widget without a Directionality ancestor.
+Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the top of your application widget tree. It determines the ambient reading direction and is used, for example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.''',
+        ),
+      );
+    },
+  );
+
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (
     WidgetTester tester,
   ) async {
@@ -746,9 +773,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Padding(padding: const EdgeInsets.all(30.0), child: container),
-      ),
+      RepaintBoundary(child: Padding(padding: const EdgeInsets.all(30.0), child: container)),
     );
 
     await expectLater(

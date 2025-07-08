@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -328,6 +329,24 @@ void main() {
     expect(BorderRadiusDirectional.circular(15.0) ~/ 10.0, BorderRadiusDirectional.circular(1.0));
 
     expect(BorderRadiusDirectional.circular(15.0) % 10.0, BorderRadiusDirectional.circular(5.0));
+  });
+
+  test('BorderRadiusDirectional.resolve with null throws detailed error', () {
+    const BorderRadiusDirectional borderRadius = BorderRadiusDirectional.all(Radius.circular(1.0));
+    expect(
+      () => borderRadius.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          '''
+No TextDirection found.
+To resolve BorderRadiusDirectional properties, it must be provided with a TextDirection.
+This error usually occurs when BorderRadiusDirectional is used in a widget without a Directionality ancestor.
+Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the top of your application widget tree. It determines the ambient reading direction and is used, for example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.''',
+        ),
+      ),
+    );
   });
 
   test('BorderRadiusDirectional.lerp() invariants', () {
