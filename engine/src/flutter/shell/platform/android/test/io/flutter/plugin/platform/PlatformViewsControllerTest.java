@@ -158,7 +158,6 @@ public class PlatformViewsControllerTest {
   public void itPassesSurfaceLifecyleResetInBackgroundLeqApi34() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
-    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     // Get the platform view registry.
     PlatformViewRegistry registry = platformViewsController.getRegistry();
