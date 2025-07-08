@@ -58,8 +58,9 @@ class EmulatorsCommand extends FlutterCommand {
     } else if (argumentResults.wasParsed('create')) {
       await _createEmulator(name: stringArg('name'));
     } else {
-      final String? searchText =
-          argumentResults.rest.isNotEmpty ? argumentResults.rest.first : null;
+      final String? searchText = argumentResults.rest.isNotEmpty
+          ? argumentResults.rest.first
+          : null;
       await _listEmulators(searchText);
     }
 
@@ -94,10 +95,9 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _listEmulators(String? searchText) async {
-    final List<Emulator> emulators =
-        searchText == null
-            ? await emulatorManager!.getAllAvailableEmulators()
-            : await emulatorManager!.getEmulatorsMatching(searchText);
+    final List<Emulator> emulators = searchText == null
+        ? await emulatorManager!.getAllAvailableEmulators()
+        : await emulatorManager!.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
       globals.printStatus('No emulators available.');

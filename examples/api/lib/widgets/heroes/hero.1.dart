@@ -72,34 +72,33 @@ class HeroExample extends StatelessWidget {
   void _gotoDetailsPage(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            (BuildContext context) => Scaffold(
-              appBar: AppBar(title: const Text('Second Page')),
-              body: Align(
-                alignment: Alignment.bottomRight,
-                child: Stack(
-                  children: <Widget>[
-                    Hero(
-                      tag: 'hero-custom-tween',
-                      createRectTween: (Rect? begin, Rect? end) {
-                        return MaterialRectCenterArcTween(begin: begin, end: end);
-                      },
-                      child: BoxWidget(
-                        size: const Size(400.0, 400.0),
-                        color: Colors.blue[700]!.withOpacity(0.5),
-                      ),
-                    ),
-                    Hero(
-                      tag: 'hero-default-tween',
-                      child: BoxWidget(
-                        size: const Size(400.0, 400.0),
-                        color: Colors.red[700]!.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
+        builder: (BuildContext context) => Scaffold(
+          appBar: AppBar(title: const Text('Second Page')),
+          body: Align(
+            alignment: Alignment.bottomRight,
+            child: Stack(
+              children: <Widget>[
+                Hero(
+                  tag: 'hero-custom-tween',
+                  createRectTween: (Rect? begin, Rect? end) {
+                    return MaterialRectCenterArcTween(begin: begin, end: end);
+                  },
+                  child: BoxWidget(
+                    size: const Size(400.0, 400.0),
+                    color: Colors.blue[700]!.withOpacity(0.5),
+                  ),
                 ),
-              ),
+                Hero(
+                  tag: 'hero-default-tween',
+                  child: BoxWidget(
+                    size: const Size(400.0, 400.0),
+                    color: Colors.red[700]!.withOpacity(0.5),
+                  ),
+                ),
+              ],
             ),
+          ),
+        ),
       ),
     );
   }

@@ -542,7 +542,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
 
   // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
   final RegExp callsTestFunctionPattern = RegExp(
-    r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
+    r'^ *(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))',
   );
 
   await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
@@ -753,10 +753,9 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     final [...List<StringLiteral> messageLiterals, StringLiteral versionLiteral] = strings;
 
     // Verify the version literal has the correct pattern.
-    final RegExpMatch? versionMatch =
-        versionLiteral is SimpleStringLiteral
-            ? deprecationVersionPattern.firstMatch(versionLiteral.value)
-            : null;
+    final RegExpMatch? versionMatch = versionLiteral is SimpleStringLiteral
+        ? deprecationVersionPattern.firstMatch(versionLiteral.value)
+        : null;
     if (versionMatch == null) {
       _addErrorWithLineInfo(
         versionLiteral,
@@ -802,11 +801,10 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
         return;
       }
     }
-    final String fullExplanation =
-        messageLiterals
-            .map((StringLiteral message) => message.stringValue ?? '')
-            .join()
-            .trimRight();
+    final String fullExplanation = messageLiterals
+        .map((StringLiteral message) => message.stringValue ?? '')
+        .join()
+        .trimRight();
     if (fullExplanation.isEmpty) {
       _addErrorWithLineInfo(
         messageLiterals.last,
@@ -1098,12 +1096,11 @@ const Set<String> _exemptTestImports = <String>{
 Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  final List<File> dartFiles =
-      await _allFiles(
-        path.join(workingDirectory, 'packages'),
-        'dart',
-        minimumMatches: 1500,
-      ).toList();
+  final List<File> dartFiles = await _allFiles(
+    path.join(workingDirectory, 'packages'),
+    'dart',
+    minimumMatches: 1500,
+  ).toList();
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
       final Match? match = _testImportPattern.firstMatch(line);
@@ -1213,12 +1210,11 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  final List<File> files =
-      await _allFiles(
-        path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
-        'dart',
-        minimumMatches: 200,
-      ).toList();
+  final List<File> files = await _allFiles(
+    path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
+    'dart',
+    minimumMatches: 200,
+  ).toList();
   for (final File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
@@ -1239,14 +1235,13 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String dev = path.join(workingDirectory, 'dev');
-  final List<File> files =
-      await _allFiles(dev, 'dart', minimumMatches: 1)
-          .where(
-            (File file) =>
-                file.path.contains('test_driver') &&
-                (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')),
-          )
-          .toList();
+  final List<File> files = await _allFiles(dev, 'dart', minimumMatches: 1)
+      .where(
+        (File file) =>
+            file.path.contains('test_driver') &&
+            (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')),
+      )
+      .toList();
   for (final File file in files) {
     final String contents = file.readAsStringSync();
     final int testCount = ' test('.allMatches(contents).length;
@@ -1373,12 +1368,11 @@ Future<void> verifyStockAppLocalizations(String workingDirectory) async {
 /// Verifies that all instances of "checked mode" have been migrated to "debug mode".
 Future<void> verifyNoCheckedMode(String workingDirectory) async {
   final String flutterPackages = path.join(workingDirectory, 'packages');
-  final List<File> files =
-      await _allFiles(
-        flutterPackages,
-        'dart',
-        minimumMatches: 400,
-      ).where((File file) => path.extension(file.path) == '.dart').toList();
+  final List<File> files = await _allFiles(
+    flutterPackages,
+    'dart',
+    minimumMatches: 400,
+  ).where((File file) => path.extension(file.path) == '.dart').toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     int lineCount = 0;
@@ -1401,12 +1395,11 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final Set<String> excludedFiles = <String>{
     path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
   };
-  final List<File> files =
-      await _allFiles(
-        flutterLib,
-        'dart',
-        minimumMatches: 400,
-      ).where((File file) => !excludedFiles.contains(file.path)).toList();
+  final List<File> files = await _allFiles(
+    flutterLib,
+    'dart',
+    minimumMatches: 400,
+  ).where((File file) => !excludedFiles.contains(file.path)).toList();
   final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
   final List<String> problems = <String>[];
   for (final File file in files) {
@@ -1458,17 +1451,16 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches = 4000}) async {
-  final List<File> files =
-      await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
-          .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
-          .where((File file) => path.basename(file.path) != 'Ahem.ttf')
-          .where((File file) => path.extension(file.path) != '.snapshot')
-          .where((File file) => path.extension(file.path) != '.png')
-          .where((File file) => path.extension(file.path) != '.jpg')
-          .where((File file) => path.extension(file.path) != '.ico')
-          .where((File file) => path.extension(file.path) != '.jar')
-          .where((File file) => path.extension(file.path) != '.swp')
-          .toList();
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+      .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
+      .where((File file) => path.basename(file.path) != 'Ahem.ttf')
+      .where((File file) => path.extension(file.path) != '.snapshot')
+      .where((File file) => path.extension(file.path) != '.png')
+      .where((File file) => path.extension(file.path) != '.jpg')
+      .where((File file) => path.extension(file.path) != '.ico')
+      .where((File file) => path.extension(file.path) != '.jar')
+      .where((File file) => path.extension(file.path) != '.swp')
+      .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
@@ -1510,12 +1502,11 @@ Future<void> verifySpacesAfterFlowControlStatements(
     '.h',
     '.m',
   };
-  final List<File> files =
-      await _allFiles(
-        workingDirectory,
-        null,
-        minimumMatches: minimumMatches,
-      ).where((File file) => extensions.contains(path.extension(file.path))).toList();
+  final List<File> files = await _allFiles(
+    workingDirectory,
+    null,
+    minimumMatches: minimumMatches,
+  ).where((File file) => extensions.contains(path.extension(file.path))).toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
@@ -2413,8 +2404,11 @@ Future<void> verifyNullInitializedDebugExpensiveFields(
   int minimumMatches = 400,
 }) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
-  final List<File> files =
-      await _allFiles(flutterLib, 'dart', minimumMatches: minimumMatches).toList();
+  final List<File> files = await _allFiles(
+    flutterLib,
+    'dart',
+    minimumMatches: minimumMatches,
+  ).toList();
   final List<String> errors = <String>[];
   for (final File file in files) {
     final ParseStringResult parsedFile = parseFile(
@@ -2584,8 +2578,9 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
-  final Iterable<Directory> subDirs =
-      Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
+  final Iterable<Directory> subDirs = Directory(
+    integrationTestsPath,
+  ).listSync().toList().whereType<Directory>();
   for (final Directory testPath in subDirs) {
     final String projectName = path.basename(testPath.path);
     final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
@@ -2626,7 +2621,8 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
             break;
           }
         }
-        final String error = '''
+        final String error =
+            '''
 Error: file $fileName mismatched for integration test $testPath
 Verify the integration test has been migrated to the latest app template.
 =====$appFilePath======

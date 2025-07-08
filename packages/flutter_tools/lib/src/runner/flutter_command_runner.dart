@@ -241,8 +241,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength:
-        globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
   );
 
   @override
@@ -399,11 +400,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
-    final bool useWrapping =
-        topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
-            ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
-            : globals.stdio.terminalColumns != null &&
-                topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+    final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
+        ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
+        : globals.stdio.terminalColumns != null &&
+              topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
       showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
@@ -449,6 +449,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
           globals.analytics.suppressTelemetry();
         }
+
+        // Required to support `flutter --version` before artifacts are cached.
+        await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag =
@@ -525,15 +528,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
       return <String>[];
     }
 
-    final List<String> projectPaths =
-        globals.fs.directory(rootPath).listSync(followLinks: false).expand((
-          FileSystemEntity entity,
-        ) {
+    final List<String> projectPaths = globals.fs
+        .directory(rootPath)
+        .listSync(followLinks: false)
+        .expand((FileSystemEntity entity) {
           if (entity is Directory && !globals.fs.path.split(entity.path).contains('.dart_tool')) {
             return _gatherProjectPaths(entity.path);
           }
           return <String>[];
-        }).toList();
+        })
+        .toList();
 
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, 'pubspec.yaml'))) {
       projectPaths.add(rootPath);

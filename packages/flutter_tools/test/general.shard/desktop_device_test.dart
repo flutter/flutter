@@ -166,15 +166,16 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
             'FLUTTER_ENGINE_SWITCH_9': 'trace-to-file=path/to/trace.binpb',
             'FLUTTER_ENGINE_SWITCH_10': 'endless-trace-buffer=true',
-            'FLUTTER_ENGINE_SWITCH_11': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_12': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_18': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '18',
+            'FLUTTER_ENGINE_SWITCH_11': 'profile-microtasks=true',
+            'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
+            'FLUTTER_ENGINE_SWITCH_13': 'enable-impeller=false',
+            'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+            'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+            'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+            'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '19',
           },
         ),
       ]);
@@ -196,6 +197,7 @@ void main() {
           traceSystrace: true,
           traceToFile: 'path/to/trace.binpb',
           endlessTraceBuffer: true,
+          profileMicrotasks: true,
           purgePersistentCache: true,
           useTestFonts: true,
           verboseSystemLogs: true,
@@ -363,6 +365,36 @@ void main() {
     );
   });
 
+  testWithoutContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-flutter-gpu=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
   testUsingContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
@@ -446,7 +478,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
@@ -493,7 +525,7 @@ class FakeMacOSDevice extends MacOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
