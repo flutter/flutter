@@ -608,6 +608,29 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 
   @override
+  Widget build(BuildContext context) {
+    final Widget parentWidget = super.build(context);
+
+    assert(parentWidget is MergeSemantics, 'Expected MergeSemantics from parent build method');
+    final MergeSemantics mergeSemantics = parentWidget as MergeSemantics;
+
+    assert(mergeSemantics.child is Semantics, 'Expected Semantics as child of MergeSemantics');
+    final Semantics parentSemantics = mergeSemantics.child! as Semantics;
+
+    final Widget innerContent = parentSemantics.child!;
+
+    return MergeSemantics(
+      child: Semantics(
+        role: SemanticsRole.menuItemCheckbox,
+        enabled: widget.enabled,
+        checked: widget.checked,
+        button: true,
+        child: innerContent,
+      ),
+    );
+  }
+
+  @override
   Widget buildChild() {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);

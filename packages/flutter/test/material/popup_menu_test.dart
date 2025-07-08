@@ -4650,6 +4650,64 @@ void main() {
     expect(borderRadius.topLeft, const Radius.circular(5));
     expect(borderRadius.topRight, const Radius.circular(5));
   });
+
+  testWidgets('CheckedPopupMenuItem has correct semantics for checked state', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<String>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<String>>[
+                const CheckedPopupMenuItem<String>(
+                  value: 'checked',
+                  checked: true,
+                  child: Text('Checked item'),
+                ),
+                const CheckedPopupMenuItem<String>(
+                  value: 'unchecked',
+                  checked: false,
+                  child: Text('Unchecked item'),
+                ),
+                const CheckedPopupMenuItem<String>(
+                  value: 'disabled',
+                  checked: true,
+                  enabled: false,
+                  child: Text('Disabled checked item'),
+                ),
+              ];
+            },
+            child: const SizedBox(height: 100.0, width: 100.0, child: Text('Menu')),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Menu'));
+    await tester.pumpAndSettle();
+
+    final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
+    final Iterable<SemanticsNode> checkboxMenuItems = allNodes.where(
+      (node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
+    );
+
+    expect(checkboxMenuItems, hasLength(3));
+
+    final Iterable<SemanticsNode> checkedItems = checkboxMenuItems.where(
+      (node) => node.hasFlag(SemanticsFlag.isChecked),
+    );
+    final Iterable<SemanticsNode> uncheckedItems = checkboxMenuItems.where(
+      (node) => !node.hasFlag(SemanticsFlag.isChecked),
+    );
+
+    expect(checkedItems, hasLength(2));
+    expect(uncheckedItems, hasLength(1));
+
+    for (final SemanticsNode node in checkboxMenuItems) {
+      expect(node.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
+    }
+
+    semantics.dispose();
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
