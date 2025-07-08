@@ -50,6 +50,10 @@ When updating the Kotlin Gradle Plugin (KGP) version used in project templates
 (`templateKotlinGradlePluginVersion`), make sure that the framework integration
 & benchmark tests are running with at least this KGP version.
 
+When updating the `warnKGPVersion` or `errorKGPVersion` ensure that versions used in
+`dev/tools/bin/generate_gradle_lockfiles.dart` are updated if needed then regenerate
+build.gradle(.kts) files.
+
 For information about the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
 
 #### The Android Gradle Plugin (AGP)

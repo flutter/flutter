@@ -88,6 +88,8 @@ object DependencyVersionChecker {
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.
+    // Advice for maintainers for other areas of code that are impacted are documented
+    // in packages/flutter_tools/lib/src/android/README.md.
     @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 2)
 
     @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
