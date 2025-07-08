@@ -14,7 +14,7 @@ class FlutterWindowsEngine;
 class DisplayMonitor {
  public:
   DisplayMonitor(FlutterWindowsEngine* engine,
-                 std::shared_ptr<WindowsProcTable> windows_proc_table);
+                 std::shared_ptr<WindowsProcTable> win32);
   virtual ~DisplayMonitor();
 
   // Updates the display information and notifies the engine

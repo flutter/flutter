@@ -21,10 +21,9 @@ struct MonitorEnumState {
 
 }  // namespace
 
-DisplayMonitor::DisplayMonitor(
-    FlutterWindowsEngine* engine,
-    std::shared_ptr<WindowsProcTable> windows_proc_table)
-    : engine_(engine), win32_(std::move(windows_proc_table)) {
+DisplayMonitor::DisplayMonitor(FlutterWindowsEngine* engine,
+                               std::shared_ptr<WindowsProcTable> win32)
+    : engine_(engine), win32_(std::move(win32)) {
   if (win32_ == nullptr) {
     win32_ = std::make_shared<WindowsProcTable>();
   }
