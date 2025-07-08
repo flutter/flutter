@@ -192,6 +192,7 @@ class TextFormField extends FormField<String> {
     bool scribbleEnabled = true,
     bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
+    List<Locale>? hintLocales,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -217,10 +218,9 @@ class TextFormField extends FormField<String> {
 
            final String? errorText = field.errorText;
            if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
+             effectiveDecoration = errorBuilder != null
+                 ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                 : effectiveDecoration.copyWith(errorText: errorText);
            }
 
            void onChangedHandler(String value) {
@@ -306,6 +306,7 @@ class TextFormField extends FormField<String> {
                scribbleEnabled: scribbleEnabled,
                stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
+               hintLocales: hintLocales,
              ),
            );
          },
@@ -365,10 +366,9 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

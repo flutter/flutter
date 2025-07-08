@@ -30,6 +30,15 @@ final String _targetWithBlockedServiceWorkers = path.join(
 );
 final String _targetPath = path.join(_testAppDirectory, _target);
 
+// Some paths are not guaranteed to actually be requested by the time we finish the test, so we just
+// ignore them and not make them part of the tracked requests or expectations.
+final Set<String> _ignoreRequestPaths = <String>{
+  'canvaskit/canvaskit.js',
+  'canvaskit/canvaskit.wasm',
+  'canvaskit/chromium/canvaskit.js',
+  'canvaskit/chromium/canvaskit.wasm',
+};
+
 enum ServiceWorkerTestType {
   // Mocks how FF disables service workers.
   blockedServiceWorkers,
@@ -297,6 +306,9 @@ Future<void> runWebServiceWorkerTest({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -367,8 +379,6 @@ Future<void> runWebServiceWorkerTest({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -423,8 +433,6 @@ Future<void> runWebServiceWorkerTest({
       'flutter_bootstrap.js': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -513,6 +521,9 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'assets/fonts/MaterialIcons-Regular.otf') {
@@ -562,8 +573,6 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
     });
@@ -659,6 +668,9 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -693,8 +705,6 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -734,6 +744,9 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -776,8 +789,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'assets/FontManifest.json': 1,
       'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
     });
@@ -791,8 +802,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},
@@ -812,8 +821,6 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
-      'canvaskit/chromium/canvaskit.js': 1,
-      'canvaskit/chromium/canvaskit.wasm': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{'manifest.json': 1, 'favicon.png': 1},

@@ -31,7 +31,7 @@ void main() {
       withDebugger: true,
       startPaused: true,
       device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>['--verbose'],
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
     await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.

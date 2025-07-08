@@ -41,15 +41,13 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine);
  * @view_id: view to render.
  * @width: width of the window in pixels.
  * @height: height of the window in pixels.
- * @background_color: color to use for background.
  *
  * Performs OpenGL commands to render current Flutter view.
  */
 void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
                                  FlutterViewId view_id,
                                  int width,
-                                 int height,
-                                 const GdkRGBA* background_color);
+                                 int height);
 
 /**
  * fl_compositor_opengl_cleanup:

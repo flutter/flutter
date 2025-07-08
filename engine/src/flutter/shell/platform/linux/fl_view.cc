@@ -487,6 +487,24 @@ static void secondary_realize_cb(FlView* self) {
   setup_cursor(self);
 }
 
+static void paint_background(FlView* self, cairo_t* cr) {
+  // Don't bother drawing if fully transparent - the widget above this will
+  // already be drawn by GTK.
+  if (self->background_color->red == 0 && self->background_color->green == 0 &&
+      self->background_color->blue == 0 && self->background_color->alpha == 0) {
+    return;
+  }
+
+  gdk_cairo_set_source_rgba(cr, self->background_color);
+  cairo_paint(cr);
+}
+
+static gboolean opengl_draw_cb(FlView* self, cairo_t* cr) {
+  paint_background(self, cr);
+
+  return FALSE;
+}
+
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
   if (gtk_gl_area_get_error(GTK_GL_AREA(self->render_area)) != NULL) {
     return FALSE;
@@ -497,13 +515,14 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
   gint scale_factor = gtk_widget_get_scale_factor(self->render_area);
   fl_compositor_opengl_render(
       FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)),
-      self->view_id, width * scale_factor, height * scale_factor,
-      self->background_color);
+      self->view_id, width * scale_factor, height * scale_factor);
 
   return TRUE;
 }
 
-static gboolean draw_cb(FlView* self, cairo_t* cr) {
+static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
+  paint_background(self, cr);
+
   return fl_compositor_software_render(
       FL_COMPOSITOR_SOFTWARE(fl_engine_get_compositor(self->engine)),
       self->view_id, cr, gtk_widget_get_scale_factor(GTK_WIDGET(self)));
@@ -677,6 +696,8 @@ static void setup_engine(FlView* self) {
     case kOpenGL:
       self->render_area = gtk_gl_area_new();
       gtk_gl_area_set_has_alpha(GTK_GL_AREA(self->render_area), TRUE);
+      g_signal_connect_swapped(self->render_area, "draw",
+                               G_CALLBACK(opengl_draw_cb), self);
       g_signal_connect_swapped(self->render_area, "render",
                                G_CALLBACK(render_cb), self);
       g_signal_connect_swapped(self->render_area, "create-context",
@@ -686,8 +707,8 @@ static void setup_engine(FlView* self) {
       break;
     case kSoftware:
       self->render_area = gtk_drawing_area_new();
-      g_signal_connect_swapped(self->render_area, "draw", G_CALLBACK(draw_cb),
-                               self);
+      g_signal_connect_swapped(self->render_area, "draw",
+                               G_CALLBACK(software_draw_cb), self);
       break;
     default:
       self->render_area = gtk_label_new("Unsupported Flutter renderer type");

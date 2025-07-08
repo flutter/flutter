@@ -154,10 +154,9 @@ void drawSkShadow(
   bool transparentOccluder,
   double devicePixelRatio,
 ) {
-  int flags =
-      transparentOccluder
-          ? SkiaShadowFlags.kTransparentOccluderShadowFlags
-          : SkiaShadowFlags.kDefaultShadowFlags;
+  int flags = transparentOccluder
+      ? SkiaShadowFlags.kTransparentOccluderShadowFlags
+      : SkiaShadowFlags.kDefaultShadowFlags;
   flags |= SkiaShadowFlags.kDirectionalLight_ShadowFlag;
 
   final ui.Color inAmbient = color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());

@@ -91,6 +91,7 @@ Future<void> _testProject(
         device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: <String>[
           '--verbose',
+          '--no-web-resources-cdn',
           if (useDDCLibraryBundleFormat)
             '--web-experimental-hot-reload'
           else

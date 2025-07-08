@@ -787,14 +787,16 @@ const List<String> packageTestArgs = <String>[
       await commandRunner.run(const <String>['test', '--no-pub', '--', 'test/fake_test.dart']);
 
       // Expect one message for each phase.
-      final List<String> logPhaseMessages =
-          logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+      final List<String> logPhaseMessages = logger.messages
+          .where((String m) => m.startsWith('Runtime for phase '))
+          .toList();
       expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
       // As we force the `runTests` command to take at least 1 ms expect at least
       // one phase to take a non-zero amount of time.
-      final List<String> logPhaseMessagesNonZero =
-          logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+      final List<String> logPhaseMessagesNonZero = logPhaseMessages
+          .where((String m) => !m.contains(Duration.zero.toString()))
+          .toList();
       expect(logPhaseMessagesNonZero, isNotEmpty);
     },
     overrides: <Type, Generator>{
@@ -818,8 +820,9 @@ const List<String> packageTestArgs = <String>[
 
       await commandRunner.run(const <String>['test', '--no-pub', '--', 'test/fake_test.dart']);
 
-      final List<String> logPhaseMessages =
-          logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+      final List<String> logPhaseMessages = logger.messages
+          .where((String m) => m.startsWith('Runtime for phase '))
+          .toList();
       expect(logPhaseMessages, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -845,10 +848,9 @@ const List<String> packageTestArgs = <String>[
     overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager:
-          () => _FakeDeviceManager(<Device>[
-            FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-          ]),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
     },
   );
 
@@ -872,10 +874,9 @@ const List<String> packageTestArgs = <String>[
     overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager:
-          () => _FakeDeviceManager(<Device>[
-            FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-          ]),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
     },
   );
 
@@ -895,10 +896,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
 
@@ -917,10 +917,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
 
@@ -943,10 +942,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
 
@@ -969,10 +967,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
 
@@ -995,10 +992,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
 
@@ -1105,10 +1101,9 @@ const List<String> packageTestArgs = <String>[
       overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager:
-            () => _FakeDeviceManager(<Device>[
-              FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-            ]),
+        DeviceManager: () => _FakeDeviceManager(<Device>[
+          FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+        ]),
       },
     );
   });
@@ -1172,10 +1167,9 @@ const List<String> packageTestArgs = <String>[
     overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager:
-          () => _FakeDeviceManager(<Device>[
-            FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-          ]),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
     },
   );
 
@@ -1200,10 +1194,9 @@ const List<String> packageTestArgs = <String>[
     overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager:
-          () => _FakeDeviceManager(<Device>[
-            FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android, supportsFlavors: true),
-          ]),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android, supportsFlavors: true),
+      ]),
     },
   );
 
@@ -1367,10 +1360,9 @@ dev_dependencies:
 
       await commandRunner.run(const <String>['test', '--no-pub']);
 
-      final String fileContent =
-          fs
-              .file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'))
-              .readAsStringSync();
+      final String fileContent = fs
+          .file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'))
+          .readAsStringSync();
       expect(fileContent, '2');
     },
     overrides: <Type, Generator>{
@@ -1507,6 +1499,28 @@ dev_dependencies:
 
         await commandRunner.run(const <String>['test', '--no-pub', '--enable-impeller']);
         expect(testRunner.lastDebuggingOptionsValue.enableImpeller, ImpellerStatus.enabled);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'Enables Flutter GPU',
+      () async {
+        final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+        final TestCommand testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--enable-impeller',
+          '--enable-flutter-gpu',
+        ]);
+        expect(testRunner.lastDebuggingOptionsValue.enableFlutterGpu, true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,

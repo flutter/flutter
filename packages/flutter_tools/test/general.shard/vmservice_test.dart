@@ -50,7 +50,7 @@ void main() {
   testWithoutContext('VM Service registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, {bool? pause, bool? force}) async {}
 
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     await setUpVmService(reloadSources: reloadSources, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kReloadSourcesServiceName, kFlutterToolAlias));
@@ -59,14 +59,14 @@ void main() {
   testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
     final FakeDevice mockDevice = FakeDevice();
 
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     await setUpVmService(device: mockDevice, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     await setUpVmService(
       printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
       vmService: mockVMService,
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     await setUpVmService(vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
@@ -113,7 +113,7 @@ void main() {
   );
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
@@ -130,7 +130,7 @@ void main() {
   });
 
   testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
@@ -157,7 +157,7 @@ void main() {
   });
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
-    final MockVMService mockVMService = MockVMService();
+    final FakeVMService mockVMService = FakeVMService();
     final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.flushUIThreadTasks(uiIsolateId: 'def');
@@ -445,12 +445,11 @@ void main() {
         const String otherExtensionName = 'ext.flutter.test.otherExtension';
 
         // Copy the other isolate and change a few fields.
-        final vm_service.Isolate isolate2 =
-            vm_service.Isolate.parse(
-              isolate.toJson()
-                ..['id'] = '2'
-                ..['extensionRPCs'] = <String>[otherExtensionName],
-            )!;
+        final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+          isolate.toJson()
+            ..['id'] = '2'
+            ..['extensionRPCs'] = <String>[otherExtensionName],
+        )!;
 
         final FlutterView fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
 
@@ -632,14 +631,15 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (
-      String url, {
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      required Logger logger,
-    }) async {
-      completer.complete(url);
-      throw Exception('');
-    };
+    openChannelForTesting =
+        (
+          String url, {
+          io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+          required Logger logger,
+        }) async {
+          completer.complete(url);
+          throw Exception('');
+        };
 
     // Construct a URL that does not end in a `/`.
     await expectLater(
@@ -651,7 +651,7 @@ void main() {
   });
 }
 
-class MockVMService extends Fake implements vm_service.VmService {
+class FakeVMService extends Fake implements vm_service.VmService {
   final Map<String, String> services = <String, String>{};
   final Map<String, vm_service.ServiceCallback> serviceCallBacks =
       <String, vm_service.ServiceCallback>{};

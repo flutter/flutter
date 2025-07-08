@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -9,9 +10,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
@@ -42,14 +42,13 @@ void main() {
         sdkNameAndVersion: 'Macos',
       );
       final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-      final FakeFlutterDevice flutterDevice =
-          FakeFlutterDevice()
-            ..testUri = testUri
-            ..vmServiceHost = (() => fakeVmServiceHost)
-            ..device = device
-            ..fakeDevFS = devFS
-            ..targetPlatform = TargetPlatform.darwin
-            ..generator = residentCompiler;
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+        ..testUri = testUri
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..device = device
+        ..fakeDevFS = devFS
+        ..targetPlatform = TargetPlatform.darwin
+        ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -67,7 +66,10 @@ void main() {
         ),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
-        analytics: FakeAnalytics(),
+        analytics: getInitializedFakeAnalyticsInstance(
+          fs: MemoryFileSystem.test(),
+          fakeFlutterVersion: FakeFlutterVersion(),
+        ),
         nativeAssetsYamlFile: 'foo.yaml',
       );
 
@@ -82,11 +84,4 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
-}
-
-class FakeAnalytics extends Fake implements Analytics {
-  @override
-  void send(Event event) => sentEvents.add(event);
-
-  final List<Event> sentEvents = <Event>[];
 }
