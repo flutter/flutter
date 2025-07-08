@@ -205,6 +205,12 @@ class TextLayout {
       layoutContext.font = styledBlock.textStyle.buildCssFontString();
       layoutContext.letterSpacing = styledBlock.textStyle.buildLetterSpacingString();
       layoutContext.wordSpacing = styledBlock.textStyle.buildWordSpacingString();
+      styledBlock.textStyle.buildFontFeatures(layoutContext);
+
+      WebParagraphDebug.log(
+        'font: ${layoutContext.font} '
+        'featureSettings ${layoutContext.textRendering} ${layoutContext.canvas!.style.fontFeatureSettings} ',
+      );
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       styledTextBlocks.add(

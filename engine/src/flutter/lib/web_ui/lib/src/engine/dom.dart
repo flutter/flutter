@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../../ui.dart';
 import 'browser_detection.dart';
 
 /// This file contains static interop classes for interacting with the DOM and
@@ -956,6 +957,9 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external String direction;
   external String letterSpacing;
   external String wordSpacing;
+  external String textRendering;
+  external String fontKerning;
+  external String fontVariantCaps;
   external set lineWidth(num? value);
 
   @JS('setLineDash')

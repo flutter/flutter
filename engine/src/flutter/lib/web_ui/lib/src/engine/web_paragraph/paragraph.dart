@@ -122,6 +122,8 @@ class WebTextStyle implements ui.TextStyle {
     double? letterSpacing,
     double? wordSpacing,
     double? height,
+    List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
       originalFontFamily: fontFamily ?? 'Arial',
@@ -138,6 +140,8 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
+      fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
     );
   }
 
@@ -156,6 +160,8 @@ class WebTextStyle implements ui.TextStyle {
     required this.letterSpacing,
     required this.wordSpacing,
     required this.height,
+    required this.fontFeatures,
+    required this.fontVariations,
   });
 
   final String? originalFontFamily;
@@ -172,6 +178,8 @@ class WebTextStyle implements ui.TextStyle {
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
+  final List<ui.FontFeature>? fontFeatures;
+  final List<ui.FontVariation>? fontVariations;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -193,6 +201,8 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
       height: other.height ?? height,
+      fontFeatures: other.fontFeatures ?? fontFeatures,
+      fontVariations: other.fontVariations ?? fontVariations,
     );
   }
 
@@ -215,7 +225,9 @@ class WebTextStyle implements ui.TextStyle {
         other.decorationThickness == decorationThickness &&
         other.letterSpacing == letterSpacing &&
         other.wordSpacing == wordSpacing &&
-        other.height == height;
+        other.height == height &&
+        other.fontFeatures == fontFeatures &&
+        other.fontVariations == fontVariations;
   }
 
   @override
@@ -235,6 +247,8 @@ class WebTextStyle implements ui.TextStyle {
       letterSpacing,
       wordSpacing,
       height,
+      fontFeatures,
+      fontVariations,
     );
   }
 
@@ -273,6 +287,18 @@ class WebTextStyle implements ui.TextStyle {
       }
       if (height != null) {
         result += 'height: $height ';
+      }
+      if (fontFeatures != null && fontFeatures!.isNotEmpty) {
+        result += 'fontFeatures(${fontFeatures!.length}) ';
+        for (final ui.FontFeature feature in fontFeatures!) {
+          result += '[${feature.feature} ${feature.value}]';
+        }
+      }
+      if (fontVariations != null && fontVariations!.isNotEmpty) {
+        result += 'fontVariations(${fontVariations!.length}) ';
+        for (final ui.FontVariation variation in fontVariations!) {
+          result += '[${variation.axis} ${variation.value}]';
+        }
       }
       return true;
     }());
@@ -325,6 +351,44 @@ class WebTextStyle implements ui.TextStyle {
 
   String buildWordSpacingString() {
     return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
+  }
+
+  void buildFontFeatures(DomCanvasRenderingContext2D context) {
+    if (fontFeatures == null) {
+      return;
+    }
+
+    for (final ui.FontFeature feature in fontFeatures!) {
+      switch (feature.feature) {
+        case 'liga':
+          context.textRendering = feature.value != 0 ? 'auto' : 'optimizeSpeed';
+          context.canvas!.style.fontFeatureSettings = '"liga" ${feature.value} ';
+          printWarning('"liga" font feature (most probably) will not work.');
+        case 'smcp':
+          context.fontVariantCaps = feature.value != 0 ? 'small-caps' : 'normal';
+        case 'c2sc':
+          context.fontVariantCaps = feature.value != 0 ? 'all-small-caps' : 'normal';
+        case 'pcap':
+          context.fontVariantCaps = feature.value != 0 ? 'petite-caps' : 'normal';
+        case 'c2pc':
+          context.fontVariantCaps = feature.value != 0 ? 'all-petite-caps' : 'normal';
+        case 'unic':
+          context.fontVariantCaps = feature.value != 0 ? 'unicase' : 'normal';
+        case 'titl':
+          context.fontVariantCaps = feature.value != 0 ? 'titling-caps' : 'normal';
+        default:
+          throw UnimplementedError(
+            'FontFeature "${feature.feature}" not supported by WebParagraph',
+          );
+      }
+    }
+  }
+
+  String buildFontVariations() {
+    if (fontVariations == null) {
+      return '';
+    }
+    throw UnimplementedError('FontVariations not supported by WebParagraph');
   }
 
   bool hasElement(StyleElements element) {

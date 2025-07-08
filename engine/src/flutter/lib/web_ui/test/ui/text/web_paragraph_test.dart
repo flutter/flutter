@@ -845,4 +845,97 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_placeholders_1_line.png', region: region);
   });
+
+  test('Draw WebParagraph with fontFeatures', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+    final WebTextStyle no_liga = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      fontFeatures: const [FontFeature('liga', 0)],
+    );
+    final WebTextStyle smcp = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      fontFeatures: const [FontFeature('smcp', 1)],
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(no_liga);
+    builder.addText('fi ffi. ');
+    builder.pop();
+    builder.addText('fi ffi.\n');
+    builder.pushStyle(smcp);
+    builder.addText('LeTteRs. ');
+    builder.pop();
+    builder.addText('LeTteRs.\n');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_font_features.png', region: region);
+  });
+
+  test('Draw WebParagraph with fontVariations', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+    final WebTextStyle wght = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      fontVariations: const [FontVariation('wght', 625)],
+    );
+    final WebTextStyle slnt = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      fontVariations: const [FontVariation('slnt', 12)],
+    );
+    final WebTextStyle ital = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      fontVariations: const [FontVariation('ital', 1)],
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(wght);
+    builder.addText('Heavy weight. ');
+    builder.pop();
+    builder.addText('Heavy weight.\n');
+    builder.pushStyle(slnt);
+    builder.addText('Slant. ');
+    builder.pop();
+    builder.addText('Slant.\n');
+    builder.pushStyle(ital);
+    builder.addText('Italic. ');
+    builder.pop();
+    builder.addText('Italic.\n');
+
+    //final WebParagraph paragraph = builder.build();
+    //paragraph.layout(const ParagraphConstraints(width: 250));
+    //paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_font_variations.png', region: region);
+  });
 }
