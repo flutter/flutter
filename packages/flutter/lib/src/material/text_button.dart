@@ -400,7 +400,6 @@ class TextButton extends ButtonStyleButton {
   /// For the [TextButton.icon] factory, the end (generally the right) value of
   /// `padding` is increased from 12 to 16.
   /// {@endtemplate}
-  // TODO(camsim99): Consider changing default styling here alternatively.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -523,7 +522,6 @@ class _TextButtonWithIconChild extends StatelessWidget {
         textButtonTheme.style?.iconAlignment ??
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
-    // TODO(camsim99): could add mouse region here.
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,

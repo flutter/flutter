@@ -708,7 +708,6 @@ class IconButton extends StatelessWidget {
     );
   }
 
-  // TODO(camsim99): Can change the default mouse cursor for the various branches here.
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -1122,12 +1121,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1270,12 +1264,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1418,12 +1407,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1561,12 +1545,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

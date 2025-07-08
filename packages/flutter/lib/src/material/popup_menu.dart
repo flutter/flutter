@@ -455,7 +455,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: InkWell(
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
-          // TODO(camsim99): Might need to modify this setting.
           mouseCursor: _EffectiveMouseCursor(widget.mouseCursor, popupMenuTheme.mouseCursor),
           child: ListTileTheme.merge(
             contentPadding: EdgeInsets.zero,
@@ -1693,7 +1692,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Semantics(expanded: _isMenuExpanded, child: child);
     }
 
-    // TODO(camsim99): Might use `IconButton` under the hood.
     return Semantics(
       child: IconButton(
         key: StandardComponentType.moreButton.key,
@@ -1720,7 +1718,6 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final MouseCursor? widgetCursor;
   final MaterialStateProperty<MouseCursor?>? themeCursor;
 
-  //TODO(camsim99): Might need to change how this is resolved.
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
