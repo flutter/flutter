@@ -768,7 +768,7 @@ void main() {
 
       expect(SystemContextMenu.isSupported(buildContext), isFalse);
     },
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -814,7 +814,7 @@ void main() {
         _ => isFalse,
       });
     },
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
     variant: TargetPlatformVariant.all(),
   );
 
@@ -840,7 +840,7 @@ void main() {
           false => isTrue,
         });
       },
-      skip: kIsWeb, // [intended]
+      skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   }
@@ -886,6 +886,6 @@ void main() {
 
       expect(tester.takeException(), isAssertionError);
     },
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
 }
