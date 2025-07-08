@@ -130,15 +130,8 @@ class AttachCommand extends FlutterCommand {
             'using "--machine" instead.',
         hide: !verboseHelp,
       )
-      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine-friendly format.',
-      );
+      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.');
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
