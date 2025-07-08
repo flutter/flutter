@@ -8173,7 +8173,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get clearButtonLabel => '\u{ca4}\u{cc6}\u{cb0}\u{cb5}\u{cc1}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -15371,7 +15371,7 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
 
   @override
-  String get alertDialogLabel => '快訊';
+  String get alertDialogLabel => '警告';
 
   @override
   String? get timerPickerMinuteLabelOne => '分';
