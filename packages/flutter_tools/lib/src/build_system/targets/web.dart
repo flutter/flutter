@@ -398,7 +398,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
     if (exitCode != 0 && exitCode != 254) {
-      environment.logger.printWarning('Unexpected wasm dry run failure:');
+      environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
       if (stderr.isNotEmpty) {
         environment.logger.printWarning(stdout);
         environment.logger.printWarning(stderr);
@@ -802,7 +802,7 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
       'main.dart.js',
       if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig,
+        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
       )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
       'index.html',
       'flutter_bootstrap.js',
