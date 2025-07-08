@@ -33,7 +33,6 @@ import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -113,13 +112,12 @@ Future<void> main(List<String> args) async {
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
-      DevtoolsLauncher:
-          () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
@@ -232,7 +230,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       InstallCommand(verboseHelp: verboseHelp),
       LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      MakeHostAppEditableCommand(),
       PackagesCommand(),
       PrecacheCommand(
         verboseHelp: verboseHelp,

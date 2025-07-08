@@ -401,7 +401,7 @@ class Radius {
     return x == y
         ? 'Radius.circular(${x.toStringAsFixed(1)})'
         : 'Radius.elliptical(${x.toStringAsFixed(1)}, '
-            '${y.toStringAsFixed(1)})';
+              '${y.toStringAsFixed(1)})';
   }
 }
 

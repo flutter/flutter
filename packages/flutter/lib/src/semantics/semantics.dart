@@ -1137,10 +1137,9 @@ class SemanticsData with Diagnosticable {
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
     ];
-    final List<String?> customSemanticsActionSummary =
-        customSemanticsActionIds!
-            .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
-            .toList();
+    final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
+        .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
@@ -3702,10 +3701,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
             )
             .toList()
           ..sort();
-    final List<String?> customSemanticsActions =
-        _customSemanticsActions.keys
-            .map<String?>((CustomSemanticsAction action) => action.label)
-            .toList();
+    final List<String?> customSemanticsActions = _customSemanticsActions.keys
+        .map<String?>((CustomSemanticsAction action) => action.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
@@ -3970,16 +3968,16 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
     final List<int> sortedIds = <int>[];
     final Set<int> visitedIds = <int>{};
-    final List<SemanticsNode> startNodes =
-        nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
-          final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
-          final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
-          final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
-          if (verticalDiff != 0) {
-            return -verticalDiff;
-          }
-          return -aTopLeft.dx.compareTo(bTopLeft.dx);
-        });
+    final List<SemanticsNode> startNodes = nodes.toList()
+      ..sort((SemanticsNode a, SemanticsNode b) {
+        final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
+        final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
+        final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
+        if (verticalDiff != 0) {
+          return -verticalDiff;
+        }
+        return -aTopLeft.dx.compareTo(bTopLeft.dx);
+      });
 
     void search(int id) {
       if (visitedIds.contains(id)) {
@@ -4207,8 +4205,9 @@ class SemanticsOwner extends ChangeNotifier {
     final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      final List<SemanticsNode> localDirtyNodes =
-          _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes
+          .where((SemanticsNode node) => !_detachedNodes.contains(node))
+          .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);

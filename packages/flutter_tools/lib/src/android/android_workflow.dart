@@ -413,18 +413,16 @@ class AndroidLicenseValidator extends DoctorValidator {
       await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
-      final Future<void> output =
-          process.stdout
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
-      final Future<void> errors =
-          process.stderr
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
+      final Future<void> output = process.stdout
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
+      final Future<void> errors = process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on IOException catch (e) {

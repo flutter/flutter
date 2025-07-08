@@ -9,11 +9,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<ui.Image> createTestImage(int width, int height, ui.Color color) async {
-  final ui.Paint paint =
-      ui.Paint()
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = 1.0
-        ..color = color;
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.0
+    ..color = color;
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
@@ -67,7 +66,10 @@ void main() {
       const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
 
       await tester.pumpWidget(
-        const RepaintBoundary(key: repaintBoundaryKey, child: ColoredBox(color: red)),
+        const RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: ColoredBox(color: red),
+        ),
       );
 
       final ui.Image referenceImage =
@@ -121,7 +123,10 @@ void main() {
       const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
 
       await tester.pumpWidget(
-        const RepaintBoundary(key: repaintBoundaryKey, child: ColoredBox(color: red)),
+        const RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: ColoredBox(color: red),
+        ),
       );
 
       final ui.Image referenceImage =
@@ -130,7 +135,10 @@ void main() {
       addTearDown(referenceImage.dispose);
 
       await tester.pumpWidget(
-        const RepaintBoundary(key: repaintBoundaryKey, child: ColoredBox(color: green)),
+        const RepaintBoundary(
+          key: repaintBoundaryKey,
+          child: ColoredBox(color: green),
+        ),
       );
 
       expect(

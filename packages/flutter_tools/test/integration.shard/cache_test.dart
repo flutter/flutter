@@ -166,8 +166,12 @@ Future<void> main(List<String> args) async {
       '--version',
     ]);
     // Parse 'arch' out of a string like '... "os_arch"\n'.
-    final String dartTargetArch =
-        (dartResult.stdout as String).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    final String dartTargetArch = (dartResult.stdout as String)
+        .trim()
+        .split(' ')
+        .last
+        .replaceAll('"', '')
+        .split('_')[1];
     final ProcessResult unameResult = await const LocalProcessManager().run(<String>[
       'uname',
       '-m',
@@ -183,6 +187,7 @@ Future<void> main(List<String> args) async {
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipArchive;
   void Function(String, Uri, Directory)? onDownloadZipTarball;
+  void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
@@ -192,6 +197,11 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   @override
   Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
+  }
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    onDownloadFile?.call(message, url, location);
   }
 
   @override

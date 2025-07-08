@@ -132,8 +132,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
-        flutterVersion:
-            () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
+        flutterVersion: () =>
+            globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: globals.userMessages,
@@ -439,10 +439,9 @@ class Doctor {
         if (!verbose || executionTime == null) {
           return '';
         }
-        final String formatted =
-            executionTime.inSeconds < 2
-                ? getElapsedAsMilliseconds(executionTime)
-                : getElapsedAsSeconds(executionTime);
+        final String formatted = executionTime.inSeconds < 2
+            ? getElapsedAsMilliseconds(executionTime)
+            : getElapsedAsSeconds(executionTime);
         return ' [$formatted]';
       }();
 
@@ -734,8 +733,10 @@ class FlutterValidator extends DoctorValidator {
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
     final String? repositoryUrl = version.repositoryUrl;
-    final VersionCheckError? upstreamValidationError =
-        VersionUpstreamValidator(version: version, platform: _platform).run();
+    final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(
+      version: version,
+      platform: _platform,
+    ).run();
 
     // VersionUpstreamValidator can produce an error if repositoryUrl is null
     if (upstreamValidationError != null) {
@@ -790,19 +791,17 @@ class DeviceValidator extends DoctorValidator {
     );
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages =
-          (await Device.descriptions(
-            devices,
-          )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(
+        devices,
+      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     List<ValidationMessage> diagnosticMessages = <ValidationMessage>[];
     final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
-      diagnosticMessages =
-          diagnostics
-              .map<ValidationMessage>((String message) => ValidationMessage.hint(message))
-              .toList();
+      diagnosticMessages = diagnostics
+          .map<ValidationMessage>((String message) => ValidationMessage.hint(message))
+          .toList();
     } else if (devices.isEmpty) {
       diagnosticMessages = <ValidationMessage>[
         ValidationMessage.hint(_userMessages.devicesMissing),

@@ -325,8 +325,9 @@ class DriveCommand extends RunCommandBase {
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File? applicationBinary =
-        applicationBinaryPath == null ? null : _fileSystem.file(applicationBinaryPath);
+    final File? applicationBinary = applicationBinaryPath == null
+        ? null
+        : _fileSystem.file(applicationBinaryPath);
 
     bool screenshotTaken = false;
     try {
@@ -361,8 +362,9 @@ class DriveCommand extends RunCommandBase {
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArg('browser-dimension')!.split(RegExp('[,x@]')),
         browserName: stringArg('browser-name'),
-        driverPort:
-            stringArg('driver-port') != null ? int.tryParse(stringArg('driver-port')!) : null,
+        driverPort: stringArg('driver-port') != null
+            ? int.tryParse(stringArg('driver-port')!)
+            : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
       );
