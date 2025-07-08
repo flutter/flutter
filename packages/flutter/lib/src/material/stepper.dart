@@ -894,7 +894,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Padding(
-              key: Key('line$i'),
               padding: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
               child: SizedBox(
                 height:
