@@ -366,7 +366,6 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       materialStates,
     );
-    print('CAMILLE: RawMaterialButton effectiveMouseCursor is $effectiveMouseCursor');
     final EdgeInsetsGeometry padding = widget.padding
         .add(
           EdgeInsets.only(

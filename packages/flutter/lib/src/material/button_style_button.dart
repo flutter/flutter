@@ -431,9 +431,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     final MaterialStateMouseCursor mouseCursor = _MouseCursor((Set<MaterialState> states) {
       return effectiveValue((ButtonStyle? style) {
-        print(
-          'CAMILLE: resolved mouse cursor from ButtonStyleButton is ${style?.mouseCursor?.resolve(states)}',
-        );
         return style?.mouseCursor?.resolve(states);
       });
     });
@@ -542,9 +539,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         alignment: resolvedAlignment!,
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: resolvedForegroundBuilder != null
-            ? resolvedForegroundBuilder(context, statesController.value, widget.child)
-            : widget.child,
+        child:
+            resolvedForegroundBuilder != null
+                ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+                : widget.child,
       ),
     );
     if (resolvedBackgroundBuilder != null) {

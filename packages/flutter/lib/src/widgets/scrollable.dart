@@ -994,12 +994,11 @@ class ScrollableState extends State<Scrollable>
     return false;
   }
 
-  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? scrollingDeviceKind) {
+  Widget _buildChrome(BuildContext context, Widget child) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
       decorationClipBehavior: widget.clipBehavior,
-      scrollingDeviceKind: scrollingDeviceKind,
     );
 
     return _configuration.buildScrollbar(
@@ -1010,7 +1009,6 @@ class ScrollableState extends State<Scrollable>
   }
 
   // DESCRIPTION
-  PointerDeviceKind? _scrollingDeviceKind;
 
   @protected
   @override
@@ -1060,7 +1058,7 @@ class ScrollableState extends State<Scrollable>
       );
     }
 
-    result = _buildChrome(context, result, _scrollingDeviceKind);
+    result = _buildChrome(context, result);
 
     // Selection is only enabled when there is a parent registrar.
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
@@ -2431,7 +2429,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
   }
 
   @override
-  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? whatever) {
+  Widget _buildChrome(BuildContext context, Widget child) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
@@ -2549,7 +2547,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
   }
 
   @override
-  Widget _buildChrome(BuildContext context, Widget child, PointerDeviceKind? whatever) {
+  Widget _buildChrome(BuildContext context, Widget child) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,

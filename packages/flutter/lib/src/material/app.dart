@@ -14,7 +14,6 @@
 library;
 
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -860,11 +859,6 @@ class MaterialScrollBehavior extends ScrollBehavior {
             assert(details.controller != null);
             return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.android:
-            if (details.scrollingDeviceKind == PointerDeviceKind.trackpad ||
-                details.scrollingDeviceKind == PointerDeviceKind.mouse) {
-              return Scrollbar(controller: details.controller, child: child);
-            }
-            return child;
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
             return child;
