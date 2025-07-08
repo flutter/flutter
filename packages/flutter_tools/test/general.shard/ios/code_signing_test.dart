@@ -1982,9 +1982,8 @@ void main() {
               '-o',
               profileWithMissingIdentityPlist.path,
             ],
-            onRun:
-                (List<String> command) =>
-                    profileWithMissingIdentityPlist.createSync(recursive: true),
+            onRun: (List<String> command) =>
+                profileWithMissingIdentityPlist.createSync(recursive: true),
           ),
           FakeCommand(
             command: <String>[

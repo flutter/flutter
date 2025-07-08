@@ -58,8 +58,9 @@ void main() {
     expect(find.text('Group 0 Tile 19'), findsOneWidget);
     expect(find.text('Group 1 Tile 19'), findsNothing);
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -104,8 +105,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -150,8 +152,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -159,12 +162,9 @@ void main() {
     expect(second.constraints.crossAxisExtent, equals(120));
 
     // Check that their parent SliverConstrainedCrossAxis have the correct paintOffsets.
-    final List<RenderSliverConstrainedCrossAxis> renderSliversConstrained =
-        tester
-            .renderObjectList<RenderSliverConstrainedCrossAxis>(
-              find.byType(SliverConstrainedCrossAxis),
-            )
-            .toList();
+    final List<RenderSliverConstrainedCrossAxis> renderSliversConstrained = tester
+        .renderObjectList<RenderSliverConstrainedCrossAxis>(find.byType(SliverConstrainedCrossAxis))
+        .toList();
     final RenderSliverConstrainedCrossAxis firstConstrained = renderSliversConstrained[0];
     final RenderSliverConstrainedCrossAxis secondConstrained = renderSliversConstrained[1];
 
@@ -208,8 +208,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
     final RenderSliverList third = renderSlivers[2];
@@ -269,8 +270,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
     final RenderSliverList third = renderSlivers[2];
@@ -333,8 +335,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
     final RenderSliverList third = renderSlivers[2];
@@ -393,8 +396,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
     final RenderSliverList third = renderSlivers[2];
@@ -421,8 +425,8 @@ void main() {
 
   testWidgets(
     'Assertion error when SliverExpanded is used outside of SliverCrossAxisGroup',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -469,25 +473,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -507,25 +507,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -562,8 +558,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -571,12 +568,9 @@ void main() {
     expect(second.constraints.crossAxisExtent, equals(100));
 
     // Check that their parent SliverConstrainedCrossAxis have the correct paintOffsets.
-    final List<RenderSliverConstrainedCrossAxis> renderSliversConstrained =
-        tester
-            .renderObjectList<RenderSliverConstrainedCrossAxis>(
-              find.byType(SliverConstrainedCrossAxis),
-            )
-            .toList();
+    final List<RenderSliverConstrainedCrossAxis> renderSliversConstrained = tester
+        .renderObjectList<RenderSliverConstrainedCrossAxis>(find.byType(SliverConstrainedCrossAxis))
+        .toList();
     final RenderSliverConstrainedCrossAxis firstConstrained = renderSliversConstrained[0];
     final RenderSliverConstrainedCrossAxis secondConstrained = renderSliversConstrained[1];
 
@@ -1073,15 +1067,15 @@ Widget _buildSliverList({
       (BuildContext context, int i) {
         return scrollDirection == Axis.vertical
             ? SizedBox(
-              key: ValueKey<int>(items[i]),
-              height: itemMainAxisExtent,
-              child: label(items[i]),
-            )
+                key: ValueKey<int>(items[i]),
+                height: itemMainAxisExtent,
+                child: label(items[i]),
+              )
             : SizedBox(
-              key: ValueKey<int>(items[i]),
-              width: itemMainAxisExtent,
-              child: label(items[i]),
-            );
+                key: ValueKey<int>(items[i]),
+                width: itemMainAxisExtent,
+                child: label(items[i]),
+              );
       },
       findChildIndexCallback: (Key key) {
         final ValueKey<int> valueKey = key as ValueKey<int>;
@@ -1114,7 +1108,10 @@ Widget _buildSliverCrossAxisGroup({
             scrollDirection: scrollDirection,
             reverse: reverse,
             controller: controller,
-            slivers: <Widget>[SliverCrossAxisGroup(slivers: slivers), ...otherSlivers],
+            slivers: <Widget>[
+              SliverCrossAxisGroup(slivers: slivers),
+              ...otherSlivers,
+            ],
           ),
         ),
       ),

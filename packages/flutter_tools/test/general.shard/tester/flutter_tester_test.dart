@@ -118,7 +118,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), isFalse);
       expect(await device.uninstallApp(FakeApplicationPackage()), isTrue);
 
-      expect(device.isSupported(), isTrue);
+      expect(await device.isSupported(), isTrue);
     });
 
     testWithoutContext('does not accept profile, release, or jit-release builds', () async {
@@ -159,7 +159,8 @@ void main() {
             '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
           ],
           completer: completer,
-          stdout: '''
+          stdout:
+              '''
 The Dart VM service is listening on $vmServiceUri
 Hello!
 ''',
@@ -202,7 +203,8 @@ Hello!
               '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill.track.dill',
             ],
             completer: completer,
-            stdout: '''
+            stdout:
+                '''
 The Dart VM service is listening on $vmServiceUri
 Hello!
 ''',

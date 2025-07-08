@@ -48,31 +48,26 @@ void main(List<String> args) {
 }
 
 Future<void> run(List<String> args) async {
-  final ArgParser parser =
-      ArgParser()
-        ..addOption(_kOptionPackages, help: 'The .packages file')
-        ..addOption(_kOptionShell, help: 'The flutter_tester binary')
-        ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
-        ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
-        ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-        ..addOption(
-          _kOptionTests,
-          help: 'Path to json file that maps Dart test files to precompiled dill files',
-        )
-        ..addOption(
-          _kOptionCoverageDirectory,
-          help: 'The path to the directory that will have coverage collected',
-        )
-        ..addFlag(
-          _kOptionCoverage,
-          negatable: false,
-          help: 'Whether to collect coverage information.',
-        )
-        ..addOption(
-          _kOptionCoveragePath,
-          defaultsTo: 'coverage/lcov.info',
-          help: 'Where to store coverage information (if coverage is enabled).',
-        );
+  final ArgParser parser = ArgParser()
+    ..addOption(_kOptionPackages, help: 'The .packages file')
+    ..addOption(_kOptionShell, help: 'The flutter_tester binary')
+    ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
+    ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
+    ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
+    ..addOption(
+      _kOptionTests,
+      help: 'Path to json file that maps Dart test files to precompiled dill files',
+    )
+    ..addOption(
+      _kOptionCoverageDirectory,
+      help: 'The path to the directory that will have coverage collected',
+    )
+    ..addFlag(_kOptionCoverage, negatable: false, help: 'Whether to collect coverage information.')
+    ..addOption(
+      _kOptionCoveragePath,
+      defaultsTo: 'coverage/lcov.info',
+      help: 'Where to store coverage information (if coverage is enabled).',
+    );
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     throwToolExit('Missing option! All options must be specified.');
@@ -83,8 +78,9 @@ Future<void> run(List<String> args) async {
   try {
     Cache.flutterRoot = tempDir.path;
 
-    final String flutterTesterBinPath =
-        globals.fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
+    final String flutterTesterBinPath = globals.fs
+        .file(argResults[_kOptionShell])
+        .resolveSymbolicLinksSync();
     if (!globals.fs.isFileSync(flutterTesterBinPath)) {
       throwToolExit('Cannot find Flutter shell at $flutterTesterBinPath');
     }
@@ -124,8 +120,9 @@ Future<void> run(List<String> args) async {
     if (argResults['coverage'] as bool? ?? false) {
       // If we have a specified coverage directory then accept all libraries by
       // setting libraryNames to null.
-      final Set<String>? libraryNames =
-          coverageDirectory != null ? null : <String>{FlutterProject.current().manifest.appName};
+      final Set<String>? libraryNames = coverageDirectory != null
+          ? null
+          : <String>{FlutterProject.current().manifest.appName};
       final String packagesPath = globals.fs.path.normalize(
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       );

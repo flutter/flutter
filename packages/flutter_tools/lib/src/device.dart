@@ -112,8 +112,9 @@ abstract class DeviceManager {
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
-    final Set<String> wellKnownIds =
-        _platformDiscoverers.expand((DeviceDiscovery discovery) => discovery.wellKnownIds).toSet();
+    final Set<String> wellKnownIds = _platformDiscoverers
+        .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+        .toSet();
     final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
 
     // Process discoverers as they can return results, so if an exact match is
@@ -325,9 +326,9 @@ class DeviceDiscoverySupportFilter {
   final bool _excludeDevicesNotSupportedByAll;
 
   Future<bool> matchesRequirements(Device device) async {
-    final bool meetsSupportByFlutterRequirement = device.isSupported();
+    final bool meetsSupportByFlutterRequirement = await device.isSupported();
     final bool meetsSupportForProjectRequirement =
-        !_excludeDevicesNotSupportedByProject || isDeviceSupportedForProject(device);
+        !_excludeDevicesNotSupportedByProject || await isDeviceSupportedForProject(device);
     final bool meetsSupportForAllRequirement =
         !_excludeDevicesNotSupportedByAll || await isDeviceSupportedForAll(device);
 
@@ -344,11 +345,11 @@ class DeviceDiscoverySupportFilter {
   /// compilers, and web requires an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
     final TargetPlatform devicePlatform = await device.targetPlatform;
-    return device.isSupported() &&
+    return await device.isSupported() &&
         devicePlatform != TargetPlatform.fuchsia_arm64 &&
         devicePlatform != TargetPlatform.fuchsia_x64 &&
         devicePlatform != TargetPlatform.web_javascript &&
-        isDeviceSupportedForProject(device);
+        await isDeviceSupportedForProject(device);
   }
 
   /// Returns whether the device is supported for the project.
@@ -358,8 +359,8 @@ class DeviceDiscoverySupportFilter {
   ///
   /// This also exists to allow the check to be overridden for google3 clients. If
   /// [_flutterProject] is null then return true.
-  bool isDeviceSupportedForProject(Device device) {
-    if (!device.isSupported()) {
+  Future<bool> isDeviceSupportedForProject(Device device) async {
+    if (!await device.isSupported()) {
       return false;
     }
     if (_flutterProject == null) {
@@ -667,11 +668,11 @@ abstract class Device {
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier});
 
   /// Check if the device is supported by Flutter.
-  bool isSupported();
+  Future<bool> isSupported();
 
   // String meant to be displayed to the user indicating if the device is
   // supported by Flutter, and, if not, why.
-  String supportMessage() => isSupported() ? 'Supported' : 'Unsupported';
+  Future<String> supportMessage() async => await isSupported() ? 'Supported' : 'Unsupported';
 
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
@@ -813,7 +814,7 @@ abstract class Device {
     // Extract device information
     final List<List<String>> table = <List<String>>[];
     for (final Device device in devices) {
-      String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
+      String supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
         final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
@@ -864,7 +865,7 @@ abstract class Device {
     return <String, Object>{
       'name': name,
       'id': id,
-      'isSupported': isSupported(),
+      'isSupported': await isSupported(),
       'targetPlatform': getNameForTargetPlatform(await targetPlatform),
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
@@ -938,6 +939,7 @@ class DebuggingOptions {
     this.traceSystrace = false,
     this.traceToFile,
     this.endlessTraceBuffer = false,
+    this.profileMicrotasks = false,
     this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
@@ -966,6 +968,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -999,6 +1002,7 @@ class DebuggingOptions {
     this.webUseWasm = false,
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -1019,6 +1023,7 @@ class DebuggingOptions {
        traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
+       profileMicrotasks = false,
        purgePersistentCache = false,
        verboseSystemLogs = false,
        hostVmServicePort = null,
@@ -1053,6 +1058,7 @@ class DebuggingOptions {
     required this.traceSystrace,
     required this.traceToFile,
     required this.endlessTraceBuffer,
+    required this.profileMicrotasks,
     required this.purgePersistentCache,
     required this.useTestFonts,
     required this.verboseSystemLogs,
@@ -1081,6 +1087,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
@@ -1110,6 +1117,7 @@ class DebuggingOptions {
   final bool traceSystrace;
   final String? traceToFile;
   final bool endlessTraceBuffer;
+  final bool profileMicrotasks;
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
@@ -1127,6 +1135,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
+  final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1213,12 +1222,14 @@ class DebuggingOptions {
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
       if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (profileMicrotasks) '--profile-microtasks',
       if (verboseSystemLogs) '--verbose-logging',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
+      if (enableFlutterGpu) '--enable-flutter-gpu',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1248,6 +1259,7 @@ class DebuggingOptions {
     'traceSystrace': traceSystrace,
     'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
+    'profileMicrotasks': profileMicrotasks,
     'purgePersistentCache': purgePersistentCache,
     'useTestFonts': useTestFonts,
     'verboseSystemLogs': verboseSystemLogs,
@@ -1276,6 +1288,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
+    'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1313,6 +1326,7 @@ class DebuggingOptions {
         traceSystrace: json['traceSystrace']! as bool,
         traceToFile: json['traceToFile'] as String?,
         endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+        profileMicrotasks: json['profileMicrotasks']! as bool,
         purgePersistentCache: json['purgePersistentCache']! as bool,
         useTestFonts: json['useTestFonts']! as bool,
         verboseSystemLogs: json['verboseSystemLogs']! as bool,
@@ -1320,10 +1334,9 @@ class DebuggingOptions {
         deviceVmServicePort: json['deviceVmServicePort'] as int?,
         disablePortPublication: json['disablePortPublication']! as bool,
         ddsPort: json['ddsPort'] as int?,
-        devToolsServerAddress:
-            json['devToolsServerAddress'] != null
-                ? Uri.parse(json['devToolsServerAddress']! as String)
-                : null,
+        devToolsServerAddress: json['devToolsServerAddress'] != null
+            ? Uri.parse(json['devToolsServerAddress']! as String)
+            : null,
         port: json['port'] as String?,
         hostname: json['hostname'] as String?,
         tlsCertPath: json['tlsCertPath'] as String?,
@@ -1344,6 +1357,7 @@ class DebuggingOptions {
         fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+        enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
