@@ -20,7 +20,6 @@ import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
-import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -437,10 +436,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       }
       rethrow;
     } finally {
-      final List<ForwardedPort> ports = device.portForwarder!.forwardedPorts.toList();
-      for (final ForwardedPort port in ports) {
-        await device.portForwarder!.unforward(port);
-      }
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
