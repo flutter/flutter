@@ -33,6 +33,7 @@ void main() {
       hotfix: 4,
       commits: 5,
       hash: 'asd',
+      gitTag: '1.2.3+hotfix.5.pre.5',
     );
 
     setUp(() {
@@ -204,6 +205,39 @@ void main() {
     );
 
     testUsingContext(
+      'fetchLatestVersion returns latest version if the upstream revision has multiple tags',
+      () async {
+        const String latestVersion = '3.4.5';
+        const List<String> tags = <String>['1.2.3', '1.2.4', latestVersion];
+        const String revision = 'abc123';
+
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+            stdout: revision,
+          ),
+          FakeCommand(
+            command: const <String>['git', 'tag', '--points-at', revision],
+            stdout: tags.join('\n'),
+          ),
+        ]);
+
+        final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(
+          localVersion: FakeFlutterVersion(),
+        );
+
+        expect(updateVersion.frameworkVersion, latestVersion);
+        expect(updateVersion.frameworkRevision, revision);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
       'fetchLatestVersion throws toolExit if HEAD is detached',
       () async {
         processManager.addCommands(const <FakeCommand>[
@@ -353,6 +387,91 @@ void main() {
           testLogger.statusText,
           contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
         );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'Can upgrade to a newer version with the same Git revision',
+      () async {
+        const String revision = 'abc123';
+        const String version = '1.2.3';
+        const String upstreamVersion = '4.5.6';
+
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: version,
+          gitTagVersion: GitTagVersion.parse(version),
+        );
+        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: upstreamVersion,
+          gitTagVersion: GitTagVersion.parse(upstreamVersion),
+        );
+
+        fakeCommandRunner.alreadyUpToDate = false;
+        fakeCommandRunner.remoteVersion = latestVersion;
+        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          force: true,
+          continueFlow: false,
+          testFlow: true,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(
+          testLogger.statusText,
+          contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
+        );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'Does not confuse an older release with the same revision as an available update',
+      () async {
+        const String revision = 'abc123';
+        const String version = '4.5.6';
+        final GitTagVersion currentTag = GitTagVersion.parse(version);
+        const String upstreamVersion = '1.2.3';
+        final GitTagVersion upstreamTag = GitTagVersion.parse(upstreamVersion);
+
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          branch: 'stable',
+          frameworkRevision: revision,
+          frameworkVersion: version,
+          gitTagVersion: currentTag,
+        );
+        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+          branch: 'stable',
+          frameworkRevision: revision,
+          frameworkVersion: upstreamVersion,
+          gitTagVersion: upstreamTag,
+        );
+
+        fakeCommandRunner.alreadyUpToDate = false;
+        fakeCommandRunner.remoteVersion = latestVersion;
+        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          force: true,
+          continueFlow: false,
+          testFlow: true,
+          gitTagVersion: currentTag,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(testLogger.statusText, contains('Flutter is already up to date on channel stable'));
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,

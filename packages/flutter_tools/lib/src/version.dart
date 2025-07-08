@@ -963,15 +963,15 @@ String _shortGitRevision(String? revision) {
 /// Version of Flutter SDK parsed from Git.
 class GitTagVersion {
   const GitTagVersion({
-    this.x,
-    this.y,
-    this.z,
+    required this.x,
+    required this.y,
+    required this.z,
+    required this.hash,
+    required this.gitTag,
     this.hotfix,
     this.devVersion,
     this.devPatch,
     this.commits,
-    this.hash,
-    this.gitTag,
   });
   const GitTagVersion.unknown()
     : x = null,
@@ -1000,7 +1000,7 @@ class GitTagVersion {
   final int? commits;
 
   /// The git hash (or an abbreviation thereof) for this commit.
-  final String? hash;
+  final String hash;
 
   /// The N in X.Y.Z-dev.N.M.
   final int? devVersion;
@@ -1009,7 +1009,7 @@ class GitTagVersion {
   final int? devPatch;
 
   /// The git tag that is this version's closest ancestor.
-  final String? gitTag;
+  final String gitTag;
 
   static GitTagVersion determine(
     ProcessUtils processUtils,
@@ -1032,12 +1032,13 @@ class GitTagVersion {
         _runGit('git fetch $flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
-    // find all tags attached to the given [gitRef]
+    // find all tags attached to the given [gitRef]. These are returned in alphabetical order, so
+    // we reverse the set of tags to examine the most recent tag versions first.
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef',
       processUtils,
       workingDirectory,
-    ).trim().split('\n');
+    ).trim().split('\n').reversed.toList();
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
@@ -1116,11 +1117,11 @@ class GitTagVersion {
   }
 
   String frameworkVersionFor(String revision) {
-    if (x == null || y == null || z == null || (hash != null && !revision.startsWith(hash!))) {
+    if (x == null || y == null || z == null || !revision.startsWith(hash)) {
       return kUnknownFrameworkVersion;
     }
-    if (commits == 0 && gitTag != null) {
-      return gitTag!;
+    if (commits == 0) {
+      return gitTag;
     }
     if (hotfix != null) {
       // This is an unexpected state where untagged commits exist past a hotfix
