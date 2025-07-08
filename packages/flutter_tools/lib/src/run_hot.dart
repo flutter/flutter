@@ -266,11 +266,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
-
-    if (debuggingOptions.serveObservatory) {
-      await enableObservatory();
-    }
-
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
@@ -380,8 +375,9 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri? nativeAssetsYaml =
-        _nativeAssetsYamlFile != null ? globals.fs.path.toUri(_nativeAssetsYamlFile) : null;
+    final Uri? nativeAssetsYaml = _nativeAssetsYamlFile != null
+        ? globals.fs.path.toUri(_nativeAssetsYamlFile)
+        : null;
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -744,8 +740,8 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  /// Returns [true] if the reload was successful.
-  /// Prints errors if [printErrors] is [true].
+  /// Returns `true` if the reload was successful.
+  /// Prints errors if [printErrors] is `true`.
   static bool validateReloadReport(
     vm_service.ReloadReport? reloadReport, {
     bool printErrors = true,
@@ -1312,8 +1308,9 @@ Future<OperationResult> defaultReloadSourcesHelper(
       }),
     );
   }
-  final Iterable<DeviceReloadReport> reports =
-      (await Future.wait(allReportsFutures)).whereType<DeviceReloadReport>();
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(
+    allReportsFutures,
+  )).whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     analytics.send(
@@ -1586,15 +1583,16 @@ class ProjectFileInvalidator {
           pool.withResource<void>(
             // Calling fs.stat() is more performant than fs.file().stat(), but
             // uri.toFilePath() does not work with MultiRootFileSystem.
-            () => (uri.hasScheme && uri.scheme != 'file'
-                    ? _fileSystem.file(uri).stat()
-                    : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
-                .then((FileStat stat) {
-                  final DateTime updatedAt = stat.modified;
-                  if (updatedAt.isAfter(lastCompiled)) {
-                    invalidatedFiles.add(uri);
-                  }
-                }),
+            () =>
+                (uri.hasScheme && uri.scheme != 'file'
+                        ? _fileSystem.file(uri).stat()
+                        : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
+                    .then((FileStat stat) {
+                      final DateTime updatedAt = stat.modified;
+                      if (updatedAt.isAfter(lastCompiled)) {
+                        invalidatedFiles.add(uri);
+                      }
+                    }),
           ),
         );
       }
@@ -1603,10 +1601,9 @@ class ProjectFileInvalidator {
       for (final Uri uri in urisToScan) {
         // Calling fs.statSync() is more performant than fs.file().statSync(), but
         // uri.toFilePath() does not work with MultiRootFileSystem.
-        final DateTime updatedAt =
-            uri.hasScheme && uri.scheme != 'file'
-                ? _fileSystem.file(uri).statSync().modified
-                : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
+        final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
+            ? _fileSystem.file(uri).statSync().modified
+            : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
         if (updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }

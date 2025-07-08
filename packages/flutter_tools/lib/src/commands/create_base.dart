@@ -12,11 +12,8 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -339,8 +336,9 @@ mixin CreateBase on FlutterCommand {
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
-    final String pluginClass =
-        pluginDartClass.endsWith('Plugin') ? pluginDartClass : '${pluginDartClass}Plugin';
+    final String pluginClass = pluginDartClass.endsWith('Plugin')
+        ? pluginDartClass
+        : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String pluginClassLowerCamelCase =
@@ -494,31 +492,6 @@ mixin CreateBase on FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    if (shouldCallPubGet) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: globals.analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
-      // Generate the l10n synthetic package that will be injected into the
-      // package_config in the call to pub.get() below.
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-      );
-    }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[
       SupportedPlatform.root,
     ];
@@ -581,21 +554,22 @@ mixin CreateBase on FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
 
     // Each segment must start with a letter.
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
-    final List<String> prefixedSegments =
-        segments.map((String segment) {
-          if (!segmentPatternRegex.hasMatch(segment)) {
-            return 'u$segment';
-          }
-          return segment;
-        }).toList();
+    final List<String> prefixedSegments = segments.map((String segment) {
+      if (!segmentPatternRegex.hasMatch(segment)) {
+        return 'u$segment';
+      }
+      return segment;
+    }).toList();
     return prefixedSegments.join('.');
   }
 
@@ -619,8 +593,10 @@ mixin CreateBase on FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments =
-        tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpIdentifier
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }

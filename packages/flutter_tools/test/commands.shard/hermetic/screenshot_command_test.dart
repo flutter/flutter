@@ -30,14 +30,11 @@ void main() {
     testUsingContext('rasterizer and skia screenshots do not require a device', () async {
       // Throw a specific exception when attempting to make a VM Service connection to
       // verify that we've made it past the initial validation.
-      openChannelForTesting = (
-        String url, {
-        CompressionOptions? compression,
-        Logger? logger,
-      }) async {
-        expect(url, 'ws://localhost:8181/ws');
-        throw Exception('dummy');
-      };
+      openChannelForTesting =
+          (String url, {CompressionOptions? compression, Logger? logger}) async {
+            expect(url, 'ws://localhost:8181/ws');
+            throw Exception('dummy');
+          };
 
       await expectLater(
         () => createTestCommandRunner(
@@ -225,7 +222,7 @@ class _ScreenshotDevice extends Fake implements Device {
   bool get isConnected => true;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool ephemeral = true;

@@ -55,7 +55,9 @@ const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
 @visibleForTesting
 const String failedToStripDebugSymbolsErrorMessage = r'''
-Release app bundle failed to strip debug symbols from native libraries. Please run flutter doctor and ensure that the Android toolchain does not report any issues.
+Release app bundle failed to strip debug symbols from native libraries.
+Please run flutter doctor and ensure that the Android toolchain does not
+report any issues.
 
 Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
 
@@ -69,13 +71,13 @@ String _getOutputAppLinkSettingsTaskFor(String buildVariant) {
 Directory getApkDirectory(FlutterProject project) {
   return project.isModule
       ? project.android.buildDirectory
-          .childDirectory('host')
-          .childDirectory('outputs')
-          .childDirectory('apk')
+            .childDirectory('host')
+            .childDirectory('outputs')
+            .childDirectory('apk')
       : project.android.buildDirectory
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('flutter-apk');
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk');
 }
 
 /// The directory where the app bundle artifact is generated.
@@ -83,13 +85,13 @@ Directory getApkDirectory(FlutterProject project) {
 Directory getBundleDirectory(FlutterProject project) {
   return project.isModule
       ? project.android.buildDirectory
-          .childDirectory('host')
-          .childDirectory('outputs')
-          .childDirectory('bundle')
+            .childDirectory('host')
+            .childDirectory('outputs')
+            .childDirectory('bundle')
       : project.android.buildDirectory
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('bundle');
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('bundle');
 }
 
 @visibleForTesting
@@ -137,7 +139,7 @@ const String androidX86DeprecationWarning =
 
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
+/// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
@@ -204,11 +206,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       outputDirectory = outputDirectory.childDirectory('host');
     }
 
-    final bool containsX86Targets =
-        androidBuildInfo.where((AndroidBuildInfo info) => info.containsX86Target).isNotEmpty;
-    if (containsX86Targets) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
       await generateTooling(project, releaseMode: androidBuildInfo.buildInfo.isRelease);
       await buildGradleAar(
@@ -220,10 +217,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
     printHowToConsumeAar(
-      buildModes:
-          androidBuildInfo.map<String>((AndroidBuildInfo androidBuildInfo) {
-            return androidBuildInfo.buildInfo.modeName;
-          }).toSet(),
+      buildModes: androidBuildInfo.map<String>((AndroidBuildInfo androidBuildInfo) {
+        return androidBuildInfo.buildInfo.modeName;
+      }).toSet(),
       androidPackage: project.manifest.androidPackage,
       repoDirectory: getRepoDirectory(outputDirectory),
       buildNumber: buildNumber,
@@ -454,9 +450,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
-    if (androidBuildInfo.containsX86Target) {
-      _logger.printWarning(androidX86DeprecationWarning);
-    }
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
     }
@@ -493,8 +486,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // Assembly work starts here.
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final String assembleTask =
-        isBuildingBundle ? getBundleTaskFor(buildInfo) : getAssembleTaskFor(buildInfo);
+    final String assembleTask = isBuildingBundle
+        ? getBundleTaskFor(buildInfo)
+        : getAssembleTaskFor(buildInfo);
 
     if (_logger.isVerbose) {
       options.add('--full-stacktrace');
@@ -537,8 +531,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final String baseApplicationName =
         project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2
-            ? 'android.app.Application'
-            : 'io.flutter.app.FlutterApplication';
+        ? 'android.app.Application'
+        : 'io.flutter.app.FlutterApplication';
     options.add('-Pbase-application-name=$baseApplicationName');
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null) {
@@ -622,10 +616,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
         throwToolExit(failedToStripDebugSymbolsErrorMessage);
       }
 
-      final String appSize =
-          (buildInfo.mode == BuildMode.debug)
-              ? '' // Don't display the size when building a debug variant.
-              : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
 
       if (buildInfo.codeSizeDirectory != null) {
         await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
@@ -639,10 +632,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
     // Gradle produced APKs.
-    final Iterable<String> apkFilesPaths =
-        project.isModule
-            ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
-            : listApkPaths(androidBuildInfo);
+    final Iterable<String> apkFilesPaths = project.isModule
+        ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
+        : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
 
     // Generate sha1 for every generated APKs.
@@ -661,10 +653,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
       apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-      final String appSize =
-          (buildInfo.mode == BuildMode.debug)
-              ? '' // Don't display the size when building a debug variant.
-              : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
       _logger.printStatus(
         '${_logger.terminal.successMark} '
         'Built ${_fileSystem.path.relative(apkFile.path)}$appSize',
@@ -723,14 +714,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym is present for at least one architecture,
+    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
     // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym')) {
+    if (result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg')) {
       return true;
     }
 
     _logger.printTrace(
-      'libflutter.so.sym not present when checking final appbundle for debug symbols.',
+      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
     );
     return false;
   }
@@ -777,10 +769,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   /// Builds AAR and POM files.
   ///
-  /// * [project] is typically [FlutterProject.current()].
+  /// * [project] is typically [FlutterProject.current].
   /// * [androidBuildInfo] is the build configuration.
-  /// * [outputDir] is the destination of the artifacts,
-  /// * [buildNumber] is the build number of the output aar,
+  /// * [outputDirectory] is the destination of the artifacts.
+  /// * [buildNumber] is the build number of the output aar.
   Future<void> buildGradleAar({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -830,7 +822,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }
@@ -1091,7 +1083,7 @@ void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) 
   );
 }
 
-/// Returns [true] if the current app uses AndroidX.
+/// Returns `true` if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
 bool isAppUsingAndroidX(Directory androidDirectory) {
@@ -1297,9 +1289,9 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 }
 
 /// Returns the local Maven repository for a local engine build.
-/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`.
 /// This method generates symlinks in the temp directory to the engine artifacts
-/// following the convention specified on https://maven.apache.org/pom.html#Repositories
+/// following the convention specified on https://maven.apache.org/pom.html#Repositories.
 Directory _getLocalEngineRepo({
   required String engineOutPath,
   required AndroidBuildInfo androidBuildInfo,
@@ -1354,9 +1346,7 @@ Directory _getLocalEngineRepo({
 
 String _getAbiByLocalEnginePath(String engineOutPath) {
   String result = 'armeabi_v7a';
-  if (engineOutPath.contains('x86')) {
-    result = 'x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'x86_64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'arm64_v8a';
@@ -1366,9 +1356,7 @@ String _getAbiByLocalEnginePath(String engineOutPath) {
 
 String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
   String result = 'android-arm';
-  if (engineOutPath.contains('x86')) {
-    result = 'android-x86';
-  } else if (engineOutPath.contains('x64')) {
+  if (engineOutPath.contains('x64')) {
     result = 'android-x64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'android-arm64';

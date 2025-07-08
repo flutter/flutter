@@ -54,16 +54,14 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
+      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
-        final Uri nonFlutterTesterAssetUri =
-            environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
         await packageConfig.parent.create();
         await packageConfig.create();
         final File dylibAfterCompiling = fileSystem.file('libbar.so');
@@ -121,10 +119,7 @@ void main() {
   // assets have to be build.
   testUsingContext(
     'does not throw if NDK not present but no native assets present',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);

@@ -30,7 +30,7 @@ abstract class ResolvedFiles {
   List<File> get sources;
 }
 
-/// Collects sources for a [Target] into a single list of [FileSystemEntities].
+/// Collects sources for a [Target] into a single list of [FileSystemEntity].
 class SourceVisitor implements ResolvedFiles {
   /// Create a new [SourceVisitor] from an [Environment].
   SourceVisitor(this.environment, [this.inputs = true]);
@@ -189,9 +189,8 @@ class SourceVisitor implements ResolvedFiles {
     );
     if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
-        for (final FileSystemEntity entity in environment.fileSystem
-            .directory(path)
-            .listSync(recursive: true))
+        for (final FileSystemEntity entity
+            in environment.fileSystem.directory(path).listSync(recursive: true))
           if (entity is File) entity,
       ]);
       return;
@@ -281,7 +280,7 @@ abstract class Source {
   /// This does not apply to inputs, which are always explicit and must be
   /// evaluated before the build.
   ///
-  /// For example, [Source.pattern] and [Source.version] are not implicit
+  /// For example, [Source.pattern] is not implicit
   /// provided they do not use any wildcards.
   bool get implicit;
 }

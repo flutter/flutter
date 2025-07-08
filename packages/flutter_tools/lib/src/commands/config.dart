@@ -61,13 +61,8 @@ class ConfigCommand extends FlutterCommand {
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
-    argParser.addFlag(
-      'machine',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Print config values as json.',
-    );
-    for (final Feature feature in allFeatures) {
+    addMachineOutputFlag(verboseHelp: verboseHelp);
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -126,13 +121,13 @@ class ConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       await handleMachine();
       return FlutterCommandResult.success();
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
           globals.config.removeValue(configSetting);
@@ -188,7 +183,7 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -247,14 +242,14 @@ class ConfigCommand extends FlutterCommand {
   String get settingsText {
     final Map<String, Feature> featuresByName = <String, Feature>{};
     final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting != null) {
         featuresByName[configSetting] = feature;
       }
     }
     final Set<String> keys = <String>{
-      ...allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...globals.config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {

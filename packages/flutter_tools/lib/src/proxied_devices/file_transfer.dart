@@ -183,10 +183,9 @@ class RollingAdler32 {
     } else if (_cur == 0) {
       return _buffer;
     } else {
-      final BytesBuilder builder =
-          BytesBuilder(copy: false)
-            ..add(Uint8List.sublistView(_buffer, _cur))
-            ..add(Uint8List.sublistView(_buffer, 0, _cur));
+      final BytesBuilder builder = BytesBuilder(copy: false)
+        ..add(Uint8List.sublistView(_buffer, _cur))
+        ..add(Uint8List.sublistView(_buffer, 0, _cur));
       return builder.takeBytes();
     }
   }
@@ -372,7 +371,7 @@ class FileTransfer {
   }
 
   /// Generate the new destination file from the source file, with the
-  /// [blocks] and [binary] stream given.
+  /// [delta] and [binary] stream given.
   Future<bool> rebuildFile(File file, List<FileDeltaBlock> delta, Stream<List<int>> binary) async {
     final RandomAccessFile fileView = await file.open();
 

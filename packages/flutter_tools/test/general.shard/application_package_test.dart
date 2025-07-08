@@ -150,11 +150,8 @@ void main() {
           ),
         );
 
-        final ApplicationPackage applicationPackage =
-            (await ApplicationPackageFactory.instance!.getPackageForPlatform(
-              TargetPlatform.android_arm,
-              applicationBinary: apkFile,
-            ))!;
+        final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!
+            .getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
         expect(applicationPackage.name, 'app-debug.apk');
         expect(applicationPackage, isA<PrebuiltApplicationPackage>());
         expect(
@@ -220,11 +217,10 @@ void main() {
     testWithoutContext(
       'Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
       () {
-        final ApkManifestData data =
-            ApkManifestData.parseFromXmlDump(
-              _aaptDataWithExplicitEnabledAndMainLauncherActivity,
-              BufferLogger.test(),
-            )!;
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithExplicitEnabledAndMainLauncherActivity,
+          BufferLogger.test(),
+        )!;
 
         expect(data, isNotNull);
         expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -235,11 +231,10 @@ void main() {
     testWithoutContext(
       'Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
       () {
-        final ApkManifestData data =
-            ApkManifestData.parseFromXmlDump(
-              _aaptDataWithDefaultEnabledAndMainLauncherActivity,
-              BufferLogger.test(),
-            )!;
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          BufferLogger.test(),
+        )!;
 
         expect(data, isNotNull);
         expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -248,8 +243,10 @@ void main() {
     );
 
     testWithoutContext('Parses manifest with a dist namespace', () {
-      final ApkManifestData data =
-          ApkManifestData.parseFromXmlDump(_aaptDataWithDistNamespace, BufferLogger.test())!;
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDistNamespace,
+        BufferLogger.test(),
+      )!;
 
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -310,11 +307,10 @@ void main() {
     testWithoutContext(
       'Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT',
       () {
-        final ApkManifestData data =
-            ApkManifestData.parseFromXmlDump(
-              _aaptDataWithLauncherAndDefaultActivity,
-              BufferLogger.test(),
-            )!;
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithLauncherAndDefaultActivity,
+          BufferLogger.test(),
+        )!;
 
         expect(data, isNotNull);
         expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -983,7 +979,7 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  writePackageConfigFile(directory: directory, mainLibName: 'my_app');
+  writePackageConfigFiles(directory: directory, mainLibName: 'my_app');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:

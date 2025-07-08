@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:yaml_edit/yaml_edit.dart';
+library;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -27,22 +30,11 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
+import '../src/throwing_pub.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
-  FeatureFlags disableExplicitPackageDependencies() {
-    // ignore: avoid_redundant_argument_values
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
-  }
-
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
   final BufferLogger logger = BufferLogger.test();
@@ -201,10 +193,7 @@ void main() {
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
         // This is not a valid Xml document
         const String invalidManifest = '<manifest></application>';
-        final FlutterProject project = await someProject(
-          androidManifestOverride: invalidManifest,
-          includePubspec: true,
-        );
+        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
 
         expect(
           () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
@@ -217,7 +206,7 @@ void main() {
       _testInMemory(
         'Project not on v2 embedding does not warn if deprecation status is irrelevant',
         () async {
-          final FlutterProject project = await someProject(includePubspec: true);
+          final FlutterProject project = await someProject();
           // The default someProject with an empty <manifest> already indicates
           // v1 embedding, as opposed to having <meta-data
           // android:name="flutterEmbedding" android:value="2" />.
@@ -228,7 +217,7 @@ void main() {
         },
       );
       _testInMemory('Android project no pubspec continues', () async {
-        final FlutterProject project = await someProject();
+        final FlutterProject project = await someProject(includePubspec: false);
         // The default someProject with an empty <manifest> already indicates
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
@@ -286,33 +275,7 @@ void main() {
       });
 
       testUsingContext(
-        '--no-explicit-package-dependencies does not determine dev dependencies',
-        () async {
-          // Create a plugin.
-          await aPluginProject(legacy: false);
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
-          // Don't bother with Android, we just want the manifest.
-          project.directory.childDirectory('android').deleteSync(recursive: true);
-
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
-          expect(
-            project.flutterPluginsDependenciesFile.readAsStringSync(),
-            isNot(contains('"dev_dependency":true')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: disableExplicitPackageDependencies,
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
-        },
-      );
-
-      testUsingContext(
-        '--explicit-package-dependencies determines dev dependencies',
+        'determines dev dependencies',
         () async {
           // Create a plugin.
           await aPluginProject(legacy: false);
@@ -328,17 +291,16 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          Pub: ThrowingPub.new,
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
       testUsingContext(
-        '--explicit-package-dependencies with releaseMode: false retains dev plugins',
+        'releaseMode: false retains dev plugins',
         () async {
           // Create a plugin.
           await aPluginProject(includeAndroidMain: true, legacy: false);
@@ -352,17 +314,16 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          Pub: ThrowingPub.new,
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
       testUsingContext(
-        '--explicit-package-dependencies with releaseMode: true omits dev plugins',
+        'releaseMode: true omits dev plugins',
         () async {
           // Create a plugin.
           await aPluginProject(includeAndroidMain: true, legacy: false);
@@ -376,12 +337,11 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          Pub: ThrowingPub.new,
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
 
@@ -397,8 +357,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -413,8 +373,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -430,8 +390,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -449,8 +409,8 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () =>
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -478,8 +438,7 @@ void main() {
 
       testUsingContext('Version.json info is correct', () {
         final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-        final FlutterManifest manifest =
-            FlutterManifest.createFromString('''
+        final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
     ''', logger: BufferLogger.test())!;
@@ -587,8 +546,8 @@ dependencies {
               gradleV: '8.0',
               agpV: '7.4.2',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -615,8 +574,8 @@ dependencies {
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -644,8 +603,8 @@ dependencies {
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
           java: java,
@@ -677,8 +636,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string
             expect(
@@ -732,8 +691,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -771,8 +730,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -812,8 +771,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -853,8 +812,8 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -892,8 +851,8 @@ dependencies {
               gradleV: gradleV,
               agpV: '',
             );
-            final CompatibilityResult value =
-                await project!.android.hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android
+                .hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -1602,10 +1561,12 @@ plugins {
 
     group('manifest', () {
       _testInMemory('can be replaced', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
+        final FlutterProject project = await someProject();
         final String originalPubspecContents = project.pubspecFile.readAsStringSync();
-        final FlutterManifest updated =
-            FlutterManifest.createFromString(validPubspecWithDependencies, logger: logger)!;
+        final FlutterManifest updated = FlutterManifest.createFromString(
+          validPubspecWithDependencies,
+          logger: logger,
+        )!;
         // Verifies the pubspec.yaml from [project] is overwritten with the pubspec
         // defined by [updated], both in the [FlutterProject] and on disk.
         expect(project.manifest, isNot(equals(updated)));
@@ -1887,10 +1848,10 @@ resolution: workspace
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
           );
-          mockXcodeProjectInterpreter
-              .buildSettingsByBuildContext[watchBuildContext] = <String, String>{
-            'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
-          };
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+              };
 
           expect(
             await project.ios.containsWatchCompanion(
@@ -1932,11 +1893,11 @@ resolution: workspace
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
           );
-          mockXcodeProjectInterpreter
-              .buildSettingsByBuildContext[watchBuildContext] = <String, String>{
-            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
-            'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
-          };
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+              };
 
           expect(
             await project.ios.containsWatchCompanion(
@@ -1961,10 +1922,10 @@ resolution: workspace
 
 Future<FlutterProject> someProject({
   String? androidManifestOverride,
-  bool includePubspec = false,
+  bool includePubspec = true,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'hello');
+  writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
     directory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
@@ -1981,28 +1942,19 @@ Future<FlutterProject> someProject({
 
 Future<FlutterProject> projectWithPluginDependency() async {
   final Directory directory = globals.fs.directory('some_project');
-  directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "my_plugin",
-      "rootUri": "/plugin_project",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+  writePackageConfigFiles(
+    directory: directory,
+    mainLibName: 'app_name',
+    packages: <String, String>{'my_plugin': '/plugin_project'},
+    devDependencies: <String>['my_plugin'],
+  );
   directory.childFile('pubspec.yaml')
     ..createSync(recursive: true)
     ..writeAsStringSync('''
 name: app_name
 flutter:
 
-dependencies:
+dev_dependencies:
   my_plugin:
     sdk: flutter
 ''');
@@ -2063,7 +2015,7 @@ class MyPlugin extends FluttPlugin { /* ... */ }
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  writePackageConfigFile(mainLibName: 'my_module', directory: directory);
+  writePackageConfigFiles(mainLibName: 'my_module', directory: directory);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:
@@ -2076,7 +2028,8 @@ flutter:
 FakeCommand createKgpVersionCommand(String kgpV) {
   return FakeCommand(
     command: const <String>['./gradlew', 'kgpVersion', '-q'],
-    stdout: '''
+    stdout:
+        '''
 KGP Version: $kgpV
 ''',
   );
@@ -2125,12 +2078,12 @@ void _testInMemory(
   // Set up enough of the packages to satisfy the templating code.
   final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: testFileSystem
         .directory(Cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
-    mainLibName: 'my_app',
+    mainLibName: 'app_name',
     packages: <String, String>{
       'flutter_template_images': dummyTemplateImagesDirectory.uri.toString(),
     },
@@ -2146,20 +2099,16 @@ void _testInMemory(
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
-      Cache:
-          () => Cache(
-            logger: globals.logger,
-            fileSystem: testFileSystem,
-            osUtils: globals.os,
-            platform: globals.platform,
-            artifacts: <ArtifactSet>[],
-          ),
-      FlutterProjectFactory:
-          () => FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
-      // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-      // See https://github.com/flutter/flutter/issues/160257 for details.
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
-      Pub: FakePubWithPrimedDeps.new,
+      Cache: () => Cache(
+        logger: globals.logger,
+        fileSystem: testFileSystem,
+        osUtils: globals.os,
+        platform: globals.platform,
+        artifacts: <ArtifactSet>[],
+      ),
+      FlutterProjectFactory: () =>
+          FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
+      Pub: ThrowingPub.new,
     },
   );
 }

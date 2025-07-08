@@ -53,10 +53,6 @@ void main() {
     return;
   }
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   for (final String device in devices) {
     for (final String buildMode in buildModes) {
       if (device == 'flutter-tester' && buildMode != 'debug') {
@@ -163,6 +159,29 @@ void main() {
     });
   });
 
+  for (final String device in devices) {
+    testWithoutContext('flutter test integration_test $device native assets', () async {
+      await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+
+        final Uri exampleDirectory = Uri.directory(packageDirectory.path).resolve('example/');
+        addIntegrationTest(exampleDirectory, packageName);
+
+        final ProcessTestResult result = await runFlutter(
+          <String>['test', 'integration_test', '-d', device],
+          exampleDirectory.toFilePath(),
+          <Transition>[Barrier(RegExp('.* All tests passed!'))],
+          logging: false,
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter test integration_test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+      });
+    });
+  }
+
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
       testWithoutContext(
@@ -234,6 +253,43 @@ void main() {
       });
     });
   }
+}
+
+void addIntegrationTest(Uri exampleDirectory, String packageName) {
+  final ProcessResult result = processManager.runSync(<String>[
+    'flutter',
+    'pub',
+    'add',
+    'dev:integration_test:{"sdk":"flutter"}',
+  ], workingDirectory: exampleDirectory.toFilePath());
+  if (result.exitCode != 0) {
+    throw Exception(
+      'flutter pub add failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
+  }
+
+  final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
+  final File integrationTestFile = fileSystem.file(integrationTestPath);
+  integrationTestFile.createSync(recursive: true);
+  integrationTestFile.writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:${packageName}_example/main.dart';
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('invoke native code', (tester) async {
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
+
+      // Verify the native function was called.
+      expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+    });
+  });
+}
+''');
 }
 
 void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
@@ -335,11 +391,10 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
   expect(dylib, exists);
-  final String infoPlist =
-      frameworksFolder
-          .childDirectory('$frameworkName.framework')
-          .childFile('Info.plist')
-          .readAsStringSync();
+  final String infoPlist = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile('Info.plist')
+      .readAsStringSync();
   expect(infoPlist, '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

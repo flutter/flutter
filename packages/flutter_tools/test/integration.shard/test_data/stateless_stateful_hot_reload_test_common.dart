@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
@@ -39,14 +40,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           completer.complete();
         }
       });
-      if (chrome) {
-        await flutter.run(
-          device: GoogleChromeDevice.kChromeDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      } else {
-        await flutter.run(additionalCommandArgs: additionalCommandArgs);
-      }
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Wait for run to finish.
       await completer.future;
       await subscription.cancel();

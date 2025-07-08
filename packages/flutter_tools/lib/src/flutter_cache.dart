@@ -23,8 +23,6 @@ import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
-  /// [rootOverride] is configurable for testing.
-  /// [artifacts] is configurable for testing.
   FlutterCache({
     required Logger logger,
     required super.fileSystem,
@@ -38,6 +36,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
     registerArtifact(FlutterWebSdk(this));
+    registerArtifact(FlutterEngineStamp(this, logger));
     registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
@@ -184,6 +183,34 @@ class FlutterWebSdk extends CachedArtifact {
     );
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
+  }
+}
+
+/// A cached artifact solely for the `engine_stamp.json` file.
+///
+/// This file is required to divine the engine build and content-hash.
+class FlutterEngineStamp extends CachedArtifact {
+  FlutterEngineStamp(Cache cache, this.logger)
+    : super('engine_stamp', cache, DevelopmentArtifact.informative);
+
+  final Logger logger;
+
+  @override
+  Directory get location => cache.getRoot();
+
+  @override
+  String? get version => cache.engineRevision;
+
+  @override
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    final Uri url = Uri.parse(
+      '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/engine_stamp.json',
+    );
+    await artifactUpdater.downloadFile('Downloading engine information...', url, location);
   }
 }
 
@@ -742,9 +769,10 @@ class IosUsbArtifacts extends CachedArtifact {
 
   static const List<String> artifactNames = <String>[
     'libimobiledevice',
-    'usbmuxd',
+    'libusbmuxd',
     'libplist',
     'openssl',
+    'libimobiledeviceglue',
     'ios-deploy',
   ];
 
@@ -754,7 +782,7 @@ class IosUsbArtifacts extends CachedArtifact {
   // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>['idevicescreenshot', 'idevicesyslog'],
-    'usbmuxd': <String>['iproxy'],
+    'libusbmuxd': <String>['iproxy'],
   };
 
   @override

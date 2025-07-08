@@ -35,7 +35,7 @@ typedef DDSLauncherCallback =
 @visibleForTesting
 DDSLauncherCallback ddsLauncherCallback = DartDevelopmentServiceLauncher.start;
 
-/// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
+/// Helper class to launch a [DartDevelopmentServiceLauncher]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   DartDevelopmentService({required Logger logger}) : _logger = logger;
@@ -64,9 +64,8 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     assert(_ddsInstance == null);
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host:
-          ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
-              .host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
+          .host,
       port: ddsPort ?? 0,
     );
     _logger.printTrace(

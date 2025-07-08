@@ -57,7 +57,7 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
   );
 }
 
-/// Combines dylibs from [sources] into a fat binary at [targetFullPath].
+/// Combines dylibs from [sources] into a fat binary in [target].
 ///
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
@@ -126,8 +126,9 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   }
 
   return <String>{
-    for (final List<String> architectureSection
-        in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
+    for (final List<String> architectureSection in parseOtoolArchitectureSections(
+      installNameResult.stdout as String,
+    ).values)
       // For each architecture, a separate install name is reported, which are
       // not necessarily the same.
       architectureSection.single,
@@ -177,10 +178,9 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath =
-      LineSplitter.split(
-        xcrunResult.stdout as String,
-      ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
+  final String installPath = LineSplitter.split(
+    xcrunResult.stdout as String,
+  ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
   return CCompilerConfig(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),

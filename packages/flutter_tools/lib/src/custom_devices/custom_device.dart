@@ -62,7 +62,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   @visibleForTesting
   final List<StreamSubscription<String>> subscriptions = <StreamSubscription<String>>[];
 
-  /// Listen to [process]' stdout and stderr, decode them using [SystemEncoding]
+  /// Listen to [process]' stdout and stderr, decode them using [encoding]
   /// and add each decoded line to [logLines].
   ///
   /// However, [logLines] will not be done when the [process]' stdout and stderr
@@ -292,6 +292,7 @@ class CustomDeviceAppSession {
       if (debuggingOptions.traceSystrace) 'trace-systrace=true',
       if (debuggingOptions.traceToFile != null) 'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer) 'endless-trace-buffer=true',
+      if (debuggingOptions.profileMicrotasks) 'profile-microtasks=true',
       if (debuggingOptions.purgePersistentCache) 'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
@@ -331,11 +332,8 @@ class CustomDeviceAppSession {
   /// Start the app on the device.
   /// Needs the app to be installed on the device and not running already.
   ///
-  /// [mainPath], [route], [debuggingOptions], [platformArgs] and
-  /// [userIdentifier] may be null.
-  ///
-  /// [ipv6] may not be respected since it depends on the device config whether
-  /// it uses ipv6 or ipv4
+  /// ipv6 may not be respected since it depends on the device config whether
+  /// it uses ipv6 or ipv4.
   Future<LaunchResult> start({
     String? mainPath,
     String? route,
@@ -436,16 +434,15 @@ class CustomDevice extends Device {
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _globalLogReader = CustomDeviceLogReader(config.label),
-       portForwarder =
-           config.usesPortForwarding
-               ? CustomDevicePortForwarder(
-                 deviceName: config.label,
-                 forwardPortCommand: config.forwardPortCommand!,
-                 forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-                 processManager: processManager,
-                 logger: logger,
-               )
-               : const NoOpDevicePortForwarder(),
+       portForwarder = config.usesPortForwarding
+           ? CustomDevicePortForwarder(
+               deviceName: config.label,
+               forwardPortCommand: config.forwardPortCommand!,
+               forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
+               processManager: processManager,
+               logger: logger,
+             )
+           : const NoOpDevicePortForwarder(),
        super(
          config.id,
          category: Category.mobile,
@@ -488,11 +485,11 @@ class CustomDevice extends Device {
   ///
   /// If the process finishes with an exit code != 0, false will be returned and
   /// the error (with the process' stdout and stderr) will be logged using
-  /// [_logger.printError].
+  /// [Logger.printError].
   ///
   /// If [timeout] is not null and the process doesn't finish in time,
   /// it will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryPing({
     Duration? timeout,
@@ -525,7 +522,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> _tryPostBuild({
     required String appName,
@@ -556,7 +553,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryUninstall({
     required String appName,
@@ -671,7 +668,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     return true;
   }
 
@@ -709,8 +706,9 @@ class CustomDevice extends Device {
     final Map<String, String> additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
       'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
-      'engineRevision':
-          artifacts.usesLocalArtifacts ? 'local' : globals.flutterVersion.engineRevision,
+      'engineRevision': artifacts.usesLocalArtifacts
+          ? 'local'
+          : globals.flutterVersion.engineRevision,
     };
 
     if (!prebuiltApplication) {

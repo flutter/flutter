@@ -377,6 +377,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.gitTagVersion = const GitTagVersion.unknown(),
     this.flutterRoot = '/path/to/flutter',
     this.nextFlutterVersion,
+    this.engineBuildDate = '12/01/02',
+    this.engineContentHash = 'cccccccccccccccccccccccccccccccccccccccc',
   });
 
   final String branch;
@@ -476,6 +478,12 @@ class FakeFlutterVersion implements FlutterVersion {
   Map<String, Object> toJson() {
     return <String, Object>{};
   }
+
+  @override
+  final String? engineBuildDate;
+
+  @override
+  final String? engineContentHash;
 }
 
 // A test implementation of [FeatureFlags] that allows enabling without reading
@@ -493,7 +501,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
-    this.isExplicitPackageDependenciesEnabled = false,
   });
 
   @override
@@ -530,9 +537,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
-  final bool isExplicitPackageDependenciesEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -545,9 +549,33 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
-      explicitPackageDependencies => isExplicitPackageDependenciesEnabled,
       _ => false,
     };
+  }
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+  ];
+
+  @override
+  Iterable<Feature> get allConfigurableFeatures {
+    return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
+
+  @override
+  Iterable<Feature> get allEnabledFeatures {
+    return allFeatures.where(isEnabled);
   }
 }
 

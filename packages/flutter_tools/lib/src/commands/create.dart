@@ -16,12 +16,12 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
+import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
-import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -70,7 +70,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
       help:
-          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+          '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy). '
+          'Only supported for "--template=plugin".',
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -324,12 +325,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
         argResults!.wasParsed('platforms') &&
         platforms.contains('web')) {
       throwToolExit('The web platform is not supported in plugin_ffi template.', exitCode: 2);
-    } else if (generateFfi && argResults!.wasParsed('ios-language')) {
-      throwToolExit(
-        'The "ios-language" option is not supported with the ${template.cliName} '
-        'template: the language will always be C or C++.',
-        exitCode: 2,
-      );
     } else if (generateFfi && argResults!.wasParsed('android-language')) {
       throwToolExit(
         'The "android-language" option is not supported with the ${template.cliName} '
@@ -337,12 +332,19 @@ class CreateCommand extends FlutterCommand with CreateBase {
         exitCode: 2,
       );
     } else if (argResults!.wasParsed('ios-language')) {
-      globals.printWarning(
-        'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
-      );
-      if (stringArg('ios-language') == 'objc') {
+      if (generateMethodChannelsPlugin) {
         globals.printWarning(
-          'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.',
+          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
+        );
+        if (stringArg('ios-language') == 'objc') {
+          globals.printWarning(
+            'Please comment in https://github.com/flutter/flutter/issues/169683 describing your use-case for using Objective-C instead of Swift.',
+          );
+        }
+      } else {
+        throwToolExit(
+          'The "ios-language" option is only supported for "--template=plugin".',
+          exitCode: 2,
         );
       }
     }
@@ -635,10 +637,9 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
-    final String? description =
-        argResults!.wasParsed('description')
-            ? stringArg('description')
-            : 'A new Flutter module project.';
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
       globals.fs.path.join('module', 'common'),
@@ -657,10 +658,9 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
-    final String? description =
-        argResults!.wasParsed('description')
-            ? stringArg('description')
-            : 'A new Flutter package project.';
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
       'package',
@@ -696,10 +696,9 @@ Your $application code is in $relativeAppMain.
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
-    final String? description =
-        argResults!.wasParsed('description')
-            ? stringArg('description')
-            : 'A new Flutter plugin project.';
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Flutter plugin project.';
     templateContext['description'] = description;
 
     final String? projectName = templateContext['projectName'] as String?;
@@ -709,10 +708,12 @@ Your $application code is in $relativeAppMain.
       templates.add('plugin_swift_package_manager');
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
-      templateContext['iosSupportedPlatform'] =
-          SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
-      templateContext['macosSupportedPlatform'] =
-          SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
+      templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
+          .format();
+      templateContext['macosSupportedPlatform'] = FlutterDarwinPlatform
+          .macos
+          .supportedPackagePlatform
+          .format();
     } else {
       templates.add('plugin_cocoapods');
     }
@@ -792,10 +793,9 @@ Your $application code is in $relativeAppMain.
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
-    final String? description =
-        argResults!.wasParsed('description')
-            ? stringArg('description')
-            : 'A new Flutter FFI plugin project.';
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>['plugin_ffi', 'plugin_shared'],
@@ -857,10 +857,9 @@ Your $application code is in $relativeAppMain.
     required FlutterTemplateType projectType,
   }) async {
     int generatedCount = 0;
-    final String? description =
-        argResults!.wasParsed('description')
-            ? stringArg('description')
-            : 'A new Dart FFI package project.';
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Dart FFI package project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>['package_ffi'],
@@ -925,8 +924,9 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
     logger: globals.logger,
   );
   final Map<String, Object?>? validSupportedPlatforms = manifest?.validSupportedPlatforms;
-  final List<String> platforms =
-      validSupportedPlatforms == null ? <String>[] : validSupportedPlatforms.keys.toList();
+  final List<String> platforms = validSupportedPlatforms == null
+      ? <String>[]
+      : validSupportedPlatforms.keys.toList();
   return platforms;
 }
 
@@ -1041,8 +1041,8 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaAndGradle(
     globals.logger,
-    javaV: javaVersion,
-    gradleV: templateGradleVersion,
+    javaVersion: javaVersion,
+    gradleVersion: templateGradleVersion,
   );
   bool javaAgpVersionsCompatible = gradle.validateJavaAndAgp(
     globals.logger,
@@ -1084,10 +1084,9 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
     // Gradle template version incompatible with Java version.
     final gradle.JavaGradleCompat? validCompatibleGradleVersionRange = gradle
         .getValidGradleVersionRangeForJavaVersion(globals.logger, javaV: javaVersion);
-    final String compatibleGradleVersionMessage =
-        validCompatibleGradleVersionRange == null
-            ? ''
-            : ' (compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
+    final String compatibleGradleVersionMessage = validCompatibleGradleVersionRange == null
+        ? ''
+        : ' (compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
 
     globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
@@ -1112,10 +1111,9 @@ used.
   // AGP template version incompatible with Java version.
   final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle
       .getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
-  final String compatibleAgpVersionMessage =
-      minimumCompatibleAgpVersion == null
-          ? ''
-          : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
+  final String compatibleAgpVersionMessage = minimumCompatibleAgpVersion == null
+      ? ''
+      : ' (minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
   final String gradleBuildFilePaths =
       '    ${_getBuildGradleConfigurationFilePaths(projectType, projectDirPath)!.join('\n    - ')}';
 
@@ -1140,12 +1138,12 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   String templateAgpVersion,
   String projectType,
 ) {
-  final String incompatibleDependency =
-      javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' : 'Gradle';
-  final String incompatibleDependencyVersion =
-      javaGradleVersionsCompatible
-          ? 'AGP version $templateAgpVersion'
-          : 'Gradle version $templateGradleVersion';
+  final String incompatibleDependency = javaGradleVersionsCompatible
+      ? 'Android Gradle Plugin (AGP)'
+      : 'Gradle';
+  final String incompatibleDependencyVersion = javaGradleVersionsCompatible
+      ? 'AGP version $templateAgpVersion'
+      : 'Gradle version $templateGradleVersion';
   final VersionRange validJavaRange = gradle.getJavaVersionFor(
     gradleV: templateGradleVersion,
     agpV: templateAgpVersion,

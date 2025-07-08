@@ -30,16 +30,19 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     return null;
   }
   final Uri projectUri = FlutterProject.current().directory.uri;
-  final String runPackageName =
-      buildInfo.packageConfig.packages.firstWhere((Package p) => p.root == projectUri).name;
-  final String pubspecPath =
-      Uri.file(buildInfo.packageConfigPath).resolve('../pubspec.yaml').toFilePath();
+  final String runPackageName = buildInfo.packageConfig.packages
+      .firstWhere((Package p) => p.root == projectUri)
+      .name;
+  final String pubspecPath = Uri.file(
+    buildInfo.packageConfigPath,
+  ).resolve('../pubspec.yaml').toFilePath();
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
     runPackageName,
+    includeDevDependencies: true,
     pubspecPath,
   );
 

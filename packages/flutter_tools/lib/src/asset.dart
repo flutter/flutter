@@ -22,6 +22,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'license_collector.dart';
+import 'package_graph.dart';
 import 'project.dart';
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -117,6 +118,7 @@ abstract class AssetBundle {
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
+    bool includeAssetsFromDevDependencies = false,
   });
 }
 
@@ -239,6 +241,7 @@ class ManifestAssetBundle implements AssetBundle {
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
+    bool includeAssetsFromDevDependencies = false,
   }) async {
     if (flutterProject == null) {
       try {
@@ -261,8 +264,9 @@ class ManifestAssetBundle implements AssetBundle {
         kind: AssetKind.regular,
         transformers: const <AssetTransformerEntry>[],
       );
-      final ByteData emptyAssetManifest =
-          const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
+      final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
+        <dynamic, dynamic>{},
+      )!;
       entries[_kAssetManifestBinFilename] = AssetBundleEntry(
         DevFSByteContent(
           emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
@@ -332,9 +336,31 @@ class ManifestAssetBundle implements AssetBundle {
       primary: true,
     );
 
-    // Add fonts, assets, and licenses from packages.
+    // Add fonts, assets, and licenses from packages in the project's
+    // dependencies.
+    // To avoid bundling assets from dev_dependencies and other pub workspace
+    // packages, we compute the set of transitive dependencies.
+    final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
+      flutterProject,
+      packageConfig,
+    );
     final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
-    for (final Package package in packageConfig.packages) {
+    for (final Dependency dependency in transitiveDependencies) {
+      if (!includeAssetsFromDevDependencies && dependency.isExclusiveDevDependency) {
+        continue;
+      }
+      final String packageName = dependency.name;
+      final Package? package = packageConfig[packageName];
+      if (package == null) {
+        // This can happen with eg. `flutter run --no-pub`.
+        //
+        // We usually expect the package config to be up to date with the
+        // current pubspec.yaml - but because we can force pub get to not be run
+        // with `flutter run --no-pub` we can end up with a new dependency in
+        // pubspec.yaml that is not yet discovered by pub and placed in the
+        // package config.
+        throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`.');
+      }
       final Uri packageUri = package.packageUriRoot;
       if (packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(
@@ -772,14 +798,14 @@ class ManifestAssetBundle implements AssetBundle {
         entries[main] = <String>[for (final _Asset variant in variants) variant.entryUri.path];
       });
     }
-    final List<_Asset> sortedKeys =
-        entries.keys.toList()
-          ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+    final List<_Asset> sortedKeys = entries.keys.toList()
+      ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
       final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
       final List<String> rawEntryVariantsPaths = entries[main]!;
-      final List<String> decodedEntryVariantPaths =
-          rawEntryVariantsPaths.map((String value) => Uri.decodeFull(value)).toList();
+      final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
+          .map((String value) => Uri.decodeFull(value))
+          .toList();
       manifest[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return manifest;
@@ -827,7 +853,7 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
-  /// 'packages/<package_name>'
+  /// `packages/<package_name>`.
   List<Font> _parsePackageFonts(
     FlutterManifest manifest,
     String packageName,
@@ -1074,10 +1100,9 @@ class ManifestAssetBundle implements AssetBundle {
     for (final String path in cache.variantsFor(assetFile.path)) {
       final String relativePath = _fileSystem.path.relative(path, from: asset.baseDir);
       final Uri relativeUri = _fileSystem.path.toUri(relativePath);
-      final Uri? entryUri =
-          asset.symbolicPrefixUri == null
-              ? relativeUri
-              : asset.symbolicPrefixUri?.resolveUri(relativeUri);
+      final Uri? entryUri = asset.symbolicPrefixUri == null
+          ? relativeUri
+          : asset.symbolicPrefixUri?.resolveUri(relativeUri);
       if (entryUri != null) {
         variants.add(
           _Asset(
@@ -1140,10 +1165,9 @@ class ManifestAssetBundle implements AssetBundle {
           '${flavorsWrappedWithQuotes.join(', ')}.';
     }
 
-    final _Asset? preExistingAsset =
-        previouslyParsedAssets
-            .where((_Asset other) => other.entryUri == newAsset.entryUri)
-            .firstOrNull;
+    final _Asset? preExistingAsset = previouslyParsedAssets
+        .where((_Asset other) => other.entryUri == newAsset.entryUri)
+        .firstOrNull;
 
     if (preExistingAsset == null || preExistingAsset.hasEquivalentFlavorsWith(newAsset)) {
       return;
@@ -1200,12 +1224,11 @@ class ManifestAssetBundle implements AssetBundle {
 
     return _Asset(
       baseDir: assetsBaseDir,
-      entryUri:
-          packageName == null
-              ? assetUri // Asset from the current application.
-              : Uri(
-                pathSegments: <String>['packages', packageName, ...assetUri.pathSegments],
-              ), // Asset from, and declared in $packageName.
+      entryUri: packageName == null
+          ? assetUri // Asset from the current application.
+          : Uri(
+              pathSegments: <String>['packages', packageName, ...assetUri.pathSegments],
+            ), // Asset from, and declared in $packageName.
       relativeUri: assetUri,
       package: attributedPackage,
       originUri: originUri,
@@ -1380,15 +1403,14 @@ class _AssetDirectoryCache {
       return _cache[assetPath]!;
     }
     if (!_variantsPerFolder.containsKey(directoryName)) {
-      _variantsPerFolder[directoryName] =
-          _fileSystem
-              .directory(directoryName)
-              .listSync()
-              .whereType<Directory>()
-              .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
-              .expand((Directory dir) => dir.listSync())
-              .whereType<File>()
-              .toList();
+      _variantsPerFolder[directoryName] = _fileSystem
+          .directory(directoryName)
+          .listSync()
+          .whereType<Directory>()
+          .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
+          .expand((Directory dir) => dir.listSync())
+          .whereType<File>()
+          .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directoryName]!;

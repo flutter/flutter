@@ -81,7 +81,6 @@ class ProtocolDiscovery {
   ///
   /// When a new VM Service URL: is available in [logReader],
   /// the URLs are forwarded at most once every [throttleDuration].
-  /// Returns when no event has been observed for [throttleTimeout].
   ///
   /// Port forwarding is only attempted when this is invoked,
   /// for each VM Service URL in the stream.
@@ -153,8 +152,8 @@ class ProtocolDiscovery {
 /// Provides a broadcast stream controller that buffers the events
 /// if there isn't a listener attached.
 /// The events are then delivered when a listener is attached to the stream.
-class _BufferedStreamController<T> {
-  _BufferedStreamController() : _events = <dynamic>[];
+class _BufferedStreamController<T extends Object> {
+  _BufferedStreamController() : _events = <Object>[];
 
   /// The stream that this controller is controlling.
   Stream<T> get stream {
@@ -164,13 +163,13 @@ class _BufferedStreamController<T> {
   late final StreamController<T> _streamController = () {
     final StreamController<T> streamControllerInstance = StreamController<T>.broadcast();
     streamControllerInstance.onListen = () {
-      for (final dynamic event in _events) {
+      for (final Object event in _events) {
         if (event is T) {
           streamControllerInstance.add(event);
         } else {
           streamControllerInstance.addError(
-            (event as Iterable<dynamic>).first as Object,
-            event.last as StackTrace,
+            (event as Iterable<Object?>).first!,
+            event.last as StackTrace?,
           );
         }
       }
@@ -179,7 +178,7 @@ class _BufferedStreamController<T> {
     return streamControllerInstance;
   }();
 
-  final List<dynamic> _events;
+  final List<Object> _events;
 
   /// Sends [event] if there is a listener attached to the broadcast stream.
   /// Otherwise, it enqueues [event] until a listener is attached.
@@ -196,7 +195,7 @@ class _BufferedStreamController<T> {
     if (_streamController.hasListener) {
       _streamController.addError(error, stackTrace);
     } else {
-      _events.add(<dynamic>[error, stackTrace]);
+      _events.add(<Object?>[error, stackTrace]);
     }
   }
 
@@ -227,20 +226,18 @@ StreamTransformer<S, S> _throttle<S>({required Duration waitDuration}) {
       final int remainingTime = currentTime - lastExecution!;
 
       // Always send the first event immediately.
-      final int nextExecutionTime =
-          isFirstMessage || remainingTime > waitDuration.inMilliseconds
-              ? 0
-              : waitDuration.inMilliseconds - remainingTime;
-      throttleFuture ??= Future<void>.delayed(
-        Duration(milliseconds: nextExecutionTime),
-      ).whenComplete(() {
-        if (done) {
-          return;
-        }
-        sink.add(latestLine);
-        throttleFuture = null;
-        lastExecution = DateTime.now().millisecondsSinceEpoch;
-      });
+      final int nextExecutionTime = isFirstMessage || remainingTime > waitDuration.inMilliseconds
+          ? 0
+          : waitDuration.inMilliseconds - remainingTime;
+      throttleFuture ??= Future<void>.delayed(Duration(milliseconds: nextExecutionTime))
+          .whenComplete(() {
+            if (done) {
+              return;
+            }
+            sink.add(latestLine);
+            throttleFuture = null;
+            lastExecution = DateTime.now().millisecondsSinceEpoch;
+          });
     },
     handleDone: (EventSink<S> sink) {
       done = true;

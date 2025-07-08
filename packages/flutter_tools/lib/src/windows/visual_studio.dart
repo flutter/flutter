@@ -41,7 +41,7 @@ class VisualStudio {
   /// True if Visual Studio installation was found.
   ///
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
-  /// users should take into account that [false] may mean that the user may
+  /// users should take into account that `false` may mean that the user may
   /// have an old version rather than no installation at all.
   bool get isInstalled => _bestVisualStudioDetails != null;
 
@@ -339,13 +339,12 @@ class VisualStudio {
     List<String>? additionalArguments,
     String? requiredWorkload,
   }) {
-    final List<String> requirementArguments =
-        validateRequirements
-            ? <String>[
-              if (requiredWorkload != null) ...<String>['-requires', requiredWorkload],
-              ..._requiredComponents(_minimumSupportedVersion).keys,
-            ]
-            : <String>[];
+    final List<String> requirementArguments = validateRequirements
+        ? <String>[
+            if (requiredWorkload != null) ...<String>['-requires', requiredWorkload],
+            ..._requiredComponents(_minimumSupportedVersion).keys,
+          ]
+        : <String>[];
     try {
       final List<String> defaultArguments = <String>[
         '-format',
@@ -451,10 +450,9 @@ class VisualStudio {
       for (final String requiredWorkload in _requiredWorkloads) {
         final VswhereDetails? result = _visualStudioDetails(
           validateRequirements: true,
-          additionalArguments:
-              checkForPrerelease
-                  ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
-                  : minimumVersionArguments,
+          additionalArguments: checkForPrerelease
+              ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
+              : minimumVersionArguments,
           requiredWorkload: requiredWorkload,
         );
 

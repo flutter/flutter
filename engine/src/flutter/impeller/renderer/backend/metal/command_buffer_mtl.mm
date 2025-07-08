@@ -162,7 +162,8 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   return CommandBufferMTL::Status::kError;
 }
 
-bool CommandBufferMTL::OnSubmitCommands(CompletionCallback callback) {
+bool CommandBufferMTL::OnSubmitCommands(bool block_on_schedule,
+                                        CompletionCallback callback) {
   auto context = context_.lock();
   if (!context) {
     return false;
@@ -182,6 +183,9 @@ bool CommandBufferMTL::OnSubmitCommands(CompletionCallback callback) {
   }
 
   [buffer_ commit];
+  if (block_on_schedule) {
+    [buffer_ waitUntilScheduled];
+  }
 
   buffer_ = nil;
   return true;

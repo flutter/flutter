@@ -70,6 +70,7 @@ impeller_component("metal_unittests") {
 
   sources = [
     "allocator_mtl_unittests.mm",
+    "context_mtl_unittests.mm",
     "swapchain_transients_mtl_unittests.mm",
     "texture_mtl_unittests.mm",
   ]

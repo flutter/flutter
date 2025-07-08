@@ -124,11 +124,27 @@ void main() {
         FileSystem: createFsWithPubspec,
       },
     );
+
+    testUsingContext('Test feature flags match feature flags', () {
+      final FeatureFlags testFeatureFlags = TestFeatureFlags();
+
+      expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
+
+      final List<String> featureNames = featureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+      final List<String> testFeatureNames = testFeatureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+
+      expect(featureNames, unorderedEquals(testFeatureNames));
+    });
   });
 
   group('Linux Destkop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterLinuxDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterLinuxDesktopFeature));
     });
 
     test('can be configured', () {
@@ -145,8 +161,9 @@ void main() {
   });
 
   group('MacOS Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterMacOSDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterMacOSDesktopFeature));
     });
 
     test('can be configured', () {
@@ -163,8 +180,9 @@ void main() {
   });
 
   group('Windows Desktop', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWindowsDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWindowsDesktopFeature));
     });
 
     test('can be configured', () {
@@ -181,8 +199,9 @@ void main() {
   });
 
   group('Web', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterWebFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWebFeature));
     });
 
     test('can be configured', () {
@@ -199,8 +218,9 @@ void main() {
   });
 
   group('Android', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterAndroidFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterAndroidFeature));
     });
 
     test('can be configured', () {
@@ -217,8 +237,9 @@ void main() {
   });
 
   group('iOS', () {
-    test('is fully enabled', () {
+    testUsingContext('is fully enabled', () {
       expect(flutterIOSFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterIOSFeature));
     });
 
     test('can be configured', () {
@@ -285,8 +306,9 @@ void main() {
   });
 
   group('CLI Animations', () {
-    test('is always enabled', () {
+    testUsingContext('is always enabled', () {
       expect(cliAnimation, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(cliAnimation));
     });
 
     test('can be disabled by TERM=dumb', () {
@@ -312,9 +334,9 @@ void main() {
       expect(
         nativeAssets,
         allOf(<Matcher>[
-          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('master', available: true, enabledByDefault: true),
           _onChannelIs('stable', available: false, enabledByDefault: false),
-          _onChannelIs('beta', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );
     });
@@ -354,24 +376,6 @@ void main() {
         shouldInvoke: swiftPackageManager,
       );
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
-    });
-  });
-
-  group('Explicit Package Dependencies', () {
-    test('is fully enabled', () {
-      expect(explicitPackageDependencies, _isFullyEnabled);
-    });
-
-    test('can be configured', () {
-      expect(explicitPackageDependencies.configSetting, 'explicit-package-dependencies');
-      expect(explicitPackageDependencies.environmentOverride, isNull);
-    });
-
-    test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: explicitPackageDependencies,
-      );
-      expect(checkFlags.isExplicitPackageDependenciesEnabled, isTrue);
     });
   });
 }
@@ -459,4 +463,13 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
   bool isEnabled(Feature feature) {
     return feature == shouldInvoke;
   }
+
+  @override
+  List<Feature> get allFeatures => throw UnimplementedError();
+
+  @override
+  List<Feature> get allConfigurableFeatures => throw UnimplementedError();
+
+  @override
+  Iterable<Feature> get allEnabledFeatures => throw UnimplementedError();
 }

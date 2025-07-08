@@ -28,8 +28,6 @@ void main() {
           'create',
           '--org',
           'io.flutter.devicelab',
-          '-i',
-          'swift',
           appName,
           '--platforms=ios',
         ], workingDirectory: workingDirectory.path);
@@ -122,8 +120,6 @@ void main() {
           'create',
           '--org',
           'io.flutter.devicelab',
-          '-i',
-          'swift',
           appName,
           '--platforms=ios',
         ], workingDirectory: workingDirectory.path);

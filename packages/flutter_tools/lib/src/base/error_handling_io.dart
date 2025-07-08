@@ -21,7 +21,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
-import 'common.dart' show throwToolExit;
+import 'common.dart' show ToolExit, throwToolExit;
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -265,8 +265,9 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create file at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(<String>[delegate.parent.path]),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(<String>[delegate.parent.path]),
     );
   }
 
@@ -398,8 +399,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -427,8 +429,9 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       () async => wrap(await delegate.create(recursive: recursive)),
       platform: _platform,
       failureMessage: 'Flutter failed to create a directory at "${delegate.path}"',
-      posixPermissionSuggestion:
-          recursive ? null : _posixPermissionSuggestion(delegate.parent.path),
+      posixPermissionSuggestion: recursive
+          ? null
+          : _posixPermissionSuggestion(delegate.parent.path),
     );
   }
 
@@ -579,7 +582,7 @@ T _runSync<T>(
 
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
-/// If a [ProcessException] is not caused by the Flutter tool, and can only be
+/// If a [io.ProcessException] is not caused by the Flutter tool, and can only be
 /// addressed by the user, it should be caught by this [ProcessManager] and thrown
 /// as a [ToolExit] using [throwToolExit].
 ///

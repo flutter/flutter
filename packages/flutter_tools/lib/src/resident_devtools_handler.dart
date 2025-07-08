@@ -186,12 +186,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
-      final String devToolsUrl =
-          activeDevToolsServer!.uri!
-              .replace(
-                queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
-              )
-              .toString();
+      final String devToolsUrl = activeDevToolsServer!.uri!
+          .replace(queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'})
+          .toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
 
       _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
@@ -374,7 +371,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   bool get printDtdUri => false;
 }
 
-/// Convert a [URI] with query parameters into a display format instead
+/// Convert the [uri] with query parameters into a display format instead
 /// of the default URI encoding.
 String urlToDisplayString(Uri uri) {
   final StringBuffer base = StringBuffer(

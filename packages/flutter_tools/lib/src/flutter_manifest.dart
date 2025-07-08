@@ -5,6 +5,7 @@
 /// @docImport 'localizations/gen_l10n.dart';
 library;
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -79,9 +80,16 @@ class FlutterManifest {
     List<Font>? fonts,
     List<Uri>? shaders,
     List<DeferredComponent>? deferredComponents,
+    bool removeDependencies = false,
   }) {
     final FlutterManifest copy = FlutterManifest._(logger: _logger);
     copy._descriptor = <String, Object?>{..._descriptor};
+    if (removeDependencies) {
+      // Remove the non-Flutter SDK dependencies if they're going to be added back later.
+      copy._descriptor['dependencies'] = YamlMap.wrap(<String, Object?>{
+        'flutter': <String, Object?>{'sdk': 'flutter'},
+      });
+    }
     copy._flutterDescriptor = <String, Object?>{..._flutterDescriptor};
 
     if (assets != null && assets.isNotEmpty) {
@@ -265,6 +273,11 @@ class FlutterManifest {
     };
   }
 
+  /// Returns the MD5 hash of the manifest contents.
+  String computeMD5Hash() {
+    return md5.convert(toYaml().toString().codeUnits).toString();
+  }
+
   /// Returns the deferred components configuration if declared. Returns
   /// null if no deferred components are declared.
   late final List<DeferredComponent>? deferredComponents = computeDeferredComponents();
@@ -285,10 +298,9 @@ class FlutterManifest {
       components.add(
         DeferredComponent(
           name: component['name'] as String,
-          libraries:
-              component['libraries'] == null
-                  ? <String>[]
-                  : (component['libraries'] as List<dynamic>).cast<String>(),
+          libraries: component['libraries'] == null
+              ? <String>[]
+              : (component['libraries'] as List<dynamic>).cast<String>(),
           assets: _computeAssets(component['assets']),
         ),
       );
@@ -344,9 +356,9 @@ class FlutterManifest {
     return fontList == null
         ? const <Map<String, Object?>>[]
         : fontList
-            .map<Map<String, Object?>?>(castStringKeyedMap)
-            .whereType<Map<String, Object?>>()
-            .toList();
+              .map<Map<String, Object?>?>(castStringKeyedMap)
+              .whereType<Map<String, Object?>>()
+              .toList();
   }
 
   late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
@@ -421,16 +433,6 @@ class FlutterManifest {
   }
 
   /// Whether localization Dart files should be generated.
-  ///
-  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
-  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
-  /// does _not_ imply a synthetic package (and never did); additional
-  /// introspection is required to determine whether a synthetic package is
-  /// required.
-  ///
-  /// See also:
-  ///
-  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
@@ -862,10 +864,8 @@ class AssetsEntry {
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
-      final (
-        List<AssetTransformerEntry>? transformers,
-        List<String> transformersErrors,
-      ) = _parseTransformersSection(yaml[_transformersKey]);
+      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
+          _parseTransformersSection(yaml[_transformersKey]);
 
       final List<String> errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
@@ -921,10 +921,8 @@ class AssetsEntry {
     final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
     final List<String> errors = <String>[];
     for (final YamlMap yaml in yamlObjects!) {
-      final (
-        AssetTransformerEntry? transformerEntry,
-        List<String> transformerErrors,
-      ) = AssetTransformerEntry.tryParse(yaml);
+      final (AssetTransformerEntry? transformerEntry, List<String> transformerErrors) =
+          AssetTransformerEntry.tryParse(yaml);
       if (transformerEntry != null) {
         transformers.add(transformerEntry);
       } else {
@@ -965,10 +963,10 @@ final class AssetTransformerEntry {
     : args = args ?? const <String>[];
 
   final String package;
-  final List<String>? args;
+  final List<String> args;
 
   Map<String, Object?> get descriptor {
-    return <String, Object?>{_kPackage: package, if (args != null) _kArgs: args};
+    return <String, Object?>{_kPackage: package, _kArgs: args};
   }
 
   static const String _kPackage = 'package';
@@ -1018,30 +1016,22 @@ final class AssetTransformerEntry {
     if (other is! AssetTransformerEntry) {
       return false;
     }
-
-    final bool argsAreEqual =
-        (() {
-          if (args == null && other.args == null) {
-            return true;
-          }
-          if (args?.length != other.args?.length) {
-            return false;
-          }
-
-          for (int index = 0; index < args!.length; index += 1) {
-            if (args![index] != other.args![index]) {
-              return false;
-            }
-          }
-          return true;
-        })();
-
-    return package == other.package && argsAreEqual;
+    if (package != other.package) {
+      return false;
+    }
+    if (args.length != other.args.length) {
+      return false;
+    }
+    for (int index = 0; index < args.length; index += 1) {
+      if (args[index] != other.args[index]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object?>[package.hashCode, args?.map((String e) => e.hashCode)]);
+  int get hashCode => Object.hash(package, Object.hashAll(args));
 
   @override
   String toString() {

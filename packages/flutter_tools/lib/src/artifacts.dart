@@ -164,7 +164,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
+    case TargetPlatform.unsupported:
     case null:
       return targetPlatform;
   }
@@ -334,8 +334,6 @@ abstract class Artifacts {
   /// all artifacts.
   ///
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
-  ///
-  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
   factory Artifacts.test({FileSystem? fileSystem}) {
     return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
@@ -490,12 +488,13 @@ class CachedArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        final String engineDir =
-            _getEngineArtifactsPath(_currentHostPlatform(_platform, _operatingSystemUtils))!;
+        final String engineDir = _getEngineArtifactsPath(
+          _currentHostPlatform(_platform, _operatingSystemUtils),
+        )!;
         return _fileSystem.file(_fileSystem.path.join(engineDir, artifactFileName));
     }
   }
@@ -513,7 +512,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.ios:
@@ -535,6 +533,8 @@ class CachedArtifacts implements Artifacts {
           platform ?? _currentHostPlatform(_platform, _operatingSystemUtils),
           mode,
         );
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -899,13 +899,14 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
         return null;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1022,12 +1023,11 @@ Directory _getMacOSFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --macos".',
     );
   }
-  final Directory? platformDirectory =
-      xcframeworkDirectory
-          .listSync()
-          .whereType<Directory>()
-          .where((Directory platformDirectory) => platformDirectory.basename.startsWith('macos-'))
-          .firstOrNull;
+  final Directory? platformDirectory = xcframeworkDirectory
+      .listSync()
+      .whereType<Directory>()
+      .where((Directory platformDirectory) => platformDirectory.basename.startsWith('macos-'))
+      .firstOrNull;
   if (platformDirectory == null) {
     throwToolExit('No macOS frameworks found in ${xcframeworkDirectory.path}');
   }
@@ -1167,7 +1167,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -1191,8 +1191,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
     platform ??= _currentHostPlatform(_platform, _operatingSystemUtils);
     platform = _mapTargetPlatform(platform);
     final bool isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
-    final String? artifactFileName =
-        isDirectoryArtifact ? null : _artifactToFileName(artifact, _platform, mode);
+    final String? artifactFileName = isDirectoryArtifact
+        ? null
+        : _artifactToFileName(artifact, _platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
@@ -1350,12 +1351,13 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1579,12 +1581,13 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 

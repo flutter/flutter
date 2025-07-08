@@ -384,11 +384,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
            height: _kSliderHeight,
          ),
        ) {
-    _drag =
-        HorizontalDragGestureRecognizer()
-          ..onStart = _handleDragStart
-          ..onUpdate = _handleDragUpdate
-          ..onEnd = _handleDragEnd;
+    _drag = HorizontalDragGestureRecognizer()
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd;
     _position = AnimationController(
       value: value,
       duration: _kDiscreteTransitionDuration,
@@ -587,16 +586,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
     if (visualPosition > 0.0) {
       final Paint paint = Paint()..color = rightColor;
-      canvas.drawRRect(
-        RRect.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
+      canvas.drawRSuperellipse(
+        RSuperellipse.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
         paint,
       );
     }
 
     if (visualPosition < 1.0) {
       final Paint paint = Paint()..color = leftColor;
-      canvas.drawRRect(
-        RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
+      canvas.drawRSuperellipse(
+        RSuperellipse.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
         paint,
       );
     }

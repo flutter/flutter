@@ -68,10 +68,11 @@ class VsCode {
     String extensionDirectory, {
     String? edition,
     required FileSystem fileSystem,
+    required Platform platform,
   }) {
     final String packageJsonPath = fileSystem.path.join(
       installPath,
-      'Resources',
+      platform.isLinux ? 'resources' : 'Resources',
       'app',
       'package.json',
     );
@@ -132,8 +133,10 @@ class VsCode {
     Platform platform,
     ProcessManager processManager,
   ) {
-    final String? homeDirPath =
-        FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+    final String? homeDirPath = FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: platform,
+    ).homeDirPath;
 
     String vsCodeSpotlightResult = '';
     String vsCodeInsiderSpotlightResult = '';
@@ -297,8 +300,10 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (final VsCodeInstallLocation searchLocation in allLocations) {
-      final String? homeDirPath =
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+      final String? homeDirPath = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: platform,
+      ).homeDirPath;
       if (homeDirPath != null && fileSystem.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory = fileSystem.path.join(
           homeDirPath,
@@ -311,6 +316,7 @@ class VsCode {
             extensionDirectory,
             edition: searchLocation.edition,
             fileSystem: fileSystem,
+            platform: platform,
           ),
         );
       }

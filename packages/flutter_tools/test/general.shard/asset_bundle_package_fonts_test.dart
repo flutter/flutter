@@ -26,11 +26,17 @@ void main() {
     return path.replaceAll('/', globals.fs.path.separator);
   }
 
-  void writePubspecFile(String path, String name, {String? fontsSection}) {
+  void writePubspecFile(
+    String path,
+    String name, {
+    String? fontsSection,
+    Map<String, String> deps = const <String, String>{},
+  }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
-      fontsSection = '''
+      fontsSection =
+          '''
 flutter:
      fonts:
 $fontsSection
@@ -44,6 +50,7 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+${deps.entries.map((MapEntry<String, String> entry) => '  ${entry.key}: {path: ${entry.value}}').join('\n')}
 $fontsSection
 ''');
   }
@@ -99,10 +106,10 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
@@ -134,7 +141,7 @@ $fontsSection
 ''';
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
@@ -170,7 +177,7 @@ $fontsSection
            - asset: a/bar
 ''';
         writePubspecFile('pubspec.yaml', 'my_app', fontsSection: fontsSection);
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: <String, String>{'test_package': 'p/p/'},
@@ -201,11 +208,11 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
         const String fontsSection = '''
        - family: foo
@@ -241,7 +248,7 @@ $fontsSection
           'test_package2': 'p2/p/',
         };
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
@@ -279,11 +286,11 @@ $fontsSection
       () async {
         final Map<String, String> deps = <String, String>{'test_package': 'p/p/'};
         writePubspecFile('pubspec.yaml', 'test');
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
 
           packages: deps,
-          mainLibName: 'my_app',
+          mainLibName: 'test',
         );
 
         const String pubspec = '''
@@ -323,7 +330,7 @@ $fontsSection
            - asset: a/bar
 ''';
         writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           packages: deps,
           mainLibName: 'test',

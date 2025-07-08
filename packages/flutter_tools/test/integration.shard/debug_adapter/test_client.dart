@@ -237,11 +237,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionAdded(String extension) =>
       serviceExtensionAddedEvents.firstWhere(
         (Map<String, Object?> body) => body['extensionRPC'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension added event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension added event before stream closed',
+        ),
       );
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
@@ -249,11 +247,9 @@ class DapTestClient {
   Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) =>
       serviceExtensionStateChangedEvents.firstWhere(
         (Map<String, Object?> body) => body['extension'] == extension,
-        orElse:
-            () =>
-                throw Exception(
-                  'Did not receive $extension extension state changed event before stream closed',
-                ),
+        orElse: () => throw Exception(
+          'Did not receive $extension extension state changed event before stream closed',
+        ),
       );
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
@@ -304,7 +300,7 @@ class DapTestClient {
   }
 
   /// Creates a [DapTestClient] that connects the server listening on
-  /// [host]:[port].
+  /// `[host]:[port]`.
   static Future<DapTestClient> connect(
     DapTestServer server, {
     bool captureVmServiceTraffic = false,
@@ -348,7 +344,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialize) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,
     String? cwd,
@@ -376,13 +372,13 @@ extension DapTestClientExtension on DapTestClient {
     //  https://github.com/flutter/flutter/issues/120015
     return skipInitialPubGetOutput
         ? output
-            .skipWhile(
-              (OutputEventBody output) =>
-                  output.output.startsWith('Running "flutter pub get"') ||
-                  output.output.startsWith('Resolving dependencies') ||
-                  output.output.startsWith('Got dependencies'),
-            )
-            .toList()
+              .skipWhile(
+                (OutputEventBody output) =>
+                    output.output.startsWith('Running "flutter pub get"') ||
+                    output.output.startsWith('Resolving dependencies') ||
+                    output.output.startsWith('Got dependencies'),
+              )
+              .toList()
         : output;
   }
 
@@ -393,7 +389,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialise) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<TestEvents> collectTestOutput({
     String? program,
     String? cwd,
@@ -403,8 +399,8 @@ extension DapTestClientExtension on DapTestClient {
     assert(start == null || launch == null, 'Only one of "start" or "launch" may be provided');
 
     final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
-    final Future<List<Map<String, Object?>>> testNotificationEventsFuture =
-        testNotificationEvents.toList();
+    final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents
+        .toList();
 
     if (start != null) {
       await start();
@@ -418,7 +414,7 @@ extension DapTestClientExtension on DapTestClient {
     );
   }
 
-  /// Sets a breakpoint at [line] in [file].
+  /// Sets a breakpoint at [line] in the file at [filePath].
   Future<void> setBreakpoint(String filePath, int line) async {
     await sendRequest(
       SetBreakpointsArguments(
@@ -468,10 +464,13 @@ extension DapTestClientExtension on DapTestClient {
     StackTraceArguments(threadId: threadId, startFrame: startFrame, levels: numFrames),
   );
 
-  /// Clears breakpoints in [file].
+  /// Clears breakpoints in the file at [filePath].
   Future<void> clearBreakpoints(String filePath) async {
     await sendRequest(
-      SetBreakpointsArguments(source: Source(path: filePath), breakpoints: <SourceBreakpoint>[]),
+      SetBreakpointsArguments(
+        source: Source(path: filePath),
+        breakpoints: <SourceBreakpoint>[],
+      ),
     );
   }
 }

@@ -114,6 +114,12 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
+      final List<String> extraFrontEndOptions = <String>[
+        ...buildInfo.extraFrontEndOptions,
+        if (buildInfo.webEnableHotReload)
+        // These flags are only valid to be passed when compiling with DDC.
+        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+      ];
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -133,14 +139,13 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
-        librariesSpec:
-            globals.fs
-                .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-                .uri
-                .toString(),
+        librariesSpec: globals.fs
+            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+            .uri
+            .toString(),
         packagesPath: buildInfo.packageConfigPath,
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
@@ -375,10 +380,9 @@ class FlutterDevice {
     }
     final Stream<String> logStream;
     if (device is IOSDevice) {
-      logStream =
-          (device! as IOSDevice)
-              .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
-              .logLines;
+      logStream = (device! as IOSDevice)
+          .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
+          .logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
@@ -399,7 +403,7 @@ class FlutterDevice {
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
       'on ${device!.displayName} in $modeName mode...',
@@ -475,7 +479,7 @@ class FlutterDevice {
 
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.mode.friendlyName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
@@ -619,12 +623,11 @@ abstract class ResidentHandlers {
   /// is run instead. On web devices, this only performs a hot restart regardless of
   /// the value of [fullRestart].
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
-    final String mode =
-        isRunningProfile
-            ? 'profile'
-            : isRunningRelease
-            ? 'release'
-            : 'this';
+    final String mode = isRunningProfile
+        ? 'profile'
+        : isRunningRelease
+        ? 'release'
+        : 'this';
     throw Exception('${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode');
   }
 
@@ -984,10 +987,9 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
-       artifactDirectory =
-           dillOutputPath == null
-               ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
-               : globals.fs.file(dillOutputPath).parent,
+       artifactDirectory = dillOutputPath == null
+           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
+           : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
@@ -1108,7 +1110,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   // there is no devFS associated with the first device.
   Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
-  /// Returns [true] if the resident runner exited after invoking [exit()].
+  /// Returns `true` if the resident runner exited after invoking [exit].
   bool get exited => _exited;
 
   @override
@@ -1347,23 +1349,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished.complete(0);
   }
 
-  Future<void> enableObservatory() async {
-    assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests =
-        <Future<vm_service.Response?>>[
-          for (final FlutterDevice? device in flutterDevices)
-            if (device != null)
-              // Notify the VM service if the user wants Observatory to be served.
-              device.vmService?.callMethodWrapper('_serveObservatory') ??
-                  Future<vm_service.Response?>.value(),
-        ];
-    try {
-      await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch (e) {
-      globals.printWarning('Unable to enable Observatory: $e');
-    }
-  }
-
   @protected
   void appFinished() {
     if (_finished.isCompleted) {
@@ -1553,7 +1538,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
@@ -1570,6 +1554,8 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
       return null;
+    case TargetPlatform.unsupported:
+      TargetPlatform.throwUnsupportedTarget();
   }
 }
 
@@ -1659,7 +1645,7 @@ class TerminalHandler {
     subscription?.cancel();
   }
 
-  /// Returns [true] if the input has been handled by this function.
+  /// Returns `true` if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
     switch (character) {

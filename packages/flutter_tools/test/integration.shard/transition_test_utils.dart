@@ -136,11 +136,12 @@ class LogLine {
             0x09 => '<BS>',
             0x0A => '<LF>',
             0x0D => '<CR>',
-            _ => '<${rune.toRadixString(16).padLeft(rune <= 0xFF
-                ? 2
-                : rune <= 0xFFFF
-                ? 4
-                : 5, '0')}>',
+            _ =>
+              '<${rune.toRadixString(16).padLeft(rune <= 0xFF
+                  ? 2
+                  : rune <= 0xFFFF
+                  ? 4
+                  : 5, '0')}>',
           },
         )
         .join();

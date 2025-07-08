@@ -12,14 +12,14 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
-import '../features.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -118,9 +118,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   @protected
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
-
-  @override
-  bool get reportNullSafety => false;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -277,7 +274,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
       );
 
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -292,8 +289,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       }
 
       // Build aot, create module.framework and copy.
-      final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
-      final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
+      final Directory iPhoneBuildOutput = modeDirectory.childDirectory(
+        XcodeSdk.IPhoneOS.platformName,
+      );
+      final Directory simulatorBuildOutput = modeDirectory.childDirectory(
+        XcodeSdk.IPhoneSimulator.platformName,
+      );
       await _produceAppFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
 
       // Build and copy plugins.
@@ -373,25 +374,24 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
     }
 
-    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+    if (buildInfos.any((BuildInfo info) => info.isDebug)) {
       // Add-to-App must manually add the LLDB Init File to their native Xcode
       // project, so provide the files and instructions.
       final File lldbInitSourceFile = project.ios.lldbInitFile;
       final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
       final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+
+      if (!lldbInitTargetFile.existsSync()) {
+        // If LLDB is being added to the output, print a warning with instructions on how to add.
+        globals.printWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+          'ensure debug mode works, please complete instructions found in '
+          '"Embed a Flutter module in your iOS app > Use frameworks > Set LLDB Init File" '
+          'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+        );
+      }
       lldbInitSourceFile.copySync(lldbInitTargetFile.path);
       lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
-      globals.printStatus(
-        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
-        'ensure debug mode works, please complete one of the following in your '
-        'native Xcode project:\n'
-        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
-        'Test actions, set LLDB Init File to: \n\n'
-        '    ${lldbInitTargetFile.path}\n\n'
-        '  * If you are already using an LLDB Init File, please append the '
-        'following to your LLDB Init File:\n\n'
-        '    command source ${lldbInitTargetFile.path}\n',
-      );
     }
 
     return FlutterCommandResult.success();
@@ -425,11 +425,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.cliName}';
+      final String artifactsMode = FlutterDarwinPlatform.ios.artifactName(mode);
 
-      final String podspecContents = '''
+      final String podspecContents =
+          '''
 Pod::Spec.new do |s|
-  s.name                  = 'Flutter'
+  s.name                  = '${FlutterDarwinPlatform.ios.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -443,10 +444,10 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/${FlutterDarwinPlatform.ios.artifactZip}' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '13.0'
-  s.vendored_frameworks   = 'Flutter.xcframework'
+  s.platform              = :ios, '${FlutterDarwinPlatform.ios.deploymentTarget()}'
+  s.vendored_frameworks   = '${FlutterDarwinPlatform.ios.xcframeworkName}'
 end
 ''';
 
@@ -490,11 +491,6 @@ end
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     final List<Directory> frameworks = <Directory>[];
 
-    // Dev dependencies are removed from release builds if the explicit package
-    // dependencies flag is on.
-    final bool devDependenciesEnabled =
-        !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
-
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
         final Directory outputBuildDirectory = switch (sdkType) {
@@ -517,7 +513,6 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
-            kDevDependenciesEnabled: devDependenciesEnabled.toString(),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,
@@ -526,8 +521,9 @@ end
           processManager: globals.processManager,
           platform: globals.platform,
           analytics: globals.analytics,
-          engineVersion:
-              globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+          engineVersion: globals.artifacts!.usesLocalArtifacts
+              ? null
+              : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );
         Target target;
@@ -573,7 +569,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'iphoneos',
+        XcodeSdk.IPhoneOS.platformName,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
@@ -592,13 +588,13 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = sentenceCase(BuildMode.debug.cliName);
+      final String simulatorConfiguration = BuildMode.debug.uppercaseName;
       pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'iphonesimulator',
+        XcodeSdk.IPhoneSimulator.platformName,
         '-configuration',
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
@@ -619,14 +615,15 @@ end
       }
 
       final Directory iPhoneBuildConfiguration = iPhoneBuildOutput.childDirectory(
-        '$xcodeBuildConfiguration-iphoneos',
+        '$xcodeBuildConfiguration-${XcodeSdk.IPhoneOS.platformName}',
       );
       final Directory simulatorBuildConfiguration = simulatorBuildOutput.childDirectory(
-        '$simulatorConfiguration-iphonesimulator',
+        '$simulatorConfiguration-${XcodeSdk.IPhoneSimulator.platformName}',
       );
 
-      final Iterable<Directory> products =
-          iPhoneBuildConfiguration.listSync(followLinks: false).whereType<Directory>();
+      final Iterable<Directory> products = iPhoneBuildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
       for (final Directory builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;

@@ -4,7 +4,6 @@
 
 import '../../base/file_system.dart';
 import '../../convert.dart';
-import '../../features.dart';
 import '../../localizations/gen_l10n.dart';
 import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
@@ -38,7 +37,7 @@ class GenerateLocalizationsTarget extends Target {
   List<String> get depfiles => <String>['gen_localizations.d'];
 
   @override
-  bool canSkip(Environment environment) {
+  Future<bool> canSkip(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     return !configFile.existsSync();
   }
@@ -58,8 +57,8 @@ class GenerateLocalizationsTarget extends Target {
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: environment.logger,
+      fileSystem: environment.fileSystem,
       defaultArbDir: defaultArbDir,
-      defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
     );
     await generateLocalizations(
       logger: environment.logger,

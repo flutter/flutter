@@ -29,7 +29,6 @@ class ScreenshotCommand extends FlutterCommand {
     );
     argParser.addOption(
       _kVmServiceUrl,
-      aliases: <String>['observatory-url'], // for historical reasons
       valueHelp: 'URI',
       help:
           'The VM Service URL to which to connect.\n'

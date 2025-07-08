@@ -38,6 +38,7 @@ sealed class WebCompilerConfig {
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
+  List<String> toCommandOptions(BuildMode buildMode);
 
   String get buildKey;
 
@@ -60,6 +61,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.noFrequencyBasedMinification = false,
     super.sourceMaps = true,
+    this.minify,
     super.renderer = WebRendererMode.defaultForJs,
   });
 
@@ -69,23 +71,16 @@ class JsCompilerConfig extends WebCompilerConfig {
     required WebRendererMode renderer,
   }) : this(nativeNullAssertions: nativeNullAssertions, renderer: renderer);
 
-  /// Build environment flag for [dumpInfo].
-  static const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-  /// Build environment flag for [noFrequencyBasedMinification].
-  static const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
-
-  /// Build environment flag for [csp].
-  static const String kCspMode = 'cspMode';
-
-  /// Build environment flag for [nativeNullAssertions].
-  static const String kNativeNullAssertions = 'NativeNullAssertions';
-
   /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
 
   /// If `--dump-info` should be passed to the compiler.
   final bool dumpInfo;
+
+  /// If minification should be used in the JS compiler.
+  ///
+  /// If `null`, minifies in release mode only.
+  final bool? minify;
 
   /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
@@ -98,10 +93,16 @@ class JsCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
+  ///
+  /// NOTE: MOST args should be passed here!
   List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
     if (nativeNullAssertions) '--native-null-assertions',
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
+    '-O${optimizationLevelForBuildMode(buildMode)}',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (csp) '--csp',
   ];
 
   @override
@@ -117,14 +118,12 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
-  /// Includes the contents of [toSharedCommandOptions].
+  /// Includes the contents of [toSharedCommandOptions]. That is where MOST
+  /// JS compiler flags should be passed!
+  @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-    if (buildMode != BuildMode.release) '--no-minify',
     ...toSharedCommandOptions(buildMode),
-    '-O${optimizationLevelForBuildMode(buildMode)}',
     if (dumpInfo) '--stage=dump-info-all',
-    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-    if (csp) '--csp',
   ];
 
   @override
@@ -135,7 +134,8 @@ class JsCompilerConfig extends WebCompilerConfig {
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
       'noFrequencyBasedMinification': noFrequencyBasedMinification,
-      'sourceMaps': sourceMaps,
+      'minify': minify,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
@@ -146,6 +146,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
+    this.minify,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
@@ -155,6 +156,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
+
+  final bool? minify;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -172,12 +175,14 @@ class WasmCompilerConfig extends WebCompilerConfig {
         BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
       };
 
+  @override
   List<String> toCommandOptions(BuildMode buildMode) {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O${optimizationLevelForBuildMode(buildMode)}',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
       if (!sourceMaps) '--no-source-maps',
+      if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
     ];
   }
@@ -186,8 +191,9 @@ class WasmCompilerConfig extends WebCompilerConfig {
   String get buildKey {
     final Map<String, dynamic> settings = <String, dynamic>{
       ...super._buildKeyMap,
-      'stripWasm': stripWasm,
-      'sourceMaps': sourceMaps,
+      kStripWasm: stripWasm,
+      'minify': minify,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }

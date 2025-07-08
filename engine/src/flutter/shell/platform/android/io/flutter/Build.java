@@ -10,7 +10,7 @@ import androidx.annotation.VisibleForTesting;
 public class Build {
   /** For use in place of the Android Build.VERSION_CODES class. */
   public static class API_LEVELS {
-    @VisibleForTesting public static final int FLUTTER_MIN = 21;
+    @VisibleForTesting public static final int FLUTTER_MIN = 24;
     /** Android 5.0 (Lollipop) */
     public static final int API_21 = 21;
     /** Android 5.1 (Lollipop MR1) */

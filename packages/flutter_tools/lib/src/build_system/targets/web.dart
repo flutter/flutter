@@ -132,7 +132,7 @@ abstract class Dart2WebTarget extends Target {
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
     const Source.artifact(Artifact.engineDartBinary),
     const Source.pattern('{BUILD_DIR}/main.dart'),
-    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override
@@ -165,8 +165,9 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
-    final String platformBinariesPath =
-        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformBinariesPath = artifacts
+        .getHostArtifact(HostArtifact.webPlatformKernelFolder)
+        .path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
@@ -181,7 +182,8 @@ class Dart2JSTarget extends Dart2WebTarget {
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
     ];
 
-    final List<String> compilationArgs = <String>[
+    // NOTE: most args should be populated in [toSharedCommandOptions].
+    final List<String> cfeCompilationArgs = <String>[
       ...sharedCommandOptions,
       ...compilerConfig.toSharedCommandOptions(buildMode),
       '-o',
@@ -198,7 +200,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
-    await processUtils.run(compilationArgs, throwOnError: true);
+    await processUtils.run(cfeCompilationArgs, throwOnError: true);
 
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
 
@@ -315,8 +317,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
-    final String platformBinariesPath =
-        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformBinariesPath = artifacts
+        .getHostArtifact(HostArtifact.webPlatformKernelFolder)
+        .path;
     final String platformFilePath = environment.fileSystem.path.join(
       platformBinariesPath,
       'dart2wasm_platform.dill',
@@ -337,7 +340,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -391,15 +393,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
 class WebReleaseBundle extends Target {
   WebReleaseBundle(List<WebCompilerConfig> configs)
     : this._(
-        compileTargets:
-            configs
-                .map(
-                  (WebCompilerConfig config) => switch (config) {
-                    WasmCompilerConfig() => Dart2WasmTarget(config),
-                    JsCompilerConfig() => Dart2JSTarget(config),
-                  },
-                )
-                .toList(),
+        compileTargets: configs
+            .map(
+              (WebCompilerConfig config) => switch (config) {
+                WasmCompilerConfig() => Dart2WasmTarget(config),
+                JsCompilerConfig() => Dart2JSTarget(config),
+              },
+            )
+            .toList(),
       );
 
   WebReleaseBundle._({required this.compileTargets})
@@ -464,8 +465,10 @@ class WebReleaseBundle extends Target {
     depfileService.writeToFile(depfile, environment.buildDir.childFile('flutter_assets.d'));
 
     final Directory webResources = environment.projectDir.childDirectory('web');
-    final List<File> inputResourceFiles =
-        webResources.listSync(recursive: true).whereType<File>().toList();
+    final List<File> inputResourceFiles = webResources
+        .listSync(recursive: true)
+        .whereType<File>()
+        .toList();
 
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
@@ -569,8 +572,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
-    final String? serviceWorkerVersion =
-        includeServiceWorkerSettings ? Random().nextInt(1 << 32).toString() : null;
+    final String? serviceWorkerVersion = includeServiceWorkerSettings
+        ? Random().nextInt(1 << 32).toString()
+        : null;
     final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
@@ -721,16 +725,15 @@ class WebServiceWorker extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final List<File> contents =
-        environment.outputDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) =>
-                  !file.path.endsWith('flutter_service_worker.js') &&
-                  !environment.fileSystem.path.basename(file.path).startsWith('.'),
-            )
-            .toList();
+    final List<File> contents = environment.outputDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where(
+          (File file) =>
+              !file.path.endsWith('flutter_service_worker.js') &&
+              !environment.fileSystem.path.basename(file.path).startsWith('.'),
+        )
+        .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
     for (final File file in contents) {
@@ -738,12 +741,9 @@ class WebServiceWorker extends Target {
       if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url =
-          environment.fileSystem.path
-              .toUri(
-                environment.fileSystem.path.relative(file.path, from: environment.outputDir.path),
-              )
-              .toString();
+      final String url = environment.fileSystem.path
+          .toUri(environment.fileSystem.path.relative(file.path, from: environment.outputDir.path))
+          .toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.

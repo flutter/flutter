@@ -146,7 +146,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     required this.activeColor,
     required this.radius,
     required this.progress,
-  }) : tickFundamentalRRect = RRect.fromLTRBXY(
+  }) : tickFundamentalShape = RSuperellipse.fromLTRBXY(
          -radius / _kDefaultIndicatorRadius,
          -radius / 3.0,
          radius / _kDefaultIndicatorRadius,
@@ -161,7 +161,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final double radius;
   final double progress;
 
-  final RRect tickFundamentalRRect;
+  final RSuperellipse tickFundamentalShape;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -178,7 +178,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
       paint.color = activeColor.withAlpha(
         progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t],
       );
-      canvas.drawRRect(tickFundamentalRRect, paint);
+      canvas.drawRSuperellipse(tickFundamentalShape, paint);
       canvas.rotate(_kTwoPI / tickCount);
     }
 

@@ -143,8 +143,7 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    path as SkwasmPath;
-    canvasClipPath(_handle, path.handle, doAntiAlias);
+    canvasClipPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, doAntiAlias);
   }
 
   @override
@@ -238,9 +237,8 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    path as SkwasmPath;
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, path.handle, paintHandle);
+    canvasDrawPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, paintHandle);
     paintDispose(paintHandle);
   }
 
@@ -341,8 +339,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
     final RawRect rawRects = scope.convertRectsToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertColorArrayToNative(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertColorArrayToNative(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(
@@ -371,8 +370,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
     final RawRect rawRects = scope.convertDoublesToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertIntsToUint32Native(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertIntsToUint32Native(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(
@@ -391,10 +391,9 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
-    path as SkwasmPath;
     canvasDrawShadow(
       _handle,
-      path.handle,
+      ((path as LazyPath).builtPath as SkwasmPath).handle,
       elevation,
       EngineFlutterDisplay.instance.devicePixelRatio,
       color.value,

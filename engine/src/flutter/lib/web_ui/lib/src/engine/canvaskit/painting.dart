@@ -48,6 +48,9 @@ class CkPaint implements ui.Paint {
     final shader = _shader;
     if (shader != null) {
       skPaint.setShader(shader.getSkShader(filterQuality));
+      if (shader.isGradient) {
+        skPaint.setDither(true);
+      }
     }
 
     final localMaskFilter = maskFilter;
@@ -340,14 +343,16 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   UniqueRef<SkShader>? ref;
 
   @override
+  bool get isGradient => false;
+
+  @override
   SkShader getSkShader(ui.FilterQuality contextualQuality) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     ref?.dispose();
 
-    final SkShader? result =
-        samplers.isEmpty
-            ? effect.makeShader(floats)
-            : effect.makeShaderWithChildren(floats, samplers);
+    final SkShader? result = samplers.isEmpty
+        ? effect.makeShader(floats)
+        : effect.makeShaderWithChildren(floats, samplers);
     if (result == null) {
       throw Exception(
         'Invalid uniform data for shader $name:'

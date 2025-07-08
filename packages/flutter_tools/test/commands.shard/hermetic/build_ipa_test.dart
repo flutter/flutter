@@ -24,11 +24,11 @@ import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
+import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   FakeXcodeProjectInterpreterWithBuildSettings({
@@ -95,7 +95,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -288,11 +288,13 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fileSystem.file('pubspec.yaml').createSync();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
-      final bool supported =
-          BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+      final bool supported = BuildIOSArchiveCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+      ).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),
@@ -423,7 +425,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -466,8 +468,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building debugging IPA'));
@@ -476,10 +479,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -520,8 +523,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building release-testing IPA'));
@@ -530,10 +534,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -574,8 +578,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building App Store IPA'));
@@ -584,10 +589,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -616,10 +621,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
     },
   );
 
@@ -660,8 +665,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building enterprise IPA'));
@@ -670,10 +676,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
     },
   );
 
@@ -702,10 +708,10 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
     },
   );
 
@@ -743,7 +749,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
@@ -802,7 +808,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -837,7 +843,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -879,8 +885,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -894,7 +901,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -938,8 +945,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -953,7 +961,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -997,8 +1005,9 @@ void main() {
 </plist>
 ''';
 
-      final String actualIpaPlistContents =
-          fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -1012,7 +1021,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1042,7 +1051,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1073,7 +1082,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1133,7 +1142,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1162,7 +1171,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1221,7 +1230,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       Analytics: () => fakeAnalytics,
@@ -1269,7 +1278,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1309,7 +1318,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1353,7 +1362,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1405,7 +1414,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1442,7 +1451,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1497,7 +1506,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1554,7 +1563,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
@@ -1617,7 +1626,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
@@ -1679,7 +1688,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
@@ -1727,7 +1736,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
@@ -1778,7 +1787,7 @@ void main() {
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
       Platform: () => macosPlatform,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
     },
@@ -1870,7 +1879,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -1962,7 +1971,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2036,7 +2045,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2110,7 +2119,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2184,7 +2193,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2260,7 +2269,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2380,7 +2389,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2470,7 +2479,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
@@ -2562,7 +2571,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => fakeProcessManager,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },

@@ -33,14 +33,13 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -51,7 +50,7 @@ class FakePub extends Fake implements Pub {
 
 void main() {
   group('usageValues', () {
-    late Testbed testbed;
+    late TestBed testbed;
     late FakePub fakePub;
 
     setUpAll(() {
@@ -60,7 +59,7 @@ void main() {
     });
 
     setUp(() {
-      testbed = Testbed(
+      testbed = TestBed(
         setup: () {
           fakePub = FakePub();
           Cache.flutterRoot = 'flutter';
@@ -134,6 +133,10 @@ void main() {
           ];
           for (final String templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
+            globals.fs
+                .directory(templatePath)
+                .childFile('pubspec.yaml.tmpl')
+                .writeAsStringSync('name: my_app');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(
@@ -174,7 +177,6 @@ void main() {
         },
         overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         },
       );
     });
@@ -225,7 +227,7 @@ void main() {
         final CreateCommand command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
+        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
         expect(
           (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
           'swift',
@@ -234,7 +236,7 @@ void main() {
         await runner.run(<String>[
           'create',
           '--no-pub',
-          '--template=app',
+          '--template=plugin',
           '--ios-language=objc',
           'testy',
         ]);
@@ -300,11 +302,10 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        FeatureFlags:
-            () => TestFeatureFlags(
-              isNativeAssetsEnabled:
-                  false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
-            ),
+        FeatureFlags: () => TestFeatureFlags(
+          isNativeAssetsEnabled:
+              false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+        ),
       },
     );
   });

@@ -16,6 +16,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/native_library.h"
+#include "flutter/fml/status_or.h"
 #include "flutter/fml/thread.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
@@ -1529,12 +1530,14 @@ CreateEmbedderRenderTarget(
   return render_target;
 }
 
-static std::pair<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>,
-                 bool /* halt engine launch if true */>
+/// Creates an EmbedderExternalViewEmbedder.
+///
+/// When a non-OK status is returned, engine startup should be halted.
+static fml::StatusOr<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>>
 InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
                                   bool enable_impeller) {
   if (compositor == nullptr) {
-    return {nullptr, false};
+    return std::unique_ptr<flutter::EmbedderExternalViewEmbedder>{nullptr};
   }
 
   auto c_create_callback =
@@ -1550,15 +1553,15 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   // Make sure the required callbacks are present
   if (!c_create_callback || !c_collect_callback) {
-    FML_LOG(ERROR) << "Required compositor callbacks absent.";
-    return {nullptr, true};
+    return fml::Status(fml::StatusCode::kInvalidArgument,
+                       "Required compositor callbacks absent.");
   }
   // Either the present view or the present layers callback must be provided.
   if ((!c_present_view_callback && !c_present_callback) ||
       (c_present_view_callback && c_present_callback)) {
-    FML_LOG(ERROR) << "Either present_layers_callback or present_view_callback "
-                      "must be provided but not both.";
-    return {nullptr, true};
+    return fml::Status(fml::StatusCode::kInvalidArgument,
+                       "Either present_layers_callback or "
+                       "present_view_callback must be provided but not both.");
   }
 
   FlutterCompositor captured_compositor = *compositor;
@@ -1601,10 +1604,9 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
     };
   }
 
-  return {std::make_unique<flutter::EmbedderExternalViewEmbedder>(
-              avoid_backing_store_cache, create_render_target_callback,
-              present_callback),
-          false};
+  return std::make_unique<flutter::EmbedderExternalViewEmbedder>(
+      avoid_backing_store_cache, create_render_target_callback,
+      present_callback);
 }
 
 // Translates embedder metrics to engine metrics, or returns a string on error.
@@ -2258,7 +2260,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
-  if (external_view_embedder_result.second) {
+  if (!external_view_embedder_result.ok()) {
+    FML_LOG(ERROR) << external_view_embedder_result.status().message();
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Compositor arguments were invalid.");
   }
@@ -2276,7 +2279,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
-      std::move(external_view_embedder_result.first), settings.enable_impeller);
+      std::move(external_view_embedder_result.value()),
+      settings.enable_impeller);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(

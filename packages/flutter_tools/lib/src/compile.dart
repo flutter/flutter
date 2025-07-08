@@ -255,8 +255,9 @@ class KernelCompiler {
     required PackageConfig packageConfig,
     String? nativeAssets,
   }) async {
-    final TargetPlatform? platform =
-        targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc
+        ? TargetPlatform.web_javascript
+        : null;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
@@ -281,8 +282,9 @@ class KernelCompiler {
 
     // Check if there's a Dart plugin registrant.
     // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
-    final File? dartPluginRegistrant =
-        checkDartPluginRegistry ? buildDir?.parent.childFile('dart_plugin_registrant.dart') : null;
+    final File? dartPluginRegistrant = checkDartPluginRegistry
+        ? buildDir?.parent.childFile('dart_plugin_registrant.dart')
+        : null;
 
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
@@ -524,11 +526,11 @@ abstract class ResidentCompiler {
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
 
-  /// If invoked for the first time, it compiles Dart script identified by
-  /// [mainPath], [invalidatedFiles] list is ignored.
+  /// If invoked for the first time, it compiles the Dart script identified by
+  /// [mainUri], [invalidatedFiles] list is ignored.
   /// On successive runs [invalidatedFiles] indicates which files need to be
-  /// recompiled. If [mainPath] is [null], previously used [mainPath] entry
-  /// point that is used for recompilation.
+  /// recompiled.
+  ///
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   ///
@@ -817,8 +819,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? additionalSourceUri,
     String? nativeAssetsUri,
   }) async {
-    final TargetPlatform? platform =
-        (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
+        ? TargetPlatform.web_javascript
+        : null;
     late final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
       commandToStartFrontendServer = <String>[

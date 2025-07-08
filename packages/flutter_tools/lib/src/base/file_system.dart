@@ -63,7 +63,17 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  String escapePath(String path) {
+    if (_platform.isWindows) {
+      path = path.replaceAll(r'\', r'\\');
+      if (path.startsWith(RegExp('[a-z]:'))) {
+        // ensure that the drive letter is upper case see
+        // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
+        return path[0].toUpperCase() + path.substring(1);
+      }
+    }
+    return path;
+  }
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -87,8 +97,9 @@ class FileSystemUtils {
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
-    String? path =
-        _platform.isWindows ? _platform.environment['USERPROFILE'] : _platform.environment['HOME'];
+    String? path = _platform.isWindows
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }

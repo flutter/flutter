@@ -100,16 +100,17 @@ void main() {
           ..writeAsStringSync('file 1');
         sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.absolute.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory
-          .childDirectory('dir1')
-          .childDirectory('dir2')..createSync(recursive: true);
+        final Directory sourceSubDirectory =
+            sourceDirectory.childDirectory('dir1').childDirectory('dir2')
+              ..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
         final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
         sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        final String targetPath =
-            io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
+        final String targetPath = io.Platform.isWindows
+            ? r'some\non-existent\target'
+            : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
         copyDirectory(sourceDirectory, targetDirectory);
@@ -177,16 +178,17 @@ void main() {
           ..writeAsStringSync('file 1');
         sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.absolute.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory
-          .childDirectory('dir1')
-          .childDirectory('dir2')..createSync(recursive: true);
+        final Directory sourceSubDirectory =
+            sourceDirectory.childDirectory('dir1').childDirectory('dir2')
+              ..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
         final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
         sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        final String targetPath =
-            io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
+        final String targetPath = io.Platform.isWindows
+            ? r'some\non-existent\target'
+            : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
         copyDirectory(sourceDirectory, targetDirectory, followLinks: false);
@@ -316,6 +318,9 @@ void main() {
       expect(fsUtils.escapePath(r'C:\foo\bar\cool.dart'), r'C:\\foo\\bar\\cool.dart');
       expect(fsUtils.escapePath(r'foo\bar\cool.dart'), r'foo\\bar\\cool.dart');
       expect(fsUtils.escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath('c:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath('x:/foo/bar/cool.dart'), 'X:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath(r'a:\foo\bar\cool.dart'), r'A:\\foo\\bar\\cool.dart');
     });
 
     testWithoutContext('on Linux', () {

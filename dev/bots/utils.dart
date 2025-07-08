@@ -44,14 +44,14 @@ final bool _isRandomizationOff =
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
 final String green = hasColor ? '\x1B[32m' : ''; // section titles, commands
-final String yellow =
-    hasColor
-        ? '\x1B[33m'
-        : ''; // indications that a test was skipped (usually renders orange or brown)
+final String yellow = hasColor
+    ? '\x1B[33m'
+    : ''; // indications that a test was skipped (usually renders orange or brown)
 final String cyan = hasColor ? '\x1B[36m' : ''; // paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // clocks
-final String gray =
-    hasColor ? '\x1B[30m' : ''; // subtle decorative items (usually renders as dark gray)
+final String gray = hasColor
+    ? '\x1B[30m'
+    : ''; // subtle decorative items (usually renders as dark gray)
 final String white = hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
 final String reset = hasColor ? '\x1B[0m' : '';
 
@@ -107,9 +107,17 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
+int get terminalColumns {
+  try {
+    return stdout.terminalColumns;
+  } catch (e) {
+    return 40;
+  }
+}
+
 String get redLine {
   if (hasColor) {
-    return '$red${'━' * stdout.terminalColumns}$reset';
+    return '$red${'━' * terminalColumns}$reset';
   }
   return '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 }
@@ -168,7 +176,7 @@ void foundError(List<String> messages) {
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
-  final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
+  final int width = math.max(15, (hasColor ? terminalColumns : 80) - 1);
   final String title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
@@ -258,7 +266,7 @@ void _printQuietly(Object? message) {
     final int start = line.lastIndexOf(_lineBreak) + 1;
     int index = start;
     int length = 0;
-    while (index < line.length && length < stdout.terminalColumns) {
+    while (index < line.length && length < terminalColumns) {
       if (line.codeUnitAt(index) == kESC) {
         // 0x1B
         index += 1;
@@ -562,8 +570,9 @@ Future<void> runFlutterTest(
 
   args.addAll(tests);
 
-  final OutputMode outputMode =
-      outputChecker == null && printOutput ? OutputMode.print : OutputMode.capture;
+  final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
 
   final CommandResult result = await runCommand(
     flutter,
@@ -685,8 +694,9 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   // Lastly, compute the indices of the items in buckets[index].
   // We derive this from the toal number items in previous buckets and the number
   // of items in this bucket.
-  final int numberOfItemsInPreviousBuckets =
-      subShardIndex == 0 ? 0 : buckets.sublist(0, subShardIndex - 1).sum;
+  final int numberOfItemsInPreviousBuckets = subShardIndex == 0
+      ? 0
+      : buckets.sublist(0, subShardIndex - 1).sum;
   final int start = numberOfItemsInPreviousBuckets;
   final int end = start + buckets[subShardIndex - 1];
 

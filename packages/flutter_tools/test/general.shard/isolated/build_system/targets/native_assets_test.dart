@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -64,6 +65,11 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
+  testWithoutContext('no dependency on KernelSnapshot', () async {
+    const DartBuildForNative target = DartBuildForNative();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+  });
+
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
     expect(
@@ -73,7 +79,7 @@ void main() {
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
-    writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     iosEnvironment.defines.remove(kIosArchs);
 
@@ -90,7 +96,7 @@ void main() {
     'NativeAssets throws error if missing sdk root',
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <String>['foo'],
@@ -116,7 +122,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: isNativeAssetsEnabled),
       },
       () async {
-        writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
         await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
@@ -133,60 +139,58 @@ void main() {
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            // Create the framework dylib.
-            const FakeCommand(
-              command: <Pattern>[
-                'lipo',
-                '-create',
-                '-output',
-                '/build/native_assets/ios/foo.framework/foo',
-                'foo.framework/foo',
-              ],
-            ),
-            // Lookup the original install names of the dylib.
-            // There can be different install names for different architectures.
-            FakeCommand(
-              command: const <Pattern>['otool', '-D', '/build/native_assets/ios/foo.framework/foo'],
-              stdout: <String>[
-                '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
-                '@rpath/libfoo.dylib',
-                '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
-                '@rpath/libfoo.dylib',
-              ].join('\n'),
-            ),
-            // Change the install name of the binary itself and of its dependencies.
-            // We pass the old to new install name mappings of all native assets dylibs,
-            // even for the dylib that is being updated, since the `-change` option
-            // is ignored if the dylib does not depend on the target dylib.
-            const FakeCommand(
-              command: <Pattern>[
-                'install_name_tool',
-                '-id',
-                '@rpath/foo.framework/foo',
-                '-change',
-                '@rpath/libfoo.dylib',
-                '@rpath/foo.framework/foo',
-                '/build/native_assets/ios/foo.framework/foo',
-              ],
-            ),
-            // Only after all changes to the dylib have been made do we sign it.
-            const FakeCommand(
-              command: <Pattern>[
-                'codesign',
-                '--force',
-                '--sign',
-                '-',
-                '--timestamp=none',
-                '/build/native_assets/ios/foo.framework',
-              ],
-            ),
-          ]),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // Create the framework dylib.
+        const FakeCommand(
+          command: <Pattern>[
+            'lipo',
+            '-create',
+            '-output',
+            '/build/native_assets/ios/foo.framework/foo',
+            'foo.framework/foo',
+          ],
+        ),
+        // Lookup the original install names of the dylib.
+        // There can be different install names for different architectures.
+        FakeCommand(
+          command: const <Pattern>['otool', '-D', '/build/native_assets/ios/foo.framework/foo'],
+          stdout: <String>[
+            '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
+            '@rpath/libfoo.dylib',
+            '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
+            '@rpath/libfoo.dylib',
+          ].join('\n'),
+        ),
+        // Change the install name of the binary itself and of its dependencies.
+        // We pass the old to new install name mappings of all native assets dylibs,
+        // even for the dylib that is being updated, since the `-change` option
+        // is ignored if the dylib does not depend on the target dylib.
+        const FakeCommand(
+          command: <Pattern>[
+            'install_name_tool',
+            '-id',
+            '@rpath/foo.framework/foo',
+            '-change',
+            '@rpath/libfoo.dylib',
+            '@rpath/foo.framework/foo',
+            '/build/native_assets/ios/foo.framework/foo',
+          ],
+        ),
+        // Only after all changes to the dylib have been made do we sign it.
+        const FakeCommand(
+          command: <Pattern>[
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            '--timestamp=none',
+            '/build/native_assets/ios/foo.framework',
+          ],
+        ),
+      ]),
     },
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final List<CodeAsset> codeAssets = <CodeAsset>[
         CodeAsset(
@@ -246,10 +250,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
-        writePackageConfigFile(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
         await fileSystem.file('libfoo.so').create();
 
         final List<CodeAsset> codeAssets = <CodeAsset>[

@@ -40,6 +40,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
   /// {@endtemplate}
+  @override
   final bool fullscreenDialog;
 
   @override

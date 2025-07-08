@@ -12,6 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
@@ -920,7 +921,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (command) {
     [items addObject:command];
   } else {
-    FML_LOG(ERROR) << "Cannot find context menu item of type \"" << type.UTF8String << "\".";
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Cannot find context menu item of type \"%@\".", type];
+    [FlutterLogger logError:errorMessage];
   }
 }
 
@@ -936,7 +939,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                         propertyList:nil];
     [items addObject:command];
   } else {
-    FML_LOG(ERROR) << "Missing title for context menu item of type \"" << type.UTF8String << "\".";
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Missing title for context menu item of type \"%@\".", type];
+    [FlutterLogger logError:errorMessage];
   }
 }
 

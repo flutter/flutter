@@ -132,14 +132,13 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects =>
-      manifest.workspace
-          .map(
-            (String entry) => FlutterProject.fromDirectory(
-              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-            ),
-          )
-          .toList();
+  List<FlutterProject> get workspaceProjects => manifest.workspace
+      .map(
+        (String entry) => FlutterProject.fromDirectory(
+          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+        ),
+      )
+      .toList();
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -222,11 +221,9 @@ class FlutterProject {
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
-  /// The `.flutter-plugins` file of this project.
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
-
-  /// The `.flutter-plugins-dependencies` file of this project,
-  /// which contains the dependencies each plugin depends on.
+  /// The `.flutter-plugins-dependencies` file of this project.
+  ///
+  /// Contains the dependencies each plugin depends on.
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   /// The `.gitignore` file of this project.
@@ -412,7 +409,9 @@ class FlutterProject {
     }
   }
 
-  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  /// A JSON encoded string containing the [FlutterManifest.appName],
+  /// [FlutterManifest.buildName] (version), and [FlutterManifest.buildNumber]
+  /// that are used to generate `version.json`.
   String getVersionInfo() {
     final String? buildName = manifest.buildName;
     final String? buildNumber = manifest.buildNumber;
@@ -692,10 +691,9 @@ class AndroidProject extends FlutterProjectPlatform {
     return ProjectValidatorResult(
       name: visibleName,
       value: validJavaGradleAgpVersions.description,
-      status:
-          validJavaGradleAgpVersions.success
-              ? StatusProjectValidator.success
-              : StatusProjectValidator.error,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
     );
   }
 
@@ -727,8 +725,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
     final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
       globals.logger,
-      javaV: javaVersion,
-      gradleV: gradleVersion,
+      javaVersion: javaVersion,
+      gradleVersion: gradleVersion,
     );
 
     final bool compatibleKgpGradle = gradle.validateGradleAndKGP(
@@ -745,11 +743,11 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
-      final String gradleDescription =
-          agpVersion != null
-              ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
-              : '';
-      description = '''
+      final String gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
+      description =
+          '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
 $gradleDescription\n
@@ -759,7 +757,8 @@ $gradleAgpCompatUrl
     }
     if (!compatibleJavaGradle) {
       // Should contain the agp error (if present) but not the valid String.
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible Java/Gradle versions.
 Java Version: $javaVersion, Gradle Version: $gradleVersion\n
@@ -768,7 +767,8 @@ $javaGradleCompatUrl
 ''';
     }
     if (!compatibleKgpGradle) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible KGP/Gradle versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
@@ -777,7 +777,8 @@ See the link below for more information:
 ''';
     }
     if (!compatibleAgpKgp) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible AGP/KGP versions.
 AGP Version: $agpVersion, KGP Version: $kgpVersion\n

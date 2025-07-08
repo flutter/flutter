@@ -116,10 +116,9 @@ class RenderSliverCrossAxisGroup extends RenderSliver
           child.parentData! as SliverPhysicalParentData;
       final SliverGeometry childLayoutGeometry = child.geometry!;
       final double remainingExtent = geometry!.scrollExtent - constraints.scrollOffset;
-      final double paintCorrection =
-          childLayoutGeometry.paintExtent > remainingExtent
-              ? childLayoutGeometry.paintExtent - remainingExtent
-              : 0.0;
+      final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
+          ? childLayoutGeometry.paintExtent - remainingExtent
+          : 0.0;
       final double childExtent =
           child.geometry!.crossAxisExtent ??
           extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
@@ -230,15 +229,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
         double childScrollOffset = 0.0;
         RenderSliver? current = childBefore(child as RenderSliver);
         while (current != null) {
-          // If the current child is not the first child, then we need to
-          // add the scroll extent of the previous child to the current child's
-          // scroll offset.
-          if (childBefore(current) != null) {
-            childScrollOffset +=
-                childAfter(current)!.geometry!.scrollExtent + child.geometry!.scrollExtent;
-          } else if (!(childAfter(child) != null && current.geometry!.hasVisualOverflow)) {
-            childScrollOffset += current.geometry!.scrollExtent;
-          }
+          childScrollOffset += current.geometry!.scrollExtent;
           current = childBefore(current);
         }
         return childScrollOffset;

@@ -23,13 +23,15 @@ DrawImageRectAtlasGeometry::DrawImageRectAtlasGeometry(
     const Rect& destination,
     const Color& color,
     BlendMode blend_mode,
-    const SamplerDescriptor& desc)
+    const SamplerDescriptor& desc,
+    bool use_strict_src_rect)
     : texture_(std::move(texture)),
       source_(source),
       destination_(destination),
       color_(color),
       blend_mode_(blend_mode),
-      desc_(desc) {}
+      desc_(desc),
+      use_strict_src_rect_(use_strict_src_rect) {}
 
 DrawImageRectAtlasGeometry::~DrawImageRectAtlasGeometry() = default;
 
@@ -121,6 +123,13 @@ BlendMode DrawImageRectAtlasGeometry::GetBlendMode() const {
 
 bool DrawImageRectAtlasGeometry::ShouldInvertBlendMode() const {
   return false;
+}
+
+std::optional<Rect> DrawImageRectAtlasGeometry::GetStrictSrcRect() const {
+  if (use_strict_src_rect_) {
+    return source_;
+  }
+  return std::nullopt;
 }
 
 ////
@@ -215,12 +224,18 @@ bool AtlasContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale =
         geometry_->GetAtlas()->GetYCoordScale();
 
-    frag_info.output_alpha = alpha_;
-    frag_info.input_alpha = 1.0;
-
-    // These values are ignored on platforms that natively support decal.
-    frag_info.tmx = static_cast<int>(Entity::TileMode::kDecal);
-    frag_info.tmy = static_cast<int>(Entity::TileMode::kDecal);
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(1.0, alpha_, static_cast<int>(Entity::TileMode::kDecal),
+                static_cast<int>(Entity::TileMode::kDecal));
+    if (auto rect = geometry_->GetStrictSrcRect(); rect.has_value()) {
+      Rect src_rect = rect.value();
+      frag_info.source_rect =
+          Vector4(src_rect.GetX(), src_rect.GetY(), src_rect.GetBottom(),
+                  src_rect.GetRight());
+      frag_info.use_strict_source_rect = 1.0;
+    } else {
+      frag_info.use_strict_source_rect = 0.0;
+    }
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
 

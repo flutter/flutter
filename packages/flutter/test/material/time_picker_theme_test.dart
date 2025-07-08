@@ -50,11 +50,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -94,11 +93,10 @@ void main() {
       ),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -122,7 +120,7 @@ void main() {
         'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
         'hourMinuteTextColor: ${const Color(0xfffffff0)}',
         'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
-        'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
+        'inputDecorationTheme.data: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
         'padding: EdgeInsets.all(1.0)',
         'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
         'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
@@ -253,7 +251,9 @@ void main() {
     final Container dayPeriodDivider = _dayPeriodDivider(tester);
     expect(
       dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: BorderSide(color: expectedBorderColor))),
+      BoxDecoration(
+        border: Border(left: BorderSide(color: expectedBorderColor)),
+      ),
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -409,7 +409,9 @@ void main() {
     final Container dayPeriodDivider = _dayPeriodDivider(tester);
     expect(
       dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: BorderSide(color: defaultTheme.colorScheme.outline))),
+      BoxDecoration(
+        border: Border(left: BorderSide(color: defaultTheme.colorScheme.outline)),
+      ),
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -826,7 +828,7 @@ void main() {
   });
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -851,7 +853,7 @@ void main() {
   );
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is not provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme();
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -1025,18 +1027,17 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     ),
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
-    inputDecorationTheme:
-        includeInputDecoration
-            ? const InputDecorationTheme(
-              filled: true,
-              fillColor: Colors.purple,
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green)),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
-              focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-              hintStyle: TextStyle(fontSize: 8),
-            )
-            : null,
+    inputDecorationTheme: includeInputDecoration
+        ? const InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.purple,
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
+            focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+            hintStyle: TextStyle(fontSize: 8),
+          )
+        : null,
   );
 }
 

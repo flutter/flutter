@@ -51,7 +51,7 @@ void main() {
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
 
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem
           .file(fileSystem.path.join('assets', 'common', 'image.png'))
@@ -128,7 +128,7 @@ flutter:
       );
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file(fileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
       fileSystem
@@ -171,7 +171,7 @@ flutter:
       );
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
       fileSystem
           .file(fileSystem.path.join('vanilla', 'flavorless.png'))
@@ -211,7 +211,7 @@ flutter:
       );
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem.file('orange.png').createSync(recursive: true);
       fileSystem.file('pubspec.yaml')
         ..createSync()
@@ -249,7 +249,7 @@ flutter:
       );
       final BufferLogger logger = BufferLogger.test();
       final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem
           .file(fileSystem.path.join('vanilla', 'actually-strawberry.png'))
           .createSync(recursive: true);
