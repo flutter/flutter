@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
@@ -156,25 +158,32 @@ void main() {
       fs = LocalFileSystem.test(signals: Signals.test());
       final BufferLogger logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
-      final Directory projectDir =
-          fs.systemTempDirectory.createTempSync('project')
-            ..childDirectory('lib/src').createSync(recursive: true)
-            ..childFile('pubspec.yaml').writeAsStringSync(kPubspec)
-            ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
-            ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
-            ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
-            ..childFile('lib/src/localizations.dart').writeAsStringSync(kLocalizationsDart)
-            ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
-            ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart)
-            ..childFile('lib/src/error.dart').writeAsStringSync(kErrorContainingLibrary)
-            ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
+      final Directory projectDir = fs.systemTempDirectory.createTempSync('project')
+        ..childDirectory('lib/src').createSync(recursive: true)
+        ..childFile('pubspec.yaml').writeAsStringSync(kPubspec)
+        ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
+        ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
+        ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
+        ..childFile('lib/src/localizations.dart').writeAsStringSync(kLocalizationsDart)
+        ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
+        ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart)
+        ..childFile('lib/src/error.dart').writeAsStringSync(kErrorContainingLibrary)
+        ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
+        previewAnalytics: WidgetPreviewAnalytics(
+          analytics: getInitializedFakeAnalyticsInstance(
+            // We don't care about anything written to the file system by analytics, so we're safe
+            // to use a different file system here.
+            fs: MemoryFileSystem.test(),
+            fakeFlutterVersion: FakeFlutterVersion(),
+          ),
+        ),
         projectRoot: projectDir,
         fs: fs,
         logger: logger,
         onChangeDetected: (_) {},
-        onPubspecChangeDetected: () {},
+        onPubspecChangeDetected: (String path) {},
       );
       codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
       final Pub pub = Pub.test(
@@ -229,13 +238,21 @@ import 'package:flutter/widgets.dart' as _i9;
 import 'package:flutter/material.dart' as _i10;
 
 List<_i1.WidgetPreview> previews() => [
-      _i1.WidgetPreview(builder: () => _i2.preview()),
-      _i1.WidgetPreview(builder: () => _i3.barPreview1()),
       _i1.WidgetPreview(
+        packageName: 'foo_project',
+        builder: () => _i2.preview(),
+      ),
+      _i1.WidgetPreview(
+        packageName: 'foo_project',
+        builder: () => _i3.barPreview1(),
+      ),
+      _i1.WidgetPreview(
+        packageName: 'foo_project',
         brightness: _i4.brightnessConstant,
         builder: () => _i3.barPreview2(),
       ),
       _i1.WidgetPreview(
+        packageName: 'foo_project',
         name: 'Foo',
         size: const _i5.Size(
           123,
@@ -259,7 +276,7 @@ List<_i1.WidgetPreview> previews() => [
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
-          const <PreviewPath, PreviewDependencyNode>{},
+          const <PreviewPath, LibraryPreviewNode>{},
         );
         expect(generatedPreviewFile, exists);
 

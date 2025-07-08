@@ -44,7 +44,8 @@ const String kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
 @visibleForTesting
-String jITCrashFailureInstructions(String deviceVersion) => '''
+String jITCrashFailureInstructions(String deviceVersion) =>
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 A change to iOS has caused a temporary break in Flutter's debug mode on
 physical devices.
@@ -204,14 +205,13 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     // Device is connected if it has either an observed usb or wifi connection
     // or it has not been observed but was found as connected in the cache.
-    final List<Device> connectedDevices =
-        _cachedPolledDevices.values.where((Device device) {
-          final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
-              _observedConnectionsByDeviceId[device.id];
-          return (deviceObservedConnections != null &&
-                  _deviceHasObservedConnection(deviceObservedConnections)) ||
-              (deviceObservedConnections == null && device.isConnected);
-        }).toList();
+    final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {
+      final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
+          _observedConnectionsByDeviceId[device.id];
+      return (deviceObservedConnections != null &&
+              _deviceHasObservedConnection(deviceObservedConnections)) ||
+          (deviceObservedConnections == null && device.isConnected);
+    }).toList();
 
     notifier.updateWithNewList(connectedDevices);
   }
@@ -428,8 +428,9 @@ class IOSDevice extends Device {
     int uninstallationResult;
     try {
       if (isCoreDevice) {
-        uninstallationResult =
-            await _coreDeviceControl.uninstallApp(deviceId: id, bundleId: app.id) ? 0 : 1;
+        uninstallationResult = await _coreDeviceControl.uninstallApp(deviceId: id, bundleId: app.id)
+            ? 0
+            : 1;
       } else {
         uninstallationResult = await _iosDeploy.uninstallApp(deviceId: id, bundleId: app.id);
       }
@@ -446,7 +447,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  bool isSupported() => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -533,15 +534,15 @@ class IOSDevice extends Device {
       if (isCoreDevice) {
         installationResult =
             await _startAppOnCoreDevice(
-                  debuggingOptions: debuggingOptions,
-                  package: package,
-                  launchArguments: launchArguments,
-                  mainPath: mainPath,
-                  discoveryTimeout: discoveryTimeout,
-                  shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
-                )
-                ? 0
-                : 1;
+              debuggingOptions: debuggingOptions,
+              package: package,
+              launchArguments: launchArguments,
+              mainPath: mainPath,
+              discoveryTimeout: discoveryTimeout,
+              shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+            )
+            ? 0
+            : 1;
       } else if (iosDeployDebugger == null) {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
@@ -1039,13 +1040,12 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder =>
-      _portForwarder ??= IOSDevicePortForwarder(
-        logger: _logger,
-        iproxy: _iproxy,
-        id: id,
-        operatingSystemUtils: globals.os,
-      );
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
+    logger: _logger,
+    iproxy: _iproxy,
+    id: id,
+    operatingSystemUtils: globals.os,
+  );
 
   @visibleForTesting
   set portForwarder(DevicePortForwarder forwarder) {
@@ -1649,8 +1649,10 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort!, _id);
       // TODO(ianh): This is a flaky race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
-      connected =
-          !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
+      connected = !await process.stdout.isEmpty.timeout(
+        _kiProxyPortForwardTimeout,
+        onTimeout: () => false,
+      );
       if (!connected) {
         process.kill();
         if (autoselect) {

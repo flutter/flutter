@@ -27,11 +27,16 @@ typedef PreviewPath = ({String path, Uri uri});
 
 /// A mapping of file / library paths to dependency graph nodes containing details related to
 /// previews defined within the file / library.
-typedef PreviewDependencyGraph = Map<PreviewPath, PreviewDependencyNode>;
+typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 
 /// Visitor which detects previews and extracts [PreviewDetails] for later code
 /// generation.
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
+  _PreviewVisitor({required LibraryElement2 lib})
+    : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null;
+
+  late final String? packageName;
+
   final List<PreviewDetails> previewEntries = <PreviewDetails>[];
 
   FunctionDeclaration? _currentFunction;
@@ -78,6 +83,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     if (_currentFunction != null) {
       final NamedType returnType = _currentFunction!.returnType! as NamedType;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: _currentFunction!.name.toString(),
         isBuilder: returnType.name2.isWidgetBuilder,
       );
@@ -85,6 +91,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
       final Token? name = _currentConstructor!.name;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: '$returnType${name == null ? '' : '.$name'}',
         isBuilder: false,
       );
@@ -92,6 +99,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       final NamedType returnType = _currentMethod!.returnType! as NamedType;
       final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: '${parentClass.name}.${_currentMethod!.name}',
         isBuilder: returnType.name2.isWidgetBuilder,
       );
@@ -114,23 +122,32 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Contains all the information related to a file being watched by [PreviewDetector].
-final class PreviewDependencyNode {
-  PreviewDependencyNode({required this.previewPath, required this.logger});
+/// Contains all the information related to a library being watched by [PreviewDetector].
+final class LibraryPreviewNode {
+  LibraryPreviewNode({required LibraryElement2 library, required this.logger})
+    : path = library.toPreviewPath() {
+    final List<String> libraryFilePaths = <String>[
+      for (final LibraryFragment fragment in library.fragments) fragment.source.fullName,
+    ];
+    files.addAll(libraryFilePaths);
+  }
 
   final Logger logger;
 
-  /// The path and URI pointing to the file.
-  final PreviewPath previewPath;
+  /// The path and URI pointing to the library.
+  final PreviewPath path;
+
+  /// The set of files contained in the library.
+  final List<String> files = <String>[];
 
   /// The list of previews contained within the file.
-  final List<PreviewDetails> filePreviews = <PreviewDetails>[];
+  final List<PreviewDetails> previews = <PreviewDetails>[];
 
   /// Files that import this file.
-  final Set<PreviewDependencyNode> dependedOnBy = <PreviewDependencyNode>{};
+  final Set<LibraryPreviewNode> dependedOnBy = <LibraryPreviewNode>{};
 
   /// Files this file imports.
-  final Set<PreviewDependencyNode> dependsOn = <PreviewDependencyNode>{};
+  final Set<LibraryPreviewNode> dependsOn = <LibraryPreviewNode>{};
 
   /// `true` if a transitive dependency has compile time errors.
   ///
@@ -140,67 +157,68 @@ final class PreviewDependencyNode {
   // TODO(bkonyi): determine how to best handle compile time errors in non-analyzed dependencies.
   bool dependencyHasErrors = false;
 
-  /// `true` if this file contains compile time errors.
+  /// `true` if this library contains compile time errors.
   bool get hasErrors => errors.isNotEmpty;
 
-  /// The set of errors found in this file.
+  /// The set of errors found in this library.
   final List<AnalysisError> errors = <AnalysisError>[];
 
-  /// Determines the set of errors found in this file.
+  /// Determines the set of errors found in this library.
   ///
-  /// Results in [errors] being populated with the latest set of errors for the file.
+  /// Results in [errors] being populated with the latest set of errors for the library.
   Future<void> populateErrors({required AnalysisContext context}) async {
-    errors
-      ..clear()
-      ..addAll(
-        ((await context.currentSession.getErrors(previewPath.path)) as ErrorsResult).errors
+    errors.clear();
+    for (final String file in files) {
+      errors.addAll(
+        ((await context.currentSession.getErrors(file)) as ErrorsResult).errors
             .where((AnalysisError error) => error.severity == Severity.error)
             .toList(),
       );
+    }
   }
 
-  /// Finds all previews defined in [compilationUnit] and adds them to [filePreviews].
-  void findPreviews({required CompilationUnit compilationUnit}) {
+  /// Finds all previews defined in the [lib] and adds them to [previews].
+  void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
-    final _PreviewVisitor visitor = _PreviewVisitor();
-    compilationUnit.visitChildren(visitor);
-    filePreviews
+    final _PreviewVisitor visitor = _PreviewVisitor(lib: lib.element2);
+    for (final ResolvedUnitResult libUnit in lib.units) {
+      libUnit.unit.visitChildren(visitor);
+    }
+    previews
       ..clear()
       ..addAll(visitor.previewEntries);
   }
 
-  /// Updates the dependency [graph] based on changes to a compilation [unit].
+  /// Updates the dependency [graph] based on changes to a set of compilation [units].
   ///
   /// This method is responsible for:
   ///   - Inserting new nodes into the graph when new dependencies are introduced
-  ///   - Computing the set of upstream and downstream dependencies of [unit]
+  ///   - Computing the set of upstream and downstream dependencies of [units]
   void updateDependencyGraph({
     required PreviewDependencyGraph graph,
-    required ResolvedUnitResult unit,
+    required List<ResolvedUnitResult> units,
   }) {
-    final Set<PreviewDependencyNode> updatedDependencies = <PreviewDependencyNode>{};
-    final LibraryFragment fragment = unit.libraryFragment;
-    for (final LibraryImport importedLib in fragment.libraryImports2) {
-      for (final LibraryFragment importedFragment in importedLib.importedLibrary2!.fragments) {
-        if (importedFragment == fragment) {
-          // Don't include the current file as its own dependency.
+    final Set<LibraryPreviewNode> updatedDependencies = <LibraryPreviewNode>{};
+
+    for (final ResolvedUnitResult unit in units) {
+      final LibraryFragment fragment = unit.libraryFragment;
+      for (final LibraryImport importedLib in fragment.libraryImports2) {
+        if (importedLib.importedLibrary2 == null) {
+          // This is an import for a file that's not analyzed (likely an import of a package from
+          // the pub-cache) and isn't necessary to track as part of the dependency graph.
           continue;
         }
-        final PreviewDependencyNode result = graph.putIfAbsent(
-          importedFragment.source.toPreviewPath(),
-          () => PreviewDependencyNode(
-            previewPath: importedFragment.source.toPreviewPath(),
-            logger: logger,
-          ),
+        final LibraryElement2 importedLibrary = importedLib.importedLibrary2!;
+        final LibraryPreviewNode result = graph.putIfAbsent(
+          importedLibrary.toPreviewPath(),
+          () => LibraryPreviewNode(library: importedLibrary, logger: logger),
         );
         updatedDependencies.add(result);
       }
     }
 
-    final Set<PreviewDependencyNode> removedDependencies = dependsOn.difference(
-      updatedDependencies,
-    );
-    for (final PreviewDependencyNode removedDependency in removedDependencies) {
+    final Set<LibraryPreviewNode> removedDependencies = dependsOn.difference(updatedDependencies);
+    for (final LibraryPreviewNode removedDependency in removedDependencies) {
       removedDependency.dependedOnBy.remove(this);
     }
 
@@ -209,10 +227,10 @@ final class PreviewDependencyNode {
       ..addAll(updatedDependencies);
 
     dependencyHasErrors = false;
-    for (final PreviewDependencyNode dependency in updatedDependencies) {
+    for (final LibraryPreviewNode dependency in updatedDependencies) {
       dependency.dependedOnBy.add(this);
       if (dependency.dependencyHasErrors || dependency.errors.isNotEmpty) {
-        logger.printWarning('Dependency ${dependency.previewPath.uri} has errors');
+        logger.printWarning('Dependency ${dependency.path.uri} has errors');
         dependencyHasErrors = true;
       }
     }
@@ -221,7 +239,6 @@ final class PreviewDependencyNode {
   @override
   String toString() {
     return '(errorCount: ${errors.length} dependencyHasErrors: $dependencyHasErrors '
-        'previews: $filePreviews '
-        'dependedOnBy: ${dependedOnBy.length})';
+        'previews: $previews dependedOnBy: ${dependedOnBy.length})';
   }
 }

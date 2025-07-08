@@ -17,7 +17,8 @@ import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
-String _missingLocalNetworkPermissionsInstructions(String err) => '''
+String _missingLocalNetworkPermissionsInstructions(String err) =>
+    '''
 Flutter could not access the local network.
 
 Please ensure your IDE or terminal app has permission to access devices on the local network. This allows Flutter to connect to the Dart VM.
@@ -331,10 +332,9 @@ class MDnsVmServiceDiscovery {
         }
 
         _logger.printTrace('Checking for available port on $domainName');
-        final List<SrvResourceRecord> srvRecords =
-            await client
-                .lookup<SrvResourceRecord>(ResourceRecordQuery.service(domainName))
-                .toList();
+        final List<SrvResourceRecord> srvRecords = await client
+            .lookup<SrvResourceRecord>(ResourceRecordQuery.service(domainName))
+            .toList();
         if (srvRecords.isEmpty) {
           continue;
         }
@@ -361,24 +361,22 @@ class MDnsVmServiceDiscovery {
         // Get the IP address of the device if using the IP as the host.
         InternetAddress? ipAddress;
         if (useDeviceIPAsHost) {
-          List<IPAddressResourceRecord> ipAddresses =
-              await client
-                  .lookup<IPAddressResourceRecord>(
-                    ipv6
-                        ? ResourceRecordQuery.addressIPv6(srvRecord.target)
-                        : ResourceRecordQuery.addressIPv4(srvRecord.target),
-                  )
-                  .toList();
+          List<IPAddressResourceRecord> ipAddresses = await client
+              .lookup<IPAddressResourceRecord>(
+                ipv6
+                    ? ResourceRecordQuery.addressIPv6(srvRecord.target)
+                    : ResourceRecordQuery.addressIPv4(srvRecord.target),
+              )
+              .toList();
           if (ipAddresses.isEmpty) {
             throwToolExit('Did not find IP for service ${srvRecord.target}.');
           }
 
           // Filter out link-local addresses.
           if (ipAddresses.length > 1) {
-            ipAddresses =
-                ipAddresses
-                    .where((IPAddressResourceRecord element) => !element.address.isLinkLocal)
-                    .toList();
+            ipAddresses = ipAddresses
+                .where((IPAddressResourceRecord element) => !element.address.isLinkLocal)
+                .toList();
           }
 
           ipAddress = ipAddresses.first.address;
@@ -391,8 +389,9 @@ class MDnsVmServiceDiscovery {
         }
 
         _logger.printTrace('Checking for authentication code for $domainName');
-        final List<TxtResourceRecord> txt =
-            await client.lookup<TxtResourceRecord>(ResourceRecordQuery.text(domainName)).toList();
+        final List<TxtResourceRecord> txt = await client
+            .lookup<TxtResourceRecord>(ResourceRecordQuery.text(domainName))
+            .toList();
 
         String authCode = '';
         if (txt.isNotEmpty) {
@@ -607,6 +606,8 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -656,10 +657,9 @@ Future<Uri> buildVMServiceUri(
     // so just use the device's port.
     actualHostPort = devicePort;
   } else {
-    actualHostPort =
-        hostVmservicePort == 0
-            ? await device.portForwarder?.forward(devicePort)
-            : hostVmservicePort;
+    actualHostPort = hostVmservicePort == 0
+        ? await device.portForwarder?.forward(devicePort)
+        : hostVmservicePort;
   }
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

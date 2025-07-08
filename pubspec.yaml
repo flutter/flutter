@@ -1,81 +1,81 @@
 name: _flutter_packages
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 workspace:
-  - packages/flutter
-  - packages/flutter/test_private/test
-  - packages/flutter/test_private
-  - packages/flutter_driver
-  - packages/flutter_localizations
-  - packages/flutter_test
-  - packages/integration_test
-  - packages/integration_test/example
-  - packages/integration_test/integration_test_macos
-  - packages/fuchsia_remote_debug_protocol
-  - packages/flutter_web_plugins
-  - packages/flutter_goldens
-  - dev/checks_tool
-  - dev/devicelab
-  - dev/manual_tests
-  - dev/tracing_tests
-  - dev/customer_testing
-  - dev/integration_tests/link_hook
-  - dev/integration_tests/hook_user_defines
-  - dev/integration_tests/flavors
-  - dev/integration_tests/spell_check
-  - dev/integration_tests/wide_gamut_test
-  - dev/integration_tests/release_smoke_test
-  - dev/integration_tests/deferred_components_test
-  - dev/integration_tests/new_gallery
-  - dev/integration_tests/web
-  - dev/integration_tests/ios_add2app_life_cycle/flutterapp
-  - dev/integration_tests/platform_interaction
-  - dev/integration_tests/external_textures
-  - dev/integration_tests/channels
-  - dev/integration_tests/android_semantics_testing
-  - dev/integration_tests/ui
-  - dev/integration_tests/android_views
-  - dev/integration_tests/ios_platform_view_tests
-  - dev/integration_tests/flutter_gallery
-  - dev/integration_tests/android_engine_test
-  - dev/integration_tests/display_cutout_rotation
-  - dev/integration_tests/web_e2e_tests
-  - dev/integration_tests/keyboard_hot_restart
-  - dev/integration_tests/web_compile_tests
-  - dev/integration_tests/ios_app_with_extensions
-  - dev/integration_tests/windows_startup_test
-  - dev/bots
-  - dev/forbidden_from_release_tests
+  - dev/a11y_assessments
   - dev/automated_tests
-  - dev/snippets
-  - dev/tools
-  - dev/tools/android_driver_extensions
-  - dev/tools/gen_keycodes
-  - dev/tools/gen_defaults
-  - dev/tools/vitool
-  - dev/conductor/core
+  - dev/benchmarks/complex_layout
+  - dev/benchmarks/imitation_game_flutter
+  - dev/benchmarks/macrobenchmarks
   - dev/benchmarks/microbenchmarks
   - dev/benchmarks/multiple_flutters/module
   - dev/benchmarks/platform_channels_benchmarks
   - dev/benchmarks/platform_views_layout
   - dev/benchmarks/platform_views_layout_hybrid_composition
-  - dev/benchmarks/macrobenchmarks
-  - dev/benchmarks/complex_layout
-  - dev/benchmarks/imitation_game_flutter
   - dev/benchmarks/test_apps/stocks
-  - dev/a11y_assessments
-  - examples/image_list
-  - examples/platform_channel
-  - examples/layers
-  - examples/hello_world
-  - examples/platform_view
-  - examples/platform_channel_swift
-  - examples/flutter_view
-  - examples/texture
+  - dev/bots
+  - dev/checks_tool
+  - dev/customer_testing
+  - dev/devicelab
+  - dev/forbidden_from_release_tests
+  - dev/integration_tests/android_engine_test
+  - dev/integration_tests/android_semantics_testing
+  - dev/integration_tests/android_views
+  - dev/integration_tests/channels
+  - dev/integration_tests/deferred_components_test
+  - dev/integration_tests/display_cutout_rotation
+  - dev/integration_tests/external_textures
+  - dev/integration_tests/flavors
+  - dev/integration_tests/flutter_gallery
+  - dev/integration_tests/hook_user_defines
+  - dev/integration_tests/ios_add2app_life_cycle/flutterapp
+  - dev/integration_tests/ios_app_with_extensions
+  - dev/integration_tests/ios_platform_view_tests
+  - dev/integration_tests/keyboard_hot_restart
+  - dev/integration_tests/link_hook
+  - dev/integration_tests/new_gallery
+  - dev/integration_tests/platform_interaction
+  - dev/integration_tests/release_smoke_test
+  - dev/integration_tests/spell_check
+  - dev/integration_tests/ui
+  - dev/integration_tests/web
+  - dev/integration_tests/web_compile_tests
+  - dev/integration_tests/web_e2e_tests
+  - dev/integration_tests/wide_gamut_test
+  - dev/integration_tests/windows_startup_test
+  - dev/manual_tests
+  - dev/packages_autoroller
+  - dev/snippets
+  - dev/tools
+  - dev/tools/android_driver_extensions
+  - dev/tools/gen_defaults
+  - dev/tools/gen_keycodes
+  - dev/tools/vitool
+  - dev/tracing_tests
   - examples/api
+  - examples/flutter_view
+  - examples/hello_world
+  - examples/image_list
+  - examples/layers
+  - examples/platform_channel
+  - examples/platform_channel_swift
+  - examples/platform_view
   - examples/splash
+  - examples/texture
+  - packages/flutter
+  - packages/flutter_driver
+  - packages/flutter_goldens
+  - packages/flutter_localizations
+  - packages/flutter_test
+  - packages/flutter_web_plugins
+  - packages/flutter/test_private
+  - packages/flutter/test_private/test
+  - packages/fuchsia_remote_debug_protocol
+  - packages/integration_test
+  - packages/integration_test/example
+  - packages/integration_test/integration_test_macos
 
 dependencies:
   _discoveryapis_commons: 1.0.7
@@ -186,8 +186,8 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.0
   video_player_android: 2.8.7
-  video_player_avfoundation: 2.7.1
-  video_player_platform_interface: 6.3.0
+  video_player_avfoundation: 2.7.2
+  video_player_platform_interface: 6.4.0
   video_player_web: 2.3.5
   vm_service: 15.0.2
   vm_snapshot_analysis: 0.7.6
@@ -213,4 +213,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: suvu4j
+# PUBSPEC CHECKSUM: j61vfe

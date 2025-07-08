@@ -390,9 +390,7 @@ class OutlinedButton extends ButtonStyleButton {
           maximumSize: Size.infinite,
           side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-          enabledMouseCursor:
-              SystemMouseCursors
-                  .basic, // TODO(camsim99): for this and for other ButtonStyleButtons, may be able to cut down on the enable/disabled parameters (may be breaking though....) + need to update documentation
+          enabledMouseCursor: SystemMouseCursors.basic,
           disabledMouseCursor: SystemMouseCursors.basic,
           visualDensity: theme.visualDensity,
           tapTargetSize: theme.materialTapTargetSize,

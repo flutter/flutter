@@ -42,15 +42,14 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(title: Text(widget.title)),
       body: ListView.builder(
         itemCount: 1000,
-        itemBuilder:
-            (BuildContext context, int index) => Padding(
-              padding: const EdgeInsets.all(20),
-              child: Container(
-                height: 100,
-                color: Colors.lightBlue,
-                child: Center(child: Text('Item $index')),
-              ),
-            ),
+        itemBuilder: (BuildContext context, int index) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            height: 100,
+            color: Colors.lightBlue,
+            child: Center(child: Text('Item $index')),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('scroll-button'),
