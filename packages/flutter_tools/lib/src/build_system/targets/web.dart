@@ -406,7 +406,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    String result = 'unknown';
+    final String result;
     String? findingsSummary;
 
     if (exitCode != 0 && exitCode != 254) {
