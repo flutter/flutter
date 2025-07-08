@@ -415,7 +415,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
         '`--wasm` flag. See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm',
       );
-      return;
     } else if (stderr.isNotEmpty) {
       environment.logger.printWarning('Wasm dry run failed:');
       environment.logger.printWarning(stdout);
