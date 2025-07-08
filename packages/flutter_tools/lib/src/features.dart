@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_features.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
@@ -56,7 +59,25 @@ abstract class FeatureFlags {
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
-  bool isEnabled(Feature feature);
+  ///
+  /// This default implementation is used by google3 to facilitate rolls.
+  /// In Flutter, this is overriden by [FlutterFeatureFlags.isEnabled].
+  bool isEnabled(Feature feature) {
+    return switch (feature) {
+      flutterWebFeature => isWebEnabled,
+      flutterLinuxDesktopFeature => isLinuxEnabled,
+      flutterMacOSDesktopFeature => isMacOSEnabled,
+      flutterWindowsDesktopFeature => isWindowsEnabled,
+      flutterAndroidFeature => isAndroidEnabled,
+      flutterIOSFeature => isIOSEnabled,
+      flutterFuchsiaFeature => isFuchsiaEnabled,
+      flutterCustomDevicesFeature => areCustomDevicesEnabled,
+      cliAnimation => isCliAnimationEnabled,
+      nativeAssets => isNativeAssetsEnabled,
+      swiftPackageManager => isSwiftPackageManagerEnabled,
+      _ => throw UnsupportedError('Unknown feature "${feature.name}"'),
+    };
+  }
 
   /// All current Flutter feature flags.
   List<Feature> get allFeatures => const <Feature>[
@@ -81,7 +102,6 @@ abstract class FeatureFlags {
   }
 
   /// All Flutter feature flags that are enabled.
-  // This member is overriden in google3.
   Iterable<Feature> get allEnabledFeatures {
     return allFeatures.where(isEnabled);
   }

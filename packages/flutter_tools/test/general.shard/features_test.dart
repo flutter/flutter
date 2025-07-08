@@ -139,6 +139,13 @@ void main() {
 
       expect(featureNames, unorderedEquals(testFeatureNames));
     });
+
+    testUsingContext('FeatureFlags.isEnabled does not throw UnsupportedError', () {
+      final FeatureFlags testFeatureFlags = _DefaultFeatureFlags();
+      for (final Feature feature in featureFlags.allFeatures) {
+        expect(() => testFeatureFlags.isEnabled(feature), returnsNormally);
+      }
+    });
   });
 
   group('Linux Destkop', () {
@@ -473,3 +480,5 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
   @override
   Iterable<Feature> get allEnabledFeatures => throw UnimplementedError();
 }
+
+class _DefaultFeatureFlags extends FeatureFlags {}
