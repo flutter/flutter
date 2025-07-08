@@ -631,7 +631,6 @@ class CustomDevice extends Device {
       // launch the readLogs command
       _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
       _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
-      return _globalLogReader;
     }
 
     return _globalLogReader;
