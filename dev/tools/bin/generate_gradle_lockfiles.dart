@@ -301,6 +301,7 @@ include ":app"
 // Consider updating this file to reflect the latest updates to app templates
 // when performing batch updates (this file is modeled after
 // root_app/android/build.gradle.kts).
+// After modification verify formatting with ktlint.
 const String rootGradleKtsFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -317,10 +318,18 @@ allprojects {
     }
 }
 
-rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
+rootProject.layout.buildDirectory.value(
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+)
 
 subprojects {
-    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
+    project.layout.buildDirectory.value(
+        rootProject.layout.buildDirectory
+            .dir(project.name)
+            .get()
+    )
 }
 subprojects {
     project.evaluationDependsOn(":app")
