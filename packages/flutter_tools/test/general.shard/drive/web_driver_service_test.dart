@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/isolated/devfs_config.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -277,13 +278,14 @@ void main() {
       final WebDriverService service = setUpDriverService();
       final device = FakeDevice();
       final webHeaders = <String, String>{'test-header': 'test-value'};
+      final devConfig = DevConfig(headers: webHeaders);
       await service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, webHeaders: webHeaders, ipv6: true),
+        DebuggingOptions.enabled(BuildInfo.profile, devConfig: devConfig, ipv6: true),
       );
       await service.stop();
-      expect(FakeResidentRunner.instance.debuggingOptions.webHeaders, equals(webHeaders));
+      expect(FakeResidentRunner.instance.debuggingOptions.devConfig?.headers, equals(webHeaders));
     },
     overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
   );
