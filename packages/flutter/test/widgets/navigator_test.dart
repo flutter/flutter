@@ -1325,39 +1325,36 @@ void main() {
           switch (routeName) {
             case '/':
               return MaterialPageRoute<bool>(
-                builder:
-                    (BuildContext context) => OnTapPage(
-                      id: '/',
-                      onTap: () async {
-                        firstReturnValue = await Navigator.pushNamed(context, '/A');
-                      },
-                    ),
+                builder: (BuildContext context) => OnTapPage(
+                  id: '/',
+                  onTap: () async {
+                    firstReturnValue = await Navigator.pushNamed(context, '/A');
+                  },
+                ),
                 settings: settings,
               );
             case '/A':
               return MaterialPageRoute<bool>(
-                builder:
-                    (BuildContext context) => OnTapPage(
-                      id: 'A',
-                      onTap: () async {
-                        secondReturnValue = await Navigator.pushNamed(context, '/B');
-                      },
-                    ),
+                builder: (BuildContext context) => OnTapPage(
+                  id: 'A',
+                  onTap: () async {
+                    secondReturnValue = await Navigator.pushNamed(context, '/B');
+                  },
+                ),
                 settings: settings,
               );
             case '/B':
               return MaterialPageRoute<bool>(
-                builder:
-                    (BuildContext context) => OnTapPage(
-                      id: 'B',
-                      onTap: () async {
-                        Navigator.popUntil<bool>(
-                          context,
-                          (Route<dynamic> route) => route.isFirst,
-                          true,
-                        );
-                      },
-                    ),
+                builder: (BuildContext context) => OnTapPage(
+                  id: 'B',
+                  onTap: () async {
+                    Navigator.popUntil<bool>(
+                      context,
+                      (Route<dynamic> route) => route.isFirst,
+                      true,
+                    );
+                  },
+                ),
                 settings: settings,
               );
             default:
