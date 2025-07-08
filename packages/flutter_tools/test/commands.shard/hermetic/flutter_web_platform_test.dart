@@ -19,7 +19,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-class MockServer implements shelf.Server {
+class FakeServer implements shelf.Server {
   shelf.Handler? mountedHandler;
 
   @override
@@ -77,7 +77,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final MockServer server = MockServer();
+      final FakeServer server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
@@ -123,7 +123,7 @@ void main() {
         browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
         logger: logger,
       );
-      final MockServer server = MockServer();
+      final FakeServer server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),

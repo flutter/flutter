@@ -14,6 +14,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// An interface to the Dart analysis server.
 class AnalysisServer {
@@ -138,6 +139,9 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
+    if (line.startsWith(globals.kVMServiceMessageRegExp)) {
+      return;
+    }
 
     final dynamic response = json.decode(line);
 
@@ -193,18 +197,17 @@ class AnalysisServer {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'] as String;
     final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
-    final List<AnalysisError> errors =
-        errorsList
-            .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
-            .map<AnalysisError>((Map<String, dynamic> json) {
-              return AnalysisError(
-                WrittenError.fromJson(json),
-                fileSystem: _fileSystem,
-                platform: _platform,
-                terminal: _terminal,
-              );
-            })
-            .toList();
+    final List<AnalysisError> errors = errorsList
+        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
+        .map<AnalysisError>((Map<String, dynamic> json) {
+          return AnalysisError(
+            WrittenError.fromJson(json),
+            fileSystem: _fileSystem,
+            platform: _platform,
+            terminal: _terminal,
+          );
+        })
+        .toList();
     if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
     }

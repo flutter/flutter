@@ -365,10 +365,9 @@ class IOSDeployDebugger {
             if (_debuggerState == _IOSDeployDebuggerState.launching) {
               _logger.printTrace(line);
               final bool attachSuccess = line == 'success';
-              _debuggerState =
-                  attachSuccess
-                      ? _IOSDeployDebuggerState.attached
-                      : _IOSDeployDebuggerState.detached;
+              _debuggerState = attachSuccess
+                  ? _IOSDeployDebuggerState.attached
+                  : _IOSDeployDebuggerState.detached;
               if (!debuggerCompleter.isCompleted) {
                 debuggerCompleter.complete(attachSuccess);
               }

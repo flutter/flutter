@@ -113,6 +113,9 @@ class DevelopmentArtifact {
   /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
+  /// Artifacts which contain build information for the flutter tool.
+  static const DevelopmentArtifact informative = DevelopmentArtifact._('informative');
+
   /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     androidGenSnapshot,
@@ -126,6 +129,7 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
+    informative,
   ];
 
   @override
@@ -587,12 +591,9 @@ class Cache {
       throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
 
-    final String cipdOverride =
-        original
-            .replace(
-              pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'],
-            )
-            .toString();
+    final String cipdOverride = original
+        .replace(pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'])
+        .toString();
     return cipdOverride;
   }
 
@@ -1130,6 +1131,13 @@ class ArtifactUpdater {
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, _operatingSystemUtils.unpack);
+  }
+
+  /// Download a file from the given [url] and copy it to [location].
+  Future<void> downloadFile(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, (File file, Directory dir) {
+      file.copySync(dir.childFile(file.basename).path);
+    });
   }
 
   /// Download an archive from the given [url] and unzip it to [location].

@@ -34,12 +34,11 @@ const SegmentationCacheSpec kSmallParagraphCacheSpec = (cacheSize: 100000, maxTe
 const SegmentationCacheSpec kMediumParagraphCacheSpec = (cacheSize: 10000, maxTextLength: 100);
 const SegmentationCacheSpec kLargeParagraphCacheSpec = (cacheSize: 20, maxTextLength: 50000);
 
-typedef SegmentationCache =
-    ({
-      LruCache<String, SegmentationResult> small,
-      LruCache<String, SegmentationResult> medium,
-      LruCache<String, SegmentationResult> large,
-    });
+typedef SegmentationCache = ({
+  LruCache<String, SegmentationResult> small,
+  LruCache<String, SegmentationResult> medium,
+  LruCache<String, SegmentationResult> large,
+});
 
 /// Caches segmentation results for small, medium and large paragraphts.
 ///
@@ -161,8 +160,9 @@ Uint32List fragmentUsingV8LineBreaker(String text) {
     final LineBreakFragment fragment = fragments[i];
     final int uint32Index = 2 + i * 2;
     typedArray[uint32Index] = fragment.end;
-    typedArray[uint32Index + 1] =
-        fragment.type == LineBreakType.mandatory ? _kHardLineBreak : _kSoftLineBreak;
+    typedArray[uint32Index + 1] = fragment.type == LineBreakType.mandatory
+        ? _kHardLineBreak
+        : _kSoftLineBreak;
   }
 
   return typedArray;

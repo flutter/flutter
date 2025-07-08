@@ -32,10 +32,9 @@ String _escapeBackslashes(String s) {
 String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
   // Prefer the build arguments for version information.
   final String buildName = buildInfo.buildName ?? project.parent.manifest.buildName ?? '1.0.0';
-  final String? buildNumber =
-      buildInfo.buildName != null
-          ? buildInfo.buildNumber
-          : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
+  final String? buildNumber = buildInfo.buildName != null
+      ? buildInfo.buildNumber
+      : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
 
   return buildNumber != null ? '$buildName+$buildNumber' : buildName;
 }

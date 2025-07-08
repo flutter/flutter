@@ -78,8 +78,8 @@ void main() {
 
   testWidgets(
     'Use onUnknownRoute',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       late String unknownForRouteCalled;
       await tester.pumpWidget(
@@ -246,13 +246,12 @@ void main() {
         restorationScopeId: 'app',
         home: CupertinoTabView(
           restorationScopeId: 'tab',
-          builder:
-              (BuildContext context) => CupertinoButton(
-                child: const Text('home'),
-                onPressed: () {
-                  Navigator.of(context).restorablePushNamed('/2');
-                },
-              ),
+          builder: (BuildContext context) => CupertinoButton(
+            child: const Text('home'),
+            onPressed: () {
+              Navigator.of(context).restorablePushNamed('/2');
+            },
+          ),
           routes: <String, WidgetBuilder>{
             '/2': (BuildContext context) => const Text('second route'),
           },
@@ -303,14 +302,13 @@ void main() {
               BottomNavigationBarItem(label: '', icon: Text('2')),
             ],
           ),
-          tabBuilder:
-              (_, int i) => PopScope<Object?>(
-                canPop: false,
-                child: CupertinoTabView(
-                  navigatorKey: key,
-                  builder: (BuildContext context) => const Text('first route'),
-                ),
-              ),
+          tabBuilder: (_, int i) => PopScope<Object?>(
+            canPop: false,
+            child: CupertinoTabView(
+              navigatorKey: key,
+              builder: (BuildContext context) => const Text('first route'),
+            ),
+          ),
         ),
       ),
     );

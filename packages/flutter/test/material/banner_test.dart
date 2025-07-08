@@ -72,8 +72,8 @@ void main() {
                       actions: <Widget>[
                         TextButton(
                           child: const Text('DISMISS'),
-                          onPressed:
-                              () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                          onPressed: () =>
+                              ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                         ),
                       ],
                     ),
@@ -145,13 +145,13 @@ void main() {
                         actions: <Widget>[
                           TextButton(
                             child: const Text('OK'),
-                            onPressed:
-                                () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                           ),
                           TextButton(
                             child: const Text('DISMISS'),
-                            onPressed:
-                                () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                           ),
                         ],
                       ),
@@ -212,8 +212,8 @@ void main() {
                         actions: <Widget>[
                           TextButton(
                             child: const Text('DISMISS'),
-                            onPressed:
-                                () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                           ),
                         ],
                       ),
@@ -287,8 +287,8 @@ void main() {
                       actions: <Widget>[
                         TextButton(
                           child: const Text('DISMISS'),
-                          onPressed:
-                              () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                          onPressed: () =>
+                              ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                         ),
                       ],
                     ),
@@ -380,8 +380,8 @@ void main() {
                         TextButton(
                           key: dismissTarget,
                           child: const Text('DISMISS'),
-                          onPressed:
-                              () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                          onPressed: () =>
+                              ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                         ),
                       ],
                     ),
@@ -438,8 +438,8 @@ void main() {
                         TextButton(
                           key: dismissTarget,
                           child: const Text('DISMISS'),
-                          onPressed:
-                              () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                          onPressed: () =>
+                              ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                         ),
                       ],
                     ),
@@ -539,8 +539,8 @@ void main() {
                           actions: <Widget>[
                             TextButton(
                               child: const Text('DISMISS'),
-                              onPressed:
-                                  () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                             ),
                           ],
                         ),
@@ -601,8 +601,8 @@ void main() {
                         actions: <Widget>[
                           TextButton(
                             child: const Text('DISMISS'),
-                            onPressed:
-                                () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                           ),
                         ],
                       ),
@@ -669,8 +669,8 @@ void main() {
                           actions: <Widget>[
                             TextButton(
                               child: const Text('DISMISS'),
-                              onPressed:
-                                  () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                             ),
                           ],
                         ),
@@ -736,8 +736,8 @@ void main() {
                         actions: <Widget>[
                           TextButton(
                             child: const Text('DISMISS'),
-                            onPressed:
-                                () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                           ),
                         ],
                       ),
@@ -828,8 +828,8 @@ void main() {
                               key: ValueKey<int>(index),
                               child: GestureDetector(
                                 key: const ValueKey<String>('dismiss-target'),
-                                onTap:
-                                    () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                                onTap: () =>
+                                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
                           }
@@ -948,8 +948,8 @@ void main() {
                               key: ValueKey<int>(index),
                               child: GestureDetector(
                                 key: const ValueKey<String>('dismiss-target'),
-                                onTap:
-                                    () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                                onTap: () =>
+                                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
                           }
@@ -1051,8 +1051,8 @@ void main() {
                               key: ValueKey<int>(index),
                               child: GestureDetector(
                                 key: const ValueKey<String>('dismiss-target'),
-                                onTap:
-                                    () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                                onTap: () =>
+                                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
                           }

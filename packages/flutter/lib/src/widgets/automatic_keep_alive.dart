@@ -290,10 +290,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       DiagnosticsProperty<Map<Listenable, VoidCallback>>(
         'handles',
         _handles,
-        description:
-            _handles != null
-                ? '${_handles!.length} active client${_handles!.length == 1 ? "" : "s"}'
-                : null,
+        description: _handles != null
+            ? '${_handles!.length} active client${_handles!.length == 1 ? "" : "s"}'
+            : null,
         ifNull: 'no notifications ever received',
       ),
     );

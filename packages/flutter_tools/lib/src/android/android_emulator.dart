@@ -58,8 +58,10 @@ class AndroidEmulators extends EmulatorDiscovery {
       return <AndroidEmulator>[];
     }
 
-    final String listAvdsOutput =
-        (await _processUtils.run(<String>[emulatorPath, '-list-avds'])).stdout.trim();
+    final String listAvdsOutput = (await _processUtils.run(<String>[
+      emulatorPath,
+      '-list-avds',
+    ])).stdout.trim();
 
     final List<AndroidEmulator> emulators = <AndroidEmulator>[];
     _extractEmulatorAvdInfo(listAvdsOutput, emulators);

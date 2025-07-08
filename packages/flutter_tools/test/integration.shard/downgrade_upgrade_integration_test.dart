@@ -45,7 +45,8 @@ void main() {
       expect(
         exitCode,
         0,
-        reason: '''
+        reason:
+            '''
 trace:
 ${logger.traceText}
 

@@ -22,11 +22,12 @@ void main() {
 
     Map<String, String> getFilesystemContents([Directory? root]) {
       final String tempPath = tempDir.absolute.path;
-      final List<String> paths =
-          (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
-            final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
-            return relativePath;
-          }).toList();
+      final List<String> paths = (root ?? tempDir).listSync(recursive: true).map((
+        FileSystemEntity entity,
+      ) {
+        final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
+        return relativePath;
+      }).toList();
       final Map<String, String> contents = <String, String>{};
       for (final String path in paths) {
         final String absPath = globals.fs.path.join(tempPath, path);

@@ -29,6 +29,12 @@ class LicenseChecker {
                  std::ostream& licenses,
                  std::string_view data_dir,
                  const Flags& flags);
+  /// Run on a single file.
+  static int FileRun(std::string_view working_dir,
+                     std::string_view full_path,
+                     std::ostream& licenses,
+                     std::string_view data_dir,
+                     const Flags& flags);
 };
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_LICENSE_CHECKER_H_

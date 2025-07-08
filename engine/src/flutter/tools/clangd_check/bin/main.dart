@@ -11,18 +11,17 @@ import 'package:path/path.dart' as p;
 
 void main(List<String> args) {
   final Engine? engine = Engine.tryFindWithin();
-  final ArgParser parser =
-      ArgParser()
-        ..addFlag('help', abbr: 'h', help: 'Print this usage information.', negatable: false)
-        ..addOption(
-          'clangd',
-          help: 'Path to clangd. Defaults to deriving the path from compile_commands.json.',
-        )
-        ..addOption(
-          'compile-commands-dir',
-          help: 'Path to a directory containing compile_commands.json.',
-          defaultsTo: engine?.latestOutput()?.compileCommandsJson.parent.path,
-        );
+  final ArgParser parser = ArgParser()
+    ..addFlag('help', abbr: 'h', help: 'Print this usage information.', negatable: false)
+    ..addOption(
+      'clangd',
+      help: 'Path to clangd. Defaults to deriving the path from compile_commands.json.',
+    )
+    ..addOption(
+      'compile-commands-dir',
+      help: 'Path to a directory containing compile_commands.json.',
+      defaultsTo: engine?.latestOutput()?.compileCommandsJson.parent.path,
+    );
   final ArgResults results = parser.parse(args);
   if (results['help'] as bool) {
     io.stdout.writeln(parser.usage);

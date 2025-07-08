@@ -217,11 +217,14 @@ void main() {
 
   testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrap(child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedSlideWidgetState())),
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedSlideWidgetState()),
+      ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SlideTransition slideWidget = tester.widget<SlideTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(SlideTransition)).first,
@@ -272,11 +275,14 @@ void main() {
 
   testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrap(child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedScaleWidgetState())),
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedScaleWidgetState()),
+      ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(ScaleTransition)).first,
@@ -332,8 +338,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(RotationTransition)).first,
@@ -389,8 +396,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(of: find.byType(Placeholder), matching: find.byType(FadeTransition)).first,
@@ -472,8 +480,9 @@ void main() {
       ),
     );
 
-    final RebuildCountingState<StatefulWidget> state =
-        tester.widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget)).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
       find
@@ -609,14 +618,13 @@ void main() {
       wrap(
         child: ValueListenableBuilder<Curve>(
           valueListenable: curve,
-          builder:
-              (_, Curve c, _) => AnimatedOpacity(
-                key: key,
-                opacity: 1.0,
-                duration: const Duration(seconds: 1),
-                curve: c,
-                child: Container(color: Colors.green),
-              ),
+          builder: (_, Curve c, _) => AnimatedOpacity(
+            key: key,
+            opacity: 1.0,
+            duration: const Duration(seconds: 1),
+            curve: c,
+            child: Container(color: Colors.green),
+          ),
         ),
       ),
     );
@@ -720,8 +728,8 @@ class TestAnimatedWidget extends StatefulWidget {
 
   RebuildCountingState<StatefulWidget>? get rebuildState =>
       state is RebuildCountingState<StatefulWidget>
-          ? state as RebuildCountingState<StatefulWidget>
-          : null;
+      ? state as RebuildCountingState<StatefulWidget>
+      : null;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
@@ -914,10 +922,9 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
     return AnimatedDefaultTextStyle(
       duration: duration,
       onEnd: widget.callback,
-      style:
-          toggle
-              ? const TextStyle(fontStyle: FontStyle.italic)
-              : const TextStyle(fontStyle: FontStyle.normal),
+      style: toggle
+          ? const TextStyle(fontStyle: FontStyle.italic)
+          : const TextStyle(fontStyle: FontStyle.normal),
       child: child,
     );
   }

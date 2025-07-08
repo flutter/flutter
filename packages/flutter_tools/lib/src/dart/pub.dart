@@ -436,8 +436,9 @@ class _DefaultPub implements Pub {
       }
     } on io.ProcessException catch (exception) {
       final StringBuffer buffer = StringBuffer('${exception.message}\n');
-      final String directoryExistsMessage =
-          _fileSystem.directory(directory).existsSync() ? 'exists' : 'does not exist';
+      final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
+          ? 'exists'
+          : 'does not exist';
       buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       throw io.ProcessException(

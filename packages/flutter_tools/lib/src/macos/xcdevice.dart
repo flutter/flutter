@@ -161,8 +161,9 @@ class XCDevice {
       if (result.exitCode == 0) {
         final String listOutput = result.stdout;
         try {
-          final List<Object> listResults =
-              (json.decode(result.stdout) as List<Object?>).whereType<Object>().toList();
+          final List<Object> listResults = (json.decode(result.stdout) as List<Object?>)
+              .whereType<Object>()
+              .toList();
           _cachedListResults = listResults;
           return listResults;
         } on FormatException {
@@ -376,14 +377,12 @@ class XCDevice {
         _usbDeviceWaitProcess?.kill();
       });
 
-      final Future<void> allProcessesExited = Future.wait(<Future<void>>[
-        usbProcessExited,
-        wifiProcessExited,
-      ]).whenComplete(() async {
-        _usbDeviceWaitProcess = null;
-        _wifiDeviceWaitProcess = null;
-        await waitStreamController?.close();
-      });
+      final Future<void> allProcessesExited =
+          Future.wait(<Future<void>>[usbProcessExited, wifiProcessExited]).whenComplete(() async {
+            _usbDeviceWaitProcess = null;
+            _wifiDeviceWaitProcess = null;
+            await waitStreamController?.close();
+          });
 
       return await Future.any(<Future<XCDeviceEventNotification?>>[
         allProcessesExited.then((_) => null),

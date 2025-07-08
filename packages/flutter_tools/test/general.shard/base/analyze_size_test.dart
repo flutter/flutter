@@ -68,19 +68,17 @@ void main() {
       analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive =
-        Archive()
-          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final Archive archive = Archive()
+      ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
-    final File aotSizeJson =
-        fileSystem.file('test.json')
-          ..createSync()
-          ..writeAsStringSync(aotSizeOutput);
+    final File aotSizeJson = fileSystem.file('test.json')
+      ..createSync()
+      ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')..writeAsStringSync('{}');
     final Map<String, dynamic> result = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
       zipFile: apk,
@@ -155,13 +153,12 @@ void main() {
       analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive =
-        Archive()
-          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final Archive archive = Archive()
+      ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')..writeAsStringSync(aotSizeOutput);

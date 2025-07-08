@@ -100,11 +100,10 @@ class EmulatorManager {
       // if there's an exact match and we need all those with this prefix
       // so we can keep adding suffixes until we miss.
       final List<Emulator> all = await getAllAvailableEmulators();
-      final Set<String> takenNames =
-          all
-              .map<String>((Emulator e) => e.id)
-              .where((String id) => id.startsWith(autoName))
-              .toSet();
+      final Set<String> takenNames = all
+          .map<String>((Emulator e) => e.id)
+          .where((String id) => id.startsWith(autoName))
+          .toSet();
       int suffix = 1;
       name = autoName;
       while (takenNames.contains(name)) {
@@ -186,11 +185,10 @@ class EmulatorManager {
       return null;
     }
 
-    final List<String> availableDevices =
-        runResult.stdout
-            .split('\n')
-            .where((String l) => preferredDevices.contains(l.trim()))
-            .toList();
+    final List<String> availableDevices = runResult.stdout
+        .split('\n')
+        .where((String l) => preferredDevices.contains(l.trim()))
+        .toList();
 
     for (final String device in preferredDevices) {
       if (availableDevices.contains(device)) {
@@ -209,25 +207,22 @@ class EmulatorManager {
     final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
 
     // Get the list of IDs that match our criteria
-    final List<String> availableIDs =
-        runResult.stderr
-            .split('\n')
-            .where((String l) => _androidApiVersion.hasMatch(l))
-            .where((String l) => l.contains('system-images'))
-            .where((String l) => l.contains('google_apis_playstore'))
-            .toList();
+    final List<String> availableIDs = runResult.stderr
+        .split('\n')
+        .where((String l) => _androidApiVersion.hasMatch(l))
+        .where((String l) => l.contains('system-images'))
+        .where((String l) => l.contains('google_apis_playstore'))
+        .toList();
 
-    final List<int> availableApiVersions =
-        availableIDs
-            .map<String>((String id) => _androidApiVersion.firstMatch(id)!.group(1)!)
-            .map<int>((String apiVersion) => int.parse(apiVersion))
-            .toList();
+    final List<int> availableApiVersions = availableIDs
+        .map<String>((String id) => _androidApiVersion.firstMatch(id)!.group(1)!)
+        .map<int>((String apiVersion) => int.parse(apiVersion))
+        .toList();
 
     // Get the highest Android API version or whats left
-    final int apiVersion =
-        availableApiVersions.isNotEmpty
-            ? availableApiVersions.reduce(math.max)
-            : -1; // Don't match below
+    final int apiVersion = availableApiVersions.isNotEmpty
+        ? availableApiVersions.reduce(math.max)
+        : -1; // Don't match below
 
     // We're out of preferences, we just have to return the first one with the high
     // API version.

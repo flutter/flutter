@@ -83,7 +83,8 @@ class GitHubTemplateCreator {
   ) async {
     final String errorString = sanitizedCrashException(error);
     final String title = '[tool_crash] $errorString';
-    final String body = '''
+    final String body =
+        '''
 ## Command
 ```sh
 $command
@@ -130,18 +131,17 @@ ${_projectMetadataInformation()}
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final FlutterTemplateType? projectType = metadata.projectType;
-      final StringBuffer description =
-          StringBuffer()
-            ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
-            ..writeln('**Version**: ${manifest.appVersion}')
-            ..writeln('**Material**: ${manifest.usesMaterialDesign}')
-            ..writeln('**Android X**: ${manifest.usesAndroidX}')
-            ..writeln('**Module**: ${manifest.isModule}')
-            ..writeln('**Plugin**: ${manifest.isPlugin}')
-            ..writeln('**Android package**: ${manifest.androidPackage}')
-            ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
-            ..writeln('**Creation channel**: ${metadata.versionChannel}')
-            ..writeln('**Creation framework version**: ${metadata.versionRevision}');
+      final StringBuffer description = StringBuffer()
+        ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
+        ..writeln('**Version**: ${manifest.appVersion}')
+        ..writeln('**Material**: ${manifest.usesMaterialDesign}')
+        ..writeln('**Android X**: ${manifest.usesAndroidX}')
+        ..writeln('**Module**: ${manifest.isModule}')
+        ..writeln('**Plugin**: ${manifest.isPlugin}')
+        ..writeln('**Android package**: ${manifest.androidPackage}')
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
+        ..writeln('**Creation channel**: ${metadata.versionChannel}')
+        ..writeln('**Creation framework version**: ${metadata.versionRevision}');
 
       final File file = project.flutterPluginsDependenciesFile;
       if (file.existsSync()) {

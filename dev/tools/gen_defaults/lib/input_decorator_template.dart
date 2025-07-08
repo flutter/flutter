@@ -14,7 +14,8 @@ class InputDecoratorTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends InputDecorationThemeData {
    _${blockName}DefaultsM3(this.context)
     : super();
@@ -224,10 +225,9 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
 
   /// Generate a [BorderSide] for the given components.
   String mergedBorder(String componentToken1, String componentToken2) {
-    final String borderColor =
-        componentColor(componentToken1) != 'null'
-            ? componentColor(componentToken1)
-            : componentColor(componentToken2);
+    final String borderColor = componentColor(componentToken1) != 'null'
+        ? componentColor(componentToken1)
+        : componentColor(componentToken2);
     final double width =
         (getToken('$componentToken1.width', optional: true) ??
                 getToken('$componentToken1.height', optional: true) ??

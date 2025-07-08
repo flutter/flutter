@@ -103,11 +103,10 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Learn more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),
@@ -132,11 +131,10 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Find out more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),

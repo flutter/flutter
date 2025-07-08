@@ -239,35 +239,38 @@ void main() {
           expect(initialRoute, '/abc');
           return <Route<void>>[
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page one');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page one');
+                  },
             ),
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page two');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page two');
+                  },
             ),
           ];
         },
         initialRoute: '/abc',
         onGenerateRoute: (RouteSettings settings) {
           return PageRouteBuilder<void>(
-            pageBuilder: (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return const Text('regular page');
-            },
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) {
+                  return const Text('regular page');
+                },
           );
         },
         color: const Color(0xFF123456),
@@ -450,8 +453,8 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
-      onPopPage:
-          (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) => true,
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
     );
     addTearDown(delegate.dispose);
     await tester.pumpWidget(
@@ -594,13 +597,19 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(10)), child: widget),
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(10)),
+        child: widget,
+      ),
     );
 
     expect(routeBuildCount, equals(1));
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(20)), child: widget),
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(20)),
+        child: widget,
+      ),
     );
 
     expect(routeBuildCount, equals(1));

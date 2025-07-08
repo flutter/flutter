@@ -36,10 +36,9 @@ final class PredictiveBackEvent {
   factory PredictiveBackEvent.fromMap(Map<String?, Object?> map) {
     final List<Object?>? touchOffset = map['touchOffset'] as List<Object?>?;
     return PredictiveBackEvent._(
-      touchOffset:
-          touchOffset == null
-              ? null
-              : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
+      touchOffset: touchOffset == null
+          ? null
+          : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
       swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
     );

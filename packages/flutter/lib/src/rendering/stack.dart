@@ -575,10 +575,9 @@ class RenderStack extends RenderBox
     TextBaseline baseline,
   ) {
     final StackParentData childParentData = child.parentData! as StackParentData;
-    final BoxConstraints childConstraints =
-        childParentData.isPositioned
-            ? childParentData.positionedChildConstraints(stackSize)
-            : nonPositionedChildConstraints;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+        ? childParentData.positionedChildConstraints(stackSize)
+        : nonPositionedChildConstraints;
     final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
     if (baselineOffset == null) {
       return null;

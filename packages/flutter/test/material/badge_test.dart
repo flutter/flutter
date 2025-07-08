@@ -143,7 +143,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Align(alignment: Alignment.topLeft, child: Badge(child: Icon(Icons.add))),
+        home: const Align(
+          alignment: Alignment.topLeft,
+          child: Badge(child: Icon(Icons.add)),
+        ),
       ),
     );
 
@@ -177,7 +180,10 @@ void main() {
         theme: theme,
         home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: Align(alignment: Alignment.topLeft, child: Badge(child: Icon(Icons.add))),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Badge(child: Icon(Icons.add)),
+          ),
         ),
       ),
     );

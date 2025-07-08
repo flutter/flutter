@@ -132,8 +132,9 @@ class SwiftPackage {
     if (_platforms.isEmpty) {
       return null;
     }
-    final List<String> platformStrings =
-        _platforms.map((SwiftPackageSupportedPlatform platform) => platform.format()).toList();
+    final List<String> platformStrings = _platforms
+        .map((SwiftPackageSupportedPlatform platform) => platform.format())
+        .toList();
     return platformStrings.join(',\n$_doubleIndent');
   }
 
@@ -141,8 +142,9 @@ class SwiftPackage {
     if (_products.isEmpty) {
       return '';
     }
-    final List<String> libraries =
-        _products.map((SwiftPackageProduct product) => product.format()).toList();
+    final List<String> libraries = _products
+        .map((SwiftPackageProduct product) => product.format())
+        .toList();
     return libraries.join(',\n$_doubleIndent');
   }
 
@@ -150,10 +152,9 @@ class SwiftPackage {
     if (_dependencies.isEmpty) {
       return '';
     }
-    final List<String> packages =
-        _dependencies
-            .map((SwiftPackagePackageDependency dependency) => dependency.format())
-            .toList();
+    final List<String> packages = _dependencies
+        .map((SwiftPackagePackageDependency dependency) => dependency.format())
+        .toList();
     return packages.join(',\n$_doubleIndent');
   }
 
@@ -161,8 +162,9 @@ class SwiftPackage {
     if (_targets.isEmpty) {
       return '';
     }
-    final List<String> targetList =
-        _targets.map((SwiftPackageTarget target) => target.format()).toList();
+    final List<String> targetList = _targets
+        .map((SwiftPackageTarget target) => target.format())
+        .toList();
     return targetList.join(',\n$_doubleIndent');
   }
 }
@@ -319,11 +321,11 @@ class SwiftPackageTarget {
     }
 
     if (dependencies != null && dependencies!.isNotEmpty) {
-      final List<String> targetDependencies =
-          dependencies!
-              .map((SwiftPackageTargetDependency dependency) => dependency.format())
-              .toList();
-      final String dependenciesString = '''
+      final List<String> targetDependencies = dependencies!
+          .map((SwiftPackageTargetDependency dependency) => dependency.format())
+          .toList();
+      final String dependenciesString =
+          '''
 dependencies: [
 ${targetDependencies.join(",\n")}
 $targetDetailsIndent]''';

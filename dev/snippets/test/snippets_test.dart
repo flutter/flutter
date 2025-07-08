@@ -306,7 +306,8 @@ void main() {
           'ELEMENT_NAME': 'element',
           'FLUTTER_ROOT': flutterRoot.absolute.path,
           // The details here don't really matter other than the flutter root.
-          'FLUTTER_VERSION': '''
+          'FLUTTER_VERSION':
+              '''
       {
         "frameworkVersion": "2.5.0-6.0.pre.55",
         "channel": "use_snippets_pkg",

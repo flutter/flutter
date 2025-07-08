@@ -80,7 +80,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/83668
   testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {
-      return MaterialApp(home: Scaffold(body: const Placeholder(), bottomSheet: bottomSheet));
+      return MaterialApp(
+        home: Scaffold(body: const Placeholder(), bottomSheet: bottomSheet),
+      );
     }
 
     await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
@@ -97,7 +99,12 @@ void main() {
       int buildCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            body: const Center(child: Text('body')),
+          ),
+        ),
       );
 
       final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet(
@@ -158,7 +165,12 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -189,7 +201,12 @@ void main() {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            body: const Center(child: Text('body')),
+          ),
+        ),
       );
 
       scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -225,7 +242,12 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -259,7 +281,12 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
@@ -453,7 +480,11 @@ void main() {
 
   testWidgets('showBottomSheet()', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: Placeholder(key: key))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: Placeholder(key: key)),
+      ),
+    );
 
     int buildCount = 0;
     showBottomSheet(
@@ -566,7 +597,9 @@ void main() {
   testWidgets('Scaffold.bottomSheet should be updated without creating a new RO'
       ' when the new widget has the same key and type.', (WidgetTester tester) async {
     Widget buildFrame(String text) {
-      return MaterialApp(home: Scaffold(body: const Placeholder(), bottomSheet: Text(text)));
+      return MaterialApp(
+        home: Scaffold(body: const Placeholder(), bottomSheet: Text(text)),
+      );
     }
 
     await tester.pumpWidget(buildFrame('I love Flutter!'));
@@ -591,7 +624,12 @@ void main() {
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     scaffoldKey.currentState!.showBottomSheet(
@@ -626,7 +664,12 @@ void main() {
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((

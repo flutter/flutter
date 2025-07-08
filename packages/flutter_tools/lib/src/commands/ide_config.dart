@@ -187,8 +187,9 @@ class IdeConfigCommand extends FlutterCommand {
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final Iterable<File> templateFiles =
-        _templateDirectory.listSync(recursive: true).whereType<File>();
+    final Iterable<File> templateFiles = _templateDirectory
+        .listSync(recursive: true)
+        .whereType<File>();
     for (final File templateFile in templateFiles) {
       final String relativePath = globals.fs.path.relative(
         templateFile.absolute.path,

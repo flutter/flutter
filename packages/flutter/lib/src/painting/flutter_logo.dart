@@ -45,12 +45,11 @@ class FlutterLogoDecoration extends Decoration {
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
-  }) : _position =
-           identical(style, FlutterLogoStyle.markOnly)
-               ? 0.0
-               : identical(style, FlutterLogoStyle.horizontal)
-               ? 1.0
-               : -1.0,
+  }) : _position = identical(style, FlutterLogoStyle.markOnly)
+           ? 0.0
+           : identical(style, FlutterLogoStyle.horizontal)
+           ? 1.0
+           : -1.0,
        _opacity = 1.0;
 
   const FlutterLogoDecoration._(
@@ -251,10 +250,9 @@ class _FlutterLogoPainter extends BoxPainter {
       textDirection: TextDirection.ltr,
     );
     _textPainter.layout();
-    final ui.TextBox textSize =
-        _textPainter
-            .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: kLabel.length))
-            .single;
+    final ui.TextBox textSize = _textPainter
+        .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: kLabel.length))
+        .single;
     _textBoundingRect = Rect.fromLTRB(textSize.left, textSize.top, textSize.right, textSize.bottom);
   }
 
@@ -287,28 +285,25 @@ class _FlutterLogoPainter extends BoxPainter {
     final Paint trianglePaint = Paint()..shader = triangleGradient;
 
     // Draw the basic shape.
-    final Path topBeam =
-        Path()
-          ..moveTo(37.7, 128.9)
-          ..lineTo(9.8, 101.0)
-          ..lineTo(100.4, 10.4)
-          ..lineTo(156.2, 10.4);
+    final Path topBeam = Path()
+      ..moveTo(37.7, 128.9)
+      ..lineTo(9.8, 101.0)
+      ..lineTo(100.4, 10.4)
+      ..lineTo(156.2, 10.4);
     canvas.drawPath(topBeam, lightPaint);
 
-    final Path middleBeam =
-        Path()
-          ..moveTo(156.2, 94.0)
-          ..lineTo(100.4, 94.0)
-          ..lineTo(78.5, 115.9)
-          ..lineTo(106.4, 143.8);
+    final Path middleBeam = Path()
+      ..moveTo(156.2, 94.0)
+      ..lineTo(100.4, 94.0)
+      ..lineTo(78.5, 115.9)
+      ..lineTo(106.4, 143.8);
     canvas.drawPath(middleBeam, lightPaint);
 
-    final Path bottomBeam =
-        Path()
-          ..moveTo(79.5, 170.7)
-          ..lineTo(100.4, 191.6)
-          ..lineTo(156.2, 191.6)
-          ..lineTo(107.4, 142.8);
+    final Path bottomBeam = Path()
+      ..moveTo(79.5, 170.7)
+      ..lineTo(100.4, 191.6)
+      ..lineTo(156.2, 191.6)
+      ..lineTo(107.4, 142.8);
     canvas.drawPath(bottomBeam, darkPaint);
 
     // The overlap between middle and bottom beam.
@@ -326,11 +321,10 @@ class _FlutterLogoPainter extends BoxPainter {
     canvas.restore();
 
     // The gradients below the middle beam on top of the bottom beam.
-    final Path triangle =
-        Path()
-          ..moveTo(79.5, 170.7)
-          ..lineTo(120.9, 156.4)
-          ..lineTo(107.4, 142.8);
+    final Path triangle = Path()
+      ..moveTo(79.5, 170.7)
+      ..lineTo(120.9, 156.4)
+      ..lineTo(107.4, 142.8);
     canvas.drawPath(triangle, trianglePaint);
 
     canvas.restore();
@@ -408,12 +402,11 @@ class _FlutterLogoPainter extends BoxPainter {
         canvas.save();
         if (_config._position < 1.0) {
           final Offset center = logoSquare.center;
-          final Path path =
-              Path()
-                ..moveTo(center.dx, center.dy)
-                ..lineTo(center.dx + rect.width, center.dy - rect.width)
-                ..lineTo(center.dx + rect.width, center.dy + rect.width)
-                ..close();
+          final Path path = Path()
+            ..moveTo(center.dx, center.dy)
+            ..lineTo(center.dx + rect.width, center.dy - rect.width)
+            ..lineTo(center.dx + rect.width, center.dy + rect.width)
+            ..close();
           canvas.clipPath(path);
         }
         canvas.translate(textOffset.dx, textOffset.dy);

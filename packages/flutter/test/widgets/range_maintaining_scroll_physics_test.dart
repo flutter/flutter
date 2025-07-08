@@ -55,11 +55,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListView.builder(
-          itemBuilder:
-              (BuildContext context, int index) =>
-                  index == 0
-                      ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-                      : Container(height: 300, color: Colors.red),
+          itemBuilder: (BuildContext context, int index) => index == 0
+              ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+              : Container(height: 300, color: Colors.red),
           itemCount: 2,
         ),
       ),
@@ -104,11 +102,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListView.builder(
-          itemBuilder:
-              (BuildContext context, int index) =>
-                  index == 0
-                      ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-                      : Container(height: 300, color: Colors.red),
+          itemBuilder: (BuildContext context, int index) => index == 0
+              ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+              : Container(height: 300, color: Colors.red),
           itemCount: 2,
         ),
       ),
@@ -174,11 +170,9 @@ void main() {
           },
           child: ListView.builder(
             physics: const RangeMaintainingScrollPhysics(parent: BouncingScrollPhysics()),
-            itemBuilder:
-                (BuildContext context, int index) =>
-                    index == 0
-                        ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-                        : Container(height: 300, color: Colors.red),
+            itemBuilder: (BuildContext context, int index) => index == 0
+                ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+                : Container(height: 300, color: Colors.red),
             itemCount: 2,
           ),
         ),
@@ -306,7 +300,10 @@ void main() {
               height: 100.0,
               child: ListView(
                 children: <Widget>[
-                  SizedBox(height: itemExtent, child: Placeholder(key: key)),
+                  SizedBox(
+                    height: itemExtent,
+                    child: Placeholder(key: key),
+                  ),
                   if (twoItems) const SizedBox(height: itemExtent, child: Placeholder()),
                 ],
               ),
@@ -376,7 +373,11 @@ class TabBarDemo extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             bottom: const TabBar(
-              tabs: <Widget>[Tab(text: 'car'), Tab(text: 'transit'), Tab(text: 'bike')],
+              tabs: <Widget>[
+                Tab(text: 'car'),
+                Tab(text: 'transit'),
+                Tab(text: 'bike'),
+              ],
             ),
             title: const Text('Tabs Demo'),
           ),

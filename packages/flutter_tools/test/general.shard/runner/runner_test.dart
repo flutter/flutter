@@ -34,6 +34,7 @@ void main() {
     int? firstExitCode;
     late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
+    late FakeStdio fakeStdio;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -58,6 +59,7 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      fakeStdio = FakeStdio();
     });
 
     tearDown(() {
@@ -105,18 +107,72 @@ void main() {
         expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
         Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'error handling crash report (bot)',
+      () async {
+        final Completer<void> completer = Completer<void>();
+        // runner.run() asynchronously calls the exit function set above, so we
+        // catch it in a zone.
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>['crash'],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report on a bot',
+        );
+
+        expect(
+          fakeStdio.writtenToStderr,
+          contains(contains('Feature flags enabled:')),
+          reason: 'Should emit feature flags (ignore specifics for test stability)',
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+        BotDetector: () => const FakeBotDetector(true),
+        io.Stdio: () => fakeStdio,
       },
     );
 
@@ -160,18 +216,15 @@ void main() {
         await completer.future;
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
@@ -234,22 +287,23 @@ void main() {
         expect(sentDetails.command, 'flutter crash');
         expect(sentDetails.error.toString(), 'Exception: an exception % --');
         expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+        expect(
+          await sentDetails.doctorText.text,
+          stringContainsInOrder(<String>['[!] Flutter', 'Dart version 12']),
+          reason: 'Captures flutter doctor -v, which includes Dart version',
+        );
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
@@ -282,6 +336,7 @@ void main() {
         fileSystem.currentDirectory = currentDirectory;
         inTestSetup = false;
       });
+
       testUsingContext(
         'create local report in temporary directory',
         () async {
@@ -345,19 +400,19 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
-          Platform:
-              () => FakePlatform(
-                environment: <String, String>{
-                  'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                  'FLUTTER_ROOT': '/',
-                },
-              ),
+          Platform: () => FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+              'FLUTTER_ROOT': '/',
+            },
+          ),
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
           CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-          HttpClientFactory: () => () => FakeHttpClient.any(),
+          HttpClientFactory: () =>
+              () => FakeHttpClient.any(),
         },
       );
     });

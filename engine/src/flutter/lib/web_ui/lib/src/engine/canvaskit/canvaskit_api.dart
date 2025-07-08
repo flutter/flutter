@@ -1145,10 +1145,9 @@ Float32List toSkPoint(ui.Offset offset) {
 }
 
 /// Color stops used when the framework specifies `null`.
-final Float32List _kDefaultSkColorStops =
-    Float32List(2)
-      ..[0] = 0
-      ..[1] = 1;
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
 
 /// Converts a list of color stops into a Skia-compatible JS array or color stops.
 ///

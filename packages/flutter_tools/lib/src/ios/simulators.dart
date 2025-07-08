@@ -584,13 +584,13 @@ class IOSSimulator extends Device {
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
         : globals.fs.path.join(
-          globals.fsUtils.homeDirPath!,
-          'Library',
-          'Logs',
-          'CoreSimulator',
-          id,
-          'system.log',
-        );
+            globals.fsUtils.homeDirPath!,
+            'Library',
+            'Logs',
+            'CoreSimulator',
+            id,
+            'system.log',
+          );
   }
 
   @override

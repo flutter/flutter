@@ -113,11 +113,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
@@ -221,9 +220,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     request.addEventListener(
       'error',
       ((JSObject e) => completer.completeError(
-            image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
-          ))
-          .toJS,
+        image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
+      )).toJS,
     );
 
     request.send();

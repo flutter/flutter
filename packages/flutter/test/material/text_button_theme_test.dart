@@ -27,7 +27,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: TextButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -63,7 +65,9 @@ void main() {
       MaterialApp(
         theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: TextButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -165,10 +169,12 @@ void main() {
           body: Center(
             // If the TextButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.textButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : TextButtonTheme(data: TextButtonThemeData(style: themeStyle), child: child),
+            child: themeStyle == null
+                ? child
+                : TextButtonTheme(
+                    data: TextButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );

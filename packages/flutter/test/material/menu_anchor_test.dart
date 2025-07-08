@@ -339,8 +339,9 @@ void main() {
     );
 
     // Menu bar (horizontal menu).
-    Finder menuMaterial =
-        find.ancestor(of: find.byType(TextButton), matching: find.byType(Material)).first;
+    Finder menuMaterial = find
+        .ancestor(of: find.byType(TextButton), matching: find.byType(Material))
+        .first;
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
@@ -353,8 +354,9 @@ void main() {
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
-    Finder buttonMaterial =
-        find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
+    Finder buttonMaterial = find
+        .descendant(of: find.byType(TextButton), matching: find.byType(Material))
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -367,13 +369,12 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
 
-    menuMaterial =
-        find
-            .ancestor(
-              of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     material = tester.widget<Material>(menuMaterial);
     expect(opened.last, equals(TestMenu.mainMenu1));
@@ -386,13 +387,12 @@ void main() {
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
-    buttonMaterial =
-        find
-            .descendant(
-              of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -425,13 +425,12 @@ void main() {
     );
 
     // Menu bar (horizontal menu).
-    Finder menuMaterial =
-        find
-            .ancestor(
-              of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    Finder menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
@@ -444,13 +443,12 @@ void main() {
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
-    Finder buttonMaterial =
-        find
-            .descendant(
-              of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    Finder buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -461,13 +459,12 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu2.label));
     await tester.pump();
 
-    menuMaterial =
-        find
-            .ancestor(
-              of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     material = tester.widget<Material>(menuMaterial);
     expect(material.color, themeData.colorScheme.surfaceContainer);
@@ -479,13 +476,12 @@ void main() {
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
-    buttonMaterial =
-        find
-            .descendant(
-              of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
-              matching: find.byType(Material),
-            )
-            .first;
+    buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -590,7 +586,10 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              MenuBar(controller: controller, children: createTestMenus(onPressed: onMenuSelected)),
+              MenuBar(
+                controller: controller,
+                children: createTestMenus(onPressed: onMenuSelected),
+              ),
               ElevatedButton(
                 autofocus: true,
                 onPressed: () {},
@@ -678,7 +677,9 @@ void main() {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                    Expanded(
+                      child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                    ),
                   ],
                 ),
                 const Expanded(child: Placeholder()),
@@ -741,7 +742,9 @@ void main() {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                      Expanded(
+                        child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                      ),
                     ],
                   ),
                   const Expanded(child: Placeholder()),
@@ -809,8 +812,9 @@ void main() {
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
-      final Finder findMenuScope =
-          find.ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope)).first;
+      final Finder findMenuScope = find
+          .ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope))
+          .first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
@@ -850,10 +854,9 @@ void main() {
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
-      final Finder findMenuScope =
-          find
-              .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
-              .first;
+      final Finder findMenuScope = find
+          .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
+          .first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
@@ -904,10 +907,9 @@ void main() {
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
-      final Finder findMenuScope =
-          find
-              .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
-              .first;
+      final Finder findMenuScope = find
+          .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
+          .first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
@@ -936,10 +938,9 @@ void main() {
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
-      final Finder findMenuScope =
-          find
-              .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
-              .first;
+      final Finder findMenuScope = find
+          .ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope))
+          .first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
@@ -969,7 +970,9 @@ void main() {
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
                       children: <Widget>[
-                        Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                        Expanded(
+                          child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                        ),
                       ],
                     ),
                   ),
@@ -1035,7 +1038,9 @@ void main() {
                       padding: const EdgeInsets.all(12.0),
                       child: Row(
                         children: <Widget>[
-                          Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                          Expanded(
+                            child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                          ),
                         ],
                       ),
                     ),
@@ -1347,11 +1352,10 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       menuBar.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(
         description.join('\n'),
@@ -3028,11 +3032,10 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       submenu.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(
         description,
@@ -3218,7 +3221,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/147479.
     testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SizedBox(width: 200, child: MenuItemButton()))),
+        const MaterialApp(
+          home: Scaffold(body: SizedBox(width: 200, child: MenuItemButton())),
+        ),
       );
 
       expect(tester.takeException(), isNull);
@@ -3262,7 +3267,9 @@ void main() {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                    Expanded(
+                      child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                    ),
                   ],
                 ),
                 const Expanded(child: Placeholder()),
@@ -3306,7 +3313,9 @@ void main() {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Expanded(child: MenuBar(children: createTestMenus(onPressed: onPressed))),
+                      Expanded(
+                        child: MenuBar(children: createTestMenus(onPressed: onPressed)),
+                      ),
                     ],
                   ),
                   const Expanded(child: Placeholder()),
@@ -3739,12 +3748,11 @@ void main() {
               child: Column(
                 children: <Widget>[
                   MenuBar(
-                    style:
-                        menuPadding != null
-                            ? MenuStyle(
-                              padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding),
-                            )
-                            : null,
+                    style: menuPadding != null
+                        ? MenuStyle(
+                            padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding),
+                          )
+                        : null,
                     children: createTestMenus(onPressed: onPressed),
                   ),
                   const Expanded(child: Placeholder()),
@@ -4421,8 +4429,9 @@ void main() {
       );
 
       // Test menu button text style uses the TextTheme.labelLarge.
-      Finder buttonMaterial =
-          find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
+      Finder buttonMaterial = find
+          .descendant(of: find.byType(TextButton), matching: find.byType(Material))
+          .first;
       Material material = tester.widget<Material>(buttonMaterial);
       expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
       expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
@@ -4434,13 +4443,12 @@ void main() {
       await tester.pump();
 
       // Test menu item text style uses the TextTheme.labelLarge.
-      buttonMaterial =
-          find
-              .descendant(
-                of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-                matching: find.byType(Material),
-              )
-              .first;
+      buttonMaterial = find
+          .descendant(
+            of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+            matching: find.byType(Material),
+          )
+          .first;
       material = tester.widget<Material>(buttonMaterial);
       expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
       expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
@@ -4896,10 +4904,9 @@ void main() {
                   menuChildren: <Widget>[
                     SubmenuButton(
                       submenuIcon: icon,
-                      menuChildren:
-                          enabled
-                              ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
-                              : <Widget>[],
+                      menuChildren: enabled
+                          ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
+                          : <Widget>[],
                       child: Text(TestMenu.subSubMenu110.label),
                     ),
                   ],

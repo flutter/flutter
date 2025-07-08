@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -13,18 +14,39 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
+import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'utils/project_testing_utils.dart';
+import '../../../src/common.dart';
+import '../../../src/context.dart';
+import '../../../src/fake_devices.dart';
+import '../../../src/fakes.dart';
+import '../../../src/test_flutter_command_runner.dart';
+import '../utils/project_testing_utils.dart';
+
+class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreviewDtdServices {
+  @override
+  Future<void> connect({required Uri dtdWsUri}) async {}
+
+  @override
+  DtdLauncher get dtdLauncher => throw UnimplementedError();
+
+  @override
+  Uri? get dtdUri => Uri();
+
+  @override
+  Future<void> launchAndConnect() async {}
+}
 
 void main() {
   late Directory originalCwd;
@@ -37,6 +59,8 @@ void main() {
   LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
   late BotDetector botDetector;
   late Platform platform;
+  late FakeDeviceManager fakeDeviceManager;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() async {
     originalCwd = globals.fs.currentDirectory;
@@ -48,6 +72,20 @@ void main() {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     mockStdio = FakeStdio();
     platform = FakePlatform.fromPlatform(const LocalPlatform());
+
+    // Create a fake device manager which only contains a single Chrome device.
+    const String kChromeDeviceId = 'chrome-id';
+    final FakeDevice fakeChromeDevice = FakeDevice('chrome', kChromeDeviceId)
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
+    fakeDeviceManager = FakeDeviceManager()
+      ..addAttachedDevice(fakeChromeDevice)
+      ..specifiedDeviceId = kChromeDeviceId;
+
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+
     // Most, but not all, tests will run some variant of "pub get" after creation,
     // which in turn will check for the presence of the Flutter SDK root. Without
     // this field set consistently, the order of the tests becomes important *or*
@@ -86,11 +124,24 @@ void main() {
           platform: platform,
         ),
         artifacts: Artifacts.test(),
-        processManager: FakeProcessManager.any(),
+        processManager: loggingProcessManager,
+        dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
   }
+
+  void expectNPreviewLaunchTimingEvents(int n) {
+    final Iterable<Event> launchTimingEvent = fakeAnalytics.sentEvents.where(
+      (Event e) =>
+          e.eventData['workflow'] == WidgetPreviewAnalytics.kWorkflow &&
+          e.eventData['variableName'] == WidgetPreviewAnalytics.kLaunchTime,
+    );
+    expect(launchTimingEvent, hasLength(n));
+  }
+
+  void expectNoPreviewLaunchTimingEvents() => expectNPreviewLaunchTimingEvents(0);
+  void expectSinglePreviewLaunchTimingEvent() => expectNPreviewLaunchTimingEvents(1);
 
   Future<void> startWidgetPreview({
     required Directory? rootProject,
@@ -138,6 +189,7 @@ void main() {
         } on ToolExit catch (e) {
           expect(e.message, contains('Could not find foo'));
         }
+        expectNoPreviewLaunchTimingEvents();
       });
 
       testUsingContext('more than one project directory is provided', () async {
@@ -147,6 +199,7 @@ void main() {
         } on ToolExit catch (e) {
           expect(e.message, contains('Only one directory should be provided.'));
         }
+        expectNoPreviewLaunchTimingEvents();
       });
 
       testUsingContext('run outside of a Flutter project directory', () async {
@@ -156,6 +209,7 @@ void main() {
         } on ToolExit catch (e) {
           expect(e.message, contains('${tempDir.path} is not a valid Flutter project.'));
         }
+        expectNoPreviewLaunchTimingEvents();
       });
     });
 
@@ -164,19 +218,21 @@ void main() {
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
+        expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -187,19 +243,21 @@ void main() {
         // Try to execute using the CWD.
         fs.currentDirectory = rootProject;
         await startWidgetPreview(rootProject: null);
+        expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -217,6 +275,7 @@ import 'package:flutter_project/foo.dart' as _i2;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(
+        packageName: 'flutter_project',
         name: 'preview',
         builder: () => _i2.preview(),
       )
@@ -241,17 +300,19 @@ List<_i1.WidgetPreview> previews() => [
 
         await startWidgetPreview(rootProject: rootProject);
         expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -277,19 +338,21 @@ List<_i1.WidgetPreview> previews() => [
         await startWidgetPreview(rootProject: null);
 
         expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
+        expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -298,18 +361,19 @@ List<_i1.WidgetPreview> previews() => [
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
-        await cleanWidgetPreview(rootProject: rootProject);
+        expectSinglePreviewLaunchTimingEvent();
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -353,16 +417,17 @@ List<_i1.WidgetPreview> previews() => [
         );
       },
       overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });

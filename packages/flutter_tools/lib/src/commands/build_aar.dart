@@ -124,10 +124,10 @@ class BuildAarCommand extends BuildSubCommand {
     final String? buildNumberArg = stringArg('build-number');
     final String buildNumber =
         argParser.options.containsKey('build-number') &&
-                buildNumberArg != null &&
-                buildNumberArg.isNotEmpty
-            ? buildNumberArg
-            : '1.0';
+            buildNumberArg != null &&
+            buildNumberArg.isNotEmpty
+        ? buildNumberArg
+        : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
@@ -160,8 +160,9 @@ class BuildAarCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final String buildLabel =
-        impellerEnabled ? 'manifest-aar-impeller-enabled' : 'manifest-aar-impeller-disabled';
+    final String buildLabel = impellerEnabled
+        ? 'manifest-aar-impeller-enabled'
+        : 'manifest-aar-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();

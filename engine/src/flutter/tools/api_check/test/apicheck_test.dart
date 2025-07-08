@@ -48,20 +48,19 @@ void checkApiConsistency(String flutterRoot) {
       enumName: 'AccessibilityFeatureFlag',
     );
     // Java values: FOO_BAR(1 << N).
-    final List<String> javaEnumValues =
-        getJavaEnumValues(
-          sourcePath: path.join(
-            flutterRoot,
-            'shell',
-            'platform',
-            'android',
-            'io',
-            'flutter',
-            'view',
-            'AccessibilityBridge.java',
-          ),
-          enumName: 'AccessibilityFeature',
-        ).map(allCapsToCamelCase).toList();
+    final List<String> javaEnumValues = getJavaEnumValues(
+      sourcePath: path.join(
+        flutterRoot,
+        'shell',
+        'platform',
+        'android',
+        'io',
+        'flutter',
+        'view',
+        'AccessibilityBridge.java',
+      ),
+      enumName: 'AccessibilityFeature',
+    ).map(allCapsToCamelCase).toList();
 
     expect(embedderEnumValues, uiFields);
     expect(internalEnumValues, uiFields);
@@ -89,20 +88,19 @@ void checkApiConsistency(String flutterRoot) {
       enumName: 'SemanticsAction',
     );
     // Java values: FOO_BAR(1 << N).
-    final List<String> javaEnumValues =
-        getJavaEnumValues(
-          sourcePath: path.join(
-            flutterRoot,
-            'shell',
-            'platform',
-            'android',
-            'io',
-            'flutter',
-            'view',
-            'AccessibilityBridge.java',
-          ),
-          enumName: 'Action',
-        ).map(allCapsToCamelCase).toList();
+    final List<String> javaEnumValues = getJavaEnumValues(
+      sourcePath: path.join(
+        flutterRoot,
+        'shell',
+        'platform',
+        'android',
+        'io',
+        'flutter',
+        'view',
+        'AccessibilityBridge.java',
+      ),
+      enumName: 'Action',
+    ).map(allCapsToCamelCase).toList();
 
     expect(webuiFields, uiFields);
     expect(embedderEnumValues, uiFields);
@@ -126,22 +124,21 @@ void checkApiConsistency(String flutterRoot) {
       enumName: 'AppLifecycleState',
     );
     // Java values: FOO_BAR(1 << N).
-    final List<String> javaEnumValues =
-        getJavaEnumValues(
-          sourcePath: path.join(
-            flutterRoot,
-            'shell',
-            'platform',
-            'android',
-            'io',
-            'flutter',
-            'embedding',
-            'engine',
-            'systemchannels',
-            'LifecycleChannel.java',
-          ),
-          enumName: 'AppLifecycleState',
-        ).map(allCapsToCamelCase).toList();
+    final List<String> javaEnumValues = getJavaEnumValues(
+      sourcePath: path.join(
+        flutterRoot,
+        'shell',
+        'platform',
+        'android',
+        'io',
+        'flutter',
+        'embedding',
+        'engine',
+        'systemchannels',
+        'LifecycleChannel.java',
+      ),
+      enumName: 'AppLifecycleState',
+    ).map(allCapsToCamelCase).toList();
 
     expect(webuiFields, uiFields);
     expect(internalEnumValues, uiFields);

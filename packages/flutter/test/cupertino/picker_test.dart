@@ -743,28 +743,27 @@ void main() {
                 itemExtent: 55,
                 diameterRatio: 0.9,
                 onSelectedItemChanged: (int index) {},
-                children:
-                    children
-                        .map<Widget>(
-                          (int index) => GestureDetector(
-                            key: ValueKey<int>(index),
-                            onTap: () {
-                              tappedChildren.add(index);
-                            },
-                            child: SizedBox(
-                              width: 55,
-                              height: 55,
-                              child: CustomPaint(
-                                painter: TestCallbackPainter(
-                                  onPaint: () {
-                                    paintedChildren.add(index);
-                                  },
-                                ),
-                              ),
+                children: children
+                    .map<Widget>(
+                      (int index) => GestureDetector(
+                        key: ValueKey<int>(index),
+                        onTap: () {
+                          tappedChildren.add(index);
+                        },
+                        child: SizedBox(
+                          width: 55,
+                          height: 55,
+                          child: CustomPaint(
+                            painter: TestCallbackPainter(
+                              onPaint: () {
+                                paintedChildren.add(index);
+                              },
                             ),
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),

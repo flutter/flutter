@@ -8,7 +8,8 @@ class ChipTemplate extends TokenTemplate {
   const ChipTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 {
   final String testString = 'This is chip_template.dart class.';
 }

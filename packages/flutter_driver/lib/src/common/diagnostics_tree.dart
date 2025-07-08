@@ -57,12 +57,12 @@ class GetDiagnosticsTree extends CommandWithTarget {
   final DiagnosticsType diagnosticsType;
 
   @override
-  Map<String, String> serialize() =>
-      super.serialize()..addAll(<String, String>{
-        'subtreeDepth': subtreeDepth.toString(),
-        'includeProperties': includeProperties.toString(),
-        'diagnosticsType': _diagnosticsTypeIndex.toSimpleName(diagnosticsType),
-      });
+  Map<String, String> serialize() => super.serialize()
+    ..addAll(<String, String>{
+      'subtreeDepth': subtreeDepth.toString(),
+      'includeProperties': includeProperties.toString(),
+      'diagnosticsType': _diagnosticsTypeIndex.toSimpleName(diagnosticsType),
+    });
 
   @override
   String get kind => 'get_diagnostics_tree';

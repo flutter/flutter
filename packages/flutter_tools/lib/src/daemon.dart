@@ -158,10 +158,9 @@ class DaemonInputStreamConverter {
       return chunk.length;
     } else {
       final int chunkRemainingLength = chunk.length - start;
-      final int sizeToRead =
-          chunkRemainingLength < remainingBinaryLength
-              ? chunkRemainingLength
-              : remainingBinaryLength;
+      final int sizeToRead = chunkRemainingLength < remainingBinaryLength
+          ? chunkRemainingLength
+          : remainingBinaryLength;
       currentBinaryStream.add(chunk.sublist(start, start + sizeToRead));
       return sizeToRead;
     }

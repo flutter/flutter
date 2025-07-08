@@ -381,19 +381,17 @@ class PaintingContext extends ClipContext {
     }
     assert(() {
       if (debugRepaintRainbowEnabled) {
-        final Paint paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 6.0
-              ..color = debugCurrentRepaintColor.toColor();
+        final Paint paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6.0
+          ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(estimatedBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
-        final Paint paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.0
-              ..color = const Color(0xFFFF9800);
+        final Paint paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFF9800);
         canvas.drawRect(estimatedBounds, paint);
       }
       return true;
@@ -777,10 +775,9 @@ class PaintingContext extends ClipContext {
     PaintingContextCallback painter, {
     TransformLayer? oldLayer,
   }) {
-    final Matrix4 effectiveTransform =
-        Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-          ..multiply(transform)
-          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
+    final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+      ..multiply(transform)
+      ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;
@@ -2084,20 +2081,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         stack: stack,
         library: 'rendering library',
         context: ErrorDescription('during $method()'),
-        informationCollector:
-            () => <DiagnosticsNode>[
-              // debugCreator should always be null outside of debugMode, but we want
-              // the tree shaker to notice this.
-              if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
-              describeForError(
-                'The following RenderObject was being processed when the exception was fired',
-              ),
-              // TODO(jacobr): this error message has a code smell. Consider whether
-              // displaying the truncated children is really useful for command line
-              // users. Inspector users can see the full tree by clicking on the
-              // render object so this may not be that useful.
-              describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          // debugCreator should always be null outside of debugMode, but we want
+          // the tree shaker to notice this.
+          if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
+          describeForError(
+            'The following RenderObject was being processed when the exception was fired',
+          ),
+          // TODO(jacobr): this error message has a code smell. Consider whether
+          // displaying the truncated children is really useful for command line
+          // users. Inspector users can see the full tree by clicking on the
+          // render object so this may not be that useful.
+          describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
+        ],
       ),
     );
   }
@@ -2211,8 +2207,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
 
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
-      final String culpritMethodName =
-          debugActiveLayout.debugDoingThisLayout ? 'performLayout' : 'performResize';
+      final String culpritMethodName = debugActiveLayout.debugDoingThisLayout
+          ? 'performLayout'
+          : 'performResize';
       final String culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
       result = false;
 
@@ -2254,11 +2251,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         'A $runtimeType was mutated in $culpritFullMethodName.',
       );
       final bool isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
-      final String description =
-          isMutatedByAncestor
-              ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
-              : 'A RenderObject must not mutate another RenderObject from a different render subtree '
-                  'in its $culpritMethodName method.';
+      final String description = isMutatedByAncestor
+          ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
+          : 'A RenderObject must not mutate another RenderObject from a different render subtree '
+                'in its $culpritMethodName method.';
 
       throw FlutterError.fromParts(<DiagnosticsNode>[
         summary,
@@ -2681,8 +2677,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
             final Match? targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
             final String? problemFunction =
                 (targetFrameMatch != null && targetFrameMatch.groupCount > 0)
-                    ? targetFrameMatch.group(1)
-                    : stack[targetFrame].trim();
+                ? targetFrameMatch.group(1)
+                : stack[targetFrame].trim();
             return <DiagnosticsNode>[
               ErrorDescription(
                 "These invalid constraints were provided to $runtimeType's layout() "
@@ -4607,6 +4603,7 @@ final class _SemanticsParentData {
     required this.blocksUserActions,
     required this.explicitChildNodes,
     required this.tagsForChildren,
+    required this.localeForChildren,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -4633,12 +4630,15 @@ final class _SemanticsParentData {
   /// [_RenderObjectSemantics.shouldFormSemanticsNode] is true.
   final Set<SemanticsTag>? tagsForChildren;
 
+  final Locale? localeForChildren;
+
   @override
   bool operator ==(Object other) {
     return other is _SemanticsParentData &&
         other.mergeIntoParent == mergeIntoParent &&
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
+        other.localeForChildren == localeForChildren &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -4648,6 +4648,7 @@ final class _SemanticsParentData {
       mergeIntoParent,
       blocksUserActions,
       explicitChildNodes,
+      localeForChildren,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -4783,8 +4784,10 @@ class _IncompleteSemanticsFragment extends _SemanticsFragment {
   }
 }
 
-typedef _MergeUpAndSiblingMergeGroups =
-    (List<_SemanticsFragment> mergeUp, List<List<_SemanticsFragment>> siblingMergeGroups);
+typedef _MergeUpAndSiblingMergeGroups = (
+  List<_SemanticsFragment> mergeUp,
+  List<List<_SemanticsFragment>> siblingMergeGroups,
+);
 
 /// A wrapper class for a [RenderObject] that provides semantics related
 /// properties and compilations.
@@ -5037,6 +5040,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
+    // localeForSubtree from the config overrides parentData's inherited locale.
+    final Locale? localeForChildren =
+        configProvider.effective.localeForSubtree ?? parentData?.localeForChildren;
+
     siblingMergeGroups.clear();
     mergeUp.clear();
     final _SemanticsParentData childParentData = _SemanticsParentData(
@@ -5044,6 +5051,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
+      localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
     );
@@ -5060,12 +5068,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
 
-      final Iterable<SemanticsConfiguration> mergeUpConfigs =
-          mergeUp
-              .map<SemanticsConfiguration?>(
-                (_SemanticsFragment fragment) => fragment.configToMergeUp,
-              )
-              .whereType<SemanticsConfiguration>();
+      final Iterable<SemanticsConfiguration> mergeUpConfigs = mergeUp
+          .map<SemanticsConfiguration?>((_SemanticsFragment fragment) => fragment.configToMergeUp)
+          .whereType<SemanticsConfiguration>();
       configProvider.absorbAll(mergeUpConfigs);
       // merge up fragments below this object will not be visible to parent
       // because they are either absorbed or will form a semantics node.
@@ -5093,6 +5098,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
         configProvider.updateConfig((SemanticsConfiguration config) {
           config.isBlockingUserActions = blocksUserAction;
+        });
+      }
+      if (localeForChildren != configProvider.effective.locale) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.locale = localeForChildren;
         });
       }
     }
@@ -5163,6 +5173,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         blocksUserActions: childParentData.blocksUserActions,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
+        localeForChildren: childParentData.localeForChildren,
       );
     } else {
       effectiveChildParentData = childParentData;
@@ -5289,15 +5300,15 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       );
       child._updateGeometry(newGeometry: childGeometry);
     }
-    for (final _RenderObjectSemantics explicitSiblingChild in siblingMergeGroups
-        .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
-        .whereType<_RenderObjectSemantics>()
-        .expand(
-          (_RenderObjectSemantics siblingChild) =>
-              siblingChild.shouldFormSemanticsNode
+    for (final _RenderObjectSemantics explicitSiblingChild
+        in siblingMergeGroups
+            .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
+            .whereType<_RenderObjectSemantics>()
+            .expand(
+              (_RenderObjectSemantics siblingChild) => siblingChild.shouldFormSemanticsNode
                   ? <_RenderObjectSemantics>[siblingChild]
                   : siblingChild._children,
-        )) {
+            )) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: parentGeometry.paintClipRect,
         parentSemanticsClipRect: parentGeometry.semanticsClipRect,
@@ -5489,14 +5500,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         _producedSiblingNodesAndOwners[node] = group;
         semanticsNodes.add(node);
 
-        final Set<SemanticsTag> tags =
-            group
-                .map<Set<SemanticsTag>?>(
-                  (_SemanticsFragment fragment) => fragment.owner.parentData!.tagsForChildren,
-                )
-                .whereType<Set<SemanticsTag>>()
-                .expand<SemanticsTag>((Set<SemanticsTag> tags) => tags)
-                .toSet();
+        final Set<SemanticsTag> tags = group
+            .map<Set<SemanticsTag>?>(
+              (_SemanticsFragment fragment) => fragment.owner.parentData!.tagsForChildren,
+            )
+            .whereType<Set<SemanticsTag>>()
+            .expand<SemanticsTag>((Set<SemanticsTag> tags) => tags)
+            .toSet();
         // This fragment is only allowed to add tags into the node instead of
         // cleaning it since some of the tags may be added by the parent fragment
         // who actually take these node as their siblings.
@@ -5981,11 +5991,10 @@ final class _SemanticsGeometry {
     _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
     parent.applyPaintTransform(child, _temporaryTransformHolder);
 
-    final Rect paintClipRect =
-        _transformRect(
-          _intersectRects(additionalPaintClip, parentPaintClipRect),
-          _temporaryTransformHolder,
-        )!;
+    final Rect paintClipRect = _transformRect(
+      _intersectRects(additionalPaintClip, parentPaintClipRect),
+      _temporaryTransformHolder,
+    )!;
     final Rect? semanticsClip =
         parent.describeSemanticsClip(child) ??
         _intersectRects(parentSemanticsClipRect, additionalPaintClip);

@@ -26,7 +26,9 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: false, onChanged: (bool? b) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: false, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -42,7 +44,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: true, onChanged: (bool? b) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: true, onChanged: (bool? b) {})),
+      ),
     );
 
     expect(
@@ -376,14 +380,13 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return CupertinoCheckbox(
                 value: value,
-                onChanged:
-                    enabled
-                        ? (bool? newValue) {
-                          setState(() {
-                            value = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (bool? newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 autofocus: true,
               );
             },
@@ -845,7 +848,9 @@ void main() {
     const Color pressedDarkShadow = Color(0x26ffffff);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: false, onChanged: (_) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: false, onChanged: (_) {})),
+      ),
     );
 
     final TestGesture gesture1 = await tester.startGesture(
@@ -863,7 +868,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoCheckbox(value: true, onChanged: (_) {}))),
+      CupertinoApp(
+        home: Center(child: CupertinoCheckbox(value: true, onChanged: (_) {})),
+      ),
     );
 
     final TestGesture gesture2 = await tester.startGesture(

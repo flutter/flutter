@@ -163,28 +163,28 @@ Future<void> testMain() async {
 
     // test getTangentForOffset with vertical line
     final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
-    final PathMetrics simpleMetricsVertical =
-        simpleVerticalLine.computeMetrics()..iterator.moveNext();
+    final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()
+      ..iterator.moveNext();
     final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0)!;
     expect(posTanVertical.position, equals(const Offset(0.0, 5.0)));
     expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
     // test getTangentForOffset with diagonal line
     final Path simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
-    final PathMetrics simpleMetricsDiagonal =
-        simpleDiagonalLine.computeMetrics()..iterator.moveNext();
+    final PathMetrics simpleMetricsDiagonal = simpleDiagonalLine.computeMetrics()
+      ..iterator.moveNext();
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
-    final Tangent posTanDiagonal =
-        simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint)!;
+    final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(
+      midPoint,
+    )!;
     expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
     expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 
     // test a multi-contour path
-    final Path multiContour =
-        Path()
-          ..lineTo(0.0, 10.0)
-          ..moveTo(10.0, 10.0)
-          ..lineTo(10.0, 15.0);
+    final Path multiContour = Path()
+      ..lineTo(0.0, 10.0)
+      ..moveTo(10.0, 10.0)
+      ..lineTo(10.0, 15.0);
 
     final PathMetrics multiContourMetric = multiContour.computeMetrics();
     expect(() => multiContourMetric.iterator.current, throwsRangeError);
@@ -199,12 +199,11 @@ Future<void> testMain() async {
   });
 
   test('PathMetrics can remember lengths and isClosed', () {
-    final Path path =
-        Path()
-          ..lineTo(0, 10)
-          ..close()
-          ..moveTo(0, 15)
-          ..lineTo(10, 15);
+    final Path path = Path()
+      ..lineTo(0, 10)
+      ..close()
+      ..moveTo(0, 15)
+      ..lineTo(10, 15);
     final List<PathMetric> metrics = path.computeMetrics().toList();
     expect(metrics.length, 2);
     expect(metrics[0].length, 20);

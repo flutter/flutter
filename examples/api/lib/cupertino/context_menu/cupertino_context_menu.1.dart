@@ -93,10 +93,9 @@ class ContextMenuExample extends StatelessWidget {
               );
 
               return Container(
-                decoration:
-                    animation.value < CupertinoContextMenu.animationOpensAt
-                        ? boxDecorationAnimation.value
-                        : null,
+                decoration: animation.value < CupertinoContextMenu.animationOpensAt
+                    ? boxDecorationAnimation.value
+                    : null,
                 child: Container(
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemYellow,

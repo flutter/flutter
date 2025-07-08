@@ -330,23 +330,20 @@ void main() {
               animationDuration: kSizeAnimationDuration,
               children: <ExpansionPanel>[
                 ExpansionPanel(
-                  headerBuilder:
-                      (BuildContext context, bool isExpanded) =>
-                          const Placeholder(fallbackHeight: 12.0),
+                  headerBuilder: (BuildContext context, bool isExpanded) =>
+                      const Placeholder(fallbackHeight: 12.0),
                   body: const SizedBox(height: 100.0, child: Placeholder(fallbackHeight: 12.0)),
                   isExpanded: a,
                 ),
                 ExpansionPanel(
-                  headerBuilder:
-                      (BuildContext context, bool isExpanded) =>
-                          const Placeholder(fallbackHeight: 12.0),
+                  headerBuilder: (BuildContext context, bool isExpanded) =>
+                      const Placeholder(fallbackHeight: 12.0),
                   body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: b,
                 ),
                 ExpansionPanel(
-                  headerBuilder:
-                      (BuildContext context, bool isExpanded) =>
-                          const Placeholder(fallbackHeight: 12.0),
+                  headerBuilder: (BuildContext context, bool isExpanded) =>
+                      const Placeholder(fallbackHeight: 12.0),
                   body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: c,
                 ),
@@ -846,10 +843,9 @@ void main() {
 
     ExpansionPanelList buildExpansionPanelList(StateSetter setState) {
       return ExpansionPanelList(
-        expansionCallback:
-            (int index, _) => setState(() {
-              panelExpansionState[index] = !panelExpansionState[index];
-            }),
+        expansionCallback: (int index, _) => setState(() {
+          panelExpansionState[index] = !panelExpansionState[index];
+        }),
         children: <ExpansionPanel>[
           ExpansionPanel(
             isExpanded: panelExpansionState[0],
@@ -882,16 +878,14 @@ void main() {
           return MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child:
-                    isRadioList
-                        ? buildRadioExpansionPanelList()
-                        : buildExpansionPanelList(setState),
+                child: isRadioList
+                    ? buildRadioExpansionPanelList()
+                    : buildExpansionPanelList(setState),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed:
-                    () => setState(() {
-                      isRadioList = !isRadioList;
-                    }),
+                onPressed: () => setState(() {
+                  isRadioList = !isRadioList;
+                }),
               ),
             ),
           );
@@ -2086,10 +2080,9 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    final Finder ignorePointerFinder =
-        find
-            .descendant(of: find.byType(ExpansionPanelList), matching: find.byType(IgnorePointer))
-            .first;
+    final Finder ignorePointerFinder = find
+        .descendant(of: find.byType(ExpansionPanelList), matching: find.byType(IgnorePointer))
+        .first;
 
     final IgnorePointer ignorePointerFalse = tester.widget(ignorePointerFinder);
     expect(ignorePointerFalse.ignoring, isFalse);

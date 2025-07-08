@@ -556,10 +556,9 @@ class OpacityOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() => PlatformViewStyling(
-    position:
-        offset != ui.Offset.zero
-            ? PlatformViewPosition.offset(offset)
-            : const PlatformViewPosition.zero(),
+    position: offset != ui.Offset.zero
+        ? PlatformViewPosition.offset(offset)
+        : const PlatformViewPosition.zero(),
     opacity: alpha.toDouble() / 255.0,
   );
 
@@ -1357,8 +1356,9 @@ class LayerBuilder {
   }
 
   PictureEngineLayer sliceUp() {
-    final int sliceCount =
-        layer.operation.affectsBackdrop ? getCurrentSliceCount() : sliceBuilders.length;
+    final int sliceCount = layer.operation.affectsBackdrop
+        ? getCurrentSliceCount()
+        : sliceBuilders.length;
     final slices = <LayerSlice?>[];
     for (int i = 0; i < sliceCount; i++) {
       final ui.Rect? backdropRect;

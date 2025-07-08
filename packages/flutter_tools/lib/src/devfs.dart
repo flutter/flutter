@@ -667,18 +667,17 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            final Future<DevFSContent?> pending =
-                (() async {
-                  if (entry.transformers.isEmpty || kind != AssetKind.regular) {
-                    return entry.content;
-                  }
-                  return _assetTransformer.retransformAsset(
-                    inputAssetKey: archivePath,
-                    inputAssetContent: entry.content,
-                    transformerEntries: entry.transformers,
-                    workingDirectory: rootDirectory.path,
-                  );
-                })();
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
 
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {

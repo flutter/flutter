@@ -24,8 +24,9 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        endpoints.length > 1 ? endpoints[1] : endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+        ? endpoints[1]
+        : endpoints[0];
     final Offset anchorAbove = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
       globalEditableRegion.top +

@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -65,16 +64,20 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
       },
-      overrides: <Type, Generator>{Analytics: () => FakeAnalytics()},
+      overrides: <Type, Generator>{
+        Analytics: () => getInitializedFakeAnalyticsInstance(
+          fakeFlutterVersion: FakeFlutterVersion(),
+          fs: MemoryFileSystem.test(),
+        ),
+      },
     );
     device = FakeDevice();
     devFS = FakeDevFS();
-    flutterDevice =
-        FakeFlutterDevice()
-          ..testUri = testUri
-          ..vmServiceHost = (() => fakeVmServiceHost)
-          ..device = device
-          ..fakeDevFS = devFS;
+    flutterDevice = FakeFlutterDevice()
+      ..testUri = testUri
+      ..vmServiceHost = (() => fakeVmServiceHost)
+      ..device = device
+      ..fakeDevFS = devFS;
   });
 
   testUsingContext(
@@ -112,8 +115,8 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
@@ -136,8 +139,8 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
@@ -201,8 +204,8 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         applicationBinary: globals.fs.file('app-debug.apk'),
@@ -510,10 +513,9 @@ void main() {
           listViews,
           FakeVmServiceRequest(
             method: 'getVM',
-            jsonResponse:
-                vm_service.VM.parse(<String, Object>{
-                  'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-                })!.toJson(),
+            jsonResponse: vm_service.VM.parse(<String, Object>{
+              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
+            })!.toJson(),
           ),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
@@ -570,10 +572,9 @@ void main() {
           listViews,
           FakeVmServiceRequest(
             method: 'getVM',
-            jsonResponse:
-                vm_service.VM.parse(<String, Object>{
-                  'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-                })!.toJson(),
+            jsonResponse: vm_service.VM.parse(<String, Object>{
+              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
+            })!.toJson(),
           ),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
@@ -637,10 +638,9 @@ void main() {
           listViews,
           FakeVmServiceRequest(
             method: 'getVM',
-            jsonResponse:
-                vm_service.VM.parse(<String, Object>{
-                  'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-                })!.toJson(),
+            jsonResponse: vm_service.VM.parse(<String, Object>{
+              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
+            })!.toJson(),
           ),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
@@ -834,10 +834,9 @@ void main() {
 
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
 
-      final List<Event> hotRunnerInfoEvents =
-          fakeAnalytics.sentEvents
-              .where((Event e) => e.eventName.label == 'hot_runner_info')
-              .toList();
+      final List<Event> hotRunnerInfoEvents = fakeAnalytics.sentEvents
+          .where((Event e) => e.eventName.label == 'hot_runner_info')
+          .toList();
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
@@ -1265,8 +1264,8 @@ flutter:
       globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final FakeResidentCompiler residentCompiler =
-          FakeResidentCompiler()..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
@@ -2015,22 +2014,23 @@ flutter:
       () async {
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
         final FakeDevice device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
-        ddsLauncherCallback = ({
-          required Uri remoteVmServiceUri,
-          Uri? serviceUri,
-          bool enableAuthCodes = true,
-          bool serveDevTools = false,
-          Uri? devToolsServerAddress,
-          bool enableServicePortFallback = false,
-          List<String> cachedUserTags = const <String>[],
-          String? dartExecutable,
-          String? google3WorkspaceRoot,
-        }) {
-          throw DartDevelopmentServiceException.existingDdsInstance(
-            'Existing DDS at http://localhost/existingDdsInMessage.',
-            ddsUri: Uri.parse('http://localhost/existingDdsInField'),
-          );
-        };
+        ddsLauncherCallback =
+            ({
+              required Uri remoteVmServiceUri,
+              Uri? serviceUri,
+              bool enableAuthCodes = true,
+              bool serveDevTools = false,
+              Uri? devToolsServerAddress,
+              bool enableServicePortFallback = false,
+              List<String> cachedUserTags = const <String>[],
+              String? dartExecutable,
+              String? google3WorkspaceRoot,
+            }) {
+              throw DartDevelopmentServiceException.existingDdsInstance(
+                'Existing DDS at http://localhost/existingDdsInMessage.',
+                ddsUri: Uri.parse('http://localhost/existingDdsInField'),
+              );
+            };
         final TestFlutterDevice flutterDevice = TestFlutterDevice(
           device,
           vmServiceUris: Stream<Uri>.value(testUri),
@@ -2051,19 +2051,18 @@ flutter:
         expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
       },
       overrides: <Type, Generator>{
-        VMServiceConnector:
-            () =>
-                (
-                  Uri httpUri, {
-                  ReloadSources? reloadSources,
-                  Restart? restart,
-                  CompileExpression? compileExpression,
-                  FlutterProject? flutterProject,
-                  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                  io.CompressionOptions? compression,
-                  Device? device,
-                  required Logger logger,
-                }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              required Logger logger,
+            }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
       },
     ),
   );
@@ -2075,24 +2074,25 @@ flutter:
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
         final FakeDevice device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
         final Completer<void> done = Completer<void>();
-        ddsLauncherCallback = ({
-          required Uri remoteVmServiceUri,
-          Uri? serviceUri,
-          bool enableAuthCodes = true,
-          bool serveDevTools = false,
-          Uri? devToolsServerAddress,
-          bool enableServicePortFallback = false,
-          List<String> cachedUserTags = const <String>[],
-          String? dartExecutable,
-          String? google3WorkspaceRoot,
-        }) async {
-          expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-          expect(enableAuthCodes, isFalse);
-          expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
-          expect(cachedUserTags, isEmpty);
-          done.complete();
-          return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
-        };
+        ddsLauncherCallback =
+            ({
+              required Uri remoteVmServiceUri,
+              Uri? serviceUri,
+              bool enableAuthCodes = true,
+              bool serveDevTools = false,
+              Uri? devToolsServerAddress,
+              bool enableServicePortFallback = false,
+              List<String> cachedUserTags = const <String>[],
+              String? dartExecutable,
+              String? google3WorkspaceRoot,
+            }) async {
+              expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
+              expect(enableAuthCodes, isFalse);
+              expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
+              expect(cachedUserTags, isEmpty);
+              done.complete();
+              return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
+            };
         final TestFlutterDevice flutterDevice = TestFlutterDevice(
           device,
           vmServiceUris: Stream<Uri>.value(testUri),
@@ -2108,19 +2108,18 @@ flutter:
         await done.future;
       },
       overrides: <Type, Generator>{
-        VMServiceConnector:
-            () =>
-                (
-                  Uri httpUri, {
-                  ReloadSources? reloadSources,
-                  Restart? restart,
-                  CompileExpression? compileExpression,
-                  FlutterProject? flutterProject,
-                  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                  io.CompressionOptions? compression,
-                  Device? device,
-                  required Logger logger,
-                }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              required Logger logger,
+            }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
       },
     ),
   );
@@ -2251,14 +2250,13 @@ flutter:
         sdkNameAndVersion: 'Macos',
       );
       final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-      final FakeFlutterDevice flutterDevice =
-          FakeFlutterDevice()
-            ..testUri = testUri
-            ..vmServiceHost = (() => fakeVmServiceHost)
-            ..device = device
-            ..fakeDevFS = devFS
-            ..targetPlatform = TargetPlatform.darwin
-            ..generator = residentCompiler;
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+        ..testUri = testUri
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..device = device
+        ..fakeDevFS = devFS
+        ..targetPlatform = TargetPlatform.darwin
+        ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -2291,11 +2289,4 @@ flutter:
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
-}
-
-class FakeAnalytics extends Fake implements Analytics {
-  @override
-  void send(Event event) => sentEvents.add(event);
-
-  final List<Event> sentEvents = <Event>[];
 }

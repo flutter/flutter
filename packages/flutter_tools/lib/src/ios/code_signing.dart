@@ -31,7 +31,8 @@ const String _codeSignSelectionCanceled =
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
-const String noCertificatesInstruction = '''
+const String noCertificatesInstruction =
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
@@ -51,7 +52,8 @@ Or run on an iOS simulator without code signing
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
-const String noProvisioningProfileInstruction = '''
+const String noProvisioningProfileInstruction =
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 No Provisioning Profile was found for your project's Bundle Identifier or your\u0020
 device. You can create a new Provisioning Profile for your project in Xcode for\u0020
@@ -70,7 +72,8 @@ Or run on an iOS simulator without code signing
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
-const String noDevelopmentTeamInstruction = '''
+const String noDevelopmentTeamInstruction =
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 Building a deployable iOS app requires a selected Development Team with a\u0020
 Provisioning Profile. Please ensure that a Development Team is selected by:
@@ -403,14 +406,13 @@ class XcodeCodeSigningSettings {
   Future<List<String>> _getSigningIdentities() async {
     String findIdentityStdout;
     try {
-      findIdentityStdout =
-          (await _processUtils.run(<String>[
-            'security',
-            'find-identity',
-            '-p',
-            'codesigning',
-            '-v',
-          ], throwOnError: true)).stdout.trim();
+      findIdentityStdout = (await _processUtils.run(<String>[
+        'security',
+        'find-identity',
+        '-p',
+        'codesigning',
+        '-v',
+      ], throwOnError: true)).stdout.trim();
     } on ProcessException catch (error) {
       _logger.printError('Unexpected failure from find-identity: $error.');
       return <String>[];
@@ -560,14 +562,13 @@ class XcodeCodeSigningSettings {
     }
     String signingCertificateStdout;
     try {
-      signingCertificateStdout =
-          (await _processUtils.run(<String>[
-            'security',
-            'find-certificate',
-            '-c',
-            signingCertificateId,
-            '-p',
-          ], throwOnError: true)).stdout.trim();
+      signingCertificateStdout = (await _processUtils.run(<String>[
+        'security',
+        'find-certificate',
+        '-c',
+        signingCertificateId,
+        '-p',
+      ], throwOnError: true)).stdout.trim();
     } on ProcessException catch (error) {
       _logger.printError('Unexpected error from security: $error');
       return null;

@@ -333,10 +333,9 @@ void drawHelloWorld() {
     canvas.drawParagraph(paragraph, ui.Offset.zero);
 
     final ui.Picture picture = recorder.endRecording();
-    final ui.SceneBuilder sceneBuilder =
-        ui.SceneBuilder()
-          ..addPicture(ui.Offset.zero, picture)
-          ..pop();
+    final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+      ..addPicture(ui.Offset.zero, picture)
+      ..pop();
 
     ui.PlatformDispatcher.instance.implicitView?.render(sceneBuilder.build());
   };
@@ -466,6 +465,7 @@ Future<void> sendSemanticsTreeInfo() async {
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
+      locale: null,
     );
     return builder.build();
   }

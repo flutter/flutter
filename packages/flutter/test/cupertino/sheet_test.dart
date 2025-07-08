@@ -115,12 +115,11 @@ void main() {
     expect(pageOneOffset.dy, greaterThan(0.0));
     expect(pageOneOffset.dx, greaterThan(0.0));
     expect(find.text('Page 2'), findsOneWidget);
-    final double pageTwoYOffset =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoYOffset = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoYOffset, greaterThan(pageOneOffset.dy));
   });
 
@@ -191,12 +190,11 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
-    final double previousPageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double previousPageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
 
     await tester.tap(find.text('Push Page 3'));
     await tester.pumpAndSettle();
@@ -375,12 +373,11 @@ void main() {
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
-    final double pageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoDY, greaterThan(0.0));
 
     await tester.tap(find.text('Push Page 3'));
@@ -390,12 +387,11 @@ void main() {
     expect(find.text('Page 3'), findsOneWidget);
 
     // New route should be at the same height as the previous route.
-    final double pageThreeDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageThreeDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageThreeDY, greaterThan(0.0));
     expect(pageThreeDY, equals(pageTwoDY));
   });
@@ -622,16 +618,17 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
-                  child: Container(),
-                );
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return CupertinoPageScaffold(
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
+                      child: Container(),
+                    );
+                  },
             );
           }
           return CupertinoSheetRoute<void>(
@@ -1415,15 +1412,14 @@ void main() {
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
 
-      final double pageHeight =
-          tester
-              .getRect(
-                find.ancestor(
-                  of: find.text('Top container'),
-                  matching: find.byType(CupertinoPageScaffold),
-                ),
-              )
-              .bottom;
+      final double pageHeight = tester
+          .getRect(
+            find.ancestor(
+              of: find.text('Top container'),
+              matching: find.byType(CupertinoPageScaffold),
+            ),
+          )
+          .bottom;
       expect(
         pageHeight -
             tester

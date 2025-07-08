@@ -159,10 +159,9 @@ class WebDevFS implements DevFS {
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
         try {
-          final DebugConnection debugConnection =
-              useDebugExtension
-                  ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
-                  : await dwds.debugConnection(appConnection);
+          final DebugConnection debugConnection = useDebugExtension
+              ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
+              : await dwds.debugConnection(appConnection);
           if (foundFirstConnection) {
             appConnection.runMain();
           } else {
@@ -312,17 +311,17 @@ class WebDevFS implements DevFS {
         'main.dart.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleBootstrapScript(
-              entrypoint: entrypoint,
-              ddcModuleLoaderUrl: 'ddc_module_loader.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableMiddleware,
-              isWindows: platform.isWindows,
-            )
+                entrypoint: entrypoint,
+                ddcModuleLoaderUrl: 'ddc_module_loader.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: shouldEnableMiddleware,
+                isWindows: platform.isWindows,
+              )
             : generateBootstrapScript(
-              requireUrl: 'require.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: shouldEnableMiddleware,
-            ),
+                requireUrl: 'require.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: shouldEnableMiddleware,
+              ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
       if (ddcModuleSystem) {
@@ -332,16 +331,16 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              onLoadEndBootstrap: onLoadEndBootstrap,
-              isCi: platform.environment.containsKey(kLuciEnvName),
-            )
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                onLoadEndBootstrap: onLoadEndBootstrap,
+                isCi: platform.environment.containsKey(kLuciEnvName),
+              )
             : generateMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              loaderRootDirectory: baseUri.toString(),
-            ),
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                loaderRootDirectory: baseUri.toString(),
+              ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
       // be shared.

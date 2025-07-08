@@ -110,10 +110,9 @@ void main() {
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file =
-        fs.file('/blue.png')
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kBlueSquarePng);
+    final File file = fs.file('/blue.png')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
     final MultiFrameImageStreamCompleter completer =

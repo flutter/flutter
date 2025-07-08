@@ -123,11 +123,10 @@ void main() {
     chromeConnection = FakeChromeConnection();
     chromeTab = FakeChromeTab('index.html');
     webServerDevice = FakeWebServerDevice();
-    flutterDevice =
-        FakeFlutterDevice()
-          .._devFS = webDevFS
-          ..device = mockDevice
-          ..generator = residentCompiler;
+    flutterDevice = FakeFlutterDevice()
+      .._devFS = webDevFS
+      ..device = mockDevice
+      ..generator = residentCompiler;
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');

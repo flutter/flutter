@@ -13,7 +13,9 @@ class ErrorBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: Center(child: ErrorBuilderExample())));
+    return const MaterialApp(
+      home: Scaffold(body: Center(child: ErrorBuilderExample())),
+    );
   }
 }
 

@@ -15,17 +15,15 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth;
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
     final Rect rect = Offset.zero & size;
-    final Path path =
-        Path()
-          ..addRect(rect)
-          ..addPolygon(<Offset>[rect.topRight, rect.bottomLeft], false)
-          ..addPolygon(<Offset>[rect.topLeft, rect.bottomRight], false);
+    final Path path = Path()
+      ..addRect(rect)
+      ..addPolygon(<Offset>[rect.topRight, rect.bottomLeft], false)
+      ..addPolygon(<Offset>[rect.topLeft, rect.bottomRight], false);
     canvas.drawPath(path, paint);
   }
 

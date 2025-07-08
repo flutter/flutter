@@ -28,17 +28,13 @@ class TestTree {
                   },
                 ),
                 child: RenderPositionedBox(
-                  child:
-                      child = RenderConstrainedBox(
-                        additionalConstraints: const BoxConstraints.tightFor(
-                          height: 20.0,
-                          width: 20.0,
-                        ),
-                        child: RenderSemanticsAnnotations(
-                          textDirection: TextDirection.ltr,
-                          properties: const SemanticsProperties(label: 'Hello there foo'),
-                        ),
-                      ),
+                  child: child = RenderConstrainedBox(
+                    additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+                    child: RenderSemanticsAnnotations(
+                      textDirection: TextDirection.ltr,
+                      properties: const SemanticsProperties(label: 'Hello there foo'),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -69,23 +65,18 @@ class TestCompositingBitsTree {
         // the act of transplanting the root into a new container will cause the
         // repaint of the new parent node to satisfy the test.
         child: RenderRepaintBoundary(
-          child:
-              compositor = MutableCompositor(
-                child: RenderCustomPaint(
-                  painter: TestCallbackPainter(
-                    onPaint: () {
-                      painted = true;
-                    },
-                  ),
-                  child:
-                      child = RenderConstrainedBox(
-                        additionalConstraints: const BoxConstraints.tightFor(
-                          height: 20.0,
-                          width: 20.0,
-                        ),
-                      ),
-                ),
+          child: compositor = MutableCompositor(
+            child: RenderCustomPaint(
+              painter: TestCallbackPainter(
+                onPaint: () {
+                  painted = true;
+                },
               ),
+              child: child = RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+              ),
+            ),
+          ),
         ),
       ),
     );

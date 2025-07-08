@@ -152,14 +152,16 @@ name: foo
       testTimeRecorder.print();
 
       // Expect one message for each phase.
-      final List<String> logPhaseMessages =
-          logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+      final List<String> logPhaseMessages = logger.messages
+          .where((String m) => m.startsWith('Runtime for phase '))
+          .toList();
       expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
       // As the compile method adds a job to a queue etc we expect at
       // least one phase to take a non-zero amount of time.
-      final List<String> logPhaseMessagesNonZero =
-          logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+      final List<String> logPhaseMessagesNonZero = logPhaseMessages
+          .where((String m) => !m.contains(Duration.zero.toString()))
+          .toList();
       expect(logPhaseMessagesNonZero, isNotEmpty);
     },
     overrides: <Type, Generator>{

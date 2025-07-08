@@ -291,19 +291,18 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => Stack(
-              children: <Widget>[
-                const SecondWidget(),
-                WillPopScope(
-                  child: const SizedBox(),
-                  onWillPop: () async {
-                    willPopCalled = true;
-                    return false;
-                  },
-                ),
-              ],
+        '/modal': (BuildContext context) => Stack(
+          children: <Widget>[
+            const SecondWidget(),
+            WillPopScope(
+              child: const SizedBox(),
+              onWillPop: () async {
+                willPopCalled = true;
+                return false;
+              },
             ),
+          ],
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -338,19 +337,18 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => Stack(
-              children: <Widget>[
-                const SecondWidget(),
-                WillPopScope(
-                  child: const SizedBox(),
-                  onWillPop: () async {
-                    willPopCalled = true;
-                    return true;
-                  },
-                ),
-              ],
+        '/modal': (BuildContext context) => Stack(
+          children: <Widget>[
+            const SecondWidget(),
+            WillPopScope(
+              child: const SizedBox(),
+              onWillPop: () async {
+                willPopCalled = true;
+                return true;
+              },
             ),
+          ],
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -383,12 +381,11 @@ void main() {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => SecondWidget(
-              onDismiss: () {
-                dismissCallbackCalled = true;
-              },
-            ),
+        '/modal': (BuildContext context) => SecondWidget(
+          onDismiss: () {
+            dismissCallbackCalled = true;
+          },
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -761,19 +758,18 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => Stack(
-              children: <Widget>[
-                const AnimatedSecondWidget(),
-                WillPopScope(
-                  child: const SizedBox(),
-                  onWillPop: () async {
-                    willPopCalled = true;
-                    return false;
-                  },
-                ),
-              ],
+        '/modal': (BuildContext context) => Stack(
+          children: <Widget>[
+            const AnimatedSecondWidget(),
+            WillPopScope(
+              child: const SizedBox(),
+              onWillPop: () async {
+                willPopCalled = true;
+                return false;
+              },
             ),
+          ],
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -808,19 +804,18 @@ void main() {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => Stack(
-              children: <Widget>[
-                const AnimatedSecondWidget(),
-                WillPopScope(
-                  child: const SizedBox(),
-                  onWillPop: () async {
-                    willPopCalled = true;
-                    return true;
-                  },
-                ),
-              ],
+        '/modal': (BuildContext context) => Stack(
+          children: <Widget>[
+            const AnimatedSecondWidget(),
+            WillPopScope(
+              child: const SizedBox(),
+              onWillPop: () async {
+                willPopCalled = true;
+                return true;
+              },
             ),
+          ],
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -853,12 +848,11 @@ void main() {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
-        '/modal':
-            (BuildContext context) => AnimatedSecondWidget(
-              onDismiss: () {
-                dismissCallbackCalled = true;
-              },
-            ),
+        '/modal': (BuildContext context) => AnimatedSecondWidget(
+          onDismiss: () {
+            dismissCallbackCalled = true;
+          },
+        ),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));

@@ -36,6 +36,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
     registerArtifact(FlutterWebSdk(this));
+    registerArtifact(FlutterEngineStamp(this, logger));
     registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
@@ -182,6 +183,34 @@ class FlutterWebSdk extends CachedArtifact {
     );
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
+  }
+}
+
+/// A cached artifact solely for the `engine_stamp.json` file.
+///
+/// This file is required to divine the engine build and content-hash.
+class FlutterEngineStamp extends CachedArtifact {
+  FlutterEngineStamp(Cache cache, this.logger)
+    : super('engine_stamp', cache, DevelopmentArtifact.informative);
+
+  final Logger logger;
+
+  @override
+  Directory get location => cache.getRoot();
+
+  @override
+  String? get version => cache.engineRevision;
+
+  @override
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    final Uri url = Uri.parse(
+      '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/engine_stamp.json',
+    );
+    await artifactUpdater.downloadFile('Downloading engine information...', url, location);
   }
 }
 

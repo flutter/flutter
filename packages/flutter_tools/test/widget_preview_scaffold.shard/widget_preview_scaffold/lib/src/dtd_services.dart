@@ -11,14 +11,24 @@ class WidgetPreviewScaffoldDtdServices {
   /// Environment variable for the DTD URI.
   static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
 
+  // WARNING: Keep these constants and services in sync with those defined in the widget preview
+  // scaffold's dtd_services.dart.
+  //
+  // START KEEP SYNCED
+
+  static const String kWidgetPreviewService = 'widget-preview';
+  static const String kHotRestartPreviewer = 'hotRestartPreviewer';
+
+  // END KEEP SYNCED
+
   /// Connects to the Dart Tooling Daemon (DTD) specified by the Flutter tool.
   ///
   /// If the connection is successful, the Widget Preview Scaffold will register services and
   /// subscribe to various streams to interact directly with other tooling (e.g., IDEs).
-  Future<void> connect() async {
-    final Uri dtdWsUri = Uri.parse(
-      const String.fromEnvironment(kWidgetPreviewDtdUriEnvVar),
-    );
+  Future<void> connect({Uri? dtdUri}) async {
+    final Uri dtdWsUri =
+        dtdUri ??
+        Uri.parse(const String.fromEnvironment(kWidgetPreviewDtdUriEnvVar));
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       _dtd.postEvent(
@@ -28,6 +38,14 @@ class WidgetPreviewScaffoldDtdServices {
       ),
     );
   }
+
+  Future<DTDResponse> _call(
+    String methodName, {
+    Map<String, Object?>? params,
+  }) => _dtd.call(kWidgetPreviewService, methodName, params: params);
+
+  /// Trigger a hot restart of the widget preview scaffold.
+  Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
 
   late final DartToolingDaemon _dtd;
 }

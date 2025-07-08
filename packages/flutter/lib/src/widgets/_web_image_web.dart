@@ -39,6 +39,10 @@ class ImgElementPlatformView extends StatelessWidget {
       // without fetching it over the network again.
       final web.HTMLImageElement img = web.document.createElement('img') as web.HTMLImageElement;
       img.src = paramsMap['src']! as String;
+      // Set `width` and `height`, otherwise the engine will issue a warning.
+      img.style
+        ..width = '100%'
+        ..height = '100%';
       return img;
     });
   }
@@ -104,8 +108,9 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       fit: fit,
       alignment: alignment,
       matchTextDirection: matchTextDirection,
-      textDirection:
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+      textDirection: matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null,
     );
   }
 
@@ -118,8 +123,9 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       ..fit = fit
       ..alignment = alignment
       ..matchTextDirection = matchTextDirection
-      ..textDirection =
-          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
+      ..textDirection = matchTextDirection || alignment is! Alignment
+          ? Directionality.of(context)
+          : null;
   }
 }
 

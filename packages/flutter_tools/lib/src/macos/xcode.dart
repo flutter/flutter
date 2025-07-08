@@ -103,8 +103,10 @@ class Xcode {
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath =
-            _processUtils.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+        _xcodeSelectPath = _processUtils
+            .runSync(<String>['/usr/bin/xcode-select', '--print-path'])
+            .stdout
+            .trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {

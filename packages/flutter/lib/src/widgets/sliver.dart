@@ -975,8 +975,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     owner!.buildScope(this, () {
       final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index - 1] != null);
-      _currentBeforeChild =
-          insertFirst ? null : (_childElements[index - 1]!.renderObject as RenderBox?);
+      _currentBeforeChild = insertFirst
+          ? null
+          : (_childElements[index - 1]!.renderObject as RenderBox?);
       Element? newChild;
       try {
         final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
@@ -1095,10 +1096,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       int lo = 0;
       int hi = 1;
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      const int max =
-          kIsWeb
-              ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
-              : ((1 << 63) - 1);
+      const int max = kIsWeb
+          ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
+          : ((1 << 63) - 1);
       while (_build(hi - 1, adaptorWidget) != null) {
         lo = hi - 1;
         if (hi < max ~/ 2) {
@@ -1524,10 +1524,9 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  Type get debugTypicalAncestorWidgetClass =>
-      throw FlutterError(
-        'Multiple Types are supported, use debugTypicalAncestorWidgetDescription.',
-      );
+  Type get debugTypicalAncestorWidgetClass => throw FlutterError(
+    'Multiple Types are supported, use debugTypicalAncestorWidgetDescription.',
+  );
 
   @override
   String get debugTypicalAncestorWidgetDescription =>

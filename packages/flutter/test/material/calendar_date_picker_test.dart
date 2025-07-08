@@ -587,10 +587,9 @@ void main() {
           final DateTime updatedDate = DateTime(1976, 2, 23);
           final DateTime firstDate = DateTime(1970);
           final DateTime lastDate = DateTime(2099, 31, 12);
-          final Color selectedColor =
-              useMaterial3
-                  ? const Color(0xff6750a4)
-                  : const Color(0xff2196f3); // default primary color
+          final Color selectedColor = useMaterial3
+              ? const Color(0xff6750a4)
+              : const Color(0xff2196f3); // default primary color
 
           await tester.pumpWidget(
             calendarDatePicker(

@@ -1352,13 +1352,12 @@ TerminalHandler setUpTerminalHandler(
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
-  final FakeResidentRunner residentRunner =
-      FakeResidentRunner(device, testLogger, localFileSystem)
-        ..supportsServiceProtocol = supportsServiceProtocol
-        ..supportsRestart = supportsRestart
-        ..canHotReload = supportsHotReload
-        ..fatalReloadError = fatalReloadError
-        ..reloadExitCode = reloadExitCode;
+  final FakeResidentRunner residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
+    ..supportsServiceProtocol = supportsServiceProtocol
+    ..supportsRestart = supportsRestart
+    ..canHotReload = supportsHotReload
+    ..fatalReloadError = fatalReloadError
+    ..reloadExitCode = reloadExitCode;
 
   switch (buildMode) {
     case BuildMode.debug:

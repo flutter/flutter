@@ -37,7 +37,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextField(focusNode: focusNode, autofocus: true))),
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode, autofocus: true)),
+        ),
       ),
     );
 
@@ -71,7 +73,11 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode)),
+        ),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
@@ -90,7 +96,9 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(autofocus: true)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(autofocus: true))),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isTrue);
@@ -103,7 +111,11 @@ void main() {
   testWidgets('Tap shows keyboard', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
-    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: TextField()))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: TextField())),
+      ),
+    );
 
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -139,7 +151,10 @@ void main() {
       MaterialApp(
         home: Material(
           child: ListView(
-            children: <Widget>[TextField(focusNode: focusNode), Container(height: 1000.0)],
+            children: <Widget>[
+              TextField(focusNode: focusNode),
+              Container(height: 1000.0),
+            ],
           ),
         ),
       ),
@@ -174,7 +189,10 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              TextField(focusNode: focusNode, decoration: InputDecoration(prefixText: prefix)),
+              TextField(
+                focusNode: focusNode,
+                decoration: InputDecoration(prefixText: prefix),
+              ),
               Container(height: 1000.0),
             ],
           ),
@@ -198,7 +216,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(decoration: null)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(decoration: null))),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isFalse);

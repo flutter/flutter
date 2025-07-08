@@ -2119,10 +2119,9 @@ void main() {
 
     testWidgets('select all up', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllUp =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
+      final SingleActivator selectAllUp = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2140,10 +2139,9 @@ void main() {
 
     testWidgets('select all down', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllDown =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
+      final SingleActivator selectAllDown = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
       controller.text = testVerticalText;
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2246,10 +2244,9 @@ void main() {
 
     testWidgets('select all left', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllLeft =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true);
+      final SingleActivator selectAllLeft = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 
@@ -2267,10 +2264,9 @@ void main() {
 
     testWidgets('select all right', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-      final SingleActivator selectAllRight =
-          isMacOS
-              ? const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true)
-              : const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true);
+      final SingleActivator selectAllRight = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true);
       controller.text = 'testing';
       controller.selection = const TextSelection.collapsed(offset: 5);
 

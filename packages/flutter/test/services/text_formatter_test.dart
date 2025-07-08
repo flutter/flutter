@@ -516,8 +516,10 @@ void main() {
   );
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
-        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: offset));
+    TextEditingValue collapsedValue(String text, int offset) => TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: offset),
+    );
 
     TextEditingValue oldValue = collapsedValue('123', 0);
     TextEditingValue newValue = collapsedValue('123456', 6);
@@ -578,8 +580,10 @@ void main() {
   );
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
-        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: offset));
+    TextEditingValue collapsedValue(String text, int offset) => TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: offset),
+    );
 
     TextEditingValue oldValue = collapsedValue('123', 0);
     TextEditingValue newValue = collapsedValue('123456', 6);
@@ -605,8 +609,10 @@ void main() {
   });
 
   test('WhitelistingTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
-        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: offset));
+    TextEditingValue collapsedValue(String text, int offset) => TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: offset),
+    );
 
     TextEditingValue oldValue = collapsedValue('123', 0);
     TextEditingValue newValue = collapsedValue('123456', 6);
@@ -645,13 +651,12 @@ void main() {
     final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
 
     for (int i = 0; i < newValue.text.length; i += 1) {
-      final String text =
-          formatter
-              .formatEditUpdate(
-                oldValue,
-                newValue.copyWith(selection: TextSelection.collapsed(offset: i)),
-              )
-              .text;
+      final String text = formatter
+          .formatEditUpdate(
+            oldValue,
+            newValue.copyWith(selection: TextSelection.collapsed(offset: i)),
+          )
+          .text;
       expect(filteredText, text);
     }
   });
@@ -668,10 +673,9 @@ void main() {
     final String filteredText = formatter.formatEditUpdate(oldValue, newValue).text;
 
     for (int i = 0; i < newValue.text.length; i += 1) {
-      final String text =
-          formatter
-              .formatEditUpdate(oldValue, newValue.copyWith(composing: TextRange.collapsed(i)))
-              .text;
+      final String text = formatter
+          .formatEditUpdate(oldValue, newValue.copyWith(composing: TextRange.collapsed(i)))
+          .text;
       expect(filteredText, text);
     }
   });

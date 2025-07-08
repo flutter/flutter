@@ -393,20 +393,19 @@ void main() {
     final List<String> recognized = <String>[];
 
     setUp(() {
-      gesture =
-          LongPressGestureRecognizer()
-            ..onLongPressDown = (LongPressDownDetails details) {
-              recognized.add('down');
-            }
-            ..onLongPressCancel = () {
-              recognized.add('cancel');
-            }
-            ..onLongPressStart = (LongPressStartDetails details) {
-              recognized.add('start');
-            }
-            ..onLongPressEnd = (LongPressEndDetails details) {
-              recognized.add('end');
-            };
+      gesture = LongPressGestureRecognizer()
+        ..onLongPressDown = (LongPressDownDetails details) {
+          recognized.add('down');
+        }
+        ..onLongPressCancel = () {
+          recognized.add('cancel');
+        }
+        ..onLongPressStart = (LongPressStartDetails details) {
+          recognized.add('start');
+        }
+        ..onLongPressEnd = (LongPressEndDetails details) {
+          recognized.add('end');
+        };
     });
 
     tearDown(() {
@@ -550,21 +549,18 @@ void main() {
     late TapGestureRecognizer tapSecondary;
     late LongPressGestureRecognizer longPress;
     setUp(() {
-      tapPrimary =
-          TapGestureRecognizer()
-            ..onTapDown = (TapDownDetails details) {
-              recognized.add('tapPrimary');
-            };
-      tapSecondary =
-          TapGestureRecognizer()
-            ..onSecondaryTapDown = (TapDownDetails details) {
-              recognized.add('tapSecondary');
-            };
-      longPress =
-          LongPressGestureRecognizer()
-            ..onLongPressStart = (_) {
-              recognized.add('longPress');
-            };
+      tapPrimary = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('tapPrimary');
+        };
+      tapSecondary = TapGestureRecognizer()
+        ..onSecondaryTapDown = (TapDownDetails details) {
+          recognized.add('tapSecondary');
+        };
+      longPress = LongPressGestureRecognizer()
+        ..onLongPressStart = (_) {
+          recognized.add('longPress');
+        };
     });
 
     tearDown(() {
@@ -603,23 +599,22 @@ void main() {
 
   testGesture('A secondary long press should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    final LongPressGestureRecognizer longPress =
-        LongPressGestureRecognizer()
-          ..onLongPressStart = (LongPressStartDetails details) {
-            recognized.add('primaryStart');
-          }
-          ..onLongPress = () {
-            recognized.add('primary');
-          }
-          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            recognized.add('primaryUpdate');
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            recognized.add('primaryEnd');
-          }
-          ..onLongPressUp = () {
-            recognized.add('primaryUp');
-          };
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        recognized.add('primaryStart');
+      }
+      ..onLongPress = () {
+        recognized.add('primary');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('primaryUpdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('primaryEnd');
+      }
+      ..onLongPressUp = () {
+        recognized.add('primaryUp');
+      };
 
     const PointerDownEvent down2 = PointerDownEvent(
       pointer: 2,
@@ -650,38 +645,37 @@ void main() {
     GestureTester tester,
   ) {
     final List<String> recognized = <String>[];
-    final LongPressGestureRecognizer longPress =
-        LongPressGestureRecognizer()
-          ..onLongPressStart = (LongPressStartDetails details) {
-            recognized.add('primaryStart');
-          }
-          ..onLongPress = () {
-            recognized.add('primary');
-          }
-          ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            recognized.add('primaryUpdate');
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            recognized.add('primaryEnd');
-          }
-          ..onLongPressUp = () {
-            recognized.add('primaryUp');
-          }
-          ..onSecondaryLongPressStart = (LongPressStartDetails details) {
-            recognized.add('secondaryStart');
-          }
-          ..onSecondaryLongPress = () {
-            recognized.add('secondary');
-          }
-          ..onSecondaryLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-            recognized.add('secondaryUpdate');
-          }
-          ..onSecondaryLongPressEnd = (LongPressEndDetails details) {
-            recognized.add('secondaryEnd');
-          }
-          ..onSecondaryLongPressUp = () {
-            recognized.add('secondaryUp');
-          };
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        recognized.add('primaryStart');
+      }
+      ..onLongPress = () {
+        recognized.add('primary');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('primaryUpdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('primaryEnd');
+      }
+      ..onLongPressUp = () {
+        recognized.add('primaryUp');
+      }
+      ..onSecondaryLongPressStart = (LongPressStartDetails details) {
+        recognized.add('secondaryStart');
+      }
+      ..onSecondaryLongPress = () {
+        recognized.add('secondary');
+      }
+      ..onSecondaryLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('secondaryUpdate');
+      }
+      ..onSecondaryLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('secondaryEnd');
+      }
+      ..onSecondaryLongPressUp = () {
+        recognized.add('secondaryUp');
+      };
 
     const PointerDownEvent down2 = PointerDownEvent(
       pointer: 2,
@@ -712,14 +706,13 @@ void main() {
     GestureTester tester,
   ) {
     final List<String> recognized = <String>[];
-    final LongPressGestureRecognizer longPress =
-        LongPressGestureRecognizer()
-          ..onLongPressStart = (LongPressStartDetails details) {
-            recognized.add('primaryStart');
-          }
-          ..onLongPressEnd = (LongPressEndDetails details) {
-            recognized.add('primaryEnd');
-          };
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        recognized.add('primaryStart');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('primaryEnd');
+      };
 
     const PointerDownEvent down4 = PointerDownEvent(pointer: 8, position: Offset(10, 10));
 
@@ -759,14 +752,13 @@ void main() {
     (GestureTester tester) {
       // This reproduces sequences seen on macOS.
       final List<String> recognized = <String>[];
-      final LongPressGestureRecognizer longPress =
-          LongPressGestureRecognizer()
-            ..onLongPressStart = (LongPressStartDetails details) {
-              recognized.add('primaryStart');
-            }
-            ..onLongPressEnd = (LongPressEndDetails details) {
-              recognized.add('primaryEnd');
-            };
+      final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+        ..onLongPressStart = (LongPressStartDetails details) {
+          recognized.add('primaryStart');
+        }
+        ..onLongPressEnd = (LongPressEndDetails details) {
+          recognized.add('primaryEnd');
+        };
 
       const PointerDownEvent down5 = PointerDownEvent(pointer: 9, position: Offset(10, 10));
 

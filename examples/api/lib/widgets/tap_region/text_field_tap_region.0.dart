@@ -172,10 +172,9 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
     if (text != controller.text) {
       controller.value = TextEditingValue(
         text: text,
-        selection:
-            collapsed
-                ? TextSelection.collapsed(offset: text.length)
-                : TextSelection(baseOffset: 0, extentOffset: text.length),
+        selection: collapsed
+            ? TextSelection.collapsed(offset: text.length)
+            : TextSelection(baseOffset: 0, extentOffset: text.length),
       );
     }
   }

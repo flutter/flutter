@@ -281,8 +281,8 @@ void main() {
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
         },
         overrides: <Type, Generator>{
-          XcodeProjectInterpreter:
-              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
+          XcodeProjectInterpreter: () =>
+              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
         },
       );
 
@@ -303,8 +303,8 @@ void main() {
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
         },
         overrides: <Type, Generator>{
-          XcodeProjectInterpreter:
-              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
+          XcodeProjectInterpreter: () =>
+              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
         },
       );
 
@@ -325,8 +325,8 @@ void main() {
           expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
         },
         overrides: <Type, Generator>{
-          XcodeProjectInterpreter:
-              () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
+          XcodeProjectInterpreter: () =>
+              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
         },
       );
     });

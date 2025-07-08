@@ -419,18 +419,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       return;
     }
     final bool wasHeldDown = _buttonHeldDown;
-    final TickerFuture ticker =
-        _buttonHeldDown
-            ? _animationController.animateTo(
-              1.0,
-              duration: kFadeOutDuration,
-              curve: Curves.easeInOutCubicEmphasized,
-            )
-            : _animationController.animateTo(
-              0.0,
-              duration: kFadeInDuration,
-              curve: Curves.easeOutCubic,
-            );
+    final TickerFuture ticker = _buttonHeldDown
+        ? _animationController.animateTo(
+            1.0,
+            duration: kFadeOutDuration,
+            curve: Curves.easeInOutCubicEmphasized,
+          )
+        : _animationController.animateTo(
+            0.0,
+            duration: kFadeInDuration,
+            curve: Curves.easeOutCubic,
+          );
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown) {
         _animate();
@@ -451,32 +450,31 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final Size? minimumSize =
-        widget.minimumSize == null
-            ? widget.minSize == null
-                ? null
-                : Size(widget.minSize!, widget.minSize!)
-            : widget.minimumSize!;
+    final Size? minimumSize = widget.minimumSize == null
+        ? widget.minSize == null
+              ? null
+              : Size(widget.minSize!, widget.minSize!)
+        : widget.minimumSize!;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
-    final Color? backgroundColor = (widget.color == null
-            ? widget._style != _CupertinoButtonStyle.plain
-                ? primaryColor
-                : null
-            : CupertinoDynamicColor.maybeResolve(widget.color, context))
-        ?.withOpacity(
-          widget._style == _CupertinoButtonStyle.tinted
-              ? CupertinoTheme.brightnessOf(context) == Brightness.light
-                  ? kCupertinoButtonTintedOpacityLight
-                  : kCupertinoButtonTintedOpacityDark
-              : widget.color?.opacity ?? 1.0,
-        );
-    final Color foregroundColor =
-        widget._style == _CupertinoButtonStyle.filled
-            ? themeData.primaryContrastingColor
-            : enabled
-            ? primaryColor
-            : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
+    final Color? backgroundColor =
+        (widget.color == null
+                ? widget._style != _CupertinoButtonStyle.plain
+                      ? primaryColor
+                      : null
+                : CupertinoDynamicColor.maybeResolve(widget.color, context))
+            ?.withOpacity(
+              widget._style == _CupertinoButtonStyle.tinted
+                  ? CupertinoTheme.brightnessOf(context) == Brightness.light
+                        ? kCupertinoButtonTintedOpacityLight
+                        : kCupertinoButtonTintedOpacityDark
+                  : widget.color?.opacity ?? 1.0,
+            );
+    final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
+        ? themeData.primaryContrastingColor
+        : enabled
+        ? primaryColor
+        : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
 
     final Color effectiveFocusOutlineColor =
         widget.focusColor ??
@@ -489,14 +487,16 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
 
-    final TextStyle textStyle = (widget.sizeStyle == CupertinoButtonSize.small
-            ? themeData.textTheme.actionSmallTextStyle
-            : themeData.textTheme.actionTextStyle)
-        .copyWith(color: foregroundColor);
+    final TextStyle textStyle =
+        (widget.sizeStyle == CupertinoButtonSize.small
+                ? themeData.textTheme.actionSmallTextStyle
+                : themeData.textTheme.actionTextStyle)
+            .copyWith(color: foregroundColor);
     final IconThemeData iconTheme = IconTheme.of(context).copyWith(
       color: foregroundColor,
-      size:
-          textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
+      size: textStyle.fontSize != null
+          ? textStyle.fontSize! * 1.2
+          : kCupertinoButtonDefaultIconSize,
     );
 
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
@@ -512,20 +512,18 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final ShapeDecoration shapeDecoration = ShapeDecoration(
       shape: RoundedSuperellipseBorder(
-        side:
-            enabled && isFocused
-                ? BorderSide(
-                  color: effectiveFocusOutlineColor,
-                  width: 3.5,
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                )
-                : BorderSide.none,
+        side: enabled && isFocused
+            ? BorderSide(
+                color: effectiveFocusOutlineColor,
+                width: 3.5,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              )
+            : BorderSide.none,
         borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
       ),
-      color:
-          backgroundColor != null && !enabled
-              ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-              : backgroundColor,
+      color: backgroundColor != null && !enabled
+          ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+          : backgroundColor,
     );
 
     return MouseRegion(

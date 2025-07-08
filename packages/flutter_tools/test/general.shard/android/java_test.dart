@@ -56,15 +56,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 ''',
           ),
         );
-        final Java java =
-            Java.find(
-              config: config,
-              androidStudio: androidStudio,
-              logger: logger,
-              fileSystem: fs,
-              platform: platform,
-              processManager: processManager,
-            )!;
+        final Java java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: processManager,
+        )!;
 
         expect(java.javaHome, androidStudioBundledJdkHome);
         expect(java.binaryPath, expectedJavaBinaryPath);
@@ -85,17 +84,16 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
           const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
-          final Java java =
-              Java.find(
-                config: config,
-                androidStudio: androidStudio,
-                logger: logger,
-                fileSystem: fs,
-                platform: FakePlatform(
-                  environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
-                ),
-                processManager: processManager,
-              )!;
+          final Java java = Java.find(
+            config: config,
+            androidStudio: androidStudio,
+            logger: logger,
+            fileSystem: fs,
+            platform: FakePlatform(
+              environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
+            ),
+            processManager: processManager,
+          )!;
 
           expect(java.javaHome, javaHome);
           expect(java.binaryPath, expectedJavaBinaryPath);
@@ -112,15 +110,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], stdout: '/fake/which/java/path'),
         );
 
-        final Java java =
-            Java.find(
-              config: config,
-              androidStudio: androidStudio,
-              logger: logger,
-              fileSystem: fs,
-              platform: platform,
-              processManager: processManager,
-            )!;
+        final Java java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: processManager,
+        )!;
 
         expect(java.javaHome, isNull);
         expect(java.binaryPath, os.which('java')!.path);

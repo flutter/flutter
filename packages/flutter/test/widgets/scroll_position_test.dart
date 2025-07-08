@@ -165,11 +165,10 @@ void main() {
 
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
-    final List<FocusNode> nodes =
-        List<FocusNode>.generate(
-          11,
-          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
-        ).toList();
+    final List<FocusNode> nodes = List<FocusNode>.generate(
+      11,
+      (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+    ).toList();
     addTearDown(() {
       for (final FocusNode node in nodes) {
         node.dispose();
@@ -182,14 +181,13 @@ void main() {
       MaterialApp(
         home: ListView(
           controller: controller,
-          children:
-              items.map<Widget>((int item) {
-                return Focus(
-                  key: ValueKey<int>(item),
-                  focusNode: nodes[item],
-                  child: Container(height: 110),
-                );
-              }).toList(),
+          children: items.map<Widget>((int item) {
+            return Focus(
+              key: ValueKey<int>(item),
+              focusNode: nodes[item],
+              child: Container(height: 110),
+            );
+          }).toList(),
         ),
       ),
     );

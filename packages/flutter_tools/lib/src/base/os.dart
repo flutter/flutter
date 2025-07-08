@@ -152,8 +152,9 @@ abstract class OperatingSystemUtils {
   Future<int> findFreePort({bool ipv6 = false}) async {
     int port = 0;
     ServerSocket? serverSocket;
-    final InternetAddress loopback =
-        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopback = ipv6
+        ? InternetAddress.loopbackIPv6
+        : InternetAddress.loopbackIPv4;
     try {
       serverSocket = await ServerSocket.bind(loopback, 0);
       port = serverSocket.port;
@@ -306,10 +307,9 @@ class _LinuxUtils extends _PosixUtils {
     if (_name == null) {
       const String prettyNameKey = 'PRETTY_NAME';
       // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
-      final String osReleasePath =
-          _fileSystem.file('/etc/os-release').existsSync()
-              ? '/etc/os-release'
-              : '/usr/lib/os-release';
+      final String osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
+          ? '/etc/os-release'
+          : '/usr/lib/os-release';
       String prettyName;
       String kernelRelease;
       try {
@@ -482,8 +482,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
       final Abi abi = Abi.current();
-      _hostPlatform =
-          (abi == Abi.windowsArm64) ? HostPlatform.windows_arm64 : HostPlatform.windows_x64;
+      _hostPlatform = (abi == Abi.windowsArm64)
+          ? HostPlatform.windows_arm64
+          : HostPlatform.windows_x64;
     }
     return _hostPlatform!;
   }

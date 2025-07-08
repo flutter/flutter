@@ -349,7 +349,7 @@ tasks.register("clean", Delete) {
       });
     });
 
-    group('migrate min sdk versions less than 21 to flutter.minSdkVersion '
+    group('migrate min sdk versions less than 24 to flutter.minSdkVersion '
         'when in a FlutterProject that is an app', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
@@ -392,13 +392,43 @@ tasks.register("clean", Delete) {
         );
       });
 
-      testWithoutContext('do nothing when >=api 21', () async {
+      testWithoutContext('replace when api 21', () async {
         const String minSdkVersion21 = 'minSdkVersion 21';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion21));
         await migration.migrate();
         expect(
           project.appGradleFile.readAsStringSync(),
-          sampleModuleGradleBuildFile(minSdkVersion21),
+          sampleModuleGradleBuildFile(replacementMinSdkText),
+        );
+      });
+
+      testWithoutContext('replace when api 22', () async {
+        const String minSdkVersion20 = 'minSdkVersion = 22';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
+        await migration.migrate();
+        expect(
+          project.appGradleFile.readAsStringSync(),
+          sampleModuleGradleBuildFile(replacementMinSdkText),
+        );
+      });
+
+      testWithoutContext('replace when api 23', () async {
+        const String minSdkVersion20 = 'minSdk = 23';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
+        await migration.migrate();
+        expect(
+          project.appGradleFile.readAsStringSync(),
+          sampleModuleGradleBuildFile(replacementMinSdkText),
+        );
+      });
+
+      testWithoutContext('do nothing when >=api 24', () async {
+        const String minSdkVersion24 = 'minSdkVersion 24';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion24));
+        await migration.migrate();
+        expect(
+          project.appGradleFile.readAsStringSync(),
+          sampleModuleGradleBuildFile(minSdkVersion24),
         );
       });
 
@@ -415,7 +445,7 @@ tasks.register("clean", Delete) {
       testWithoutContext('avoid rewriting comments', () async {
         const String code =
             '// minSdkVersion 19  // old default\n'
-            '        minSdkVersion 23  // new version';
+            '        minSdkVersion 24  // new version';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(code));
         await migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(code));
@@ -447,7 +477,7 @@ tasks.register("clean", Delete) {
         );
       });
 
-      testWithoutContext('do nothing when minSdkVersion is set '
+      testWithoutContext('migrate when minSdkVersion is set '
           'using = syntax', () async {
         const String equalsSyntaxMinSdkVersion19 = 'minSdkVersion = 19';
         project.appGradleFile.writeAsStringSync(
@@ -456,7 +486,7 @@ tasks.register("clean", Delete) {
         await migration.migrate();
         expect(
           project.appGradleFile.readAsStringSync(),
-          sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19),
+          sampleModuleGradleBuildFile(replacementMinSdkText),
         );
       });
     });
@@ -490,14 +520,16 @@ tasks.register("clean", Delete) {
         'delete and note when FlutterMultiDexApplication.java is present',
         () async {
           // Write a blank string to the FlutterMultiDexApplication.java file.
-          final File flutterMultiDexApplication = project.hostAppGradleRoot
-            .childDirectory('src')
-            .childDirectory('main')
-            .childDirectory('java')
-            .childDirectory('io')
-            .childDirectory('flutter')
-            .childDirectory('app')
-            .childFile('FlutterMultiDexApplication.java')..createSync(recursive: true);
+          final File flutterMultiDexApplication =
+              project.hostAppGradleRoot
+                  .childDirectory('src')
+                  .childDirectory('main')
+                  .childDirectory('java')
+                  .childDirectory('io')
+                  .childDirectory('flutter')
+                  .childDirectory('app')
+                  .childFile('FlutterMultiDexApplication.java')
+                ..createSync(recursive: true);
           flutterMultiDexApplication.writeAsStringSync('');
 
           await migration.migrate();

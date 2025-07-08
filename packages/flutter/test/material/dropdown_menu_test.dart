@@ -582,10 +582,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder menuMaterial =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder menuMaterial = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final Size menuSize = tester.getSize(menuMaterial);
       expect(menuSize, const Size(180.0, 304.0));
 
@@ -600,10 +599,9 @@ void main() {
       await tester.tap(anchor);
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double updatedMenuWidth = tester.getSize(updatedMenu).width;
       expect(updatedMenuWidth, 200.0);
     },
@@ -629,10 +627,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder menuMaterial =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder menuMaterial = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double menuWidth = tester.getSize(menuMaterial).width;
       expect(menuWidth, closeTo(184.5, 0.1));
 
@@ -647,10 +644,9 @@ void main() {
       await tester.tap(anchor);
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double updatedMenuWidth = tester.getSize(updatedMenu).width;
       expect(updatedMenuWidth, 200.0);
     },
@@ -950,10 +946,9 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder menuView = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -965,10 +960,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize, const Size(180.0, 100.0));
@@ -993,10 +987,9 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder menuView = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -1008,10 +1001,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize.height, equals(100.0));
@@ -1204,8 +1196,9 @@ void main() {
       ),
     );
 
-    final Finder dropdownIcon =
-        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+    final Finder dropdownIcon = find
+        .descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText))
+        .last;
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -1231,8 +1224,9 @@ void main() {
       ),
     );
 
-    final Finder dropdownIcon =
-        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+    final Finder dropdownIcon = find
+        .descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText))
+        .last;
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -1252,13 +1246,9 @@ void main() {
     await tester.tap(iconButton);
     await tester.pump();
 
-    final Finder menuMaterial =
-        find
-            .ancestor(
-              of: findMenuItemButton(TestMenu.mainMenu0.label),
-              matching: find.byType(Material),
-            )
-            .last;
+    final Finder menuMaterial = find
+        .ancestor(of: findMenuItemButton(TestMenu.mainMenu0.label), matching: find.byType(Material))
+        .last;
     expect(menuMaterial, findsOneWidget);
   });
 
@@ -1410,13 +1400,9 @@ void main() {
     await tester.tap(iconButton);
     await tester.pump();
 
-    final Finder menuMaterial =
-        find
-            .ancestor(
-              of: findMenuItemButton(TestMenu.mainMenu0.label),
-              matching: find.byType(Material),
-            )
-            .last;
+    final Finder menuMaterial = find
+        .ancestor(of: findMenuItemButton(TestMenu.mainMenu0.label), matching: find.byType(Material))
+        .last;
     expect(menuMaterial, findsOneWidget);
   });
 
@@ -2871,24 +2857,23 @@ void main() {
 
     await tester.pumpWidget(
       StatefulBuilder(
-        builder:
-            (BuildContext context, StateSetter setState) => MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: DropdownMenu<TestMenu>(
-                    requestFocusOnTap: true,
-                    dropdownMenuEntries: menuChildren,
-                    hintText: hintText,
-                    onSelected: (TestMenu? value) {
-                      setState(() {
-                        selectedValue = value;
-                      });
-                    },
-                    controller: controller,
-                  ),
-                ),
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                hintText: hintText,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                },
+                controller: controller,
               ),
             ),
+          ),
+        ),
       ),
     );
     final SemanticsNode node = tester.getSemantics(find.text(hintText));
@@ -3092,10 +3077,9 @@ void main() {
           body: DropdownMenu<TestMenu>(
             controller: controller,
             width: 100,
-            dropdownMenuEntries:
-                TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
-                  return DropdownMenuEntry<TestMenu>(value: item, label: '${item.label} $longText');
-                }).toList(),
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(value: item, label: '${item.label} $longText');
+            }).toList(),
           ),
         ),
       ),
@@ -3137,14 +3121,13 @@ void main() {
             key: ValueKey<int>(maxLines),
             controller: controller,
             width: 100,
-            dropdownMenuEntries:
-                TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
-                  return DropdownMenuEntry<TestMenu>(
-                    value: item,
-                    label: '${item.label} $longText',
-                    labelWidget: Text('${item.label} $longText', maxLines: maxLines),
-                  );
-                }).toList(),
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(
+                value: item,
+                label: '${item.label} $longText',
+                labelWidget: Text('${item.label} $longText', maxLines: maxLines),
+              );
+            }).toList(),
           ),
         ),
       );
@@ -3460,7 +3443,9 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuItems))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuItems)),
+      ),
     );
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -4196,7 +4181,9 @@ void main() {
 
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
     );
     TextField textField = tester.widget(find.byType(TextField));
     // Default behavior.
@@ -4225,7 +4212,9 @@ void main() {
 
   testWidgets('DropdownMenu passes textInputAction to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
     );
     TextField textField = tester.widget(find.byType(TextField));
     // Default behavior.
@@ -4473,6 +4462,59 @@ void main() {
     controller2.dispose();
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169942.
+  testWidgets(
+    'DropdownMenu disabled state applies proper styling to label and selected value text',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      final Color disabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
+
+      Widget buildDropdownMenu({required bool isEnabled}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: DropdownMenu<String>(
+              width: double.infinity,
+              enabled: isEnabled,
+              initialSelection: 'One',
+              label: const Text('Choose number'),
+              dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+                DropdownMenuEntry<String>(value: 'One', label: 'One'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: true));
+
+      // Find the TextField and its EditableText from DropdownMenu.
+      final TextField enabledTextField = tester.widget(find.byType(TextField));
+      final EditableText enabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify enabled state styling for the TextField.
+      expect(enabledTextField.enabled, isTrue);
+      expect(enabledEditableText.style.color, isNot(disabledColor));
+
+      // Switch to the disabled state by rebuilding the widget.
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: false));
+
+      // Find the TextField and its EditableText in disabled state.
+      final TextField textField = tester.widget(find.byType(TextField));
+      final EditableText disabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify disabled state styling for the TextField.
+      expect(textField.enabled, isFalse);
+      expect(disabledEditableText.style.color, disabledColor);
+
+      // Verify the selected value text has disabled color.
+      final EditableText selectedValueText = tester.widget<EditableText>(
+        find.descendant(of: find.byType(TextField), matching: find.byType(EditableText)),
+      );
+      expect(selectedValueText.style.color, disabledColor);
+    },
+  );
 }
 
 enum TestMenu {

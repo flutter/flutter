@@ -10,11 +10,10 @@ import 'package:ui/ui.dart' as ui;
 ///
 /// Position needs to be absolute since these svgs are sandwiched between
 /// canvas elements and can cause layout shifts otherwise.
-final SVGSVGElement kSvgResourceHeader =
-    createSVGSVGElement()
-      ..setAttribute('width', 0)
-      ..setAttribute('height', 0)
-      ..style.position = 'absolute';
+final SVGSVGElement kSvgResourceHeader = createSVGSVGElement()
+  ..setAttribute('width', 0)
+  ..setAttribute('height', 0)
+  ..style.position = 'absolute';
 
 /// This composites HTML views into the [ui.Scene].
 class HtmlViewEmbedder {
@@ -212,10 +211,9 @@ class HtmlViewEmbedder {
   void _applyMutators(EmbeddedViewParams params, DomElement embeddedView, int viewId) {
     final MutatorsStack mutators = params.mutators;
     DomElement head = embeddedView;
-    Matrix4 headTransform =
-        params.offset == ui.Offset.zero
-            ? Matrix4.identity()
-            : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
+    Matrix4 headTransform = params.offset == ui.Offset.zero
+        ? Matrix4.identity()
+        : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
     double embeddedOpacity = 1.0;
     _resetAnchor(head);
     _cleanUpClipDefs(viewId);
@@ -371,8 +369,8 @@ class HtmlViewEmbedder {
     final List<RenderingRenderCanvas> renderCanvases = rendering.canvases;
     int renderCanvasIndex = 0;
     for (final RenderingRenderCanvas renderCanvas in renderCanvases) {
-      final CkPicture renderPicture =
-          _context.optimizedCanvasRecorders![renderCanvasIndex++].endRecording();
+      final CkPicture renderPicture = _context.optimizedCanvasRecorders![renderCanvasIndex++]
+          .endRecording();
       await rasterizer.rasterizeToCanvas(renderCanvas.displayCanvas!, <CkPicture>[renderPicture]);
       renderPicture.dispose();
     }
@@ -391,8 +389,8 @@ class HtmlViewEmbedder {
       final CkCanvas boundsCanvas = boundsRecorder.beginRecording(
         ui.Rect.fromLTWH(0, 0, _frameSize.width.toDouble(), _frameSize.height.toDouble()),
       );
-      final CkPaint platformViewBoundsPaint =
-          CkPaint()..color = const ui.Color.fromARGB(100, 0, 255, 0);
+      final CkPaint platformViewBoundsPaint = CkPaint()
+        ..color = const ui.Color.fromARGB(100, 0, 255, 0);
       final CkPaint pictureBoundsPaint = CkPaint()..color = const ui.Color.fromARGB(100, 0, 0, 255);
       for (final RenderingEntity entity in _activeRendering.entities) {
         if (entity is RenderingPlatformView) {

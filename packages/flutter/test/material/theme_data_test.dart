@@ -1054,10 +1054,9 @@ void main() {
     'VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
-        platform:
-            debugDefaultTargetPlatformOverride! == TargetPlatform.android
-                ? TargetPlatform.linux
-                : TargetPlatform.android,
+        platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android
+            ? TargetPlatform.linux
+            : TargetPlatform.android,
       );
       switch (debugDefaultTargetPlatformOverride!) {
         case TargetPlatform.iOS:
@@ -1854,11 +1853,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     ThemeData().debugFillProperties(properties);
-    final List<String> propertyNameList =
-        properties.properties
-            .map((final DiagnosticsNode node) => node.name)
-            .whereType<String>()
-            .toList();
+    final List<String> propertyNameList = properties.properties
+        .map((final DiagnosticsNode node) => node.name)
+        .whereType<String>()
+        .toList();
     final Set<String> propertyNames = propertyNameList.toSet();
 
     // Ensure there are no duplicates.

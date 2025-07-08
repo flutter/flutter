@@ -116,8 +116,9 @@ void main() {
 
       for (int keyState = 0; keyState < 1 << 2; keyState += 1) {
         final bool shift = keyState & 0x1 != 0;
-        final LogicalKeyboardKey key =
-            keyState & 0x2 != 0 ? LogicalKeyboardKey.delete : LogicalKeyboardKey.backspace;
+        final LogicalKeyboardKey key = keyState & 0x2 != 0
+            ? LogicalKeyboardKey.delete
+            : LogicalKeyboardKey.backspace;
 
         state.lastIntent = null;
         final SingleActivator activator = SingleActivator(key, meta: true, shift: shift);

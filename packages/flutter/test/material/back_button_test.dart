@@ -121,7 +121,9 @@ void main() {
 
   testWidgets('BackButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: BackButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: BackButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(
@@ -256,7 +258,9 @@ void main() {
 
   testWidgets('CloseButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: CloseButton(color: Colors.red))),
+      const MaterialApp(
+        home: Material(child: CloseButton(color: Colors.red)),
+      ),
     );
 
     final RichText iconText = tester.firstWidget(

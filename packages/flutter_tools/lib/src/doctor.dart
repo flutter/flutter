@@ -36,7 +36,6 @@ import 'linux/linux_workflow.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
-import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -133,14 +132,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
-        flutterVersion:
-            () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
+        flutterVersion: () =>
+            globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
+        featureFlags: featureFlags,
       ),
       if (platform.isWindows)
         WindowsVersionValidator(
@@ -432,9 +432,6 @@ class Doctor {
             ),
           );
         }
-        // TODO(eliasyishak): remove this after migrating from package:usage,
-        //  https://github.com/flutter/flutter/issues/128251
-        DoctorResultEvent(validator: validator, result: result).send();
       }
 
       final String executionDuration = () {
@@ -442,10 +439,9 @@ class Doctor {
         if (!verbose || executionTime == null) {
           return '';
         }
-        final String formatted =
-            executionTime.inSeconds < 2
-                ? getElapsedAsMilliseconds(executionTime)
-                : getElapsedAsSeconds(executionTime);
+        final String formatted = executionTime.inSeconds < 2
+            ? getElapsedAsMilliseconds(executionTime)
+            : getElapsedAsSeconds(executionTime);
         return ' [$formatted]';
       }();
 
@@ -539,6 +535,7 @@ class FlutterValidator extends DoctorValidator {
     required ProcessManager processManager,
     required String Function() flutterRoot,
     required OperatingSystemUtils operatingSystemUtils,
+    required FeatureFlags featureFlags,
   }) : _flutterVersion = flutterVersion,
        _devToolsVersion = devToolsVersion,
        _platform = platform,
@@ -548,6 +545,7 @@ class FlutterValidator extends DoctorValidator {
        _processManager = processManager,
        _flutterRoot = flutterRoot,
        _operatingSystemUtils = operatingSystemUtils,
+       _featureFlags = featureFlags,
        super('Flutter');
 
   final Platform _platform;
@@ -559,6 +557,7 @@ class FlutterValidator extends DoctorValidator {
   final Artifacts _artifacts;
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
+  final FeatureFlags _featureFlags;
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -600,6 +599,24 @@ class FlutterValidator extends DoctorValidator {
       if (storageBaseUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterMirrorURL(storageBaseUrl)));
       }
+      // Add feature flags that are either enabled, or disabled compared to the default setting.
+      final List<String> featureFlags = <String>[
+        ..._featureFlags.allConfigurableFeatures
+            .where((Feature f) {
+              final bool enabled = _featureFlags.isEnabled(f);
+              final bool defaults = f.getSettingForChannel(version.channel).enabledByDefault;
+              return enabled || enabled != defaults;
+            })
+            .map((Feature f) {
+              // SAFETY: allConfigurableFeatures only returns features with a non-null configSetting
+              String setting = f.configSetting!;
+              if (!_featureFlags.isEnabled(f)) {
+                setting = 'no-$setting';
+              }
+              return setting;
+            }),
+      ];
+      messages.add(ValidationMessage('Feature flags: ${featureFlags.join(', ')}'));
     } on VersionCheckError catch (e) {
       messages.add(ValidationMessage.error(e.message));
     }
@@ -716,8 +733,10 @@ class FlutterValidator extends DoctorValidator {
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
     final String? repositoryUrl = version.repositoryUrl;
-    final VersionCheckError? upstreamValidationError =
-        VersionUpstreamValidator(version: version, platform: _platform).run();
+    final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(
+      version: version,
+      platform: _platform,
+    ).run();
 
     // VersionUpstreamValidator can produce an error if repositoryUrl is null
     if (upstreamValidationError != null) {
@@ -772,19 +791,17 @@ class DeviceValidator extends DoctorValidator {
     );
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages =
-          (await Device.descriptions(
-            devices,
-          )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(
+        devices,
+      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     List<ValidationMessage> diagnosticMessages = <ValidationMessage>[];
     final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
-      diagnosticMessages =
-          diagnostics
-              .map<ValidationMessage>((String message) => ValidationMessage.hint(message))
-              .toList();
+      diagnosticMessages = diagnostics
+          .map<ValidationMessage>((String message) => ValidationMessage.hint(message))
+          .toList();
     } else if (devices.isEmpty) {
       diagnosticMessages = <ValidationMessage>[
         ValidationMessage.hint(_userMessages.devicesMissing),
@@ -832,6 +849,7 @@ class DoctorText {
         startedValidatorTasks: _validatorTasks,
         showPii: showPii,
         sendEvent: _sendDoctorEvent,
+        verbose: _logger.isVerbose,
       );
       // Do not send the doctor event a second time.
       _sendDoctorEvent = false;

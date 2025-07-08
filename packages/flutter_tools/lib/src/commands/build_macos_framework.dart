@@ -195,7 +195,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
       final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
-      final String podspecContents = '''
+      final String podspecContents =
+          '''
 Pod::Spec.new do |s|
   s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
@@ -255,8 +256,9 @@ end
         processManager: globals.processManager,
         platform: globals.platform,
         analytics: globals.analytics,
-        engineVersion:
-            globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+        engineVersion: globals.artifacts!.usesLocalArtifacts
+            ? null
+            : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;
@@ -346,8 +348,9 @@ end
 
       final Directory buildConfiguration = buildOutput.childDirectory(xcodeBuildConfiguration);
 
-      final Iterable<Directory> products =
-          buildConfiguration.listSync(followLinks: false).whereType<Directory>();
+      final Iterable<Directory> products = buildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
       for (final Directory builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
