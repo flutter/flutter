@@ -426,6 +426,8 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
+  // TODO(camsim99): not sure that I can modify this directly since this is referenced by cupertino. maybe the material level above?
   static MouseCursor _clickable(Set<WidgetState> states) {
     return SystemMouseCursors.basic;
   }
