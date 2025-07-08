@@ -549,3 +549,19 @@ bool listEquals<T>(List<T> a, List<T> b) {
   }
   return true;
 }
+
+/// Simple "X (months|days|hours|minutes) ago" [Duration] converter.
+extension DurationAgo on Duration {
+  String ago() {
+    if (inDays > 31) {
+      return '${inDays ~/ 31} months ago';
+    }
+    if (inDays > 1) {
+      return '$inDays days ago';
+    }
+    if (inHours > 1) {
+      return '$inHours hours ago';
+    }
+    return '$inMinutes minutes ago';
+  }
+}
