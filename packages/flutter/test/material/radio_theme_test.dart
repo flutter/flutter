@@ -27,6 +27,7 @@ void main() {
     expect(themeData.splashRadius, null);
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.visualDensity, null);
+    expect(themeData.backgroundColor, null);
 
     const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
     expect(theme.data.mouseCursor, null);
@@ -35,37 +36,37 @@ void main() {
     expect(theme.data.splashRadius, null);
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.visualDensity, null);
+    expect(theme.data.backgroundColor, null);
   });
 
   testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
-    expect(description, <String>[]);
+    expect(description, const <String>[]);
   });
 
   testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData(
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
-      fillColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+      fillColor: WidgetStatePropertyAll<Color>(Color(0xfffffff0)),
+      overlayColor: WidgetStatePropertyAll<Color>(Color(0xfffffff1)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
+      backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -76,6 +77,7 @@ void main() {
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
+        'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)})',
       ]),
     );
   });
@@ -88,6 +90,8 @@ void main() {
     const Color selectedFillColor = Color(0xfffffff1);
     const Color focusOverlayColor = Color(0xfffffff2);
     const Color hoverOverlayColor = Color(0xfffffff3);
+    const Color defaultBackgroundColor = Color(0xfffffff4);
+    const Color selectedBackgroundColor = Color(0xfffffff5);
     const double splashRadius = 1.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
@@ -96,18 +100,18 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: const WidgetStatePropertyAll<MouseCursor>(mouseCursor),
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return focusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return hoverOverlayColor;
               }
               return null;
@@ -115,6 +119,12 @@ void main() {
             splashRadius: splashRadius,
             materialTapTargetSize: materialTapTargetSize,
             visualDensity: visualDensity,
+            backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedBackgroundColor;
+              }
+              return defaultBackgroundColor;
+            }),
           ),
         ),
         home: Scaffold(
@@ -134,7 +144,7 @@ void main() {
     expect(
       _getRadioMaterial(tester),
       paints
-        ..circle(color: Colors.transparent)
+        ..circle(color: defaultBackgroundColor)
         ..circle(color: defaultFillColor),
     );
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
@@ -146,7 +156,7 @@ void main() {
     expect(
       _getRadioMaterial(tester),
       paints
-        ..circle(color: Colors.transparent)
+        ..circle(color: selectedBackgroundColor)
         ..circle(color: selectedFillColor),
     );
 
@@ -177,6 +187,8 @@ void main() {
     const Color themeSelectedFillColor = Color(0xfffffff1);
     const Color themeFocusOverlayColor = Color(0xfffffff2);
     const Color themeHoverOverlayColor = Color(0xfffffff3);
+    const Color themeDefaultBackgroundColor = Color(0xfffffff4);
+    const Color themeSelectedBackgroundColor = Color(0xfffffff5);
     const double themeSplashRadius = 1.0;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const VisualDensity themeVisualDensity = VisualDensity.standard;
@@ -186,6 +198,8 @@ void main() {
     const Color selectedFillColor = Color(0xfffffff1);
     const Color focusColor = Color(0xfffffff2);
     const Color hoverColor = Color(0xfffffff3);
+    const Color defaultBackgroundColor = Color(0xfffffff4);
+    const Color selectedBackgroundColor = Color(0xfffffff5);
     const double splashRadius = 2.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
@@ -194,18 +208,18 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            mouseCursor: const WidgetStatePropertyAll<MouseCursor>(themeMouseCursor),
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.focused)) {
+            overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.focused)) {
                 return themeFocusOverlayColor;
               }
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return themeHoverOverlayColor;
               }
               return null;
@@ -213,6 +227,12 @@ void main() {
             splashRadius: themeSplashRadius,
             materialTapTargetSize: themeMaterialTapTargetSize,
             visualDensity: themeVisualDensity,
+            backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return themeSelectedBackgroundColor;
+              }
+              return themeDefaultBackgroundColor;
+            }),
           ),
         ),
         home: Scaffold(
@@ -222,8 +242,8 @@ void main() {
             groupValue: 0,
             autofocus: autofocus,
             mouseCursor: mouseCursor,
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            fillColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
@@ -233,6 +253,12 @@ void main() {
             splashRadius: splashRadius,
             materialTapTargetSize: materialTapTargetSize,
             visualDensity: visualDensity,
+            backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedBackgroundColor;
+              }
+              return defaultBackgroundColor;
+            }),
           ),
         ),
       );
@@ -244,7 +270,7 @@ void main() {
     expect(
       _getRadioMaterial(tester),
       paints
-        ..circle(color: Colors.transparent)
+        ..circle(color: defaultBackgroundColor)
         ..circle(color: defaultFillColor),
     );
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
@@ -256,7 +282,7 @@ void main() {
     expect(
       _getRadioMaterial(tester),
       paints
-        ..circle(color: Colors.transparent)
+        ..circle(color: selectedBackgroundColor)
         ..circle(color: selectedFillColor),
     );
 
@@ -353,7 +379,9 @@ void main() {
             splashRadius: splashRadius,
           ),
         ),
-        home: Scaffold(body: Radio<int>(value: active ? 1 : 0, groupValue: 1, onChanged: (_) {})),
+        home: Scaffold(
+          body: Radio<int>(value: active ? 1 : 0, groupValue: 1, onChanged: (_) {}),
+        ),
       );
     }
 

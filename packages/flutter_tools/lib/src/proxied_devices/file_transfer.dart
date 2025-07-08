@@ -183,10 +183,9 @@ class RollingAdler32 {
     } else if (_cur == 0) {
       return _buffer;
     } else {
-      final BytesBuilder builder =
-          BytesBuilder(copy: false)
-            ..add(Uint8List.sublistView(_buffer, _cur))
-            ..add(Uint8List.sublistView(_buffer, 0, _cur));
+      final BytesBuilder builder = BytesBuilder(copy: false)
+        ..add(Uint8List.sublistView(_buffer, _cur))
+        ..add(Uint8List.sublistView(_buffer, 0, _cur));
       return builder.takeBytes();
     }
   }

@@ -238,9 +238,9 @@ abstract final class TestAsyncUtils {
       }
       final String again =
           (originalGuarder.callerFile == collidingGuarder.callerFile) &&
-                  (originalGuarder.callerLine == collidingGuarder.callerLine)
-              ? 'again '
-              : '';
+              (originalGuarder.callerLine == collidingGuarder.callerLine)
+          ? 'again '
+          : '';
       final String collidingKind = collidingGuarder.className == null ? 'function' : 'method';
       String collidingName;
       if ((originalGuarder.className == collidingGuarder.className) &&
@@ -357,8 +357,11 @@ abstract final class TestAsyncUtils {
     if (kIsWeb) {
       return null;
     }
-    final List<String> stack =
-        rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
+    final List<String> stack = rawStack
+        .toString()
+        .split('\n')
+        .where(_stripAsynchronousSuspensions)
+        .toList();
     assert(stack.last == '');
     stack.removeLast();
     final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');

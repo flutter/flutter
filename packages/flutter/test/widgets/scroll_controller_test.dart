@@ -20,10 +20,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children:
-              kStates.map<Widget>((String state) {
-                return SizedBox(height: 200.0, child: Text(state));
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return SizedBox(height: 200.0, child: Text(state));
+          }).toList(),
         ),
       ),
     );
@@ -57,10 +56,9 @@ void main() {
         child: ListView(
           key: const Key('second'),
           controller: controller,
-          children:
-              kStates.map<Widget>((String state) {
-                return SizedBox(height: 200.0, child: Text(state));
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return SizedBox(height: 200.0, child: Text(state));
+          }).toList(),
         ),
       ),
     );
@@ -82,10 +80,9 @@ void main() {
         child: ListView(
           key: const Key('second'),
           controller: controller2,
-          children:
-              kStates.map<Widget>((String state) {
-                return SizedBox(height: 200.0, child: Text(state));
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return SizedBox(height: 200.0, child: Text(state));
+          }).toList(),
         ),
       ),
     );
@@ -111,10 +108,9 @@ void main() {
           key: const Key('second'),
           controller: controller2,
           physics: const BouncingScrollPhysics(),
-          children:
-              kStates.map<Widget>((String state) {
-                return SizedBox(height: 200.0, child: Text(state));
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return SizedBox(height: 200.0, child: Text(state));
+          }).toList(),
         ),
       ),
     );
@@ -220,20 +216,18 @@ void main() {
               constraints: const BoxConstraints(maxHeight: 500.0),
               child: ListView(
                 controller: controller,
-                children:
-                    kStates.map<Widget>((String state) {
-                      return SizedBox(height: 200.0, child: Text(state));
-                    }).toList(),
+                children: kStates.map<Widget>((String state) {
+                  return SizedBox(height: 200.0, child: Text(state));
+                }).toList(),
               ),
             ),
             Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
               child: ListView(
                 controller: controller,
-                children:
-                    kStates.map<Widget>((String state) {
-                      return SizedBox(height: 200.0, child: Text(state));
-                    }).toList(),
+                children: kStates.map<Widget>((String state) {
+                  return SizedBox(height: 200.0, child: Text(state));
+                }).toList(),
               ),
             ),
           ],
@@ -272,20 +266,18 @@ void main() {
               constraints: const BoxConstraints(maxHeight: 500.0),
               child: ListView(
                 controller: controller,
-                children:
-                    kStates.map<Widget>((String state) {
-                      return SizedBox(height: 200.0, child: Text(state));
-                    }).toList(),
+                children: kStates.map<Widget>((String state) {
+                  return SizedBox(height: 200.0, child: Text(state));
+                }).toList(),
               ),
             ),
             Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
               child: ListView(
                 controller: controller,
-                children:
-                    kStates.map<Widget>((String state) {
-                      return SizedBox(height: 200.0, child: Text(state));
-                    }).toList(),
+                children: kStates.map<Widget>((String state) {
+                  return SizedBox(height: 200.0, child: Text(state));
+                }).toList(),
               ),
             ),
           ],
@@ -312,10 +304,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children:
-              kStates.map<Widget>((String state) {
-                return SizedBox(height: 200.0, child: Text(state));
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return SizedBox(height: 200.0, child: Text(state));
+          }).toList(),
         ),
       ),
     );
@@ -346,10 +337,9 @@ void main() {
             child: ListView(
               key: UniqueKey(), // it's a different ListView every time
               controller: controller,
-              children:
-                  List<Widget>.generate(50, (int index) {
-                    return SizedBox(height: 100.0, child: Text('Item $index'));
-                  }).toList(),
+              children: List<Widget>.generate(50, (int index) {
+                return SizedBox(height: 100.0, child: Text('Item $index'));
+              }).toList(),
             ),
           ),
         ),
@@ -395,10 +385,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children:
-              List<Widget>.generate(50, (int index) {
-                return SizedBox(height: 100.0, child: Text('Item $index'));
-              }).toList(),
+          children: List<Widget>.generate(50, (int index) {
+            return SizedBox(height: 100.0, child: Text('Item $index'));
+          }).toList(),
         ),
       );
     }
