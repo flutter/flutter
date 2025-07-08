@@ -354,7 +354,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, floating: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),
@@ -388,7 +390,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(floating: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),
@@ -422,7 +426,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),

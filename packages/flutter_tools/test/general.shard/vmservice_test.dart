@@ -445,12 +445,11 @@ void main() {
         const String otherExtensionName = 'ext.flutter.test.otherExtension';
 
         // Copy the other isolate and change a few fields.
-        final vm_service.Isolate isolate2 =
-            vm_service.Isolate.parse(
-              isolate.toJson()
-                ..['id'] = '2'
-                ..['extensionRPCs'] = <String>[otherExtensionName],
-            )!;
+        final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+          isolate.toJson()
+            ..['id'] = '2'
+            ..['extensionRPCs'] = <String>[otherExtensionName],
+        )!;
 
         final FlutterView fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
 
@@ -632,14 +631,15 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (
-      String url, {
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      required Logger logger,
-    }) async {
-      completer.complete(url);
-      throw Exception('');
-    };
+    openChannelForTesting =
+        (
+          String url, {
+          io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+          required Logger logger,
+        }) async {
+          completer.complete(url);
+          throw Exception('');
+        };
 
     // Construct a URL that does not end in a `/`.
     await expectLater(

@@ -366,11 +366,11 @@ void main() {
       final File fakeZipFile = fs.file('archive.zip');
       final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
       const String content = 'hello, world!';
-      final Archive archive =
-          Archive()..addFile(
-            // This file would be extracted outside of the target extraction dir
-            ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
-          );
+      final Archive archive = Archive()
+        ..addFile(
+          // This file would be extracted outside of the target extraction dir
+          ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+        );
       final List<int> zipData = ZipEncoder().encode(archive)!;
       fakeZipFile.writeAsBytesSync(zipData);
       expect(

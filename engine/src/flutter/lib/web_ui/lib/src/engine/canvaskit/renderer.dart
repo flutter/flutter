@@ -363,32 +363,31 @@ class CanvasKitRenderer implements Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
-          : CkTextStyle(
-            color: color,
-            decoration: decoration,
-            decorationColor: decorationColor,
-            decorationStyle: decorationStyle,
-            decorationThickness: decorationThickness,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            textBaseline: textBaseline,
-            fontFamily: fontFamily,
-            fontFamilyFallback: fontFamilyFallback,
-            fontSize: fontSize,
-            letterSpacing: letterSpacing,
-            wordSpacing: wordSpacing,
-            height: height,
-            leadingDistribution: leadingDistribution,
-            locale: locale,
-            background: background as CkPaint?,
-            foreground: foreground as CkPaint?,
-            shadows: shadows,
-            fontFeatures: fontFeatures,
-            fontVariations: fontVariations,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      : CkTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background as CkPaint?,
+          foreground: foreground as CkPaint?,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        );
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -404,28 +403,27 @@ class CanvasKitRenderer implements Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebParagraphStyle(
-            textDirection: textDirection,
-            textAlign: textAlign,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-          )
-          : CkParagraphStyle(
-            textAlign: textAlign,
-            textDirection: textDirection,
-            maxLines: maxLines,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            height: height,
-            textHeightBehavior: textHeightBehavior,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            strutStyle: strutStyle,
-            ellipsis: ellipsis,
-            locale: locale,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebParagraphStyle(
+          textDirection: textDirection,
+          textAlign: textAlign,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+        )
+      : CkParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle,
+          ellipsis: ellipsis,
+          locale: locale,
+        );
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -438,20 +436,19 @@ class CanvasKitRenderer implements Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebStrutStyle()
-          : CkStrutStyle(
-            fontFamily: fontFamily,
-            fontFamilyFallback: fontFamilyFallback,
-            fontSize: fontSize,
-            height: height,
-            leadingDistribution: leadingDistribution,
-            leading: leading,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            forceStrutHeight: forceStrutHeight,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebStrutStyle()
+      : CkStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        );
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
@@ -467,8 +464,9 @@ class CanvasKitRenderer implements Renderer {
     );
     final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
     final RenderQueue renderQueue = rasterizer.queue;
-    final FrameTimingRecorder? recorder =
-        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.

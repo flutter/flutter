@@ -363,11 +363,10 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      Artifacts:
-          () => Artifacts.testLocalEngine(
-            localEngine: 'out/host_release',
-            localEngineHost: 'out/host_release',
-          ),
+      Artifacts: () => Artifacts.testLocalEngine(
+        localEngine: 'out/host_release',
+        localEngineHost: 'out/host_release',
+      ),
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

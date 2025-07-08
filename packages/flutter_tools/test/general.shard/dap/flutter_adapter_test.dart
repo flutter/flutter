@@ -23,13 +23,15 @@ import 'mocks.dart';
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
   final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
-  final FileSystemStyle fsStyle =
-      platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
+  final FileSystemStyle fsStyle = platform.isWindows
+      ? FileSystemStyle.windows
+      : FileSystemStyle.posix;
   final String flutterRoot = platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
 
   group('flutter adapter', () {
-    final String expectedFlutterExecutable =
-        platform.isWindows ? r'C:\fake\flutter\bin\flutter.bat' : '/fake/flutter/bin/flutter';
+    final String expectedFlutterExecutable = platform.isWindows
+        ? r'C:\fake\flutter\bin\flutter.bat'
+        : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
       Cache.flutterRoot = flutterRoot;
@@ -230,16 +232,15 @@ void main() {
         );
 
         // Begin listening for progress events up until `progressEnd` (but don't await yet).
-        final Future<List<List<Object?>>> progressEventsFuture =
-            adapter.dapToClientProgressEvents
-                .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
-                .map(
-                  (Map<String, Object?> message) => <Object?>[
-                    message['event'],
-                    (message['body']! as Map<String, Object?>)['message'],
-                  ],
-                )
-                .toList();
+        final Future<List<List<Object?>>> progressEventsFuture = adapter.dapToClientProgressEvents
+            .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
+            .map(
+              (Map<String, Object?> message) => <Object?>[
+                message['event'],
+                (message['body']! as Map<String, Object?>)['message'],
+              ],
+            )
+            .toList();
 
         // Initialize with progress support.
         await adapter.initializeRequest(
@@ -280,16 +281,15 @@ void main() {
         );
 
         // Begin listening for progress events up until `progressEnd` (but don't await yet).
-        final Future<List<List<Object?>>> progressEventsFuture =
-            adapter.dapToClientProgressEvents
-                .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
-                .map(
-                  (Map<String, Object?> message) => <Object?>[
-                    message['event'],
-                    (message['body']! as Map<String, Object?>)['message'],
-                  ],
-                )
-                .toList();
+        final Future<List<List<Object?>>> progressEventsFuture = adapter.dapToClientProgressEvents
+            .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
+            .map(
+              (Map<String, Object?> message) => <Object?>[
+                message['event'],
+                (message['body']! as Map<String, Object?>)['message'],
+              ],
+            )
+            .toList();
 
         // Initialize with progress support.
         await adapter.initializeRequest(
@@ -615,8 +615,8 @@ void main() {
 
         // Pretend to be the client, handling any reverse-requests for exposeUrl
         // and mapping the host to 'mapped-host'.
-        adapter.exposeUrlHandler =
-            (String url) => Uri.parse(url).replace(host: 'mapped-host').toString();
+        adapter.exposeUrlHandler = (String url) =>
+            Uri.parse(url).replace(host: 'mapped-host').toString();
 
         // Simulate Flutter asking for a URL to be exposed.
         const int requestId = 12345;

@@ -65,12 +65,10 @@ class PreviewManifest {
     if (updatedPubspecPath != null) {
       final PreviewManifestContents? manifest = _tryLoadManifest();
       if (manifest != null) {
-        final FlutterProject project = <FlutterProject>[
-          rootProject,
-          ...rootProject.workspaceProjects,
-        ].firstWhere(
-          (FlutterProject project) => project.pubspecFile.absolute.path == updatedPubspecPath,
-        );
+        final FlutterProject project =
+            <FlutterProject>[rootProject, ...rootProject.workspaceProjects].firstWhere(
+              (FlutterProject project) => project.pubspecFile.absolute.path == updatedPubspecPath,
+            );
         final Map<String, String> pubspecHashes =
             (manifest[kPubspecHashes]! as Map<String, Object?>).cast<String, String>();
         pubspecHashes[updatedPubspecPath] = project.manifest.computeMD5Hash();
@@ -138,8 +136,8 @@ class PreviewManifest {
       );
       return true;
     }
-    final Map<String, String> pubspecHashes =
-        (manifest[kPubspecHashes]! as Map<String, Object?>).cast<String, String>();
+    final Map<String, String> pubspecHashes = (manifest[kPubspecHashes]! as Map<String, Object?>)
+        .cast<String, String>();
     return !const MapEquality<String, String>().equals(pubspecHashes, _calculatePubspecHashes());
   }
 
