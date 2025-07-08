@@ -31,6 +31,7 @@ import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
@@ -1867,8 +1868,10 @@ flutter:
     'throws when port is an integer outside the valid TCP range',
     () async {
       final logger = BufferLogger.test();
+      const devConfig = WebDevServerConfig(port: 65536);
+      const devConfig2 = WebDevServerConfig(port: -1);
 
-      var debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
+      var debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, devConfig: devConfig);
       ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
@@ -1876,7 +1879,7 @@ flutter:
       );
       await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
 
-      debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
+      debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, devConfig: devConfig2);
       residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
