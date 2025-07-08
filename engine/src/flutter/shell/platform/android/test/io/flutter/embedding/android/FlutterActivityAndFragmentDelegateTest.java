@@ -15,12 +15,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.clearInvocations;
 
 import android.app.Activity;
 import android.content.Context;
@@ -1150,7 +1150,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
 
-    // These are above (or equal) the threadshold, so each should send a warning (order does not matter).
+    // These are above (or equal) the threadshold, so each should send a warning (order does not
+    // matter).
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
     verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
