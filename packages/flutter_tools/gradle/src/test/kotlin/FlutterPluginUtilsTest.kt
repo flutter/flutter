@@ -1230,9 +1230,7 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
-    fun addTasksForOutputsAppLinkSettingsNoAndroid(
-        @TempDir tempDir: Path
-    ) {
+    fun addTasksForOutputsAppLinkSettingsNoAndroid() {
         val mockProject = mockk<Project>()
         val mockLogger = mockk<Logger>()
         every { mockProject.logger } returns mockLogger

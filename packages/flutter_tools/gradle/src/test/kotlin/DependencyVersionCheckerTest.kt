@@ -51,16 +51,18 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 
 // The following values will need to be modified when the corresponding "warn$DepName" versions
 // are updated in DependencyVersionChecker.kt
-private const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
-private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
-private const val SUPPORTED_KGP_VERSION: String = "1.8.10"
+// These values should match the flutter create template values.
+// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
+private const val SUPPORTED_GRADLE_VERSION: String = "8.12"
+private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 9, 1)
+private const val SUPPORTED_KGP_VERSION: String = "2.1.0"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
     @Test
     fun `AGP version in error range results in DependencyValidationException`() {
-        val exampleErrorAgpVersion = AndroidPluginVersion(4, 2, 0)
+        val exampleErrorAgpVersion = AndroidPluginVersion(8, 1, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -130,7 +132,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `KGP version in warn range results in warning logs`() {
-        val exampleWarnKgpVersion = "1.8.0"
+        val exampleWarnKgpVersion = "1.8.20"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -157,7 +159,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Java version in warn range results in warning logs`() {
-        val exampleWarnJavaVersion = JavaVersion.VERSION_1_8
+        val exampleWarnJavaVersion = JavaVersion.VERSION_16
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(javaVersion = exampleWarnJavaVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -204,7 +206,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in warn range results in warning logs`() {
-        val exampleWarnGradleVersion = "7.4.0"
+        val exampleWarnGradleVersion = "8.5.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -475,10 +477,6 @@ private object MockProjectFactory {
                 val variant = mockk<Variant>()
                 every { variant.name } returns it.flavor
                 every { variant.minSdk } returns mockk { every { apiLevel } returns it.version }
-                // Gradle prints a warning about this api being removed in gradle 9 but there is
-                // no way to suppress individual warnings. We can remove this line when our tests
-                // use gradle 9 or higher.
-                every { variant.minSdkVersion } returns mockk { every { apiLevel } returns it.version }
                 onVariantsFnSlot.captured.invoke(variant)
             }
             return@answers Unit
