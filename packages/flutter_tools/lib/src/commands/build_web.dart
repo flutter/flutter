@@ -113,6 +113,13 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag(
+      'wasm-dry-run',
+      defaultsTo: true,
+      help:
+          'Compiles wasm in dry run mode during JS only compilations. '
+          'Disable to suppress warnings.',
+    );
+    argParser.addFlag(
       'no-frequency-based-minification',
       negatable: false,
       help:
@@ -225,6 +232,13 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
+        ),
+        WasmCompilerConfig(
+          optimizationLevel: optimizationLevel,
+          stripWasm: boolArg('strip-wasm'),
+          sourceMaps: sourceMaps,
+          minify: minifyWasm,
+          dryRun: boolArg('wasm-dry-run'),
         ),
       ];
     }
