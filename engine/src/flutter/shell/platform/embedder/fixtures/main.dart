@@ -610,16 +610,17 @@ void platform_messages_no_response() {
   PlatformDispatcher
       .instance
       .onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
-  PlatformDispatcher
-      .instance
-      .onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
-    final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    signalNativeMessage(utf8.decode(list));
-    // This does nothing because no one is listening on the other side. But complete the loop anyway
-    // to make sure all null checking on response handles in the engine is in place.
-    callback!(data);
+    PlatformDispatcher
+        .instance
+        .onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+      final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      signalNativeMessage(utf8.decode(list));
+      // This does nothing because no one is listening on the other side. But complete the loop anyway
+      // to make sure all null checking on response handles in the engine is in place.
+      callback!(data);
+    };
+    signalNativeTest();
   };
-  signalNativeTest();
 }
 
 @pragma('vm:entry-point')
