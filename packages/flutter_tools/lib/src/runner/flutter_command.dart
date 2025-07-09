@@ -241,6 +241,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
+  bool get outputMachineFormat => boolArg('machine');
+
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
@@ -1277,6 +1279,15 @@ abstract class FlutterCommand extends Command<void> {
       'enable-embedder-api',
       hide: !verboseHelp,
       help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
+  void addMachineOutputFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Outputs in a machine readable structured JSON format.',
+      hide: !verboseHelp,
     );
   }
 

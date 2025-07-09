@@ -402,6 +402,7 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -424,14 +425,6 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine friendly format.',
-      )
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
@@ -760,7 +753,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       if (devices!.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }

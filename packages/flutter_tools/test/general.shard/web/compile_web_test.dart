@@ -105,7 +105,8 @@ environement:
           Event.flutterBuildInfo(
             label: 'web-compile',
             buildType: 'web',
-            settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+            settings:
+                'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
           ),
         ]),
       );
