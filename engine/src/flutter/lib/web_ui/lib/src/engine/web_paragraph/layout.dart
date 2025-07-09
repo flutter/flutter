@@ -252,10 +252,9 @@ class TextLayout {
       final ExtendedTextCluster cluster = textClusters[i];
       width += cluster.bounds.width;
     }
-    final double left =
-        run.bidiLevel.isEven
-            ? textClusters[run.clusterRange.start].bounds.left
-            : textClusters[run.clusterRange.end - 1].bounds.left;
+    final double left = run.bidiLevel.isEven
+        ? textClusters[run.clusterRange.start].bounds.left
+        : textClusters[run.clusterRange.end - 1].bounds.left;
     run.shift = shift - left;
     return width;
   }
