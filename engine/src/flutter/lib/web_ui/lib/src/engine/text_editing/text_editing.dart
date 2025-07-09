@@ -1411,6 +1411,14 @@ abstract class DefaultTextEditingStrategy
       );
     }
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1516,7 +1524,6 @@ abstract class DefaultTextEditingStrategy
   }
 
   EditingState suppressInteractiveSelectionIfNeeded(EditingState editingState) {
-    // TODO: Flutter Web's click to move cursor seems to be broken with enableInteractiveSelection: false.
     if (inputConfiguration.enableInteractiveSelection) {
       return editingState;
     }
@@ -1535,6 +1542,7 @@ abstract class DefaultTextEditingStrategy
         'forward' => selectionEnd,
         _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
       };
+      // TODO: Is this necessary? Or will Flutter framework send this back? Does that cause flicker?
       element.setSelectionRange(collapsedOffset, collapsedOffset);
       return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
     } else if (domElement.isA<DomHTMLTextAreaElement>()) {
@@ -1546,6 +1554,7 @@ abstract class DefaultTextEditingStrategy
         'forward' => selectionEnd,
         _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
       };
+      // TODO: Is this necessary? Or will Flutter framework send this back? Does that cause flicker?
       element.setSelectionRange(collapsedOffset, collapsedOffset);
       return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
     } else {
@@ -1620,6 +1629,13 @@ abstract class DefaultTextEditingStrategy
     }
   }
 
+  void handleClipboardEvent(DomEvent event) {
+    // Prevent clipboard copy/paste if interactive selection is disabled.
+    if (!inputConfiguration.enableInteractiveSelection) {
+      event.preventDefault();
+    }
+  }
+
   void maybeSendAction(DomEvent e) {
     if (e.isA<DomKeyboardEvent>()) {
       final DomKeyboardEvent event = e as DomKeyboardEvent;
@@ -1634,15 +1650,15 @@ abstract class DefaultTextEditingStrategy
       }
 
       // Suppress shortcuts if interactive selection is disabled.
-      if (!inputConfiguration.enableInteractiveSelection) {
-        const shortcuts = <String>{'a', 'c', 'v'};
-        final isMacOs = ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
-        if (isMacOs && event.metaKey && shortcuts.contains(event.key)) {
-          event.preventDefault();
-        } else if (!isMacOs && event.ctrlKey && shortcuts.contains(event.key)) {
-          event.preventDefault();
-        }
-      }
+      // if (!inputConfiguration.enableInteractiveSelection) {
+      //   const shortcuts = <String>{'a', 'c', 'v'};
+      //   final isMacOs = ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+      //   if (isMacOs && event.metaKey && shortcuts.contains(event.key)) {
+      //     event.preventDefault();
+      //   } else if (!isMacOs && event.ctrlKey && shortcuts.contains(event.key)) {
+      //     event.preventDefault();
+      //   }
+      // }
     }
   }
 
@@ -1814,6 +1830,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
@@ -1952,6 +1976,14 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -2036,6 +2068,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
     );
 
     preventDefaultForMouseEvents();
