@@ -209,8 +209,11 @@ class AnsiTerminal implements Terminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color]!;
 
+  // See https://no-color.org/.
+  bool get _noColorSet => _platform.environment.containsKey('NO_COLOR');
+
   @override
-  bool get supportsColor => _platform.stdoutSupportsAnsi;
+  bool get supportsColor => _platform.stdoutSupportsAnsi && !_noColorSet;
 
   @override
   bool get isCliAnimationEnabled => _isCliAnimationEnabled;
