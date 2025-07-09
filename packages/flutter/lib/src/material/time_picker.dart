@@ -2134,8 +2134,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     ).applyDefaults(inputDecorationTheme);
     // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    // Clear the hint text when emptyInitialTime is true to avoid showing a
-    // misleading placeholder.
+    // Clear the hint text when emptyInitialTime is true.
     final String? hintText = focusNode.hasFocus || widget.emptyInitialTime ? null : _formattedValue;
 
     // Because the fill color is specified in both the inputDecorationTheme and
