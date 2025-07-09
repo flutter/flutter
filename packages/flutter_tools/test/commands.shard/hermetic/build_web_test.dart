@@ -412,16 +412,28 @@ void main() {
           TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             expect(target, isA<WebServiceWorker>());
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
-            expect(configs, hasLength(1));
-            final WebCompilerConfig config = configs.single;
-            expect(config.renderer, WebRendererMode.canvaskit);
-            expect(config.compileTarget, CompileTarget.js);
-            final List<String> options = config.toCommandOptions(BuildMode.release);
-            expect(options, <String>[
+            expect(configs, hasLength(2));
+            final WebCompilerConfig jsConfig = configs[0];
+            expect(jsConfig.renderer, WebRendererMode.canvaskit);
+            expect(jsConfig.compileTarget, CompileTarget.js);
+            final List<String> jsOptions = jsConfig.toCommandOptions(BuildMode.release);
+            expect(jsOptions, <String>[
               '--native-null-assertions',
               '--no-source-maps',
               '-O4',
               '--minify',
+            ]);
+
+            final WebCompilerConfig wasmConfig = configs[1];
+            expect(wasmConfig.renderer, WebRendererMode.skwasm);
+            expect(wasmConfig.compileTarget, CompileTarget.wasm);
+            final List<String> wasmOptions = wasmConfig.toCommandOptions(BuildMode.release);
+            expect(wasmOptions, <String>[
+              '-O2',
+              '--strip-wasm',
+              '--no-source-maps',
+              '--minify',
+              '--extra-compiler-option=--dry-run',
             ]);
           }),
     },
