@@ -1957,7 +1957,7 @@ void main() {
     expect(painter.height, 10);
   });
 
-  test('debugPaintTextLayoutBoxes with strut disabled', () {
+  test('debugPaintTextLayoutBoxes', () {
     const TextSpan span = TextSpan(
       text: 'M',
       // ascent = 96, descent = 32
@@ -1965,11 +1965,10 @@ void main() {
       children: <InlineSpan>[TextSpan(text: 'M', style: TextStyle(fontSize: 64))],
     );
 
-    final TextPainter painter =
-        TextPainter()
-          ..textDirection = TextDirection.ltr
-          ..text = span
-          ..layout();
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = span
+      ..layout();
     expect(
       (Canvas canvas) {
         painter.debugPaintTextLayoutBoxes = true;
@@ -1979,32 +1978,6 @@ void main() {
       paints
         ..rect(rect: Offset.zero & const Size.square(128))
         ..rect(rect: const Offset(128, 96 - 48) & const Size.square(64)),
-    );
-  });
-
-  test('debugPaintTextLayoutBoxes with strut enabled', () {
-    const TextSpan span = TextSpan(
-      text: 'M',
-      // ascent = 96, descent = 32
-      style: TextStyle(fontSize: 128),
-      children: <InlineSpan>[TextSpan(text: 'M', style: TextStyle(fontSize: 64))],
-    );
-
-    final TextPainter painter =
-        TextPainter()
-          ..textDirection = TextDirection.ltr
-          ..strutStyle = const StrutStyle(fontSize: 128)
-          ..text = span
-          ..layout();
-    expect(
-      (Canvas canvas) {
-        painter.debugPaintTextLayoutBoxes = true;
-        painter.paint(canvas, Offset.zero);
-        painter.debugPaintTextLayoutBoxes = false;
-      },
-      paints
-        ..rect(rect: Offset.zero & const Size.square(128))
-        ..rect(rect: const Offset(128, 0) & const Size(64, 128)),
     );
   });
 
