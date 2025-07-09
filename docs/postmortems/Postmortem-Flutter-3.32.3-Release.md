@@ -10,7 +10,7 @@ The 3.32.3 hotfix release, which included some usability and memory leak fixes f
 
 As a result, a manual downgrade and a few other possible workarounds were needed to get a working Flutter SDK on macOS, until 3.32.4 could be published with correctly signed binaries.
 
-Three parts of the system failed (not including the GCP outage):
+Three parts of the system failed (not including the [GCP outage](https://status.cloud.google.com/incidents/ow5i3PPK96RduMcb1SsW)):
 
 1. Once we realized we wanted to rollback (release a new version that is actually an older version) we couldn't - the release tool lacked that function.
 2. Even if the release tool supported rolling back, it's unclear if the `flutter` tool would understand that change.
