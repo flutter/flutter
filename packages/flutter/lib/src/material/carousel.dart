@@ -1756,7 +1756,7 @@ class CarouselController extends ScrollController {
   ///
   /// The logic differs slightly based on the view type:
   /// - In [CarouselView], it's based on fixed-size item layout.
-  /// - In [CarouselView.weight], it uses item weights to determine visual prominence.
+  /// - In [CarouselView.weighted], it uses item weights to determine visual prominence.
   ///
   /// This is maintained by the carousel's layout logic and reflects the most
   /// up-to-date state after layout.
