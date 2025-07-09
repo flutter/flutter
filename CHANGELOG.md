@@ -31,6 +31,19 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 ## Flutter 3.32 Changes
 
+### [3.32.6](https://github.com/flutter/flutter/releases/tag/3.32.6)
+
+- [flutter/171106](https://github.com/flutter/flutter/pull/171106) - When a scroll view contains a `LayoutBuilder` on any platform, prevent null check crash.
+- [flutter/171239](https://github.com/flutter/flutter/pull/171239) - When using Impeller + Vulkan and transitioning between activities that use Flutter on Android, prevent a crash.
+- [flutter/171737](https://github.com/flutter/flutter/pull/171737) - When using platform views on Android SDK 10-13 (API 29-33) prevent app crash when backgrounding and then foregrounding app.
+
+### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
+
+- [flutter/170924](https://github.com/flutter/flutter/pull/170924) - Fix Flutter Windows on devices that only support OpenGL ES 2, like computers with Intel graphics cards.
+- [flutter/170880](https://github.com/flutter/flutter/pull/170880) - Fixes unhandled exception on application shutdown in the debug adapter used by IDEs.
+- [flutter/170846](https://github.com/flutter/flutter/pull/170846) - Fix image decode errors on iOS that could occur if a push notification triggered image decoding while the app is backgrounded.
+- [flutter/171034](https://github.com/flutter/flutter/pull/171034) - Fixed an issue where iOS/macOS workflows may not behave as expected due to missing dev dependencies.
+
 ### [3.32.4](https://github.com/flutter/flutter/releases/tag/3.32.4)
 
 - [flutter/170536](https://github.com/flutter/flutter/issues/170536) - Fixes a code-signing issue on Mac hosts when running `dart` tooling.
