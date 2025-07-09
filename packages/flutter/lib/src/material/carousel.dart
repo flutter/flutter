@@ -1747,7 +1747,19 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The current index of the carousel.
+  /// The index of the item currently centered in the viewport.
+  ///
+  /// This value is:
+  /// - Initialized to [initialItem].
+  /// - Dynamically updated during layout based on the item closest to the
+  ///   viewport's center.
+  ///
+  /// The logic differs slightly based on the view type:
+  /// - In [CarouselView], it's based on fixed-size item layout.
+  /// - In [CarouselView.weight], it uses item weights to determine visual prominence.
+  ///
+  /// This is maintained by the carousel's layout logic and reflects the most
+  /// up-to-date state after layout.
   int get currentIndex => _currentIndex ?? initialItem;
   int? _currentIndex;
 
