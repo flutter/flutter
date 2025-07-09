@@ -34,7 +34,7 @@ import 'theme.dart';
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
 ///  * [WidgetStateProperty.resolve], "resolve" a material state property
 ///    to a simple value based on a set of [WidgetState]s.
-///  * [hemeData.iconButtonTheme], which can be used to override the default
+///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 @immutable
 class IconButtonThemeData with Diagnosticable {
