@@ -32,7 +32,7 @@ class UpgradeCommand extends FlutterCommand {
         help: 'Force upgrade the flutter branch, potentially discarding local changes.',
         negatable: false,
       )
-      ..addOption(
+      ..addFlag(
         'continue',
         hide: !verboseHelp,
         help:
@@ -40,6 +40,13 @@ class UpgradeCommand extends FlutterCommand {
             'manually. It is used re-entrantly by the standard upgrade command after '
             'the new version of Flutter is available, to hand off the upgrade process '
             'from the old version to the new version.',
+      )
+      ..addOption(
+        'continue-started-at',
+        hide: !verboseHelp,
+        help:
+            'If --continue is provided, an ISO 8601 timestamp of the time that the '
+            'initial upgrade command was started. This should not be invoked manually.',
       )
       ..addOption(
         'working-directory',
@@ -71,11 +78,16 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   UpgradePhase _parsePhaseFromContinueArg() {
-    final String? continueArg = stringArg('continue');
-    if (continueArg == null) {
+    if (!boolArg('continue')) {
       return const UpgradePhase.firstHalf();
     } else {
-      return UpgradePhase.secondHalf(upgradeStartedAt: DateTime.parse(continueArg));
+      final DateTime? upgradeStartedAt;
+      if (stringArg('continue-started-at') case final String iso8601String) {
+        upgradeStartedAt = DateTime.parse(iso8601String);
+      } else {
+        upgradeStartedAt = null;
+      }
+      return UpgradePhase.secondHalf(upgradeStartedAt: upgradeStartedAt);
     }
   }
 
@@ -102,7 +114,7 @@ class UpgradeCommand extends FlutterCommand {
 @immutable
 sealed class UpgradePhase {
   const factory UpgradePhase.firstHalf() = _FirstHalf;
-  const factory UpgradePhase.secondHalf({required DateTime upgradeStartedAt}) = _SecondHalf;
+  const factory UpgradePhase.secondHalf({required DateTime? upgradeStartedAt}) = _SecondHalf;
 }
 
 final class _FirstHalf implements UpgradePhase {
@@ -113,7 +125,9 @@ final class _SecondHalf implements UpgradePhase {
   const _SecondHalf({required this.upgradeStartedAt});
 
   /// What time the original `flutter upgrade` command started at.
-  final DateTime upgradeStartedAt;
+  ///
+  /// If omitted, the initiating client was too old to know to pass this value.
+  final DateTime? upgradeStartedAt;
 }
 
 @visibleForTesting
@@ -141,10 +155,12 @@ class UpgradeCommandRunner {
           testFlow: testFlow,
           verifyOnly: verifyOnly,
         );
-      case _SecondHalf(:final DateTime upgradeStartedAt):
+      case _SecondHalf(:final DateTime? upgradeStartedAt):
         await _runCommandSecondHalf(flutterVersion);
-        final Duration execution = clock.now().difference(upgradeStartedAt);
-        globals.printStatus('Took ${getElapsedAsMinutesOrSeconds(execution)}');
+        if (upgradeStartedAt != null) {
+          final Duration execution = clock.now().difference(upgradeStartedAt);
+          globals.printStatus('Took ${getElapsedAsMinutesOrSeconds(execution)}');
+        }
     }
     return FlutterCommandResult.success();
   }
@@ -239,6 +255,7 @@ class UpgradeCommandRunner {
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
         '--continue',
+        '--continue-started-at',
         startedAt.toIso8601String(),
         '--no-version-check',
       ],

@@ -54,6 +54,7 @@ void main() {
         await runner.run(<String>[
           'upgrade',
           '--continue',
+          '--continue-started-at',
           '2026-01-01T00:00:00.000Z',
           '--no-version-check',
         ]);
@@ -96,6 +97,7 @@ void main() {
             'bin/flutter',
             'upgrade',
             '--continue',
+            '--continue-started-at',
             '2026-01-01T00:00:00.000Z',
             '--no-version-check',
           ],
@@ -138,6 +140,7 @@ void main() {
         await runner.run(<String>[
           'upgrade',
           '--continue',
+          '--continue-started-at',
           '2026-01-01T00:00:00.000Z',
           '--no-version-check',
         ]);
@@ -165,6 +168,7 @@ void main() {
             'bin/flutter',
             'upgrade',
             '--continue',
+            '--continue-started-at',
             '2026-01-01T00:00:00.000Z',
             '--no-version-check',
           ],
@@ -226,6 +230,7 @@ void main() {
         await runner.run(<String>[
           'upgrade',
           '--continue',
+          '--continue-started-at',
           '2026-01-01T00:00:00.000Z',
           '--no-version-check',
         ]);
@@ -262,6 +267,7 @@ void main() {
             'bin/flutter',
             'upgrade',
             '--continue',
+            '--continue-started-at',
             '2026-01-01T00:00:00.000Z',
             '--no-version-check',
           ],

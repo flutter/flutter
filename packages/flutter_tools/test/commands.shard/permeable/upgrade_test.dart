@@ -133,7 +133,7 @@ void main() {
     );
 
     testUsingContext(
-      'starts the upgrade operation and passes now as --continue <iso-date>',
+      'starts the upgrade operation and passes now as --continue-started-at <iso-date>',
       () async {
         const String revision = 'abc123';
         const String upstreamRevision = 'def456';
@@ -163,6 +163,7 @@ void main() {
               'bin/flutter',
               'upgrade',
               '--continue',
+              '--continue-started-at',
               now.toIso8601String(),
               '--no-version-check',
             ],
@@ -444,6 +445,7 @@ void main() {
               globals.fs.path.join('bin', 'flutter'),
               'upgrade',
               '--continue',
+              '--continue-started-at',
               '2026-01-01T00:00:00.000Z',
               '--no-version-check',
             ],
@@ -527,8 +529,8 @@ void main() {
         fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: true,
-          continueFlow: false,
           testFlow: true,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -573,8 +575,8 @@ void main() {
         fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: true,
-          continueFlow: false,
           testFlow: true,
           gitTagVersion: currentTag,
           flutterVersion: flutterVersion,
@@ -623,6 +625,7 @@ void main() {
               globals.fs.path.join('bin', 'flutter'),
               'upgrade',
               '--continue',
+              '--continue-started-at',
               '2026-01-01T00:00:00.000Z',
               '--no-version-check',
             ],
@@ -734,9 +737,12 @@ void main() {
               commandRunner: fakeCommandRunner,
             );
 
-            await createTestCommandRunner(
-              upgradeCommand,
-            ).run(<String>['upgrade', '--continue', DateTime.now().toIso8601String()]);
+            await createTestCommandRunner(upgradeCommand).run(<String>[
+              'upgrade',
+              '--continue',
+              '--continue-started-at',
+              DateTime.now().toIso8601String(),
+            ]);
 
             expect(
               json.decode(flutterToolState.readAsStringSync()),
