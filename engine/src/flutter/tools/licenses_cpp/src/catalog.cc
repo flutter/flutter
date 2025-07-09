@@ -111,6 +111,9 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
 
   std::vector<Catalog::Match> results;
   std::vector<int> missed_results;
+  missed_results.reserve(selector_results.size());
+  std::vector<int> hit_results;
+  hit_results.reserve(selector_results.size());
   for (int selector_result : selector_results) {
     RE2* matcher = matchers_[selector_result].get();
     std::string_view match_text;
@@ -119,20 +122,31 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
                        /*nsubmatch=*/1)) {
       results.emplace_back(Match{.matcher = names_[selector_result],
                                  .matched_text = match_text});
+      hit_results.push_back(selector_result);
     } else {
       missed_results.push_back(selector_result);
     }
   }
   if (selector_results.size() != results.size()) {
-    std::stringstream ss;
+    std::stringstream missed;
     for (size_t i = 0; i < missed_results.size(); ++i) {
       if (i != 0) {
-        ss << ", ";
+        missed << ", ";
       }
-      ss << names_[missed_results[i]];
+      missed << names_[missed_results[i]];
     }
-    return absl::NotFoundError(absl::StrCat(
-        "Selected matcher(s) (", ss.str(), ") didn't match."));
+    std::stringstream hit;
+    hit << " Hit matcher(s): (";
+    for (size_t i = 0; i < hit_results.size(); ++i) {
+      if (i != 0) {
+        hit << ", ";
+      }
+      hit << names_[hit_results[i]];
+    }
+    hit << ")";
+    return absl::NotFoundError(
+        absl::StrCat("Selected matcher(s) (", missed.str(), ") didn't match.",
+                     hit_results.empty() ? "" : hit.str()));
   } else {
     for (size_t i = 0; i < results.size(); ++i) {
       for (size_t j = i + 1; j < results.size(); ++j) {

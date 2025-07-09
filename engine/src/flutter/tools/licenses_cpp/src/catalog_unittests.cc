@@ -109,6 +109,21 @@ TEST(CatalogTest, MultipleSelectorsFail) {
       << has_match.status().message();
 }
 
+TEST(CatalogTest, OnlyOneSelectorsFail) {
+  absl::StatusOr<Catalog> catalog = Catalog::Make(
+      {{"matcher1", ".*foo.*", ".*foo.*"}, {"matcher2", ".*oo.*", "blah"}});
+  ASSERT_TRUE(catalog.ok()) << catalog.status();
+  absl::StatusOr<std::vector<Catalog::Match>> has_match =
+      catalog->FindMatch("foo");
+  ASSERT_FALSE(has_match.ok());
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(),
+                                "matcher1"))
+      << has_match.status().message();
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(),
+                                "matcher2"))
+      << has_match.status().message();
+}
+
 TEST(CatalogTest, MultipleMatchNoOverlap) {
   absl::StatusOr<Catalog> catalog =
       Catalog::Make({{"foo", ".*foo", ".*foo"}, {"bar", "bar.*", "bar.*"}});
