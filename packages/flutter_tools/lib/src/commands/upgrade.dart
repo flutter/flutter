@@ -81,10 +81,9 @@ class UpgradeCommand extends FlutterCommand {
         globals.platform,
         workingDirectory: _commandRunner.workingDirectory,
       ),
-      flutterVersion:
-          stringArg('working-directory') == null
-              ? globals.flutterVersion
-              : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
+      flutterVersion: stringArg('working-directory') == null
+          ? globals.flutterVersion
+          : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -124,7 +123,10 @@ class UpgradeCommandRunner {
     required bool verifyOnly,
   }) async {
     final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
-    if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
+    // It's possible for a given framework revision to have multiple tags (i.e., due to a release
+    // rollback). Verify the upstream version tag isn't newer than the current tag.
+    if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision &&
+        flutterVersion.gitTagVersion.gitTag.compareTo(upstreamVersion.gitTagVersion.gitTag) >= 0) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
       return;
@@ -300,8 +302,10 @@ class UpgradeCommandRunner {
     }
     // At this point the current checkout should be on HEAD of a branch having
     // an upstream. Check whether this upstream is "standard".
-    final VersionCheckError? error =
-        VersionUpstreamValidator(version: localVersion, platform: globals.platform).run();
+    final VersionCheckError? error = VersionUpstreamValidator(
+      version: localVersion,
+      platform: globals.platform,
+    ).run();
     if (error != null) {
       throwToolExit(
         'Unable to upgrade Flutter: '

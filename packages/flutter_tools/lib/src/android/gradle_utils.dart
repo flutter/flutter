@@ -36,6 +36,7 @@ const String templateDefaultGradleVersion = '8.12';
 //  * ndkVersion constant in this file
 //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
 const String templateAndroidGradlePluginVersion = '8.9.1';
 const String templateAndroidGradlePluginVersionForModule = '8.9.1';
@@ -51,7 +52,7 @@ const String templateKotlinGradlePluginVersion = '2.1.0';
 //
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '36';
-const String minSdkVersion = '21';
+const String minSdkVersion = '24';
 const String targetSdkVersion = '36';
 const String ndkVersion = '27.0.12077973';
 
@@ -158,9 +159,10 @@ final RegExp gradleOrgVersionMatch = RegExp(
 );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
-// file which have minSdkVersion 16,17, 18, 19, or 20.
+// file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
+// equals syntax and when using minSdk or minSdkVersion.
 final RegExp tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdkVersion (1[6789]|20)(?=\s*(?://|$))',
+  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 
@@ -240,7 +242,8 @@ class GradleUtils {
     }
     propertiesDirectory.createSync(recursive: true);
     final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
-    final String propertyContents = '''
+    final String propertyContents =
+        '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME

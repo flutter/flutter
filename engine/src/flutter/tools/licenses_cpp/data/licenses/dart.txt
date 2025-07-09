@@ -1,5 +1,5 @@
 dart
-Copyright \d+, the Dart project authors.
+^Copyright \d+, the Dart project authors.
 Copyright \d+, the Dart project authors.\s*
 
 Redistribution and use in source and binary forms, with or without

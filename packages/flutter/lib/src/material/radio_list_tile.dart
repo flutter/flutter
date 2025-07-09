@@ -200,6 +200,8 @@ class RadioListTile<T> extends StatefulWidget {
     this.titleAlignment,
     this.enabled,
     this.internalAddSemanticForOnTap = false,
+    this.radioBackgroundColor,
+    this.radioSide,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(isThreeLine != true || subtitle != null);
@@ -252,6 +254,8 @@ class RadioListTile<T> extends StatefulWidget {
     this.useCupertinoCheckmarkStyle = false,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = false,
+    this.radioBackgroundColor,
+    this.radioSide,
   }) : _radioType = _RadioType.adaptive,
        assert(isThreeLine != true || subtitle != null);
 
@@ -515,6 +519,30 @@ class RadioListTile<T> extends StatefulWidget {
   /// Otherwise, an assertion error is thrown.
   final bool? enabled;
 
+  /// The color of the background of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it is transparent in all states.
+  final WidgetStateProperty<Color?>? radioBackgroundColor;
+
+  /// The side for the circular border of the radio button, in all
+  /// [WidgetState]s.
+  ///
+  /// This property can be a [BorderSide] or a [WidgetStateBorderSide] to leverage
+  /// widget state resolution.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to a border using the fill color.
+  final BorderSide? radioSide;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
@@ -609,6 +637,8 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             splashRadius: widget.splashRadius,
             enabled: _enabled,
             groupRegistry: _radioRegistry,
+            backgroundColor: widget.radioBackgroundColor,
+            side: widget.radioSide,
           ),
         );
       case _RadioType.adaptive:
@@ -628,6 +658,8 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             useCupertinoCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
             enabled: _enabled,
             groupRegistry: _radioRegistry,
+            backgroundColor: widget.radioBackgroundColor,
+            side: widget.radioSide,
           ),
         );
     }

@@ -509,8 +509,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
   void _onExpansionChanged() {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint =
-        _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint;
+    final String stateHint = _tileController.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
@@ -565,18 +566,16 @@ class _ExpansionTileState extends State<ExpansionTile> {
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
     final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint =
-        _tileController.isExpanded
-            ? localizations.expansionTileExpandedTapHint
-            : localizations.expansionTileCollapsedTapHint;
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
     String? semanticsHint;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        semanticsHint =
-            _tileController.isExpanded
-                ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-                : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
+        semanticsHint = _tileController.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -600,10 +599,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
           leading: widget.leading ?? _buildLeadingIcon(context, animation),
           title: widget.title,
           subtitle: widget.subtitle,
-          trailing:
-              widget.showTrailingIcon
-                  ? widget.trailing ?? _buildTrailingIcon(context, animation)
-                  : null,
+          trailing: widget.showTrailingIcon
+              ? widget.trailing ?? _buildTrailingIcon(context, animation)
+              : null,
           minTileHeight: widget.minTileHeight,
           internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
         ),
@@ -677,8 +675,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
     super.didUpdateWidget(oldWidget);
     final ThemeData theme = Theme.of(context);
     _expansionTileTheme = ExpansionTileTheme.of(context);
-    final ExpansionTileThemeData defaults =
-        theme.useMaterial3 ? _ExpansionTileDefaultsM3(context) : _ExpansionTileDefaultsM2(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
     if (widget.collapsedShape != oldWidget.collapsedShape || widget.shape != oldWidget.shape) {
       _updateShapeBorder(theme);
     }
@@ -704,8 +703,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _expansionTileTheme = ExpansionTileTheme.of(context);
-    final ExpansionTileThemeData defaults =
-        theme.useMaterial3 ? _ExpansionTileDefaultsM3(context) : _ExpansionTileDefaultsM2(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
     _updateAnimationDuration();
     _updateShapeBorder(theme);
     _updateHeaderColor(defaults);

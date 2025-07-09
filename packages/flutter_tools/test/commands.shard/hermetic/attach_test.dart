@@ -95,12 +95,11 @@ void main() {
 
       setUp(() {
         fakeLogReader = FakeDeviceLogReader();
-        portForwarder = RecordingPortForwarder(hostPort);
+        portForwarder = RecordingPortForwarder(defaultHostPort: hostPort);
         fakeDds = FakeDartDevelopmentService();
-        device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = portForwarder
-              ..dds = fakeDds;
+        device = FakeAndroidDevice(id: '1')
+          ..portForwarder = portForwarder
+          ..dds = fakeDds;
       });
 
       tearDown(() {
@@ -141,8 +140,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -156,10 +155,14 @@ void main() {
               fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
+
           await completer.future;
 
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
           await fakeLogReader.dispose();
           await loggerSubscription.cancel();
@@ -169,19 +172,15 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -210,19 +209,20 @@ void main() {
             }
           });
           final FakeHotRunner hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool allowExistingDdsInstance,
-            bool enableDevTools,
-          ) async {
-            appStartedCompleter?.complete();
-            return 0;
-          };
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async {
+                appStartedCompleter?.complete();
+                return 0;
+              };
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -249,19 +249,15 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
           Signals: () => FakeSignals(),
         },
       );
@@ -306,14 +302,13 @@ void main() {
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           bool passedArtifactTest = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()
-                ..hotRunner = hotRunner
-                .._artifactTester = (Artifacts artifacts) {
-                  expect(artifacts, isA<CachedLocalEngineArtifacts>());
-                  // expecting this to be true ensures this test ran
-                  passedArtifactTest = true;
-                };
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner
+            .._artifactTester = (Artifacts artifacts) {
+              expect(artifacts, isA<CachedLocalEngineArtifacts>());
+              // expecting this to be true ensures this test ran
+              passedArtifactTest = true;
+            };
 
           await createTestCommandRunner(
             AttachCommand(
@@ -344,19 +339,15 @@ void main() {
           DeviceManager: () => testDeviceManager,
           FileSystem: () => testFileSystem,
           Logger: () => logger,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
           ProcessManager: () => FakeProcessManager.empty(),
         },
       );
@@ -386,8 +377,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -409,8 +400,11 @@ void main() {
           final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
           expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
 
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
           expect(hotRunnerFactory.devices, hasLength(1));
         },
         overrides: <Type, Generator>{
@@ -418,35 +412,31 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
-                  <String, List<SrvResourceRecord>>{
-                    'bar': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'bar',
-                        future,
-                        port: devicePort,
-                        weight: 1,
-                        priority: 1,
-                        target: 'appId',
-                      ),
-                    ],
-                  },
-                  txtResponse: <String, List<TxtResourceRecord>>{
-                    'bar': <TxtResourceRecord>[
-                      TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
-                    ],
-                  },
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
+              <String, List<SrvResourceRecord>>{
+                'bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'bar',
+                    future,
+                    port: devicePort,
+                    weight: 1,
+                    priority: 1,
+                    target: 'appId',
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'bar': <TxtResourceRecord>[
+                  TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -469,8 +459,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -492,8 +482,7 @@ void main() {
           final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
-          expect(portForwarder.devicePort, null);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, isEmpty);
           expect(hotRunnerFactory.devices, hasLength(1));
         },
         overrides: <Type, Generator>{
@@ -501,44 +490,40 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
-                  <String, List<SrvResourceRecord>>{
-                    'srv-foo': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'srv-foo',
-                        future,
-                        port: 123,
-                        weight: 1,
-                        priority: 1,
-                        target: 'target-foo',
-                      ),
-                    ],
-                  },
-                  ipResponse: <String, List<IPAddressResourceRecord>>{
-                    'target-foo': <IPAddressResourceRecord>[
-                      IPAddressResourceRecord(
-                        'target-foo',
-                        0,
-                        address: InternetAddress.tryParse('111.111.111.111')!,
-                      ),
-                    ],
-                  },
-                  txtResponse: <String, List<TxtResourceRecord>>{
-                    'srv-foo': <TxtResourceRecord>[
-                      TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                    ],
-                  },
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
+              <String, List<SrvResourceRecord>>{
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -561,8 +546,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -584,8 +569,7 @@ void main() {
           final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
-          expect(portForwarder.devicePort, null);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, isEmpty);
           expect(hotRunnerFactory.devices, hasLength(1));
         },
         overrides: <Type, Generator>{
@@ -593,57 +577,53 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[
-                    PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-                    PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-                  ],
-                  <String, List<SrvResourceRecord>>{
-                    'srv-bar': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'srv-bar',
-                        future,
-                        port: 321,
-                        weight: 1,
-                        priority: 1,
-                        target: 'target-bar',
-                      ),
-                    ],
-                    'srv-foo': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'srv-foo',
-                        future,
-                        port: 123,
-                        weight: 1,
-                        priority: 1,
-                        target: 'target-foo',
-                      ),
-                    ],
-                  },
-                  ipResponse: <String, List<IPAddressResourceRecord>>{
-                    'target-foo': <IPAddressResourceRecord>[
-                      IPAddressResourceRecord(
-                        'target-foo',
-                        0,
-                        address: InternetAddress.tryParse('111.111.111.111')!,
-                      ),
-                    ],
-                  },
-                  txtResponse: <String, List<TxtResourceRecord>>{
-                    'srv-foo': <TxtResourceRecord>[
-                      TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                    ],
-                  },
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[
+                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+              ],
+              <String, List<SrvResourceRecord>>{
+                'srv-bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-bar',
+                    future,
+                    port: 321,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-bar',
+                  ),
+                ],
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -666,8 +646,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -689,8 +669,7 @@ void main() {
           final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
-          expect(portForwarder.devicePort, null);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, isEmpty);
           expect(hotRunnerFactory.devices, hasLength(1));
         },
         overrides: <Type, Generator>{
@@ -698,57 +677,53 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[
-                    PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-                    PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-                  ],
-                  <String, List<SrvResourceRecord>>{
-                    'srv-bar': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'srv-bar',
-                        future,
-                        port: 321,
-                        weight: 1,
-                        priority: 1,
-                        target: 'target-bar',
-                      ),
-                    ],
-                    'srv-foo': <SrvResourceRecord>[
-                      SrvResourceRecord(
-                        'srv-foo',
-                        future,
-                        port: 123,
-                        weight: 1,
-                        priority: 1,
-                        target: 'target-foo',
-                      ),
-                    ],
-                  },
-                  ipResponse: <String, List<IPAddressResourceRecord>>{
-                    'target-foo': <IPAddressResourceRecord>[
-                      IPAddressResourceRecord(
-                        'target-foo',
-                        0,
-                        address: InternetAddress.tryParse('111.111.111.111')!,
-                      ),
-                    ],
-                  },
-                  txtResponse: <String, List<TxtResourceRecord>>{
-                    'srv-foo': <TxtResourceRecord>[
-                      TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-                    ],
-                  },
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[
+                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+              ],
+              <String, List<SrvResourceRecord>>{
+                'srv-bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-bar',
+                    future,
+                    port: 321,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-bar',
+                  ),
+                ],
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -785,8 +760,11 @@ void main() {
           ).run(<String>['attach']);
           await completer.future;
 
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
           await fakeLogReader.dispose();
           await expectLoggerInterruptEndsTask(task, logger);
@@ -863,8 +841,8 @@ void main() {
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           final AttachCommand command = AttachCommand(
             hotRunnerFactory: hotRunnerFactory,
@@ -971,8 +949,8 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final FakeHotRunnerFactory hotRunnerFactory =
-              FakeHotRunnerFactory()..hotRunner = hotRunner;
+          final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -988,8 +966,11 @@ void main() {
           ).run(<String>['attach', '--ipv6']);
           await completer.future;
 
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
           await fakeLogReader.dispose();
           await loggerSubscription.cancel();
@@ -999,19 +980,15 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
-          MDnsVmServiceDiscovery:
-              () => MDnsVmServiceDiscovery(
-                mdnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                preliminaryMDnsClient: FakeMDnsClient(
-                  <PtrResourceRecord>[],
-                  <String, List<SrvResourceRecord>>{},
-                ),
-                logger: logger,
-                analytics: const NoOpAnalytics(),
-              ),
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
         },
       );
 
@@ -1061,11 +1038,10 @@ void main() {
 
       setUp(() {
         final FakeDartDevelopmentService fakeDds = FakeDartDevelopmentService();
-        portForwarder = RecordingPortForwarder(hostPort);
-        device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = portForwarder
-              ..dds = fakeDds;
+        portForwarder = RecordingPortForwarder(defaultHostPort: 42);
+        device = FakeAndroidDevice(id: '1')
+          ..portForwarder = portForwarder
+          ..dds = fakeDds;
       });
 
       testUsingContext(
@@ -1095,8 +1071,12 @@ void main() {
             ),
           ).run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
           await expectLoggerInterruptEndsTask(task, logger);
           await loggerSubscription.cancel();
@@ -1137,8 +1117,11 @@ void main() {
           ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
 
-          expect(portForwarder.devicePort, devicePort);
-          expect(portForwarder.hostPort, hostPort);
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
           await expectLoggerInterruptEndsTask(task, logger);
           await loggerSubscription.cancel();
@@ -1166,29 +1149,30 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>[
-            'attach',
-            '--debug-port',
-            '$devicePort',
-            '--vm-service-port',
-            '$hostPort',
-            // Ensure DDS doesn't use hostPort by binding to a random port.
-            '--dds-port',
-            '0',
-          ]);
+          final Future<void> task =
+              createTestCommandRunner(
+                AttachCommand(
+                  stdio: stdio,
+                  logger: logger,
+                  terminal: terminal,
+                  signals: signals,
+                  platform: platform,
+                  processInfo: processInfo,
+                  fileSystem: testFileSystem,
+                ),
+              ).run(<String>[
+                'attach',
+                '--debug-port',
+                '$devicePort',
+                '--vm-service-port',
+                '$hostPort',
+                // Ensure DDS doesn't use hostPort by binding to a random port.
+                '--dds-port',
+                '0',
+              ]);
           await completer.future;
-          expect(portForwarder.devicePort, null);
-          expect(portForwarder.hostPort, 42);
+
+          expect(portForwarder.forwardedPorts, isEmpty);
 
           await expectLoggerInterruptEndsTask(task, logger);
           await loggerSubscription.cancel();
@@ -1216,30 +1200,31 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>[
-            'attach',
-            '--debug-port',
-            '$devicePort',
-            '--vm-service-port',
-            '$hostPort',
-            '--ipv6',
-            // Ensure DDS doesn't use hostPort by binding to a random port.
-            '--dds-port',
-            '0',
-          ]);
+          final Future<void> task =
+              createTestCommandRunner(
+                AttachCommand(
+                  stdio: stdio,
+                  logger: logger,
+                  terminal: terminal,
+                  signals: signals,
+                  platform: platform,
+                  processInfo: processInfo,
+                  fileSystem: testFileSystem,
+                ),
+              ).run(<String>[
+                'attach',
+                '--debug-port',
+                '$devicePort',
+                '--vm-service-port',
+                '$hostPort',
+                '--ipv6',
+                // Ensure DDS doesn't use hostPort by binding to a random port.
+                '--dds-port',
+                '0',
+              ]);
           await completer.future;
-          expect(portForwarder.devicePort, null);
-          expect(portForwarder.hostPort, 42);
+
+          expect(portForwarder.forwardedPorts, isEmpty);
 
           await expectLoggerInterruptEndsTask(task, logger);
           await loggerSubscription.cancel();
@@ -1341,25 +1326,25 @@ void main() {
     testUsingContext(
       'Catches service disappeared error',
       () async {
-        final FakeAndroidDevice device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = const NoOpDevicePortForwarder()
-              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
         final FakeHotRunner hotRunner = FakeHotRunner();
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async {
-          await null;
-          throw vm_service.RPCError(
-            'flutter._listViews',
-            vm_service.RPCErrorKind.kServiceDisappeared.code,
-            '',
-          );
-        };
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kServiceDisappeared.code,
+                '',
+              );
+            };
 
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
@@ -1389,25 +1374,25 @@ void main() {
     testUsingContext(
       'Catches "Service connection disposed" error by code',
       () async {
-        final FakeAndroidDevice device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = const NoOpDevicePortForwarder()
-              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
         final FakeHotRunner hotRunner = FakeHotRunner();
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async {
-          await null;
-          throw vm_service.RPCError(
-            'flutter._listViews',
-            vm_service.RPCErrorKind.kConnectionDisposed.code,
-            'dummy text not matched',
-          );
-        };
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kConnectionDisposed.code,
+                'dummy text not matched',
+              );
+            };
 
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
@@ -1437,25 +1422,25 @@ void main() {
     testUsingContext(
       'Catches "Service connection disposed" error by text',
       () async {
-        final FakeAndroidDevice device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = const NoOpDevicePortForwarder()
-              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
         final FakeHotRunner hotRunner = FakeHotRunner();
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async {
-          await null;
-          throw vm_service.RPCError(
-            'flutter._listViews',
-            vm_service.RPCErrorKind.kServerError.code,
-            'Service connection disposed',
-          );
-        };
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kServerError.code,
+                'Service connection disposed',
+              );
+            };
 
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
@@ -1485,26 +1470,26 @@ void main() {
     testUsingContext(
       'Does not catch generic RPC error',
       () async {
-        final FakeAndroidDevice device =
-            FakeAndroidDevice(id: '1')
-              ..portForwarder = const NoOpDevicePortForwarder()
-              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
         final FakeHotRunner hotRunner = FakeHotRunner();
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async {
-          await null;
-          throw vm_service.RPCError(
-            'flutter._listViews',
-            vm_service.RPCErrorKind.kInvalidParams.code,
-            '',
-          );
-        };
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kInvalidParams.code,
+                '',
+              );
+            };
 
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
@@ -1651,26 +1636,44 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
 }
 
 class RecordingPortForwarder implements DevicePortForwarder {
-  RecordingPortForwarder([this.hostPort]);
-
-  int? devicePort;
-  int? hostPort;
+  RecordingPortForwarder({required this.defaultHostPort});
+  final int defaultHostPort;
 
   @override
-  Future<void> dispose() async {}
-
-  @override
-  Future<int> forward(int devicePort, {int? hostPort}) async {
-    this.devicePort = devicePort;
-    this.hostPort ??= hostPort;
-    return this.hostPort!;
+  Future<void> dispose() async {
+    forwardedPorts.clear();
   }
 
   @override
-  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+  Future<int> forward(int devicePort, {int? hostPort}) async {
+    hostPort ??= defaultHostPort;
+    final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
+    forwardedPorts.add(forwardedPort);
+    return forwardedPort.hostPort;
+  }
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {}
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {
+    // Find a matching forwarded port.
+    int? n;
+    for (final (int i, ForwardedPort possibleMatch) in forwardedPorts.indexed) {
+      if (possibleMatch.hostPort != forwardedPort.hostPort ||
+          possibleMatch.devicePort != forwardedPort.devicePort) {
+        continue;
+      }
+      if (n != null) {
+        throw StateError('Multiple matching ports for $forwardedPort');
+      }
+      n = i;
+    }
+    if (n == null) {
+      throw StateError('No port found for $forwardedPort');
+    }
+    forwardedPorts.removeAt(n);
+  }
 }
 
 class StreamLogger extends Logger {
@@ -1854,7 +1857,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool get isConnected => true;
@@ -1908,6 +1911,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     ipv6: ipv6,
     logger: logger,
   );
+
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
+  }
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
@@ -1963,7 +1971,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final PlatformType platformType = PlatformType.ios;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
@@ -2022,7 +2030,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   String get displayName => name;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
@@ -2046,7 +2054,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   bool get isWirelesslyConnected => false;
 
   @override
-  DevicePortForwarder portForwarder = RecordingPortForwarder();
+  DevicePortForwarder portForwarder = RecordingPortForwarder(defaultHostPort: 42);
 
   @override
   VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
