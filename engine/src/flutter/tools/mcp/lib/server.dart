@@ -43,9 +43,7 @@ final class EngineServer extends MCPServer with ToolsSupport {
     name: 'engine_list_targets',
     description: 'Lists build targets for a given config.',
     inputSchema: Schema.object(
-      properties: {
-        'config': Schema.string(description: 'The build config to query.'),
-      },
+      properties: {'config': Schema.string(description: 'The build config to query.')},
     ),
     annotations: ToolAnnotations(readOnlyHint: true),
   );
