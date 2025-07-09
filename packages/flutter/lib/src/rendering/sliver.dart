@@ -1674,6 +1674,19 @@ abstract class RenderSliver extends RenderObject {
     return 0.0;
   }
 
+  /// Returns the scroll offset required to reveal the specified child.
+  ///
+  /// This method is used to calculate the scroll offset needed to bring the given
+  /// [child] into view within this sliver. By default, it returns the value from
+  /// [childScrollOffset], but subclasses can override this method to provide
+  /// custom logic for revealing a child.
+  ///
+  /// Typically used by [RenderViewportBase.getOffsetToReveal] to ensure a particular
+  /// child is visible.
+  double? childScrollOffsetToReveal(covariant RenderObject child) {
+    return childScrollOffset(child);
+  }
+
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
