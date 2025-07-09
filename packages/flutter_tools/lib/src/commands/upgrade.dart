@@ -45,7 +45,7 @@ class UpgradeCommand extends FlutterCommand {
         'continue-started-at',
         hide: !verboseHelp,
         help:
-            'If --continue is provided, an ISO 8601 timestamp of the time that the '
+            'If "--continue" is provided, an ISO 8601 timestamp of the time that the '
             'initial upgrade command was started. This should not be invoked manually.',
       )
       ..addOption(
