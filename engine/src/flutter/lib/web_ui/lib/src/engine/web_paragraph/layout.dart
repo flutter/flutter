@@ -76,7 +76,7 @@ class TextLayout {
       }
     }
     textToClusterMap[paragraph.text.length] = textClusters.length;
-    // TODO: Why do we need this last empty cluster?
+    // TODO(jlavrova): Why do we need this last empty cluster?
     textClusters.add(ExtendedTextCluster.empty());
   }
 
@@ -291,10 +291,10 @@ class ExtendedTextCluster {
     : start = cluster!.begin,
       end = cluster.end;
 
-  // TODO: Remove this.
+  // TODO(jlavrova): Remove this.
   ExtendedTextCluster.empty() : start = 0, end = 0, bounds = ui.Rect.zero;
 
-  // TODO: Make this non-nullable.
+  // TODO(jlavrova): Make this non-nullable.
   DomTextCluster? cluster;
   final int start;
   final int end;
@@ -302,7 +302,7 @@ class ExtendedTextCluster {
 
   // TODO(jlavrova): once we know everything we need we can calculate it once
   // and do not keep textMetrics longer than we have to
-  // TODO: Make this non-nullable.
+  // TODO(jlavrova): Make this non-nullable.
   DomTextMetrics? textMetrics;
 
   String textFrom(WebParagraph paragraph) => paragraph.text.substring(start, end);

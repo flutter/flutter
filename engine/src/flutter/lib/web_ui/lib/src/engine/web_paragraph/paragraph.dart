@@ -445,6 +445,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     ui.TextBaseline? baseline,
   }) {}
 
+  // ignore: unused_element
   void _addPlaceholder(WebParagraphPlaceholder placeholderStyle) {}
 
   @override
