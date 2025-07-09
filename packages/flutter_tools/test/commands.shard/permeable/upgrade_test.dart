@@ -160,7 +160,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              'bin/flutter',
+              globals.fs.path.join('bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -215,8 +215,13 @@ void main() {
         fakeCommandRunner.clock = SystemClock.fixed(now);
 
         processManager.addCommands(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+          FakeCommand(
+            command: <String>[
+              globals.fs.path.join('bin', 'flutter'),
+              '--no-color',
+              '--no-version-check',
+              'precache',
+            ],
           ),
         ]);
 
