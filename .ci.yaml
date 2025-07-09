@@ -1049,6 +1049,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1165,7 +1166,6 @@ targets:
 
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -1638,7 +1638,6 @@ targets:
 
   - name: Linux_android_emu android_engine_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -1665,7 +1664,6 @@ targets:
 
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       shard: android_engine_opengles_tests
@@ -1784,6 +1782,7 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
+    bringup: true # brittle line numbers https://github.com/flutter/flutter/issues/171725
     timeout: 60
     properties:
       dependencies: >-
@@ -4292,6 +4291,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6120,6 +6120,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: build_android_host_app_with_module_source
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**

@@ -35,7 +35,8 @@ void main() {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
-      fontsSection = '''
+      fontsSection =
+          '''
 flutter:
      fonts:
 $fontsSection

@@ -104,7 +104,8 @@ class TestRegistry<T> extends RadioGroupRegistry<T> {
   T? groupValue;
 
   @override
-  ValueChanged<T?> get onChanged => (T? newValue) => groupValue = newValue;
+  ValueChanged<T?> get onChanged =>
+      (T? newValue) => groupValue = newValue;
 
   @override
   void registerClient(RadioClient<T> radio) => clients.add(radio);

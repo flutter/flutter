@@ -85,15 +85,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     VoidCallback? onEnd,
   }) : _vsync = vsync,
        _clipBehavior = clipBehavior {
-    _controller = AnimationController(
-      vsync: vsync,
-      duration: duration,
-      reverseDuration: reverseDuration,
-    )..addListener(() {
-      if (_controller.value != _lastValue) {
-        markNeedsLayout();
-      }
-    });
+    _controller =
+        AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
+          ..addListener(() {
+            if (_controller.value != _lastValue) {
+              markNeedsLayout();
+            }
+          });
     _animation = CurvedAnimation(parent: _controller, curve: curve);
     _onEnd = onEnd;
   }

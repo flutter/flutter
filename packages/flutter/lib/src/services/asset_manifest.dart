@@ -101,10 +101,9 @@ class _AssetManifestBin implements AssetManifest {
       if (variantData == null) {
         return null;
       }
-      _typeCastedData[key] =
-          ((_data[key] ?? <Object?>[]) as Iterable<Object?>).cast<Map<Object?, Object?>>().map((
-            Map<Object?, Object?> data,
-          ) {
+      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
+          .cast<Map<Object?, Object?>>()
+          .map((Map<Object?, Object?> data) {
             final String asset = data['asset']! as String;
             final Object? dpr = data['dpr'];
             return AssetMetadata(
@@ -112,7 +111,8 @@ class _AssetManifestBin implements AssetManifest {
               targetDevicePixelRatio: dpr as double?,
               main: key == asset,
             );
-          }).toList();
+          })
+          .toList();
 
       _data.remove(key);
     }

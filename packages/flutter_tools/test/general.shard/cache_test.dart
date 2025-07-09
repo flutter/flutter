@@ -123,14 +123,13 @@ void main() {
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_cache_test_download.',
       );
-      final Cache cache =
-          FakeSecondaryCache()
-            ..version = 'asdasd'
-            ..artifactDirectory = artifactDir
-            ..downloadDir = downloadDir
-            ..onSetStamp = (String name, String version) {
-              throw const FileSystemException('stamp write failed');
-            };
+      final Cache cache = FakeSecondaryCache()
+        ..version = 'asdasd'
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir
+        ..onSetStamp = (String name, String version) {
+          throw const FileSystemException('stamp write failed');
+        };
 
       final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
@@ -147,12 +146,11 @@ void main() {
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_cache_test_download.',
       );
-      final Cache cache =
-          FakeSecondaryCache()
-            ..version =
-                null // version is missing.
-            ..artifactDirectory = artifactDir
-            ..downloadDir = downloadDir;
+      final Cache cache = FakeSecondaryCache()
+        ..version =
+            null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
 
       final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
@@ -185,10 +183,9 @@ void main() {
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_cache_test_artifact.',
       );
-      final FakeSecondaryCache cache =
-          FakeSecondaryCache()
-            ..artifactDirectory = artifactDir
-            ..version = '123456';
+      final FakeSecondaryCache cache = FakeSecondaryCache()
+        ..artifactDirectory = artifactDir
+        ..version = '123456';
 
       final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
         processManager: FakeProcessManager.any(),
@@ -305,13 +302,13 @@ void main() {
     );
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
-      final InternetAddress address =
-          (await InternetAddress.lookup('storage.googleapis.com')).first;
+      final InternetAddress address = (await InternetAddress.lookup(
+        'storage.googleapis.com',
+      )).first;
       final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
-      final FakeSecondaryCachedArtifact artifact2 =
-          FakeSecondaryCachedArtifact()
-            ..upToDate = false
-            ..updateException = SocketException('Connection reset by peer', address: address);
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
+        ..upToDate = false
+        ..updateException = SocketException('Connection reset by peer', address: address);
 
       final BufferLogger logger = BufferLogger.test();
       final Cache cache = Cache.test(
@@ -402,10 +399,9 @@ void main() {
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_cache_test_download.',
       );
-      final FakeSecondaryCache cache =
-          FakeSecondaryCache()
-            ..artifactDirectory = artifactDir
-            ..downloadDir = downloadDir;
+      final FakeSecondaryCache cache = FakeSecondaryCache()
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
       artifactDir.childDirectory('bin_dir').createSync();
       artifactDir.childFile('unused_url_path').createSync();
 
@@ -417,11 +413,10 @@ void main() {
         requiredArtifacts: DevelopmentArtifact.universal,
       );
       await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
-      final Directory dir =
-          fileSystem.systemTempDirectory
-              .listSync(recursive: true)
-              .whereType<Directory>()
-              .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
+      final Directory dir = fileSystem.systemTempDirectory
+          .listSync(recursive: true)
+          .whereType<Directory>()
+          .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
 
       expect(dir, isNotNull);
       expect(dir.path, artifactDir.childDirectory('bin_dir').path);
@@ -440,10 +435,9 @@ void main() {
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_cache_test_download.',
     );
-    final FakeSecondaryCache cache =
-        FakeSecondaryCache()
-          ..artifactDirectory = artifactDir
-          ..downloadDir = downloadDir;
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
     artifactDir.childDirectory('pkg').createSync();
 
     final FakeCachedArtifact artifact = FakeCachedArtifact(
@@ -454,12 +448,11 @@ void main() {
     );
 
     Uri? packageUrl;
-    final ArtifactUpdater artifactUpdater =
-        FakeArtifactUpdater()
-          ..onDownloadZipArchive = (String message, Uri url, Directory location) {
-            location.childDirectory('package_dir').createSync();
-            packageUrl = url;
-          };
+    final ArtifactUpdater artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.childDirectory('package_dir').createSync();
+        packageUrl = url;
+      };
 
     await artifact.updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     expect(packageUrl, isNotNull);
@@ -468,11 +461,10 @@ void main() {
       'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/package_dir.zip',
     );
 
-    final Directory dir =
-        fileSystem.systemTempDirectory
-            .listSync(recursive: true)
-            .whereType<Directory>()
-            .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
+    final Directory dir = fileSystem.systemTempDirectory
+        .listSync(recursive: true)
+        .whereType<Directory>()
+        .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
     expect(dir.path, artifactDir.childDirectory('pkg').path);
     expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });
@@ -592,10 +584,9 @@ void main() {
 
   testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache =
-        FakeSecondaryCache()
-          ..artifactDirectory = fileSystem.currentDirectory
-          ..version = '123456';
+    final Cache cache = FakeSecondaryCache()
+      ..artifactDirectory = fileSystem.currentDirectory
+      ..version = '123456';
 
     final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
     final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
@@ -1031,6 +1022,43 @@ void main() {
     );
   });
 
+  testWithoutContext('FlutterEngineStamp fetches engine_stamp.json', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+    );
+    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
+    final FlutterEngineStamp engineStamp = FlutterEngineStamp(cache, BufferLogger.test());
+
+    final List<String> messages = <String>[];
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
+    artifactUpdater.onDownloadFile = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+    };
+
+    await engineStamp.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(messages, <String>['Downloading engine information...']);
+
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/engine_stamp.json',
+    ]);
+    expect(locations, <String>['/bin/cache']);
+    // file copy is done by the real uploader; not the fake.
+  });
+
   testWithoutContext(
     'LegacyCanvasKitRemover removes old canvaskit artifacts if they exist',
     () async {
@@ -1236,19 +1264,18 @@ void main() {
         Cache: () => cache,
         FileSystem: () => memoryFileSystem,
         Platform: () => FakePlatform(),
-        ProcessManager:
-            () => FakeProcessManager.list(<FakeCommand>[
-              const FakeCommand(
-                command: <String>[
-                  '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
-                  '-b',
-                  'packages/flutter_tools/gradle/resolve_dependencies.gradle.kts',
-                  '--project-cache-dir',
-                  '/bin/cache/flutter_gradle_wrapper.rand0',
-                  'resolveDependencies',
-                ],
-              ),
-            ]),
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
+              '-b',
+              'packages/flutter_tools/gradle/resolve_dependencies.gradle.kts',
+              '--project-cache-dir',
+              '/bin/cache/flutter_gradle_wrapper.rand0',
+              'resolveDependencies',
+            ],
+          ),
+        ]),
         AndroidSdk: () => fakeAndroidSdk,
       },
     );
@@ -1453,6 +1480,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipArchive;
   void Function(String, Uri, Directory)? onDownloadZipTarball;
+  void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
@@ -1462,6 +1490,11 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   @override
   Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
+  }
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    onDownloadFile?.call(message, url, location);
   }
 
   @override

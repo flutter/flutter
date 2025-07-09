@@ -17,6 +17,7 @@ import android.view.Display;
 import android.view.inputmethod.InputMethodManager;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build.API_LEVELS;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
@@ -25,7 +26,7 @@ import org.robolectric.annotation.Config;
 @TargetApi(API_LEVELS.API_28)
 public class SingleViewPresentationTest {
   @Test
-  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_30)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_30)
   public void returnsOuterContextInputMethodManager() {
     // There's a bug in Android Q caused by the IMM being instanced per display.
     // https://github.com/flutter/flutter/issues/38375. We need the context returned by
@@ -56,7 +57,7 @@ public class SingleViewPresentationTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_30)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_30)
   public void returnsOuterContextInputMethodManager_createDisplayContext() {
     // The IMM should also persist across display contexts created from the base context.
 
