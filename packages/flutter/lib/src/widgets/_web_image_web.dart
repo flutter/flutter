@@ -348,9 +348,15 @@ class RenderWebImage extends RenderShiftedBox {
       return;
     }
 
-    // Size and position the <img> element child given the BoxFit, Alignment,
-    // and constraints. The child might be larger than `size`, in which case it
-    // will be clipped in the `paint` step.
+    // Size and position the <img> element child.
+    //
+    // The `ImgElementPlatformView` which contains the `<img>` element is sized
+    // independently of the `RenderWebImage`. The `RenderWebImage` needs to
+    // size and position its child to match the `BoxFit` and `Alignment`
+    // properties.
+    //
+    // The child could be smaller or larger than the `RenderWebImage`. If the
+    // child is larger, then it will be clipped in the `paint` step.
     final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
     fit ??= BoxFit.scaleDown;
     final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
