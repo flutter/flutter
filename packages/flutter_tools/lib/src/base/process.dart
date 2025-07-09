@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
+import 'async_guard.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -65,14 +66,32 @@ class _DefaultShutdownHooks implements ShutdownHooks {
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
     _shutdownHooksRunning = true;
+    final List<(Object, StackTrace)> uncaught = <(Object, StackTrace)>[];
     try {
-      final List<Future<dynamic>> futures = <Future<dynamic>>[
-        for (final ShutdownHook shutdownHook in registeredHooks)
-          if (shutdownHook() case final Future<dynamic> result) result,
-      ];
-      await Future.wait<dynamic>(futures);
+      final List<Future<void>> futures = <Future<void>>[];
+      for (final ShutdownHook shutdownHook in registeredHooks) {
+        try {
+          final Future<void> future = asyncGuard<void>(
+            () async => shutdownHook(),
+            onError: (Object e, StackTrace s) {
+              uncaught.add((e, s));
+            },
+          );
+          futures.add(future);
+        } on Object catch (e, s) {
+          uncaught.add((e, s));
+        }
+      }
+      await Future.wait<void>(futures);
     } finally {
       _shutdownHooksRunning = false;
+    }
+    if (uncaught.isNotEmpty) {
+      logger.printWarning('One or more uncaught errors occurred shutting down:');
+      for (final (Object e, StackTrace s) in uncaught) {
+        logger.printWarning('$e', indent: 2);
+        logger.printTrace('$s');
+      }
     }
     logger.printTrace('Shutdown hooks complete');
   }
