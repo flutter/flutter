@@ -501,6 +501,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
+    this.isMultiWindowEnabled = false,
   });
 
   @override
@@ -537,6 +538,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
+  final bool isMultiWindowEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -549,6 +553,7 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      multiWindowFeature => isMultiWindowEnabled,
       _ => false,
     };
   }
@@ -566,6 +571,7 @@ class TestFeatureFlags implements FeatureFlags {
     cliAnimation,
     nativeAssets,
     swiftPackageManager,
+    multiWindowFeature,
   ];
 
   @override

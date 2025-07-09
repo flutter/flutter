@@ -14,6 +14,7 @@ import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 
+import '../foundation/_features.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
@@ -274,6 +275,10 @@ class Dialog extends StatelessWidget {
         constraints ?? dialogTheme.constraints ?? const BoxConstraints(minWidth: 280.0);
 
     Widget dialogChild;
+
+    if (isMultiWindowEnabled) {
+      // TODO(team-desktop): Use a window if necessary.
+    }
 
     if (_fullscreen) {
       dialogChild = Material(
