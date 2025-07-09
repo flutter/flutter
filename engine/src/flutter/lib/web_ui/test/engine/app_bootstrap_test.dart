@@ -7,7 +7,6 @@ library;
 
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
-import 'dart:js_util';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -55,9 +54,9 @@ void testMain() {
 
     expect(engineInitializer, isNotNull);
 
-    final Object maybeApp = await promiseToFuture<Object>(
-      callMethod<Object>(engineInitializer, 'autoStart', <Object?>[]),
-    );
+    final JSObject maybeApp = await engineInitializer
+        .callMethod<JSPromise<JSObject>>('autoStart'.toJS)
+        .toDart;
 
     expect(maybeApp, isA<FlutterApp>());
     expect(initCalled, 1, reason: 'initEngine should be called first.');
@@ -69,9 +68,9 @@ void testMain() {
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-    final Object maybeAppInitializer = await promiseToFuture<Object>(
-      callMethod<Object>(engineInitializer, 'initializeEngine', <Object?>[]),
-    );
+    final JSObject maybeAppInitializer = await engineInitializer
+        .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
+        .toDart;
 
     expect(maybeAppInitializer, isA<FlutterAppRunner>());
     expect(initCalled, 1, reason: 'initEngine should have been called.');
@@ -83,13 +82,13 @@ void testMain() {
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-    final Object appInitializer = await promiseToFuture<Object>(
-      callMethod<Object>(engineInitializer, 'initializeEngine', <Object?>[]),
-    );
+    final JSObject appInitializer = await engineInitializer
+        .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
+        .toDart;
     expect(appInitializer, isA<FlutterAppRunner>());
-    final Object maybeApp = await promiseToFuture<Object>(
-      callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
-    );
+    final JSObject maybeApp = await appInitializer
+        .callMethod<JSPromise<JSObject>>('runApp'.toJS)
+        .toDart;
     expect(maybeApp, isA<FlutterApp>());
     expect(initCalled, 1, reason: 'initEngine should have been called.');
     expect(runCalled, 2, reason: 'runApp should have been called.');
@@ -101,12 +100,12 @@ void testMain() {
 
       final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-      final Object appInitializer = await promiseToFuture<Object>(
-        callMethod<Object>(engineInitializer, 'initializeEngine', <Object?>[]),
-      );
-      final FlutterApp maybeApp = await promiseToFuture<FlutterApp>(
-        callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
-      );
+      final JSObject appInitializer = await engineInitializer
+          .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
+          .toDart;
+      final FlutterApp maybeApp = await appInitializer
+          .callMethod<JSPromise<FlutterApp>>('runApp'.toJS)
+          .toDart;
 
       expect(maybeApp['addView'].isA<JSFunction>(), isTrue);
       expect(maybeApp['removeView'].isA<JSFunction>(), isTrue);
@@ -116,20 +115,24 @@ void testMain() {
 
       final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-      final Object appInitializer = await promiseToFuture<Object>(
-        callMethod<Object>(engineInitializer, 'initializeEngine', <dynamic>[
-          jsify(<String, Object?>{'multiViewEnabled': true}),
-        ]),
-      );
-      final Object maybeApp = await promiseToFuture<Object>(
-        callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
-      );
-      final int viewId = callMethod<num>(maybeApp, 'addView', <dynamic>[
-        jsify(<String, Object?>{'hostElement': createDomElement('div')}),
-      ]).toInt();
+      final JSObject appInitializer = await engineInitializer
+          .callMethod<JSPromise<JSObject>>(
+            'initializeEngine'.toJS,
+            <String, Object?>{'multiViewEnabled': true}.jsify(),
+          )
+          .toDart;
+      final JSObject maybeApp = await appInitializer
+          .callMethod<JSPromise<JSObject>>('runApp'.toJS)
+          .toDart;
+      final int viewId = maybeApp
+          .callMethod<JSNumber>(
+            'addView'.toJS,
+            <String, Object?>{'hostElement': createDomElement('div')}.jsify(),
+          )
+          .toDartInt;
       expect(bootstrap.viewManager[viewId], isNotNull);
 
-      callMethod<Object>(maybeApp, 'removeView', <Object>[viewId]);
+      maybeApp.callMethod('removeView'.toJS, viewId.toJS);
       expect(bootstrap.viewManager[viewId], isNull);
     });
   });

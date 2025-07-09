@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -213,21 +213,22 @@ void testMain() {
 
         // Emulate WebGL context loss.
         final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas()!;
-        final Object ctx = canvas.getContext('webgl2')!;
-        final Object loseContextExtension = js_util.callMethod(ctx, 'getExtension', <String>[
-          'WEBGL_lose_context',
-        ]);
-        js_util.callMethod<void>(loseContextExtension, 'loseContext', const <void>[]);
+        final JSObject ctx = canvas.getContext('webgl2')! as JSObject;
+        final JSObject loseContextExtension = ctx.callMethod<JSObject>(
+          'getExtension'.toJS,
+          'WEBGL_lose_context'.toJS,
+        );
+        loseContextExtension.callMethod('loseContext'.toJS);
 
         // Pump a timer to allow the "lose context" event to propagate.
         await Future<void>.delayed(Duration.zero);
         // We don't create a new GL context until the context is restored.
         expect(surface.debugContextLost, isTrue);
-        final bool isContextLost = js_util.callMethod<bool>(ctx, 'isContextLost', const <void>[]);
+        final bool isContextLost = ctx.callMethod<JSBoolean>('isContextLost'.toJS).toDart;
         expect(isContextLost, isTrue);
 
         // Emulate WebGL context restoration.
-        js_util.callMethod<void>(loseContextExtension, 'restoreContext', const <void>[]);
+        loseContextExtension.callMethod('restoreContext'.toJS);
 
         // Pump a timer to allow the "restore context" event to propagate.
         await Future<void>.delayed(Duration.zero);
@@ -291,23 +292,20 @@ void testMain() {
       final Surface surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final Object originalTransferToImageBitmap = js_util.getProperty(
-        offscreenCanvas,
-        'transferToImageBitmap',
+      final JSObject originalTransferToImageBitmap = offscreenCanvas.getProperty<JSObject>(
+        'transferToImageBitmap'.toJS,
       );
-      js_util.setProperty(
-        offscreenCanvas,
-        'originalTransferToImageBitmap',
+      offscreenCanvas.setProperty(
+        'originalTransferToImageBitmap'.toJS,
         originalTransferToImageBitmap,
       );
       int transferToImageBitmapCalls = 0;
-      js_util.setProperty(
-        offscreenCanvas,
-        'transferToImageBitmap',
-        js_util.allowInterop(() {
+      offscreenCanvas.setProperty(
+        'transferToImageBitmap'.toJS,
+        () {
           transferToImageBitmapCalls++;
-          return js_util.callMethod<Object>(offscreenCanvas, 'originalTransferToImageBitmap', []);
-        }),
+          return offscreenCanvas.callMethod<JSObject>('originalTransferToImageBitmap'.toJS);
+        }.toJS,
       );
       final RenderCanvas renderCanvas = RenderCanvas();
       final CkPictureRecorder recorder = CkPictureRecorder();
@@ -323,18 +321,13 @@ void testMain() {
     }, skip: !Surface.offscreenCanvasSupported);
 
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
-      final Object originalMakeGrContext = js_util.getProperty(canvasKit, 'MakeGrContext');
-      js_util.setProperty(canvasKit, 'originalMakeGrContext', originalMakeGrContext);
-      js_util.setProperty(
-        canvasKit,
-        'MakeGrContext',
-        js_util.allowInterop((int glContext) {
-          return null;
-        }),
-      );
+      final JSObject originalMakeGrContext = canvasKit.getProperty('MakeGrContext'.toJS);
+      canvasKit
+        ..setProperty('originalMakeGrContext'.toJS, originalMakeGrContext)
+        ..setProperty('MakeGrContext'.toJS, ((int glContext) => null).toJS);
       final Surface surface = Surface();
       expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
-      js_util.setProperty(canvasKit, 'MakeGrContext', originalMakeGrContext);
+      canvasKit.setProperty('MakeGrContext'.toJS, originalMakeGrContext);
       // Skipping on Firefox for now since Firefox headless doesn't support WebGL
     }, skip: isFirefox);
 

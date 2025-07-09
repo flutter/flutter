@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -420,11 +420,10 @@ Future<void> testMain() async {
     bool simulateError = false;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{
-        'orientation': <Object?, Object?>{
+    domWindow.setProperty(
+      'screen'.toJS,
+      <String, Object?>{
+        'orientation': <String, Object?>{
           'lock': (String lockType) {
             lockCalls.add(lockType);
             if (simulateError) {
@@ -436,7 +435,7 @@ Future<void> testMain() async {
             unlockCount += 1;
           }.toJS,
         },
-      }),
+      }.jsify(),
     );
 
     // Sanity-check the test setup.
@@ -493,7 +492,7 @@ Future<void> testMain() async {
     expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
 
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow.setProperty('screen'.toJS, original);
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/66128.
@@ -501,14 +500,10 @@ Future<void> testMain() async {
     final DomScreen? original = domWindow.screen;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{'orientation': null}),
-    );
+    domWindow.setProperty('screen'.toJS, <Object?, Object?>{'orientation': null}.jsify());
     expect(domWindow.screen!.orientation, isNull);
     expect(await sendSetPreferredOrientations(<dynamic>[]), isFalse);
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow.setProperty('screen'.toJS, original);
   });
 
   test(

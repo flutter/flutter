@@ -30,7 +30,7 @@ void testMain() {
 
       // TODO(web): Replace the above nullification by the following assertion
       // when wasm and JS tests initialize their config the same way:
-      // assert(js_util.getProperty<Object?>(domWindow, 'flutterConfiguration') == null);
+      // assert(domWindow.getProperty('flutterConfiguration'.toJS) == null);
 
       await initializeEngineServices(jsConfiguration: config);
 
