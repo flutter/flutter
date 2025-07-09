@@ -280,6 +280,33 @@ void main() {
       }
     }
   });
+
+  test('no import of base/exit.dart in lib/** outside of allow-listed paths', () {
+    final List<String> allowedPaths = <String>[
+      fileSystem.path.join(flutterTools, 'lib', 'runner.dart'),
+    ];
+
+    bool isNotAllowed(FileSystemEntity entity) {
+      return allowedPaths.every((String path) => !entity.path.contains(path));
+    }
+
+    for (final String dirName in <String>['lib']) {
+      final Iterable<File> files = fileSystem
+          .directory(fileSystem.path.join(flutterTools, dirName))
+          .listSync(recursive: true)
+          .where(_isDartFile)
+          .where(isNotAllowed)
+          .map(_asFile);
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*src/base/exit.dart'))) {
+            final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
+            fail('$relativePath imports flutter_tools/src/base/exit.dart');
+          }
+        }
+      }
+    }
+  });
 }
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
