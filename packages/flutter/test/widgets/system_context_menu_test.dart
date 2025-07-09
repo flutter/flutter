@@ -711,7 +711,6 @@ void main() {
     },
   );
 
-
   test('systemContextMenuItemDataFromJson handles Live Text', () {
     final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};
     final IOSSystemContextMenuItemData item = systemContextMenuItemDataFromJson(json);
