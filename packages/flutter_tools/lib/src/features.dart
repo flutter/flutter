@@ -53,6 +53,11 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether to stop writing the `{FLUTTER_ROOT}/version` file.
+  ///
+  /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+  bool get isOmitLegacyVersionFileEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -71,6 +76,7 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     swiftPackageManager,
+    omitLegacyVersionFile,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -174,6 +180,18 @@ const Feature swiftPackageManager = Feature(
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
+///
+/// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+const Feature omitLegacyVersionFile = Feature(
+  name: 'stops writing the legacy version file',
+  configSetting: 'omit-legacy-version-file',
+  extraHelpText:
+      'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
+      'the flutter tool execution; a newer file format has existed for some '
+      'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
