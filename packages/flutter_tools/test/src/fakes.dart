@@ -501,6 +501,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
+    this.isOmitLegacyVersionFileEnabled = false,
   });
 
   @override
@@ -537,6 +538,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
+  final bool isOmitLegacyVersionFileEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -549,6 +553,7 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       _ => false,
     };
   }
@@ -566,6 +571,7 @@ class TestFeatureFlags implements FeatureFlags {
     cliAnimation,
     nativeAssets,
     swiftPackageManager,
+    omitLegacyVersionFile,
   ];
 
   @override
