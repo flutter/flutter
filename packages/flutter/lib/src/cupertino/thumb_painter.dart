@@ -12,11 +12,6 @@ import 'colors.dart';
 
 const Color _kThumbBorderColor = Color(0x0A000000);
 
-const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
-  BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8.0),
-  BoxShadow(color: Color(0x0F000000), offset: Offset(0, 3), blurRadius: 1.0),
-];
-
 const List<BoxShadow> _kSliderBoxShadows = <BoxShadow>[
   BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8.0),
   BoxShadow(color: Color(0x29000000), offset: Offset(0, 1), blurRadius: 1.0),
@@ -32,12 +27,6 @@ class CupertinoThumbPainter {
     this.color = CupertinoColors.white,
     this.shadows = _kSliderBoxShadows,
   });
-
-  /// Creates an object that paints an iOS-style switch thumb.
-  const CupertinoThumbPainter.switchThumb({
-    Color color = CupertinoColors.white,
-    List<BoxShadow> shadows = _kSwitchBoxShadows,
-  }) : this(color: color, shadows: shadows);
 
   /// The color of the interior of the thumb.
   final Color color;
@@ -56,16 +45,18 @@ class CupertinoThumbPainter {
   /// Consider using [radius] and [extension] when deciding how large a
   /// rectangle to use for the thumb.
   void paint(Canvas canvas, Rect rect) {
-    final RSuperellipse thumbShape = RSuperellipse.fromRectAndRadius(
+    // Paint RRects instead of RSuperellipses here, because practically
+    // [CupertinoSlider] only draws circular thumbs.
+    final RRect thumbShape = RRect.fromRectAndRadius(
       rect,
       Radius.circular(rect.shortestSide / 2.0),
     );
 
     for (final BoxShadow shadow in shadows) {
-      canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
+      canvas.drawRRect(thumbShape.shift(shadow.offset), shadow.toPaint());
     }
 
-    canvas.drawRSuperellipse(thumbShape.inflate(0.5), Paint()..color = _kThumbBorderColor);
-    canvas.drawRSuperellipse(thumbShape, Paint()..color = color);
+    canvas.drawRRect(thumbShape.inflate(0.5), Paint()..color = _kThumbBorderColor);
+    canvas.drawRRect(thumbShape, Paint()..color = color);
   }
 }
