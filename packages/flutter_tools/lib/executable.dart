@@ -112,13 +112,12 @@ Future<void> main(List<String> args) async {
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
-      DevtoolsLauncher:
-          () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
