@@ -2290,8 +2290,8 @@ void main() {
 
           expect(textFields[0].controller?.text, isEmpty); // hour
           expect(textFields[1].controller?.text, isEmpty); // minute
-          expect(textFields[0].decoration?.hintText, isEmpty);
-          expect(textFields[1].decoration?.hintText, isEmpty);
+          expect(textFields[0].decoration?.hintText, isNull);
+          expect(textFields[1].decoration?.hintText, isNull);
           await finishPicker(tester);
         },
       );
@@ -2315,6 +2315,8 @@ void main() {
 
         expect(textFields[0].controller?.text, isEmpty); // hour
         expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
 
         await tester.enterText(find.byType(TextField).first, '11');
         await tester.enterText(find.byType(TextField).last, '30');
