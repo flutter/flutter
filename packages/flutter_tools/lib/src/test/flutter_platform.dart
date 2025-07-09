@@ -20,7 +20,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
@@ -28,7 +27,6 @@ import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
-
 import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
@@ -65,8 +63,6 @@ FlutterPlatform installHook({
   TestWatcher? watcher,
   bool enableVmService = false,
   bool machine = false,
-  String? precompiledDillPath,
-  Map<String, String>? precompiledDillFiles,
   bool updateGoldens = false,
   String? testAssetDirectory,
   InternetAddressType serverType = InternetAddressType.IPv4,
@@ -97,8 +93,6 @@ FlutterPlatform installHook({
     machine: machine,
     enableVmService: enableVmService,
     host: _kHosts[serverType],
-    precompiledDillPath: precompiledDillPath,
-    precompiledDillFiles: precompiledDillFiles,
     updateGoldens: updateGoldens,
     testAssetDirectory: testAssetDirectory,
     projectRootDirectory: projectRootDirectory,
@@ -312,8 +306,6 @@ class FlutterPlatform extends PlatformPlugin {
     this.enableVmService,
     this.machine,
     this.host,
-    this.precompiledDillPath,
-    this.precompiledDillFiles,
     this.updateGoldens,
     this.testAssetDirectory,
     this.projectRootDirectory,
@@ -343,8 +335,6 @@ class FlutterPlatform extends PlatformPlugin {
   final bool? enableVmService;
   final bool? machine;
   final InternetAddress? host;
-  final String? precompiledDillPath;
-  final Map<String, String>? precompiledDillFiles;
   final bool? updateGoldens;
   final String? testAssetDirectory;
   final Uri? projectRootDirectory;
@@ -361,6 +351,7 @@ class FlutterPlatform extends PlatformPlugin {
   /// If this is null, the test will run as a regular test with the Flutter
   /// Tester; otherwise it will run as a Integration Test on this device.
   final Device? integrationTestDevice;
+
   bool get _isIntegrationTest => integrationTestDevice != null;
   late final TestGoldenComparator _testGoldenComparator;
 
@@ -416,12 +407,6 @@ class FlutterPlatform extends PlatformPlugin {
           'installHook() was called with a VM Service port or debugger mode enabled, but then more than one test suite was run.',
         );
       }
-      // Fail if we're passing in a precompiled entry-point.
-      if (precompiledDillPath != null) {
-        throwToolExit(
-          'installHook() was called with a precompiled test entry-point, but then more than one test suite was run.',
-        );
-      }
     }
 
     final int ourTestCount = _testCount;
@@ -462,25 +447,26 @@ class FlutterPlatform extends PlatformPlugin {
     if (compiler == null || compiler!.compiler == null) {
       throw Exception('Compiler is not set up properly to compile $expression');
     }
-    final CompilerOutput? compilerOutput = await compiler!.compiler!.compileExpression(
-      expression,
-      definitions,
-      definitionTypes,
-      typeDefinitions,
-      typeBounds,
-      typeDefaults,
-      libraryUri,
-      klass,
-      method,
-      isStatic,
-    );
-    if (compilerOutput != null) {
-      if (compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
-        return base64.encode(compilerOutput.expressionData!);
-      } else if (compilerOutput.errorCount > 0 && compilerOutput.errorMessage != null) {
-        throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
-      }
-    }
+    throw UnimplementedError("demeter where are you?");
+    // final CompilerOutput? compilerOutput = await compiler!.compiler!.compileExpression(
+    //   expression,
+    //   definitions,
+    //   definitionTypes,
+    //   typeDefinitions,
+    //   typeBounds,
+    //   typeDefaults,
+    //   libraryUri,
+    //   klass,
+    //   method,
+    //   isStatic,
+    // );
+    // if (compilerOutput != null) {
+    //   if (compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
+    //     return base64.encode(compilerOutput.expressionData!);
+    //   } else if (compilerOutput.errorCount > 0 && compilerOutput.errorMessage != null) {
+    //     throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
+    //   }
+    // }
     throw Exception('Failed to compile $expression');
   }
 
@@ -631,7 +617,6 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
-            precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
           final Uri uri = globals.fs.file(path).uri;
@@ -644,35 +629,26 @@ class FlutterPlatform extends PlatformPlugin {
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
       String? mainDart;
-      if (precompiledDillPath != null) {
-        mainDart = precompiledDillPath;
-        initializeExpressionCompiler(testPath);
-      } else if (precompiledDillFiles != null) {
-        mainDart = precompiledDillFiles![testPath];
-      } else {
-        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
+      mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
-        // Integration test device takes care of the compilation.
-        if (integrationTestDevice == null) {
-          // Lazily instantiate compiler so it is built only if it is actually used.
-          compiler ??= TestCompiler(
-            debuggingOptions.buildInfo,
-            flutterProject,
-            testTimeRecorder: testTimeRecorder,
-          );
-          switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
-            case TestCompilerComplete(:final String outputPath):
-              mainDart = outputPath;
-            case TestCompilerFailure(:final String? error):
-              testHarnessChannel.sink.addError(
-                'Compilation failed for testPath=$testPath: $error.',
-              );
-              return null;
-          }
-        } else {
-          // For integration tests, we may still need to set up expression compilation service.
-          initializeExpressionCompiler(mainDart);
+      // Integration test device takes care of the compilation.
+      if (integrationTestDevice == null) {
+        // Lazily instantiate compiler so it is built only if it is actually used.
+        compiler ??= TestCompiler(
+          debuggingOptions.buildInfo,
+          flutterProject,
+          testTimeRecorder: testTimeRecorder,
+        );
+        switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
+          case TestCompilerComplete(:final String outputPath):
+            mainDart = outputPath;
+          case TestCompilerFailure(:final String? error):
+            testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath: $error.');
+            return null;
         }
+      } else {
+        // For integration tests, we may still need to set up expression compilation service.
+        initializeExpressionCompiler(mainDart);
       }
 
       globals.printTrace('test $ourTestCount: starting test device');
@@ -812,10 +788,12 @@ class FlutterPlatform extends PlatformPlugin {
       packageConfig[flutterProject!.manifest.appName],
       Cache.flutterRoot!,
     );
+
+    final File? testConfigFile = findTestConfigFile(globals.fs.file(testUrl), globals.logger);
+
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // This MUST be a file URI.
+      testConfigFile: testConfigFile,
       packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
@@ -878,9 +856,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   void add(S event) => _parent.add(event);
+
   @override
   void addError(Object errorEvent, [StackTrace? stackTrace]) =>
       _parent.addError(errorEvent, stackTrace);
+
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
@@ -888,6 +868,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 @immutable
 class _AsyncError {
   const _AsyncError(this.error, this.stack);
+
   final dynamic error;
   final StackTrace stack;
 }
