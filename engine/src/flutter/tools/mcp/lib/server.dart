@@ -8,18 +8,20 @@ import 'dart:io' show Process;
 
 import 'package:dart_mcp/server.dart';
 import 'package:process_runner/process_runner.dart';
-import 'package:stream_channel/stream_channel.dart' show StreamChannel;
 
+/// An [MCPServer] that provides tools an agent would need to develop the
+/// Flutter engine.
 final class EngineServer extends MCPServer with ToolsSupport {
-  EngineServer.fromStreamChannel(StreamChannel<String> stream, {ProcessRunner? processRunner})
+  /// Create an [EngineServer] that is communicating over [stream].
+  /// [processRunner] can be supplied for testing, to mock out subprocesses.
+  EngineServer.fromStreamChannel(super.stream, {ProcessRunner? processRunner})
     : _processRunner = processRunner ?? ProcessRunner(),
       super.fromStreamChannel(
-        stream,
         implementation: Implementation(name: 'engine mcp', version: '0.0.1'),
         instructions: '',
       );
 
-  ProcessRunner _processRunner;
+  final ProcessRunner _processRunner;
 
   final _engineBuildHelp = Tool(
     name: 'engine_build_help',
