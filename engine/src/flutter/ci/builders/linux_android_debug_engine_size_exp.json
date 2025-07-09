@@ -39,7 +39,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--no-dart-secure-socket",
                 "--rbe",
                 "--no-goma"
