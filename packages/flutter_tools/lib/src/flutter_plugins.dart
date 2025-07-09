@@ -1661,7 +1661,7 @@ bool _hasPluginInlineImpl(
 /// Determine if the plugin provides an inline Dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   final DartPluginClassAndFilePair? platformInfo = plugin.pluginDartClassPlatforms[platformKey];
-  return platformInfo != null && platformInfo.dartClass != 'none';
+  return platformInfo != null;
 }
 
 /// Get the resolved [Plugin] `resolution` from the [candidates] serving as
