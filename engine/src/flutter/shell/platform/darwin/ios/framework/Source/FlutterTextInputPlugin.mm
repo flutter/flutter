@@ -12,7 +12,6 @@
 #include "unicode/uchar.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
@@ -1522,11 +1521,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (NSUInteger)decrementOffsetPosition:(NSUInteger)position {
-  return fml::RangeForCharacterAtIndex(self.text, MAX(0, position - 1)).location;
+  return position < 2 ? 0
+                      : [self.text rangeOfComposedCharacterSequenceAtIndex:position - 1].location;
 }
 
 - (NSUInteger)incrementOffsetPosition:(NSUInteger)position {
-  NSRange charRange = fml::RangeForCharacterAtIndex(self.text, position);
+  if (position + 1 >= self.text.length) {
+    return self.text.length;
+  }
+  NSRange charRange = [self.text rangeOfComposedCharacterSequenceAtIndex:position];
   return MIN(position + charRange.length, self.text.length);
 }
 
@@ -1818,15 +1821,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSInteger index = position.index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
-  NSArray<UITextSelectionRect*>* rects = [self
-      selectionRectsForRange:[FlutterTextRange
-                                 rangeWithNSRange:fml::RangeForCharactersInRange(
-                                                      self.text,
-                                                      NSMakeRange(
-                                                          MAX(0, index - 1),
-                                                          (index >= (NSInteger)self.text.length)
-                                                              ? 1
-                                                              : 2))]];
+  NSInteger start = MAX(0, index - 1);
+  NSInteger end = MIN(self.text.length, start + 2);
+  NSRange characterRange = NSMakeRange(start, end - start);
+  NSArray<UITextSelectionRect*>* rects =
+      [self selectionRectsForRange:[FlutterTextRange rangeWithNSRange:characterRange]];
   if (rects.count == 0) {
     return CGRectZero;
   }
@@ -1985,7 +1984,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
   NSUInteger currentIndex = _selectedTextRange.start.index;
-  return [FlutterTextRange rangeWithNSRange:fml::RangeForCharacterAtIndex(self.text, currentIndex)];
+  return [FlutterTextRange
+      rangeWithNSRange:[self.text rangeOfComposedCharacterSequenceAtIndex:currentIndex]];
 }
 
 // Overall logic for floating cursor's "move" gesture and "selection" gesture:
@@ -2232,7 +2232,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     // See: https://github.com/flutter/flutter/issues/111494#issuecomment-1248441346
     if (IsEmoji(self.text, _selectedTextRange.range)) {
       NSString* deletedText = [self.text substringWithRange:_selectedTextRange.range];
-      NSRange deleteFirstCharacterRange = fml::RangeForCharacterAtIndex(deletedText, 0);
+      NSRange deleteFirstCharacterRange = [deletedText rangeOfComposedCharacterSequenceAtIndex:0];
       self.temporarilyDeletedComposedCharacter =
           [deletedText substringWithRange:deleteFirstCharacterRange];
     }

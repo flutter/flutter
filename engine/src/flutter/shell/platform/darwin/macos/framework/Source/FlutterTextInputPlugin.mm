@@ -11,7 +11,6 @@
 #include <memory>
 
 #include "flutter/common/constants.h"
-#include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"

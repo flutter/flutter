@@ -144,8 +144,6 @@ source_set("fml") {
       "platform/darwin/platform_version.mm",
       "platform/darwin/scoped_nsautorelease_pool.cc",
       "platform/darwin/scoped_nsautorelease_pool.h",
-      "platform/darwin/string_range_sanitization.h",
-      "platform/darwin/string_range_sanitization.mm",
     ]
 
     frameworks = [ "Foundation.framework" ]
@@ -363,7 +361,6 @@ if (enable_unittests) {
 
       sources += [
         "platform/darwin/cf_utils_unittests.mm",
-        "platform/darwin/string_range_sanitization_unittests.mm",
       ]
     }
 
