@@ -1532,6 +1532,8 @@ abstract class DefaultTextEditingStrategy
       return editingState;
     }
 
+    // If interactive selection is disabled, collapse the selection to the newly
+    // selected offset.
     var currentOffset = lastEditingState?.baseOffset ?? 0;
     if (activeDomElement.isA<DomHTMLInputElement>()) {
       final element = domElement as DomHTMLInputElement;
@@ -1542,7 +1544,6 @@ abstract class DefaultTextEditingStrategy
         'forward' => selectionEnd,
         _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
       };
-      // TODO: Is this necessary? Or will Flutter framework send this back? Does that cause flicker?
       element.setSelectionRange(collapsedOffset, collapsedOffset);
       return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
     } else if (domElement.isA<DomHTMLTextAreaElement>()) {
@@ -1554,7 +1555,6 @@ abstract class DefaultTextEditingStrategy
         'forward' => selectionEnd,
         _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
       };
-      // TODO: Is this necessary? Or will Flutter framework send this back? Does that cause flicker?
       element.setSelectionRange(collapsedOffset, collapsedOffset);
       return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
     } else {
