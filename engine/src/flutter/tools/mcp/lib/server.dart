@@ -16,6 +16,7 @@ final class EngineServer extends MCPServer with ToolsSupport {
       super.fromStreamChannel(
         stream,
         implementation: Implementation(name: 'engine mcp', version: '0.0.1'),
+        instructions: '',
       );
 
   ProcessRunner _processRunner;
