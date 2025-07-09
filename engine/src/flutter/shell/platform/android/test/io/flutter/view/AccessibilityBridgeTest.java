@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -940,8 +941,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actualContentDescription.toString(), root.tooltip);
   }
 
-  @Config(sdk = API_LEVELS.API_28)
-  @TargetApi(API_LEVELS.API_28)
+  @Config(minSdk = API_LEVELS.API_25)
   @Test
   public void itSetsTooltipCorrectlyWithContentDescription() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -975,10 +975,15 @@ public class AccessibilityBridgeTest {
     // Test the generated AccessibilityNodeInfo for the node we created
     // and verify it has correct tooltip text.
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    CharSequence actualTooltipText = nodeInfo.getTooltipText();
     CharSequence actualContentDescription = nodeInfo.getContentDescription();
-    assertEquals(actualTooltipText.toString(), root.tooltip);
-    assertEquals(actualContentDescription.toString(), root.label);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      CharSequence actualTooltipText = nodeInfo.getTooltipText();
+      assertEquals(actualTooltipText.toString(), root.tooltip);
+      assertEquals(actualContentDescription.toString(), root.label);
+    } else {
+      assertEquals(actualContentDescription.toString(), root.label + "\n" + root.tooltip);
+    }
   }
 
   @TargetApi(API_LEVELS.API_28)

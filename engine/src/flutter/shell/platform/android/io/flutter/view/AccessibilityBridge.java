@@ -932,9 +932,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (semanticsNode.tooltip != null) {
         result.setTooltipText(semanticsNode.tooltip);
         // Tooltips are not announced when a node is focused resulting in no
-        // message. This is only announced after a long press and the tooltip.
-        // To be consistent with other platforms, and prevent TalkBack from
-        // announcing the node as unlabeled, a content description is set.
+        // message. This is only announced after a long press and the tooltip
+        // is shown.
+        // To be consistent with platforms other than Android and prevent
+        // TalkBack from announcing the node as unlabeled, a content
+        // description is set.
         if (semanticsNode.getValueLabelHint() == null) {
           result.setContentDescription(semanticsNode.tooltip);
         }
