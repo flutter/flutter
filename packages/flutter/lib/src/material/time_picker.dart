@@ -2136,12 +2136,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     // appears odd above the hint text.
     // Clear the hint text when emptyInitialTime is true to avoid showing a
     // misleading placeholder.
-    final String? hintText =
-        focusNode.hasFocus
-            ? null
-            : widget.emptyInitialTime
-            ? ''
-            : _formattedValue;
+    final String? hintText = focusNode.hasFocus || widget.emptyInitialTime ? null : _formattedValue;
 
     // Because the fill color is specified in both the inputDecorationTheme and
     // the TimePickerTheme, if there's one in the user's input decoration theme,
@@ -2311,8 +2306,7 @@ class TimePickerDialog extends StatefulWidget {
   /// If true and entry mode is [TimePickerEntryMode.input], the hour and minute
   /// fields will be empty on start instead of pre-filled with [initialTime].
   ///
-  /// Improves UX by removing the need to delete default values before typing.
-  /// Skipped in dial mode.
+  /// Has no effect in dial mode.
   final bool emptyInitialInput;
 
   @override
