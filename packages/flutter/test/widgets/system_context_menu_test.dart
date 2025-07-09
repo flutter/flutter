@@ -711,11 +711,6 @@ void main() {
     },
   );
 
-  test('IOSSystemContextMenuItemDataLiveText debugFillProperties', () {
-    const IOSSystemContextMenuItemDataLiveText item = IOSSystemContextMenuItemDataLiveText();
-    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
-    expect(diagnosticsNodes, hasLength(0));
-  });
 
   test('systemContextMenuItemDataFromJson handles Live Text', () {
     final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};

@@ -3077,18 +3077,12 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
 ///  * [IOSSystemContextMenuItemLiveText], which performs a similar role but at the
 ///    widget level.
 ///  * https://github.com/flutter/flutter/issues/169781
-final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData
-    with Diagnosticable {
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData {
   /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
   const IOSSystemContextMenuItemDataLiveText();
 
   @override
   String get _jsonType => 'captureTextFromCamera';
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-  }
 }
 
 // TODO(justinmc): Support the "custom" type.
