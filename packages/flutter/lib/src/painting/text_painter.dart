@@ -1295,8 +1295,9 @@ class TextPainter {
   ///
   /// {@template flutter.painting.textPainter.debugPaintTextLayoutBoxes}
   /// Each painted box illustrates how the encompassed text contributes to the
-  /// overall text layout. For instance, the line height of a line is the smallest
-  /// vertical extent that covers all text boxes on that line.
+  /// overall text layout. For instance, for paragraphs whose [StrutStyle] is
+  /// disabled, the line height of a line is the smallest vertical extent that
+  /// covers all text boxes on that line.
   ///
   /// Typically, only characters with a non-zero horizontal advance produce
   /// these boxes. No boxes will be painted for lines that only consist of a new
@@ -1362,14 +1363,12 @@ class TextPainter {
     _TextPainterLayoutCacheWithOffset layout,
     Offset offset,
   ) {
-    final Paint paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0
-          ..color = const Color(0xFF00FFFF);
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF00FFFF);
     final List<TextBox> textBoxes = getBoxesForSelection(
       TextSelection(baseOffset: 0, extentOffset: plainText.length),
-      boxHeightStyle: _strutDisabled ? ui.BoxHeightStyle.tight : ui.BoxHeightStyle.strut,
     );
     for (final TextBox textBox in textBoxes) {
       canvas.drawRect(textBox.toRect().shift(offset), paint);
