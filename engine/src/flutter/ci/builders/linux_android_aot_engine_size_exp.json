@@ -43,6 +43,7 @@
                 "--android",
                 "--android-cpu",
                 "arm64",
+                "--no-prebuilt-dart-sdk",
                 "--no-dart-secure-socket",
                 "--rbe",
                 "--no-goma"
@@ -68,51 +69,6 @@
                     ]
                 }
             ]
-        },
-        {
-            "archives": [
-                {
-                    "name": "ci/android_release_x64_size_exp",
-                    "type": "gcs",
-                    "base_path": "out/ci/android_release_x64_size_exp/zip_archives/",
-                    "include_paths": [
-                        "out/ci/android_release_x64_size_exp/zip_archives/android-x64-release-size-exp/artifacts.zip",
-                        "out/ci/android_release_x64_size_exp/zip_archives/android-x64-release-size-exp/linux-x64.zip",
-                        "out/ci/android_release_x64_size_exp/zip_archives/android-x64-release-size-exp/symbols.zip",
-                        "out/ci/android_release_x64_size_exp/zip_archives/android-x64-release-size-exp/analyze-snapshot-linux-x64.zip"
-                    ],
-                    "realm": "production"
-                }
-            ],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "use_rbe": true
-            },
-            "gn": [
-                "--target-dir",
-                "ci/android_release_x64_size_exp",
-                "--runtime-mode",
-                "release",
-                "--android",
-                "--android-cpu",
-                "x64",
-                "--no-dart-secure-socket",
-                "--rbe",
-                "--no-goma"
-            ],
-            "name": "ci/android_release_x64_size_exp",
-            "description": "Produces experimental release mode artifacts to target x64 Android from a Linux host with dynamic modules enabled.",
-            "ninja": {
-                "config": "ci/android_release_x64_size_exp",
-                "targets": [
-                    "default",
-                    "clang_x64/gen_snapshot",
-                    "flutter/shell/platform/android:analyze_snapshot"
-                ]
-            }
         }
     ],
     "generators": {
