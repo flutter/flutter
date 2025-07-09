@@ -563,6 +563,7 @@ targets:
   #
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
+    bringup: true
     timeout: 120
     enabled_branches:
       # Don't run this on release branches
@@ -583,6 +584,7 @@ targets:
 
   - name: Linux linux_android_debug_engine_size_exp
     recipe: engine_v2/engine_v2
+    bringup: true
     timeout: 120
     enabled_branches:
       # Don't run this on release branches
