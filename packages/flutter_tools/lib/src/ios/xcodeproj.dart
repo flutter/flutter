@@ -18,7 +18,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../reporting/reporting.dart';
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -68,7 +67,7 @@ class XcodeProjectInterpreter {
   ///
   /// Defaults to installed with sufficient version,
   /// a memory file system, fake platform, buffer logger,
-  /// test [Usage], and test [Terminal].
+  /// test [Analytics], and test [Terminal].
   /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,

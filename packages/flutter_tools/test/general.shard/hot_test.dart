@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -152,12 +151,10 @@ void main() {
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     late MemoryFileSystem fileSystem;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      testUsage = TestUsage();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -351,26 +348,6 @@ name: my_app
           ).restart(fullRestart: true);
 
           expect(result.isOk, true);
-          expect(testUsage.events, <TestUsageEvent>[
-            const TestUsageEvent(
-              'hot',
-              'restart',
-              parameters: CustomDimensions(
-                hotEventTargetPlatform: 'flutter-tester',
-                hotEventSdkName: 'Tester',
-                hotEventEmulator: false,
-                hotEventFullRestart: true,
-                hotEventOverallTimeInMs: 64000,
-                hotEventSyncedBytes: 4,
-                hotEventInvalidatedSourcesCount: 2,
-                hotEventTransferTimeInMs: 32000,
-                hotEventCompileTimeInMs: 16000,
-                hotEventFindInvalidatedTimeInMs: 128000,
-                hotEventScannedSourcesCount: 8,
-              ),
-            ),
-          ]);
-
           expect(
             fakeAnalytics.sentEvents,
             contains(
@@ -398,7 +375,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => testUsage,
         },
       );
     });
@@ -471,31 +447,6 @@ name: my_app
           ).restart();
 
           expect(result.isOk, true);
-          expect(testUsage.events, <TestUsageEvent>[
-            const TestUsageEvent(
-              'hot',
-              'reload',
-              parameters: CustomDimensions(
-                hotEventFinalLibraryCount: 2,
-                hotEventSyncedLibraryCount: 3,
-                hotEventSyncedClassesCount: 4,
-                hotEventSyncedProceduresCount: 5,
-                hotEventSyncedBytes: 8,
-                hotEventInvalidatedSourcesCount: 6,
-                hotEventTransferTimeInMs: 32000,
-                hotEventOverallTimeInMs: 128000,
-                hotEventTargetPlatform: 'flutter-tester',
-                hotEventSdkName: 'Tester',
-                hotEventEmulator: false,
-                hotEventFullRestart: false,
-                hotEventCompileTimeInMs: 16000,
-                hotEventFindInvalidatedTimeInMs: 64000,
-                hotEventScannedSourcesCount: 16,
-                hotEventReassembleTimeInMs: 256000,
-                hotEventReloadVMTimeInMs: 512000,
-              ),
-            ),
-          ]);
           expect(
             fakeAnalytics.sentEvents,
             contains(
@@ -529,7 +480,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => testUsage,
         },
       );
     });
@@ -574,7 +524,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => testUsage,
         },
       );
     });
@@ -619,7 +568,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => testUsage,
         },
       );
     });
