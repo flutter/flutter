@@ -100,14 +100,6 @@
                     "name": "Tests of tools/gn",
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"
-                },
-                {
-                    "name": "Tests of tools/mcp",
-                    "language": "dart",
-                    "parameters": [
-                        "test",
-                        "flutter/tools/mcp"
-                    ]
                 }
             ]
         },
