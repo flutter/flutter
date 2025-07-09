@@ -33,9 +33,9 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.32.6](https://github.com/flutter/flutter/releases/tag/3.32.6)
 
-- [flutter/171106](https://github.com/flutter/flutter/pull/171106) - When a scrollview contains a `LayoutBuilder` on any platform prevent null check crash .
-- [flutter/171239](https://github.com/flutter/flutter/pull/171239) - When using Impeller + Vulkan and transitioning between activities that use flutter on Android prevent a crash.
-- [flutter/171737](https://github.com/flutter/flutter/pull/171737) - When using platform views on android 10-13 (api 29-33) prevent app crash when backgrounding and then foregrounding app.
+- [flutter/171106](https://github.com/flutter/flutter/pull/171106) - When a scroll view contains a `LayoutBuilder` on any platform, prevent null check crash.
+- [flutter/171239](https://github.com/flutter/flutter/pull/171239) - When using Impeller + Vulkan and transitioning between activities that use Flutter on Android, prevent a crash.
+- [flutter/171737](https://github.com/flutter/flutter/pull/171737) - When using platform views on Android SDK 10-13 (API 29-33) prevent app crash when backgrounding and then foregrounding app.
 
 ### [3.32.5](https://github.com/flutter/flutter/releases/tag/3.32.5)
 
