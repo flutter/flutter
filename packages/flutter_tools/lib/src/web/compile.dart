@@ -88,7 +88,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
+        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,

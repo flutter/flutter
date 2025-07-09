@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -133,7 +134,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('version.json'), exists);
     }),
@@ -148,7 +151,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       final String versionFile = environment.outputDir.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -265,7 +270,7 @@ name: foo
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(dumpInfo: true),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'A');
       expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
@@ -284,7 +289,9 @@ name: foo
       // Update to arbitrary resource file triggers rebuild.
       webResources.childFile('foo.txt').writeAsStringSync('B');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'B');
     }),
@@ -304,7 +311,9 @@ name: foo
       environment.buildDir.childFile('main.dart.mjs')
         ..createSync()
         ..writeAsStringSync('old mjs');
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'old wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'old mjs');
 
@@ -315,7 +324,9 @@ name: foo
         ..createSync()
         ..writeAsStringSync('new mjs');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'new wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'new mjs');
@@ -1198,6 +1209,7 @@ name: foo
                         sourceMaps: sourceMaps,
                         minify: minify,
                       ),
+                      const NoOpAnalytics(),
                     ).build(environment);
 
                     expect(outputJsFile.existsSync(), isTrue);
@@ -1267,7 +1279,7 @@ name: foo
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
-      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      final Dart2WasmTarget target = Dart2WasmTarget(config, const NoOpAnalytics());
       return target.buildKey;
     });
 
@@ -1404,7 +1416,7 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains file hash.
@@ -1435,7 +1447,7 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains the same file hash for both `/` and the root index.html file.
@@ -1464,7 +1476,7 @@ name: foo
       environment.outputDir.childFile('main.dart.js.map').createSync(recursive: true);
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       // No caching of source maps.
       expect(
