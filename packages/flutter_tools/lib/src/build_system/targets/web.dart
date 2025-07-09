@@ -351,7 +351,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    await processUtils.run(throwOnError: true, compilationArgs);
+    final RunResult runResult = await processUtils.run(
+      throwOnError: !compilerConfig.dryRun,
+      compilationArgs,
+    );
+    if (compilerConfig.dryRun) {
+      _handleDryRunResult(environment, runResult);
+    }
   }
 
   @override
@@ -361,31 +367,68 @@ class Dart2WasmTarget extends Dart2WebTarget {
   List<String> get depfiles => const <String>['dart2wasm.d'];
 
   @override
-  Map<String, Object?> get buildConfig => <String, Object?>{
-    'compileTarget': 'dart2wasm',
-    'renderer': compilerConfig.renderer.name,
-    'mainWasmPath': 'main.dart.wasm',
-    'jsSupportRuntimePath': 'main.dart.mjs',
-  };
+  Map<String, Object?> get buildConfig => compilerConfig.dryRun
+      ? const <String, Object?>{}
+      : <String, Object?>{
+          'compileTarget': 'dart2wasm',
+          'renderer': compilerConfig.renderer.name,
+          'mainWasmPath': 'main.dart.wasm',
+          'jsSupportRuntimePath': 'main.dart.mjs',
+        };
 
   @override
-  Iterable<File> buildFiles(Environment environment) => environment.buildDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where(
-        (File file) => switch (file.basename) {
-          'main.dart.wasm' || 'main.dart.mjs' => true,
-          'main.dart.wasm.map' => compilerConfig.sourceMaps,
-          _ => false,
-        },
+  Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
+      ? const <File>[]
+      : environment.buildDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where(
+              (File file) => switch (file.basename) {
+                'main.dart.wasm' || 'main.dart.mjs' => true,
+                'main.dart.wasm.map' => compilerConfig.sourceMaps,
+                _ => false,
+              },
+            );
+
+  @override
+  Iterable<String> get buildPatternStems => compilerConfig.dryRun
+      ? const <String>[]
+      : <String>[
+          'main.dart.wasm',
+          'main.dart.mjs',
+          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+        ];
+
+  void _handleDryRunResult(Environment environment, RunResult runResult) {
+    final int exitCode = runResult.exitCode;
+    final String stdout = runResult.stdout;
+    final String stderr = runResult.stderr;
+    if (exitCode != 0 && exitCode != 254) {
+      environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
+      if (stderr.isNotEmpty) {
+        environment.logger.printWarning(stdout);
+        environment.logger.printWarning(stderr);
+      }
+    } else if (exitCode == 0) {
+      environment.logger.printWarning(
+        'Wasm dry run succeeded. Consider building and testing your application with the '
+        '`--wasm` flag. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm',
       );
-
-  @override
-  Iterable<String> get buildPatternStems => <String>[
-    'main.dart.wasm',
-    'main.dart.mjs',
-    if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
-  ];
+    } else if (stderr.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run failed:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(stderr);
+    } else if (stdout.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run findings:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(
+        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm\n',
+      );
+    }
+    environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
+  }
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
@@ -760,7 +803,7 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
       'main.dart.js',
       if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig,
+        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
       )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
       'index.html',
       'flutter_bootstrap.js',
