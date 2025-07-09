@@ -11,6 +11,11 @@ body:
         Thank you for contributing to Flutter!
 
         This template is for requests made to [`team-infra`](https://flutter.dev/to/team-infra).
+
+        If you are filing this to track your **own** contributed work to infrastructure, and the
+        work is already agreed upon (routine maintenance, etc), feel free to skip this template
+        and use a [blank issue](https://github.com/flutter/flutter/issues/new?labels=team-infra);
+        just remember to assign the bug to yourself so it's clear we do not have to triage it.
   - type: markdown
     attributes:
       value: |
