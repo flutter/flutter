@@ -725,7 +725,7 @@ class Text extends StatelessWidget {
           locale:
               locale, // RichText uses Localizations.localeOf to obtain a default if this is null
           softWrap: softWrap ?? defaultTextStyle.softWrap,
-          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+          overflow: overflow ?? effectiveTextStyle.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
           strutStyle: strutStyle,
@@ -753,7 +753,7 @@ class Text extends StatelessWidget {
             textDirection, // RichText uses Directionality.of to obtain a default if this is null.
         locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
         softWrap: softWrap ?? defaultTextStyle.softWrap,
-        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        overflow: overflow ?? effectiveTextStyle.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
         strutStyle: strutStyle,
