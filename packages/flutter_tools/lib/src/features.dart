@@ -192,6 +192,9 @@ const Feature omitLegacyVersionFile = Feature(
       'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
       'the flutter tool execution; a newer file format has existed for some '
       'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
