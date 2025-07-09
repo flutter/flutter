@@ -120,7 +120,7 @@ void main() {
         'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
         'hourMinuteTextColor: ${const Color(0xfffffff0)}',
         'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
-        'inputDecorationTheme.data: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
+        'inputDecorationTheme: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
         'padding: EdgeInsets.all(1.0)',
         'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
         'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
@@ -128,6 +128,25 @@ void main() {
       ]),
     );
   });
+
+  test(
+    'TimePickerThemeData.inputDecorationTheme accepts only InputDecorationTheme or InputDecorationThemeData instances',
+    () {
+      const InputDecorationTheme decorationTheme = InputDecorationTheme();
+      TimePickerThemeData timePickerTheme = const TimePickerThemeData(
+        inputDecorationTheme: decorationTheme,
+      );
+      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+
+      timePickerTheme = TimePickerThemeData(inputDecorationTheme: decorationTheme.data);
+      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+
+      // Wrong type throws.
+      expect(() {
+        TimePickerThemeData(inputDecorationTheme: Object());
+      }, throwsA(isA<AssertionError>()));
+    },
+  );
 
   testWidgets('Material2 - Passing no TimePickerThemeData uses defaults', (
     WidgetTester tester,
