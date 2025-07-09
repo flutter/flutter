@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -22,6 +23,8 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('UpgradeCommandRunner', () {
+    final DateTime jan12026 = DateTime.utc(2026);
+
     late FakeUpgradeCommandRunner fakeCommandRunner;
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
@@ -37,8 +40,10 @@ void main() {
     );
 
     setUp(() {
-      fakeCommandRunner = FakeUpgradeCommandRunner();
-      realCommandRunner = UpgradeCommandRunner()..workingDirectory = getFlutterRoot();
+      fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
+      realCommandRunner = UpgradeCommandRunner()
+        ..workingDirectory = getFlutterRoot()
+        ..clock = SystemClock.fixed(jan12026);
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()
@@ -59,8 +64,8 @@ void main() {
         fakeCommandRunner.remoteVersion = latestVersion;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: false,
-          continueFlow: false,
           testFlow: false,
           gitTagVersion: const GitTagVersion.unknown(),
           flutterVersion: flutterVersion,
@@ -84,8 +89,8 @@ void main() {
         fakeCommandRunner.willHaveUncommittedChanges = true;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: false,
-          continueFlow: false,
           testFlow: false,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -110,8 +115,8 @@ void main() {
         fakeCommandRunner.remoteVersion = latestVersion;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: false,
-          continueFlow: false,
           testFlow: false,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -120,6 +125,116 @@ void main() {
         expect(await result, FlutterCommandResult.success());
         expect(testLogger.statusText, contains('Flutter is already up to date'));
         expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'starts the upgrade operation and passes now as --continue-started-at <iso-date>',
+      () async {
+        const String revision = 'abc123';
+        const String upstreamRevision = 'def456';
+        const String version = '1.2.3';
+        const String upstreamVersion = '4.5.6';
+
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          branch: 'beta',
+          frameworkRevision: revision,
+          frameworkRevisionShort: revision,
+          frameworkVersion: version,
+        );
+
+        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+          frameworkRevision: upstreamRevision,
+          frameworkRevisionShort: upstreamRevision,
+          frameworkVersion: upstreamVersion,
+        );
+
+        final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
+        fakeCommandRunner.remoteVersion = latestVersion;
+        fakeCommandRunner.clock = SystemClock.fixed(now);
+
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              globals.fs.path.join('bin', 'flutter'),
+              'upgrade',
+              '--continue',
+              '--continue-started-at',
+              now.toIso8601String(),
+              '--no-version-check',
+            ],
+          ),
+        ]);
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
+          force: false,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(testLogger.statusText, isNot(contains('Took ')));
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'finishes the upgrade operation and prints minutes the operation took',
+      () async {
+        const String revision = 'abc123';
+        const String upstreamRevision = 'def456';
+        const String version = '1.2.3';
+        const String upstreamVersion = '4.5.6';
+
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          branch: 'beta',
+          frameworkRevision: revision,
+          frameworkRevisionShort: revision,
+          frameworkVersion: version,
+        );
+
+        final FakeFlutterVersion latestVersion = FakeFlutterVersion(
+          frameworkRevision: upstreamRevision,
+          frameworkRevisionShort: upstreamRevision,
+          frameworkVersion: upstreamVersion,
+        );
+
+        fakeCommandRunner.remoteVersion = latestVersion;
+
+        final DateTime now = DateTime.now();
+        final DateTime before = now.subtract(const Duration(minutes: 25));
+        fakeCommandRunner.clock = SystemClock.fixed(now);
+
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              globals.fs.path.join('bin', 'flutter'),
+              '--no-color',
+              '--no-version-check',
+              'precache',
+            ],
+          ),
+        ]);
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          UpgradePhase.secondHalf(upgradeStartedAt: before),
+          force: false,
+          testFlow: false,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(testLogger.statusText, contains('Took 25.0m'));
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -152,8 +267,8 @@ void main() {
         fakeCommandRunner.remoteVersion = latestVersion;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: false,
-          continueFlow: false,
           testFlow: false,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -335,6 +450,8 @@ void main() {
               globals.fs.path.join('bin', 'flutter'),
               'upgrade',
               '--continue',
+              '--continue-started-at',
+              '2026-01-01T00:00:00.000Z',
               '--no-version-check',
             ],
             environment: <String, String>{
@@ -343,7 +460,7 @@ void main() {
             },
           ),
         );
-        await realCommandRunner.flutterUpgradeContinue();
+        await realCommandRunner.flutterUpgradeContinue(startedAt: jan12026);
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
@@ -375,8 +492,8 @@ void main() {
         fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: true,
-          continueFlow: false,
           testFlow: true,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -417,8 +534,8 @@ void main() {
         fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: true,
-          continueFlow: false,
           testFlow: true,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -463,8 +580,8 @@ void main() {
         fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
           force: true,
-          continueFlow: false,
           testFlow: true,
           gitTagVersion: currentTag,
           flutterVersion: flutterVersion,
@@ -513,6 +630,8 @@ void main() {
               globals.fs.path.join('bin', 'flutter'),
               'upgrade',
               '--continue',
+              '--continue-started-at',
+              '2026-01-01T00:00:00.000Z',
               '--no-version-check',
             ],
           ),
@@ -526,8 +645,8 @@ void main() {
           final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: 'beta');
 
           final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+            const UpgradePhase.firstHalf(),
             force: true,
-            continueFlow: false,
             testFlow: false,
             gitTagVersion: const GitTagVersion.unknown(),
             flutterVersion: flutterVersion,
@@ -550,8 +669,8 @@ void main() {
           fakeCommandRunner.willHaveUncommittedChanges = true;
 
           final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+            const UpgradePhase.firstHalf(),
             force: true,
-            continueFlow: false,
             testFlow: false,
             gitTagVersion: gitTagVersion,
             flutterVersion: flutterVersion,
@@ -573,8 +692,8 @@ void main() {
           fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: '1234');
 
           final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-            force: false,
-            continueFlow: false,
+            const UpgradePhase.firstHalf(),
+            force: true,
             testFlow: false,
             gitTagVersion: gitTagVersion,
             flutterVersion: flutterVersion,
@@ -623,7 +742,12 @@ void main() {
               commandRunner: fakeCommandRunner,
             );
 
-            await createTestCommandRunner(upgradeCommand).run(<String>['upgrade', '--continue']);
+            await createTestCommandRunner(upgradeCommand).run(<String>[
+              'upgrade',
+              '--continue',
+              '--continue-started-at',
+              DateTime.now().toIso8601String(),
+            ]);
 
             expect(
               json.decode(flutterToolState.readAsStringSync()),
