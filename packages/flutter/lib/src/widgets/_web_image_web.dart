@@ -108,9 +108,8 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       fit: fit,
       alignment: alignment,
       matchTextDirection: matchTextDirection,
-      textDirection: matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null,
+      textDirection:
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
     );
   }
 
@@ -123,9 +122,8 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       ..fit = fit
       ..alignment = alignment
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null;
+      ..textDirection =
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
   }
 }
 
@@ -350,19 +348,84 @@ class RenderWebImage extends RenderShiftedBox {
       return;
     }
 
+    // Size and position the <img> element child given the BoxFit, Alignment,
+    // and constraints. The child might be larger than `size`, in which case it
+    // will be clipped in the `paint` step.
     final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
     fit ??= BoxFit.scaleDown;
     final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
-    final Size childSize = fittedSizes.destination;
-    child!.layout(BoxConstraints.tight(childSize));
-    final double halfWidthDelta = (size.width - childSize.width) / 2.0;
-    final double halfHeightDelta = (size.height - childSize.height) / 2.0;
-    final double dx =
-        halfWidthDelta +
-        (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
-    final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = Offset(dx, dy);
+
+    if (fittedSizes.source == inputSize) {
+      // If `fittedSizes.source` is the entire original image, then the child
+      // can be sized to `fittedSizes.destination` because there will be no
+      // clipping and the child will be exactly the destination size.
+      final Size childSize = fittedSizes.destination;
+      child!.layout(BoxConstraints.tight(childSize));
+
+      // In case the `childSize` is smaller than the layout constraints (for
+      // example, if the `fit` is `BoxFit.fitWidth` and the resulting child
+      // size causes it to "letterbox" in the containing box) then the child
+      // needs to be offset in the containing box.
+      final double halfWidthDelta = (size.width - childSize.width) / 2.0;
+      final double halfHeightDelta = (size.height - childSize.height) / 2.0;
+      final double dx =
+          halfWidthDelta +
+          (_flipHorizontally! ? -_resolvedAlignment!.x : _resolvedAlignment!.x) * halfWidthDelta;
+      final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Offset(dx, dy);
+    } else {
+      // Otherwise, the destination box only shows a portion of the image and
+      // the rest of the image overflows out of the box. The size of the child
+      // needs to be worked out from the size of the source and destination
+      // boxes. The offset of the child needs to be worked out from the
+      // alignment. In the `paint` method, a clip will be applied so that only
+      // the portion of the child that is in the destination box will be shown.
+      final Size sourceSize = fittedSizes.source;
+      final Size destinationSize = fittedSizes.destination;
+
+      // Only `BoxFit.fill` distorts the aspect ratio of the image. The rest of
+      // the `BoxFit` values preserve the aspect ratio. Furthermore, if the
+      // `fit` is `BoxFit.fill` then `fittedSizes.source == inputSize` since the
+      // entire image is drawn into the box. So the case of `BoxFit.fill` is
+      // never hit in this branch of the conditional. Therefore, the child
+      // size should be the source size multiplied by a scalar value. The scale
+      // can be determined by examining the relative sizes of the `sourceSize`
+      // and `destinationSize`. Since aspect ratio is preserved, `sourceSize`
+      // and `destinationSize` must have the same aspect ratio. Therefore, the
+      // scale to multiply the `inputSize` to get the `childSize` is equal to
+      // the ratio of the `destinationSize` to the `sourceSize`.
+      assert(sourceSize.aspectRatio == destinationSize.aspectRatio);
+      final double scale = destinationSize.width / sourceSize.width;
+      final Size childSize = inputSize * scale;
+      child!.layout(BoxConstraints.tight(childSize));
+
+      // Now that the child has been sized, it must also be offset by an
+      // appropriate amount so that the specified portion of the image is shown
+      // in the destination box. `Alignment.inscribe` gives the sub-rectangle
+      // of source size that will be shown in the destination box. Again, the
+      // source and destination box have the same aspect ratio, so to compute
+      // the offset for the child, first compute the offset that the original
+      // sized image would need to put the sub-rectangle given by
+      // `Alignment.inscribe` at the origin, and then scale that offset by the
+      // same scale computed above to get the offset for the child.
+      final Rect sourceRect = _resolvedAlignment!.inscribe(sourceSize, Offset.zero & inputSize);
+      final Offset childOffset = Offset(-sourceRect.left, -sourceRect.top) * scale;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = childOffset;
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) {
+      return;
+    }
+    final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
+    fit ??= BoxFit.scaleDown;
+    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
+    final Rect destinationRect = offset & fittedSizes.destination;
+    context.pushClipRect(needsCompositing, offset, destinationRect, super.paint);
   }
 
   @override
