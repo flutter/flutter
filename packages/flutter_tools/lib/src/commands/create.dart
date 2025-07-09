@@ -124,6 +124,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'documentation website (https://api.flutter.dev/). An example can be found at: '
           'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
+      hide: !verboseHelp,
     );
     argParser.addFlag(
       'empty',
@@ -138,6 +139,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'Specifies a JSON output file for a listing of Flutter code samples '
           'that can be created with "--sample".',
       valueHelp: 'path',
+      hide: !verboseHelp,
     );
   }
 
