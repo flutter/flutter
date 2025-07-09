@@ -97,7 +97,7 @@ void main() {
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
           final FlutterCommandRunner runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag())
+              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
                   as FlutterCommandRunner;
           final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
@@ -310,8 +310,10 @@ void main() {
           () {
             final FlutterCommandRunner runner =
                 createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final List<String> packagePaths =
-                runner.getRepoPackages().map((Directory d) => d.path).toList();
+            final List<String> packagePaths = runner
+                .getRepoPackages()
+                .map((Directory d) => d.path)
+                .toList();
             expect(packagePaths, <String>[
               fileSystem
                   .directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
@@ -444,8 +446,8 @@ class FakeStdio extends Stdio {
 }
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
-  _FlutterCommandWithItsOwnMachineFlag() {
-    argParser.addFlag('machine', negatable: false);
+  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
+    addMachineOutputFlag(verboseHelp: verboseHelp);
   }
 
   @override

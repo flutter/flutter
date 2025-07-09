@@ -348,8 +348,9 @@ class AnsiTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??=
-        _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    return _broadcastStdInString ??= _stdio.stdin
+        .transform<String>(const AsciiDecoder(allowInvalid: true))
+        .asBroadcastStream();
   }
 
   @override

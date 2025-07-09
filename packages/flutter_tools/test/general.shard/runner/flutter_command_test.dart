@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -324,8 +323,8 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final DummyFlutterCommand command =
-            DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final DummyFlutterCommand command = DummyFlutterCommand()
+          ..addDevToolsOptions(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
           '--${FlutterCommand.kDevToolsServerAddress}',
@@ -342,8 +341,8 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final DummyFlutterCommand command =
-            DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final DummyFlutterCommand command = DummyFlutterCommand()
+          ..addDevToolsOptions(verboseHelp: false);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
           'dummy',
@@ -424,11 +423,10 @@ void main() {
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           ProcessInfo: () => processInfo,
-          Signals:
-              () => FakeSignals(
-                subForSigTerm: signalUnderTest,
-                exitSignals: <ProcessSignal>[signalUnderTest],
-              ),
+          Signals: () => FakeSignals(
+            subForSigTerm: signalUnderTest,
+            exitSignals: <ProcessSignal>[signalUnderTest],
+          ),
           SystemClock: () => clock,
           Analytics: () => fakeAnalytics,
         },
@@ -467,11 +465,10 @@ void main() {
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           ProcessInfo: () => processInfo,
-          Signals:
-              () => FakeSignals(
-                subForSigTerm: signalUnderTest,
-                exitSignals: <ProcessSignal>[signalUnderTest],
-              ),
+          Signals: () => FakeSignals(
+            subForSigTerm: signalUnderTest,
+            exitSignals: <ProcessSignal>[signalUnderTest],
+          ),
         },
       );
     });
@@ -621,8 +618,8 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -639,8 +636,8 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -657,8 +654,8 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final DummyFlutterCommand flutterCommand =
-            DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand()
+          ..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1285,8 +1282,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1317,8 +1314,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1348,8 +1345,8 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager:
-            () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+        DeviceManager: () =>
+            FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
         FileSystem: () {
           final MemoryFileSystem fileSystem = MemoryFileSystem.test();
           fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -1401,8 +1398,8 @@ flutter:
             );
           },
           overrides: <Type, Generator>{
-            DeviceManager:
-                () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+            DeviceManager: () =>
+                FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
             Platform: () => FakePlatform(),
             Cache: () => Cache.test(processManager: FakeProcessManager.any()),
             FileSystem: () {
@@ -1432,14 +1429,12 @@ flutter:
           await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
         },
         overrides: <Type, Generator>{
-          DeviceManager:
-              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
-          Platform:
-              () =>
-                  FakePlatform()
-                    ..environment = <String, String>{
-                      'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
-                    },
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          Platform: () => FakePlatform()
+            ..environment = <String, String>{
+              'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
+            },
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           FileSystem: () {
             final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -1548,88 +1543,6 @@ flutter:
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
           FlutterVersion: () => FakeFlutterVersion(),
-        },
-      );
-    });
-
-    group('feature flags', () {
-      testUsingContext(
-        'tool exits when FLUTTER_ENABLED_FEATURE_FLAGS is set in --dart-define or --dart-define-from-file',
-        () async {
-          final CommandRunner<void> runner = createTestCommandRunner(
-            _TestRunCommandThatOnlyValidates(),
-          );
-
-          expect(
-            runner.run(<String>[
-              'run',
-              '--dart-define=FLUTTER_ENABLED_FEATURE_FLAGS=AlreadySet',
-              '--no-pub',
-              '--no-hot',
-            ]),
-            throwsToolExit(
-              message: '''
-FLUTTER_ENABLED_FEATURE_FLAGS is used by the framework and cannot be set using --dart-define or --dart-define-from-file.
-
-Use the "flutter config" command to enable feature flags.''',
-            ),
-          );
-
-          expect(
-            runner.run(<String>[
-              'run',
-              '--dart-define-from-file=config.json',
-              '--no-pub',
-              '--no-hot',
-            ]),
-            throwsToolExit(
-              message: '''
-FLUTTER_ENABLED_FEATURE_FLAGS is used by the framework and cannot be set using --dart-define or --dart-define-from-file.
-
-Use the "flutter config" command to enable feature flags.''',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          DeviceManager:
-              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
-          Platform: () => FakePlatform(),
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () {
-            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-            fileSystem
-              ..file('lib/main.dart').createSync(recursive: true)
-              ..file('pubspec.yaml').createSync()
-              ..file('.packages').createSync();
-            fileSystem.file('config.json')
-              ..createSync()
-              ..writeAsStringSync('{"FLUTTER_ENABLED_FEATURE_FLAGS": "AlreadySet"}');
-            return fileSystem;
-          },
-          ProcessManager: () => FakeProcessManager.any(),
-          FlutterVersion: () => FakeFlutterVersion(),
-        },
-      );
-
-      testUsingContext(
-        'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
-        () async {
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
-          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
-            forcedBuildMode: BuildMode.debug,
-          );
-          expect(buildInfo.dartDefines, contains('FLUTTER_ENABLED_FEATURE_FLAGS=buzz_feature'));
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags:
-              () => const FakeFeatureFlags(
-                allFeatures: <FakeFeature>[
-                  FakeFeature(name: 'Foo', enabled: true),
-                  FakeFeature(name: 'Bar', runtimeId: 'bar_feature', enabled: false),
-                  FakeFeature(name: 'Buzz', runtimeId: 'buzz_feature', enabled: true),
-                ],
-              ),
         },
       );
     });
@@ -1753,23 +1666,4 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
 
   @override
   bool get shouldRunPub => false;
-}
-
-class FakeFeature extends Feature {
-  const FakeFeature({required super.name, super.runtimeId, required this.enabled});
-
-  final bool enabled;
-}
-
-class FakeFeatureFlags implements FeatureFlags {
-  const FakeFeatureFlags({required this.allFeatures});
-
-  @override
-  final List<FakeFeature> allFeatures;
-
-  @override
-  bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

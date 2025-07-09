@@ -20,7 +20,6 @@ Table of Contents
   - [Allowing flags to be enabled](#allowing-flags-to-be-enabled)
   - [Enabling a flag by default](#enabling-a-flag-by-default)
   - [Removing a flag](#removing-a-flag)
-  - [Precedence](#precedence)
 - [Using a flag to drive behavior](#using-a-flag-to-drive-behavior)
   - [Tool](#tool)
   - [Framework](#framework)
@@ -207,43 +206,6 @@ integration tests as well.
 
 [^1]: Some flags might have a longer or indefinite lifespan, but this is rare.
 
-### Precedence
-
-Users have several options to configure flags. Assuming the following feature:
-
-```dart
-const Feature unicornEmojis = Feature(
-  name: 'add unicorn emojis in lots of fun places',
-  configSetting: 'enable-unicorn-emojis',
-  environmentOverride: 'FLUTTER_ENABLE_UNICORN_EMOJIS',
-);
-```
-
-Flutter uses the following precendence order:
-
-1. The app's `pubspec.yaml` file:
-
-   ```yaml
-   flutter:
-     config:
-       enable-unicorn-emojis: true
-   ```
-
-2. The tool's global configuration:
-
-   ```sh
-   flutter config --enable-unicorn-emojis
-   ```
-
-3. Environment variables:
-
-   ```sh
-   FLUTTER_ENABLE_UNICORN_EMOJIS=true flutter some-command
-   ```
-
-If none of these are set, Flutter falls back to the feature's
-default value for the current release channel.
-
 ## Using a flag to drive behavior
 
 Once you have a flag, you can use it to conditionally enable something or
@@ -310,10 +272,6 @@ final class SensitiveContent extends StatelessWidget {
 
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
-
-Feature flags are not designed to help tree shaking. For example, you
-cannot conditionally import Dart code depending on the enabled feature flags.
-Tree shaking might not remove code that is feature flagged off.
 
 ### Tests
 

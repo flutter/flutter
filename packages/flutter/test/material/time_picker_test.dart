@@ -362,34 +362,30 @@ void main() {
       testWidgets('tap-select an hour', (WidgetTester tester) async {
         TimeOfDay? result;
 
-        Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time;
-            }, materialType: materialType))!;
+        Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, materialType: materialType))!;
         await tester.tapAt(Offset(center.dx, center.dy - 50)); // 12:00 AM
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
-        center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time;
-            }, materialType: materialType))!;
+        center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, materialType: materialType))!;
         await tester.tapAt(Offset(center.dx + 50, center.dy));
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
-        center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time;
-            }, materialType: materialType))!;
+        center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, materialType: materialType))!;
         await tester.tapAt(Offset(center.dx, center.dy + 50));
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
-        center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time;
-            }, materialType: materialType))!;
+        center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, materialType: materialType))!;
         await tester.tapAt(Offset(center.dx, center.dy + 50));
         await tester.tapAt(Offset(center.dx - 50, center.dy));
         await finishPicker(tester);
@@ -399,10 +395,9 @@ void main() {
       testWidgets('drag-select an hour', (WidgetTester tester) async {
         late TimeOfDay result;
 
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time!;
-            }, materialType: materialType))!;
+        final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }, materialType: materialType))!;
         final Offset hour0 = Offset(center.dx, center.dy - 50); // 12:00 AM
         final Offset hour3 = Offset(center.dx + 50, center.dy);
         final Offset hour6 = Offset(center.dx, center.dy + 50);
@@ -456,10 +451,9 @@ void main() {
       testWidgets('tap-select switches from hour to minute', (WidgetTester tester) async {
         late TimeOfDay result;
 
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time!;
-            }, materialType: materialType))!;
+        final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }, materialType: materialType))!;
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
@@ -473,10 +467,9 @@ void main() {
       testWidgets('drag-select switches from hour to minute', (WidgetTester tester) async {
         late TimeOfDay result;
 
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time!;
-            }, materialType: materialType))!;
+        final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }, materialType: materialType))!;
         final Offset hour3 = Offset(center.dx + 50, center.dy);
         final Offset hour6 = Offset(center.dx, center.dy + 50);
         final Offset hour9 = Offset(center.dx - 50, center.dy);
@@ -497,10 +490,9 @@ void main() {
       ) async {
         late TimeOfDay result;
 
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time!;
-            }, materialType: materialType))!;
+        final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }, materialType: materialType))!;
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min46 = Offset(center.dx - 50, center.dy - 5); // 46 mins
 
@@ -516,10 +508,9 @@ void main() {
       ) async {
         late TimeOfDay result;
 
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {
-              result = time!;
-            }, materialType: materialType))!;
+        final Offset center = (await startPicker(tester, (TimeOfDay? time) {
+          result = time!;
+        }, materialType: materialType))!;
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min48 = Offset(center.dx - 50, center.dy - 15); // 48 mins
 
@@ -545,16 +536,22 @@ void main() {
       });
 
       testWidgets('tap-select vibrates once', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await finishPicker(tester);
         expect(feedback.hapticCount, 1);
       });
 
       testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await tester.pump(kFastFeedbackInterval);
         await tester.tapAt(Offset(center.dx, center.dy + 50));
@@ -563,8 +560,11 @@ void main() {
       });
 
       testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         await tester.tapAt(Offset(center.dx, center.dy - 50));
         await tester.pump(kSlowFeedbackInterval);
         await tester.tapAt(Offset(center.dx, center.dy + 50));
@@ -575,8 +575,11 @@ void main() {
       });
 
       testWidgets('drag-select vibrates once', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -588,8 +591,11 @@ void main() {
       });
 
       testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -605,8 +611,11 @@ void main() {
       });
 
       testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
-        final Offset center =
-            (await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          materialType: materialType,
+        ))!;
         final Offset hour0 = Offset(center.dx, center.dy - 50);
         final Offset hour3 = Offset(center.dx + 50, center.dy);
 
@@ -829,11 +838,10 @@ void main() {
                     builder: (BuildContext context) {
                       return ElevatedButton(
                         child: const Text('X'),
-                        onPressed:
-                            () => showTimePicker(
-                              context: context,
-                              initialTime: const TimeOfDay(hour: 7, minute: 0),
-                            ),
+                        onPressed: () => showTimePicker(
+                          context: context,
+                          initialTime: const TimeOfDay(hour: 7, minute: 0),
+                        ),
                       );
                     },
                   ),
@@ -865,12 +873,11 @@ void main() {
                     builder: (BuildContext context) {
                       return ElevatedButton(
                         child: const Text('X'),
-                        onPressed:
-                            () => showTimePicker(
-                              context: context,
-                              barrierDismissible: false,
-                              initialTime: const TimeOfDay(hour: 7, minute: 0),
-                            ),
+                        onPressed: () => showTimePicker(
+                          context: context,
+                          barrierDismissible: false,
+                          initialTime: const TimeOfDay(hour: 7, minute: 0),
+                        ),
                       );
                     },
                   ),
@@ -900,11 +907,10 @@ void main() {
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       child: const Text('X'),
-                      onPressed:
-                          () => showTimePicker(
-                            context: context,
-                            initialTime: const TimeOfDay(hour: 7, minute: 0),
-                          ),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
                     );
                   },
                 ),
@@ -929,12 +935,11 @@ void main() {
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       child: const Text('X'),
-                      onPressed:
-                          () => showTimePicker(
-                            context: context,
-                            barrierColor: Colors.pink,
-                            initialTime: const TimeOfDay(hour: 7, minute: 0),
-                          ),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierColor: Colors.pink,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
                     );
                   },
                 ),
@@ -958,12 +963,11 @@ void main() {
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       child: const Text('X'),
-                      onPressed:
-                          () => showTimePicker(
-                            context: context,
-                            barrierLabel: 'Custom Label',
-                            initialTime: const TimeOfDay(hour: 7, minute: 0),
-                          ),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierLabel: 'Custom Label',
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
                     );
                   },
                 ),
@@ -1580,13 +1584,12 @@ void main() {
           required SemanticsAction action,
           required String finalValue,
         }) async {
-          final SemanticsNode elevenHours =
-              semantics
-                  .nodesWith(
-                    value: 'Select hours $initialValue',
-                    ancestor: tester.renderObject(_hourControl).debugSemantics,
-                  )
-                  .single;
+          final SemanticsNode elevenHours = semantics
+              .nodesWith(
+                value: 'Select hours $initialValue',
+                ancestor: tester.renderObject(_hourControl).debugSemantics,
+              )
+              .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
@@ -1635,13 +1638,12 @@ void main() {
           required SemanticsAction action,
           required String finalValue,
         }) async {
-          final SemanticsNode elevenHours =
-              semantics
-                  .nodesWith(
-                    value: 'Select minutes $initialValue',
-                    ancestor: tester.renderObject(_minuteControl).debugSemantics,
-                  )
-                  .single;
+          final SemanticsNode elevenHours = semantics
+              .nodesWith(
+                value: 'Select minutes $initialValue',
+                ancestor: tester.renderObject(_minuteControl).debugSemantics,
+              )
+              .single;
           tester.binding.pipelineOwner.semanticsOwner!.performAction(elevenHours.id, action);
           await tester.pumpAndSettle();
           expect(
@@ -2075,26 +2077,21 @@ void main() {
           entryMode: TimePickerEntryMode.input,
           materialType: materialType,
         );
-        final double hourFieldTop =
-            tester
-                .getTopLeft(
-                  find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField'),
-                )
-                .dy;
-        final double minuteFieldTop =
-            tester
-                .getTopLeft(
-                  find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField'),
-                )
-                .dy;
-        final double separatorTop =
-            tester
-                .getTopLeft(
-                  find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-                  ),
-                )
-                .dy;
+        final double hourFieldTop = tester
+            .getTopLeft(
+              find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField'),
+            )
+            .dy;
+        final double minuteFieldTop = tester
+            .getTopLeft(
+              find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField'),
+            )
+            .dy;
+        final double separatorTop = tester
+            .getTopLeft(
+              find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+            )
+            .dy;
         expect(hourFieldTop, separatorTop);
         expect(minuteFieldTop, separatorTop);
       });
@@ -2169,15 +2166,14 @@ void main() {
     group('Time picker - Restoration (${materialType.name})', () {
       testWidgets('Time Picker state restoration test - dial mode', (WidgetTester tester) async {
         TimeOfDay? result;
-        final Offset center =
-            (await startPicker(
-              tester,
-              (TimeOfDay? time) {
-                result = time;
-              },
-              restorationId: 'restorable_time_picker',
-              materialType: materialType,
-            ))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time;
+          },
+          restorationId: 'restorable_time_picker',
+          materialType: materialType,
+        ))!;
         final Offset hour6 = Offset(center.dx, center.dy + 50); // 6:00
         final Offset min45 = Offset(center.dx - 50, center.dy); // 45 mins (or 9:00 hours)
 
@@ -2239,15 +2235,14 @@ void main() {
         WidgetTester tester,
       ) async {
         TimeOfDay? result;
-        final Offset center =
-            (await startPicker(
-              tester,
-              (TimeOfDay? time) {
-                result = time;
-              },
-              restorationId: 'restorable_time_picker',
-              materialType: materialType,
-            ))!;
+        final Offset center = (await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time;
+          },
+          restorationId: 'restorable_time_picker',
+          materialType: materialType,
+        ))!;
 
         final TestRestorationData restorationData = await tester.getRestorationData();
         // Switch to input mode from dial mode.
@@ -2492,8 +2487,9 @@ void main() {
       final Finder dayPeriodControlFinder = find.byWidgetPredicate(
         (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
       );
-      final Finder timeControlFinder =
-          find.ancestor(of: find.text('7'), matching: find.byType(Row)).first;
+      final Finder timeControlFinder = find
+          .ancestor(of: find.text('7'), matching: find.byType(Row))
+          .first;
 
       // Render in portrait mode.
       tester.view.physicalSize = const Size(800, 800.5);

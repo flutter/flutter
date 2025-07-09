@@ -59,8 +59,9 @@ void main() {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
-        final Uri nonFlutterTesterAssetUri =
-            environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
         await packageConfig.parent.create();
         await packageConfig.create();
         final File dylibAfterCompiling = fileSystem.file('libbar.so');

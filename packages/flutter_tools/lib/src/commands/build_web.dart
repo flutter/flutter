@@ -113,6 +113,13 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag(
+      'wasm-dry-run',
+      defaultsTo: true,
+      help:
+          'Compiles wasm in dry run mode during JS only compilations. '
+          'Disable to suppress warnings.',
+    );
+    argParser.addFlag(
       'no-frequency-based-minification',
       negatable: false,
       help:
@@ -162,14 +169,14 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final String? optimizationLevelArg = stringArg('optimization-level');
-    final int? optimizationLevel =
-        optimizationLevelArg != null ? int.parse(optimizationLevelArg) : null;
+    final int? optimizationLevel = optimizationLevelArg != null
+        ? int.parse(optimizationLevelArg)
+        : null;
 
     final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
-    final int? jsOptimizationLevel =
-        dart2jsOptimizationLevelValue != null
-            ? int.parse(dart2jsOptimizationLevelValue.substring(1))
-            : optimizationLevel;
+    final int? jsOptimizationLevel = dart2jsOptimizationLevelValue != null
+        ? int.parse(dart2jsOptimizationLevelValue.substring(1))
+        : optimizationLevel;
 
     final List<String> dartDefines = extractDartDefines(
       defineConfigJsonMap: extractDartDefineConfigJsonMap(),
@@ -225,6 +232,13 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
+        ),
+        WasmCompilerConfig(
+          optimizationLevel: optimizationLevel,
+          stripWasm: boolArg('strip-wasm'),
+          sourceMaps: sourceMaps,
+          minify: minifyWasm,
+          dryRun: boolArg('wasm-dry-run'),
         ),
       ];
     }

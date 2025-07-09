@@ -113,9 +113,8 @@ class ImageCache {
     }
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
     }
     _maximumSize = value;
     if (maximumSize == 0) {
@@ -152,9 +151,8 @@ class ImageCache {
     }
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
     }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
@@ -297,16 +295,15 @@ class ImageCache {
   void _trackLiveImage(Object key, ImageStreamCompleter completer, int? sizeBytes) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
-          // Even if no callers to ImageProvider.resolve have listened to the stream,
-          // the cache is listening to the stream and will remove itself once the
-          // image completes to move it from pending to keepAlive.
-          // Even if the cache size is 0, we still add this tracker, which will add
-          // a keep alive handle to the stream.
-          return _LiveImage(completer, () {
-            _liveImages.remove(key);
-          });
-        }).sizeBytes ??=
-        sizeBytes;
+      // Even if no callers to ImageProvider.resolve have listened to the stream,
+      // the cache is listening to the stream and will remove itself once the
+      // image completes to move it from pending to keepAlive.
+      // Even if the cache size is 0, we still add this tracker, which will add
+      // a keep alive handle to the stream.
+      return _LiveImage(completer, () {
+        _liveImages.remove(key);
+      });
+    }).sizeBytes ??= sizeBytes;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -327,9 +324,8 @@ class ImageCache {
   }) {
     TimelineTask? debugTimelineTask;
     if (!kReleaseMode) {
-      debugTimelineTask =
-          TimelineTask()
-            ..start('ImageCache.putIfAbsent', arguments: <String, dynamic>{'key': key.toString()});
+      debugTimelineTask = TimelineTask()
+        ..start('ImageCache.putIfAbsent', arguments: <String, dynamic>{'key': key.toString()});
     }
     ImageStreamCompleter? result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.

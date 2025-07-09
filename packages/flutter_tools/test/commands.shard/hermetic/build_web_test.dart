@@ -139,24 +139,23 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.defines, <String, String>{
-              'TargetFile': 'lib/main.dart',
-              'HasWebPlugins': 'true',
-              'ServiceWorkerStrategy': 'offline-first',
-              'BuildMode': 'release',
-              'DartDefines':
-                  'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-              'DartObfuscation': 'false',
-              'TrackWidgetCreation': 'false',
-              'TreeShakeIcons': 'true',
-              'UseLocalCanvasKit': 'true',
-            });
-          }),
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.defines, <String, String>{
+          'TargetFile': 'lib/main.dart',
+          'HasWebPlugins': 'true',
+          'ServiceWorkerStrategy': 'offline-first',
+          'BuildMode': 'release',
+          'DartDefines':
+              'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartObfuscation': 'false',
+          'TrackWidgetCreation': 'false',
+          'TreeShakeIcons': 'true',
+          'UseLocalCanvasKit': 'true',
+        });
+      }),
     },
   );
 
@@ -191,24 +190,23 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.defines, <String, String>{
-              'TargetFile': 'lib/a.dart',
-              'HasWebPlugins': 'true',
-              'ServiceWorkerStrategy': 'offline-first',
-              'BuildMode': 'release',
-              'DartDefines':
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-              'DartObfuscation': 'false',
-              'TrackWidgetCreation': 'false',
-              'TreeShakeIcons': 'true',
-              'UseLocalCanvasKit': 'true',
-            });
-          }),
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.defines, <String, String>{
+          'TargetFile': 'lib/a.dart',
+          'HasWebPlugins': 'true',
+          'ServiceWorkerStrategy': 'offline-first',
+          'BuildMode': 'release',
+          'DartDefines':
+              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartObfuscation': 'false',
+          'TrackWidgetCreation': 'false',
+          'TreeShakeIcons': 'true',
+          'UseLocalCanvasKit': 'true',
+        });
+      }),
     },
   );
 
@@ -243,24 +241,23 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.defines, <String, String>{
-              'TargetFile': 'lib/a.dart',
-              'HasWebPlugins': 'true',
-              'ServiceWorkerStrategy': 'offline-first',
-              'BuildMode': 'release',
-              'DartDefines':
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-              'DartObfuscation': 'false',
-              'TrackWidgetCreation': 'false',
-              'TreeShakeIcons': 'true',
-              'UseLocalCanvasKit': 'true',
-            });
-          }),
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.defines, <String, String>{
+          'TargetFile': 'lib/a.dart',
+          'HasWebPlugins': 'true',
+          'ServiceWorkerStrategy': 'offline-first',
+          'BuildMode': 'release',
+          'DartDefines':
+              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartObfuscation': 'false',
+          'TrackWidgetCreation': 'false',
+          'TreeShakeIcons': 'true',
+          'UseLocalCanvasKit': 'true',
+        });
+      }),
     },
   );
 
@@ -338,24 +335,23 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.defines, <String, String>{
-              'TargetFile': 'lib/main.dart',
-              'HasWebPlugins': 'true',
-              'ServiceWorkerStrategy': 'offline-first',
-              'BuildMode': 'release',
-              'DartDefines':
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-              'DartObfuscation': 'false',
-              'TrackWidgetCreation': 'false',
-              'TreeShakeIcons': 'true',
-              'UseLocalCanvasKit': 'true',
-            });
-          }),
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.defines, <String, String>{
+          'TargetFile': 'lib/main.dart',
+          'HasWebPlugins': 'true',
+          'ServiceWorkerStrategy': 'offline-first',
+          'BuildMode': 'release',
+          'DartDefines':
+              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartObfuscation': 'false',
+          'TrackWidgetCreation': 'false',
+          'TreeShakeIcons': 'true',
+          'UseLocalCanvasKit': 'true',
+        });
+      }),
     },
   );
 
@@ -412,23 +408,32 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             expect(target, isA<WebServiceWorker>());
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
-            expect(configs, hasLength(1));
-            final WebCompilerConfig config = configs.single;
-            expect(config.renderer, WebRendererMode.canvaskit);
-            expect(config.compileTarget, CompileTarget.js);
-            final List<String> options = config.toCommandOptions(BuildMode.release);
-            expect(options, <String>[
+            expect(configs, hasLength(2));
+            final WebCompilerConfig jsConfig = configs[0];
+            expect(jsConfig.renderer, WebRendererMode.canvaskit);
+            expect(jsConfig.compileTarget, CompileTarget.js);
+            final List<String> jsOptions = jsConfig.toCommandOptions(BuildMode.release);
+            expect(jsOptions, <String>[
               '--native-null-assertions',
               '--no-source-maps',
               '-O4',
               '--minify',
+            ]);
+
+            final WebCompilerConfig wasmConfig = configs[1];
+            expect(wasmConfig.renderer, WebRendererMode.skwasm);
+            expect(wasmConfig.compileTarget, CompileTarget.wasm);
+            final List<String> wasmOptions = wasmConfig.toCommandOptions(BuildMode.release);
+            expect(wasmOptions, <String>[
+              '-O2',
+              '--strip-wasm',
+              '--no-source-maps',
+              '--minify',
+              '--extra-compiler-option=--dry-run',
             ]);
           }),
     },
@@ -447,11 +452,8 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             expect(target, isA<WebServiceWorker>());
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
             expect(configs, hasLength(2));
@@ -481,11 +483,8 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
 
             expect(configs[0].toCommandOptions(BuildMode.release), contains('--minify'));
@@ -509,11 +508,8 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
 
             expect(configs[0].toCommandOptions(BuildMode.release), contains('--no-minify'));
@@ -537,11 +533,8 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
 
             expect(configs[0].toCommandOptions(BuildMode.release), contains('--minify'));
@@ -565,11 +558,8 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
 
             expect(configs[0].toCommandOptions(BuildMode.release), contains('--minify'));

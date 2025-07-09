@@ -216,8 +216,9 @@ abstract class FlutterCommand extends Command<void> {
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
-    usageLineLength:
-        globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
   );
 
   @override
@@ -239,6 +240,8 @@ abstract class FlutterCommand extends Command<void> {
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
+
+  bool get outputMachineFormat => boolArg('machine');
 
   bool get shouldUpdateCache => true;
 
@@ -451,18 +454,16 @@ abstract class FlutterCommand extends Command<void> {
   /// The value of the `--filesystem-scheme` argument.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get fileSystemScheme =>
-      argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArg(FlutterOptions.kFileSystemScheme)
-          : null;
+  String? get fileSystemScheme => argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+      ? stringArg(FlutterOptions.kFileSystemScheme)
+      : null;
 
   /// The values of the `--filesystem-root` argument.
   ///
   /// This can be overridden by some of its subclasses.
-  List<String>? get fileSystemRoots =>
-      argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? stringsArg(FlutterOptions.kFileSystemRoot)
-          : null;
+  List<String>? get fileSystemRoots => argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+      ? stringsArg(FlutterOptions.kFileSystemRoot)
+      : null;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag(
@@ -1281,6 +1282,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addMachineOutputFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Outputs in a machine readable structured JSON format.',
+      hide: !verboseHelp,
+    );
+  }
+
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject get project => FlutterProject.current();
@@ -1312,8 +1322,9 @@ abstract class FlutterCommand extends Command<void> {
     final bool trackWidgetCreation =
         argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
 
-    final String? buildNumber =
-        argParser.options.containsKey('build-number') ? stringArg('build-number') : null;
+    final String? buildNumber = argParser.options.containsKey('build-number')
+        ? stringArg('build-number')
+        : null;
 
     final File packageConfigFile = globals.fs.file(packageConfigPath());
 
@@ -1323,18 +1334,17 @@ abstract class FlutterCommand extends Command<void> {
       throwOnError: false,
     );
 
-    final List<String> experiments =
-        argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-            ? stringsArg(FlutterOptions.kEnableExperiment).toList()
-            : <String>[];
+    final List<String> experiments = argParser.options.containsKey(FlutterOptions.kEnableExperiment)
+        ? stringsArg(FlutterOptions.kEnableExperiment).toList()
+        : <String>[];
     final List<String> extraGenSnapshotOptions =
         argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-            ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions).toList()
-            : <String>[];
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions).toList()
+        : <String>[];
     final List<String> extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? stringsArg(FlutterOptions.kExtraFrontEndOptions).toList()
-            : <String>[];
+        ? stringsArg(FlutterOptions.kExtraFrontEndOptions).toList()
+        : <String>[];
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
@@ -1370,8 +1380,8 @@ abstract class FlutterCommand extends Command<void> {
 
     final String? splitDebugInfoPath =
         argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
-            ? stringArg(FlutterOptions.kSplitDebugInfoOption)
-            : null;
+        ? stringArg(FlutterOptions.kSplitDebugInfoOption)
+        : null;
 
     final bool androidGradleDaemon =
         !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon) ||
@@ -1383,13 +1393,13 @@ abstract class FlutterCommand extends Command<void> {
 
     final List<String> androidProjectArgs =
         argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
-            ? stringsArg(FlutterOptions.kAndroidProjectArgs)
-            : <String>[];
+        ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+        : <String>[];
 
     final String? androidGradleProjectCacheDir =
         argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
-            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
-            : null;
+        ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+        : null;
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -1414,8 +1424,8 @@ abstract class FlutterCommand extends Command<void> {
 
     final String? performanceMeasurementFile =
         argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
-            ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
-            : null;
+        ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
+        : null;
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
@@ -1446,7 +1456,6 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('$kAppFlavor=$flavor');
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
-    _addFeatureFlagsToDartDefines(dartDefines);
 
     return BuildInfo(
       buildMode,
@@ -1454,8 +1463,8 @@ abstract class FlutterCommand extends Command<void> {
       trackWidgetCreation: trackWidgetCreation,
       frontendServerStarterPath:
           argParser.options.containsKey(FlutterOptions.kFrontendServerStarterPath)
-              ? stringArg(FlutterOptions.kFrontendServerStarterPath)
-              : null,
+          ? stringArg(FlutterOptions.kFrontendServerStarterPath)
+          : null,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty ? extraFrontEndOptions : null,
       extraGenSnapshotOptions: extraGenSnapshotOptions.isNotEmpty ? extraGenSnapshotOptions : null,
       fileSystemRoots: fileSystemRoots,
@@ -1475,10 +1484,9 @@ abstract class FlutterCommand extends Command<void> {
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
-      initializeFromDill:
-          argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
-              ? stringArg(FlutterOptions.kInitializeFromDill)
-              : null,
+      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
+          : null,
       assumeInitializeFromDillUpToDate:
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
@@ -1507,27 +1515,6 @@ abstract class FlutterCommand extends Command<void> {
       '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
       '$flutterDartVersionDefine=${version.dartSdkVersion}',
     ]);
-  }
-
-  void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
-    if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
-      throwToolExit(
-        '$kEnabledFeatureFlags is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.\n'
-        '\n'
-        'Use the "flutter config" command to enable feature flags.',
-      );
-    }
-
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
-        .where((Feature feature) => feature.runtimeId != null)
-        .map((Feature feature) => feature.runtimeId!)
-        .join(',');
-
-    if (enabledFeatureFlags.isNotEmpty) {
-      dartDefines.add('$kEnabledFeatureFlags=$enabledFeatureFlags');
-    }
   }
 
   void setupApplicationPackages() {
@@ -1736,13 +1723,12 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Multiline values are not supported.
   String convertEnvFileToJsonRaw(String configRaw) {
-    final List<String> lines =
-        configRaw
-            .split('\n')
-            .map((String line) => line.trim())
-            .where((String line) => line.isNotEmpty)
-            .where((String line) => !line.startsWith('#')) // Remove comment lines.
-            .toList();
+    final List<String> lines = configRaw
+        .split('\n')
+        .map((String line) => line.trim())
+        .where((String line) => line.isNotEmpty)
+        .where((String line) => !line.startsWith('#')) // Remove comment lines.
+        .toList();
 
     final Map<String, String> propertyMap = <String, String>{};
     for (final String line in lines) {

@@ -112,7 +112,7 @@ pluginManagement {
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     id "com.android.application" version "8.9.1" apply false
-    id "org.jetbrains.kotlin.android" version "1.8.22" apply false
+    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
 }
 
 include ":app", ":component1"
@@ -214,7 +214,8 @@ dependencies {
 ''';
 
   @override
-  String get androidLocalProperties => '''
+  String get androidLocalProperties =>
+      '''
 flutter.sdk=${getFlutterRoot()}
 flutter.buildMode=release
 flutter.versionName=1.0.0

@@ -78,11 +78,12 @@ class LicenseCollector {
       }
     }
 
-    final List<String> combinedLicensesList =
-        packageLicenses.entries.map<String>((MapEntry<String, Set<String>> entry) {
-          final List<String> packageNames = entry.value.toList()..sort();
-          return '${packageNames.join('\n')}\n\n${entry.key}';
-        }).toList();
+    final List<String> combinedLicensesList = packageLicenses.entries.map<String>((
+      MapEntry<String, Set<String>> entry,
+    ) {
+      final List<String> packageNames = entry.value.toList()..sort();
+      return '${packageNames.join('\n')}\n\n${entry.key}';
+    }).toList();
     combinedLicensesList.sort();
 
     /// Append additional LICENSE files as specified in the pubspec.yaml.
