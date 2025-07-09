@@ -238,6 +238,8 @@ bool _defaultImageCapture(Image image) => true;
 /// Used by painting library classes that require a [TextDirection] to resolve
 /// their properties, such as [BorderRadiusDirectional].
 ///
+/// Does nothing if asserts are disabled. Always returns true.
+///
 /// See also:
 ///
 ///  * [debugCheckHasDirectionality], which is a similar widgets-library level function.
