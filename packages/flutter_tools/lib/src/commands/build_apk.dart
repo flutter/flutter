@@ -61,8 +61,7 @@ class BuildApkCommand extends BuildSubCommand {
       ..addFlag(
         'from-app-bundle',
         help:
-            'Generate build files used by flutter but '
-            'do not build any artifacts.',
+            'Generates an APK from an app bundle.',
       )
       ..addMultiOption(
         'target-platform',
