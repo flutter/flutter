@@ -33,7 +33,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.32.6](https://github.com/flutter/flutter/releases/tag/3.32.6)
 
-- [flutter/171106](https://github.com/flutter/flutter/pull/171106) - Fixes a "Null check operator used on a null value" crash when a scroll view contains a `LayoutBuilder`.
+- [flutter/171106](https://github.com/flutter/flutter/pull/171106) - When a scrollview contains a `LayoutBuilder` on any platform prevent null check crash .
 - [flutter/171239](https://github.com/flutter/flutter/pull/171239) - Fixes an issue in the Impeller Vulkan back end that can cause crashes when transitioning between different Android activities that use Flutter.
 - [flutter/171737](https://github.com/flutter/flutter/pull/171737) - Fixes full app crash when backgrounding and then bringing an app back up on Android 10-13 using an app with platform views.
 
