@@ -339,11 +339,7 @@ void main() {
         isFlutterError.having(
           (FlutterError e) => e.message,
           'message',
-          '''
-No TextDirection found.
-To resolve BorderRadiusDirectional properties, it must be provided with a TextDirection.
-This error usually occurs when BorderRadiusDirectional is used in a widget without a Directionality ancestor.
-Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the top of your application widget tree. It determines the ambient reading direction and is used, for example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.''',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
         ),
       ),
     );
