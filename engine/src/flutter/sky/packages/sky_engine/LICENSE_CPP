@@ -3150,6 +3150,36 @@ etc_decoder
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
 --------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2002-2008, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2002-2011, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2002-2016, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2003-2010, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2004-2015, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+ Copyright (C) 2015-2016, International Business Machines Corporation and others.
+ All Rights Reserved.
+--------------------------------------------------------------------------------
 harfbuzz
 
  This is part of HarfBuzz, a text shaping library.
@@ -7031,6 +7061,13 @@ Copyright (C) 2009-2011, International Business Machines
 --------------------------------------------------------------------------------
 icu
 
+Copyright (C) 2009-2011, International Business Machines
+Corporation and others. All Rights Reserved.
+
+Copyright 2007 Google Inc. All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
 Copyright (C) 2009-2011, International Business Machines Corporation and
 others. All Rights Reserved.
 --------------------------------------------------------------------------------
@@ -7096,6 +7133,13 @@ Copyright (C) 2009-2012, International Business Machines
 --------------------------------------------------------------------------------
 icu
 
+Copyright (C) 2009-2012, International Business Machines
+Corporation and others. All Rights Reserved.
+
+Copyright 2007 Google Inc. All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
 Copyright (C) 2009-2012, International Business Machines Corporation and
 others. All Rights Reserved.
 --------------------------------------------------------------------------------
@@ -7103,6 +7147,11 @@ icu
 
 Copyright (C) 2009-2013, International Business Machines
   Corporation and others.  All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+Copyright (C) 2009-2013, International Business Machines
+Corporation and others. All Rights Reserved.
 --------------------------------------------------------------------------------
 icu
 
@@ -9302,6 +9351,26 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+--------------------------------------------------------------------------------
+icu
+
+Copyright (c) 1999-2002, International Business Machines Corporation and
+others. All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+Copyright (c) 1999-2003, International Business Machines Corporation and
+others. All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+Copyright (c) 1999-2007, International Business Machines Corporation and
+others. All Rights Reserved.
+--------------------------------------------------------------------------------
+icu
+
+Copyright (c) 1999-2010, International Business Machines Corporation and
+others. All Rights Reserved.
 --------------------------------------------------------------------------------
 icu
 
