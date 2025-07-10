@@ -475,12 +475,14 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => platformDispatcher.frameData;
 
   @override
-  ui.VoidCallback? get onFrameDataChanged => null;
+  ui.VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
   @override
-  set onFrameDataChanged(ui.VoidCallback? callback) {}
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onFrameDataChanged = callback;
+  }
 
   @override
   ui.AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
