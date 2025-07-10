@@ -1063,6 +1063,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('SliverMainAxisGroup reverse hitTest', (WidgetTester tester) async {
+    bool onTapCalled = false;
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        reverse: true,
+        viewportHeight: 70,
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                onTapCalled = true;
+              },
+              child: const SizedBox(height: 50),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
+      ),
+    );
+    await tester.tapAt(const Offset(0, 10));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isFalse);
+    await tester.tapAt(const Offset(0, 69));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isTrue);
+  });
+
   testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
