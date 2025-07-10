@@ -807,34 +807,6 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
 
 typedef _LabelPart = (String text, TextDirection? textDirection);
 
-/// An immutable semantic label that contains the concatenated text.
-///
-/// This class represents the result of concatenating multiple label parts with
-/// proper text direction handling and spacing.
-@immutable
-final class SemanticsLabel {
-  const SemanticsLabel._(this._label);
-
-  final String _label;
-
-  /// The concatenation of text parts supplied using `addPart` invocations.
-  String get label => _label;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is SemanticsLabel && other._label == _label;
-  }
-
-  @override
-  int get hashCode => _label.hashCode;
-
-  @override
-  String toString() => 'SemanticsLabel("$_label")';
-}
-
 /// Builder for creating semantically correct concatenated labels with proper
 /// text direction handling and spacing.
 ///
@@ -848,7 +820,7 @@ final class SemanticsLabel {
 ///   ..addPart('Hello')
 ///   ..addPart('world');
 /// final label = builder.build();
-/// print(label.label); // "Hello world"
+/// print(label); // "Hello world"
 /// ```
 ///
 /// For multilingual text with proper RTL support:
@@ -857,7 +829,7 @@ final class SemanticsLabel {
 ///   ..addPart('Welcome', textDirection: TextDirection.ltr)
 ///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
 /// final label = builder.build();
-/// print(label.label); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
+/// print(label); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
 /// ```
 final class SemanticsLabelBuilder {
   /// Creates a new [SemanticsLabelBuilder].
@@ -893,18 +865,18 @@ final class SemanticsLabelBuilder {
   /// Returns the number of parts added to this builder.
   int get length => _parts.length;
 
-  /// Builds and returns a [SemanticsLabel] from the added parts.
+  /// Builds and returns the concatenated label from the added parts.
   ///
   /// This method concatenates all parts with proper text direction handling
   /// and spacing.
-  SemanticsLabel build() {
+  String build() {
     if (_parts.isEmpty) {
-      return const SemanticsLabel._('');
+      return '';
     }
 
     if (_parts.length == 1) {
       final (String text, TextDirection? _) = _parts.first;
-      return SemanticsLabel._(text);
+      return text;
     }
 
     // Concatenate multiple parts with proper text direction handling
@@ -931,7 +903,7 @@ final class SemanticsLabelBuilder {
       buffer.write(processedText);
     }
 
-    return SemanticsLabel._(buffer.toString());
+    return buffer.toString();
   }
 
   /// Clears all parts from this builder, allowing it to be reused.

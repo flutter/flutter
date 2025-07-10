@@ -1047,8 +1047,8 @@ void main() {
       builder.addPart('world');
       expect(builder.length, 2);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello world');
+      final String label = builder.build();
+      expect(label, 'Hello world');
     });
 
     test('custom separator', () {
@@ -1058,8 +1058,8 @@ void main() {
         ..addPart('Two')
         ..addPart('Three');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'One, Two, Three');
+      final String label = builder.build();
+      expect(label, 'One, Two, Three');
     });
 
     test('empty separator', () {
@@ -1068,8 +1068,8 @@ void main() {
         ..addPart('Hello')
         ..addPart('World');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'HelloWorld');
+      final String label = builder.build();
+      expect(label, 'HelloWorld');
     });
 
     test('ignores empty parts', () {
@@ -1079,8 +1079,8 @@ void main() {
         ..addPart('')
         ..addPart('world');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello world');
+      final String label = builder.build();
+      expect(label, 'Hello world');
       expect(builder.length, 2);
     });
 
@@ -1088,14 +1088,14 @@ void main() {
       final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
       builder.addPart('Single');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Single');
+      final String label = builder.build();
+      expect(label, 'Single');
     });
 
     test('empty builder', () {
       final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
-      final SemanticsLabel label = builder.build();
-      expect(label.label, '');
+      final String label = builder.build();
+      expect(label, '');
     });
 
     test('clear functionality', () {
@@ -1110,8 +1110,8 @@ void main() {
       expect(builder.isEmpty, isTrue);
       expect(builder.length, 0);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, '');
+      final String label = builder.build();
+      expect(label, '');
     });
 
     test('reusable builder', () {
@@ -1121,14 +1121,14 @@ void main() {
       builder
         ..addPart('First')
         ..addPart('use');
-      expect(builder.build().label, 'First use');
+      expect(builder.build(), 'First use');
 
       // Clear and reuse
       builder.clear();
       builder
         ..addPart('Second')
         ..addPart('use');
-      expect(builder.build().label, 'Second use');
+      expect(builder.build(), 'Second use');
     });
 
     test('reuse without clearing', () {
@@ -1138,19 +1138,19 @@ void main() {
       builder
         ..addPart('First')
         ..addPart('batch');
-      expect(builder.build().label, 'First batch');
+      expect(builder.build(), 'First batch');
       expect(builder.length, 2);
 
       // Add more parts without clearing - should accumulate
       builder
         ..addPart('Second')
         ..addPart('batch');
-      expect(builder.build().label, 'First batch Second batch');
+      expect(builder.build(), 'First batch Second batch');
       expect(builder.length, 4);
 
       // Add even more parts - should continue accumulating
       builder.addPart('Final');
-      expect(builder.build().label, 'First batch Second batch Final');
+      expect(builder.build(), 'First batch Second batch Final');
       expect(builder.length, 5);
     });
   });
@@ -1164,8 +1164,8 @@ void main() {
         ..addPart('Hello', textDirection: TextDirection.ltr)
         ..addPart('مرحبا', textDirection: TextDirection.rtl);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello مرحبا');
+      final String label = builder.build();
+      expect(label, 'Hello مرحبا');
     });
 
     test('text direction embedding with LTR overall direction', () {
@@ -1175,8 +1175,8 @@ void main() {
         ..addPart('مرحبا', textDirection: TextDirection.rtl)
         ..addPart('world', textDirection: TextDirection.ltr);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello \u202Bمرحبا\u202C world');
+      final String label = builder.build();
+      expect(label, 'Hello \u202Bمرحبا\u202C world');
     });
 
     test('text direction embedding with RTL overall direction', () {
@@ -1185,8 +1185,8 @@ void main() {
         ..addPart('مرحبا', textDirection: TextDirection.rtl)
         ..addPart('Hello', textDirection: TextDirection.ltr);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'مرحبا \u202AHello\u202C');
+      final String label = builder.build();
+      expect(label, 'مرحبا \u202AHello\u202C');
     });
 
     test('no embedding when all parts have same direction', () {
@@ -1195,8 +1195,8 @@ void main() {
         ..addPart('Hello', textDirection: TextDirection.ltr)
         ..addPart('world', textDirection: TextDirection.ltr);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello world');
+      final String label = builder.build();
+      expect(label, 'Hello world');
     });
 
     test('part direction falls back to overall direction', () {
@@ -1205,8 +1205,8 @@ void main() {
         ..addPart('Hello')
         ..addPart('world');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Hello world');
+      final String label = builder.build();
+      expect(label, 'Hello world');
     });
 
     test('complex multilingual example', () {
@@ -1220,34 +1220,11 @@ void main() {
         ..addPart('שלום', textDirection: TextDirection.rtl) // Hebrew
         ..addPart('to our app', textDirection: TextDirection.ltr);
 
-      expect(builder.build().label, 'Welcome, \u202Bمرحبا\u202C, \u202Bשלום\u202C, to our app');
+      expect(builder.build(), 'Welcome, \u202Bمرحبا\u202C, \u202Bשלום\u202C, to our app');
     });
   });
 
-  group('SemanticsLabel', () {
-    test('equality', () {
-      final SemanticsLabel label1 = (SemanticsLabelBuilder()..addPart('test')).build();
-      final SemanticsLabel label2 = (SemanticsLabelBuilder()..addPart('test')).build();
-      final SemanticsLabel label3 = (SemanticsLabelBuilder()..addPart('different')).build();
 
-      expect(label1, equals(label2));
-      expect(label1, isNot(equals(label3)));
-      expect(label1.hashCode, equals(label2.hashCode));
-    });
-
-
-
-    test('toString', () {
-      final SemanticsLabel label = (SemanticsLabelBuilder()..addPart('test label')).build();
-      expect(label.toString(), 'SemanticsLabel("test label")');
-    });
-
-    test('identical objects are equal', () {
-      final SemanticsLabel label = (SemanticsLabelBuilder()..addPart('test')).build();
-      expect(identical(label, label), isTrue);
-      expect(label == label, isTrue);
-    });
-  });
 
   group('Edge cases and error handling', () {
     test('very long labels', () {
@@ -1258,10 +1235,10 @@ void main() {
         ..addPart(longText)
         ..addPart('short');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label.length, 1006); // 1000 + 1 (space) + 5
-      expect(label.label, startsWith('AAAA'));
-      expect(label.label, endsWith(' short'));
+      final String label = builder.build();
+      expect(label.length, 1006); // 1000 + 1 (space) + 5
+      expect(label, startsWith('AAAA'));
+      expect(label, endsWith(' short'));
     });
 
     test('many parts', () {
@@ -1271,9 +1248,9 @@ void main() {
         builder.addPart('part$i');
       }
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, startsWith('part0 part1'));
-      expect(label.label, endsWith('part98 part99'));
+      final String label = builder.build();
+      expect(label, startsWith('part0 part1'));
+      expect(label, endsWith('part98 part99'));
       expect(builder.length, 100);
     });
 
@@ -1284,8 +1261,8 @@ void main() {
         ..addPart('second')
         ..addPart('third');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'first | second | third');
+      final String label = builder.build();
+      expect(label, 'first | second | third');
     });
 
     test('Unicode characters in content', () {
@@ -1295,8 +1272,8 @@ void main() {
         ..addPart('Math: ∑∆π')
         ..addPart('Currency: €£¥');
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
+      final String label = builder.build();
+      expect(label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
     });
 
 
