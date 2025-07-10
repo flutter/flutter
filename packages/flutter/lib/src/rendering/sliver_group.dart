@@ -270,7 +270,14 @@ class RenderSliverMainAxisGroup extends RenderSliver
     double maxPaintExtent = 0;
     double paintOffset = constraints.overlap;
 
-    RenderSliver? child = firstChild;
+    final (
+      RenderSliver? leadingChild,
+      RenderSliver? Function(RenderSliver child) advance,
+    ) = switch (constraints.growthDirection) {
+      GrowthDirection.forward => (firstChild, childAfter),
+      GrowthDirection.reverse => (lastChild, childBefore),
+    };
+    RenderSliver? child = leadingChild;
     while (child != null) {
       final double beforeOffsetPaintExtent = calculatePaintOffset(
         constraints,
@@ -305,7 +312,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
       layoutOffset += childLayoutGeometry.layoutExtent;
       maxPaintExtent += childLayoutGeometry.maxPaintExtent;
       paintOffset = math.max(childPaintOffset + childLayoutGeometry.paintExtent, paintOffset);
-      child = childAfter(child);
+      child = advance(child);
       assert(() {
         if (child != null && maxPaintExtent.isInfinite) {
           throw FlutterError(
@@ -356,11 +363,14 @@ class RenderSliverMainAxisGroup extends RenderSliver
 
     // Update the children's paintOffset based on the direction again, which
     // must be done after obtaining the `paintExtent`.
-    child = firstChild;
+    child = leadingChild;
     while (child != null) {
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
-      childParentData.paintOffset = switch (constraints.axisDirection) {
+      childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(
+        constraints.axisDirection,
+        constraints.growthDirection,
+      )) {
         AxisDirection.up => Offset(
           0.0,
           paintExtent - childParentData.paintOffset.dy - child.geometry!.paintExtent,
@@ -371,7 +381,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
         ),
         AxisDirection.right || AxisDirection.down => childParentData.paintOffset,
       };
-      child = childAfter(child);
+      child = advance(child);
     }
   }
 

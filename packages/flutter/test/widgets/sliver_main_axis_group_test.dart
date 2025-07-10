@@ -1090,6 +1090,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(onTapCalled, isTrue);
   });
+  
+  testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    const Key centerKey = Key('center');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          center: centerKey,
+          controller: controller,
+          slivers: const <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
+              ],
+            ),
+            SliverMainAxisGroup(
+              key: centerKey,
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.jumpTo(-51);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('-1')), const Offset(0, 1));
+    expect(tester.getTopLeft(find.text('1')), const Offset(0, 51));
+    expect(tester.getTopLeft(find.text('2')), const Offset(0, 101));
+    expect(tester.getTopLeft(find.text('-2')), const Offset(0, -49));
+  });
 }
 
 Widget _buildSliverList({
