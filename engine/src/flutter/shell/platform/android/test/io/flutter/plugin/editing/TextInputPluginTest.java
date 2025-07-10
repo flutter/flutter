@@ -1238,8 +1238,14 @@ public class TextInputPluginTest {
     testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
     View testView = new View(ctx);
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
-        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
     textInputPlugin.setTextInputClient(
         0,
         new TextInputChannel.Configuration(
@@ -1249,6 +1255,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
