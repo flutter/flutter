@@ -38,13 +38,7 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           const Text.rich(
-            TextSpan(
-              text: 't',
-              children: <TextSpan>[
-                TextSpan(text: 'e'),
-                TextSpan(text: 'st'),
-              ],
-            ),
+            TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'e'), TextSpan(text: 'st')]),
           ),
         ),
       );
@@ -56,12 +50,7 @@ void main() {
       testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(
-              text: const TextSpan(
-                text: 't',
-                children: <TextSpan>[TextSpan(text: 'est')],
-              ),
-            ),
+            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
           ),
         );
 
@@ -77,12 +66,7 @@ void main() {
       testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(
-              text: const TextSpan(
-                text: 't',
-                children: <TextSpan>[TextSpan(text: 'est')],
-              ),
-            ),
+            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
           ),
         );
 
@@ -102,13 +86,7 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(
-                text: 't',
-                children: <TextSpan>[
-                  TextSpan(text: 'est'),
-                  TextSpan(text: '3'),
-                ],
-              ),
+              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
             ),
           ),
         );
@@ -120,13 +98,7 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(
-                text: 't',
-                children: <TextSpan>[
-                  TextSpan(text: 'est'),
-                  TextSpan(text: '3'),
-                ],
-              ),
+              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
             ),
           ),
         );
@@ -184,12 +156,7 @@ void main() {
       testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(
-              text: const TextSpan(
-                text: 't',
-                children: <TextSpan>[TextSpan(text: 'est')],
-              ),
-            ),
+            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
           ),
         );
 
@@ -205,12 +172,7 @@ void main() {
       testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(
-              text: const TextSpan(
-                text: 't',
-                children: <TextSpan>[TextSpan(text: 'est')],
-              ),
-            ),
+            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
           ),
         );
 
@@ -230,13 +192,7 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(
-                text: 't',
-                children: <TextSpan>[
-                  TextSpan(text: 'est'),
-                  TextSpan(text: '3'),
-                ],
-              ),
+              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
             ),
           ),
         );
@@ -248,13 +204,7 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(
-                text: 't',
-                children: <TextSpan>[
-                  TextSpan(text: 'est'),
-                  TextSpan(text: '3'),
-                ],
-              ),
+              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
             ),
           ),
         );
@@ -382,10 +332,7 @@ void main() {
         _boilerplate(
           const Tooltip(
             richMessage: TextSpan(
-              children: <InlineSpan>[
-                TextSpan(text: 'Tooltip '),
-                TextSpan(text: 'Message'),
-              ],
+              children: <InlineSpan>[TextSpan(text: 'Tooltip '), TextSpan(text: 'Message')],
             ),
             child: Text('+'),
           ),
@@ -399,10 +346,7 @@ void main() {
         _boilerplate(
           const Tooltip(
             richMessage: TextSpan(
-              children: <InlineSpan>[
-                TextSpan(text: 'Tooltip '),
-                TextSpan(text: 'Message'),
-              ],
+              children: <InlineSpan>[TextSpan(text: 'Tooltip '), TextSpan(text: 'Message')],
             ),
             child: Text('+'),
           ),
@@ -469,6 +413,95 @@ void main() {
       final Finder hitTestable = find.byType(GestureDetector, skipOffstage: false).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
+      int sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: Scaffold(
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: GestureDetector(
+                      onTap: () {
+                        sliverToBoxAdapterTapped++;
+                      },
+                      child: Container(
+                        color: Colors.orange,
+                        padding: const EdgeInsets.all(16.0),
+                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter)),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('whose corresponding render object is not a RenderBox'),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping by filtering by .hitTestable excludes Slivers', (
+      WidgetTester tester,
+    ) async {
+      int sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(primarySwatch: Colors.blue),
+          home: Scaffold(
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: GestureDetector(
+                      onTap: () {
+                        sliverToBoxAdapterTapped++;
+                      },
+                      child: Container(
+                        color: Colors.orange,
+                        padding: const EdgeInsets.all(16.0),
+                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter).hitTestable()),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            stringContainsInOrder(<String>[
+              'considering only hit-testable widgets with a RenderBox',
+              'could not find any matching widgets',
+            ]),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
     });
   });
 
@@ -596,12 +629,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(
       _boilerplate(
-        Column(
-          children: <Widget>[
-            Container(key: key1, child: const Text('1')),
-            const Text('2'),
-          ],
-        ),
+        Column(children: <Widget>[Container(key: key1, child: const Text('1')), const Text('2')]),
       ),
     );
 
@@ -720,10 +748,7 @@ void main() {
       await tester.pumpWidget(
         const Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[
-            Column(children: fooBarTexts),
-            Column(children: fooBarTexts),
-          ],
+          children: <Widget>[Column(children: fooBarTexts), Column(children: fooBarTexts)],
         ),
       );
 
@@ -1429,8 +1454,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) =>
-                Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback:
+                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.evaluate().toString();
 
@@ -1449,8 +1474,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) =>
-                Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback:
+                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString();
 
@@ -1465,8 +1490,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) =>
-                Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback:
+                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString(describeSelf: true);
 
