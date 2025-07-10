@@ -210,6 +210,41 @@ void main() {
         distance,
       );
     });
+
+    testWidgets('onScrollEnd behavior reports changes correctly', (WidgetTester tester) async {
+      final List<Duration> selectedDurations = <Duration>[];
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoTimerPicker(
+                initialTimerDuration: const Duration(hours: 1, minutes: 30, seconds: 15),
+                changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+                onTimerDurationChanged: (Duration duration) => selectedDurations.add(duration),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset initialOffset = tester.getTopLeft(find.text('30'));
+
+      final TestGesture scrollGesture = await tester.startGesture(initialOffset);
+      // Should not report changes until the gesture ends.
+      await scrollGesture.moveBy(const Offset(0.0, 32.0));
+      expect(selectedDurations, isEmpty);
+
+      await scrollGesture.moveBy(const Offset(0.0, 32.0));
+      expect(selectedDurations, isEmpty);
+
+      await scrollGesture.up();
+      await tester.pumpAndSettle();
+
+      // Only reports the last change.
+      expect(selectedDurations, hasLength(1));
+      expect(selectedDurations.first, const Duration(hours: 1, minutes: 28, seconds: 15));
+    });
   });
 
   testWidgets('showDayOfWeek is only supported in date mode', (WidgetTester tester) async {
@@ -1710,6 +1745,42 @@ void main() {
       final double hourLeft = tester.getTopLeft(find.text('4')).dx;
       final double minuteLeft = tester.getTopLeft(find.text('00')).dx;
       expect(hourLeft, lessThan(minuteLeft));
+    });
+
+    testWidgets('onScrollEnd behavior reports changes correctly', (WidgetTester tester) async {
+      final List<DateTime> selectedDateTime = <DateTime>[];
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+                onDateTimeChanged: (DateTime dateTime) => selectedDateTime.add(dateTime),
+                initialDateTime: DateTime(2025),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset initialOffset = tester.getTopLeft(find.text('2025'));
+
+      final TestGesture scrollGesture = await tester.startGesture(initialOffset);
+      // Should not report changes until the gesture ends.
+      await scrollGesture.moveBy(const Offset(0.0, -32.0));
+      expect(selectedDateTime, isEmpty);
+
+      await scrollGesture.moveBy(const Offset(0.0, -32.0));
+      expect(selectedDateTime, isEmpty);
+
+      await scrollGesture.up();
+      await tester.pumpAndSettle();
+
+      // Only reports the last change.
+      expect(selectedDateTime, hasLength(1));
+      expect(selectedDateTime.first, DateTime(2027));
     });
   });
 
