@@ -242,10 +242,20 @@ void main() {
 
   /// Returns the SHA computed by `content_aware_hash`.
   String gitContentHash({required _FlutterRootUnderTest fileSystem}) {
-    final io.ProcessResult mergeBaseHeadOrigin = run(
-      fileSystem.binInternalContentAwareHash.path,
-      <String>[],
-    );
+    final String executable;
+    final List<String> args;
+    final String script = fileSystem.binInternalContentAwareHash.path;
+    if (const LocalPlatform().isWindows) {
+      executable = 'powershell';
+      args = <String>[script];
+    } else if (usePowershellOnPosix) {
+      executable = 'pwsh';
+      args = <String>[script];
+    } else {
+      executable = script;
+      args = <String>[];
+    }
+    final io.ProcessResult mergeBaseHeadOrigin = run(executable, args);
     return mergeBaseHeadOrigin.stdout as String;
   }
 
