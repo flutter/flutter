@@ -450,10 +450,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     }
 
     return MergeSemantics(
-      child: Semantics(
-        role: SemanticsRole.menuItem,
-        enabled: widget.enabled,
-        button: true,
+      child: buildSemantics(
         child: InkWell(
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
@@ -465,6 +462,16 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
           ),
         ),
       ),
+    );
+  }
+
+  @protected
+  Widget buildSemantics({required Widget child}) {
+    return Semantics(
+      role: SemanticsRole.menuItem,
+      enabled: widget.enabled,
+      button: true,
+      child: child,
     );
   }
 }
@@ -605,6 +612,17 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
       _controller.forward();
     }
     super.handleTap();
+  }
+
+  @override
+  Widget buildSemantics({required Widget child}) {
+    return Semantics(
+      role: SemanticsRole.menuItemCheckbox,
+      enabled: widget.enabled,
+      checked: widget.checked,
+      button: true,
+      child: child,
+    );
   }
 
   @override
