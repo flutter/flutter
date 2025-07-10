@@ -35,7 +35,6 @@ Also, make sure to also update to the same version in the following places:
 - The flutter min version in `engine/src/flutter/shell/platform/android/io/flutter/Build.java`
 - The versions used when engine testing in `engine/src/flutter/shell/platform/android/test_runner/build.gradle`
 - The versions used when working in engine/shell in `engine/src/flutter/shell/platform/android/build.gradle`
-- The minSdkVersion used in `packages/flutter_tools/lib/src/android/android.dart`
 
 #### Gradle
 When updating the Gradle version used in project templates
