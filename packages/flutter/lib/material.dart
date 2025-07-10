@@ -147,7 +147,6 @@ export 'src/material/radio_theme.dart';
 export 'src/material/range_slider.dart';
 export 'src/material/range_slider_parts.dart';
 export 'src/material/refresh_indicator.dart';
-export 'src/material/reorderable_list.dart';
 export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';

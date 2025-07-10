@@ -4,7 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/reorderable_list/reorderable_list_view.2.dart'
+import 'package:flutter_api_samples/widgets/reorderable_list/reorderable_list_view.2.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 

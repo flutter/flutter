@@ -10,9 +10,14 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Finder findDragHandle() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DragHandle');
+  }
+
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
     const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
@@ -42,10 +47,8 @@ void main() {
       bool reverse = false,
       EdgeInsets padding = EdgeInsets.zero,
       TextDirection textDirection = TextDirection.ltr,
-      TargetPlatform? platform,
     }) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
           child: SizedBox(
@@ -1835,7 +1838,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(build());
         // All four items should have drag handles and not delayed listeners.
-        expect(find.byIcon(Icons.drag_handle), findsNWidgets(4));
+        expect(findDragHandle(), findsNWidgets(4));
         expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
       },
       variant: TargetPlatformVariant.desktop(),
@@ -1847,38 +1850,40 @@ void main() {
         await tester.pumpWidget(build());
         // All four items should have delayed listeners and not drag handles.
         expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(4));
-        expect(find.byIcon(Icons.drag_handle), findsNothing);
+        expect(findDragHandle(), findsNothing);
       },
       variant: TargetPlatformVariant.mobile(),
     );
 
-    testWidgets('Vertical list renders drag handle in correct position', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(build(platform: TargetPlatform.macOS));
-      final Finder listView = find.byType(ReorderableListView);
-      final Finder item1 = find.byKey(const Key('Item 1'));
-      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+    testWidgets(
+      'Vertical list renders drag handle in correct position',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(build());
+        final Finder listView = find.byType(ReorderableListView);
+        final Finder item1 = find.byKey(const Key('Item 1'));
+        final Finder dragHandle = findDragHandle().first;
 
-      // Should be centered vertically within the item and 8 pixels from the right edge of the list.
-      expect(tester.getCenter(dragHandle).dy, tester.getCenter(item1).dy);
-      expect(tester.getTopRight(dragHandle).dx, tester.getSize(listView).width - 8);
-    });
+        // Should be centered vertically within the item and 8 pixels from the right edge of the list.
+        expect(tester.getCenter(dragHandle).dy, tester.getCenter(item1).dy);
+        expect(tester.getTopRight(dragHandle).dx, tester.getSize(listView).width - 8);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+    );
 
-    testWidgets('Horizontal list renders drag handle in correct position', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        build(scrollDirection: Axis.horizontal, platform: TargetPlatform.macOS),
-      );
-      final Finder listView = find.byType(ReorderableListView);
-      final Finder item1 = find.byKey(const Key('Item 1'));
-      final Finder dragHandle = find.byIcon(Icons.drag_handle).first;
+    testWidgets(
+      'Horizontal list renders drag handle in correct position',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+        final Finder listView = find.byType(ReorderableListView);
+        final Finder item1 = find.byKey(const Key('Item 1'));
+        final Finder dragHandle = findDragHandle().first;
 
-      // Should be centered horizontally within the item and 8 pixels from the bottom of the list.
-      expect(tester.getCenter(dragHandle).dx, tester.getCenter(item1).dx);
-      expect(tester.getBottomRight(dragHandle).dy, tester.getSize(listView).height - 8);
-    });
+        // Should be centered horizontally within the item and 8 pixels from the bottom of the list.
+        expect(tester.getCenter(dragHandle).dx, tester.getCenter(item1).dx);
+        expect(tester.getBottomRight(dragHandle).dy, tester.getSize(listView).height - 8);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+    );
   });
 
   testWidgets(
@@ -2353,13 +2358,13 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: tester.getCenter(find.byIcon(Icons.drag_handle).first));
+    await gesture.addPointer(location: tester.getCenter(findDragHandle().first));
     await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.grab,
     );
-    await gesture.down(tester.getCenter(find.byIcon(Icons.drag_handle).first));
+    await gesture.down(tester.getCenter(findDragHandle().first));
     await tester.pump(kLongPressTimeout);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -2403,13 +2408,13 @@ void main() {
         kind: PointerDeviceKind.mouse,
         pointer: 1,
       );
-      await gesture.addPointer(location: tester.getCenter(find.byIcon(Icons.drag_handle).first));
+      await gesture.addPointer(location: tester.getCenter(findDragHandle().first));
       await tester.pump();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         SystemMouseCursors.resizeColumn,
       );
-      await gesture.down(tester.getCenter(find.byIcon(Icons.drag_handle).first));
+      await gesture.down(tester.getCenter(findDragHandle().first));
       await tester.pump(kLongPressTimeout);
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

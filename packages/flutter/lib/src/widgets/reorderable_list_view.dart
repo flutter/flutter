@@ -2,21 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
-///
-/// @docImport 'card.dart';
 library;
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-
-import 'debug.dart';
-import 'icons.dart';
-import 'material.dart';
-import 'theme.dart';
 
 /// A list whose items the user can interactively reorder by dragging.
 ///
@@ -331,7 +326,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
     if (widget.buildDefaultDragHandles) {
-      switch (Theme.of(context).platform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
@@ -348,7 +343,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
               );
               return MouseRegion(cursor: effectiveMouseCursor, child: child);
             },
-            child: const Icon(Icons.drag_handle),
+            child: const _DragHandle(width: 15.0, height: 2.0, spacing: 2.0),
           );
           switch (widget.scrollDirection) {
             case Axis.horizontal:
@@ -403,7 +398,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       builder: (BuildContext context, Widget? child) {
         final double animValue = Curves.easeInOut.transform(animation.value);
         final double elevation = lerpDouble(0, 6, animValue)!;
-        return Material(elevation: elevation, child: child);
+        return _CustomElevation(elevation: elevation, child: child);
       },
       child: child,
     );
@@ -417,7 +412,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasOverlay(context));
 
     // If there is a header or footer we can't just apply the padding to the list,
@@ -523,4 +517,66 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(subKey, state);
+}
+
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({required this.width, required this.height, required this.spacing});
+
+  final double width;
+  final double height;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                color: const Color(0xff000000),
+                borderRadius: BorderRadius.circular(height / 2),
+              ),
+            ),
+            SizedBox(height: spacing),
+            Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                color: const Color(0xff000000),
+                borderRadius: BorderRadius.circular(height / 2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomElevation extends StatelessWidget {
+  const _CustomElevation({required this.child, required this.elevation});
+
+  final Widget? child;
+  final double elevation;
+
+  @override
+  Widget build(BuildContext context) {
+    final double blurRadius = elevation * 2.0;
+    final double spreadRadius = elevation * 0.5;
+    final Offset offset = Offset(0, elevation * 0.7);
+
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: <BoxShadow>[
+          BoxShadow(blurRadius: blurRadius, spreadRadius: spreadRadius, offset: offset),
+        ],
+      ),
+      child: child,
+    );
+  }
 }

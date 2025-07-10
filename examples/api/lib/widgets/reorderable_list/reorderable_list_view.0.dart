@@ -42,10 +42,10 @@ class _ReorderableListViewExampleState extends State<ReorderableExample> {
       padding: const EdgeInsets.symmetric(horizontal: 40),
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)
-          ListTile(
+          Card(
             key: Key('$index'),
-            tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-            title: Text('Item ${_items[index]}'),
+            color: _items[index].isOdd ? oddItemColor : evenItemColor,
+            child: Center(child: Text('Item ${_items[index]}')),
           ),
       ],
       onReorder: (int oldIndex, int newIndex) {

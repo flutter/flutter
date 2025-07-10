@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter_api_samples/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart'
+import 'package:flutter_api_samples/widgets/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 

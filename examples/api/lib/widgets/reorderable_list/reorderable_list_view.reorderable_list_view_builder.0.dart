@@ -42,10 +42,10 @@ class _ReorderableExampleState extends State<ReorderableExample> {
       padding: const EdgeInsets.symmetric(horizontal: 40),
       itemCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
-        return ListTile(
+        return Card(
           key: Key('$index'),
-          tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-          title: Text('Item ${_items[index]}'),
+          color: _items[index].isOdd ? oddItemColor : evenItemColor,
+          child: Text('Item ${_items[index]}'),
         );
       },
       onReorder: (int oldIndex, int newIndex) {
