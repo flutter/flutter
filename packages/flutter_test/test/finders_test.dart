@@ -38,7 +38,13 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           const Text.rich(
-            TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'e'), TextSpan(text: 'st')]),
+            TextSpan(
+              text: 't',
+              children: <TextSpan>[
+                TextSpan(text: 'e'),
+                TextSpan(text: 'st'),
+              ],
+            ),
           ),
         ),
       );
@@ -50,7 +56,12 @@ void main() {
       testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
         );
 
@@ -66,7 +77,12 @@ void main() {
       testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
         );
 
@@ -86,7 +102,13 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
             ),
           ),
         );
@@ -98,7 +120,13 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
             ),
           ),
         );
@@ -156,7 +184,12 @@ void main() {
       testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
         );
 
@@ -172,7 +205,12 @@ void main() {
       testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(
           _boilerplate(
-            RichText(text: const TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est')])),
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
         );
 
@@ -192,7 +230,13 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
             ),
           ),
         );
@@ -204,7 +248,13 @@ void main() {
         await tester.pumpWidget(
           _boilerplate(
             const Text.rich(
-              TextSpan(text: 't', children: <TextSpan>[TextSpan(text: 'est'), TextSpan(text: '3')]),
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
             ),
           ),
         );
@@ -332,7 +382,10 @@ void main() {
         _boilerplate(
           const Tooltip(
             richMessage: TextSpan(
-              children: <InlineSpan>[TextSpan(text: 'Tooltip '), TextSpan(text: 'Message')],
+              children: <InlineSpan>[
+                TextSpan(text: 'Tooltip '),
+                TextSpan(text: 'Message'),
+              ],
             ),
             child: Text('+'),
           ),
@@ -346,7 +399,10 @@ void main() {
         _boilerplate(
           const Tooltip(
             richMessage: TextSpan(
-              children: <InlineSpan>[TextSpan(text: 'Tooltip '), TextSpan(text: 'Message')],
+              children: <InlineSpan>[
+                TextSpan(text: 'Tooltip '),
+                TextSpan(text: 'Message'),
+              ],
             ),
             child: Text('+'),
           ),
@@ -629,7 +685,12 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(
       _boilerplate(
-        Column(children: <Widget>[Container(key: key1, child: const Text('1')), const Text('2')]),
+        Column(
+          children: <Widget>[
+            Container(key: key1, child: const Text('1')),
+            const Text('2'),
+          ],
+        ),
       ),
     );
 
@@ -748,7 +809,10 @@ void main() {
       await tester.pumpWidget(
         const Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[Column(children: fooBarTexts), Column(children: fooBarTexts)],
+          children: <Widget>[
+            Column(children: fooBarTexts),
+            Column(children: fooBarTexts),
+          ],
         ),
       );
 
@@ -1454,8 +1518,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.evaluate().toString();
 
@@ -1474,8 +1538,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString();
 
@@ -1490,8 +1554,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString(describeSelf: true);
 
