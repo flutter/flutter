@@ -60,13 +60,11 @@ NS_ASSUME_NONNULL_BEGIN
                               withClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView showToolbar:(int)client;
 - (void)flutterTextInputViewScribbleInteractionBegan:(FlutterTextInputView*)textInputView;
-- (void)flutterTextInputViewScribbleInteractionFinished:
-    (FlutterTextInputView*)textInputView;
+- (void)flutterTextInputViewScribbleInteractionFinished:(FlutterTextInputView*)textInputView;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     insertTextPlaceholderWithSize:(CGSize)size
                        withClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-       removeTextPlaceholder:(int)client;
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView removeTextPlaceholder:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     didResignFirstResponderWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
