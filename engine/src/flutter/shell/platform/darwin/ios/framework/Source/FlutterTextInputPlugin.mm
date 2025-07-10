@@ -1822,7 +1822,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
   NSInteger start = MAX(0, index - 1);
-  NSInteger end = MIN(self.text.length, start + 2);
+  NSInteger end = MIN((NSInteger)self.text.length, start + 2);
   NSRange characterRange = NSMakeRange(start, end - start);
   NSArray<UITextSelectionRect*>* rects =
       [self selectionRectsForRange:[FlutterTextRange rangeWithNSRange:characterRange]];

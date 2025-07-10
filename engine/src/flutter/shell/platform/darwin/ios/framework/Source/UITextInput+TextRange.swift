@@ -33,10 +33,10 @@ final class TextPosition: UITextPosition, NSCopying {
 
 @objc(FlutterTextRange)
 final class TextRange: UITextRange, NSCopying {
-  internal let nsRange: NSRange
+  let nsRange: NSRange
 
   init(NSRange range: NSRange) {
-    precondition(range.location != NSNotFound)
+    assert(range.location != NSNotFound)
     self.nsRange = range
   }
 
@@ -168,7 +168,7 @@ extension String.UTF16View {
     guard utf16Offset != 0 else {
       return NSRange(location: 0, length: 0)
     }
-    precondition(utf16Offset <= length)
+    assert(utf16Offset <= length)
     let index = utf16Offset - 1
     // Under the hood, rangeOfComposedCharacterSequencet calls
     // CFStringGetRangeOfCharacterClusterAtIndex with type = kCFStringComposedCharacterCluster
@@ -188,7 +188,7 @@ extension String.UTF16View {
       return breakCodepoints.contains(character) && !jamoCodepoints.contains(character)
     }
 
-    precondition(graphemeClusterRange.contains(index))
+    assert(graphemeClusterRange.contains(index))
 
     let startIndex =
       (graphemeClusterRange.lowerBound..<index).last(where: shouldBreak).map { $0 + 1 }
@@ -209,7 +209,7 @@ extension Range<UInt> {
 
 extension NSRange {
   var range: Range<UInt> {
-    precondition(location != NSNotFound)
+    assert(location != NSNotFound)
     return UInt(location)..<UInt(location + length)
   }
 }

@@ -8,7 +8,6 @@ extension String.UTF16View {
   }
 }
 
-// This should have been a tuple, but Swift tuples can't conform to Equtable (yet).
 struct TextSelection: Equatable {
   init(base: UInt, extent: UInt, markedRange: Range<UInt>?) {
     self.base = base
@@ -79,6 +78,8 @@ struct EditingState: Equatable {
         markedRange: markedTextRange))
   }
 
+  /// Returns all unique EditingStates with different marked text range and selection
+  /// range, given the text.
   static func allVariations(_ text: String) -> [EditingState] {
     TextSelection.allVariations(UInt(text.utf16.count)).map {
       EditingState(string: text, selectedTextRange: $0)
