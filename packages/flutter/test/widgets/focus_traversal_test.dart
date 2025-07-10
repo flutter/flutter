@@ -3806,7 +3806,10 @@ void main() {
     'THEN focus should skip the scope and land on the next focusable widget without requiring multiple TAB presses',
     (WidgetTester tester) async {
       final FocusNode enabledButton1Node = FocusNode();
+      addTearDown(enabledButton1Node.dispose);
+
       final FocusNode enabledButton2Node = FocusNode();
+      addTearDown(enabledButton2Node.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
