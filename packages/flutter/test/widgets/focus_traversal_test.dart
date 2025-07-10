@@ -3786,6 +3786,75 @@ void main() {
     expect(childScope.hasFocus, isTrue);
     expect(nodeA.hasFocus, isFalse);
   });
+
+  testWidgets('GIVEN onFocusNodeCreated is not null '
+      'THEN it is called when the FocusTraversalGroup is built', (WidgetTester tester) async {
+    FocusNode? node;
+    await tester.pumpWidget(
+      FocusTraversalGroup(
+        onFocusNodeCreated: (FocusNode createdNode) => node = createdNode,
+        child: const SizedBox.shrink(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(node, isNotNull);
+  });
+
+  testWidgets(
+    'GIVEN a FocusScope with no focusable descendants '
+    'WHEN the user presses TAB to navigate focus '
+    'THEN focus should skip the scope and land on the next focusable widget without requiring multiple TAB presses',
+    (WidgetTester tester) async {
+      final FocusNode enabledButton1Node = FocusNode();
+      final FocusNode enabledButton2Node = FocusNode();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                MaterialButton(
+                  focusNode: enabledButton1Node,
+                  onPressed: () {}, // enabled
+                  child: const Text('Enabled Button 1'),
+                ),
+                FocusTraversalGroup(
+                  child: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      MaterialButton(
+                        onPressed: null, // disabled
+                        child: Text('Disabled Button 1'),
+                      ),
+                      SizedBox(height: 16),
+                      MaterialButton(
+                        onPressed: null, // disabled
+                        child: Text('Disabled Button 2'),
+                      ),
+                    ],
+                  ),
+                ),
+                MaterialButton(
+                  focusNode: enabledButton2Node,
+                  onPressed: () {}, // enabled
+                  child: const Text('Enabled Button 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(enabledButton1Node.hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(enabledButton2Node.hasPrimaryFocus, isTrue);
+    },
+  );
 }
 
 class TestRoute extends PageRouteBuilder<void> {

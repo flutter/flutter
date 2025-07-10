@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../../cupertino.dart';
 import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -2038,6 +2039,7 @@ class FocusTraversalGroup extends StatefulWidget {
     FocusTraversalPolicy? policy,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
+    this.onFocusNodeCreated,
     required this.child,
   }) : policy = policy ?? ReadingOrderTraversalPolicy();
 
@@ -2068,6 +2070,9 @@ class FocusTraversalGroup extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  /// Called when the [FocusNode] of this widget is created.
+  final void Function(FocusNode)? onFocusNodeCreated;
 
   /// Returns the [FocusTraversalPolicy] that applies to the nearest ancestor of
   /// the given [FocusNode].
@@ -2205,6 +2210,12 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
     debugLabel: 'FocusTraversalGroup',
     policy: widget.policy,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onFocusNodeCreated?.call(focusNode);
+  }
 
   @override
   void dispose() {
