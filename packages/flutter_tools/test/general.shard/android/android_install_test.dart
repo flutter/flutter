@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -93,13 +94,13 @@ void main() {
     expect(await androidDevice.installApp(androidApk), false);
   });
 
-  testWithoutContext('Can install app on API level 16 or greater', () async {
+  testWithoutContext('Can install app on API level minSdk or greater', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAdbVersionCommand,
       kAdbStartServerCommand,
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.build.version.sdk]: [16]',
+        stdout: '[ro.build.version.sdk]: [${gradle_utils.minSdkVersion}]',
       ),
       kInstallCommand,
       kStoreShaCommand,
@@ -189,7 +190,7 @@ void main() {
       kAdbStartServerCommand,
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.build.version.sdk]: [16]',
+        stdout: '[ro.build.version.sdk]: [${gradle_utils.targetSdkVersion}]',
       ),
       kInstallCommand,
       const FakeCommand(
@@ -229,7 +230,7 @@ void main() {
         kAdbStartServerCommand,
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.build.version.sdk]: [16]',
+          stdout: '[ro.build.version.sdk]: [${gradle_utils.targetSdkVersion}]',
         ),
         const FakeCommand(
           command: <String>[
@@ -302,7 +303,7 @@ void main() {
         kAdbStartServerCommand,
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.build.version.sdk]: [16]',
+          stdout: '[ro.build.version.sdk]: [${gradle_utils.targetSdkVersion}]',
         ),
         const FakeCommand(
           command: <String>[
