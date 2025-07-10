@@ -5,9 +5,6 @@
 @TestOn('browser')
 library;
 
-import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -54,11 +51,8 @@ void testMain() {
 
     expect(engineInitializer, isNotNull);
 
-    final JSObject maybeApp = await engineInitializer
-        .callMethod<JSPromise<JSObject>>('autoStart'.toJS)
-        .toDart;
+    await engineInitializer.autoStart();
 
-    expect(maybeApp, isA<FlutterApp>());
     expect(initCalled, 1, reason: 'initEngine should be called first.');
     expect(runCalled, 2, reason: 'runApp should be called after init.');
   });
@@ -68,11 +62,8 @@ void testMain() {
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-    final JSObject maybeAppInitializer = await engineInitializer
-        .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
-        .toDart;
+    await engineInitializer.initializeEngine();
 
-    expect(maybeAppInitializer, isA<FlutterAppRunner>());
     expect(initCalled, 1, reason: 'initEngine should have been called.');
     expect(runCalled, 0, reason: 'runApp should not have been called.');
   });
@@ -82,57 +73,27 @@ void testMain() {
 
     final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-    final JSObject appInitializer = await engineInitializer
-        .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
-        .toDart;
-    expect(appInitializer, isA<FlutterAppRunner>());
-    final JSObject maybeApp = await appInitializer
-        .callMethod<JSPromise<JSObject>>('runApp'.toJS)
-        .toDart;
-    expect(maybeApp, isA<FlutterApp>());
+    final FlutterAppRunner appInitializer = await engineInitializer.initializeEngine();
+    await appInitializer.runApp();
+
     expect(initCalled, 1, reason: 'initEngine should have been called.');
     expect(runCalled, 2, reason: 'runApp should have been called.');
   });
 
   group('FlutterApp', () {
-    test('has addView/removeView methods', () async {
-      final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
-
-      final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
-
-      final JSObject appInitializer = await engineInitializer
-          .callMethod<JSPromise<JSObject>>('initializeEngine'.toJS)
-          .toDart;
-      final FlutterApp maybeApp = await appInitializer
-          .callMethod<JSPromise<FlutterApp>>('runApp'.toJS)
-          .toDart;
-
-      expect(maybeApp['addView'].isA<JSFunction>(), isTrue);
-      expect(maybeApp['removeView'].isA<JSFunction>(), isTrue);
-    });
     test('addView/removeView respectively adds/removes view', () async {
       final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
 
       final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
 
-      final JSObject appInitializer = await engineInitializer
-          .callMethod<JSPromise<JSObject>>(
-            'initializeEngine'.toJS,
-            <String, Object?>{'multiViewEnabled': true}.jsify(),
-          )
-          .toDart;
-      final JSObject maybeApp = await appInitializer
-          .callMethod<JSPromise<JSObject>>('runApp'.toJS)
-          .toDart;
-      final int viewId = maybeApp
-          .callMethod<JSNumber>(
-            'addView'.toJS,
-            <String, Object?>{'hostElement': createDomElement('div')}.jsify(),
-          )
-          .toDartInt;
+      final FlutterAppRunner appInitializer = await engineInitializer.initializeEngine(
+        JsFlutterConfiguration(multiViewEnabled: true),
+      );
+      final FlutterApp app = await appInitializer.runApp();
+      final int viewId = app.addView(JsFlutterViewOptions(hostElement: createDomElement('div')));
       expect(bootstrap.viewManager[viewId], isNotNull);
 
-      maybeApp.callMethod('removeView'.toJS, viewId.toJS);
+      app.removeView(viewId);
       expect(bootstrap.viewManager[viewId], isNull);
     });
   });
