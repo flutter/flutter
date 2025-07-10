@@ -142,8 +142,8 @@ The following steps are required:
 
 1. Create a [G3Fix][] to update google3's [`Google3Features`][]:
 
-   [G3Fix]: https://g3doc.corp.google.com/company/teams/core/developer/acx/flutter/process/life_of_a_pr/index.md?cl=head#g3fix
-   [`Google3Features`]: http://google3/mobile/flutter/cli/context/lib/context.dart?q=symbol%3A%5CbGoogle3Features%5Cb%20case%3Ayes
+   [G3Fix]: http://go/g3fix
+   [`Google3Features`]: http://go/flutter-google3features
 
     1. Add a new field to `Google3Features` :
 
