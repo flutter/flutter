@@ -20,7 +20,7 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 /// See also:
 ///
 /// * [FlutterFeatureFlags], Flutter's implementation of this class.
-/// * https://github.com/flutter/flutter/blob/master/docs/contributing/Feature-flags.md,
+/// * https://github.com/flutter/flutter/blob/main/docs/contributing/Feature-flags.md,
 ///   docs on feature flags and how to add or use them.
 abstract class FeatureFlags {
   /// const constructor so that subclasses can be const.
