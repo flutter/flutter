@@ -52,8 +52,9 @@ Future<void> doTests() async {
           createDomElement('div'),
         );
         final int viewId = view.viewId;
-        final JsFlutterViewOptions expectedOptions =
-            {'hostElement': createDomElement('div')}.jsify()! as JsFlutterViewOptions;
+        final JsFlutterViewOptions expectedOptions = JsFlutterViewOptions(
+          hostElement: createDomElement('div'),
+        );
 
         viewManager.registerView(view, jsViewOptions: expectedOptions);
 
