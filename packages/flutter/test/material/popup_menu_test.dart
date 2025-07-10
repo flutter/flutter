@@ -4666,7 +4666,6 @@ void main() {
                 ),
                 const CheckedPopupMenuItem<String>(
                   value: 'unchecked',
-                  checked: false,
                   child: Text('Unchecked item'),
                 ),
                 const CheckedPopupMenuItem<String>(
@@ -4687,16 +4686,16 @@ void main() {
 
     final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
     final Iterable<SemanticsNode> checkboxMenuItems = allNodes.where(
-      (node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
+      (SemanticsNode node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
     );
 
     expect(checkboxMenuItems, hasLength(3));
 
     final Iterable<SemanticsNode> checkedItems = checkboxMenuItems.where(
-      (node) => node.hasFlag(SemanticsFlag.isChecked),
+      (SemanticsNode node) => node.hasFlag(SemanticsFlag.isChecked),
     );
     final Iterable<SemanticsNode> uncheckedItems = checkboxMenuItems.where(
-      (node) => !node.hasFlag(SemanticsFlag.isChecked),
+      (SemanticsNode node) => !node.hasFlag(SemanticsFlag.isChecked),
     );
 
     expect(checkedItems, hasLength(2));
