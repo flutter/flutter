@@ -656,18 +656,12 @@ void main() {
         home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.elevated, false),
       ),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rrect(color: activeColor.darkElevatedColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkElevatedColor));
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rrect(color: activeColor.darkHighContrastColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkHighContrastColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -682,10 +676,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rrect(color: activeColor.highContrastColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.highContrastColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -721,10 +712,7 @@ void main() {
 
     expect(find.byType(CupertinoSlider), paints..rrect(color: _kSystemFill.color));
 
-    expect(
-      find.byType(CupertinoSlider),
-      isNot(paints..rrect(color: _kSystemFill.darkColor)),
-    );
+    expect(find.byType(CupertinoSlider), isNot(paints..rrect(color: _kSystemFill.darkColor)));
 
     await tester.pumpWidget(
       CupertinoApp(
