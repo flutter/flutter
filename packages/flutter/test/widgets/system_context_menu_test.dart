@@ -174,6 +174,7 @@ void main() {
       const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
         IOSSystemContextMenuItemCopy(),
         IOSSystemContextMenuItemShare(title: 'My Share Title'),
+        IOSSystemContextMenuItemLiveText(),
       ];
       final TextEditingController controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
@@ -220,6 +221,7 @@ void main() {
         itemsReceived.last[1],
         equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
       );
+      expect(itemsReceived.last[2], equals(const IOSSystemContextMenuItemDataLiveText()));
 
       state.hideToolbar();
       await tester.pump();
@@ -689,6 +691,22 @@ void main() {
       );
     },
   );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
+    () {
+      const IOSSystemContextMenuItemLiveText item = IOSSystemContextMenuItemLiveText();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final IOSSystemContextMenuItemData data = item.getData(localizations);
+      expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
+    },
+  );
+
+  test('systemContextMenuItemDataFromJson handles Live Text', () {
+    final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};
+    final IOSSystemContextMenuItemData item = systemContextMenuItemDataFromJson(json);
+    expect(item, isA<IOSSystemContextMenuItemDataLiveText>());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/169696.
   test('IOSSystemContextMenuItemLookUp debugFillProperties', () {
