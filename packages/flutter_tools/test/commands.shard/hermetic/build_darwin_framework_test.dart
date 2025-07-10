@@ -102,6 +102,8 @@ void main() {
             z: 10,
             hotfix: 13,
             commits: 2,
+            hash: '',
+            gitTag: frameworkVersion,
           );
           final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
@@ -135,7 +137,15 @@ void main() {
         'throws when license not found',
         () async {
           final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: const GitTagVersion(x: 1, y: 13, z: 10, hotfix: 13, commits: 0),
+            gitTagVersion: const GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 10,
+              hotfix: 13,
+              commits: 0,
+              hash: '',
+              gitTag: '1.13.10+hotfix.14.0',
+            ),
           );
 
           final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
@@ -159,7 +169,7 @@ void main() {
       );
 
       group('is created', () {
-        const String frameworkVersion = 'v1.13.11+hotfix.13';
+        const String frameworkVersion = 'v1.13.11+hotfix.14';
         const String licenseText = 'This is the license!';
 
         setUp(() {
@@ -174,16 +184,19 @@ void main() {
           testUsingContext(
             'created when forced',
             () async {
+              const String frameworkVersionWithCommits = '$frameworkVersion.pre.100';
               const GitTagVersion gitTagVersion = GitTagVersion(
                 x: 1,
                 y: 13,
                 z: 11,
                 hotfix: 13,
                 commits: 100,
+                hash: '',
+                gitTag: frameworkVersionWithCommits,
               );
               final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
-                frameworkVersion: frameworkVersion,
+                frameworkVersion: frameworkVersionWithCommits,
               );
 
               final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
@@ -209,16 +222,19 @@ void main() {
         group('not on master channel', () {
           late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
+            const String frameworkVersionWithCommits = '$frameworkVersion.pre.0';
             const GitTagVersion gitTagVersion = GitTagVersion(
               x: 1,
               y: 13,
               z: 11,
               hotfix: 13,
               commits: 0,
+              hash: '',
+              gitTag: frameworkVersionWithCommits,
             );
             fakeFlutterVersion = FakeFlutterVersion(
               gitTagVersion: gitTagVersion,
-              frameworkVersion: frameworkVersion,
+              frameworkVersion: frameworkVersionWithCommits,
             );
           });
 
@@ -387,13 +403,15 @@ void main() {
       testUsingContext(
         'throws when not on a released version',
         () async {
-          const String frameworkVersion = 'v1.13.10+hotfix-pre.2';
+          const String frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
           const GitTagVersion gitTagVersion = GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
             hotfix: 13,
             commits: 2,
+            hash: '',
+            gitTag: frameworkVersion,
           );
           final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
@@ -427,7 +445,15 @@ void main() {
         'throws when license not found',
         () async {
           final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: const GitTagVersion(x: 1, y: 13, z: 10, hotfix: 13, commits: 0),
+            gitTagVersion: const GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 10,
+              hotfix: 13,
+              commits: 0,
+              hash: '',
+              gitTag: '1.13.10+hotfix.14.pre.0',
+            ),
           );
 
           final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
@@ -472,6 +498,8 @@ void main() {
                 z: 11,
                 hotfix: 13,
                 commits: 100,
+                hash: '',
+                gitTag: '$frameworkVersion.pre.100',
               );
               final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
@@ -507,6 +535,8 @@ void main() {
               z: 11,
               hotfix: 13,
               commits: 0,
+              hash: '',
+              gitTag: '$frameworkVersion.pre.0',
             );
             fakeFlutterVersion = FakeFlutterVersion(
               gitTagVersion: gitTagVersion,

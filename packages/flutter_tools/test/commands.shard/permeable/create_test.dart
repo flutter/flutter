@@ -4868,6 +4868,24 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       Logger: () => logger,
     },
   );
+
+  testUsingContext('flutter create --help hides --sample', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--help']);
+    expect(logger.statusText, isNot(contains('--sample')));
+  }, overrides: <Type, Generator>{Logger: () => logger});
+
+  testUsingContext('flutter create --verbose --help shows --sample', () async {
+    // Because this is an instrumented TestCommandRunner, verboseHelp is not
+    // automatically populated like it would be for the main executable.
+    final CreateCommand command = CreateCommand(verboseHelp: true);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--verbose', '--help']);
+    expect(logger.statusText, contains('--sample'));
+  }, overrides: <Type, Generator>{Logger: () => logger});
 }
 
 Future<void> _createProject(

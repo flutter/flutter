@@ -242,6 +242,7 @@ android_java_sources = [
   "io/flutter/embedding/android/KeyboardMap.java",
   "io/flutter/embedding/android/MotionEventTracker.java",
   "io/flutter/embedding/android/RenderMode.java",
+  "io/flutter/embedding/android/SurfaceHolderCallbackCompat.java",
   "io/flutter/embedding/android/TransparencyMode.java",
   "io/flutter/embedding/android/WindowInfoRepositoryCallbackAdapterWrapper.java",
   "io/flutter/embedding/engine/FlutterEngine.java",
