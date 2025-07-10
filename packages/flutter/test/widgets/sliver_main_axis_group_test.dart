@@ -1090,7 +1090,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(onTapCalled, isTrue);
   });
-  
+
   testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
