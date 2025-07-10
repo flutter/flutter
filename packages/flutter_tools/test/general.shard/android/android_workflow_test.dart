@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -520,7 +521,7 @@ Review licenses that have not been accepted (y/N)?
       ..emulatorPath = 'path/to/emulator';
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
-      kAndroidSdkMinVersion,
+      gradle_utils.minSdkVersionInt,
       kAndroidSdkBuildToolsMinVersion.toString(),
       FakePlatform(),
     );
@@ -536,7 +537,7 @@ Review licenses that have not been accepted (y/N)?
 
     ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
-    expect(validationResult.messages.last.message, errorMessage);
+    expect(errorMessage, validationResult.messages.last.message);
 
     // Test with valid SDK but invalid build tools
     sdkVersion.sdkLevel = 29;
@@ -548,7 +549,7 @@ Review licenses that have not been accepted (y/N)?
 
     // Test with valid SDK and valid build tools
     // Will still be partial because AndroidSdk.findJavaBinary is static :(
-    sdkVersion.sdkLevel = kAndroidSdkMinVersion;
+    sdkVersion.sdkLevel = gradle_utils.minSdkVersionInt;
     sdkVersion.buildToolsVersion = kAndroidSdkBuildToolsMinVersion;
 
     validationResult = await androidValidator.validate();
