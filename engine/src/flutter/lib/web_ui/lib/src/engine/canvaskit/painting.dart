@@ -350,10 +350,9 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     ref?.dispose();
 
-    final SkShader? result =
-        samplers.isEmpty
-            ? effect.makeShader(floats)
-            : effect.makeShaderWithChildren(floats, samplers);
+    final SkShader? result = samplers.isEmpty
+        ? effect.makeShader(floats)
+        : effect.makeShaderWithChildren(floats, samplers);
     if (result == null) {
       throw Exception(
         'Invalid uniform data for shader $name:'

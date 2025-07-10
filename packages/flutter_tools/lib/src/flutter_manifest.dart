@@ -298,10 +298,9 @@ class FlutterManifest {
       components.add(
         DeferredComponent(
           name: component['name'] as String,
-          libraries:
-              component['libraries'] == null
-                  ? <String>[]
-                  : (component['libraries'] as List<dynamic>).cast<String>(),
+          libraries: component['libraries'] == null
+              ? <String>[]
+              : (component['libraries'] as List<dynamic>).cast<String>(),
           assets: _computeAssets(component['assets']),
         ),
       );
@@ -357,9 +356,9 @@ class FlutterManifest {
     return fontList == null
         ? const <Map<String, Object?>>[]
         : fontList
-            .map<Map<String, Object?>?>(castStringKeyedMap)
-            .whereType<Map<String, Object?>>()
-            .toList();
+              .map<Map<String, Object?>?>(castStringKeyedMap)
+              .whereType<Map<String, Object?>>()
+              .toList();
   }
 
   late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
@@ -865,10 +864,8 @@ class AssetsEntry {
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
-      final (
-        List<AssetTransformerEntry>? transformers,
-        List<String> transformersErrors,
-      ) = _parseTransformersSection(yaml[_transformersKey]);
+      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
+          _parseTransformersSection(yaml[_transformersKey]);
 
       final List<String> errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
@@ -924,10 +921,8 @@ class AssetsEntry {
     final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
     final List<String> errors = <String>[];
     for (final YamlMap yaml in yamlObjects!) {
-      final (
-        AssetTransformerEntry? transformerEntry,
-        List<String> transformerErrors,
-      ) = AssetTransformerEntry.tryParse(yaml);
+      final (AssetTransformerEntry? transformerEntry, List<String> transformerErrors) =
+          AssetTransformerEntry.tryParse(yaml);
       if (transformerEntry != null) {
         transformers.add(transformerEntry);
       } else {

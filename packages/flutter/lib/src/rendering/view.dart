@@ -477,12 +477,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       statusBarColor: definedOverlayStyle.statusBarColor,
       systemStatusBarContrastEnforced: definedOverlayStyle.systemStatusBarContrastEnforced,
       systemNavigationBarColor: isAndroid ? definedOverlayStyle.systemNavigationBarColor : null,
-      systemNavigationBarDividerColor:
-          isAndroid ? definedOverlayStyle.systemNavigationBarDividerColor : null,
-      systemNavigationBarIconBrightness:
-          isAndroid ? definedOverlayStyle.systemNavigationBarIconBrightness : null,
-      systemNavigationBarContrastEnforced:
-          isAndroid ? definedOverlayStyle.systemNavigationBarContrastEnforced : null,
+      systemNavigationBarDividerColor: isAndroid
+          ? definedOverlayStyle.systemNavigationBarDividerColor
+          : null,
+      systemNavigationBarIconBrightness: isAndroid
+          ? definedOverlayStyle.systemNavigationBarIconBrightness
+          : null,
+      systemNavigationBarContrastEnforced: isAndroid
+          ? definedOverlayStyle.systemNavigationBarContrastEnforced
+          : null,
     );
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }

@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -34,7 +35,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-    command = UpgradeCommand(verboseHelp: false);
+    command = UpgradeCommand(
+      verboseHelp: false,
+      commandRunner: UpgradeCommandRunner()..clock = SystemClock.fixed(DateTime.utc(2026)),
+    );
     runner = createTestCommandRunner(command);
   });
 
@@ -47,7 +51,13 @@ void main() {
       final Completer<void> reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
-        await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
+        await runner.run(<String>[
+          'upgrade',
+          '--continue',
+          '--continue-started-at',
+          '2026-01-01T00:00:00.000Z',
+          '--no-version-check',
+        ]);
         reEntryCompleter.complete();
       }
 
@@ -83,7 +93,14 @@ void main() {
         // re-enter flutter command with the newer version, so that `doctor`
         // checks will be up to date
         FakeCommand(
-          command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
+          command: const <String>[
+            'bin/flutter',
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            '2026-01-01T00:00:00.000Z',
+            '--no-version-check',
+          ],
           onRun: reEnterTool,
           completer: reEntryCompleter,
         ),
@@ -120,7 +137,13 @@ void main() {
       final Completer<void> reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
-        await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
+        await runner.run(<String>[
+          'upgrade',
+          '--continue',
+          '--continue-started-at',
+          '2026-01-01T00:00:00.000Z',
+          '--no-version-check',
+        ]);
         reEntryCompleter.complete();
       }
 
@@ -141,7 +164,14 @@ void main() {
         const FakeCommand(command: <String>['git', 'status', '-s']),
         const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
         FakeCommand(
-          command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
+          command: const <String>[
+            'bin/flutter',
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            '2026-01-01T00:00:00.000Z',
+            '--no-version-check',
+          ],
           onRun: reEnterTool,
           completer: reEntryCompleter,
         ),
@@ -178,13 +208,14 @@ void main() {
         'For the most up to date stable version of flutter, consider using the "beta" channel '
         'instead. The Flutter "beta" channel enjoys all the same automated testing as the '
         '"stable" channel, but is updated roughly once a month instead of once a quarter.\n'
-        'To change channel, run the "flutter channel beta" command.\n',
+        'To change channel, run the "flutter channel beta" command.\n'
+        'Took 0.0s\n',
       );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      FlutterVersion:
-          () => FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
+      FlutterVersion: () =>
+          FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
       Logger: () => logger,
       ProcessManager: () => processManager,
     },
@@ -196,7 +227,13 @@ void main() {
       final Completer<void> reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
-        await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
+        await runner.run(<String>[
+          'upgrade',
+          '--continue',
+          '--continue-started-at',
+          '2026-01-01T00:00:00.000Z',
+          '--no-version-check',
+        ]);
         reEntryCompleter.complete();
       }
 
@@ -226,7 +263,14 @@ void main() {
           workingDirectory: flutterRoot,
         ),
         FakeCommand(
-          command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
+          command: const <String>[
+            'bin/flutter',
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            '2026-01-01T00:00:00.000Z',
+            '--no-version-check',
+          ],
           onRun: reEnterTool,
           completer: reEntryCompleter,
           workingDirectory: flutterRoot,
@@ -257,17 +301,17 @@ void main() {
         '\n'
         "Instance of 'FakeFlutterVersion'\n" // the real FlutterVersion has a better toString, heh
         '\n'
-        'Running flutter doctor...\n',
+        'Running flutter doctor...\n'
+        'Took 0.0s\n',
       );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      FlutterVersion:
-          () => FakeFlutterVersion(
-            branch: 'beta',
-            frameworkVersion: startingTag,
-            engineRevision: 'engine',
-          ),
+      FlutterVersion: () => FakeFlutterVersion(
+        branch: 'beta',
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      ),
       Logger: () => logger,
       ProcessManager: () => processManager,
     },

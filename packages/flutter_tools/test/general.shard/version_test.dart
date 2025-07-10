@@ -12,13 +12,14 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart' show FakeFlutterVersion;
+import '../src/fakes.dart' show FakeFlutterVersion, TestFeatureFlags;
 
 final SystemClock _testClock = SystemClock.fixed(DateTime.utc(2015));
 final DateTime _stampUpToDate = _testClock.ago(
@@ -688,7 +689,8 @@ void main() {
         });
 
         testWithoutContext('loads valid JSON', () async {
-          final String value = '''
+          final String value =
+              '''
         {
           "lastKnownRemoteVersion": "${_testClock.ago(const Duration(days: 1))}",
           "lastTimeVersionWasChecked": "${_testClock.ago(const Duration(days: 2))}",
@@ -724,10 +726,9 @@ void main() {
     }
 
     testWithoutContext('returns error if repository url is null', () {
-      final VersionCheckError error =
-          runUpstreamValidator(
-            // repositoryUrl is null by default
-          )!;
+      final VersionCheckError error = runUpstreamValidator(
+        // repositoryUrl is null by default
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -745,8 +746,9 @@ void main() {
     );
 
     testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
-      final VersionCheckError error =
-          runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit)!;
+      final VersionCheckError error = runUpstreamValidator(
+        versionUpstreamUrl: flutterNonStandardUrlDotGit,
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -772,11 +774,10 @@ void main() {
     );
 
     testWithoutContext('respects FLUTTER_GIT_URL even if upstream remote url is standard', () {
-      final VersionCheckError error =
-          runUpstreamValidator(
-            versionUpstreamUrl: flutterStandardUrlDotGit,
-            flutterGitUrl: flutterNonStandardUrlDotGit,
-          )!;
+      final VersionCheckError error = runUpstreamValidator(
+        versionUpstreamUrl: flutterStandardUrlDotGit,
+        flutterGitUrl: flutterNonStandardUrlDotGit,
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -911,10 +912,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
         FakeCommand(
           command: const <String>[
@@ -928,10 +928,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
       ]);
 
@@ -1147,10 +1146,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
         FakeCommand(
           command: const <String>[
@@ -1164,10 +1162,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
       ]);
 
@@ -1189,6 +1186,54 @@ void main() {
       expect(legacyVersionFile.existsSync(), isTrue);
     },
     overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
+  );
+
+  testUsingContext(
+    'legacy version file is still supported',
+    () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+      flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
+      final File legacyVersionFile = flutterRoot.childFile('version');
+
+      final FlutterVersion flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: flutterRoot.path,
+      );
+      flutterVersion.ensureVersionFile();
+
+      expect(legacyVersionFile, exists);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: false),
+    },
+  );
+
+  testUsingContext(
+    'legacy version file is no longer supported',
+    () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+      flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
+      final File legacyVersionFile = flutterRoot.childFile('version');
+
+      final FlutterVersion flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: flutterRoot.path,
+      );
+      flutterVersion.ensureVersionFile();
+
+      expect(legacyVersionFile, isNot(exists));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: true),
+    },
   );
 
   testUsingContext('GitTagVersion', () {
@@ -1427,6 +1472,43 @@ void main() {
 
     GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  group('$FlutterEngineStampFromFile', () {
+    late FileSystem fs;
+    const String flutterRoot = '/path/to/flutter';
+
+    setUpAll(() {
+      Cache.disableLocking();
+      VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
+    });
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      fs.directory(flutterRoot).createSync(recursive: true);
+    });
+
+    test('parses expected values', () {
+      final File engineStampFile = fs.file(
+        fs.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
+      )..createSync(recursive: true);
+      engineStampFile.writeAsStringSync(
+        json.encode(<String, Object?>{
+          'build_time_ms': 1751385874000,
+          'git_revision': 'abcdefg',
+          'git_revision_date': '2014-10-02 00:00:00.000Z',
+          'content_hash': 'deadbeef',
+        }),
+      );
+      final FlutterEngineStampFromFile? result = FlutterEngineStampFromFile.tryParseFromFile(
+        engineStampFile,
+      );
+      expect(result, isNotNull);
+      expect(result!.buildDate, DateTime.fromMillisecondsSinceEpoch(1751385874000));
+      expect(result.gitRevision, 'abcdefg');
+      expect(result.gitRevisionDate, DateTime.parse('2014-10-02 00:00:00.000Z'));
+      expect(result.contentHash, 'deadbeef');
+    });
   });
 }
 

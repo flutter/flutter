@@ -57,17 +57,16 @@ const String _kIncompatibleJavaVersionMessage =
     'The configured version of Java detected may conflict with the';
 final String _kIncompatibleAgpVersionForModule =
     Version.parse(templateAndroidGradlePluginVersion) <
-            Version.parse(templateAndroidGradlePluginVersionForModule)
-        ? templateAndroidGradlePluginVersionForModule
-        : templateAndroidGradlePluginVersion;
+        Version.parse(templateAndroidGradlePluginVersionForModule)
+    ? templateAndroidGradlePluginVersionForModule
+    : templateAndroidGradlePluginVersion;
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() =>
     FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
-FakePlatform _kNoColorTerminalMacOSPlatform() =>
-    FakePlatform.fromPlatform(const LocalPlatform())
-      ..stdoutSupportsAnsi = false
-      ..operatingSystem = 'macos';
+FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
+  ..stdoutSupportsAnsi = false
+  ..operatingSystem = 'macos';
 
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
@@ -218,15 +217,14 @@ void main() {
       return _runFlutterTest(projectDir);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
       Logger: () => logger,
       Analytics: () => fakeAnalytics,
     },
@@ -251,15 +249,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -288,15 +285,14 @@ void main() {
       return _runFlutterTest(projectDir);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -316,15 +312,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
       ...noColorTerminalOverride,
     },
   );
@@ -345,15 +340,14 @@ void main() {
       expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
       ...noColorTerminalOverride,
     },
   );
@@ -378,15 +372,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -410,15 +403,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -439,15 +431,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -479,15 +470,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -513,15 +503,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -567,15 +556,14 @@ void main() {
       return _runFlutterTest(projectDir);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -603,15 +591,14 @@ void main() {
       return _runFlutterTest(projectDir.childDirectory('example'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -636,15 +623,14 @@ void main() {
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
       Logger: () => logger,
     },
   );
@@ -657,8 +643,10 @@ void main() {
         <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
         <String>['example/pubspec.yaml'],
       );
-      final String rawPubspec =
-          await projectDir.childDirectory('example').childFile('pubspec.yaml').readAsString();
+      final String rawPubspec = await projectDir
+          .childDirectory('example')
+          .childFile('pubspec.yaml')
+          .readAsString();
       final Pubspec pubspec = Pubspec.parse(rawPubspec);
       final String pluginName = projectDir.basename;
       expect(pubspec.dependencies, contains(pluginName));
@@ -667,15 +655,14 @@ void main() {
       expect(pathDependency.path, '../');
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -690,15 +677,14 @@ void main() {
       return _runFlutterTest(projectDir.childDirectory('example'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -779,8 +765,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      FeatureFlags:
-          () => TestFeatureFlags(isSwiftPackageManagerEnabled: true, isMacOSEnabled: true),
+      FeatureFlags: () =>
+          TestFeatureFlags(isSwiftPackageManagerEnabled: true, isMacOSEnabled: true),
     },
   );
 
@@ -952,15 +938,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -976,8 +961,9 @@ void main() {
 
     expectExists('android/gradle.properties');
 
-    final String actualContents =
-        await globals.fs.file('${projectDir.path}/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs
+        .file('${projectDir.path}/android/gradle.properties')
+        .readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -1000,19 +986,17 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--platform', 'android', projectDir.path]);
 
-      final String androidManifest =
-          await globals.fs
-              .file('${projectDir.path}/android/app/src/main/AndroidManifest.xml')
-              .readAsString();
+      final String androidManifest = await globals.fs
+          .file('${projectDir.path}/android/app/src/main/AndroidManifest.xml')
+          .readAsString();
       expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
       expect(androidManifest.contains('android:value="2"'), true);
 
-      final String mainActivity =
-          await globals.fs
-              .file(
-                '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
-              )
-              .readAsString();
+      final String mainActivity = await globals.fs
+          .file(
+            '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
+          )
+          .readAsString();
       // Import for the new embedding class.
       expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
@@ -1332,8 +1316,10 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    final String pubspecContents =
-        await globals.fs.directory(projectDir.path).childFile('pubspec.yaml').readAsString();
+    final String pubspecContents = await globals.fs
+        .directory(projectDir.path)
+        .childFile('pubspec.yaml')
+        .readAsString();
 
     expect(pubspecContents.contains('platforms:'), true);
   });
@@ -1360,8 +1346,9 @@ void main() {
       expectExists('lib/main.dart');
       expectExists('test/widget_test.dart');
 
-      final String actualContents =
-          await globals.fs.file('${projectDir.path}/test/widget_test.dart').readAsString();
+      final String actualContents = await globals.fs
+          .file('${projectDir.path}/test/widget_test.dart')
+          .readAsString();
 
       expect(actualContents.contains('flutter_test.dart'), true);
 
@@ -1446,8 +1433,9 @@ void main() {
 
       final String versionPath = globals.fs.path.join('.metadata');
       expectExists(versionPath);
-      final String version =
-          globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+      final String version = globals.fs
+          .file(globals.fs.path.join(projectDir.path, versionPath))
+          .readAsStringSync();
       expect(version, contains('version:'));
       expect(version, contains('revision: "12345678"'));
       expect(version, contains('channel: "omega"'));
@@ -1459,10 +1447,9 @@ void main() {
         'Dart_SDK.xml',
       );
       expectExists(intelliJSdkMetadataPath);
-      final String sdkMetaContents =
-          globals.fs
-              .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
-              .readAsStringSync();
+      final String sdkMetaContents = globals.fs
+          .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
+          .readAsStringSync();
       expect(sdkMetaContents, contains('<root url="file:/'));
       expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
     },
@@ -1553,8 +1540,9 @@ void main() {
 
       final String versionPath = globals.fs.path.join('.metadata');
       expectExists(versionPath);
-      final String version =
-          globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+      final String version = globals.fs
+          .file(globals.fs.path.join(projectDir.path, versionPath))
+          .readAsStringSync();
       expect(version, contains('version:'));
       expect(version, contains('revision: "12345678"'));
       expect(version, contains('channel: "omega"'));
@@ -1566,10 +1554,9 @@ void main() {
         'Dart_SDK.xml',
       );
       expectExists(intelliJSdkMetadataPath);
-      final String sdkMetaContents =
-          globals.fs
-              .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
-              .readAsStringSync();
+      final String sdkMetaContents = globals.fs
+          .file(globals.fs.path.join(projectDir.path, intelliJSdkMetadataPath))
+          .readAsStringSync();
       expect(sdkMetaContents, contains('<root url="file:/'));
       expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
     },
@@ -1711,15 +1698,14 @@ void main() {
       expect(displayName, 'My Project');
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -1939,8 +1925,9 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs
+        .file(globals.fs.path.join(projectDir.path, '.metadata'))
+        .readAsStringSync();
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
@@ -1957,8 +1944,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata =
-          globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+      final String metadata = globals.fs
+          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+          .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: app'));
     },
   );
@@ -1973,8 +1961,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata =
-          globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+      final String metadata = globals.fs
+          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+          .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: app'));
     },
   );
@@ -1989,8 +1978,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata =
-          globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+      final String metadata = globals.fs
+          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+          .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: module'));
     },
   );
@@ -2005,8 +1995,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata =
-          globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+      final String metadata = globals.fs
+          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+          .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: plugin'));
     },
   );
@@ -2021,8 +2012,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      final String metadata =
-          globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+      final String metadata = globals.fs
+          .file(globals.fs.path.join(projectDir.path, '.metadata'))
+          .readAsStringSync();
       expect(LineSplitter.split(metadata), contains('project_type: package'));
     },
   );
@@ -2041,15 +2033,14 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -2070,15 +2061,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -2291,15 +2281,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -2337,15 +2326,14 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -3511,8 +3499,10 @@ void main() {
     ]);
 
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'), exists);
-    final String rawPodSpec =
-        await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
+    final String rawPodSpec = await projectDir
+        .childDirectory('ios')
+        .childFile('flutter_project.podspec')
+        .readAsString();
     expect(rawPodSpec, contains("s.platform = :ios, '13.0'"));
   });
 
@@ -3524,8 +3514,9 @@ void main() {
 
     expect(globals.fs.isFileSync('${projectDir.path}/android/app/build.gradle.kts'), true);
 
-    final String buildContent =
-        await globals.fs.file('${projectDir.path}/android/app/build.gradle.kts').readAsString();
+    final String buildContent = await globals.fs
+        .file('${projectDir.path}/android/app/build.gradle.kts')
+        .readAsString();
 
     expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);
@@ -3708,18 +3699,15 @@ void main() {
         ],
       );
 
-      final String moduleBuildGradleFileContent =
-          await globals.fs
-              .file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath))
-              .readAsString();
-      final String moduleAppBuildGradleFileContent =
-          await globals.fs
-              .file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
-              .readAsString();
-      final String moduleFlutterBuildGradleFileContent =
-          await globals.fs
-              .file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
-              .readAsString();
+      final String moduleBuildGradleFileContent = await globals.fs
+          .file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath))
+          .readAsString();
+      final String moduleAppBuildGradleFileContent = await globals.fs
+          .file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath))
+          .readAsString();
+      final String moduleFlutterBuildGradleFileContent = await globals.fs
+          .file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath))
+          .readAsString();
 
       // Each build file should contain the expected namespace.
       const String expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
@@ -3729,15 +3717,14 @@ void main() {
       expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -4068,12 +4055,8 @@ void main() {
       expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
     },
     overrides: <Type, Generator>{
-      FeatureFlags:
-          () => TestFeatureFlags(
-            isWindowsEnabled: true,
-            isAndroidEnabled: false,
-            isIOSEnabled: false,
-          ),
+      FeatureFlags: () =>
+          TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
       Logger: () => logger,
     },
   );
@@ -4104,15 +4087,14 @@ void main() {
       await analyzeProject(projectDir.path, expectedFailures: expectedFailures);
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -4152,15 +4134,14 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
     },
   );
 
@@ -4394,10 +4375,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       );
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(1000, 0, 0, '1000.0.0'),
-          ), // Too high a version for template Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(1000, 0, 0, '1000.0.0'),
+      ), // Too high a version for template Gradle versions.
       Logger: () => logger,
     },
   );
@@ -4447,10 +4427,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       );
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(0, 0, 0, '0.0.0'),
-          ), // Too low a version for template AGP versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(0, 0, 0, '0.0.0'),
+      ), // Too low a version for template AGP versions.
       Logger: () => logger,
     },
   );
@@ -4466,10 +4445,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       ];
 
       for (final FlutterTemplateType projectType in relevantProjectTypes) {
-        final String relevantAgpVersion =
-            projectType == FlutterTemplateType.module
-                ? _kIncompatibleAgpVersionForModule
-                : templateAndroidGradlePluginVersion;
+        final String relevantAgpVersion = projectType == FlutterTemplateType.module
+            ? _kIncompatibleAgpVersionForModule
+            : templateAndroidGradlePluginVersion;
         final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
           false,
           templateDefaultGradleVersion,
@@ -4533,10 +4511,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       }
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(500, 0, 0, '500.0.0'),
-          ), // Too high a version for template Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(500, 0, 0, '500.0.0'),
+      ), // Too high a version for template Gradle versions.
       Logger: () => logger,
     },
   );
@@ -4554,10 +4531,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       ];
 
       for (final FlutterTemplateType projectType in relevantProjectTypes) {
-        final String relevantAgpVersion =
-            projectType == FlutterTemplateType.module
-                ? _kIncompatibleAgpVersionForModule
-                : templateAndroidGradlePluginVersion;
+        final String relevantAgpVersion = projectType == FlutterTemplateType.module
+            ? _kIncompatibleAgpVersionForModule
+            : templateAndroidGradlePluginVersion;
         final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
           true,
           templateDefaultGradleVersion,
@@ -4621,10 +4597,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       }
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(1, 8, 0, '1.8.0'),
-          ), // Too low a version for template AGP versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(1, 8, 0, '1.8.0'),
+      ), // Too low a version for template AGP versions.
       Logger: () => logger,
     },
   );
@@ -4644,10 +4619,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       ];
 
       for (final FlutterTemplateType projectType in relevantProjectTypes) {
-        final String relevantAgpVersion =
-            projectType == FlutterTemplateType.module
-                ? _kIncompatibleAgpVersionForModule
-                : templateAndroidGradlePluginVersion;
+        final String relevantAgpVersion = projectType == FlutterTemplateType.module
+            ? _kIncompatibleAgpVersionForModule
+            : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
           true,
           templateDefaultGradleVersion,
@@ -4680,10 +4654,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       }
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(20, 0, 0, '20.0.0'),
-          ), // Middle compatible Java version with current template AGP/Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(20, 0, 0, '20.0.0'),
+      ), // Middle compatible Java version with current template AGP/Gradle versions.
       Logger: () => logger,
     },
   );
@@ -4701,10 +4674,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       ];
 
       for (final FlutterTemplateType projectType in relevantProjectTypes) {
-        final String relevantAgpVersion =
-            projectType == FlutterTemplateType.module
-                ? _kIncompatibleAgpVersionForModule
-                : templateAndroidGradlePluginVersion;
+        final String relevantAgpVersion = projectType == FlutterTemplateType.module
+            ? _kIncompatibleAgpVersionForModule
+            : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
           true,
           templateDefaultGradleVersion,
@@ -4737,10 +4709,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       }
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(17, 0, 0, '22.0.0'),
-          ), // Maximum compatible Java version with current template AGP/Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(17, 0, 0, '22.0.0'),
+      ), // Maximum compatible Java version with current template AGP/Gradle versions.
       Logger: () => logger,
     },
   );
@@ -4758,10 +4729,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       ];
 
       for (final FlutterTemplateType projectType in relevantProjectTypes) {
-        final String relevantAgpVersion =
-            projectType == FlutterTemplateType.module
-                ? _kIncompatibleAgpVersionForModule
-                : templateAndroidGradlePluginVersion;
+        final String relevantAgpVersion = projectType == FlutterTemplateType.module
+            ? _kIncompatibleAgpVersionForModule
+            : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
           true,
           templateDefaultGradleVersion,
@@ -4794,10 +4764,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       }
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(17, 0, 0, '17.0.0'),
-          ), // Minimum compatible Java version with current template AGP/Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(17, 0, 0, '17.0.0'),
+      ), // Minimum compatible Java version with current template AGP/Gradle versions.
       Logger: () => logger,
     },
   );
@@ -4809,8 +4778,10 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       <String>['pubspec.yaml', 'web/index.html'],
     );
 
-    final String rawIndexHtml =
-        await projectDir.childDirectory('web').childFile('index.html').readAsString();
+    final String rawIndexHtml = await projectDir
+        .childDirectory('web')
+        .childFile('index.html')
+        .readAsString();
     const String expectedDescription = '<meta name="description" content="A new Flutter project.">';
 
     expect(rawIndexHtml.contains(expectedDescription), isTrue);
@@ -4823,8 +4794,10 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       <String>['pubspec.yaml', 'web/manifest.json'],
     );
 
-    final String rawManifestJson =
-        await projectDir.childDirectory('web').childFile('manifest.json').readAsString();
+    final String rawManifestJson = await projectDir
+        .childDirectory('web')
+        .childFile('manifest.json')
+        .readAsString();
     const String expectedDescription = '"description": "A new Flutter project."';
 
     expect(rawManifestJson.contains(expectedDescription), isTrue);
@@ -4860,14 +4833,13 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       );
     },
     overrides: <Type, Generator>{
-      FileSystem:
-          () => MemoryFileSystem.test(
-            opHandle: (String context, FileSystemOp operation) {
-              if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-                throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
-              }
-            },
-          ),
+      FileSystem: () => MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
+            throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
+          }
+        },
+      ),
       ProcessManager: () => fakeProcessManager,
     },
   );
@@ -4890,13 +4862,30 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       expect(logger.warningText, contains(expectedMessage));
     },
     overrides: <Type, Generator>{
-      Java:
-          () => FakeJava(
-            version: const software.Version.withText(500, 0, 0, '500.0.0'),
-          ), // Too high a version for template Gradle versions.
+      Java: () => FakeJava(
+        version: const software.Version.withText(500, 0, 0, '500.0.0'),
+      ), // Too high a version for template Gradle versions.
       Logger: () => logger,
     },
   );
+
+  testUsingContext('flutter create --help hides --sample', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--help']);
+    expect(logger.statusText, isNot(contains('--sample')));
+  }, overrides: <Type, Generator>{Logger: () => logger});
+
+  testUsingContext('flutter create --verbose --help shows --sample', () async {
+    // Because this is an instrumented TestCommandRunner, verboseHelp is not
+    // automatically populated like it would be for the main executable.
+    final CreateCommand command = CreateCommand(verboseHelp: true);
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--verbose', '--help']);
+    expect(logger.statusText, contains('--sample'));
+  }, overrides: <Type, Generator>{Logger: () => logger});
 }
 
 Future<void> _createProject(

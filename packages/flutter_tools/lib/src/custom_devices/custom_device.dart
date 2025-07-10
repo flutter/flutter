@@ -434,16 +434,15 @@ class CustomDevice extends Device {
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _globalLogReader = CustomDeviceLogReader(config.label),
-       portForwarder =
-           config.usesPortForwarding
-               ? CustomDevicePortForwarder(
-                 deviceName: config.label,
-                 forwardPortCommand: config.forwardPortCommand!,
-                 forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-                 processManager: processManager,
-                 logger: logger,
-               )
-               : const NoOpDevicePortForwarder(),
+       portForwarder = config.usesPortForwarding
+           ? CustomDevicePortForwarder(
+               deviceName: config.label,
+               forwardPortCommand: config.forwardPortCommand!,
+               forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
+               processManager: processManager,
+               logger: logger,
+             )
+           : const NoOpDevicePortForwarder(),
        super(
          config.id,
          category: Category.mobile,
@@ -458,6 +457,7 @@ class CustomDevice extends Device {
   final Map<ApplicationPackage, CustomDeviceAppSession> _sessions =
       <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
+  Process? _globalLogReaderProcess;
 
   @override
   final DevicePortForwarder portForwarder;
@@ -611,15 +611,26 @@ class CustomDevice extends Device {
     _sessions
       ..forEach((_, CustomDeviceAppSession session) => session.dispose())
       ..clear();
+    _globalLogReaderProcess?.kill();
+    _globalLogReaderProcess = null;
   }
 
   @override
   Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
+    }
+
+    if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
+      // launch the readLogs command
+      _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
+      _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
     return _globalLogReader;
@@ -707,8 +718,9 @@ class CustomDevice extends Device {
     final Map<String, String> additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
       'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
-      'engineRevision':
-          artifacts.usesLocalArtifacts ? 'local' : globals.flutterVersion.engineRevision,
+      'engineRevision': artifacts.usesLocalArtifacts
+          ? 'local'
+          : globals.flutterVersion.engineRevision,
     };
 
     if (!prebuiltApplication) {

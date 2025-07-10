@@ -1254,8 +1254,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext(
       'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
       () async {
-        final List<IOSSimulatorRuntime> runtimes =
-            await simulatorUtilsBadSimctl.getAvailableIOSRuntimes();
+        final List<IOSSimulatorRuntime> runtimes = await simulatorUtilsBadSimctl
+            .getAvailableIOSRuntimes();
 
         expect(runtimes, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);

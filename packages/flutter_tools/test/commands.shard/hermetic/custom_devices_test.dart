@@ -18,8 +18,10 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -90,7 +92,8 @@ const String defaultConfigLinux1 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ]
 }
@@ -154,7 +157,8 @@ const String defaultConfigLinux2 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ],
   "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
@@ -301,24 +305,22 @@ CustomDevicesCommand createCustomDevicesCommand({
   logger ??= BufferLogger.test();
 
   return CustomDevicesCommand.test(
-    customDevicesConfig:
-        config != null
-            ? config(fileSystem, logger)
-            : CustomDevicesConfig.test(
-              platform: platform,
-              fileSystem: fileSystem,
-              directory: fileSystem.directory('/'),
-              logger: logger,
-            ),
+    customDevicesConfig: config != null
+        ? config(fileSystem, logger)
+        : CustomDevicesConfig.test(
+            platform: platform,
+            fileSystem: fileSystem,
+            directory: fileSystem.directory('/'),
+            logger: logger,
+          ),
     operatingSystemUtils: FakeOperatingSystemUtils(
-      hostPlatform:
-          platform.isLinux
-              ? HostPlatform.linux_x64
-              : platform.isWindows
-              ? HostPlatform.windows_x64
-              : platform.isMacOS
-              ? HostPlatform.darwin_x64
-              : throw UnsupportedError('Unsupported operating system'),
+      hostPlatform: platform.isLinux
+          ? HostPlatform.linux_x64
+          : platform.isWindows
+          ? HostPlatform.windows_x64
+          : platform.isMacOS
+          ? HostPlatform.darwin_x64
+          : throw UnsupportedError('Unsupported operating system'),
     ),
     terminal: terminal != null ? terminal(platform) : FakeTerminal(platform: platform),
     platform: platform,
@@ -468,20 +470,19 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal:
-              (Platform platform) => createFakeTerminalForAddingSshDevice(
-                platform: platform,
-                id: 'testid',
-                label: 'testlabel',
-                sdkNameAndVersion: 'testsdknameandversion',
-                enabled: 'y',
-                hostname: 'testhostname',
-                username: 'testuser',
-                runDebug: 'testrundebug',
-                usePortForwarding: 'y',
-                screenshot: 'testscreenshot',
-                apply: 'y',
-              ),
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
           fileSystem: fs,
           processManager: FakeProcessManager.any(),
           featureEnabled: true,
@@ -559,20 +560,19 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-        terminal:
-            (Platform platform) => createFakeTerminalForAddingSshDevice(
-              platform: platform,
-              id: 'testid',
-              label: 'testlabel',
-              sdkNameAndVersion: 'testsdknameandversion',
-              enabled: 'y',
-              hostname: '192.168.178.1',
-              username: 'testuser',
-              runDebug: 'testrundebug',
-              usePortForwarding: 'y',
-              screenshot: 'testscreenshot',
-              apply: 'y',
-            ),
+        terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          platform: platform,
+          id: 'testid',
+          label: 'testlabel',
+          sdkNameAndVersion: 'testsdknameandversion',
+          enabled: 'y',
+          hostname: '192.168.178.1',
+          username: 'testuser',
+          runDebug: 'testrundebug',
+          usePortForwarding: 'y',
+          screenshot: 'testscreenshot',
+          apply: 'y',
+        ),
         processManager: FakeProcessManager.any(),
         fileSystem: fs,
         featureEnabled: true,
@@ -649,20 +649,19 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-        terminal:
-            (Platform platform) => createFakeTerminalForAddingSshDevice(
-              platform: platform,
-              id: 'testid',
-              label: 'testlabel',
-              sdkNameAndVersion: 'testsdknameandversion',
-              enabled: 'y',
-              hostname: '::1',
-              username: 'testuser',
-              runDebug: 'testrundebug',
-              usePortForwarding: 'y',
-              screenshot: 'testscreenshot',
-              apply: 'y',
-            ),
+        terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          platform: platform,
+          id: 'testid',
+          label: 'testlabel',
+          sdkNameAndVersion: 'testsdknameandversion',
+          enabled: 'y',
+          hostname: '::1',
+          username: 'testuser',
+          runDebug: 'testrundebug',
+          usePortForwarding: 'y',
+          screenshot: 'testscreenshot',
+          apply: 'y',
+        ),
         fileSystem: fs,
         featureEnabled: true,
       );
@@ -745,20 +744,19 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal:
-              (Platform platform) => createFakeTerminalForAddingSshDevice(
-                platform: platform,
-                id: 'testid',
-                label: 'testlabel',
-                sdkNameAndVersion: 'testsdknameandversion',
-                enabled: 'y',
-                hostname: 'testhostname',
-                username: 'testuser',
-                runDebug: 'testrundebug',
-                usePortForwarding: 'n',
-                screenshot: 'testscreenshot',
-                apply: 'y',
-              ),
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'n',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
           fileSystem: fs,
           featureEnabled: true,
         );
@@ -825,20 +823,19 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal:
-              (Platform platform) => createFakeTerminalForAddingSshDevice(
-                platform: platform,
-                id: 'testid',
-                label: 'testlabel',
-                sdkNameAndVersion: 'testsdknameandversion',
-                enabled: 'y',
-                hostname: 'testhostname',
-                username: 'testuser',
-                runDebug: 'testrundebug',
-                usePortForwarding: 'y',
-                screenshot: '',
-                apply: 'y',
-              ),
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: '',
+            apply: 'y',
+          ),
           fileSystem: fs,
           featureEnabled: true,
         );
@@ -930,8 +927,9 @@ void main() {
       expect(fs.file('/.flutter_custom_devices.json.bak'), exists);
       expect(config.devices, hasLength(0));
 
-      final Uint8List backupContents =
-          fs.file('.flutter_custom_devices.json.bak').readAsBytesSync();
+      final Uint8List backupContents = fs
+          .file('.flutter_custom_devices.json.bak')
+          .readAsBytesSync();
       expect(contentsBefore, equals(backupContents));
     });
 
@@ -1076,8 +1074,9 @@ void main() {
         ),
       );
 
-      final Uint8List backupContents =
-          fs.file('.flutter_custom_devices.json.bak').readAsBytesSync();
+      final Uint8List backupContents = fs
+          .file('.flutter_custom_devices.json.bak')
+          .readAsBytesSync();
       expect(contentsBefore, equals(backupContents));
       expect(
         fs.file('.flutter_custom_devices.json').readAsStringSync(),
@@ -1106,6 +1105,26 @@ void main() {
         );
       },
     );
+
+    testUsingContext('custom-device log reader command', () async {
+      const String logLine = 'Hello, from custom device!';
+      const List<String> logLineCommand = <String>['echo', logLine];
+      const List<String> expectedLogLines = <String>[logLine];
+
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: logLineCommand, stdout: logLine),
+      ]);
+      final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.exampleUnix.copyWith(
+        readLogsCommand: logLineCommand,
+      );
+      final CustomDevice customDevice = CustomDevice(
+        config: customDeviceConfig,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+      );
+      final DeviceLogReader logReader = await customDevice.getLogReader();
+      expect(logReader.logLines, emitsInOrder(expectedLogLines));
+    });
   });
 
   group('windows', () {
@@ -1119,20 +1138,19 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal:
-              (Platform platform) => createFakeTerminalForAddingSshDevice(
-                platform: platform,
-                id: 'testid',
-                label: 'testlabel',
-                sdkNameAndVersion: 'testsdknameandversion',
-                enabled: 'y',
-                hostname: 'testhostname',
-                username: 'testuser',
-                runDebug: 'testrundebug',
-                usePortForwarding: 'y',
-                screenshot: 'testscreenshot',
-                apply: 'y',
-              ),
+          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+            platform: platform,
+            id: 'testid',
+            label: 'testlabel',
+            sdkNameAndVersion: 'testsdknameandversion',
+            enabled: 'y',
+            hostname: 'testhostname',
+            username: 'testuser',
+            runDebug: 'testrundebug',
+            usePortForwarding: 'y',
+            screenshot: 'testscreenshot',
+            apply: 'y',
+          ),
           fileSystem: fs,
           platform: windowsPlatform,
           featureEnabled: true,
