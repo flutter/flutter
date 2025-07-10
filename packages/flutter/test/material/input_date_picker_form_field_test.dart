@@ -420,7 +420,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -440,7 +439,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -463,7 +461,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
