@@ -1532,34 +1532,13 @@ abstract class DefaultTextEditingStrategy
       return editingState;
     }
 
-    // If interactive selection is disabled, collapse the selection to the newly
-    // selected offset.
-    var currentOffset = lastEditingState?.baseOffset ?? 0;
-    if (activeDomElement.isA<DomHTMLInputElement>()) {
-      final element = domElement as DomHTMLInputElement;
-      final selectionStart = element.selectionStart?.toInt() ?? 0;
-      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
-      final collapsedOffset = switch (element.selectionDirection) {
-        'backward' => selectionStart,
-        'forward' => selectionEnd,
-        _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
-      };
-      element.setSelectionRange(collapsedOffset, collapsedOffset);
-      return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
-    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
-      final element = domElement as DomHTMLTextAreaElement;
-      final selectionStart = element.selectionStart?.toInt() ?? 0;
-      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
-      final collapsedOffset = switch (element.selectionDirection) {
-        'backward' => selectionStart,
-        'forward' => selectionEnd,
-        _ => currentOffset == selectionStart ? selectionEnd : selectionStart,
-      };
-      element.setSelectionRange(collapsedOffset, collapsedOffset);
-      return editingState.copyWith(baseOffset: collapsedOffset, extentOffset: collapsedOffset);
-    } else {
-      return editingState;
-    }
+    // If interactive selection is disabled, collapse the selection to the end.
+    final newEditingState = editingState.copyWith(
+      baseOffset: editingState.extentOffset,
+      extentOffset: editingState.extentOffset,
+    );
+    newEditingState.applyToDomElement(activeDomElement);
+    return newEditingState;
   }
 
   void handleBeforeInput(DomEvent event) {

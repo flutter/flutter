@@ -2969,6 +2969,7 @@ Future<void> testMain() async {
 
       spy.messages.clear();
 
+      // Forward selection collapses at the end.
       input.setSelectionRange(2, 5, 'forward');
       if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         final DomEvent keyup = createDomEvent('Event', 'keyup');
@@ -2986,6 +2987,30 @@ Future<void> testMain() async {
           'text': 'something',
           'selectionBase': 5,
           'selectionExtent': 5,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      // Backward selection collapses at the start.
+      input.setSelectionRange(2, 5, 'backward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 2,
+          'selectionExtent': 2,
           'composingBase': -1,
           'composingExtent': -1,
         },
