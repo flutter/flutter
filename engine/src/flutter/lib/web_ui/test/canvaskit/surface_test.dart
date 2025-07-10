@@ -213,22 +213,19 @@ void testMain() {
 
         // Emulate WebGL context loss.
         final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas()!;
-        final JSObject ctx = canvas.getContext('webgl2')! as JSObject;
-        final JSObject loseContextExtension = ctx.callMethod<JSObject>(
-          'getExtension'.toJS,
-          'WEBGL_lose_context'.toJS,
-        );
-        loseContextExtension.callMethod('loseContext'.toJS);
+        final WebGLContext ctx = canvas.getGlContext(2);
+        final WebGLLoseContextExtension loseContextExtension = ctx.loseContextExtension;
+        loseContextExtension.loseContext();
 
         // Pump a timer to allow the "lose context" event to propagate.
         await Future<void>.delayed(Duration.zero);
         // We don't create a new GL context until the context is restored.
         expect(surface.debugContextLost, isTrue);
-        final bool isContextLost = ctx.callMethod<JSBoolean>('isContextLost'.toJS).toDart;
+        final bool isContextLost = ctx.isContextLost();
         expect(isContextLost, isTrue);
 
         // Emulate WebGL context restoration.
-        loseContextExtension.callMethod('restoreContext'.toJS);
+        loseContextExtension.restoreContext();
 
         // Pump a timer to allow the "restore context" event to propagate.
         await Future<void>.delayed(Duration.zero);
