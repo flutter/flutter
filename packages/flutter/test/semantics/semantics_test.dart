@@ -1130,6 +1130,29 @@ void main() {
         ..addPart('use');
       expect(builder.build().label, 'Second use');
     });
+
+    test('reuse without clearing', () {
+      final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
+
+      // First use
+      builder
+        ..addPart('First')
+        ..addPart('batch');
+      expect(builder.build().label, 'First batch');
+      expect(builder.length, 2);
+
+      // Add more parts without clearing - should accumulate
+      builder
+        ..addPart('Second')
+        ..addPart('batch');
+      expect(builder.build().label, 'First batch Second batch');
+      expect(builder.length, 4);
+
+      // Add even more parts - should continue accumulating
+      builder.addPart('Final');
+      expect(builder.build().label, 'First batch Second batch Final');
+      expect(builder.length, 5);
+    });
   });
 
 
@@ -1197,7 +1220,7 @@ void main() {
         ..addPart('שלום', textDirection: TextDirection.rtl) // Hebrew
         ..addPart('to our app', textDirection: TextDirection.ltr);
 
-      expect(builder.build().label, contains('Welcome \u202Bمرحبا\u202C \u202Bשלום\u202C to our app'));
+      expect(builder.build().label, 'Welcome, \u202Bمرحبا\u202C, \u202Bשלום\u202C, to our app');
     });
   });
 

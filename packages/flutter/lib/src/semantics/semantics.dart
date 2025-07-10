@@ -883,7 +883,7 @@ final class SemanticsLabelBuilder {
   /// Empty parts are ignored.
   void addPart(String label, {TextDirection? textDirection}) {
     if (label.isNotEmpty) {
-      _parts.add(_LabelPart(label, textDirection));
+      _parts.add((label, textDirection));
     }
   }
 
@@ -903,31 +903,32 @@ final class SemanticsLabelBuilder {
     }
 
     if (_parts.length == 1) {
-      final _LabelPart part = _parts.first;
-      return SemanticsLabel._(part.text);
+      final (String text, TextDirection? _) = _parts.first;
+      return SemanticsLabel._(text);
     }
 
     // Concatenate multiple parts with proper text direction handling
     final StringBuffer buffer = StringBuffer();
-    buffer.write(_parts.first.text);
+    final (String firstText, TextDirection? _) = _parts.first;
+    buffer.write(firstText);
 
-    for (final (String text, TextDirection? textDirection) in _parts) {
-      final TextDirection? partDirection = currentPart.textDirection ?? textDirection;
+    for (final (String partText, TextDirection? partTextDirection) in _parts.skip(1)) {
+      final TextDirection? partDirection = partTextDirection ?? textDirection;
 
       if (separator.isNotEmpty) {
         buffer.write(separator);
       }
 
-      String partText = currentPart.text;
+      String processedText = partText;
       if (textDirection != null && partDirection != null && textDirection != partDirection) {
         final String directionalEmbedding = switch (partDirection) {
           TextDirection.rtl => Unicode.RLE,
           TextDirection.ltr => Unicode.LRE,
         };
-        partText = directionalEmbedding + partText + Unicode.PDF;
+        processedText = directionalEmbedding + partText + Unicode.PDF;
       }
 
-      buffer.write(partText);
+      buffer.write(processedText);
     }
 
     return SemanticsLabel._(buffer.toString());
