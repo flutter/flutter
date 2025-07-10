@@ -14,7 +14,7 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 /// The rest of the tools code should use this class instead of looking up
 /// features directly. To facilitate rolls to google3 and other clients, all
 /// flags should be provided with a default implementation here. Clients that
-/// use this class should extent instead of implement, so that new flags are
+/// use this class should extend instead of implement, so that new flags are
 /// picked up automatically.
 abstract class FeatureFlags {
   /// const constructor so that subclasses can be const.
@@ -53,6 +53,11 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether to stop writing the `{FLUTTER_ROOT}/version` file.
+  ///
+  /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+  bool get isOmitLegacyVersionFileEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -71,14 +76,27 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     swiftPackageManager,
+    omitLegacyVersionFile,
   ];
+
+  /// All current Flutter feature flags that can be configured.
+  ///
+  /// [Feature.configSetting] is not `null`.
+  Iterable<Feature> get allConfigurableFeatures {
+    return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
+
+  /// All Flutter feature flags that are enabled.
+  // This member is overriden in google3.
+  Iterable<Feature> get allEnabledFeatures {
+    return allFeatures.where(isEnabled);
+  }
 }
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures =>
-    featureFlags.allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -159,6 +177,21 @@ const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
+///
+/// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+const Feature omitLegacyVersionFile = Feature(
+  name: 'stops writing the legacy version file',
+  configSetting: 'omit-legacy-version-file',
+  extraHelpText:
+      'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
+      'the flutter tool execution; a newer file format has existed for some '
+      'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),

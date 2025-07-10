@@ -175,8 +175,8 @@ class CarouselViewTheme extends InheritedTheme {
   /// CarouselViewThemeData theme = CarouselViewTheme.of(context);
   /// ```
   static CarouselViewThemeData of(BuildContext context) {
-    final CarouselViewTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<CarouselViewTheme>();
+    final CarouselViewTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<CarouselViewTheme>();
     return inheritedTheme?.data ?? Theme.of(context).carouselViewTheme;
   }
 

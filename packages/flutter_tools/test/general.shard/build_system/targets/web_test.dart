@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -99,10 +100,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -134,7 +134,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('version.json'), exists);
     }),
@@ -149,7 +151,9 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       final String versionFile = environment.outputDir.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -266,7 +270,7 @@ name: foo
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(dumpInfo: true),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'A');
       expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
@@ -285,7 +289,9 @@ name: foo
       // Update to arbitrary resource file triggers rebuild.
       webResources.childFile('foo.txt').writeAsStringSync('B');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const JsCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'B');
     }),
@@ -305,7 +311,9 @@ name: foo
       environment.buildDir.childFile('main.dart.mjs')
         ..createSync()
         ..writeAsStringSync('old mjs');
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'old wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'old mjs');
 
@@ -316,7 +324,9 @@ name: foo
         ..createSync()
         ..writeAsStringSync('new mjs');
 
-      await WebReleaseBundle(<WebCompilerConfig>[const WasmCompilerConfig()]).build(environment);
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const WasmCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'new wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'new mjs');
@@ -327,10 +337,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -350,10 +359,9 @@ name: foo
     'WebEntrypointTarget generates a plugin registrant for a file outside of main',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'true';
         await const WebEntrypointTarget().build(environment);
@@ -375,10 +383,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with plugins and init platform on windows',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
 
         environment.defines[kHasWebPlugins] = 'true';
@@ -409,10 +416,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -441,10 +447,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('// @dart=2.8\nvoid main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
 
@@ -464,10 +469,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint with a language version from a package config',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         globals.fs.file(globals.fs.path.join('pubspec.yaml')).writeAsStringSync('name: foo\n');
         environment.defines[kTargetFile] = mainFile.path;
         await const WebEntrypointTarget().build(environment);
@@ -488,10 +492,9 @@ name: foo
     'WebEntrypointTarget generates an entrypoint without plugins and without init platform',
     () => testbed.run(
       () async {
-        final File mainFile =
-            globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('void main() {}');
+        final File mainFile = globals.fs.file(globals.fs.path.join('foo', 'lib', 'main.dart'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
         environment.defines[kTargetFile] = mainFile.path;
         environment.defines[kHasWebPlugins] = 'false';
         await const WebEntrypointTarget().build(environment);
@@ -1138,75 +1141,81 @@ name: foo
         ]) {
           for (final String buildMode in const <String>['profile', 'release', 'debug']) {
             for (final bool sourceMaps in const <bool>[true, false]) {
-              test(
-                'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps',
-                () => testbed.run(() async {
-                  final int expectedLevel =
-                      level ??
-                      switch (buildMode) {
-                        'debug' => 0,
-                        'profile' || 'release' => 2,
-                        _ => throw UnimplementedError(),
-                      };
-                  environment.defines[kBuildMode] = buildMode;
-                  environment.defines[kDartDefines] = encodeDartDefines(defines);
+              for (final bool minify in const <bool>[true, false]) {
+                test(
+                  'Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps minify=$minify',
+                  () => testbed.run(() async {
+                    final int expectedLevel =
+                        level ??
+                        switch (buildMode) {
+                          'debug' => 0,
+                          'profile' || 'release' => 2,
+                          _ => throw UnimplementedError(),
+                        };
+                    environment.defines[kBuildMode] = buildMode;
+                    environment.defines[kDartDefines] = encodeDartDefines(defines);
 
-                  final File depFile = environment.buildDir.childFile('dart2wasm.d');
+                    final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-                  final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
-                  processManager.addCommand(
-                    FakeCommand(
-                      command: <String>[
-                        ..._kDart2WasmLinuxArgs,
-                        '-Ddart.vm.profile=${buildMode == 'profile'}',
-                        '-Ddart.vm.product=${buildMode == 'release'}',
-                        if (buildMode != 'debug') ...<String>[
-                          '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
-                          '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
+                    processManager.addCommand(
+                      FakeCommand(
+                        command: <String>[
+                          ..._kDart2WasmLinuxArgs,
+                          '-Ddart.vm.profile=${buildMode == 'profile'}',
+                          '-Ddart.vm.product=${buildMode == 'release'}',
+                          if (buildMode != 'debug') ...<String>[
+                            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+                            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+                          ],
+                          if (renderer == WebRendererMode.skwasm) ...<String>[
+                            '--extra-compiler-option=--import-shared-memory',
+                            '--extra-compiler-option=--shared-memory-max-pages=32768',
+                          ],
+                          ...defines.map((String define) => '-D$define'),
+                          if (renderer == WebRendererMode.skwasm) ...<String>[
+                            '-DFLUTTER_WEB_USE_SKIA=false',
+                            '-DFLUTTER_WEB_USE_SKWASM=true',
+                          ],
+                          if (renderer == WebRendererMode.canvaskit) ...<String>[
+                            '-DFLUTTER_WEB_USE_SKIA=true',
+                            '-DFLUTTER_WEB_USE_SKWASM=false',
+                          ],
+                          '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+                          '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                          '-O$expectedLevel',
+                          if (strip && buildMode == 'release')
+                            '--strip-wasm'
+                          else
+                            '--no-strip-wasm',
+                          if (!sourceMaps) '--no-source-maps',
+                          if (minify) '--minify' else '--no-minify',
+                          if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
+                          '-o',
+                          environment.buildDir.childFile('main.dart.wasm').absolute.path,
+                          environment.buildDir.childFile('main.dart').absolute.path,
                         ],
-                        if (renderer == WebRendererMode.skwasm) ...<String>[
-                          '--extra-compiler-option=--import-shared-memory',
-                          '--extra-compiler-option=--shared-memory-max-pages=32768',
-                        ],
-                        ...defines.map((String define) => '-D$define'),
-                        if (renderer == WebRendererMode.skwasm) ...<String>[
-                          '-DFLUTTER_WEB_USE_SKIA=false',
-                          '-DFLUTTER_WEB_USE_SKWASM=true',
-                        ],
-                        if (renderer == WebRendererMode.canvaskit) ...<String>[
-                          '-DFLUTTER_WEB_USE_SKIA=true',
-                          '-DFLUTTER_WEB_USE_SKWASM=false',
-                        ],
-                        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-                        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
-                        '-O$expectedLevel',
-                        if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
-                        if (!sourceMaps) '--no-source-maps',
-                        if (buildMode == 'debug') '--extra-compiler-option=--enable-asserts',
-                        '-o',
-                        environment.buildDir.childFile('main.dart.wasm').absolute.path,
-                        environment.buildDir.childFile('main.dart').absolute.path,
-                      ],
-                      onRun:
-                          (_) =>
-                              outputJsFile
-                                ..createSync()
-                                ..writeAsStringSync('foo'),
-                    ),
-                  );
+                        onRun: (_) => outputJsFile
+                          ..createSync()
+                          ..writeAsStringSync('foo'),
+                      ),
+                    );
 
-                  await Dart2WasmTarget(
-                    WasmCompilerConfig(
-                      optimizationLevel: level,
-                      stripWasm: strip,
-                      renderer: renderer,
-                      sourceMaps: sourceMaps,
-                    ),
-                  ).build(environment);
+                    await Dart2WasmTarget(
+                      WasmCompilerConfig(
+                        optimizationLevel: level,
+                        stripWasm: strip,
+                        renderer: renderer,
+                        sourceMaps: sourceMaps,
+                        minify: minify,
+                      ),
+                      const NoOpAnalytics(),
+                    ).build(environment);
 
-                  expect(outputJsFile.existsSync(), isTrue);
-                }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
-              );
+                    expect(outputJsFile.existsSync(), isTrue);
+                  }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+                );
+              }
             }
           }
         }
@@ -1257,22 +1266,95 @@ name: foo
       WasmCompilerConfig(optimizationLevel: 0),
       WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
       WasmCompilerConfig(stripWasm: false),
+      WasmCompilerConfig(minify: false),
+      WasmCompilerConfig(dryRun: true),
 
       // All properties non-default
       WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: WebRendererMode.canvaskit,
+        dryRun: true,
       ),
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
-      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      final Dart2WasmTarget target = Dart2WasmTarget(config, const NoOpAnalytics());
       return target.buildKey;
     });
 
     // Make sure all the build keys are unique.
     expect(buildKeys.toSet().length, buildKeys.length);
+  });
+
+  test('JsCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const JsCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const JsCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
+  });
+
+  test('WasmCompilerConfig minification based on release mode', () {
+    // Explicit `minify: true` should always result in `--minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.debug),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.profile),
+      contains('--minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: true).toCommandOptions(BuildMode.release),
+      contains('--minify'),
+    );
+
+    // Explicit `minify: false` should always result in `--no-minify` in all modes.
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.debug),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.profile),
+      contains('--no-minify'),
+    );
+    expect(
+      const WasmCompilerConfig(minify: false).toCommandOptions(BuildMode.release),
+      contains('--no-minify'),
+    );
+
+    // Default `minify` should result in `--minify` only in release mode.
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.debug), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.profile), contains('--no-minify'));
+    expect(const WasmCompilerConfig().toCommandOptions(BuildMode.release), contains('--minify'));
   });
 
   test(
@@ -1334,7 +1416,7 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains file hash.
@@ -1365,7 +1447,7 @@ name: foo
         ..writeAsStringSync('A');
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
       // Contains the same file hash for both `/` and the root index.html file.
@@ -1394,7 +1476,7 @@ name: foo
       environment.outputDir.childFile('main.dart.js.map').createSync(recursive: true);
       await WebServiceWorker(globals.fs, <WebCompilerConfig>[
         const JsCompilerConfig(),
-      ]).build(environment);
+      ], const NoOpAnalytics()).build(environment);
 
       // No caching of source maps.
       expect(

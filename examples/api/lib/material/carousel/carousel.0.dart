@@ -60,10 +60,9 @@ class _CarouselExampleState extends State<CarouselExample> {
             controller: controller,
             itemSnapping: true,
             flexWeights: const <int>[1, 7, 1],
-            children:
-                ImageInfo.values.map((ImageInfo image) {
-                  return HeroLayoutCard(imageInfo: image);
-                }).toList(),
+            children: ImageInfo.values.map((ImageInfo image) {
+              return HeroLayoutCard(imageInfo: image);
+            }).toList(),
           ),
         ),
         const SizedBox(height: 20),
@@ -90,26 +89,25 @@ class _CarouselExampleState extends State<CarouselExample> {
           child: CarouselView.weighted(
             flexWeights: const <int>[3, 3, 3, 2, 1],
             consumeMaxWeight: false,
-            children:
-                CardInfo.values.map((CardInfo info) {
-                  return ColoredBox(
-                    color: info.backgroundColor,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(info.icon, color: info.color, size: 32.0),
-                          Text(
-                            info.label,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.clip,
-                            softWrap: false,
-                          ),
-                        ],
+            children: CardInfo.values.map((CardInfo info) {
+              return ColoredBox(
+                color: info.backgroundColor,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(info.icon, color: info.color, size: 32.0),
+                      Text(
+                        info.label,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.clip,
+                        softWrap: false,
                       ),
-                    ),
-                  );
-                }).toList(),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         const SizedBox(height: 20),

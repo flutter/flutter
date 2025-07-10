@@ -38,7 +38,13 @@ class LicenseCheckerTest : public testing::Test {
       return absl::InternalError("can't make temp dir");
     }
 
-    return temp_dir_;
+    fs::path engine_path = temp_dir_ / "engine";
+    fs::create_directory(engine_path, err);
+    if (err) {
+      return absl::InternalError("can't make temp engine dir");
+    }
+
+    return engine_path;
   }
 
  private:
@@ -51,6 +57,13 @@ namespace {
 
 const char* kHeader = R"header(
 // Copyright Test
+
+void main() {
+}
+)header";
+
+const char* kUnknownHeader = R"header(
+// Unknown Copyright
 
 void main() {
 }
@@ -69,6 +82,11 @@ const char* kLicense = R"lic(Test License
 v2.0
 )lic";
 
+const char* kUnknownLicense = R"lic(Unknown License
+2025
+v2.0
+)lic";
+
 absl::StatusOr<Data> MakeTestData() {
   std::stringstream include;
   include << ".*\\.cc" << std::endl;
@@ -82,19 +100,29 @@ absl::StatusOr<Data> MakeTestData() {
   if (!exclude_filter.ok()) {
     return exclude_filter.status();
   }
+
+  absl::StatusOr<Catalog> catalog =
+      Catalog::Make({{"test", "Test License", R"lic(Test License
+v\d\.\d)lic"},
+                     {"header", "Copyright Test", "(?:C )?Copyright Test"}});
+  if (!catalog.ok()) {
+    return catalog.status();
+  }
+
   return Data{
       .include_filter = std::move(*include_filter),
       .exclude_filter = std::move(*exclude_filter),
+      .catalog = std::move(catalog.value()),
   };
 }
 
-absl::Status WriteFile(const char* data, const fs::path& path) {
+absl::Status WriteFile(std::string_view data, const fs::path& path) {
   std::ofstream of;
   of.open(path.string(), std::ios::binary);
   if (!of.good()) {
     return absl::InternalError("can't open file");
   }
-  of.write(data, std::strlen(data));
+  of.write(data.data(), data.length());
   of.close();
   return absl::OkStatus();
 }
@@ -152,7 +180,58 @@ TEST_F(LicenseCheckerTest, SimplePass) {
   std::stringstream ss;
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
-  EXPECT_EQ(errors.size(), 0u);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+}
+
+TEST_F(LicenseCheckerTest, UnknownFileLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kUnknownHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Expected copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "")
+      << (errors.size() > 1 ? absl::StrCat("\n", errors[1]) : "");
+}
+
+TEST_F(LicenseCheckerTest, UnknownLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  // Make sure the error is only reported once.
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "foo.cc").ok());
+  ASSERT_TRUE(WriteFile(kUnknownLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "foo.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+  ASSERT_TRUE(!errors.empty());
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Unknown license in.*LICENSE"))
+      << errors[0];
 }
 
 TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
@@ -173,7 +252,65 @@ TEST_F(LicenseCheckerTest, SimpleMissingFileLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 1u);
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
-                        "Expected copyright in.*main.cc"));
+                        "Expected copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
+}
+
+TEST_F(LicenseCheckerTest, SimpleIgnoreFile) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << R"regex(^main\.cc)regex" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kUnknownHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u);
+}
+
+TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  std::stringstream exclude;
+  exclude << "^LICENSE" << std::endl;
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude);
+  ASSERT_TRUE(exclude_filter.ok());
+  data->exclude_filter = std::move(exclude_filter.value());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+)output");
 }
 
 TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
@@ -192,7 +329,7 @@ TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
   std::stringstream ss;
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), ss, *data);
-  EXPECT_EQ(errors.size(), 0u);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
 
   EXPECT_EQ(ss.str(), R"output(engine
 
@@ -223,7 +360,6 @@ TEST_F(LicenseCheckerTest, SimpleWritesTwoFileLicensesFiles) {
   EXPECT_EQ(ss.str(), R"output(engine
 
 C Copyright Test
-
 --------------------------------------------------------------------------------
 engine
 
@@ -294,7 +430,7 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
   ASSERT_TRUE(data.ok());
 
   fs::current_path(*temp_path);
-  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
   Repo repo;
   repo.Add("main.cc");
@@ -308,12 +444,41 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
 
   EXPECT_EQ(ss.str(), R"output(engine
 
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
 Test License
 v2.0
 )output");
 }
 
-TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
+TEST_F(LicenseCheckerTest, RootDirectoryIsStrict) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Expected root copyright in.*main.cc"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
+}
+
+TEST_F(LicenseCheckerTest, ThirdPartyDirectoryLicense) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -322,7 +487,6 @@ TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
 
   fs::current_path(*temp_path);
   ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
-  ASSERT_EQ(std::system("echo \"Hello world!\" > main.cc"), 0);
   ASSERT_EQ(std::system("echo \"Hello world!\" > third_party/foobar/foo.cc"),
             0);
   ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
@@ -330,7 +494,6 @@ TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
       WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
           .ok());
   Repo repo;
-  repo.Add("main.cc");
   repo.Add("LICENSE");
   repo.Add("third_party/foobar/foo.cc");
   repo.Add("third_party/foobar/LICENSE");
@@ -341,10 +504,107 @@ TEST_F(LicenseCheckerTest, ThirdyPartyDirectoryLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(engine
-foobar
+  EXPECT_EQ(ss.str(), R"output(foobar
 
 Test License
 v2.0
 )output");
+}
+
+TEST_F(LicenseCheckerTest, OnlyPrintMatch) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(absl::StrCat(kLicense, "\n----------------------\n"),
+                        *temp_path / "LICENSE")
+                  .ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  repo.Add(*temp_path / "LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
+Test License
+v2.0
+)output");
+}
+
+TEST_F(LicenseCheckerTest, OnlyPrintMatchHeader) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(R"header(
+// Extra text.
+// Copyright Test
+//
+// Extra text.
+
+void main() {
+}
+)header",
+                        *temp_path / "main.cc")
+                  .ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+)output");
+}
+
+TEST_F(LicenseCheckerTest, UnmatchedCommentsAsErrors) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("mkdir -p third_party/foobar"), 0);
+  ASSERT_TRUE(
+      WriteFile(kUnknownHeader, *temp_path / "third_party/foobar/foo.cc").ok());
+  ASSERT_TRUE(
+      WriteFile(kLicense, *temp_path / "third_party" / "foobar" / "LICENSE")
+          .ok());
+  Repo repo;
+  repo.Add("third_party/foobar/foo.cc");
+  repo.Add("third_party/foobar/LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  LicenseChecker::Flags flags = {.treat_unmatched_comments_as_errors = true};
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data, flags);
+
+  EXPECT_EQ(errors.size(), 1u);
+  EXPECT_TRUE(
+      FindError(errors, absl::StatusCode::kNotFound,
+                "(?s).*foo.cc.*Selector didn't match.*Unknown Copyright"))
+      << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
 }

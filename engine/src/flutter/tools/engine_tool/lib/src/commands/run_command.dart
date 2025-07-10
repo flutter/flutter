@@ -102,11 +102,10 @@ See `flutter run --help` for a listing
     return mode;
   }
 
-  late final Future<RunTarget?> _runTarget =
-      (() async {
-        final devices = await _flutterTool.devices();
-        return RunTarget.detectAndSelect(devices, idPrefix: _getDeviceId());
-      })();
+  late final Future<RunTarget?> _runTarget = (() async {
+    final devices = await _flutterTool.devices();
+    return RunTarget.detectAndSelect(devices, idPrefix: _getDeviceId());
+  })();
 
   @override
   Future<int> run() async {
@@ -253,19 +252,19 @@ final class RunTarget {
       // -----------------------------------------------------------------------
       // iOS.
       // TODO(matanlurey): https://github.com/flutter/flutter/issues/155960
-      TargetPlatform.iOSUnspecified || TargetPlatform.iOSX64 || TargetPlatform.iOSArm64 =>
-        throw FatalError(
-          'iOS targets are currently unsupported.\n\nIf you are an '
-          'iOS engine developer, and have a need for this, please either +1 or '
-          'help us implement https://github.com/flutter/flutter/issues/155960.',
-        ),
+      TargetPlatform.iOSUnspecified ||
+      TargetPlatform.iOSX64 ||
+      TargetPlatform.iOSArm64 => throw FatalError(
+        'iOS targets are currently unsupported.\n\nIf you are an '
+        'iOS engine developer, and have a need for this, please either +1 or '
+        'help us implement https://github.com/flutter/flutter/issues/155960.',
+      ),
 
       // LEGACY ANDROID
-      TargetPlatform.androidArm =>
-        throw FatalError(
-          'Legacy Android targets are not supported. '
-          'Please use android-arm64 or android-x64.',
-        ),
+      TargetPlatform.androidArm => throw FatalError(
+        'Legacy Android targets are not supported. '
+        'Please use android-arm64 or android-x64.',
+      ),
 
       // FUCHSIA
       TargetPlatform.fuchsiaArm64 ||
@@ -275,12 +274,11 @@ final class RunTarget {
       TargetPlatform.tester => throw FatalError('flutter_tester is not supported.'),
 
       // Platforms that maybe could be supported, but we don't know about.
-      _ =>
-        throw FatalError(
-          'Unknown target platform: ${device.targetPlatform.identifier}.\n\nIf '
-          'this is a new platform that should be supported, please file a bug: '
-          'https://github.com/flutter/flutter/issues/new?labels=e:%20engine-tool.',
-        ),
+      _ => throw FatalError(
+        'Unknown target platform: ${device.targetPlatform.identifier}.\n\nIf '
+        'this is a new platform that should be supported, please file a bug: '
+        'https://github.com/flutter/flutter/issues/new?labels=e:%20engine-tool.',
+      ),
     };
   }
 
@@ -293,8 +291,9 @@ final class RunTarget {
       TargetPlatform.androidUnspecified ||
       TargetPlatform.androidX86 ||
       TargetPlatform.androidX64 ||
-      TargetPlatform
-          .androidArm64 => [Label.parseGn('//flutter/shell/platform/android:android_jar')],
+      TargetPlatform.androidArm64 => [
+        Label.parseGn('//flutter/shell/platform/android:android_jar'),
+      ],
 
       // iOS.
       TargetPlatform.iOSUnspecified || TargetPlatform.iOSX64 || TargetPlatform.iOSArm64 => [
@@ -319,12 +318,11 @@ final class RunTarget {
 
       // Unsupported platforms.
       // -----------------------------------------------------------------------
-      _ =>
-        throw FatalError(
-          'Unknown target platform: ${device.targetPlatform.identifier}.\n\nIf '
-          'this is a new platform that should be supported, please file a bug: '
-          'https://github.com/flutter/flutter/issues/new?labels=e:%20engine-tool.',
-        ),
+      _ => throw FatalError(
+        'Unknown target platform: ${device.targetPlatform.identifier}.\n\nIf '
+        'this is a new platform that should be supported, please file a bug: '
+        'https://github.com/flutter/flutter/issues/new?labels=e:%20engine-tool.',
+      ),
     };
   }
 }

@@ -87,16 +87,24 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final NumberFormat kSecondsFormat = NumberFormat('0.0');
-final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
+final NumberFormat _singleDigitPrecision = NumberFormat('0.0');
+final NumberFormat _decimalPattern = NumberFormat.decimalPattern();
+
+String getElapsedAsMinutesOrSeconds(Duration duration) {
+  if (duration.inMinutes < 1) {
+    return getElapsedAsSeconds(duration);
+  }
+  final double minutes = duration.inSeconds / Duration.secondsPerMinute;
+  return '${_singleDigitPrecision.format(minutes)}m';
+}
 
 String getElapsedAsSeconds(Duration duration) {
   final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
-  return '${kSecondsFormat.format(seconds)}s';
+  return '${_singleDigitPrecision.format(seconds)}s';
 }
 
 String getElapsedAsMilliseconds(Duration duration) {
-  return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
+  return '${_decimalPattern.format(duration.inMilliseconds)}ms';
 }
 
 /// Return a platform-appropriate [String] representing the size of the given number of bytes.
@@ -548,4 +556,20 @@ bool listEquals<T>(List<T> a, List<T> b) {
     }
   }
   return true;
+}
+
+/// Simple "X (months|days|hours|minutes) ago" [Duration] converter.
+extension DurationAgo on Duration {
+  String ago() {
+    if (inDays > 31) {
+      return '${inDays ~/ 31} months ago';
+    }
+    if (inDays > 1) {
+      return '$inDays days ago';
+    }
+    if (inHours > 1) {
+      return '$inHours hours ago';
+    }
+    return '$inMinutes minutes ago';
+  }
 }

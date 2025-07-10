@@ -218,11 +218,14 @@ void main() {
 
     testWithoutContext('returns the gradle properties file', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory(gradleDirectoryName)
-        .childDirectory(gradleWrapperDirectoryName)..createSync(recursive: true);
-      final File expectedFile =
-          await wrapperDirectory.childFile(gradleWrapperPropertiesFilename).create();
+      final Directory wrapperDirectory =
+          androidDirectory
+              .childDirectory(gradleDirectoryName)
+              .childDirectory(gradleWrapperDirectoryName)
+            ..createSync(recursive: true);
+      final File expectedFile = await wrapperDirectory
+          .childFile(gradleWrapperPropertiesFilename)
+          .create();
       final File gradleWrapperFile = getGradleWrapperFile(androidDirectory);
       expect(gradleWrapperFile.path, expectedFile.path);
     });
@@ -230,9 +233,9 @@ void main() {
     testWithoutContext('returns the gradle wrapper version', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -250,9 +253,9 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
     testWithoutContext('ignores gradle comments', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -272,9 +275,9 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
     testWithoutContext('returns gradlew version, whitespace, location', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
@@ -293,9 +296,9 @@ zipStorePath=wrapper/dists
 
     testWithoutContext('does not crash on hypothetical new format', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
       wrapperDirectory
@@ -314,7 +317,8 @@ zipStorePath=wrapper/dists
 
     testWithoutContext('returns the installed gradle version', () async {
       const String expectedVersion = '7.4.2';
-      const String gradleOutput = '''
+      const String gradleOutput =
+          '''
 
 ------------------------------------------------------------
 Gradle $expectedVersion
@@ -330,13 +334,10 @@ JVM:          11.0.18 (Azul Systems, Inc. 11.0.18+10-LTS)
 OS:           Mac OS X 13.2.1 aarch64
 ''';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final ProcessManager processManager =
-          FakeProcessManager.empty()..addCommand(
-            const FakeCommand(
-              command: <String>['gradle', gradleVersionsFlag],
-              stdout: gradleOutput,
-            ),
-          );
+      final ProcessManager processManager = FakeProcessManager.empty()
+        ..addCommand(
+          const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
+        );
 
       expect(
         await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -348,13 +349,10 @@ OS:           Mac OS X 13.2.1 aarch64
       const String expectedVersion = '7.4.2';
       const String gradleOutput = 'Gradle   $expectedVersion';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final ProcessManager processManager =
-          FakeProcessManager.empty()..addCommand(
-            const FakeCommand(
-              command: <String>['gradle', gradleVersionsFlag],
-              stdout: gradleOutput,
-            ),
-          );
+      final ProcessManager processManager = FakeProcessManager.empty()
+        ..addCommand(
+          const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
+        );
 
       expect(
         await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -717,7 +715,8 @@ dependencies {
     FakeCommand createKgpVersionCommand(String kgpV) {
       return FakeCommand(
         command: const <String>['./gradlew', 'kgpVersion', '-q'],
-        stdout: '''
+        stdout:
+            '''
     KGP Version: $kgpV
     ''',
       );

@@ -40,7 +40,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -53,7 +53,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -85,7 +85,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);

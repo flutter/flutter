@@ -55,8 +55,8 @@ void main() {
 
   group('doctor', () {
     testUsingContext('vs code validator when both installed', () async {
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithExtension.validate();
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension
+          .validate();
       expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
@@ -88,8 +88,8 @@ void main() {
         VsCodeValidatorTestTargets.installedWithExtension64bit.title,
         'VS Code, 64-bit edition',
       );
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit
+          .validate();
       expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
@@ -106,8 +106,8 @@ void main() {
     });
 
     testUsingContext('vs code validator when extension missing', () async {
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension
+          .validate();
       expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
@@ -144,8 +144,8 @@ void main() {
       });
 
       testWithoutContext('diagnostic message', () async {
-        final FakeDeviceManager deviceManager =
-            FakeDeviceManager()..diagnostics = <String>['Device locked'];
+        final FakeDeviceManager deviceManager = FakeDeviceManager()
+          ..diagnostics = <String>['Device locked'];
 
         final DeviceValidator deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
@@ -159,10 +159,9 @@ void main() {
 
       testWithoutContext('diagnostic message and devices', () async {
         final FakeDevice device = FakeDevice();
-        final FakeDeviceManager deviceManager =
-            FakeDeviceManager()
-              ..devices = <Device>[device]
-              ..diagnostics = <String>['Device locked'];
+        final FakeDeviceManager deviceManager = FakeDeviceManager()
+          ..devices = <Device>[device]
+          ..diagnostics = <String>['Device locked'];
 
         final DeviceValidator deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
@@ -444,7 +443,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      logger = BufferLogger.test();
+      logger = BufferLogger.test(verbose: true);
     });
 
     testUsingContext(
@@ -717,11 +716,10 @@ void main() {
   testUsingContext(
     'WebWorkflow is a part of validator workflows if enabled',
     () async {
-      final List<Workflow> workflows =
-          DoctorValidatorsProvider.test(
-            featureFlags: TestFeatureFlags(isWebEnabled: true),
-            platform: FakePlatform(),
-          ).workflows;
+      final List<Workflow> workflows = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        platform: FakePlatform(),
+      ).workflows;
       expect(workflows, contains(isA<WebWorkflow>()));
     },
     overrides: <Type, Generator>{
@@ -733,11 +731,10 @@ void main() {
   testUsingContext(
     'CustomDevicesWorkflow is a part of validator workflows if enabled',
     () async {
-      final List<Workflow> workflows =
-          DoctorValidatorsProvider.test(
-            featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
-            platform: FakePlatform(),
-          ).workflows;
+      final List<Workflow> workflows = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        platform: FakePlatform(),
+      ).workflows;
       expect(workflows, contains(isA<CustomDeviceWorkflow>()));
     },
     overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => fakeProcessManager},
@@ -768,11 +765,10 @@ void main() {
         fakeProcessManager.addCommands(const <FakeCommand>[
           FakeCommand(command: <String>['which', 'java']),
         ]);
-        final List<DoctorValidator> validators =
-            DoctorValidatorsProvider.test(
-              featureFlags: featureFlags,
-              platform: FakePlatform(),
-            ).validators;
+        final List<DoctorValidator> validators = DoctorValidatorsProvider.test(
+          featureFlags: featureFlags,
+          platform: FakePlatform(),
+        ).validators;
         final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
         final ValidationResult result = await flutterValidator.validate();
         expect(
@@ -781,12 +777,11 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        Cache:
-            () => Cache.test(
-              rootOverride: fs.directory('/path/to/flutter'),
-              fileSystem: fs,
-              processManager: fakeProcessManager,
-            ),
+        Cache: () => Cache.test(
+          rootOverride: fs.directory('/path/to/flutter'),
+          fileSystem: fs,
+          processManager: fakeProcessManager,
+        ),
         FileSystem: () => fs,
         FlutterVersion: () => initialVersion,
         Platform: () => FakePlatform(),
@@ -795,6 +790,7 @@ void main() {
       },
     );
   });
+
   testUsingContext(
     'If android workflow is disabled, AndroidStudio validator is not included',
     () {
@@ -1482,7 +1478,7 @@ class FakeDevice extends Fake implements Device {
   Category get category => Category.mobile;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;

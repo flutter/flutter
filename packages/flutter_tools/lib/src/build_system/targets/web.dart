@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
@@ -165,8 +166,9 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
-    final String platformBinariesPath =
-        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformBinariesPath = artifacts
+        .getHostArtifact(HostArtifact.webPlatformKernelFolder)
+        .path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
@@ -272,10 +274,12 @@ class Dart2JSTarget extends Dart2WebTarget {
 
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
-  Dart2WasmTarget(this.compilerConfig);
+  Dart2WasmTarget(this.compilerConfig, this._analytics);
 
   @override
   final WasmCompilerConfig compilerConfig;
+
+  final Analytics _analytics;
 
   /// List the preconfigured build options for a given build mode.
   List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) => switch (mode) {
@@ -316,8 +320,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
-    final String platformBinariesPath =
-        artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformBinariesPath = artifacts
+        .getHostArtifact(HostArtifact.webPlatformKernelFolder)
+        .path;
     final String platformFilePath = environment.fileSystem.path.join(
       platformBinariesPath,
       'dart2wasm_platform.dill',
@@ -349,7 +354,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    await processUtils.run(throwOnError: true, compilationArgs);
+    final RunResult runResult = await processUtils.run(
+      throwOnError: !compilerConfig.dryRun,
+      compilationArgs,
+    );
+    if (compilerConfig.dryRun) {
+      _handleDryRunResult(environment, runResult);
+    }
   }
 
   @override
@@ -359,47 +370,99 @@ class Dart2WasmTarget extends Dart2WebTarget {
   List<String> get depfiles => const <String>['dart2wasm.d'];
 
   @override
-  Map<String, Object?> get buildConfig => <String, Object?>{
-    'compileTarget': 'dart2wasm',
-    'renderer': compilerConfig.renderer.name,
-    'mainWasmPath': 'main.dart.wasm',
-    'jsSupportRuntimePath': 'main.dart.mjs',
-  };
+  Map<String, Object?> get buildConfig => compilerConfig.dryRun
+      ? const <String, Object?>{}
+      : <String, Object?>{
+          'compileTarget': 'dart2wasm',
+          'renderer': compilerConfig.renderer.name,
+          'mainWasmPath': 'main.dart.wasm',
+          'jsSupportRuntimePath': 'main.dart.mjs',
+        };
 
   @override
-  Iterable<File> buildFiles(Environment environment) => environment.buildDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where(
-        (File file) => switch (file.basename) {
-          'main.dart.wasm' || 'main.dart.mjs' => true,
-          'main.dart.wasm.map' => compilerConfig.sourceMaps,
-          _ => false,
-        },
+  Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
+      ? const <File>[]
+      : environment.buildDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where(
+              (File file) => switch (file.basename) {
+                'main.dart.wasm' || 'main.dart.mjs' => true,
+                'main.dart.wasm.map' => compilerConfig.sourceMaps,
+                _ => false,
+              },
+            );
+
+  @override
+  Iterable<String> get buildPatternStems => compilerConfig.dryRun
+      ? const <String>[]
+      : <String>[
+          'main.dart.wasm',
+          'main.dart.mjs',
+          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+        ];
+
+  void _handleDryRunResult(Environment environment, RunResult runResult) {
+    final int exitCode = runResult.exitCode;
+    final String stdout = runResult.stdout;
+    final String stderr = runResult.stderr;
+    final String result;
+    String? findingsSummary;
+
+    if (exitCode != 0 && exitCode != 254) {
+      environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
+      if (stderr.isNotEmpty) {
+        environment.logger.printWarning(stdout);
+        environment.logger.printWarning(stderr);
+      }
+      result = 'crash';
+    } else if (exitCode == 0) {
+      environment.logger.printWarning(
+        'Wasm dry run succeeded. Consider building and testing your application with the '
+        '`--wasm` flag. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm',
       );
+      result = 'success';
+    } else if (stderr.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run failed:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(stderr);
+      result = 'failure';
+    } else if (stdout.isNotEmpty) {
+      environment.logger.printWarning('Wasm dry run findings:');
+      environment.logger.printWarning(stdout);
+      environment.logger.printWarning(
+        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm\n',
+      );
+      result = 'findings';
+      findingsSummary = RegExp(
+        r'\(([0-9]+)\)',
+      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
+    } else {
+      result = 'unknown';
+    }
+    environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
-  @override
-  Iterable<String> get buildPatternStems => <String>[
-    'main.dart.wasm',
-    'main.dart.mjs',
-    if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
-  ];
+    _analytics.send(
+      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+    );
+  }
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  WebReleaseBundle(List<WebCompilerConfig> configs)
+  WebReleaseBundle(List<WebCompilerConfig> configs, Analytics analytics)
     : this._(
-        compileTargets:
-            configs
-                .map(
-                  (WebCompilerConfig config) => switch (config) {
-                    WasmCompilerConfig() => Dart2WasmTarget(config),
-                    JsCompilerConfig() => Dart2JSTarget(config),
-                  },
-                )
-                .toList(),
+        compileTargets: configs
+            .map(
+              (WebCompilerConfig config) => switch (config) {
+                WasmCompilerConfig() => Dart2WasmTarget(config, analytics),
+                JsCompilerConfig() => Dart2JSTarget(config),
+              },
+            )
+            .toList(),
       );
 
   WebReleaseBundle._({required this.compileTargets})
@@ -464,8 +527,10 @@ class WebReleaseBundle extends Target {
     depfileService.writeToFile(depfile, environment.buildDir.childFile('flutter_assets.d'));
 
     final Directory webResources = environment.projectDir.childDirectory('web');
-    final List<File> inputResourceFiles =
-        webResources.listSync(recursive: true).whereType<File>().toList();
+    final List<File> inputResourceFiles = webResources
+        .listSync(recursive: true)
+        .whereType<File>()
+        .toList();
 
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
@@ -569,8 +634,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
-    final String? serviceWorkerVersion =
-        includeServiceWorkerSettings ? Random().nextInt(1 << 32).toString() : null;
+    final String? serviceWorkerVersion = includeServiceWorkerSettings
+        ? Random().nextInt(1 << 32).toString()
+        : null;
     final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
@@ -696,17 +762,18 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.compileConfigs);
+  const WebServiceWorker(this.fileSystem, this.compileConfigs, this.analytics);
 
   final FileSystem fileSystem;
   final List<WebCompilerConfig> compileConfigs;
+  final Analytics analytics;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    WebReleaseBundle(compileConfigs),
+    WebReleaseBundle(compileConfigs, analytics),
     WebBuiltInAssets(fileSystem),
   ];
 
@@ -721,16 +788,15 @@ class WebServiceWorker extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final List<File> contents =
-        environment.outputDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) =>
-                  !file.path.endsWith('flutter_service_worker.js') &&
-                  !environment.fileSystem.path.basename(file.path).startsWith('.'),
-            )
-            .toList();
+    final List<File> contents = environment.outputDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where(
+          (File file) =>
+              !file.path.endsWith('flutter_service_worker.js') &&
+              !environment.fileSystem.path.basename(file.path).startsWith('.'),
+        )
+        .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
     for (final File file in contents) {
@@ -738,12 +804,9 @@ class WebServiceWorker extends Target {
       if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url =
-          environment.fileSystem.path
-              .toUri(
-                environment.fileSystem.path.relative(file.path, from: environment.outputDir.path),
-              )
-              .toString();
+      final String url = environment.fileSystem.path
+          .toUri(environment.fileSystem.path.relative(file.path, from: environment.outputDir.path))
+          .toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
@@ -760,7 +823,7 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
       'main.dart.js',
       if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig,
+        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
       )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
       'index.html',
       'flutter_bootstrap.js',

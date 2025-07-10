@@ -4,6 +4,8 @@
 
 #include "impeller/toolkit/interop/impeller.h"
 
+#include <algorithm>
+#include <iterator>
 #include <sstream>
 
 #include "flutter/fml/mapping.h"
@@ -17,6 +19,7 @@
 #include "impeller/toolkit/interop/context.h"
 #include "impeller/toolkit/interop/dl_builder.h"
 #include "impeller/toolkit/interop/formats.h"
+#include "impeller/toolkit/interop/fragment_program.h"
 #include "impeller/toolkit/interop/glyph_info.h"
 #include "impeller/toolkit/interop/image_filter.h"
 #include "impeller/toolkit/interop/line_metrics.h"
@@ -60,6 +63,7 @@ DEFINE_PEER_GETTER(ColorSource, ImpellerColorSource);
 DEFINE_PEER_GETTER(Context, ImpellerContext);
 DEFINE_PEER_GETTER(DisplayList, ImpellerDisplayList);
 DEFINE_PEER_GETTER(DisplayListBuilder, ImpellerDisplayListBuilder);
+DEFINE_PEER_GETTER(FragmentProgram, ImpellerFragmentProgram);
 DEFINE_PEER_GETTER(GlyphInfo, ImpellerGlyphInfo);
 DEFINE_PEER_GETTER(ImageFilter, ImpellerImageFilter);
 DEFINE_PEER_GETTER(LineMetrics, ImpellerLineMetrics);
@@ -950,6 +954,52 @@ ImpellerColorSource ImpellerColorSourceCreateImageNew(
       .Leak();
 }
 
+struct SamplersAndUniforms {
+  std::vector<std::shared_ptr<flutter::DlColorSource>> samplers;
+  std::shared_ptr<std::vector<uint8_t>> uniforms;
+};
+
+static SamplersAndUniforms ReadSamplersAndUniforms(ImpellerTexture* samplers,
+                                                   size_t samplers_count,
+                                                   const uint8_t* data,
+                                                   size_t data_bytes_length) {
+  SamplersAndUniforms result;
+  result.uniforms = std::make_shared<std::vector<uint8_t>>();
+  if (data_bytes_length > 0) {
+    std::copy(data, data + data_bytes_length,
+              std::back_inserter(*result.uniforms));
+  }
+  if (samplers_count > 0) {
+    result.samplers.reserve(samplers_count);
+    for (size_t i = 0; i < samplers_count; i++) {
+      result.samplers.emplace_back(flutter::DlColorSource::MakeImage(
+          DlImageImpeller::Make(GetPeer(samplers[i])->GetTexture()),  //
+          flutter::DlTileMode::kClamp,                                //
+          flutter::DlTileMode::kClamp                                 //
+          ));
+    }
+  }
+  return result;
+}
+
+IMPELLER_EXTERN_C ImpellerColorSource
+ImpellerColorSourceCreateFragmentProgramNew(
+    ImpellerContext context,
+    ImpellerFragmentProgram fragment_program,
+    ImpellerTexture* samplers,
+    size_t samplers_count,
+    const uint8_t* data,
+    size_t data_bytes_length) {
+  auto bindings = ReadSamplersAndUniforms(samplers, samplers_count, data,
+                                          data_bytes_length);
+  return ColorSource::MakeFragmentProgram(*GetPeer(context),             //
+                                          *GetPeer(fragment_program),    //
+                                          std::move(bindings.samplers),  //
+                                          std::move(bindings.uniforms)   //
+                                          )
+      .Leak();
+}
+
 IMPELLER_EXTERN_C
 void ImpellerColorFilterRetain(ImpellerColorFilter color_filter) {
   ObjectBase::SafeRetain(color_filter);
@@ -1032,7 +1082,24 @@ ImpellerImageFilter ImpellerImageFilterCreateMatrixNew(
 }
 
 IMPELLER_EXTERN_C
-ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
+ImpellerImageFilter ImpellerImageFilterCreateFragmentProgramNew(
+    ImpellerContext context,
+    ImpellerFragmentProgram fragment_program,
+    ImpellerTexture* samplers,
+    size_t samplers_count,
+    const uint8_t* data,
+    size_t data_bytes_length) {
+  auto bindings = ReadSamplersAndUniforms(samplers, samplers_count, data,
+                                          data_bytes_length);
+  return ImageFilter::MakeFragmentProgram(*GetPeer(context),             //
+                                          *GetPeer(fragment_program),    //
+                                          std::move(bindings.samplers),  //
+                                          std::move(bindings.uniforms)   //
+                                          )
+      .Leak();
+}
+
+IMPELLER_EXTERN_C ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
     ImpellerImageFilter outer,
     ImpellerImageFilter inner) {
   return ImageFilter::MakeCompose(*GetPeer(outer), *GetPeer(inner)).Leak();
@@ -1486,6 +1553,54 @@ IMPELLER_EXTERN_C
 ImpellerTextDirection ImpellerGlyphInfoGetTextDirection(
     ImpellerGlyphInfo glyph_info) {
   return GetPeer(glyph_info)->GetTextDirection();
+}
+
+//------------------------------------------------------------------------------
+// Fragment Program
+//------------------------------------------------------------------------------
+
+static std::shared_ptr<fml::Mapping> MakeCopyableMapping(
+    const ImpellerMapping* data,
+    void* user_data) {
+  if (data == nullptr) {
+    return nullptr;
+  }
+
+  // If the user has supplied a release callback, defer deallocation to them.
+  if (auto callback = data->on_release) {
+    return std::make_shared<fml::NonOwnedMapping>(
+        data->data,    //
+        data->length,  //
+        [user_data, callback](const uint8_t* data, size_t size) {
+          callback(user_data);
+        });
+  }
+
+  return std::make_shared<fml::MallocMapping>(
+      fml::MallocMapping::Copy(data->data, data->length));
+}
+
+IMPELLER_EXTERN_C
+ImpellerFragmentProgram ImpellerFragmentProgramNew(
+    const ImpellerMapping* data,
+    void* data_release_user_data) {
+  auto data_mapping = MakeCopyableMapping(data, data_release_user_data);
+  auto program = Create<FragmentProgram>(std::move(data_mapping));
+  if (!program->IsValid()) {
+    VALIDATION_LOG << "Could not create valid fragment program.";
+    return nullptr;
+  }
+  return program.Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerFragmentProgramRetain(ImpellerFragmentProgram fragment_program) {
+  ObjectBase::SafeRetain(fragment_program);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerFragmentProgramRelease(ImpellerFragmentProgram fragment_program) {
+  ObjectBase::SafeRelease(fragment_program);
 }
 
 }  // namespace impeller::interop
