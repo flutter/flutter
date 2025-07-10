@@ -534,8 +534,7 @@ void runTests() {
 
       expect(tester.layers, contains(isA<ClipRectLayer>()));
       final ClipRectLayer clipLayer = tester.layers.whereType<ClipRectLayer>().first;
-      // The clipRect is in the bottom right corner of the 800x600 view.
-      expect(clipLayer.clipRect, const Rect.fromLTWH(800 - 300, 600 - 300, 300, 300));
+      expect(clipLayer.clipRect, const Rect.fromLTWH(250, 150, 300, 300));
     });
 
     testWidgets('BoxFit.none does not scale and clips when necessary', (WidgetTester tester) async {

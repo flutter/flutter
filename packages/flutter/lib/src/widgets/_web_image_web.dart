@@ -108,9 +108,8 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       fit: fit,
       alignment: alignment,
       matchTextDirection: matchTextDirection,
-      textDirection: matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null,
+      textDirection:
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
     );
   }
 
@@ -123,9 +122,8 @@ class RawWebImage extends SingleChildRenderObjectWidget {
       ..fit = fit
       ..alignment = alignment
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! Alignment
-          ? Directionality.of(context)
-          : null;
+      ..textDirection =
+          matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
   }
 }
 
@@ -152,6 +150,7 @@ class RenderWebImage extends RenderShiftedBox {
 
   Alignment? _resolvedAlignment;
   bool? _flipHorizontally;
+  bool _needsClip = false;
 
   void _resolve() {
     if (_resolvedAlignment != null) {
@@ -164,7 +163,7 @@ class RenderWebImage extends RenderShiftedBox {
   void _markNeedResolution() {
     _resolvedAlignment = null;
     _flipHorizontally = null;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// Whether to paint the image in the direction of the [TextDirection].
@@ -266,7 +265,7 @@ class RenderWebImage extends RenderShiftedBox {
       return;
     }
     _fit = value;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// How to align the image within its bounds.
@@ -360,8 +359,8 @@ class RenderWebImage extends RenderShiftedBox {
     // The child could be smaller or larger than the `RenderWebImage`. If the
     // child is larger, then it will be clipped in the `paint` step.
     final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
-    fit ??= BoxFit.scaleDown;
-    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
+    final BoxFit resolvedFit = fit ?? BoxFit.scaleDown;
+    final FittedSizes fittedSizes = applyBoxFit(resolvedFit, inputSize, size);
 
     if (fittedSizes.source == inputSize) {
       // If `fittedSizes.source` is the entire original image, then the child
@@ -382,6 +381,7 @@ class RenderWebImage extends RenderShiftedBox {
       final double dy = halfHeightDelta + _resolvedAlignment!.y * halfHeightDelta;
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Offset(dx, dy);
+      _needsClip = false;
     } else {
       // Otherwise, the destination box only shows a portion of the image and
       // the rest of the image overflows out of the box. The size of the child
@@ -403,7 +403,9 @@ class RenderWebImage extends RenderShiftedBox {
       // and `destinationSize` must have the same aspect ratio. Therefore, the
       // scale to multiply the `inputSize` to get the `childSize` is equal to
       // the ratio of the `destinationSize` to the `sourceSize`.
-      assert(sourceSize.aspectRatio == destinationSize.aspectRatio);
+      assert(
+        (sourceSize.aspectRatio - destinationSize.aspectRatio).abs() < precisionErrorTolerance,
+      );
       final double scale = destinationSize.width / sourceSize.width;
       final Size childSize = inputSize * scale;
       child!.layout(BoxConstraints.tight(childSize));
@@ -421,6 +423,7 @@ class RenderWebImage extends RenderShiftedBox {
       final Offset childOffset = Offset(-sourceRect.left, -sourceRect.top) * scale;
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = childOffset;
+      _needsClip = true;
     }
   }
 
@@ -429,11 +432,12 @@ class RenderWebImage extends RenderShiftedBox {
     if (child == null) {
       return;
     }
-    final Size inputSize = Size(image.naturalWidth.toDouble(), image.naturalHeight.toDouble());
-    fit ??= BoxFit.scaleDown;
-    final FittedSizes fittedSizes = applyBoxFit(fit!, inputSize, size);
-    final Rect destinationRect = offset & fittedSizes.destination;
-    context.pushClipRect(needsCompositing, offset, destinationRect, super.paint);
+    if (_needsClip) {
+      final Rect destinationRect = Offset.zero & size;
+      context.pushClipRect(needsCompositing, offset, destinationRect, super.paint);
+    } else {
+      super.paint(context, offset);
+    }
   }
 
   @override
