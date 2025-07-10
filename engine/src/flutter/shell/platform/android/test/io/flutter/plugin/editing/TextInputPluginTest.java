@@ -1231,6 +1231,42 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void clearTextInputClient_restartsImmWhenIMEHidden() {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    assertEquals(1, testImm.getRestartCount(testView));
+
+    // Imm restarts when IME is hidden.
+    ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
+    imeSyncCallback.getImeVisibilityListener().onImeVisibilityChanged(false);
+    assertEquals(2, testImm.getRestartCount(testView));
+  }
+
+  @Test
   public void destroy_clearTextInputMethodHandler() {
     View testView = new View(ctx);
     TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
