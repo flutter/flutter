@@ -218,7 +218,6 @@ public class KeyboardManager
 
   @Override
   public boolean handleEvent(@NonNull KeyEvent keyEvent) {
-    Log.e(TAG, "KeyboardManager handleKeyEvent: " + keyEvent);
     final boolean isRedispatchedEvent = redispatchedEvents.remove(keyEvent);
     if (isRedispatchedEvent) {
       return false;

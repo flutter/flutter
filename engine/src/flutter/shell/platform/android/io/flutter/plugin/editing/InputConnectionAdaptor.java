@@ -224,7 +224,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
   // TODO(garyq): Implement a more feature complete version of getExtractedText
   @Override
   public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
-    Log.e(TAG, "getExtractedText " + request + " " + flags + " ");
     final boolean textMonitor = (flags & GET_EXTRACTED_TEXT_MONITOR) != 0;
     if (textMonitor == (mExtractRequest == null)) {
       Log.d(TAG, "The input method toggled text monitoring " + (textMonitor ? "on" : "off"));
@@ -237,7 +236,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
 
   @Override
   public boolean requestCursorUpdates(int cursorUpdateMode) {
-    Log.e(TAG, "requestCursorUpdates: " + cursorUpdateMode);
     if ((cursorUpdateMode & CURSOR_UPDATE_IMMEDIATE) != 0) {
       mImm.updateCursorAnchorInfo(mFlutterView, getCursorAnchorInfo());
     }
@@ -260,7 +258,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
 
   @Override
   public void closeConnection() {
-    Log.e(TAG, "closeConnection");
     super.closeConnection();
     mEditable.removeEditingStateListener(this);
     for (; batchEditNestDepth > 0; batchEditNestDepth--) {
@@ -301,12 +298,10 @@ public class InputConnectionAdaptor extends BaseInputConnection
   // occur, and need a chance to be handled by the framework.
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    Log.e(TAG, "sendKeyEvent " + event);
     return keyboardDelegate.handleEvent(event);
   }
 
   public boolean handleKeyEvent(KeyEvent event) {
-    Log.e(TAG, "handleKeyEvent " + event);
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
       if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
         return handleHorizontalMovement(true, event.isShiftPressed());

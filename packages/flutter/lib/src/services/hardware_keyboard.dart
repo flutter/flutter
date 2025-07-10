@@ -1078,7 +1078,6 @@ class KeyEventManager {
   )
   bool handleKeyData(ui.KeyData data) {
     _transitMode ??= KeyDataTransitMode.keyDataThenRawKeyData;
-    debugPrint('handleKeyData $_transitMode');
     switch (_transitMode!) {
       case KeyDataTransitMode.rawKeyData:
         assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
@@ -1153,7 +1152,6 @@ class KeyEventManager {
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
-    debugPrint('handleRawKeyMessage transit mode: $_transitMode');
     if (_transitMode == null) {
       _transitMode = KeyDataTransitMode.rawKeyData;
       // Convert raw events using a listener so that conversion only occurs if
@@ -1176,7 +1174,6 @@ class KeyEventManager {
         shouldDispatch = false;
       }
     }
-    debugPrint('handleRawKeyMessage, should dispatch $shouldDispatch');
 
     bool handled = true;
     if (shouldDispatch) {
@@ -1198,7 +1195,6 @@ class KeyEventManager {
       handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
       _keyEventsSinceLastMessage.clear();
     }
-    debugPrint('handleRawKeyMessage, handled $handled');
 
     return <String, dynamic>{'handled': handled};
   }
