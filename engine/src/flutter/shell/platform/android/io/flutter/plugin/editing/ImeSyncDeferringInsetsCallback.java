@@ -133,7 +133,8 @@ class ImeSyncDeferringInsetsCallback {
     // @Override
     // public WindowInsetsAnimation.Bounds onStart(
     //     @NonNull WindowInsetsAnimation animation, @NonNull WindowInsetsAnimation.Bounds bounds) {
-    //   // Observe changes to software keyboard visibility and notify listener when animation start.
+    //   // Observe changes to software keyboard visibility and notify listener when animation
+    // start.
     //   // See https://developer.android.com/develop/ui/views/layout/sw-keyboard.
     //   WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
     //   if (insets != null && imeVisibilityListener != null) {
