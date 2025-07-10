@@ -1153,13 +1153,7 @@ void main() {
         ..addPart('world', textDirection: TextDirection.ltr);
 
       final SemanticsLabel label = builder.build();
-      // First part never gets embedding, subsequent RTL parts get RLE...PDF
-      expect(label.label, contains('Hello'));
-      expect(label.label, contains('مرحبا'));
-      expect(label.label, contains('world'));
-      // Should contain Unicode RLE and PDF characters around RTL text
-      expect(label.label, contains('\u202B')); // RLE
-      expect(label.label, contains('\u202C')); // PDF
+      expect(label.label, 'Hello \u202Bمرحبا\u202C world');
     });
 
     test('text direction embedding with RTL overall direction', () {
@@ -1169,9 +1163,7 @@ void main() {
         ..addPart('Hello', textDirection: TextDirection.ltr);
 
       final SemanticsLabel label = builder.build();
-      // LTR part should get LRE...PDF embedding
-      expect(label.label, contains('\u202A')); // LRE (not LRO)
-      expect(label.label, contains('\u202C')); // PDF
+      expect(label.label, 'مرحبا \u202AHello\u202C');
     });
 
     test('no embedding when all parts have same direction', () {
@@ -1182,9 +1174,6 @@ void main() {
 
       final SemanticsLabel label = builder.build();
       expect(label.label, 'Hello world');
-      expect(label.label, isNot(contains('\u202B'))); // No RLE
-      expect(label.label, isNot(contains('\u202D'))); // No LRE
-      expect(label.label, isNot(contains('\u202C'))); // No PDF
     });
 
     test('part direction falls back to overall direction', () {
@@ -1195,7 +1184,6 @@ void main() {
 
       final SemanticsLabel label = builder.build();
       expect(label.label, 'Hello world');
-      expect(label.label, isNot(contains('\u202B'))); // No embedding needed
     });
 
     test('complex multilingual example', () {
@@ -1209,17 +1197,7 @@ void main() {
         ..addPart('שלום', textDirection: TextDirection.rtl) // Hebrew
         ..addPart('to our app', textDirection: TextDirection.ltr);
 
-      final SemanticsLabel label = builder.build();
-      expect(label.label, contains('Welcome'));
-      expect(label.label, contains('مرحبا'));
-      expect(label.label, contains('שלום'));
-      expect(label.label, contains('to our app'));
-
-      // Should have Unicode embedding for RTL parts
-      final int rleCount = '\u202B'.allMatches(label.label).length;
-      final int pdfCount = '\u202C'.allMatches(label.label).length;
-      expect(rleCount, 2); // Two RTL parts
-      expect(pdfCount, 2); // Two closing PDF marks
+      expect(builder.build().label, contains('Welcome \u202Bمرحبا\u202C \u202Bשלום\u202C to our app'));
     });
   });
 

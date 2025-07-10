@@ -805,13 +805,7 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   }
 }
 
-/// Internal representation of a label part for [SemanticsLabelBuilder].
-class _LabelPart {
-  _LabelPart(this.text, this.textDirection);
-
-  final String text;
-  final TextDirection? textDirection;
-}
+typedef _LabelPart = (String text, TextDirection? textDirection);
 
 /// An immutable semantic label that contains the concatenated text.
 ///
@@ -917,8 +911,7 @@ final class SemanticsLabelBuilder {
     final StringBuffer buffer = StringBuffer();
     buffer.write(_parts.first.text);
 
-    for (int i = 1; i < _parts.length; i++) {
-      final _LabelPart currentPart = _parts[i];
+    for (final (String text, TextDirection? textDirection) in _parts) {
       final TextDirection? partDirection = currentPart.textDirection ?? textDirection;
 
       if (separator.isNotEmpty) {
