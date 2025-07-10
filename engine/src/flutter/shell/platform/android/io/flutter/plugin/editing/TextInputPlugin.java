@@ -93,7 +93,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
       imeSyncCallback.install();
 
-      // When the IME is hidden, we need to notify the framework that close connection.
+      // When the IME is hidden, we need to restart the input method manager to accomodate
+      // some keyboards like the Samsung keyboard that may be caching old state.
       imeSyncCallback.setImeVisibilityListener(
           new ImeSyncDeferringInsetsCallback.ImeVisibilityListener() {
             @Override
@@ -596,6 +597,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
+    // When the IME is hidden, we need to restart the input method manager to accomodate
+    // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
     if (insets != null && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
       mImm.restartInput(mView);
