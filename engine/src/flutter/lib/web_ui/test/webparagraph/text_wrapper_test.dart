@@ -7,7 +7,7 @@ import 'package:ui/src/engine/web_paragraph/layout.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 
-import '../../common/test_initialization.dart';
+import '../common/test_initialization.dart';
 
 // TODO(jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
 final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
