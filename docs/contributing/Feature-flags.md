@@ -116,7 +116,7 @@ The following steps are required:
    ```dart
    abstract class FeatureFlags {
      /// Whether to add unicorm emojis in lots of fun places.
-     bool get isUnicornEmojisEnabled => false;
+     bool get isUnicornEmojisEnabled;
    }
    ```
 
@@ -130,6 +130,38 @@ The following steps are required:
    ```
 
    [`FlutterFeatureFlagsIsEnabled`]: ../../packages/flutter_tools/lib/src/flutter_features.dart
+
+1. Add a new entry in `FeatureFlags.allFeatures`:
+
+   ```dart
+   List<Feature> get allFeatures => const <Feature>[
+     // ...
+     unicornEmojis,
+   ];
+   ```
+
+1. Create a [G3Fix][] to update google3's [`Google3Features`][]:
+
+   [G3Fix]: https://g3doc.corp.google.com/company/teams/core/developer/acx/flutter/process/life_of_a_pr/index.md?cl=head#g3fix
+   [`Google3Features`]: http://google3/mobile/flutter/cli/context/lib/context.dart?q=symbol%3A%5CbGoogle3Features%5Cb%20case%3Ayes
+
+    1. Add a new field to `Google3Features` :
+
+       ```dart
+       class Google3Features extends FeatureFlags {
+         @override
+         bool get isUnicornEmojisEnabled => true;
+       }
+       ```
+
+    2. Add a new entry to `Google3Features.allFeatures`:
+
+       ```dart
+       List<Feature> get allFeatures => const <Feature>[
+         // ...
+         unicornEmojis,
+       ];
+       ```
 
 ### Allowing flags to be enabled
 
