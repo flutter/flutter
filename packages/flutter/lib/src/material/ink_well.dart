@@ -861,7 +861,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
   void activateOnIntent(Intent? intent) {
-    debugPrint('InkWell - activate on intent');
     _activationTimer?.cancel();
     _activationTimer = null;
     _startNewSplash(context: context);
@@ -1135,7 +1134,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool _hasFocus = false;
   void handleFocusUpdate(bool hasFocus) {
-    debugPrint('Inkwell - handleFocusUpdate $hasFocus');
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
     // (MaterialState) states include MaterialState.focused if

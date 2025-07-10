@@ -99,7 +99,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             @Override
             public void onImeVisibilityChanged(boolean visible) {
               if (!visible) {
-                Log.e(TAG, "onImeVisibilityChanged - restarting input " + mImm.isAcceptingText() + " " + mImm.isActive());
                 mImm.restartInput(mView);
               }
             }
@@ -312,15 +311,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @Nullable
   public InputConnection createInputConnection(
       @NonNull View view, @NonNull KeyboardManager keyboardManager, @NonNull EditorInfo outAttrs) {
-    Log.e(TAG, "createInputConnection");
     if (inputTarget.type == InputTarget.Type.NO_TARGET) {
-      Log.e(TAG, "createInputConnection - no target returning null");
       lastInputConnection = null;
       return null;
     }
 
     if (inputTarget.type == InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW) {
-      Log.e(TAG, "createInputConnection - platformView returning null");
       return null;
     }
 
@@ -429,7 +425,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   @VisibleForTesting
   void showTextInput(View view) {
-    Log.e(TAG, "showTextInput ");
     if (configuration == null
         || configuration.inputType == null
         || configuration.inputType.type != TextInputChannel.TextInputType.NONE) {
@@ -441,7 +436,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   private void hideTextInput(View view) {
-    Log.e(TAG, "hideTextInput");
     notifyViewExited();
     // Note: when a virtual display is used, a race condition may lead to us hiding the keyboard
     // here just after a platform view has shown it.
@@ -578,7 +572,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   @VisibleForTesting
   void clearTextInputClient() {
-    Log.e(TAG, "clearTextInputClient");
     if (inputTarget.type == InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW) {
       // This only applies to platform views that use a virtual display.
       // Focus changes in the framework tree have no guarantees on the order focus nodes are
@@ -594,7 +587,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // If we ever want to allow the framework to clear a platform view text client we should
       // probably consider changing the focus manager such that focus nodes that lost focus are
       // notified before focus nodes that gained focus as part of the same focus event.
-      Log.e(TAG, "clearTextInputClient - returning early");
       return;
     }
     mEditable.removeEditingStateListener(this);
@@ -639,7 +631,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   // -------- Start: KeyboardManager Synchronous Responder -------
   public boolean handleKeyEvent(@NonNull KeyEvent keyEvent) {
-    Log.e(TAG, "handleKeyEvent: " + keyEvent);
     if (!getInputMethodManager().isAcceptingText() || lastInputConnection == null) {
       return false;
     }
