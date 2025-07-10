@@ -23,15 +23,12 @@ Future<void> testMain() async {
     const JSONMethodCodec codec = JSONMethodCodec();
 
     late ClipboardMessageHandler clipboardMessageHandler;
-    _MockClipboardAPICopyStrategy clipboardApiCopyStrategy = _MockClipboardAPICopyStrategy();
-    _MockClipboardAPIPasteStrategy clipboardApiPasteStrategy = _MockClipboardAPIPasteStrategy();
+    _MockClipboardStrategy mockClipboardStrategy = _MockClipboardStrategy();
 
     setUp(() {
       clipboardMessageHandler = ClipboardMessageHandler();
-      clipboardApiCopyStrategy = _MockClipboardAPICopyStrategy();
-      clipboardApiPasteStrategy = _MockClipboardAPIPasteStrategy();
-      clipboardMessageHandler.copyToClipboardStrategy = clipboardApiCopyStrategy;
-      clipboardMessageHandler.pasteFromClipboardStrategy = clipboardApiPasteStrategy;
+      mockClipboardStrategy = _MockClipboardStrategy();
+      clipboardMessageHandler.clipboardStrategy = mockClipboardStrategy;
     });
 
     test('kTextPlainFormat is correct', () {
@@ -49,7 +46,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when clipboard is not available', () async {
-        clipboardApiCopyStrategy.onSetData = (String? text) async {
+        mockClipboardStrategy.onSetData = (String? text) async {
           throw StateError('Clipboard is not available in the context.');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -72,7 +69,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when exception arises', () async {
-        clipboardApiCopyStrategy.onSetData = (String? text) async {
+        mockClipboardStrategy.onSetData = (String? text) async {
           throw Exception('');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -119,7 +116,7 @@ Future<void> testMain() async {
       });
 
       test('completes with text when clipboard is not empty', () async {
-        clipboardApiPasteStrategy.onGetData = () async => testText;
+        mockClipboardStrategy.onGetData = () async => testText;
         final Completer<ByteData> completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(
@@ -133,7 +130,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when clipboard is not available', () async {
-        clipboardApiPasteStrategy.onGetData = () async {
+        mockClipboardStrategy.onGetData = () async {
           throw StateError('Clipboard is not available in the context.');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -159,7 +156,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when exception arises', () async {
-        clipboardApiPasteStrategy.onGetData = () async {
+        mockClipboardStrategy.onGetData = () async {
           throw Exception('');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -197,7 +194,7 @@ Future<void> testMain() async {
       });
 
       test('completes with true value when clipboard is not empty', () async {
-        clipboardApiPasteStrategy.onGetData = () async => testText;
+        mockClipboardStrategy.onGetData = () async => testText;
         final Completer<ByteData> completer = Completer<ByteData>();
 
         clipboardMessageHandler.hasStringsMethodCall(completer.complete);
@@ -208,7 +205,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when clipboard is not available', () async {
-        clipboardApiPasteStrategy.onGetData = () async {
+        mockClipboardStrategy.onGetData = () async {
           throw StateError('Clipboard is not available in the context.');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -231,7 +228,7 @@ Future<void> testMain() async {
       });
 
       test('completes with error when exception arises', () async {
-        clipboardApiPasteStrategy.onGetData = () async {
+        mockClipboardStrategy.onGetData = () async {
           throw Exception('');
         };
         final Completer<ByteData> completer = Completer<ByteData>();
@@ -256,8 +253,10 @@ Future<void> testMain() async {
   });
 }
 
-class _MockClipboardAPICopyStrategy implements ClipboardAPICopyStrategy {
+class _MockClipboardStrategy implements ClipboardStrategy {
   Future<void> Function(String?)? onSetData;
+
+  Future<String> Function()? onGetData;
 
   @override
   Future<void> setData(String? text) async {
@@ -266,10 +265,6 @@ class _MockClipboardAPICopyStrategy implements ClipboardAPICopyStrategy {
     }
     await onSetData!.call(text);
   }
-}
-
-class _MockClipboardAPIPasteStrategy implements ClipboardAPIPasteStrategy {
-  Future<String> Function()? onGetData;
 
   @override
   Future<String> getData() async {

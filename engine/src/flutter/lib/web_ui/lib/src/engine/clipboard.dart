@@ -14,16 +14,13 @@ class ClipboardMessageHandler {
   @visibleForTesting
   static const String kTextPlainFormat = 'text/plain';
 
-  /// Helper to handle copy to clipboard functionality.
-  CopyToClipboardStrategy _copyToClipboardStrategy = CopyToClipboardStrategy();
-
-  /// Helper to handle copy to clipboard functionality.
-  PasteFromClipboardStrategy _pasteFromClipboardStrategy = PasteFromClipboardStrategy();
+  /// Helper to handle clipboard functionality.
+  ClipboardStrategy _clipboardStrategy = ClipboardStrategy();
 
   /// Handles the platform message which copies the given text to the clipboard.
   void setDataMethodCall(ui.PlatformMessageResponseCallback? callback, String? text) {
     const MethodCodec codec = JSONMethodCodec();
-    _copyToClipboardStrategy
+    _clipboardStrategy
         .setData(text)
         .then((_) => callback!(codec.encodeSuccessEnvelope(null)))
         .catchError((Object error) {
@@ -41,7 +38,7 @@ class ClipboardMessageHandler {
       return;
     }
 
-    _pasteFromClipboardStrategy
+    _clipboardStrategy
         .getData()
         .then((String data) {
           final Map<String, Object?> map = <String, Object?>{'text': data};
@@ -57,7 +54,7 @@ class ClipboardMessageHandler {
   /// pasteable strings.
   void hasStringsMethodCall(ui.PlatformMessageResponseCallback? callback) {
     const MethodCodec codec = JSONMethodCodec();
-    _pasteFromClipboardStrategy
+    _clipboardStrategy
         .getData()
         .then((String data) {
           final Map<String, Object?> map = <String, Object?>{'value': data.isNotEmpty};
@@ -69,44 +66,19 @@ class ClipboardMessageHandler {
         });
   }
 
-  /// Overrides the default paste from clipboard strategy.
+  /// Overrides the default clipboard strategy.
   @visibleForTesting
-  set pasteFromClipboardStrategy(PasteFromClipboardStrategy strategy) {
-    _pasteFromClipboardStrategy = strategy;
-  }
-
-  /// Overrides the default copy to clipboard strategy.
-  @visibleForTesting
-  set copyToClipboardStrategy(CopyToClipboardStrategy strategy) {
-    _copyToClipboardStrategy = strategy;
+  set clipboardStrategy(ClipboardStrategy strategy) {
+    _clipboardStrategy = strategy;
   }
 }
 
-/// Provides functionality for writing text to clipboard.
-abstract class CopyToClipboardStrategy {
-  factory CopyToClipboardStrategy() {
-    return ClipboardAPICopyStrategy();
-  }
-
-  /// Places the text onto the browser clipboard.
-  Future<void> setData(String? text);
-}
-
-/// Provides functionality for reading text from clipboard.
-abstract class PasteFromClipboardStrategy {
-  factory PasteFromClipboardStrategy() {
-    return ClipboardAPIPasteStrategy();
-  }
-
-  /// Returns text from the browser clipboard.
-  Future<String> getData();
-}
-
-/// Provides functionality for writing text to clipboard using Clipboard API.
+/// Provides functionality for writing and reading text from the clipboard
+/// using the Clipboard API.
 ///
 /// See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API
-class ClipboardAPICopyStrategy implements CopyToClipboardStrategy {
-  @override
+class ClipboardStrategy {
+  /// Places the text onto the browser clipboard.
   Future<void> setData(String? text) async {
     final clipboard = domWindow.navigator.clipboard;
 
@@ -120,13 +92,8 @@ class ClipboardAPICopyStrategy implements CopyToClipboardStrategy {
 
     await clipboard.writeText(text!);
   }
-}
 
-/// Provides functionality for reading text from clipboard using Clipboard API.
-///
-/// See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API
-class ClipboardAPIPasteStrategy implements PasteFromClipboardStrategy {
-  @override
+  /// Returns text from the browser clipboard.
   Future<String> getData() async {
     final clipboard = domWindow.navigator.clipboard;
 
