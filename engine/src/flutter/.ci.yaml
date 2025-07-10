@@ -554,3 +554,30 @@ targets:
     timeout: 120
     properties:
       config_name: windows_unopt
+
+  #          _____________________⚠️__________________________
+  #
+  #      This is a size experiment for reducing engine binary sizes.
+  #     It is highly volatile and will not be supported if you use it.
+  #          _____________________⚠️__________________________
+  #
+  - name: Linux linux_android_aot_engine_size_exp
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
+    properties:
+      release_build: "true"
+      config_name: linux_android_aot_engine_size_exp
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Linux
+    dimensions:
+      # This is needed so that orchestrators that only spawn subbuilds are not
+      # assigned to the large 32 core workers when doing release builds.
+      # For more details see the issue
+      # at https://github.com/flutter/flutter/issues/152186.
+      cores: "8"
