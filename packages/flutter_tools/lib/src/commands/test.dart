@@ -78,6 +78,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
 
     argParser
@@ -164,14 +165,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'If unset, matches the current package name.',
         valueHelp: 'package-name-regexp',
         splitCommas: false,
-      )
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input '
-            'and provide output and progress in machine friendly format.',
       )
       ..addFlag(
         'update-goldens',
@@ -319,11 +312,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> results =
-        _isIntegrationTest
-            // Use [DeviceBasedDevelopmentArtifacts].
-            ? await super.requiredArtifacts
-            : <DevelopmentArtifact>{};
+    final Set<DevelopmentArtifact> results = _isIntegrationTest
+        // Use [DeviceBasedDevelopmentArtifacts].
+        ? await super.requiredArtifacts
+        : <DevelopmentArtifact>{};
     if (isWeb) {
       results.add(DevelopmentArtifact.web);
     }
@@ -373,8 +365,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     // This needs to be set before [super.verifyThenRunCommand] so that the
     // correct [requiredArtifacts] can be identified before [run] takes place.
-    final List<String> testFilePaths =
-        _testFileUris.map((Uri uri) => uri.replace(query: '').toFilePath()).toList();
+    final List<String> testFilePaths = _testFileUris
+        .map((Uri uri) => uri.replace(query: '').toFilePath())
+        .toList();
     _isIntegrationTest = _shouldRunAsIntegrationTests(
       globals.fs.currentDirectory.absolute.path,
       testFilePaths,
@@ -473,10 +466,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
-    final Uri? nativeAssetsJson =
-        _isIntegrationTest
-            ? null // Don't build for host when running integration tests.
-            : await nativeAssetsBuilder?.build(buildInfo);
+    final Uri? nativeAssetsJson = _isIntegrationTest
+        ? null // Don't build for host when running integration tests.
+        : await nativeAssetsBuilder?.build(buildInfo);
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
@@ -569,7 +561,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final bool machine = boolArg('machine');
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') || boolArg('branch-coverage')) {
       final Set<String> packagesToInclude = _getCoveragePackages(
@@ -578,7 +569,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !machine,
+        verbose: !outputMachineFormat,
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
@@ -588,7 +579,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     TestWatcher? watcher;
-    if (machine) {
+    if (outputMachineFormat) {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
@@ -650,7 +641,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
@@ -678,7 +669,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
@@ -826,8 +817,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    final Iterable<DevFSFileContent> files =
-        entries.values.map((AssetBundleEntry asset) => asset.content).whereType<DevFSFileContent>();
+    final Iterable<DevFSFileContent> files = entries.values
+        .map((AssetBundleEntry asset) => asset.content)
+        .whereType<DevFSFileContent>();
     for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
@@ -839,8 +831,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final File cachedFlavorFile = globals.fs.file(
       globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
     );
-    final String? cachedFlavor =
-        cachedFlavorFile.existsSync() ? cachedFlavorFile.readAsStringSync() : null;
+    final String? cachedFlavor = cachedFlavorFile.existsSync()
+        ? cachedFlavorFile.readAsStringSync()
+        : null;
     if (cachedFlavor != flavor) {
       return true;
     }

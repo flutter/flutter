@@ -13,8 +13,9 @@ import 'package:process_runner/process_runner.dart';
 //
 // See README.md for more information.
 
-final Directory flutterRoot =
-    Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+final Directory flutterRoot = Directory(
+  path.fromUri(Platform.script),
+).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));

@@ -32,6 +32,11 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 /// Visitor which detects previews and extracts [PreviewDetails] for later code
 /// generation.
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
+  _PreviewVisitor({required LibraryElement2 lib})
+    : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null;
+
+  late final String? packageName;
+
   final List<PreviewDetails> previewEntries = <PreviewDetails>[];
 
   FunctionDeclaration? _currentFunction;
@@ -78,6 +83,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     if (_currentFunction != null) {
       final NamedType returnType = _currentFunction!.returnType! as NamedType;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: _currentFunction!.name.toString(),
         isBuilder: returnType.name2.isWidgetBuilder,
       );
@@ -85,6 +91,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
       final Token? name = _currentConstructor!.name;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: '$returnType${name == null ? '' : '.$name'}',
         isBuilder: false,
       );
@@ -92,6 +99,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       final NamedType returnType = _currentMethod!.returnType! as NamedType;
       final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
       _currentPreview = PreviewDetails(
+        packageName: packageName,
         functionName: '${parentClass.name}.${_currentMethod!.name}',
         isBuilder: returnType.name2.isWidgetBuilder,
       );
@@ -169,11 +177,11 @@ final class LibraryPreviewNode {
     }
   }
 
-  /// Finds all previews defined in the compilation [units] and adds them to [previews].
-  void findPreviews({required List<ResolvedUnitResult> units}) {
+  /// Finds all previews defined in the [lib] and adds them to [previews].
+  void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
-    final _PreviewVisitor visitor = _PreviewVisitor();
-    for (final ResolvedUnitResult libUnit in units) {
+    final _PreviewVisitor visitor = _PreviewVisitor(lib: lib.element2);
+    for (final ResolvedUnitResult libUnit in lib.units) {
       libUnit.unit.visitChildren(visitor);
     }
     previews
@@ -195,6 +203,11 @@ final class LibraryPreviewNode {
     for (final ResolvedUnitResult unit in units) {
       final LibraryFragment fragment = unit.libraryFragment;
       for (final LibraryImport importedLib in fragment.libraryImports2) {
+        if (importedLib.importedLibrary2 == null) {
+          // This is an import for a file that's not analyzed (likely an import of a package from
+          // the pub-cache) and isn't necessary to track as part of the dependency graph.
+          continue;
+        }
         final LibraryElement2 importedLibrary = importedLib.importedLibrary2!;
         final LibraryPreviewNode result = graph.putIfAbsent(
           importedLibrary.toPreviewPath(),

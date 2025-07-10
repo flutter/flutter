@@ -25,9 +25,8 @@ void main() {
       goldenKey = Uri.parse('file://golden_key');
       imageFile2 = globals.fs.file('second_test_image_file');
       goldenKey2 = Uri.parse('file://second_golden_key');
-      createFakeProcess =
-          (String stdout) =>
-              FakeProcess(exitCode: Future<int>.value(0), stdout: stdoutFromString(stdout));
+      createFakeProcess = (String stdout) =>
+          FakeProcess(exitCode: Future<int>.value(0), stdout: stdoutFromString(stdout));
     });
 
     testWithoutContext('can pass data', () async {

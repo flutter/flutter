@@ -358,7 +358,8 @@ class IosProject extends XcodeBasedProject {
 
   static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
 
-  static const String _lldbInitTemplate = '''
+  static const String _lldbInitTemplate =
+      '''
 #
 # Generated file, do not edit.
 #
@@ -616,13 +617,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (entitlementPath != null) {
         final File entitlement = hostAppRoot.childFile(entitlementPath);
         if (entitlement.existsSync()) {
-          final List<String>? domains =
-              globals.plistParser
-                  .getValueFromFile<List<Object>>(
-                    entitlement.path,
-                    PlistParser.kAssociatedDomainsKey,
-                  )
-                  ?.cast<String>();
+          final List<String>? domains = globals.plistParser
+              .getValueFromFile<List<Object>>(entitlement.path, PlistParser.kAssociatedDomainsKey)
+              ?.cast<String>();
 
           if (domains != null) {
             return <String>[
@@ -854,14 +851,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   File get pluginRegistrantHeader {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule
+        ? pluginRegistrantHost.childDirectory('Classes')
+        : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.h');
   }
 
   File get pluginRegistrantImplementation {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule
+        ? pluginRegistrantHost.childDirectory('Classes')
+        : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
