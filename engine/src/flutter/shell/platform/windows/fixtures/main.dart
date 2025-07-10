@@ -405,6 +405,11 @@ void testEngineId() {
 }
 
 @pragma('vm:entry-point')
+void testWindowController() {
+  signal();
+}
+
+@pragma('vm:entry-point')
 Future<void> sendSemanticsTreeInfo() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {

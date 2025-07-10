@@ -18,8 +18,10 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -90,7 +92,8 @@ const String defaultConfigLinux1 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ]
 }
@@ -154,7 +157,8 @@ const String defaultConfigLinux2 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
+      ],
+      "readLogs": null
     }
   ],
   "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
@@ -1101,6 +1105,26 @@ void main() {
         );
       },
     );
+
+    testUsingContext('custom-device log reader command', () async {
+      const String logLine = 'Hello, from custom device!';
+      const List<String> logLineCommand = <String>['echo', logLine];
+      const List<String> expectedLogLines = <String>[logLine];
+
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: logLineCommand, stdout: logLine),
+      ]);
+      final CustomDeviceConfig customDeviceConfig = CustomDeviceConfig.exampleUnix.copyWith(
+        readLogsCommand: logLineCommand,
+      );
+      final CustomDevice customDevice = CustomDevice(
+        config: customDeviceConfig,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+      );
+      final DeviceLogReader logReader = await customDevice.getLogReader();
+      expect(logReader.logLines, emitsInOrder(expectedLogLines));
+    });
   });
 
   group('windows', () {

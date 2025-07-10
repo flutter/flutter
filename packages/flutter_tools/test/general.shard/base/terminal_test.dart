@@ -38,11 +38,13 @@ void main() {
 
   group('ANSI coloring, bold, and clearing', () {
     late AnsiTerminal terminal;
+    late FakePlatform platform;
 
     setUp(() {
+      platform = FakePlatform()..stdoutSupportsAnsi = true;
       terminal = AnsiTerminal(
         stdio: Stdio(), // Danger, using real stdio.
-        platform: FakePlatform()..stdoutSupportsAnsi = true,
+        platform: platform,
       );
     });
 
@@ -53,6 +55,19 @@ void main() {
           equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
         );
       }
+    });
+
+    testWithoutContext('can opt-out of color using NO_COLOR', () {
+      platform.environment = <String, String>{'NO_COLOR': ''};
+      expect(
+        terminal,
+        isA<Terminal>().having((Terminal t) => t.supportsColor, 'supportsColor', isFalse),
+      );
+
+      expect(
+        terminal.color('output-without-color', TerminalColor.red),
+        equals('output-without-color'),
+      );
     });
 
     testWithoutContext('adding bold works', () {
