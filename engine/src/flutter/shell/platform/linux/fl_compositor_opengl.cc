@@ -44,17 +44,11 @@ struct _FlCompositorOpenGL {
   // Engine we are rendering.
   GWeakRef engine;
 
-  // OpenGL contexts.
+  // Target OpenGL context;
+  GdkGLContext* context;
+
+  // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
-
-  // Flag to track lazy initialization.
-  gboolean initialized;
-
-  // The pixel format passed to the engine.
-  GLint sized_format;
-
-  // The format used to create textures.
-  GLint general_format;
 
   // target dimension for resizing
   int target_width;
@@ -82,8 +76,8 @@ struct _FlCompositorOpenGL {
   // Verticies for the uniform square.
   GLuint vertex_buffer;
 
-  // Framebuffers to render keyed by view ID.
-  GHashTable* framebuffers_by_view_id;
+  // Framebuffers to render.
+  GPtrArray* framebuffers;
 
   // Mutex used when blocking the raster thread until a task is completed on
   // platform thread.
@@ -144,22 +138,6 @@ static gchar* get_program_log(GLuint program) {
   glGetProgramInfoLog(program, log_length, nullptr, log);
 
   return log;
-}
-
-// Perform single run OpenGL initialization.
-static void initialize(FlCompositorOpenGL* self) {
-  if (self->initialized) {
-    return;
-  }
-  self->initialized = TRUE;
-
-  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-    self->sized_format = GL_BGRA8_EXT;
-    self->general_format = GL_BGRA_EXT;
-  } else {
-    self->sized_format = GL_RGBA8;
-    self->general_format = GL_RGBA;
-  }
 }
 
 static void fl_compositor_opengl_unblock_main_thread(FlCompositorOpenGL* self) {
@@ -320,7 +298,6 @@ static void render(FlCompositorOpenGL* self,
 }
 
 static gboolean present_layers(FlCompositorOpenGL* self,
-                               FlutterViewId view_id,
                                const FlutterLayer** layers,
                                size_t layers_count) {
   g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
@@ -337,6 +314,11 @@ static gboolean present_layers(FlCompositorOpenGL* self,
   self->had_first_frame = true;
 
   fl_compositor_opengl_unblock_main_thread(self);
+
+  GLint general_format = GL_RGBA;
+  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
+    general_format = GL_BGRA_EXT;
+  }
 
   g_autoptr(GPtrArray) framebuffers =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -356,20 +338,10 @@ static gboolean present_layers(FlCompositorOpenGL* self,
     }
   }
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-  if (engine == nullptr) {
-    return TRUE;
-  }
-  g_autoptr(FlRenderable) renderable =
-      fl_engine_get_renderable(engine, view_id);
-  if (renderable == nullptr) {
-    return TRUE;
-  }
-
-  if (view_id == flutter::kFlutterImplicitViewId) {
+  if (self->context == nullptr) {
     // Store for rendering later
-    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
-                        g_ptr_array_ref(framebuffers));
+    g_ptr_array_unref(self->framebuffers);
+    self->framebuffers = g_ptr_array_ref(framebuffers);
   } else {
     // Composite into a single framebuffer.
     if (framebuffers->len > 1) {
@@ -390,7 +362,7 @@ static gboolean present_layers(FlCompositorOpenGL* self,
       }
 
       FlFramebuffer* view_framebuffer =
-          fl_framebuffer_new(self->general_format, width, height);
+          fl_framebuffer_new(general_format, width, height);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                         fl_framebuffer_get_id(view_framebuffer));
       render(self, framebuffers, width, height);
@@ -406,13 +378,12 @@ static gboolean present_layers(FlCompositorOpenGL* self,
     size_t data_length = width * height * 4;
     g_autofree uint8_t* data = static_cast<uint8_t*>(malloc(data_length));
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
-    glReadPixels(0, 0, width, height, self->general_format, GL_UNSIGNED_BYTE,
-                 data);
+    glReadPixels(0, 0, width, height, general_format, GL_UNSIGNED_BYTE, data);
 
     // Write into a texture in the views context.
-    fl_renderable_make_current(renderable);
+    gdk_gl_context_make_current(self->context);
     g_autoptr(FlFramebuffer) view_framebuffer =
-        fl_framebuffer_new(self->general_format, width, height);
+        fl_framebuffer_new(general_format, width, height);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                       fl_framebuffer_get_id(view_framebuffer));
     glBindTexture(GL_TEXTURE_2D,
@@ -423,19 +394,15 @@ static gboolean present_layers(FlCompositorOpenGL* self,
     g_autoptr(GPtrArray) secondary_framebuffers =
         g_ptr_array_new_with_free_func(g_object_unref);
     g_ptr_array_add(secondary_framebuffers, g_object_ref(view_framebuffer));
-    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
-                        g_ptr_array_ref(secondary_framebuffers));
+    g_ptr_array_unref(self->framebuffers);
+    self->framebuffers = g_ptr_array_ref(secondary_framebuffers);
   }
-
-  fl_renderable_redraw(renderable);
 
   return TRUE;
 }
 
 typedef struct {
   FlCompositorOpenGL* self;
-
-  FlutterViewId view_id;
 
   const FlutterLayer** layers;
   size_t layers_count;
@@ -452,8 +419,7 @@ static void present_layers_task_cb(gpointer user_data) {
 
   // Perform the present.
   fl_opengl_manager_make_current(self->opengl_manager);
-  data->result =
-      present_layers(self, data->view_id, data->layers, data->layers_count);
+  data->result = present_layers(self, data->layers, data->layers_count);
   fl_opengl_manager_clear_current(self->opengl_manager);
 
   // Complete fl_compositor_opengl_present_layers().
@@ -465,65 +431,6 @@ static void present_layers_task_cb(gpointer user_data) {
 static FlutterRendererType fl_compositor_opengl_get_renderer_type(
     FlCompositor* compositor) {
   return kOpenGL;
-}
-
-static void fl_compositor_opengl_setup(FlCompositor* compositor) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  fl_opengl_manager_make_current(self->opengl_manager);
-
-  self->has_gl_framebuffer_blit =
-      driver_supports_blit() &&
-      (epoxy_gl_version() >= 30 ||
-       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
-
-  if (!self->has_gl_framebuffer_blit) {
-    setup_shader(self);
-  }
-}
-
-static gboolean fl_compositor_opengl_create_backing_store(
-    FlCompositor* compositor,
-    const FlutterBackingStoreConfig* config,
-    FlutterBackingStore* backing_store_out) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  fl_opengl_manager_make_current(self->opengl_manager);
-
-  initialize(self);
-
-  FlFramebuffer* framebuffer = fl_framebuffer_new(
-      self->general_format, config->size.width, config->size.height);
-  if (!framebuffer) {
-    g_warning("Failed to create backing store");
-    return FALSE;
-  }
-
-  backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
-  backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
-  backing_store_out->open_gl.framebuffer.user_data = framebuffer;
-  backing_store_out->open_gl.framebuffer.name =
-      fl_framebuffer_get_id(framebuffer);
-  backing_store_out->open_gl.framebuffer.target = self->sized_format;
-  backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
-    // Backing store destroyed in fl_compositor_opengl_collect_backing_store(),
-    // set on FlutterCompositor.collect_backing_store_callback during engine
-    // start.
-  };
-
-  return TRUE;
-}
-
-static gboolean fl_compositor_opengl_collect_backing_store(
-    FlCompositor* compositor,
-    const FlutterBackingStore* backing_store) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  fl_opengl_manager_make_current(self->opengl_manager);
-
-  // OpenGL context is required when destroying #FlFramebuffer.
-  g_object_unref(backing_store->open_gl.framebuffer.user_data);
-  return TRUE;
 }
 
 static void fl_compositor_opengl_wait_for_frame(FlCompositor* compositor,
@@ -544,7 +451,6 @@ static void fl_compositor_opengl_wait_for_frame(FlCompositor* compositor,
 }
 
 static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
-                                                    FlutterViewId view_id,
                                                     const FlutterLayer** layers,
                                                     size_t layers_count) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
@@ -559,7 +465,6 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   FlTaskRunner* task_runner = fl_engine_get_task_runner(engine);
   PresentLayersData data = {
       .self = self,
-      .view_id = view_id,
       .layers = layers,
       .layers_count = layers_count,
       .result = FALSE,
@@ -586,8 +491,9 @@ static void fl_compositor_opengl_dispose(GObject* object) {
   fl_compositor_opengl_unblock_main_thread(self);
 
   g_weak_ref_clear(&self->engine);
+  g_clear_object(&self->context);
   g_clear_object(&self->opengl_manager);
-  g_clear_pointer(&self->framebuffers_by_view_id, g_hash_table_unref);
+  g_clear_pointer(&self->framebuffers, g_ptr_array_unref);
   g_mutex_clear(&self->present_mutex);
   g_cond_clear(&self->present_condition);
 
@@ -597,11 +503,6 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->get_renderer_type =
       fl_compositor_opengl_get_renderer_type;
-  FL_COMPOSITOR_CLASS(klass)->setup = fl_compositor_opengl_setup;
-  FL_COMPOSITOR_CLASS(klass)->create_backing_store =
-      fl_compositor_opengl_create_backing_store;
-  FL_COMPOSITOR_CLASS(klass)->collect_backing_store =
-      fl_compositor_opengl_collect_backing_store;
   FL_COMPOSITOR_CLASS(klass)->wait_for_frame =
       fl_compositor_opengl_wait_for_frame;
   FL_COMPOSITOR_CLASS(klass)->present_layers =
@@ -611,26 +512,37 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 }
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
-  self->framebuffers_by_view_id = g_hash_table_new_full(
-      g_direct_hash, g_direct_equal, nullptr,
-      reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
+  self->framebuffers = g_ptr_array_new();
   g_mutex_init(&self->present_mutex);
   g_cond_init(&self->present_condition);
 }
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine) {
+FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
+                                             GdkGLContext* context) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
   g_weak_ref_init(&self->engine, engine);
+  self->context =
+      context != nullptr ? GDK_GL_CONTEXT(g_object_ref(context)) : nullptr;
   self->opengl_manager =
       FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
+
+  fl_opengl_manager_make_current(self->opengl_manager);
+
+  self->has_gl_framebuffer_blit =
+      driver_supports_blit() &&
+      (epoxy_gl_version() >= 30 ||
+       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+
+  if (!self->has_gl_framebuffer_blit) {
+    setup_shader(self);
+  }
 
   return self;
 }
 
 void fl_compositor_opengl_render(FlCompositorOpenGL* self,
-                                 FlutterViewId view_id,
                                  int width,
                                  int height) {
   g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
@@ -638,11 +550,7 @@ void fl_compositor_opengl_render(FlCompositorOpenGL* self,
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  GPtrArray* framebuffers = reinterpret_cast<GPtrArray*>((g_hash_table_lookup(
-      self->framebuffers_by_view_id, GINT_TO_POINTER(view_id))));
-  if (framebuffers != nullptr) {
-    render(self, framebuffers, width, height);
-  }
+  render(self, self->framebuffers, width, height);
 
   glFlush();
 }
