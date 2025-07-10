@@ -1648,17 +1648,6 @@ abstract class DefaultTextEditingStrategy
         // Prevent the browser from inserting a new line.
         event.preventDefault();
       }
-
-      // Suppress shortcuts if interactive selection is disabled.
-      // if (!inputConfiguration.enableInteractiveSelection) {
-      //   const shortcuts = <String>{'a', 'c', 'v'};
-      //   final isMacOs = ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
-      //   if (isMacOs && event.metaKey && shortcuts.contains(event.key)) {
-      //     event.preventDefault();
-      //   } else if (!isMacOs && event.ctrlKey && shortcuts.contains(event.key)) {
-      //     event.preventDefault();
-      //   }
-      // }
     }
   }
 

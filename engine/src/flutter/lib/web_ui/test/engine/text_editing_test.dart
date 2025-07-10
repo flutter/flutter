@@ -726,6 +726,7 @@ Future<void> testMain() async {
       bool decimal = false,
       bool isMultiline = false,
       bool autofillEnabled = true,
+      bool enableInteractiveSelection = true,
     }) {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         ++clientId,
@@ -736,6 +737,7 @@ Future<void> testMain() async {
           decimal: decimal,
           isMultiline: isMultiline,
           autofillEnabled: autofillEnabled,
+          enableInteractiveSelection: enableInteractiveSelection,
         ),
       ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -2948,14 +2950,8 @@ Future<void> testMain() async {
     }, skip: true);
 
     test('Collapses selections if interactive selection disabled', () {
-      final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
-        123,
-        createFlutterConfig('text', enableInteractiveSelection: false),
-      ]);
-      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+      final int clientId = showKeyboard(inputType: 'text', enableInteractiveSelection: false);
 
-      const MethodCall show = MethodCall('TextInput.show');
-      sendFrameworkMessage(codec.encodeMethodCall(show));
       // The Safari strategy doesn't insert the input element into the DOM until
       // it has received the geometry information.
       final List<double> transform = Matrix4.identity().storage.toList();
@@ -2985,7 +2981,7 @@ Future<void> testMain() async {
       expect(spy.messages[0].channel, 'flutter/textinput');
       expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
       expect(spy.messages[0].methodArguments, <dynamic>[
-        123, // Client ID
+        clientId,
         <String, dynamic>{
           'text': 'something',
           'selectionBase': 5,
