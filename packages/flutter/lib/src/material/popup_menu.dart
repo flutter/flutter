@@ -450,10 +450,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     }
 
     return MergeSemantics(
-      child: Semantics(
-        role: SemanticsRole.menuItem,
-        enabled: widget.enabled,
-        button: true,
+      child: buildSemantics(
         child: InkWell(
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
@@ -465,6 +462,25 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Builds the semantic wrapper for the popup menu item.
+  ///
+  /// This method creates the [Semantics] widget that provides accessibility
+  /// information for the menu item. By default, it sets the semantic role to
+  /// [SemanticsRole.menuItem] and includes the enabled state and button flag.
+  ///
+  /// Subclasses can override this method to customize the semantic properties.
+  /// For example, [CheckedPopupMenuItem] overrides this to use
+  /// [SemanticsRole.menuItemCheckbox] and include checked state information.
+  @protected
+  Widget buildSemantics({required Widget child}) {
+    return Semantics(
+      role: SemanticsRole.menuItem,
+      enabled: widget.enabled,
+      button: true,
+      child: child,
     );
   }
 }
@@ -605,6 +621,17 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
       _controller.forward();
     }
     super.handleTap();
+  }
+
+  @override
+  Widget buildSemantics({required Widget child}) {
+    return Semantics(
+      role: SemanticsRole.menuItemCheckbox,
+      enabled: widget.enabled,
+      checked: widget.checked,
+      button: true,
+      child: child,
+    );
   }
 
   @override
