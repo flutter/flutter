@@ -2543,6 +2543,26 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  int? get overlayPortalChild => _overlayPortalChild;
+  int? _overlayPortalChild;
+  set overlayPortalChild(int? value) {
+    if (_overlayPortalChild == value) {
+      return;
+    }
+    _overlayPortalChild = value;
+    _markDirty();
+  }
+
+  int? get overlayPortalParent => _overlayPortalParent;
+  int? _overlayPortalParent;
+  set overlayPortalParent(int? value) {
+    if (_overlayPortalParent == value) {
+      return;
+    }
+    _overlayPortalParent = value;
+    _markDirty();
+  }
+
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
@@ -3611,45 +3631,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
-  // Matrix4? recalculateTransformForNewParent(SemanticsNode newParent) {
-  //   // If the new parent is the same as the current parent, return the current transform
-  //   // if (parent == newParent) {
-  //   //   return transform;
-  //   // }
-
-  //   // Get the current global transform of the node
-  //   final Matrix4 currentNodeTransform = _getGlobalTransform(this);
-
-  //   // Get the global transform of the new parent
-  //   final Matrix4 parentGlobalTransform = _getGlobalTransform(newParent);
-
-  //   // Calculate the transform from node to new parent
-  //   // This is: parentGlobalTransform.inverted() * nodeGlobalTransform
-  //   final Matrix4 parentInverse = parentGlobalTransform.clone()..invert();
-  //   // if (parentInverse.invert() == 0) {
-  //   //   // If the parent transform is not invertible, return null
-  //   //   return null;
-  //   // }
-
-  //   return (parentInverse * currentNodeTransform) as Matrix4;
-  // }
-
-  // Matrix4 _getGlobalTransform(SemanticsNode node) {
-  //   Matrix4 globalTransform = Matrix4.identity();
-
-  //   // Walk up the parent chain and accumulate transforms
-  //   SemanticsNode? current = node.semanticsParent ?? node.parent;
-  //   while (current != null) {
-  //     final Matrix4? parentTransform = current.transform;
-  //     if (parentTransform != null) {
-  //       globalTransform = (parentTransform * globalTransform) as Matrix4;
-  //     }
-  //     current = current.semanticsParent ?? current.parent;
-  //   }
-
-  //   return globalTransform;
-  // }
-
   static Float64List _initIdentityTransform() {
     return Matrix4.identity().storage;
   }
@@ -3676,12 +3657,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     } else {
       List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      print('parent id: $id, sortedChildren: ${sortedChildren.map((e) => e.id)}');
       childrenInTraversalOrder = Int32List(updatedChildren!.length);
       for (int i = 0; i < updatedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
-      // print('id: $id childrenInTraversalOrder: $childrenInTraversalOrder');
       final int childCount = _children!.length;
       // _children is sorted in paint order, so we invert it to get the hit test
       // order.
@@ -3689,7 +3668,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       for (int i = childCount - 1; i >= 0; i -= 1) {
         childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
       }
-      // print('childrenInHitTestOrder: $childrenInHitTestOrder');
     }
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
@@ -3700,27 +3678,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    if (data.identifier.endsWith('parent')) {
-      final SemanticsNode? overlayPortalChild =
-          owner!._overlayPortalChildNodes[identifier.split(' ')[0]];
-      if (overlayPortalChild != null) {
-        print(
-          'overlayportalParent id: $id overlayPortalChild id: ${overlayPortalChild.id} depth: ${overlayPortalChild.depth}',
-        );
-      }
-    }
-
     _SemanticsGeometry? geometry;
     if (data.identifier.endsWith('child')) {
-      // print(
-      //   'owner!._overlayPortalParentNodes: ${owner!._overlayPortalParentNodes.map((key, value) => MapEntry(key, value.id))}',
-      // );
-      // print('计算SemanticsGeometry!!!!: current node label: $label');
       semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
-
-      // print(
-      //   'PARENT $semanticsParent SEMANTICS CLIP RECT: ${semanticsParent!.parentSemanticsClipRect}',
-      // );
       geometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: semanticsParent!.parentPaintClipRect,
         parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
@@ -3732,73 +3692,19 @@ class SemanticsNode with DiagnosticableTreeMixin {
       rect = geometry.rect;
       parentPaintClipRect = geometry.paintClipRect;
       parentSemanticsClipRect = geometry.semanticsClipRect;
-      print('====================== id: $id ========================');
-      print('transform: ${geometry.transform}');
-      Rect globalRect = getGlobalRect(this);
-      print('>>>>>>>>> id: $id, Global rect: $globalRect <<<<<<<<<<');
-      print(
-        'Global rect removing scaling: ${Rect.fromLTRB(globalRect.left / 3.5, globalRect.top / 3.5, globalRect.right / 3.5, globalRect.bottom / 3.5)}',
-      );
-      print('  local rect: ${rect}');
-      print('==============================================');
     }
 
-    // print('>>>>>>>>>>>>>>>>>>>>>>> id: $id, Local rect: $rect');
-    // bool isInOverlayPortalSubtree = false;
-    // SemanticsNode? current = this;
-    // while (current != null) {
-    //   if (current.identifier.endsWith('child')) {
-    //     isInOverlayPortalSubtree = true;
-    //     break;
-    //   }
-    //   current = current.parent;
-    // }
-    // Rect globalRect = geometry!.rect;
-    // SemanticsNode? current = this;
-    // while (current != null) {
-    //   final Matrix4? transform = geometry!.transform;
-    //   if (transform != null) {
-    //     globalRect = MatrixUtils.transformRect(transform, globalRect);
-    //   }
-    //   current = current.semanticsParent;
-    // }
-
-    // print('geometry transform: \n$transform');
-    // print('>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-
-    // bool isInOverlayPortalSubtree = false;
-    // SemanticsNode? current = this;
-    // while (current != null) {
-    //   if (current.identifier.endsWith('child')) {
-    //     isInOverlayPortalSubtree = true;
-    //     break;
-    //   }
-    //   current = current.parent;
-    // }
-
-    // if (identifier.endsWith('child')) {
-    //   semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
-    // }
-
-    // Matrix4? updatedTransform;
-    // if (identifier.endsWith('child')) {
-    //   // semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
-    //   updatedTransform = _SemanticsGeometry.computeChildGeometry(
-    //     parentTransform: semanticsParent?.transform,
-    //     parent: semanticsParent!,
-    //     child: this,
-    //   );
-    // } else {
-    //   updatedTransform = data.transform;
-    // }
-    // print(
-    //   '------------------ $id: $label -------------------\n transform:\n${data.transform} \nrect: $rect',
-    // );
+    if (data.identifier.endsWith('parent')) {
+      overlayPortalChild = owner!._overlayPortalChildNodes[data.identifier.split(' ')[0]]?.id;
+      // print owner!._overlayPortalChildNodes
+    }
     if (data.identifier.endsWith('child')) {
-      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      print('transform: \n${geometry?.transform}');
-      print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
+      // print owner!._overlayPortalChildNodes
     }
+    print('==========================================');
+    print('parent id: $id, overlayPortalChild: $overlayPortalChild');
+    print('child id: $id, overlayPortalPArent: $overlayPortalChild');
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
@@ -3827,7 +3733,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
+      transform: kIsWeb
+          ? data.transform?.storage ?? _kIdentityTransform
+          : geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
+      overlayPortalChild: overlayPortalChild,
+      overlayPortalParent: overlayPortalParent,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
@@ -3890,7 +3800,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       // In the absence of text direction default to paint order.
       childrenInDefaultOrder = updatedChildren;
     }
-    print('parent id: $id, childrenInDefaultOrder: ${childrenInDefaultOrder?.map((e) => e.id)}');
     // List.sort does not guarantee stable sort order. Therefore, children are
     // first partitioned into groups that have compatible sort keys, i.e. keys
     // in the same group can be compared to each other. These groups stay in
@@ -4216,7 +4125,6 @@ final class _SemanticsGeometry {
     while (!identical(childSemanticsNode, parentSemanticsNode)) {
       final int fromDepth = childSemanticsNode.depth;
       final int toDepth = parentSemanticsNode.depth;
-      print('fromDepth: $fromDepth, toDepth: $toDepth');
       // print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
       if (fromDepth >= toDepth) {
         assert(
@@ -4241,16 +4149,6 @@ final class _SemanticsGeometry {
       }
     }
 
-    // Calculate transform.
-    // assert(childToCommonAncestor.length >= 2);
-    // // print('child to commen ancestor list: ${childToCommonAncestor.map((e) => e.id)}');
-    // for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
-    //   transform.multiply(childToCommonAncestor[i].transform ?? Matrix4.identity());
-    //   // childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
-    // }
-
-    print('parentToCommonAncestorTransform: $parentToCommonAncestorTransform');
-    // print('parentToCommonAncestorTransform invert: ${parentToCommonAncestorTransform?.invert()}');
     if (parentToCommonAncestorTransform != null) {
       if (parentToCommonAncestorTransform.invert() != 0) {
         transform.multiply(parentToCommonAncestorTransform);
@@ -4258,7 +4156,6 @@ final class _SemanticsGeometry {
         transform.setZero();
       }
     }
-    print('transform: \n$transform');
 
     // assert(childToCommonAncestor.last == parent);
     // Calculate clips.
@@ -4344,38 +4241,6 @@ final class _SemanticsGeometry {
   // This instance should never be returned to the caller. Otherwise, the data
   // stored in it will be overwritten unpredictably by subsequent reuses.
   static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
-
-  // Computes the semantics and painting clip rects for the given child and
-  // assigns the rects to _semanticsClipRect and _paintClipRect respectively.
-  //
-  // The caller must guarantee that child.parent == parent. The resulting rects
-  // are in `child`'s coordinate system.
-  // static _SemanticsGeometryClips _computeClipRect(
-  //   RenderObject parent,
-  //   RenderObject child,
-  //   Rect? parentSemanticsClipRect,
-  //   Rect? parentPaintClipRect,
-  // ) {
-  //   assert(identical(child.parent, parent));
-  //   final Rect? additionalPaintClip = parent.describeApproximatePaintClip(child);
-  //   if (parentPaintClipRect == null && additionalPaintClip == null) {
-  //     return (null, null);
-  //   }
-  //   // Computes the paint transform from child to parent. The _transformRect
-  //   // method will compute the inverse.
-  //   _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
-  //   parent.applyPaintTransform(child, _temporaryTransformHolder);
-
-  //   final Rect paintClipRect =
-  //       _transformRect(
-  //         _intersectRects(additionalPaintClip, parentPaintClipRect),
-  //         _temporaryTransformHolder,
-  //       )!;
-  //   final Rect? semanticsClip =
-  //       parent.describeSemanticsClip(child) ??
-  //       _intersectRects(parentSemanticsClipRect, additionalPaintClip);
-  //   return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
-  // }
 }
 
 /// A group of [nodes] that are disjoint vertically or horizontally from other
@@ -4771,64 +4636,45 @@ class SemanticsOwner extends ChangeNotifier {
 
     final List<SemanticsNode> updatedVisitedNodes = <SemanticsNode>[];
 
-    if (kIsWeb) {
-      visitedNodes.forEach(updatedVisitedNodes.add);
-    } else {
-      for (final SemanticsNode node in visitedNodes) {
+    for (final SemanticsNode node in visitedNodes) {
+      final String identifier = node.identifier.split(' ')[0];
+
+      final bool isOverlayPortalParent = node.identifier.endsWith('parent');
+      final bool isOverlayPortalChild = node.identifier.endsWith('child');
+      if (kIsWeb) {
+        updatedVisitedNodes.add(node);
+      } else {
         if (node.identifier.isEmpty) {
           // If the node has no identifier, it is not an overlay portal node.
           updatedVisitedNodes.add(node);
           continue;
         }
 
-        final String identifier = node.identifier.split(' ')[0];
-
-        final bool isOverlayPortalParent = node.identifier.endsWith('parent');
-        final bool isOverlayPortalChild = node.identifier.endsWith('child');
-
-        if (isOverlayPortalParent) {
-          // If the node is an overlay portal parent, we need to update the parent node.
-          _overlayPortalParentNodes[identifier] = node;
-        } else if (isOverlayPortalChild) {
+        if (isOverlayPortalChild) {
           // If the node is a child of an overlay portal, we need to add parent node before node.
           final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
             print('parentNode: ${parentNode.id}');
             updatedVisitedNodes.add(parentNode);
           }
-          _overlayPortalChildNodes[identifier] = node;
-
-          // final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
-          // if (parentNode != null) {
-          //   parentNode._redepthChild(node);
-          // }
         }
 
         updatedVisitedNodes.add(node);
       }
-    }
-    print('visitedNodes id list: ${visitedNodes.map((SemanticsNode node) => node.id)}');
-    // print(
-    //   'updatedVisitedNodes id list: ${updatedVisitedNodes.map((SemanticsNode node) => node.id)}',
-    // );
-    // print(
-    //   'updatedVisitedNodes label list: ${updatedVisitedNodes.map((SemanticsNode node) => node.label)}',
-    // );
-    // print('--------------- global parent & child list ---------------');
-    // List<String> formattedEntries = [];
-    // _overlayPortalParentNodes.forEach((key, node) {
-    //   formattedEntries.add('$key: ${node.id}');
-    // });
-    // // Join all elements of the list into a single string with a comma and space separator.
-    // print(formattedEntries.join(', '));
-    // List<String> formattedEntries1 = [];
-    // _overlayPortalChildNodes.forEach((key, node) {
-    //   formattedEntries1.add('$key: ${node.id}');
-    // });
-    // print(formattedEntries1.join(', '));
 
-    // print('--------------------------------------------------');
-    print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id)}');
+      if (isOverlayPortalParent) {
+        // If the node is an overlay portal parent, we need to update the parent node.
+        _overlayPortalParentNodes[identifier] = node;
+      } else if (isOverlayPortalChild) {
+        // If the node is a child of an overlay portal, we need to add parent node before node.
+        final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
+        if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
+          print('parentNode: ${parentNode.id}');
+          updatedVisitedNodes.add(parentNode);
+        }
+        _overlayPortalChildNodes[identifier] = node;
+      }
+    }
 
     for (final SemanticsNode node in updatedVisitedNodes) {
       assert(
