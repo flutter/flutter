@@ -19,7 +19,7 @@ const FileSystem fileSystem = LocalFileSystem();
 final String flutterBin = fileSystem.path.join(
   getFlutterRoot(),
   'bin',
-  platform.isWindows ? 'flutter-dev.bat' : 'flutter-dev',
+  platform.isWindows ? 'flutter.bat' : 'flutter',
 );
 
 /// The [Platform] for the integration test environment.
