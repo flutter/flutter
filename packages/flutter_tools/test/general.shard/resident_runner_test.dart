@@ -754,20 +754,6 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
