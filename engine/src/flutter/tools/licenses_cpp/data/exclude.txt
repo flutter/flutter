@@ -2,6 +2,7 @@
 # This file describes all the files we don't need to do a copyright header
 # check on.
 ################################################################################
+.*/CMakeLists\.txt$
 .*/test/.*
 .*/testing/.*
 .*/tests/.*
@@ -22,6 +23,7 @@
 ^third_party/dart/third_party/pkg/.*
 ^third_party/dart/third_party/requirejs/.*
 ^third_party/depot_tools/.*
+^third_party/freetype2/docs/.*
 ^third_party/harfbuzz/.*\.py
 ^third_party/harfbuzz/perf/.*
 ^third_party/harfbuzz/src/harfbuzz.cc
@@ -55,6 +57,8 @@
 ^third_party/swiftshader/third_party/llvm-16.0/.*
 ^third_party/vulkan-deps/spirv-headers/.*
 ^third_party/vulkan-deps/vulkan-loader/.*
+^tools/android_sdk/packages\.txt$
+^tools/licenses_cpp/data/.*
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
@@ -95,3 +99,5 @@ third_party/freetype2/src/tools/.*
 third_party/freetype2/src/truetype/ttpload.c
 # This file is a conglomeration of licenses found in files.
 third_party/vulkan-deps/glslang/src/LICENSE.TXT
+# This file has a copyright but isn't included in legacy tool
+^third_party/freetype2/meson_options\.txt$
