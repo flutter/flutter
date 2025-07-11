@@ -90,7 +90,7 @@ void main() {
     );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
     late int pid;
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -185,7 +185,7 @@ void main() {
       'ui',
     );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -370,7 +370,7 @@ void main() {
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    final RegExp finalLine = RegExp(r'^The Flutter DevTools');
+    final finalLine = RegExp(r'^The Flutter DevTools');
     final ProcessTestResult result = await runFlutter(
       <String>['run', '-dflutter-tester'],
       testDirectory,
