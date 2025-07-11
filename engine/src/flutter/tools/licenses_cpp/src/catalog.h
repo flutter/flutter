@@ -42,7 +42,7 @@ class Catalog {
   /// @return absl::StatusCode::kNotFound when a match can't be found.
   /// absl::StatusCode::kInvalidArgument if more than one match comes up from
   /// the selector.
-  absl::StatusOr<Match> FindMatch(std::string_view query) const;
+  absl::StatusOr<std::vector<Match>> FindMatch(std::string_view query) const;
 
   /// VisibleForTesting
   static absl::StatusOr<Entry> ParseEntry(std::istream& is);

@@ -73,29 +73,67 @@ TEST(CatalogTest, Simple) {
   absl::StatusOr<Catalog> catalog =
       Catalog::Make({{"foobar", ".*foo.*", ".*foo.*"}});
   ASSERT_TRUE(catalog.ok());
-  absl::StatusOr<Catalog::Match> match = catalog->FindMatch("foo");
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch("foo");
   ASSERT_TRUE(match.ok());
-  ASSERT_EQ(match->matcher, "foobar");
+  ASSERT_EQ(match->front().matcher, "foobar");
 }
 
-TEST(CatalogTest, MultipleMatch) {
-  absl::StatusOr<Catalog> catalog =
-      Catalog::Make({{"foobar", ".*foo.*", ""}, {"oo", ".*oo.*", ""}});
+TEST(CatalogTest, MultipleMatchOverlapping) {
+  absl::StatusOr<Catalog> catalog = Catalog::Make(
+      {{"matcher1", ".*foo.*", ".*foo.*"}, {"matcher2", ".*oo.*", ".*oo.*"}});
   ASSERT_TRUE(catalog.ok()) << catalog.status();
-  absl::StatusOr<Catalog::Match> has_match = catalog->FindMatch("foo");
+  absl::StatusOr<std::vector<Catalog::Match>> has_match =
+      catalog->FindMatch("foo");
   ASSERT_FALSE(has_match.ok());
   ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(),
-                                "Multiple unique matches found"))
+                                "Selected matchers overlap"))
       << has_match.status().message();
-  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "foo"))
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher1"))
       << has_match.status().message();
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher2"))
+      << has_match.status().message();
+}
+
+TEST(CatalogTest, MultipleSelectorsFail) {
+  absl::StatusOr<Catalog> catalog = Catalog::Make(
+      {{"matcher1", ".*foo.*", "blah"}, {"matcher2", ".*oo.*", "blah"}});
+  ASSERT_TRUE(catalog.ok()) << catalog.status();
+  absl::StatusOr<std::vector<Catalog::Match>> has_match =
+      catalog->FindMatch("foo");
+  ASSERT_FALSE(has_match.ok());
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher1"))
+      << has_match.status().message();
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher2"))
+      << has_match.status().message();
+}
+
+TEST(CatalogTest, OnlyOneSelectorsFail) {
+  absl::StatusOr<Catalog> catalog = Catalog::Make(
+      {{"matcher1", ".*foo.*", ".*foo.*"}, {"matcher2", ".*oo.*", "blah"}});
+  ASSERT_TRUE(catalog.ok()) << catalog.status();
+  absl::StatusOr<std::vector<Catalog::Match>> has_match =
+      catalog->FindMatch("foo");
+  ASSERT_FALSE(has_match.ok());
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher1"))
+      << has_match.status().message();
+  ASSERT_TRUE(RE2::PartialMatch(has_match.status().message(), "matcher2"))
+      << has_match.status().message();
+}
+
+TEST(CatalogTest, MultipleMatchNoOverlap) {
+  absl::StatusOr<Catalog> catalog =
+      Catalog::Make({{"foo", ".*foo", ".*foo"}, {"bar", "bar.*", "bar.*"}});
+  ASSERT_TRUE(catalog.ok()) << catalog.status();
+  absl::StatusOr<std::vector<Catalog::Match>> has_match =
+      catalog->FindMatch("hello foo bar world");
+  ASSERT_TRUE(has_match.ok()) << has_match.status();
 }
 
 TEST(CatalogTest, NoSelectorMatch) {
   absl::StatusOr<Catalog> catalog =
       Catalog::Make({{"foobar", ".*bar.*", ".*foo.*"}});
   ASSERT_TRUE(catalog.ok());
-  absl::StatusOr<Catalog::Match> match = catalog->FindMatch("foo");
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch("foo");
   ASSERT_FALSE(match.ok());
   ASSERT_EQ(match.status().code(), absl::StatusCode::kNotFound);
 }
@@ -104,7 +142,7 @@ TEST(CatalogTest, NoSelectionMatch) {
   absl::StatusOr<Catalog> catalog =
       Catalog::Make({{"foobar", ".*foo.*", ".*bar.*"}});
   ASSERT_TRUE(catalog.ok());
-  absl::StatusOr<Catalog::Match> match = catalog->FindMatch("foo");
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch("foo");
   ASSERT_FALSE(match.ok());
   ASSERT_EQ(match.status().code(), absl::StatusCode::kNotFound);
 }
@@ -135,6 +173,7 @@ TEST(CatalogTest, SkiaLicense) {
   ASSERT_TRUE(entry.ok()) << entry.status();
   absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
   ASSERT_TRUE(catalog.ok());
-  absl::StatusOr<Catalog::Match> match = catalog->FindMatch(kSkiaLicense);
+  absl::StatusOr<std::vector<Catalog::Match>> match =
+      catalog->FindMatch(kSkiaLicense);
   EXPECT_TRUE(match.ok()) << match.status();
 }
