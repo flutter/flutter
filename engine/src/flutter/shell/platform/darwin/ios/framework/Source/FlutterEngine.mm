@@ -848,7 +848,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   );
 
   // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController.stateIsBackground;
+  self.isGpuDisabled = self.viewController
+                           ? self.viewController.stateIsBackground
+                           : FlutterSharedApplication.application &&
+                                 FlutterSharedApplication.application.applicationState ==
+                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
