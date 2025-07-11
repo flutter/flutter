@@ -413,7 +413,9 @@ def main():
         ci_config = json.load(f)
         upload_content_hash = ci_config.get('luci_flags', {}).get('upload_content_hash', False)
     if upload_content_hash:
-      script_path = os.path.join(_src_root_dir, '..', 'bin', 'internal', 'content_aware_hash.sh')
+      script_path = os.path.join(
+          _src_root_dir, '..', '..', 'bin', 'internal', 'content_aware_hash.sh'
+      )
       if os.path.exists(script_path):
         command = [script_path]
         try:
