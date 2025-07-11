@@ -238,12 +238,16 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
     explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
         : dispatcher_(dispatcher) {}
 
-    void MoveTo(const DlPoint& p2, bool will_be_closed);
-    void LineTo(const DlPoint& p2);
-    void QuadTo(const DlPoint& cp, const DlPoint& p2);
-    bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);
-    void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2);
-    void Close();
+    void MoveTo(const DlPoint& p2, bool will_be_closed) override;
+    void LineTo(const DlPoint& p2) override;
+    void QuadTo(const DlPoint& cp, const DlPoint& p2) override;
+    bool ConicTo(const DlPoint& cp,
+                 const DlPoint& p2,
+                 DlScalar weight) override;
+    void CubicTo(const DlPoint& cp1,
+                 const DlPoint& cp2,
+                 const DlPoint& p2) override;
+    void Close() override;
 
    private:
     DisplayListStreamDispatcher& dispatcher_;

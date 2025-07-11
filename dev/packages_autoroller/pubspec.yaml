@@ -1,0 +1,22 @@
+name: packages_autoroller
+description: Flutter Automated Release Tool
+
+publish_to: none
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  args: any
+  file: any
+  meta: any
+  path: any
+  platform: any
+  process: any
+
+dev_dependencies:
+  test: any
+
+# PUBSPEC CHECKSUM: qk9eio

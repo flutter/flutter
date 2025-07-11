@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -66,10 +67,10 @@ abstract class UnpackMacOS extends UnpackDarwin {
     _removeDenylistedFiles(environment.outputDir);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('FlutterMacOS.framework')
+        .childDirectory(FlutterDarwinPlatform.macos.frameworkName)
         .childDirectory('Versions')
         .childDirectory('A')
-        .childFile('FlutterMacOS');
+        .childFile(FlutterDarwinPlatform.macos.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
@@ -214,7 +215,8 @@ class DebugMacOSFramework extends Target {
     );
 
     outputFile.createSync(recursive: true);
-    final File debugApp = environment.buildDir.childFile('debug_app.cc')..writeAsStringSync(r'''
+    final File debugApp = environment.buildDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode!.clang(<String>[
@@ -399,9 +401,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
 
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment.outputDir.childDirectory('App.framework');
-    final Directory outputDirectory = frameworkRootDirectory
-      .childDirectory('Versions')
-      .childDirectory('A')..createSync(recursive: true);
+    final Directory outputDirectory =
+        frameworkRootDirectory.childDirectory('Versions').childDirectory('A')
+          ..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir

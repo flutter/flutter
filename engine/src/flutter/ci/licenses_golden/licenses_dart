@@ -1,4 +1,4 @@
-Signature: 276ddee1f44ce201cf15f63a931f773b
+Signature: d74be6be25740b9dd93496093725630c
 
 ====================================================================================================
 LIBRARY: dart
@@ -2069,7 +2069,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: dart
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_io_api_impl.cc + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/observatory_assets_empty.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/include/bin/dart_io_api.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/developer.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/timeline.cc + ../../../flutter/third_party/dart/LICENSE
@@ -2143,11 +2142,9 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/developer/timeline.dart + ../.
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/io/io_resource_info.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/io/security_context.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js/_js_annotations.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/asset.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/vmservice.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_io_api_impl.cc
-FILE: ../../../flutter/third_party/dart/runtime/bin/observatory_assets_empty.cc
 FILE: ../../../flutter/third_party/dart/runtime/include/bin/dart_io_api.h
 FILE: ../../../flutter/third_party/dart/runtime/lib/developer.cc
 FILE: ../../../flutter/third_party/dart/runtime/lib/timeline.cc
@@ -2221,7 +2218,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/developer/timeline.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/io/io_resource_info.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/io/security_context.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/js/_js_annotations.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/asset.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/vmservice.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
@@ -4230,6 +4226,8 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dar
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2wasm.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc + ../../../flutter/third_party/dart/LICENSE
@@ -4239,6 +4237,7 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc + ../../../flu
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/utils/dart_mcp_server/dart_mcp_server.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c
 FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc
@@ -4256,6 +4255,8 @@ FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2
 FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer_dart2wasm.dart
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
 FILE: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/line_starts_reader.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc
@@ -4265,6 +4266,7 @@ FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.h
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
+FILE: ../../../flutter/third_party/dart/utils/dart_mcp_server/dart_mcp_server.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2025, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4892,7 +4894,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/f8e88f6ce02a775961863dc4f84e4bcd448ce840
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/07ea3aaaadf06e37f7a8c2556d7d2951c8278d0f
 /third_party/fallback_root_certificates/
 
 ====================================================================================================

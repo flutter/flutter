@@ -354,6 +354,7 @@
 # android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @bkonyi @flutter/tool
 # verify_binaries_codesigned @cbracken @flutter/releases
+# verify_binaries_pre_codesigned @vashworth @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web
 # web_integration_tests @yjbanov @flutter/web
 # web_long_running_tests @yjbanov @flutter/web

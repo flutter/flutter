@@ -69,12 +69,11 @@ class WebBuilder {
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-    final Directory outputDirectory =
-        outputDirectoryPath == null
-            ? _fileSystem.directory(
-              _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
-            )
-            : _fileSystem.directory(outputDirectoryPath);
+    final Directory outputDirectory = outputDirectoryPath == null
+        ? _fileSystem.directory(
+            _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
+          )
+        : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
     // The migrators to apply to a Web project.
@@ -89,7 +88,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
+        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
@@ -111,8 +110,9 @@ class WebBuilder {
           platform: globals.platform,
           analytics: _analytics,
           cacheDir: globals.cache.getRoot(),
-          engineVersion:
-              globals.artifacts!.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
+          engineVersion: globals.artifacts!.usesLocalArtifacts
+              ? null
+              : _flutterVersion.engineRevision,
           flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406

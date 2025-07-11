@@ -11,6 +11,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -223,6 +224,8 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final String? targetOS = switch (targetPlatform) {
@@ -236,6 +239,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
+      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -290,10 +294,13 @@ class KernelSnapshot extends Target {
     // not get from the FLAVOR environment variable. This is because when built
     // from Xcode, the scheme/flavor can be changed through the UI and is not
     // reflected in the environment variable.
-    if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+    final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromTargetPlatform(
+      targetPlatform,
+    );
+
+    if (darwinPlatform != null) {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final XcodeBasedProject xcodeProject =
-          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
       flavor = environment.defines[kFlavor];

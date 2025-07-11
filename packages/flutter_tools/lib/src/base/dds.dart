@@ -64,9 +64,8 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     assert(_ddsInstance == null);
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host:
-          ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
-              .host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
+          .host,
       port: ddsPort ?? 0,
     );
     _logger.printTrace(

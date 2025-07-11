@@ -152,7 +152,7 @@ abstract class Target {
   ///
   /// Returning `true` will cause [build] to be skipped. This is equivalent
   /// to a build that produces no outputs.
-  bool canSkip(Environment environment) => false;
+  Future<bool> canSkip(Environment environment) async => false;
 
   /// The action which performs this build step.
   Future<void> build(Environment environment);
@@ -666,12 +666,10 @@ class FlutterBuildSystem extends BuildSystem {
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
-      inputFiles:
-          buildInstance.inputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
-      outputFiles:
-          buildInstance.outputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
+      inputFiles: buildInstance.inputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
@@ -771,8 +769,8 @@ class FlutterBuildSystem extends BuildSystem {
       // edited .last_config or deleted .dart_tool.
       return;
     }
-    final List<String> lastOutputs =
-        (json.decode(outputsFile.readAsStringSync()) as List<Object?>).cast<String>();
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
+        .cast<String>();
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
@@ -866,7 +864,7 @@ class _BuildInstance {
       node.outputs.clear();
 
       // Check if we can skip via runtime dependencies.
-      final bool runtimeSkip = node.target.canSkip(environment);
+      final bool runtimeSkip = await node.target.canSkip(environment);
       if (runtimeSkip) {
         logger.printTrace('Skipping target: ${node.target.name}');
         skipped = true;
@@ -1165,10 +1163,10 @@ class Node {
     // For each output, first determine if we've already computed the key
     // for it. Then collect it to be sent off for hashing as a group.
     for (final String previousOutput in previousOutputs) {
-      // output paths changed.
+      // Output paths changed - an output was removed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetChanged);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetRemoval);
         reason.data.add(previousOutput);
         // if this isn't a current output file there is no reason to compute the key.
         continue;
@@ -1191,6 +1189,16 @@ class Node {
         }
       } else {
         sourcesToDiff.add(file);
+      }
+    }
+
+    for (final String currentOutput in currentOutputPaths) {
+      // Output paths changed - a new output was added.
+      if (!previousOutputs.contains(currentOutput)) {
+        _dirty = true;
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetAddition);
+        reason.data.add(currentOutput);
+        continue;
       }
     }
 
@@ -1238,8 +1246,10 @@ class InvalidatedReason {
         'The following outputs have updated contents: ${data.join(',')}',
       InvalidatedReasonKind.outputMissing =>
         'The following outputs were missing: ${data.join(',')}',
-      InvalidatedReasonKind.outputSetChanged =>
+      InvalidatedReasonKind.outputSetRemoval =>
         'The following outputs were removed from the output set: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetAddition =>
+        'The following outputs were added to the output set: ${data.join(',')}',
       InvalidatedReasonKind.buildKeyChanged => 'The target build key changed.',
     };
   }
@@ -1260,8 +1270,11 @@ enum InvalidatedReasonKind {
   /// An output file that is expected is missing.
   outputMissing,
 
-  /// The set of expected output files changed.
-  outputSetChanged,
+  /// An output file was added to the set of expected output files.
+  outputSetAddition,
+
+  /// An output file was removed from the set of expected output files.
+  outputSetRemoval,
 
   /// The build key changed
   buildKeyChanged,

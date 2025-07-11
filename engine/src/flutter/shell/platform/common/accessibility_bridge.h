@@ -161,7 +161,7 @@ class AccessibilityBridge
   // See FlutterSemanticsNode in embedder.h
   typedef struct {
     int32_t id;
-    FlutterSemanticsFlag flags;
+    FlutterSemanticsFlags* flags;
     FlutterSemanticsAction actions;
     int32_t text_selection_base;
     int32_t text_selection_extent;

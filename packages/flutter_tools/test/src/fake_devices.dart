@@ -180,7 +180,7 @@ class FakeDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool get supportsFlavors => _supportsFlavors;
@@ -284,14 +284,16 @@ class FakeDeviceLogReader extends DeviceLogReader {
 
   final List<String> _lineQueue = <String>[];
   late final StreamController<String> _linesController = StreamController<String>.broadcast(
-    onListen: () {
-      _lineQueue.forEach(_linesController.add);
-      _lineQueue.clear();
-    },
+    onListen: _onListen,
   );
 
   @override
   Stream<String> get logLines => _linesController.stream;
+
+  void _onListen() {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  }
 
   void addLine(String line) {
     if (_linesController.hasListener) {

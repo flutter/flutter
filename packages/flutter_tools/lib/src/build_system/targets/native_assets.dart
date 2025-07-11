@@ -39,8 +39,10 @@ abstract class DartBuild extends Target {
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String? runPackageName = packageConfig.packages
+          .where((Package p) => p.root == projectUri)
+          .firstOrNull
+          ?.name;
       if (runPackageName == null) {
         throw StateError(
           'Could not determine run package name. '
@@ -51,6 +53,12 @@ abstract class DartBuild extends Target {
         );
       }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+      final String? buildModeEnvironment = environment.defines[kBuildMode];
+      if (buildModeEnvironment == null) {
+        throw MissingDefineException(kBuildMode, name);
+      }
+      final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+      final bool includeDevDependencies = !buildMode.isRelease;
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -59,7 +67,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName,
-            includeDevDependencies: false,
+            includeDevDependencies: includeDevDependencies,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(

@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_package_manager.dart';
@@ -21,7 +22,7 @@ import '../project.dart';
 class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
-    SupportedPlatform platform,
+    FlutterDarwinPlatform platform,
     BuildInfo buildInfo, {
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Logger logger,
@@ -37,7 +38,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
-  final SupportedPlatform _platform;
+  final FlutterDarwinPlatform _platform;
   final BuildInfo? _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
@@ -86,23 +87,23 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
   String get _runnerFrameworksBuildPhaseIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosRunnerFrameworksBuildPhaseIdentifier
         : _macosRunnerFrameworksBuildPhaseIdentifier;
   }
 
   String get _runnerNativeTargetIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosRunnerNativeTargetIdentifier
         : _macosRunnerNativeTargetIdentifier;
   }
 
   String get _projectIdentifier {
-    return _platform == SupportedPlatform.ios ? _iosProjectIdentifier : _macosProjectIdentifier;
+    return _platform == FlutterDarwinPlatform.ios ? _iosProjectIdentifier : _macosProjectIdentifier;
   }
 
   String get _flutterGroupIdentifier {
-    return _platform == SupportedPlatform.ios
+    return _platform == FlutterDarwinPlatform.ios
         ? _iosFlutterGroupIdentifier
         : _macosFlutterGroupIdentifier;
   }
@@ -114,7 +115,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// `Flutter/Flutter/ephemeral`. This is likely due to the macOS Flutter `PBXGroup`
   /// using `path` whereas the iOS Flutter `PBXGroup` uses `name`.
   String get _relativeEphemeralPath {
-    return _platform == SupportedPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
+    return _platform == FlutterDarwinPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
   }
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
@@ -300,7 +301,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
 
     final String scriptText;
-    if (_platform == SupportedPlatform.ios) {
+    if (_platform == FlutterDarwinPlatform.ios) {
       scriptText =
           r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
     } else {
@@ -308,7 +309,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
     }
 
-    String newContent = '''
+    String newContent =
+        '''
          <ExecutionAction
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
@@ -329,17 +331,20 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (schemeContent.contains('PreActions')) {
       newScheme = schemeContent.replaceFirst('<PreActions>', '<PreActions>\n$newContent');
     } else {
-      newContent = '''
+      newContent =
+          '''
       <PreActions>
 $newContent
       </PreActions>
 ''';
-      String? buildAction =
-          schemeLines.where((String line) => line.contains('<BuildActionEntries>')).firstOrNull;
+      String? buildAction = schemeLines
+          .where((String line) => line.contains('<BuildActionEntries>'))
+          .firstOrNull;
       if (buildAction == null) {
         // If there are no BuildActionEntries, append before end of BuildAction.
-        buildAction =
-            schemeLines.where((String line) => line.contains('</BuildAction>')).firstOrNull;
+        buildAction = schemeLines
+            .where((String line) => line.contains('</BuildAction>'))
+            .firstOrNull;
 
         if (buildAction == null) {
           throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildAction.');
@@ -570,16 +575,15 @@ $newContent
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated =
-        projectInfo.frameworksBuildPhases
-            .where(
-              (ParsedProjectFrameworksBuildPhase phase) =>
-                  phase.identifier == _runnerFrameworksBuildPhaseIdentifier &&
-                  phase.files != null &&
-                  phase.files!.contains(_flutterPluginsSwiftPackageBuildFileIdentifier),
-            )
-            .toList()
-            .isNotEmpty;
+    final bool migrated = projectInfo.frameworksBuildPhases
+        .where(
+          (ParsedProjectFrameworksBuildPhase phase) =>
+              phase.identifier == _runnerFrameworksBuildPhaseIdentifier &&
+              phase.files != null &&
+              phase.files!.contains(_flutterPluginsSwiftPackageBuildFileIdentifier),
+        )
+        .toList()
+        .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('PBXFrameworksBuildPhase was not migrated or was migrated incorrectly.');
     }
@@ -612,14 +616,14 @@ $newContent
 
     // Get the Frameworks Build Phase for the Runner target from the parsed
     // project info.
-    final ParsedProjectFrameworksBuildPhase? runnerFrameworksPhase =
-        projectInfo.frameworksBuildPhases
-            .where(
-              (ParsedProjectFrameworksBuildPhase phase) =>
-                  phase.identifier == _runnerFrameworksBuildPhaseIdentifier,
-            )
-            .toList()
-            .firstOrNull;
+    final ParsedProjectFrameworksBuildPhase? runnerFrameworksPhase = projectInfo
+        .frameworksBuildPhases
+        .where(
+          (ParsedProjectFrameworksBuildPhase phase) =>
+              phase.identifier == _runnerFrameworksBuildPhaseIdentifier,
+        )
+        .toList()
+        .firstOrNull;
     if (runnerFrameworksPhase == null) {
       throw Exception(
         'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
@@ -628,7 +632,8 @@ $newContent
 
     if (runnerFrameworksPhase.files == null) {
       // If files is null, the files field is missing and must be added.
-      const String newContent = '''
+      const String newContent =
+          '''
 			files = (
 				$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */,
 			);''';
@@ -656,18 +661,17 @@ $newContent
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated =
-        projectInfo.nativeTargets
-            .where(
-              (ParsedNativeTarget target) =>
-                  target.identifier == _runnerNativeTargetIdentifier &&
-                  target.packageProductDependencies != null &&
-                  target.packageProductDependencies!.contains(
-                    _flutterPluginsSwiftPackageProductDependencyIdentifier,
-                  ),
-            )
-            .toList()
-            .isNotEmpty;
+    final bool migrated = projectInfo.nativeTargets
+        .where(
+          (ParsedNativeTarget target) =>
+              target.identifier == _runnerNativeTargetIdentifier &&
+              target.packageProductDependencies != null &&
+              target.packageProductDependencies!.contains(
+                _flutterPluginsSwiftPackageProductDependencyIdentifier,
+              ),
+        )
+        .toList()
+        .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('PBXNativeTarget was not migrated or was migrated incorrectly.');
     }
@@ -683,21 +687,17 @@ $newContent
     final (int startSectionIndex, int endSectionIndex) = _sectionRange('PBXNativeTarget', lines);
 
     // Find index where Native Target for the Runner target begins.
-    final ParsedNativeTarget? runnerNativeTarget =
-        projectInfo.nativeTargets
-            .where(
-              (ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier,
-            )
-            .firstOrNull;
+    final ParsedNativeTarget? runnerNativeTarget = projectInfo.nativeTargets
+        .where((ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier)
+        .firstOrNull;
     if (runnerNativeTarget == null) {
       throw Exception(
         'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
       );
     }
-    final String subsectionLineStart =
-        runnerNativeTarget.name != null
-            ? '$_runnerNativeTargetIdentifier /* ${runnerNativeTarget.name} */ = {'
-            : _runnerNativeTargetIdentifier;
+    final String subsectionLineStart = runnerNativeTarget.name != null
+        ? '$_runnerNativeTargetIdentifier /* ${runnerNativeTarget.name} */ = {'
+        : _runnerNativeTargetIdentifier;
     final int runnerNativeTargetStartIndex = lines.indexWhere(
       (String line) => line.trim().startsWith(subsectionLineStart),
       startSectionIndex,
@@ -740,16 +740,15 @@ $newContent
     bool logErrorIfNotMigrated = false,
     required String fileReferenceIdentifier,
   }) {
-    final bool migrated =
-        projectInfo.parsedGroups
-            .where(
-              (ParsedProjectGroup group) =>
-                  group.identifier == _flutterGroupIdentifier &&
-                  group.children != null &&
-                  group.children!.contains(fileReferenceIdentifier),
-            )
-            .toList()
-            .isNotEmpty;
+    final bool migrated = projectInfo.parsedGroups
+        .where(
+          (ParsedProjectGroup group) =>
+              group.identifier == _flutterGroupIdentifier &&
+              group.children != null &&
+              group.children!.contains(fileReferenceIdentifier),
+        )
+        .toList()
+        .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('PBXGroup was not migrated or was migrated incorrectly.');
     }
@@ -779,18 +778,18 @@ $newContent
     }
 
     // Get the Flutter Group from the parsed project info.
-    final ParsedProjectGroup? parsedGroup =
-        projectInfo.parsedGroups
-            .where((ParsedProjectGroup group) => group.identifier == _flutterGroupIdentifier)
-            .toList()
-            .firstOrNull;
+    final ParsedProjectGroup? parsedGroup = projectInfo.parsedGroups
+        .where((ParsedProjectGroup group) => group.identifier == _flutterGroupIdentifier)
+        .toList()
+        .firstOrNull;
     if (parsedGroup == null) {
       throw Exception('Unable to find parsed Flutter PBXGroup.');
     }
 
     if (parsedGroup.children == null) {
       // If children is null, the children field is missing and must be added.
-      final String newContent = '''
+      final String newContent =
+          '''
 			children = (
 				$fileReferenceIdentifier /* $fileReferenceName */,
 			);''';
@@ -815,18 +814,17 @@ $newContent
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated =
-        projectInfo.projects
-            .where(
-              (ParsedProject target) =>
-                  target.identifier == _projectIdentifier &&
-                  target.packageReferences != null &&
-                  target.packageReferences!.contains(
-                    _localFlutterPluginsSwiftPackageReferenceIdentifier,
-                  ),
-            )
-            .toList()
-            .isNotEmpty;
+    final bool migrated = projectInfo.projects
+        .where(
+          (ParsedProject target) =>
+              target.identifier == _projectIdentifier &&
+              target.packageReferences != null &&
+              target.packageReferences!.contains(
+                _localFlutterPluginsSwiftPackageReferenceIdentifier,
+              ),
+        )
+        .toList()
+        .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('PBXProject was not migrated or was migrated incorrectly.');
     }
@@ -851,11 +849,10 @@ $newContent
     }
 
     // Get the Runner project from the parsed project info.
-    final ParsedProject? projectObject =
-        projectInfo.projects
-            .where((ParsedProject project) => project.identifier == _projectIdentifier)
-            .toList()
-            .firstOrNull;
+    final ParsedProject? projectObject = projectInfo.projects
+        .where((ParsedProject project) => project.identifier == _projectIdentifier)
+        .toList()
+        .firstOrNull;
     if (projectObject == null) {
       throw Exception('Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.');
     }

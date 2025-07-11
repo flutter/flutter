@@ -135,11 +135,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
     final bool updateHashes = boolArg(_keyUpdateHashes);
     final bool offline = boolArg(_keyOffline);
-    final List<CherryPick> cherryPicks =
-        stringsArg(_keyCherryPick)
-            .map((String e) => e.split(':'))
-            .map((List<String> e) => (package: e[0], version: e[1]))
-            .toList();
+    final List<CherryPick> cherryPicks = stringsArg(_keyCherryPick)
+        .map((String e) => e.split(':'))
+        .map((List<String> e) => (package: e[0], version: e[1]))
+        .toList();
     final bool relaxToAny = boolArg(_keyUpgradeMajor);
     final bool excludeTools = boolArg(_keyExcludeTools);
 
@@ -222,11 +221,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkPins(rootDirectory);
 
     await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
-    await _pubGet(toolProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
-    await _pubGet(
-      widgetPreviewScaffoldProject,
-      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
-    );
+
+    // See https://github.com/flutter/flutter/pull/170364.
+    await _pubGet(toolProject, false);
+    await _pubGet(widgetPreviewScaffoldProject, false);
 
     await _downloadCoverageData();
 
@@ -295,43 +293,35 @@ class UpdatePackagesCommand extends FlutterCommand {
   void _relaxDeps(YamlEditor yamlEditor, RelaxMode relaxMode, Map<String, String> fixedDeps) {
     ResolvedDependencies().forEach(
       yamlEditor: yamlEditor,
-      func: (
-        Map<String, String> dependencies,
-        String depType,
-        String packageName,
-        Object? version,
-      ) {
-        if (version is String) {
-          if (fixedDeps.containsKey(packageName)) {
-            yamlEditor.update(<String>[depType, packageName], fixedDeps[packageName]);
-          } else {
-            yamlEditor.update(
-              <String>[depType, packageName],
-              switch (relaxMode) {
-                RelaxMode.any => 'any',
-                RelaxMode.caret => _versionWithCaret(version),
-                RelaxMode.strict => _versionWithoutCaret(version),
-              },
-            );
-          }
-        }
-      },
+      func:
+          (Map<String, String> dependencies, String depType, String packageName, Object? version) {
+            if (version is String) {
+              if (fixedDeps.containsKey(packageName)) {
+                yamlEditor.update(<String>[depType, packageName], fixedDeps[packageName]);
+              } else {
+                yamlEditor.update(
+                  <String>[depType, packageName],
+                  switch (relaxMode) {
+                    RelaxMode.any => 'any',
+                    RelaxMode.caret => _versionWithCaret(version),
+                    RelaxMode.strict => _versionWithoutCaret(version),
+                  },
+                );
+              }
+            }
+          },
     );
   }
 
   ResolvedDependencies _fetchDeps(YamlEditor yamlEditor) {
     return ResolvedDependencies()..forEach(
       yamlEditor: yamlEditor,
-      func: (
-        Map<String, String> dependencies,
-        String depType,
-        String packageName,
-        Object? version,
-      ) {
-        if (version is String) {
-          dependencies[packageName] = version;
-        }
-      },
+      func:
+          (Map<String, String> dependencies, String depType, String packageName, Object? version) {
+            if (version is String) {
+              dependencies[packageName] = version;
+            }
+          },
     );
   }
 
@@ -340,17 +330,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     final YamlEditor yamlEditor = YamlEditor(pubspecFile.readAsStringSync());
     dependencies.forEach(
       yamlEditor: yamlEditor,
-      func: (
-        Map<String, String> dependencies,
-        String depType,
-        String packageName,
-        Object? version,
-      ) {
-        if (dependencies.containsKey(packageName)) {
-          final String version = dependencies[packageName]!;
-          yamlEditor.update(<String>[depType, packageName], version);
-        }
-      },
+      func:
+          (Map<String, String> dependencies, String depType, String packageName, Object? version) {
+            if (dependencies.containsKey(packageName)) {
+              final String version = dependencies[packageName]!;
+              yamlEditor.update(<String>[depType, packageName], version);
+            }
+          },
     );
     pubspecFile.writeAsStringSync(yamlEditor.toString());
   }
@@ -418,8 +404,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (checksum != actualChecksum) {
       throwToolExit(
         'Pubspec in ${directory.path} has out of date dependencies. '
-        'Please run "flutter update-packages --force-upgrade" to update them correctly. '
-        'The hash does not match the expectation.',
+        'Please run "flutter update-packages --force-upgrade --update-hashes" to '
+        'update them correctly. The hash ($checksum) does not match the '
+        'expectation ($actualChecksum).',
       );
     }
   }
@@ -526,10 +513,9 @@ class ResolvedDependencies {
                 .map((CherryPick pick) => pick.version)
                 .firstOrNull ??
             oldData?[packageName];
-        mergedDeps.data[dependencyType]![packageName] =
-            oldVersion?.startsWith('^') ?? false
-                ? _versionWithCaret(newVersion)
-                : _versionWithoutCaret(newVersion);
+        mergedDeps.data[dependencyType]![packageName] = oldVersion?.startsWith('^') ?? false
+            ? _versionWithCaret(newVersion)
+            : _versionWithoutCaret(newVersion);
       }
     }
     return mergedDeps;

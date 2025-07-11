@@ -88,28 +88,31 @@ object DependencyVersionChecker {
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(7, 4, 2)
+    // Advice for maintainers for other areas of code that are impacted are documented
+    // in packages/flutter_tools/lib/src/android/README.md.
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 2)
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(7, 0, 2)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
 
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_11
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 0, 0)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 1, 1)
 
-    @VisibleForTesting internal val warnKGPVersion: Version = Version(1, 8, 10)
+    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 1, 0)
 
-    @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
+    @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 8, 10)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
+    // Non inclusive.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int = 21
+    internal val warnMinSdkVersion: Int = 24
 
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int = 1
+    internal val errorMinSdkVersion: Int = 23
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective
@@ -182,6 +185,9 @@ object DependencyVersionChecker {
         it: Variant
     ): MinSdkVersion {
         val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
+        // TODO(reidbaker): Remove version check as 8.3 is the minimum supported version.
+        // Keeping the check around so that users that bypass will get the error message and not
+        // a compile time error. See https://github.com/flutter/flutter/pull/171399
         return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
             MinSdkVersion(it.name, it.minSdk.apiLevel)
         } else {

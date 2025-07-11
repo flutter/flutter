@@ -118,6 +118,13 @@ group("flutter") {
         "//flutter/tools/path_ops",
       ]
 
+      if (host_os == "linux" || host_os == "mac") {
+        public_deps += [
+          "//flutter/tools/licenses_cpp",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        ]
+      }
+
       if (host_os == "linux") {
         public_deps += [
           # Built alongside gen_snapshot for 64 bit targets

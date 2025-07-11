@@ -146,6 +146,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
+    this.minify,
+    this.dryRun = false,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
@@ -155,6 +157,10 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
+
+  final bool? minify;
+
+  final bool dryRun;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -179,7 +185,9 @@ class WasmCompilerConfig extends WebCompilerConfig {
       '-O${optimizationLevelForBuildMode(buildMode)}',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
       if (!sourceMaps) '--no-source-maps',
+      if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
+      if (dryRun) '--extra-compiler-option=--dry-run',
     ];
   }
 
@@ -188,8 +196,16 @@ class WasmCompilerConfig extends WebCompilerConfig {
     final Map<String, dynamic> settings = <String, dynamic>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
+      'minify': minify,
+      'dryRun': dryRun,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'dryRun': dryRun,
+  };
 }

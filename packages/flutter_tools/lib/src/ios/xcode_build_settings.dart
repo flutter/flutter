@@ -10,6 +10,7 @@ import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import 'xcodeproj.dart';
 
 String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
@@ -72,10 +73,9 @@ void _updateGeneratedXcodePropertiesFile({
 
   final String newContent = buffer.toString();
 
-  final File generatedXcodePropertiesFile =
-      useMacOSConfig
-          ? project.macos.generatedXcodePropertiesFile
-          : project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+      ? project.macos.generatedXcodePropertiesFile
+      : project.ios.generatedXcodePropertiesFile;
 
   if (!generatedXcodePropertiesFile.existsSync()) {
     generatedXcodePropertiesFile.createSync(recursive: true);
@@ -110,10 +110,9 @@ void _updateGeneratedEnvironmentVariablesScript({
     }
   }
 
-  final File generatedModuleBuildPhaseScript =
-      useMacOSConfig
-          ? project.macos.generatedEnvironmentVariableExportScript
-          : project.ios.generatedEnvironmentVariableExportScript;
+  final File generatedModuleBuildPhaseScript = useMacOSConfig
+      ? project.macos.generatedEnvironmentVariableExportScript
+      : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');
@@ -240,8 +239,10 @@ Future<List<String>> _xcodeBuildSettingsLines({
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7');
+    xcodeBuildSettings.add(
+      'EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneSimulator.platformName}*]=$excludedSimulatorArchs',
+    );
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneOS.platformName}*]=armv7');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

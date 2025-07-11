@@ -761,8 +761,9 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
 
 namespace {
 struct ArcFarmOptions {
-  bool use_center;
-  bool full_circles;
+  bool use_center = false;
+  bool full_circles = false;
+  bool sweeps_over_360 = false;
   Scalar vertical_scale = 1.0f;
 };
 
@@ -772,9 +773,10 @@ void RenderArcFarm(DisplayListBuilder& builder,
   builder.Save();
   builder.Translate(50, 50);
   const Rect arc_bounds = Rect::MakeLTRB(0, 0, 42, 42 * opts.vertical_scale);
+  const int sweep_limit = opts.sweeps_over_360 ? 420 : 360;
   for (int start = 0; start <= 360; start += 30) {
     builder.Save();
-    for (int sweep = 30; sweep <= 360; sweep += 30) {
+    for (int sweep = 30; sweep <= sweep_limit; sweep += 30) {
       builder.DrawArc(arc_bounds, start, opts.full_circles ? 360 : sweep,
                       opts.use_center, paint);
       builder.Translate(50, 0);
@@ -896,6 +898,92 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithBevelJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithMiterJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  // Default miter of 4.0 does a miter on all of the centers, but
+  // using 3.0 will show some bevels on the widest interior angles...
+  paint.setStrokeMiter(3.0f);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtEnds) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -906,6 +994,44 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtEnds) {
   paint.setStrokeWidth(8.0f);
   paint.setStrokeCap(DlStrokeCap::kSquare);
   paint.setColor(DlColor::kRed());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtAndRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(8.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kRed());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kGreen());
 
   RenderArcFarm(builder, paint,
                 {

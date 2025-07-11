@@ -71,7 +71,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
+      expect(await const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
       final Environment environment2 = Environment.test(
         fileSystem.currentDirectory,
@@ -82,7 +82,7 @@ void main() {
         generateDartPluginRegistry: true,
       );
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
+      expect(await const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
 
     testWithoutContext('skipped based on platform', () async {
@@ -100,7 +100,7 @@ void main() {
 
       for (final String targetPlatform in canSkip.keys) {
         expect(
-          const DartPluginRegistrantTarget().canSkip(
+          await const DartPluginRegistrantTarget().canSkip(
             Environment.test(
               fileSystem.currentDirectory,
               artifacts: Artifacts.test(),

@@ -4,6 +4,71 @@
 
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
+namespace {
+
+// TODO(hangyujin): Update these two functions once the SemanticsFlags in
+// dart:ui are updated to use tristate/quad-state flags for properties like
+// isChecked and isSelected.
+FlutterCheckState ToFlutterCheckState(bool is_not_none,
+                                      bool is_true,
+                                      bool is_mixed) {
+  if (!is_not_none) {
+    return kFlutterCheckStateNone;
+  }
+  if (is_true) {
+    return kFlutterCheckStateTrue;
+  }
+  if (is_mixed) {
+    return kFlutterCheckStateMixed;
+  }
+  return kFlutterCheckStateFalse;
+}
+
+FlutterTristate ToFlutterTristate(bool is_not_none, bool is_true) {
+  if (!is_not_none) {
+    return kFlutterTristateNone;
+  }
+  if (is_true) {
+    return kFlutterTristateTrue;
+  }
+  return kFlutterTristateFalse;
+}
+
+std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
+    const flutter::SemanticsFlags& source) {
+  return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
+      .is_checked = ToFlutterCheckState(
+          source.hasCheckedState, source.isChecked, source.isCheckStateMixed),
+      .is_selected =
+          ToFlutterTristate(source.hasSelectedState, source.isSelected),
+      .is_enabled = ToFlutterTristate(source.hasEnabledState, source.isEnabled),
+      .is_toggled = ToFlutterTristate(source.hasToggledState, source.isToggled),
+      .is_expanded =
+          ToFlutterTristate(source.hasExpandedState, source.isExpanded),
+      .is_required =
+          ToFlutterTristate(source.hasRequiredState, source.isRequired),
+      .is_focused = ToFlutterTristate(source.isFocusable, source.isFocused),
+      .is_button = source.isButton,
+      .is_text_field = source.isTextField,
+      .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
+      .is_header = source.isHeader,
+      .is_obscured = source.isObscured,
+      .scopes_route = source.scopesRoute,
+      .names_route = source.namesRoute,
+      .is_hidden = source.isHidden,
+      .is_image = source.isImage,
+      .is_live_region = source.isLiveRegion,
+      .has_implicit_scrolling = source.hasImplicitScrolling,
+      .is_multiline = source.isMultiline,
+      .is_read_only = source.isReadOnly,
+      .is_link = source.isLink,
+      .is_slider = source.isSlider,
+      .is_keyboard_key = source.isKeyboardKey,
+  });
+}
+
+}  // namespace
+
 namespace flutter {
 
 EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
@@ -26,6 +91,9 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
+// This function is for backward compatibility and contains only a subset of
+// the flags. New flags will be added only to `FlutterSemanticsFlags`, not
+// `FlutterSemanticsFlag`.
 FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   int result = 0;
 
@@ -192,6 +260,7 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
     const CustomAccessibilityActionUpdates& actions) {
   nodes_.reserve(nodes.size());
+  flags_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
@@ -238,6 +307,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
+  flags_.emplace_back(ConvertToFlutterSemanticsFlags(node.flags));
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
@@ -279,6 +349,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
+      flags_.back().get(),
   });
 }
 
