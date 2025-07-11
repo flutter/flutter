@@ -1254,6 +1254,8 @@ class HotRunner extends ResidentRunner {
   }
 }
 
+typedef AddBenchmarkDataCallback = void Function(String name, int value);
+
 typedef ReloadSourcesHelper =
     Future<OperationResult> Function(
       HotRunner hotRunner,
@@ -1277,8 +1279,11 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Analytics analytics,
-) async {
+  Analytics analytics, {
+  AddBenchmarkDataCallback? addBenchmarkData,
+}) async {
+  addBenchmarkData ??= hotRunner._addBenchmarkData;
+
   final Stopwatch vmReloadTimer = Stopwatch()..start();
   const String entryPath = 'main.dart.incremental.dill';
   final List<Future<DeviceReloadReport?>> allReportsFutures = <Future<DeviceReloadReport?>>[];
@@ -1342,10 +1347,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
   // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
   // Record time it took for the VM to reload the sources.
-  hotRunner._addBenchmarkData(
-    'hotReloadVMReloadMilliseconds',
-    vmReloadTimer.elapsed.inMilliseconds,
-  );
+  addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
   return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
 }
 
@@ -1356,13 +1358,17 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 }) async {
   final String deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
   final vm_service.VM vm = await device.vmService!.service.getVM();
+  // Once you have reloaded one isolate in an isolate group - you have reloaded
+  // all of them.
+  final Set<String> alreadyReloadedGroups = <String>{};
   return <Future<vm_service.ReloadReport>>[
     for (final vm_service.IsolateRef isolateRef in vm.isolates!)
-      device.vmService!.service.reloadSources(
-        isolateRef.id!,
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-      ),
+      if (alreadyReloadedGroups.add(isolateRef.isolateGroupId!))
+        device.vmService!.service.reloadSources(
+          isolateRef.id!,
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+        ),
   ];
 }
 
