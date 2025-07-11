@@ -623,7 +623,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
     super.handleTap();
   }
 
-   @override
+  @override
   Widget buildSemantics({required Widget child}) {
     return Semantics(
       role: SemanticsRole.menuItemCheckbox,

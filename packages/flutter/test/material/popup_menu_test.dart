@@ -1617,10 +1617,7 @@ void main() {
                   checked: true,
                   child: Text('Checked Item'),
                 ),
-                const CheckedPopupMenuItem<int>(
-                  value: 2,
-                  child: Text('Unchecked Item'),
-                ),
+                const CheckedPopupMenuItem<int>(value: 2, child: Text('Unchecked Item')),
               ];
             },
             child: const SizedBox(height: 100.0, width: 100.0, child: Text('XXX')),
@@ -1634,7 +1631,9 @@ void main() {
     // Verify that CheckedPopupMenuItem uses SemanticsRole.menuItemCheckbox
     final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
     final List<SemanticsNode> menuItemNodes = allNodes
-        .where((SemanticsNode node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox)
+        .where(
+          (SemanticsNode node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
+        )
         .toList();
     expect(menuItemNodes, hasLength(2));
 
