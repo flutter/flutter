@@ -46,7 +46,6 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// predictive back transition.
   const PredictiveBackPageTransitionsBuilder();
 
-  // TODO(justinmc): Should I really reference this via constant or just hardcode it?
   @override
   Duration get transitionDuration =>
       const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds);
