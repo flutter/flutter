@@ -9,6 +9,7 @@
 
 import argparse
 import errno
+import json
 import os
 import platform
 import re
@@ -256,8 +257,6 @@ def ProcessCIPDPackage(upload, engine_version):
     print('--upload requires --engine-version to be specified.')
     return
 
-  tag = 'git_revision:%s' % engine_version
-  already_exists = CheckCIPDPackageExists('flutter/fuchsia', tag)
   if already_exists:
     print('CIPD package flutter/fuchsia tag %s already exists!' % tag)
     return
@@ -400,9 +399,30 @@ def main():
   # presubmit workflows.
   should_upload = args.upload
   engine_version = args.engine_version
+  content_hash = ''
   if not engine_version:
     engine_version = 'HEAD'
     should_upload = False
+  else:
+    # When content hashing is enabled, the engine version will be a content
+    # hash instead of a git revision.
+    ci_config_path = os.path.join(_src_root_dir, 'flutter', 'ci', 'builders', 'linux_fuchsia.json')
+    upload_content_hash = False
+    if os.path.exists(ci_config_path):
+      with open(ci_config_path, 'r') as f:
+        ci_config = json.load(f)
+        upload_content_hash = ci_config.get('luci_flags', {}).get('upload_content_hash', False)
+    if upload_content_hash:
+      script_path = os.path.join(_src_root_dir, '..', 'bin', 'internal', 'content_aware_hash.sh')
+      if os.path.exists(script_path):
+        command = [script_path]
+        try:
+          content_hash = subprocess.check_output(command, text=True).strip()
+          print('Using content hash %s for engine version' % content_hash)
+        except subprocess.CalledProcessError as e:
+          print('Error getting content hash, falling back to git hash: %s' % e)
+      else:
+        print('Could not find content_aware_hash.sh at %s' % script_path)
 
   # Create and optionally upload CIPD package
   if args.cipd_dry_run or args.upload:
