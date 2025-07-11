@@ -46,7 +46,7 @@ void main() {
   testWithoutContext(
     'FlutterManifest has no fonts or assets when the "flutter" section is empty',
     () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -68,7 +68,7 @@ dependencies:
   );
 
   testWithoutContext('FlutterManifest knows if Material Design is used', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -85,7 +85,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest knows if generate is provided', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -102,7 +102,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can parse invalid generate key', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -119,7 +119,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest knows if generate is disabled', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -136,7 +136,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest has one font family with one asset', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -172,7 +172,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has one font family with a simple asset '
       'and one with weight', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -214,7 +214,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has one font family with a simple asset '
       'and one with weight and style', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -257,7 +257,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has two font families, each with one '
       'simple asset and one with weight and style', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -322,7 +322,7 @@ flutter:
 
   testWithoutContext('FlutterManifest.fontsDescriptor combines descriptors from '
       'individual fonts', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -369,7 +369,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has only one of two font families when '
       'one declaration is missing the "family" option', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -419,7 +419,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has only one of two font families when '
       'one declaration is missing the "fonts" option', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -465,7 +465,7 @@ flutter:
 
   testWithoutContext('FlutterManifest has no font family when declaration is '
       'missing the "asset" option', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -488,7 +488,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest allows a blank flutter section', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -509,7 +509,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest allows a module declaration', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
   module:
@@ -528,7 +528,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
   plugin:
@@ -546,7 +546,7 @@ flutter:
 
   testWithoutContext('FlutterManifest allows a multi-plat plugin declaration '
       'with android only', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     plugin:
@@ -567,7 +567,7 @@ flutter:
 
   testWithoutContext('FlutterManifest allows a multi-plat plugin declaration '
       'with ios only', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     plugin:
@@ -586,7 +586,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest handles an invalid plugin declaration', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     plugin:
@@ -602,7 +602,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 1', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 version: 1.0.0+2
 dependencies:
@@ -623,7 +623,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch with no build version', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 version: 0.0.1
 dependencies:
@@ -641,7 +641,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 2', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 version: 1.0.0-beta+exp.sha.5114f85
 dependencies:
@@ -666,7 +666,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses major.minor+build version clause', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 version: 1.0.0+2
 dependencies:
@@ -687,7 +687,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses empty version clause', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 version:
 dependencies:
@@ -705,7 +705,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses no version clause', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -723,7 +723,7 @@ flutter:
 
   // Regression test for https://github.com/flutter/flutter/issues/31764
   testWithoutContext('FlutterManifest returns proper error when font detail is malformed', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -745,7 +745,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest ignores empty list of fonts', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -765,7 +765,7 @@ flutter:
 
   testWithoutContext('FlutterManifest returns proper error when font detail is '
       'not a list of maps', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -788,7 +788,7 @@ flutter:
 
   testWithoutContext('FlutterManifest returns proper error when font is a map '
       'instead of a list', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -811,7 +811,7 @@ flutter:
 
   testWithoutContext('FlutterManifest returns proper error when second font '
       'family is invalid', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -836,7 +836,7 @@ flutter:
 
   testWithoutContext('FlutterManifest returns proper error when flutter is a '
       'list instead of a map', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -861,7 +861,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can parse manifest on posix filesystem', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -881,7 +881,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can parse manifest on windows filesystem', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -904,7 +904,7 @@ flutter:
   testWithoutContext(
     'FlutterManifest getSupportedPlatforms return null if runs on legacy format',
     () {
-      const String manifest = '''
+      const manifest = '''
 name: test
 flutter:
   plugin:
@@ -924,7 +924,7 @@ flutter:
   testWithoutContext(
     'FlutterManifest validSupportedPlatforms return null if the platform keys are not valid',
     () {
-      const String manifest = '''
+      const manifest = '''
 name: test
 flutter:
   plugin:
@@ -944,7 +944,7 @@ flutter:
   );
 
   testWithoutContext('FlutterManifest validSupportedPlatforms only returns valid platforms', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
   plugin:
@@ -967,7 +967,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
   plugin:
@@ -995,7 +995,7 @@ flutter:
 
   testWithoutContext('FlutterManifest validates a platform section that is a list '
       'instead of a map', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     plugin:
@@ -1016,7 +1016,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest validates plugin format not support.', () {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
   plugin:
@@ -1040,7 +1040,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest handles empty licenses list', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1059,7 +1059,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can specify additional LICENSE files', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1078,7 +1078,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can validate incorrect licenses key', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1100,7 +1100,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest validates individual list items', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1125,7 +1125,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses single deferred components', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1155,7 +1155,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses multiple deferred components', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1198,7 +1198,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses empty deferred components', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1217,7 +1217,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component requires name', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1241,7 +1241,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component is list', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1263,7 +1263,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component libraries is list', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1289,7 +1289,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component libraries is string', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1316,7 +1316,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component assets is string', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1341,7 +1341,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component multiple assets is string', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1368,7 +1368,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest multiple deferred components assets is string', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1398,7 +1398,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest deferred component assets is list', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1419,7 +1419,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1450,7 +1450,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can parse empty dependencies', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 ''';
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
@@ -1465,7 +1465,7 @@ name: test
   testWithoutContext(
     'FlutterManifest provides a guided error to migrate disable-swift-package-manager',
     () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1486,7 +1486,7 @@ flutter:
   );
 
   testWithoutContext('FlutterManifest can parse default flavor', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     default-flavor: prod
@@ -1501,7 +1501,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 flutter:
     default-flavor: 3
@@ -1517,7 +1517,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest.copyWith generates a valid manifest', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1605,7 +1605,7 @@ flutter:
   });
 
   testWithoutContext('FlutterManifest can parse workspace', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 workspace:
 - pkgs/bar
@@ -1621,7 +1621,7 @@ workspace:
   });
 
   testWithoutContext('FlutterManifest can parse empty workspace', () async {
-    const String manifest = '''
+    const manifest = '''
 name: test
 ''';
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
