@@ -133,8 +133,7 @@ class _DefaultUsage implements Usage {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version =
         versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final suppressEnvFlag =
-        globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    final suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String? logFilePath =
         logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
@@ -335,8 +334,7 @@ class LogToFileAnalytics extends AnalyticsMock {
   final File logFile;
   final _sessionValues = <String, String>{};
 
-  final _sendController =
-      StreamController<Map<String, dynamic>>.broadcast(sync: true);
+  final _sendController = StreamController<Map<String, dynamic>>.broadcast(sync: true);
 
   @override
   Stream<Map<String, dynamic>> get onSend => _sendController.stream;
@@ -537,7 +535,7 @@ class TestTimingEvent {
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
+bool _mapsEqual(Map<String, String>? a, Map<String, String>? b) {
   if (a == b) {
     return true;
   }
@@ -548,8 +546,8 @@ bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
     return false;
   }
 
-  for (final dynamic k in a.keys) {
-    final dynamic bValue = b[k];
+  for (final String k in a.keys) {
+    final String? bValue = b[k];
     if (bValue == null && !b.containsKey(k)) {
       return false;
     }
