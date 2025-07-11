@@ -4569,6 +4569,72 @@ void _testTables() {
     expect(object.element.getAttribute('role'), 'columnheader');
   });
 
+  test('table with text and button in cells ', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
+      transform: Matrix4.identity().toFloat64(),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          role: ui.SemanticsRole.table,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              role: ui.SemanticsRole.row,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 3,
+                  role: ui.SemanticsRole.cell,
+                  label: 'hello world',
+                  rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
+                ),
+                tester.updateNode(
+                  id: 4,
+                  role: ui.SemanticsRole.cell,
+                  rect: const ui.Rect.fromLTRB(50, 0, 100, 50),
+                  children: <SemanticsNodeUpdate>[
+                    tester.updateNode(
+                      id: 5,
+                      flags: const ui.SemanticsFlags(isButton: true),
+                      label: 'Button',
+                      rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0">
+    <sem id="flt-semantic-node-1" role="table">
+        <sem id="flt-semantic-node-2" role="row">
+            <sem id="flt-semantic-node-3" role="cell">
+                <span>hello world</span>
+            </sem>
+            <sem id="flt-semantic-node-4" role="cell">
+                <sem id="flt-semantic-node-5" role="button">Button</sem>
+            </sem>
+        </sem>
+    </sem>
+</sem>
+''');
+    final SemanticsObject object = tester.getSemanticsObject(1);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.table);
+  });
+
   semantics().semanticsEnabled = false;
 }
 
