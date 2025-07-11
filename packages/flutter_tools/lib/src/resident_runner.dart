@@ -1420,10 +1420,16 @@ abstract class ResidentRunner extends ResidentHandlers {
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
         if (uri != null) {
+          final s = urlToDisplayString(uri);
+          // Trailing slashes might confuse clients.
+          int i = s.length;
+          while (i > 0 && s[i - 1] == '/') {
+            i--;
+          }
           logger.printStatus(
             'The Flutter DevTools debugger and profiler '
             'on ${device.device!.displayName} '
-            'is available at: ${urlToDisplayString(uri)}',
+            'is available at: ${s.substring(0, i)}',
           );
         }
       }
