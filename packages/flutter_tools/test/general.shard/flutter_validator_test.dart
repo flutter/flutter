@@ -780,6 +780,42 @@ class FakeFlutterFeatures extends FeatureFlags {
   final bool _enabled;
 
   @override
+  bool get isLinuxEnabled => _enabled;
+
+  @override
+  bool get isMacOSEnabled => _enabled;
+
+  @override
+  bool get isWebEnabled => _enabled;
+
+  @override
+  bool get isWindowsEnabled => _enabled;
+
+  @override
+  bool get isAndroidEnabled => _enabled;
+
+  @override
+  bool get isIOSEnabled => _enabled;
+
+  @override
+  bool get isFuchsiaEnabled => _enabled;
+
+  @override
+  bool get areCustomDevicesEnabled => _enabled;
+
+  @override
+  bool get isCliAnimationEnabled => _enabled;
+
+  @override
+  bool get isNativeAssetsEnabled => _enabled;
+
+  @override
+  bool get isSwiftPackageManagerEnabled => _enabled;
+
+  @override
+  bool get isOmitLegacyVersionFileEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override
