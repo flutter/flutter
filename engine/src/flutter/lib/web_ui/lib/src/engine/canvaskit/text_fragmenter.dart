@@ -139,7 +139,7 @@ Uint32List fragmentUsingIntlSegmenter(String text, IntlSegmenterGranularity gran
 
 // These are the soft/hard line break values expected by Skia's SkParagraph.
 const int kSoftLineBreak = 0;
-const int kHardLineBreak = 1;
+const int kHardLineBreak = 100;
 
 final DomV8BreakIterator _v8LineBreaker = createV8BreakIterator();
 
