@@ -4593,7 +4593,7 @@ void _testTables() {
                 tester.updateNode(
                   id: 3,
                   role: ui.SemanticsRole.cell,
-                  label: "hello world",
+                  label: 'hello world',
                   rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
                 ),
                 tester.updateNode(
@@ -4604,7 +4604,7 @@ void _testTables() {
                     tester.updateNode(
                       id: 5,
                       flags: const ui.SemanticsFlags(isButton: true),
-                      label: "Button",
+                      label: 'Button',
                       rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
                     ),
                   ],
