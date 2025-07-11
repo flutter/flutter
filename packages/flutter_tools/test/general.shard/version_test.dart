@@ -12,13 +12,14 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart' show FakeFlutterVersion;
+import '../src/fakes.dart' show FakeFlutterVersion, TestFeatureFlags;
 
 final SystemClock _testClock = SystemClock.fixed(DateTime.utc(2015));
 final DateTime _stampUpToDate = _testClock.ago(
@@ -1185,6 +1186,54 @@ void main() {
       expect(legacyVersionFile.existsSync(), isTrue);
     },
     overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
+  );
+
+  testUsingContext(
+    'legacy version file is still supported',
+    () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+      flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
+      final File legacyVersionFile = flutterRoot.childFile('version');
+
+      final FlutterVersion flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: flutterRoot.path,
+      );
+      flutterVersion.ensureVersionFile();
+
+      expect(legacyVersionFile, exists);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: false),
+    },
+  );
+
+  testUsingContext(
+    'legacy version file is no longer supported',
+    () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+      flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
+      final File legacyVersionFile = flutterRoot.childFile('version');
+
+      final FlutterVersion flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: flutterRoot.path,
+      );
+      flutterVersion.ensureVersionFile();
+
+      expect(legacyVersionFile, isNot(exists));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: true),
+    },
   );
 
   testUsingContext('GitTagVersion', () {
