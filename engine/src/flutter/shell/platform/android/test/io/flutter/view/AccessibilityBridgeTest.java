@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -934,8 +935,55 @@ public class AccessibilityBridgeTest {
     // Test the generated AccessibilityNodeInfo for the node we created
     // and verify it has correct tooltip text.
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    CharSequence actual = nodeInfo.getTooltipText();
-    assertEquals(actual.toString(), root.tooltip);
+    CharSequence actualTooltipText = nodeInfo.getTooltipText();
+    CharSequence actualContentDescription = nodeInfo.getContentDescription();
+    assertEquals(actualTooltipText.toString(), root.tooltip);
+    assertEquals(actualContentDescription.toString(), root.tooltip);
+  }
+
+  @Config(minSdk = API_LEVELS.API_25)
+  @Test
+  public void itSetsTooltipCorrectlyWithContentDescription() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+    // Create a node with tooltip.
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.tooltip = "tooltip";
+    root.label = "desc";
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // Test the generated AccessibilityNodeInfo for the node we created
+    // and verify it has correct tooltip text.
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    CharSequence actualContentDescription = nodeInfo.getContentDescription();
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      CharSequence actualTooltipText = nodeInfo.getTooltipText();
+      assertEquals(actualTooltipText.toString(), root.tooltip);
+      assertEquals(actualContentDescription.toString(), root.label);
+    } else {
+      assertEquals(actualContentDescription.toString(), root.label + "\n" + root.tooltip);
+    }
   }
 
   @TargetApi(API_LEVELS.API_28)
