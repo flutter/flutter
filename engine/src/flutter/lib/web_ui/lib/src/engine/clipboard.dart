@@ -78,9 +78,8 @@ class ClipboardMessageHandler {
 ///
 /// See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API
 class ClipboardStrategy {
-  /// Places the text onto the browser clipboard.
-  Future<void> setData(String? text) async {
-    final clipboard = domWindow.navigator.clipboard;
+  DomClipboard get _clipboard {
+    final DomClipboard? clipboard = domWindow.navigator.clipboard;
 
     if (clipboard == null) {
       // This can happen when the browser is outdated or the context is not
@@ -90,21 +89,16 @@ class ClipboardStrategy {
       throw StateError('Clipboard is not available in the context.');
     }
 
-    await clipboard.writeText(text!);
+    return clipboard;
+  }
+
+  /// Places the text onto the browser clipboard.
+  Future<void> setData(String? text) async {
+    await _clipboard.writeText(text!);
   }
 
   /// Returns text from the browser clipboard.
   Future<String> getData() async {
-    final clipboard = domWindow.navigator.clipboard;
-
-    if (clipboard == null) {
-      // This can happen when the browser is outdated or the context is not
-      // secure.
-      // See: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard
-      // See: https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts
-      throw StateError('Clipboard is not available in the context.');
-    }
-
-    return clipboard.readText();
+    return _clipboard.readText();
   }
 }
