@@ -836,10 +836,7 @@ final class SemanticsLabelBuilder {
   ///
   /// The [separator] is used between text parts (defaults to space).
   /// The [textDirection] specifies the overall text direction for the concatenated label.
-  SemanticsLabelBuilder({
-    this.separator = ' ',
-    this.textDirection,
-  });
+  SemanticsLabelBuilder({this.separator = ' ', this.textDirection});
 
   /// The separator used between text parts.
   final String separator;

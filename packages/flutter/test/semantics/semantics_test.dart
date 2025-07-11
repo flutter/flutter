@@ -1155,8 +1155,6 @@ void main() {
     });
   });
 
-
-
   group('SemanticsLabelBuilder text direction', () {
     test('no text direction embedding when overall direction is null', () {
       final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
@@ -1224,8 +1222,6 @@ void main() {
     });
   });
 
-
-
   group('Edge cases and error handling', () {
     test('very long labels', () {
       final SemanticsLabelBuilder builder = SemanticsLabelBuilder();
@@ -1275,8 +1271,6 @@ void main() {
       final String label = builder.build();
       expect(label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
     });
-
-
   });
 }
 
