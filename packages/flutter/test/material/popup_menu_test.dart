@@ -1604,6 +1604,56 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('CheckedPopupMenuItem has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<int>>[
+                const CheckedPopupMenuItem<int>(
+                  value: 1,
+                  checked: true,
+                  child: Text('Checked Item'),
+                ),
+                const CheckedPopupMenuItem<int>(value: 2, child: Text('Unchecked Item')),
+              ];
+            },
+            child: const SizedBox(height: 100.0, width: 100.0, child: Text('XXX')),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    // Verify that CheckedPopupMenuItem uses SemanticsRole.menuItemCheckbox
+    final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
+    final List<SemanticsNode> menuItemNodes = allNodes
+        .where(
+          (SemanticsNode node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
+        )
+        .toList();
+    expect(menuItemNodes, hasLength(2));
+
+    // Verify that the checked item has the isChecked flag
+    final SemanticsNode checkedNode = menuItemNodes.firstWhere(
+      (SemanticsNode node) => node.getSemanticsData().hasFlag(SemanticsFlag.isChecked),
+    );
+    expect(checkedNode.getSemanticsData().hasFlag(SemanticsFlag.hasCheckedState), isTrue);
+    expect(checkedNode.getSemanticsData().hasFlag(SemanticsFlag.isChecked), isTrue);
+
+    // Verify that the unchecked item has hasCheckedState but not isChecked
+    final SemanticsNode uncheckedNode = menuItemNodes.firstWhere(
+      (SemanticsNode node) => !node.getSemanticsData().hasFlag(SemanticsFlag.isChecked),
+    );
+    expect(uncheckedNode.getSemanticsData().hasFlag(SemanticsFlag.hasCheckedState), isTrue);
+    expect(uncheckedNode.getSemanticsData().hasFlag(SemanticsFlag.isChecked), isFalse);
+
+    semantics.dispose();
+  });
+
   testWidgets('PopupMenuButton PopupMenuDivider', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27072
 
@@ -4649,63 +4699,6 @@ void main() {
     expect(borderRadius.bottomRight, const Radius.circular(5));
     expect(borderRadius.topLeft, const Radius.circular(5));
     expect(borderRadius.topRight, const Radius.circular(5));
-  });
-
-  testWidgets('CheckedPopupMenuItem has correct semantics for checked state', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: PopupMenuButton<String>(
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuItem<String>>[
-                const CheckedPopupMenuItem<String>(
-                  value: 'checked',
-                  checked: true,
-                  child: Text('Checked item'),
-                ),
-                const CheckedPopupMenuItem<String>(
-                  value: 'unchecked',
-                  child: Text('Unchecked item'),
-                ),
-                const CheckedPopupMenuItem<String>(
-                  value: 'disabled',
-                  checked: true,
-                  enabled: false,
-                  child: Text('Disabled checked item'),
-                ),
-              ];
-            },
-            child: const SizedBox(height: 100.0, width: 100.0, child: Text('Menu')),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('Menu'));
-    await tester.pumpAndSettle();
-
-    final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
-    final Iterable<SemanticsNode> checkboxMenuItems = allNodes.where(
-      (SemanticsNode node) => node.getSemanticsData().role == SemanticsRole.menuItemCheckbox,
-    );
-
-    expect(checkboxMenuItems, hasLength(3));
-
-    final Iterable<SemanticsNode> checkedItems = checkboxMenuItems.where(
-      (SemanticsNode node) => node.hasFlag(SemanticsFlag.isChecked),
-    );
-    final Iterable<SemanticsNode> uncheckedItems = checkboxMenuItems.where(
-      (SemanticsNode node) => !node.hasFlag(SemanticsFlag.isChecked),
-    );
-
-    expect(checkedItems, hasLength(2));
-    expect(uncheckedItems, hasLength(1));
-
-    for (final SemanticsNode node in checkboxMenuItems) {
-      expect(node.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
-    }
-
-    semantics.dispose();
   });
 }
 
