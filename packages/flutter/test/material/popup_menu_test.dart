@@ -1637,17 +1637,20 @@ void main() {
         .toList();
     expect(menuItemNodes, hasLength(2));
 
-    // Verify that the checked item has the isChecked flag
+    // Verify that the checked item has the correct properties
     final SemanticsNode checkedNode = menuItemNodes.firstWhere(
       (SemanticsNode node) => node.getSemanticsData().hasFlag(SemanticsFlag.isChecked),
     );
+    expect(checkedNode.getSemanticsData().role, SemanticsRole.menuItemCheckbox);
+    expect(checkedNode.getSemanticsData().hasFlag(SemanticsFlag.isButton), isTrue);
     expect(checkedNode.getSemanticsData().hasFlag(SemanticsFlag.hasCheckedState), isTrue);
-    expect(checkedNode.getSemanticsData().hasFlag(SemanticsFlag.isChecked), isTrue);
 
-    // Verify that the unchecked item has hasCheckedState but not isChecked
+    // Verify that the unchecked item has the correct properties
     final SemanticsNode uncheckedNode = menuItemNodes.firstWhere(
       (SemanticsNode node) => !node.getSemanticsData().hasFlag(SemanticsFlag.isChecked),
     );
+    expect(uncheckedNode.getSemanticsData().role, SemanticsRole.menuItemCheckbox);
+    expect(uncheckedNode.getSemanticsData().hasFlag(SemanticsFlag.isButton), isTrue);
     expect(uncheckedNode.getSemanticsData().hasFlag(SemanticsFlag.hasCheckedState), isTrue);
     expect(uncheckedNode.getSemanticsData().hasFlag(SemanticsFlag.isChecked), isFalse);
 
