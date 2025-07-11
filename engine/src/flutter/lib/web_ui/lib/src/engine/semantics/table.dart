@@ -34,7 +34,7 @@ class SemanticCell extends SemanticRole {
     : super.withBasics(
         EngineSemanticsRole.cell,
         semanticsObject,
-        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+        preferredLabelRepresentation: LabelRepresentation.sizedSpan,
       ) {
     setAriaRole('cell');
   }
