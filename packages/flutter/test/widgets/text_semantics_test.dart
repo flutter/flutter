@@ -173,4 +173,24 @@ void main() {
     expect(labelToNodeId['has been created.'], '');
     expect(labelToNodeId.length, 3);
   });
+
+  testWidgets('GIVEN a Text widget with a locale '
+    'WHEN semantics are built '
+    'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
+    const Locale locale = Locale('de', 'DE');
+    
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text('Flutter 2050', locale: locale),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.text('Flutter 2025'));
+    final LocaleStringAttribute localeStringAttribute =
+        node.attributedLabel.attributes[0] as LocaleStringAttribute;
+
+    expect(node.label, 'Flutter 2050');
+    expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
+  });
 }
