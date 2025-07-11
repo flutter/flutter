@@ -9,21 +9,22 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:{{agpVersion}}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${{kotlinVersion}}")
     }
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
 
-apply plugin: "com.android.library"
+apply(plugin = "com.android.library")
+apply(plugin = "kotlin-android")
 
 android {
     namespace = "{{androidIdentifier}}"
-
     compileSdk = {{compileSdkVersion}}
 
     compileOptions {
@@ -31,20 +32,31 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
     defaultConfig {
         minSdk = {{minSdkVersion}}
     }
 
     dependencies {
-        testImplementation("junit:junit:4.13.2")
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }
 
     testOptions {
         unitTests.all {
+            useJUnitPlatform()
+
             testLogging {
-               events "passed", "skipped", "failed", "standardOut", "standardError"
-               outputs.upToDateWhen {false}
+               events("passed", "skipped", "failed", "standardOut", "standardError")
+               outputs.upToDateWhen { false }
                showStandardStreams = true
             }
         }
