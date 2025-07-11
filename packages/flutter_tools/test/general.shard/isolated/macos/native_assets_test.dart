@@ -50,10 +50,10 @@ void main() {
     runPackageName = environment.projectDir.basename;
   });
 
-  for (final bool flutterTester in <bool>[false, true]) {
-    final bool isArm64 = Architecture.current == Architecture.arm64;
+  for (final flutterTester in <bool>[false, true]) {
+    final isArm64 = Architecture.current == Architecture.arm64;
 
-    String testName = '';
+    var testName = '';
     if (flutterTester) {
       testName += ' flutter tester';
     }
@@ -75,10 +75,7 @@ void main() {
       dylibPathBuz = '/build/native_assets/macos/buz.framework/Versions/A/buz';
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
-    for (final BuildMode buildMode in <BuildMode>[
-      BuildMode.debug,
-      if (!flutterTester) BuildMode.release,
-    ]) {
+    for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
@@ -274,7 +271,7 @@ void main() {
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
-          final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
               codeAssets: buildMode == BuildMode.debug
@@ -287,7 +284,7 @@ void main() {
                     codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                   ),
           );
-          final Map<String, String> environmentDefines = <String, String>{
+          final environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
           };
@@ -315,7 +312,7 @@ void main() {
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
           );
-          final String expectedArchsBeingBuilt = flutterTester
+          final expectedArchsBeingBuilt = flutterTester
               ? (isArm64 ? 'arm64' : 'x64')
               : '[arm64, x64]';
           expect(
