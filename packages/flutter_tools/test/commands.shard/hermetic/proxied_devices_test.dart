@@ -39,12 +39,12 @@ void main() {
     setUp(() {
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
-      final FakeDaemonStreams serverDaemonStreams = FakeDaemonStreams();
+      final serverDaemonStreams = FakeDaemonStreams();
       serverDaemonConnection = DaemonConnection(
         daemonStreams: serverDaemonStreams,
         logger: bufferLogger,
       );
-      final FakeDaemonStreams clientDaemonStreams = FakeDaemonStreams();
+      final clientDaemonStreams = FakeDaemonStreams();
       clientDaemonConnection = DaemonConnection(
         daemonStreams: clientDaemonStreams,
         logger: bufferLogger,
@@ -70,11 +70,11 @@ void main() {
     testUsingContext('can list devices', () async {
       daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(
+      final proxiedDevices = ProxiedDevices(
         clientDaemonConnection,
         logger: bufferLogger,
       );
@@ -91,11 +91,11 @@ void main() {
     testUsingContext('calls supportsRuntimeMode', () async {
       daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(
+      final proxiedDevices = ProxiedDevices(
         clientDaemonConnection,
         logger: bufferLogger,
       );
@@ -111,16 +111,16 @@ void main() {
     testUsingContext('redirects logs', () async {
       daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
       fakeDevice = FakeAndroidDevice();
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(
+      final proxiedDevices = ProxiedDevices(
         clientDaemonConnection,
         logger: bufferLogger,
       );
 
-      final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
+      final fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
 
       final List<Device> devices = await proxiedDevices.devices();
@@ -143,15 +143,15 @@ void main() {
       () async {
         daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
         fakeDevice = FakeAndroidDevice();
-        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
         discoverer.addDevice(fakeDevice);
 
-        final ProxiedDevices proxiedDevices = ProxiedDevices(
+        final proxiedDevices = ProxiedDevices(
           clientDaemonConnection,
           logger: bufferLogger,
         );
-        final FakePrebuiltApplicationPackage prebuiltApplicationPackage =
+        final prebuiltApplicationPackage =
             FakePrebuiltApplicationPackage();
         final File dummyApplicationBinary = memoryFileSystem.file('/directory/dummy_file');
         dummyApplicationBinary.parent.createSync();
@@ -163,7 +163,7 @@ void main() {
         final Device device = devices[0];
 
         // Now try to start the app
-        final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
+        final applicationPackage = FakeApplicationPackage();
         applicationPackageFactory.applicationPackage = applicationPackage;
 
         final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
@@ -204,11 +204,11 @@ void main() {
       () async {
         daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
         fakeDevice = FakeAndroidDevice();
-        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
         discoverer.addDevice(fakeDevice);
 
-        final ProxiedDevices proxiedDevices = ProxiedDevices(
+        final proxiedDevices = ProxiedDevices(
           clientDaemonConnection,
           logger: bufferLogger,
         );
@@ -217,7 +217,7 @@ void main() {
         expect(devices, hasLength(1));
         final Device device = devices[0];
 
-        final List<int> screenshot = <int>[1, 2, 3, 4, 5];
+        final screenshot = <int>[1, 2, 3, 4, 5];
         fakeDevice.screenshot = screenshot;
 
         final File screenshotOutputFile = memoryFileSystem.file('screenshot_file');
@@ -235,8 +235,8 @@ void main() {
 }
 
 class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
+  final inputs = StreamController<DaemonMessage>();
+  final outputs = StreamController<DaemonMessage>();
 
   @override
   Stream<DaemonMessage> get inputStream {
@@ -258,10 +258,10 @@ class FakeDaemonStreams implements DaemonStreams {
 
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
-  final String id = 'device';
+  final id = 'device';
 
   @override
-  final String name = 'device';
+  final name = 'device';
 
   @override
   String get displayName => name;
@@ -282,7 +282,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final PlatformType platformType = PlatformType.android;
 
   @override
-  final bool ephemeral = false;
+  final ephemeral = false;
 
   @override
   bool get isConnected => true;
@@ -358,8 +358,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 }
 
 class FakeDeviceLogReader implements DeviceLogReader {
-  final StreamController<String> logLinesController = StreamController<String>();
-  bool disposeCalled = false;
+  final logLinesController = StreamController<String>();
+  var disposeCalled = false;
 
   @override
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {}

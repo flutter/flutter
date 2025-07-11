@@ -21,14 +21,14 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     bool supportsRestart = true,
     FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
   }) {
-    final StreamController<List<int>> stdinController = StreamController<List<int>>();
-    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
-    final ByteStreamServerChannel channel = ByteStreamServerChannel(
+    final stdinController = StreamController<List<int>>();
+    final stdoutController = StreamController<List<int>>();
+    final channel = ByteStreamServerChannel(
       stdinController.stream,
       stdoutController.sink,
       null,
     );
-    final ByteStreamServerChannel clientChannel = ByteStreamServerChannel(
+    final clientChannel = ByteStreamServerChannel(
       stdoutController.stream,
       stdinController.sink,
       null,
@@ -61,7 +61,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     });
   }
 
-  int _seq = 1;
+  var _seq = 1;
   final ByteStreamServerChannel clientChannel;
   final bool simulateAppStarted;
   final bool simulateAppStopError;
@@ -77,7 +77,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   @override
   bool get sendLogsToClient => false;
 
-  final StreamController<Map<String, Object?>> _dapToClientMessagesController =
+  final _dapToClientMessagesController =
       StreamController<Map<String, Object?>>.broadcast();
 
   /// A stream of all messages sent from the adapter back to the client.
@@ -85,7 +85,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// A stream of all progress events sent from the adapter back to the client.
   Stream<Map<String, Object?>> get dapToClientProgressEvents {
-    const List<String> progressEventTypes = <String>[
+    const progressEventTypes = <String>[
       'progressStart',
       'progressUpdate',
       'progressEnd',
@@ -97,7 +97,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
-  final List<Map<String, Object?>> dapToFlutterMessages = <Map<String, Object?>>[];
+  final dapToFlutterMessages = <Map<String, Object?>>[];
 
   /// The `method`s of all messages sent to the `flutter run` processes `stdin`
   /// by the debug adapter.
@@ -161,9 +161,9 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     // Pretend to be the client, delegating any reverse-requests to the relevant
     // handler that is provided by the test.
     if (message is Event && message.event == 'flutter.forwardedRequest') {
-      final Map<String, Object?> body = message.body! as Map<String, Object?>;
-      final String method = body['method']! as String;
-      final Map<String, Object?>? params = body['params'] as Map<String, Object?>?;
+      final body = message.body! as Map<String, Object?>;
+      final method = body['method']! as String;
+      final params = body['params'] as Map<String, Object?>?;
 
       final Object? result = _handleReverseRequest(method, params);
 
@@ -181,7 +181,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   Object? _handleReverseRequest(String method, Map<String, Object?>? params) {
     switch (method) {
       case 'app.exposeUrl':
-        final String url = params!['url']! as String;
+        final url = params!['url']! as String;
         return exposeUrlHandler!(url);
       default:
         throw ArgumentError('Reverse-request $method is unknown');
@@ -228,9 +228,9 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
   }) {
-    final StreamController<List<int>> stdinController = StreamController<List<int>>();
-    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
-    final ByteStreamServerChannel channel = ByteStreamServerChannel(
+    final stdinController = StreamController<List<int>>();
+    final stdoutController = StreamController<List<int>>();
+    final channel = ByteStreamServerChannel(
       stdinController.stream,
       stdoutController.sink,
       null,
@@ -288,5 +288,5 @@ class FakeRequest extends Request {
         'seq': _requestId++,
       });
 
-  static int _requestId = 1;
+  static var _requestId = 1;
 }

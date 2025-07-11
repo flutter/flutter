@@ -40,7 +40,7 @@ void main() {
     });
 
     testWithoutContext('skipped if files are missing', () async {
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
       await macosProjectMigration.migrate();
       expect(fakeAnalytics.sentEvents, isEmpty);
@@ -55,11 +55,11 @@ void main() {
     });
 
     testWithoutContext('skipped if nothing to upgrade', () async {
-      const String contents = 'Nothing to upgrade';
+      const contents = 'Nothing to upgrade';
       xcodeProjectInfoFile.writeAsStringSync(contents);
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
       await macosProjectMigration.migrate();
       expect(fakeAnalytics.sentEvents, isEmpty);
@@ -71,12 +71,12 @@ void main() {
     });
 
     testWithoutContext('skips migrating script with embed', () async {
-      const String contents = r'''
+      const contents = r'''
 shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
 			''';
       xcodeProjectInfoFile.writeAsStringSync(contents);
 
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
       await macosProjectMigration.migrate();
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -95,7 +95,7 @@ keep this 1
 keep this 2
 ''');
 
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
       await macosProjectMigration.migrate();
       expect(fakeAnalytics.sentEvents, isEmpty);
@@ -113,7 +113,7 @@ keep this 2
 		D73912F022F37F9bogus /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73912F022F37F9bogus /* App.framework */; };
 ''');
 
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
 
       expect(
@@ -137,7 +137,7 @@ keep this 2
 				33D1A10522148B93bogus /* FlutterMacOS.framework in Bundle Framework */,
 ''');
 
-      final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
+      final macosProjectMigration =
           RemoveMacOSFrameworkLinkAndEmbeddingMigration(macOSProject, testLogger, fakeAnalytics);
       expect(
         macosProjectMigration.migrate,
@@ -175,7 +175,7 @@ keep this 2
     });
 
     testWithoutContext('skipped if files are missing', () async {
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+      final macOSProjectMigration = MacOSDeploymentTargetMigration(
         project,
         testLogger,
       );
@@ -195,16 +195,16 @@ keep this 2
     });
 
     testWithoutContext('skipped if nothing to upgrade', () async {
-      const String xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.15;';
+      const xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.15;';
       xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-      const String podfileFileContents = "# platform :osx, '10.15'";
+      const podfileFileContents = "# platform :osx, '10.15'";
       podfile.writeAsStringSync(podfileFileContents);
       final DateTime podfileLastModified = podfile.lastModifiedSync();
 
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+      final macOSProjectMigration = MacOSDeploymentTargetMigration(
         project,
         testLogger,
       );
@@ -230,7 +230,7 @@ keep this 2
 platform :osx, '10.11'
 ''');
 
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+      final macOSProjectMigration = MacOSDeploymentTargetMigration(
         project,
         testLogger,
       );
@@ -267,7 +267,7 @@ platform :osx, '10.15'
 platform :osx, '10.14'
 ''');
 
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+      final macOSProjectMigration = MacOSDeploymentTargetMigration(
         project,
         testLogger,
       );
@@ -304,7 +304,7 @@ platform :osx, '10.15'
 platform :osx, '10.13'
 ''');
 
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
+      final macOSProjectMigration = MacOSDeploymentTargetMigration(
         project,
         testLogger,
       );
@@ -365,7 +365,7 @@ platform :osx, '10.15'
     }
 
     testWithMocks('skipped if files are missing', () async {
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+      final macOSProjectMigration = FlutterApplicationMigration(
         project,
         testLogger,
       );
@@ -377,7 +377,7 @@ platform :osx, '10.15'
     });
 
     testWithMocks('skipped if no NSPrincipalClass key exists to upgrade', () async {
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+      final macOSProjectMigration = FlutterApplicationMigration(
         project,
         testLogger,
       );
@@ -395,7 +395,7 @@ platform :osx, '10.15'
 
     testWithMocks('skipped if already de-upgraded (or never migrated)', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+      final macOSProjectMigration = FlutterApplicationMigration(
         project,
         testLogger,
       );
@@ -413,7 +413,7 @@ platform :osx, '10.15'
 
     testWithMocks('Info.plist migrated to use NSApplication', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+      final macOSProjectMigration = FlutterApplicationMigration(
         project,
         testLogger,
       );
@@ -436,9 +436,9 @@ platform :osx, '10.15'
     });
 
     testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
-      const String differentApp = 'DIFFERENTApplication';
+      const differentApp = 'DIFFERENTApplication';
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, differentApp);
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+      final macOSProjectMigration = FlutterApplicationMigration(
         project,
         testLogger,
       );
@@ -470,7 +470,7 @@ platform :osx, '10.15'
     });
 
     testWithoutContext('skipped if files are missing', () async {
-      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+      final migration = NSApplicationMainDeprecationMigration(
         project,
         testLogger,
       );
@@ -481,7 +481,7 @@ platform :osx, '10.15'
     });
 
     testWithoutContext('skipped if nothing to upgrade', () async {
-      const String appDelegateContents = '''
+      const appDelegateContents = '''
 import Cocoa
 import FlutterMacOS
 
@@ -495,7 +495,7 @@ class AppDelegate: FlutterAppDelegate {
       appDelegateFile.writeAsStringSync(appDelegateContents);
       final DateTime lastModified = appDelegateFile.lastModifiedSync();
 
-      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+      final migration = NSApplicationMainDeprecationMigration(
         project,
         testLogger,
       );
@@ -520,7 +520,7 @@ class AppDelegate: FlutterAppDelegate {
 }
 ''');
 
-      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+      final migration = NSApplicationMainDeprecationMigration(
         project,
         testLogger,
       );
@@ -559,7 +559,7 @@ class AppDelegate: FlutterAppDelegate {
     });
 
     testWithoutContext('skipped if files are missing', () async {
-      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+      final migration = SecureRestorableStateMigration(
         project,
         testLogger,
       );
@@ -570,7 +570,7 @@ class AppDelegate: FlutterAppDelegate {
     });
 
     testWithoutContext('skipped if nothing to upgrade', () async {
-      const String appDelegateContents = '''
+      const appDelegateContents = '''
 import Cocoa
 import FlutterMacOS
 
@@ -588,7 +588,7 @@ class AppDelegate: FlutterAppDelegate {
       appDelegateFile.writeAsStringSync(appDelegateContents);
       final DateTime lastModified = appDelegateFile.lastModifiedSync();
 
-      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+      final migration = SecureRestorableStateMigration(
         project,
         testLogger,
       );
@@ -601,7 +601,7 @@ class AppDelegate: FlutterAppDelegate {
     });
 
     testWithoutContext('skipped if override already present, but different', () async {
-      const String appDelegateContents = '''
+      const appDelegateContents = '''
 import Cocoa
 import FlutterMacOS
 
@@ -619,7 +619,7 @@ class AppDelegate: FlutterAppDelegate {
       appDelegateFile.writeAsStringSync(appDelegateContents);
       final DateTime lastModified = appDelegateFile.lastModifiedSync();
 
-      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+      final migration = SecureRestorableStateMigration(
         project,
         testLogger,
       );
@@ -632,7 +632,7 @@ class AppDelegate: FlutterAppDelegate {
     });
 
     testWithoutContext('warns if override not present and cannot be applied cleanly', () async {
-      const String appDelegateContents = '''
+      const appDelegateContents = '''
 import Cocoa
 import FlutterMacOS
 
@@ -648,7 +648,7 @@ class AppDelegate: FlutterAppDelegate {
       appDelegateFile.writeAsStringSync(appDelegateContents);
       final DateTime lastModified = appDelegateFile.lastModifiedSync();
 
-      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+      final migration = SecureRestorableStateMigration(
         project,
         testLogger,
       );
@@ -676,7 +676,7 @@ class AppDelegate: FlutterAppDelegate {
 }
 ''');
 
-      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+      final migration = SecureRestorableStateMigration(
         project,
         testLogger,
       );

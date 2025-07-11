@@ -24,7 +24,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-const Map<String, String> kDyLdLibEntry = <String, String>{
+const kDyLdLibEntry = <String, String>{
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
 };
 
@@ -47,7 +47,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: bundleDirectory,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[iosDeployPath, '--id', '1234', '--bundle', '/', '--no-wifi'],
         environment: const <String, String>{'PATH': '/usr/bin:null', ...kDyLdLibEntry},
@@ -71,7 +71,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: bundleDirectory,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[iosDeployPath, '--id', '1234', '--bundle', '/'],
         environment: const <String, String>{'PATH': '/usr/bin:null', ...kDyLdLibEntry},
@@ -96,7 +96,7 @@ void main() {
       applicationPackage: bundleDirectory,
     );
 
-    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final processManager = FakeProcessManager.empty();
 
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -117,7 +117,7 @@ void main() {
       uncompressedBundle: bundleDirectory,
       applicationPackage: bundleDirectory,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[iosDeployPath, '--id', '1234', '--uninstall_only', '--bundle_id', 'app'],
         environment: const <String, String>{'PATH': '/usr/bin:null', ...kDyLdLibEntry},
@@ -137,7 +137,7 @@ void main() {
       applicationPackage: bundleDirectory,
     );
 
-    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final processManager = FakeProcessManager.empty();
 
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -159,7 +159,7 @@ void main() {
         uncompressedBundle: bundleDirectory,
         applicationPackage: bundleDirectory,
       );
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -188,7 +188,7 @@ void main() {
         uncompressedBundle: bundleDirectory,
         applicationPackage: bundleDirectory,
       );
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -216,7 +216,7 @@ void main() {
         uncompressedBundle: bundleDirectory,
         applicationPackage: bundleDirectory,
       );
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -232,7 +232,7 @@ void main() {
           exitCode: 255,
         ),
       ]);
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         logger: logger,
@@ -251,9 +251,9 @@ void main() {
         uncompressedBundle: bundleDirectory,
         applicationPackage: bundleDirectory,
       );
-      const String stderr =
+      const stderr =
           '2020-03-26 17:48:43.484 ios-deploy[21518:5501783] [ !! ] Timed out waiting for device';
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -270,7 +270,7 @@ void main() {
           exitCode: 253,
         ),
       ]);
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         logger: logger,
@@ -290,7 +290,7 @@ void main() {
         applicationPackage: bundleDirectory,
       );
 
-      final FakeProcessManager processManager = FakeProcessManager.empty();
+      final processManager = FakeProcessManager.empty();
 
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
@@ -312,7 +312,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: bundleDirectory,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[iosDeployPath, '--id', '1234', '--bundle', '/', '--no-wifi'],
         environment: const <String, String>{'PATH': '/usr/bin:null', ...kDyLdLibEntry},
@@ -331,7 +331,7 @@ void main() {
       uncompressedBundle: bundleDirectory,
       applicationPackage: bundleDirectory,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[iosDeployPath, '--id', '1234', '--uninstall_only', '--bundle_id', 'app'],
         environment: const <String, String>{'PATH': '/usr/bin:null', ...kDyLdLibEntry},
@@ -354,12 +354,12 @@ IOSDevice setUpIOSDevice({
   bool isCoreDevice = false,
 }) {
   logger ??= BufferLogger.test();
-  final FakePlatform platform = FakePlatform(
+  final platform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{},
   );
   artifacts ??= Artifacts.test();
-  final Cache cache = Cache.test(
+  final cache = Cache.test(
     platform: platform,
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),

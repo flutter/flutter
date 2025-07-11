@@ -19,7 +19,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-const String otherGradleVersionWrapper = r'''
+const otherGradleVersionWrapper = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-6.6-all.zip
@@ -27,7 +27,7 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
-const String gradleWrapperToMigrate = r'''
+const gradleWrapperToMigrate = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip
@@ -35,7 +35,7 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
-const String gradleWrapperToMigrateTo = r'''
+const gradleWrapperToMigrateTo = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-all.zip
@@ -118,10 +118,10 @@ dependencies {}
 ''';
 }
 
-final Version androidStudioDolphin = Version(2021, 3, 1);
+final androidStudioDolphin = Version(2021, 3, 1);
 
-const Version _javaVersion17 = Version.withText(17, 0, 2, 'openjdk 17.0.2');
-const Version _javaVersion16 = Version.withText(16, 0, 2, 'openjdk 16.0.2');
+const _javaVersion17 = Version.withText(17, 0, 2, 'openjdk 17.0.2');
+const _javaVersion16 = Version.withText(16, 0, 2, 'openjdk 16.0.2');
 
 void main() {
   group('Android migration', () {
@@ -141,7 +141,7 @@ void main() {
       });
 
       testUsingContext('skipped if files are missing', () async {
-        final TopLevelGradleBuildFileMigration androidProjectMigration =
+        final androidProjectMigration =
             TopLevelGradleBuildFileMigration(project, bufferLogger);
         await androidProjectMigration.migrate();
         expect(topLevelGradleBuildFile.existsSync(), isFalse);
@@ -158,7 +158,7 @@ tasks.register("clean", Delete) {
 }
         ''');
 
-        final TopLevelGradleBuildFileMigration androidProjectMigration =
+        final androidProjectMigration =
             TopLevelGradleBuildFileMigration(project, bufferLogger);
         final DateTime previousLastModified = topLevelGradleBuildFile.lastModifiedSync();
         await androidProjectMigration.migrate();
@@ -173,7 +173,7 @@ task clean(type: Delete) {
 }
 ''');
 
-        final TopLevelGradleBuildFileMigration androidProjectMigration =
+        final androidProjectMigration =
             TopLevelGradleBuildFileMigration(project, bufferLogger);
         await androidProjectMigration.migrate();
 
@@ -216,7 +216,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if files are missing', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -229,7 +229,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio is null', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -242,7 +242,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is null', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -256,7 +256,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if error is encountered in migrate()', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeErroringJava(),
               bufferLogger,
@@ -270,7 +270,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(),
               bufferLogger,
@@ -284,7 +284,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if bundled java version is less than 17', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion16),
               bufferLogger,
@@ -299,7 +299,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('nothing is changed if gradle version not one that was '
           'used by flutter create', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -314,7 +314,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('change is made with one of the specific gradle versions'
           ' we migrate for', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -335,7 +335,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('change is not made when opt out flag is set', () async {
-        final AndroidStudioJavaGradleConflictMigration migration =
+        final migration =
             AndroidStudioJavaGradleConflictMigration(
               java: FakeJava(version: _javaVersion17),
               bufferLogger,
@@ -373,7 +373,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 19', () async {
-        const String minSdkVersion19 = 'minSdkVersion 19';
+        const minSdkVersion19 = 'minSdkVersion 19';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         await migration.migrate();
         expect(
@@ -383,7 +383,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 20', () async {
-        const String minSdkVersion20 = 'minSdkVersion 20';
+        const minSdkVersion20 = 'minSdkVersion 20';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
         await migration.migrate();
         expect(
@@ -393,7 +393,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 21', () async {
-        const String minSdkVersion21 = 'minSdkVersion 21';
+        const minSdkVersion21 = 'minSdkVersion 21';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion21));
         await migration.migrate();
         expect(
@@ -403,7 +403,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 22', () async {
-        const String minSdkVersion20 = 'minSdkVersion = 22';
+        const minSdkVersion20 = 'minSdkVersion = 22';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
         await migration.migrate();
         expect(
@@ -413,7 +413,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 23', () async {
-        const String minSdkVersion20 = 'minSdk = 23';
+        const minSdkVersion20 = 'minSdk = 23';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
         await migration.migrate();
         expect(
@@ -423,7 +423,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('do nothing when >=api 24', () async {
-        const String minSdkVersion24 = 'minSdkVersion 24';
+        const minSdkVersion24 = 'minSdkVersion 24';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion24));
         await migration.migrate();
         expect(
@@ -443,7 +443,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('avoid rewriting comments', () async {
-        const String code =
+        const code =
             '// minSdkVersion 19  // old default\n'
             '        minSdkVersion 24  // new version';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(code));
@@ -457,7 +457,7 @@ tasks.register("clean", Delete) {
           module: true,
         );
         migration = MinSdkVersionMigration(project, bufferLogger);
-        const String minSdkVersion19 = 'minSdkVersion 19';
+        const minSdkVersion19 = 'minSdkVersion 19';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         await migration.migrate();
         expect(
@@ -468,7 +468,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('do nothing when minSdkVersion is set '
           'to a constant', () async {
-        const String minSdkVersionConstant = 'minSdkVersion kMinSdkversion';
+        const minSdkVersionConstant = 'minSdkVersion kMinSdkversion';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersionConstant));
         await migration.migrate();
         expect(
@@ -479,7 +479,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('migrate when minSdkVersion is set '
           'using = syntax', () async {
-        const String equalsSyntaxMinSdkVersion19 = 'minSdkVersion = 19';
+        const equalsSyntaxMinSdkVersion19 = 'minSdkVersion = 19';
         project.appGradleFile.writeAsStringSync(
           sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19),
         );

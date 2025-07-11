@@ -28,8 +28,8 @@ void main() {
         final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
         return relativePath;
       }).toList();
-      final Map<String, String> contents = <String, String>{};
-      for (final String path in paths) {
+      final contents = <String, String>{};
+      for (final path in paths) {
         final String absPath = globals.fs.path.join(tempPath, path);
         if (globals.fs.isDirectorySync(absPath)) {
           contents[path] = 'dir';
@@ -86,7 +86,7 @@ void main() {
     }) async {
       dir ??= tempDir;
       Cache.flutterRoot = tempDir.absolute.path;
-      final IdeConfigCommand command = IdeConfigCommand();
+      final command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['ide-config', ...args]);
 
@@ -105,7 +105,7 @@ void main() {
           );
         }
       }
-      for (final String path in unexpectedPaths) {
+      for (final path in unexpectedPaths) {
         expect(
           fileOrDirectoryExists(globals.fs.path.join(dir.path, path)),
           false,
@@ -151,7 +151,7 @@ void main() {
       );
       final Map<String, String> flutterManifest = getManifest(tempDir, 'template');
       populateDir(templateManifest);
-      final Map<String, String> expectedContents = <String, String>{
+      final expectedContents = <String, String>{
         ...templateManifest,
         ...flutterManifest,
       };
@@ -168,7 +168,7 @@ void main() {
       populateDir(templateManifest);
       populateDir(flutterManifest);
       final Map<String, String> overwrittenManifest = getManifest(tempDir, 'template');
-      final Map<String, String> expectedContents = <String, String>{
+      final expectedContents = <String, String>{
         ...templateManifest,
         ...overwrittenManifest,
       };
@@ -193,7 +193,7 @@ void main() {
       templateManifest[flutterIml] = 'flutter existing';
       final Map<String, String> flutterManifest = getManifest(tempDir, 'existing');
       populateDir(flutterManifest);
-      final Map<String, String> expectedContents = <String, String>{
+      final expectedContents = <String, String>{
         ...flutterManifest,
         ...templateManifest,
       };
@@ -217,7 +217,7 @@ void main() {
         'existing',
         isTemplate: true,
       );
-      final Map<String, String> expectedContents = <String, String>{
+      final expectedContents = <String, String>{
         ...flutterManifest,
         ...updatedTemplates,
       };
@@ -250,7 +250,7 @@ void main() {
         'flutter.iml${Template.copyTemplateExtension}',
       );
       updatedTemplates.remove(flutterIml);
-      final Map<String, String> expectedContents = <String, String>{
+      final expectedContents = <String, String>{
         ...flutterManifest,
         ...updatedTemplates,
       };
@@ -291,7 +291,7 @@ void main() {
         updatedTemplates.remove(deepIml);
         deepIml = globals.fs.path.join(deepIml, 'deep.iml');
         updatedTemplates.remove(deepIml);
-        final Map<String, String> expectedContents = <String, String>{
+        final expectedContents = <String, String>{
           ...flutterManifest,
           ...updatedTemplates,
         };

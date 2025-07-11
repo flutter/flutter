@@ -46,12 +46,12 @@ class AnalysisServer {
   final bool suppressAnalytics;
 
   Process? _process;
-  final StreamController<bool> _analyzingController = StreamController<bool>.broadcast();
-  final StreamController<FileAnalysisErrors> _errorsController =
+  final _analyzingController = StreamController<bool>.broadcast();
+  final _errorsController =
       StreamController<FileAnalysisErrors>.broadcast();
-  bool _didServerErrorOccur = false;
+  var _didServerErrorOccur = false;
 
-  int _id = 0;
+  var _id = 0;
 
   Future<void> start() async {
     final String snapshot = _fileSystem.path.join(
@@ -60,7 +60,7 @@ class AnalysisServer {
       'snapshots',
       'analysis_server.dart.snapshot',
     );
-    final List<String> command = <String>[
+    final command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--disable-server-feature-completion',
@@ -96,7 +96,7 @@ class AnalysisServer {
     });
   }
 
-  final List<String> _logs = <String>[];
+  final _logs = <String>[];
 
   /// Aggregated STDOUT and STDERR logs from the server.
   ///
@@ -147,7 +147,7 @@ class AnalysisServer {
 
     if (response is Map<String, dynamic>) {
       if (response['event'] != null) {
-        final String event = response['event'] as String;
+        final event = response['event'] as String;
         final dynamic params = response['params'];
         Map<String, dynamic>? paramsMap;
         if (params is Map<String, dynamic>) {
@@ -178,7 +178,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing =
+      final isAnalyzing =
           (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
@@ -195,8 +195,8 @@ class AnalysisServer {
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
-    final String file = issueInfo['file'] as String;
-    final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
+    final file = issueInfo['file'] as String;
+    final errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
         .map<AnalysisError>((Map<String, dynamic> json) {
@@ -311,7 +311,7 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
+    final location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,
@@ -334,7 +334,7 @@ class WrittenError {
   final int startColumn;
   final int offset;
 
-  static final Map<String, AnalysisSeverity> _severityMap = <String, AnalysisSeverity>{
+  static final _severityMap = <String, AnalysisSeverity>{
     'INFO': AnalysisSeverity.info,
     'WARNING': AnalysisSeverity.warning,
     'ERROR': AnalysisSeverity.error,

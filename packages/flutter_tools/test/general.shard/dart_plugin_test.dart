@@ -41,7 +41,7 @@ void main() {
 
     group('resolvePlatformImplementation', () {
       testWithoutContext('selects uncontested implementation from direct dependency', () async {
-        final Set<String> directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
+        final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
             'url_launcher_linux',
@@ -99,7 +99,7 @@ void main() {
       testWithoutContext(
         'selects uncontested implementation from direct dependency with additional native implementation',
         () async {
-          final Set<String> directDependencies = <String>{
+          final directDependencies = <String>{
             'url_launcher_linux',
             'url_launcher_macos',
           };
@@ -156,7 +156,7 @@ void main() {
       );
 
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
-        final Set<String> directDependencies = <String>{'url_launcher_macos'};
+        final directDependencies = <String>{'url_launcher_macos'};
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
             'url_launcher_macos',
@@ -212,7 +212,7 @@ void main() {
       });
 
       testWithoutContext('selects inline implementation on mobile', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -255,7 +255,7 @@ void main() {
       // See https://github.com/flutter/flutter/issues/87862 for details.
       testWithoutContext('does not select inline implementation on desktop for '
           'missing min Flutter SDK constraint', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -281,7 +281,7 @@ void main() {
       // See https://github.com/flutter/flutter/issues/87862 for details.
       testWithoutContext('does not select inline implementation on desktop for '
           'min Flutter SDK constraint < 2.11', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -306,7 +306,7 @@ void main() {
 
       testWithoutContext('selects inline implementation on desktop for '
           'min Flutter SDK requirement of at least 2.11', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -353,7 +353,7 @@ void main() {
       });
 
       testWithoutContext('selects default implementation', () async {
-        final Set<String> directDependencies = <String>{};
+        final directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -434,7 +434,7 @@ void main() {
       testWithoutContext(
         'selects default implementation if interface is direct dependency',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
 
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
@@ -484,7 +484,7 @@ void main() {
       );
 
       testWithoutContext('user-selected implementation overrides default implementation', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
         };
@@ -548,7 +548,7 @@ void main() {
       });
 
       testWithoutContext('user-selected implementation overrides inline implementation', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
         };
@@ -609,7 +609,7 @@ void main() {
       testUsingContext(
         'provides error when a plugin has a default implementation and implements another plugin',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -673,7 +673,7 @@ void main() {
       testUsingContext(
         'provides error when a plugin has a default implementation and an inline implementation',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -725,7 +725,7 @@ void main() {
       testUsingContext(
         'provides warning when a plugin references a default plugin without implementation',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -774,7 +774,7 @@ void main() {
       testUsingContext(
         'avoid warning when a plugin references a default plugin with a native implementation only',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -818,7 +818,7 @@ void main() {
       testUsingContext(
         'selects default Dart implementation without warning, while choosing plugin selection for nativeOrDart',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -872,7 +872,7 @@ void main() {
       testUsingContext(
         'provides warning when a plugin references a default plugin which does not exist',
         () async {
-          final Set<String> directDependencies = <String>{'url_launcher'};
+          final directDependencies = <String>{'url_launcher'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               Plugin.fromYaml(
@@ -906,7 +906,7 @@ void main() {
       );
 
       testUsingContext('provides error when user selected multiple implementations', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'url_launcher_linux_1',
           'url_launcher_linux_2',
         };
@@ -956,7 +956,7 @@ void main() {
       });
 
       testUsingContext('provides all errors when user selected multiple implementations', () async {
-        final Set<String> directDependencies = <String>{
+        final directDependencies = <String>{
           'url_launcher_linux_1',
           'url_launcher_linux_2',
           'url_launcher_windows_1',
@@ -1045,7 +1045,7 @@ void main() {
       testUsingContext(
         'provides error when user needs to select among multiple implementations',
         () async {
-          final Set<String> directDependencies = <String>{};
+          final directDependencies = <String>{};
           expect(() {
             resolvePlatformImplementation(<Plugin>[
               Plugin.fromYaml(
@@ -1464,7 +1464,7 @@ void createFakeDartPlugins(
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  Set<String> dependencies = <String>{};
+  var dependencies = <String>{};
 
   @override
   String get appName => 'myapp';
@@ -1472,7 +1472,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  bool isModule = false;
+  var isModule = false;
 
   @override
   late FlutterManifest manifest;

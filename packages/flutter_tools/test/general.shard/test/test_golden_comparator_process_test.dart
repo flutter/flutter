@@ -30,15 +30,15 @@ void main() {
     });
 
     testWithoutContext('can pass data', () async {
-      final Map<String, dynamic> expectedResponse = <String, dynamic>{
+      final expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
       };
 
       final FakeProcess mockProcess = createFakeProcess('${jsonEncode(expectedResponse)}\n');
-      final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
+      final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(
+      final process = TestGoldenComparatorProcess(
         mockProcess,
         logger: BufferLogger.test(),
       );
@@ -55,11 +55,11 @@ void main() {
     });
 
     testWithoutContext('can handle multiple requests', () async {
-      final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
+      final expectedResponse1 = <String, dynamic>{
         'success': true,
         'message': 'some message',
       };
-      final Map<String, dynamic> expectedResponse2 = <String, dynamic>{
+      final expectedResponse2 = <String, dynamic>{
         'success': false,
         'message': 'some other message',
       };
@@ -67,9 +67,9 @@ void main() {
       final FakeProcess mockProcess = createFakeProcess(
         '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
       );
-      final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
+      final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(
+      final process = TestGoldenComparatorProcess(
         mockProcess,
         logger: BufferLogger.test(),
       );
@@ -91,7 +91,7 @@ void main() {
     });
 
     testWithoutContext('ignores anything that does not look like JSON', () async {
-      final Map<String, dynamic> expectedResponse = <String, dynamic>{
+      final expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
       };
@@ -103,9 +103,9 @@ ${jsonEncode(expectedResponse)}
 {"success": false}
 Other JSON data after the initial data
 ''');
-      final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
+      final ioSink = mockProcess.stdin as MemoryIOSink;
 
-      final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(
+      final process = TestGoldenComparatorProcess(
         mockProcess,
         logger: BufferLogger.test(),
       );

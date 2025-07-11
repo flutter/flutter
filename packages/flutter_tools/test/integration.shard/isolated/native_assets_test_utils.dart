@@ -75,18 +75,18 @@ Future<void> addTestProjectAsDependency(
   final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(
     linkHookPubspecFile.readAsStringSync(),
   );
-  final Map<String, Object?> linkHooksDependencies =
+  final linkHooksDependencies =
       linkHookPubspec['dependencies']! as Map<String, Object?>;
-  final Map<String, Object?> linkHooksDevDependencies =
+  final linkHooksDevDependencies =
       linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
 
   final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(
     thisPubspecFile.readAsStringSync(),
   );
 
-  final Map<String, Object?> thisDependencies =
+  final thisDependencies =
       thisPubspec['dependencies']! as Map<String, Object?>;
-  final Map<String, Object?> thisDevDependencies =
+  final thisDevDependencies =
       thisPubspec['dev_dependencies']! as Map<String, Object?>;
 
   // Flutter CI uses pinned dependencies for all packages (including
@@ -146,7 +146,7 @@ import '${packageName}_bindings_generated.dart' as bindings;
 /// actually invoke the native code from the test project. If it succeeds to
 /// build, then the user-define is properly wired through.
 Future<void> addUserDefine(String packageName, Directory packageDirectory) async {
-  for (final File pubspecFile in <File>[
+  for (final pubspecFile in <File>[
     packageDirectory.childFile('pubspec.yaml'),
     packageDirectory.childDirectory('example').childFile('pubspec.yaml'),
   ]) {
@@ -211,7 +211,7 @@ FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
   await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
   // Update builder to build the native library and link it into the main library.
-  const String builderSource = r'''
+  const builderSource = r'''
 
 import 'package:logging/logging.dart';
 import 'package:hooks/hooks.dart';

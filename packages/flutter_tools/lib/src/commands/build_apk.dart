@@ -69,12 +69,12 @@ class BuildApkCommand extends BuildSubCommand {
     return BuildMode.release;
   }
 
-  static const List<String> _kDefaultJitArchs = <String>[
+  static const _kDefaultJitArchs = <String>[
     'android-arm',
     'android-arm64',
     'android-x64',
   ];
-  static const List<String> _kDefaultAotArchs = <String>[
+  static const _kDefaultAotArchs = <String>[
     'android-arm',
     'android-arm64',
     'android-x64',
@@ -87,7 +87,7 @@ class BuildApkCommand extends BuildSubCommand {
       : stringsArg('target-platform');
 
   @override
-  final String name = 'apk';
+  final name = 'apk';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -101,7 +101,7 @@ class BuildApkCommand extends BuildSubCommand {
   };
 
   @override
-  final String description =
+  final description =
       'Build an Android APK file from your app.\n\n'
       "This command can build debug and release versions of your application. 'debug' builds support "
       "debugging and a quick development cycle. 'release' builds don't support debugging and are "
@@ -128,7 +128,7 @@ class BuildApkCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
+    final androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
@@ -147,7 +147,7 @@ class BuildApkCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final String buildLabel = impellerEnabled
+    final buildLabel = impellerEnabled
         ? 'manifest-impeller-enabled'
         : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));

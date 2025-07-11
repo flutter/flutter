@@ -31,8 +31,8 @@ void main() {
     debugServiceExtension = "internal"
     allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(
       project,
       BufferLogger.test(),
     );
@@ -66,8 +66,8 @@ void main() {
         debugServiceExtension = "internal"
         allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(
       project,
       BufferLogger.test(),
     );
@@ -102,8 +102,8 @@ void main() {
     enableGPUValidationMode = "1"
     allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(
       project,
       BufferLogger.test(),
     );
@@ -120,8 +120,8 @@ void main() {
     final File file = fs.file('does_not_exist')
       ..createSync()
       ..writeAsStringSync('NO_OP');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(
       project,
       BufferLogger.test(),
     );
@@ -133,8 +133,8 @@ void main() {
 
   testWithoutContext('No-op on missing file', () async {
     final FileSystem fs = MemoryFileSystem.test();
-    final FakeIosProject project = FakeIosProject(fs.file('does_not_exist'));
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
+    final project = FakeIosProject(fs.file('does_not_exist'));
+    final validator = MetalAPIValidationMigrator.ios(
       project,
       BufferLogger.test(),
     );

@@ -71,7 +71,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
+    final mdnsVMServiceDiscoveryForAttach =
         MdnsVMServiceDiscoveryForAttach(
           device: this,
           appId: appId,
@@ -157,7 +157,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
       allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
-  static bool allowDiscovery = false;
+  static var allowDiscovery = false;
 
   @override
   Future<List<Device>> pollingGetDevices({Duration? timeout}) async {

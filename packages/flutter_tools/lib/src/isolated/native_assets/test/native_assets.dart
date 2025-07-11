@@ -63,7 +63,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
-  final Map<String, String> environmentDefines = <String, String>{
+  final environmentDefines = <String, String>{
     kBuildMode: buildInfo.mode.cliName,
   };
 

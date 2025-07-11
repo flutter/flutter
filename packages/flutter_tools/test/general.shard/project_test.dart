@@ -37,13 +37,13 @@ import '../src/throwing_pub.dart';
 void main() {
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
-  final BufferLogger logger = BufferLogger.test();
+  final logger = BufferLogger.test();
 
   group('Project', () {
     group('construction', () {
       testWithoutContext('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final FlutterProjectFactory projectFactory = FlutterProjectFactory(
+        final projectFactory = FlutterProjectFactory(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
         );
@@ -124,7 +124,7 @@ void main() {
 
     group('ensure ready for platform-specific tooling', () {
       _testInMemory('does nothing, if project is not created', () async {
-        final FlutterProject project = FlutterProject(
+        final project = FlutterProject(
           globals.fs.directory('not_created'),
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
@@ -192,7 +192,7 @@ void main() {
       });
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
         // This is not a valid Xml document
-        const String invalidManifest = '<manifest></application>';
+        const invalidManifest = '<manifest></application>';
         final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
 
         expect(
@@ -437,17 +437,17 @@ void main() {
       });
 
       testUsingContext('Version.json info is correct', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
     ''', logger: BufferLogger.test())!;
-        final FlutterProject project = FlutterProject(
+        final project = FlutterProject(
           fileSystem.systemTempDirectory,
           manifest,
           manifest,
         );
-        final Map<String, dynamic> versionInfo =
+        final versionInfo =
             jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'], 'test');
         expect(versionInfo['version'], '1.0.0');
@@ -614,10 +614,10 @@ dependencies {
         );
       });
       group('_', () {
-        const String javaV = '17.0.2';
-        const String gradleV = '6.7.3';
-        const String agpV = '7.2.0';
-        const String kgpV = '2.1.0';
+        const javaV = '17.0.2';
+        const gradleV = '6.7.3';
+        const agpV = '7.2.0';
+        const kgpV = '2.1.0';
 
         final FakeProcessManager processManager;
         final Java java;
@@ -669,10 +669,10 @@ dependencies {
         );
       });
       group('_', () {
-        const String javaV = '17.0.2';
-        const String gradleV = '6.7.3';
-        const String agpV = '4.2.0';
-        const String kgpV = '1.7.22';
+        const javaV = '17.0.2';
+        const gradleV = '6.7.3';
+        const agpV = '4.2.0';
+        const kgpV = '1.7.22';
 
         final FakeProcessManager processManager;
         final Java java;
@@ -724,8 +724,8 @@ dependencies {
         _testInMemory(
           'incompatible gradle/agp only',
           () async {
-            const String gradleV = '7.0.3';
-            const String agpV = '7.1.0';
+            const gradleV = '7.0.3';
+            const agpV = '7.1.0';
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
@@ -750,9 +750,9 @@ dependencies {
         );
       });
       group('_', () {
-        const String gradleV = '8.11';
-        const String agpV = '8.7.2';
-        const String kgpV = '2.1.10';
+        const gradleV = '8.11';
+        const agpV = '8.7.2';
+        const kgpV = '2.1.10';
 
         final FakeProcessManager processManager;
         final Java java;
@@ -791,9 +791,9 @@ dependencies {
         );
       });
       group('_', () {
-        const String gradleV = '8.9';
-        const String agpV = '8.7.2';
-        const String kgpV = '2.0.20';
+        const gradleV = '8.9';
+        const agpV = '8.7.2';
+        const kgpV = '2.0.20';
 
         final FakeProcessManager processManager;
         final Java java;
@@ -846,7 +846,7 @@ dependencies {
         _testInMemory(
           'null agp only',
           () async {
-            const String gradleV = '7.0.3';
+            const gradleV = '7.0.3';
             final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: '',
@@ -1041,10 +1041,10 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
-          const String entitlementFilePath = 'myEntitlement.Entitlement';
+          const entitlementFilePath = 'myEntitlement.Entitlement';
           project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             target: 'Runner',
             configuration: 'config',
           );
@@ -1074,7 +1074,7 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final Map<String, Object?> json =
+          final json =
               jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
 
           expect(
@@ -1089,10 +1089,10 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
-          const String entitlementFilePath = 'nested/somewhere/myEntitlement.Entitlement';
+          const entitlementFilePath = 'nested/somewhere/myEntitlement.Entitlement';
           project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             target: 'Runner',
             configuration: 'config',
           );
@@ -1122,7 +1122,7 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final Map<String, Object?> json =
+          final json =
               jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(
             json['associatedDomains'],
@@ -1137,7 +1137,7 @@ plugins {
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
 
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             target: 'Runner',
             configuration: 'config',
           );
@@ -1160,7 +1160,7 @@ plugins {
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
-          final Map<String, Object?> json =
+          final json =
               jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(json['teamIdentifier'], 'ABC');
           expect(json['bundleIdentifier'], 'io.flutter.someProject');
@@ -1177,7 +1177,7 @@ plugins {
         testWithMocks('from build settings, if no plist', () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
@@ -1219,7 +1219,7 @@ plugins {
         testWithMocks('from build settings and plist, if default variable', () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
@@ -1238,7 +1238,7 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
             'SUFFIX': 'suffix',
@@ -1295,7 +1295,7 @@ plugins {
         testWithMocks('handles case insensitive flavor', () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Free');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Free');
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
@@ -1305,7 +1305,7 @@ plugins {
             <String>['Free'],
             logger,
           );
-          const BuildInfo buildInfo = BuildInfo(
+          const buildInfo = BuildInfo(
             BuildMode.debug,
             'free',
             treeShakeIcons: false,
@@ -1324,7 +1324,7 @@ plugins {
             <String>['Runner'],
             logger,
           );
-          const BuildInfo buildInfo = BuildInfo(
+          const buildInfo = BuildInfo(
             BuildMode.debug,
             'free',
             treeShakeIcons: false,
@@ -1449,7 +1449,7 @@ plugins {
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
             'PRODUCT_NAME': 'My App',
           };
@@ -1639,7 +1639,7 @@ resolution: workspace
       'cannot find bundle identifier',
       () async {
         final FlutterProject project = await someProject();
-        final XcodeProjectInfo projectInfo = XcodeProjectInfo(
+        final projectInfo = XcodeProjectInfo(
           <String>['WatchTarget'],
           <String>[],
           <String>[],
@@ -1665,7 +1665,7 @@ resolution: workspace
 
     group('with bundle identifier', () {
       setUp(() {
-        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           IosProject.kProductBundleIdKey: 'io.flutter.someProject',
         };
@@ -1791,7 +1791,7 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             scheme: 'Runner',
             deviceId: '123',
           );
@@ -1835,7 +1835,7 @@ resolution: workspace
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
 ''');
 
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             scheme: 'Runner',
             deviceId: '123',
           );
@@ -1843,7 +1843,7 @@ resolution: workspace
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
 
-          const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
+          const watchBuildContext = XcodeProjectBuildContext(
             scheme: 'WatchScheme',
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
@@ -1880,7 +1880,7 @@ resolution: workspace
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
 ''');
-          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          const buildContext = XcodeProjectBuildContext(
             scheme: 'Runner',
             deviceId: '123',
           );
@@ -1888,7 +1888,7 @@ resolution: workspace
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
 
-          const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
+          const watchBuildContext = XcodeProjectBuildContext(
             scheme: 'WatchScheme',
             deviceId: '123',
             sdk: XcodeSdk.WatchOS,
@@ -2286,7 +2286,7 @@ File androidPluginRegistrant(Directory parent) {
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({this.version});
 
-  final Map<XcodeProjectBuildContext, Map<String, String>> buildSettingsByBuildContext =
+  final buildSettingsByBuildContext =
       <XcodeProjectBuildContext, Map<String, String>>{};
   late XcodeProjectInfo xcodeProjectInfo;
 

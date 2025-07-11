@@ -50,12 +50,12 @@ void main() {
     runPackageName = environment.projectDir.basename;
   });
 
-  for (final bool flutterTester in <bool>[false, true]) {
-    String testName = '';
+  for (final flutterTester in <bool>[false, true]) {
+    var testName = '';
     if (flutterTester) {
       testName += ' flutter tester';
     }
-    for (final BuildMode buildMode in <BuildMode>[
+    for (final buildMode in <BuildMode>[
       BuildMode.debug,
       if (!flutterTester) BuildMode.release,
     ]) {
@@ -80,7 +80,7 @@ void main() {
           // The mock doesn't create the file, so create it here.
           await dylibAfterCompiling.create();
 
-          final List<CodeAsset> codeAssets = <CodeAsset>[
+          final codeAssets = <CodeAsset>[
             CodeAsset(
               package: 'bar',
               name: 'bar.dart',
@@ -88,14 +88,14 @@ void main() {
               file: dylibAfterCompiling.uri,
             ),
           ];
-          final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
             linkResult: buildMode == BuildMode.debug
                 ? null
                 : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
           );
-          final Map<String, String> environmentDefines = <String, String>{
+          final environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
           };
           final TargetPlatform targetPlatform = flutterTester
@@ -108,7 +108,7 @@ void main() {
             fileSystem: fileSystem,
             buildRunner: buildRunner,
           );
-          final String expectedDirectory = flutterTester
+          final expectedDirectory = flutterTester
               ? code_assets.OS.current.toString()
               : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
@@ -124,8 +124,8 @@ void main() {
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
           );
-          final String expectedOS = flutterTester ? OS.current.toString() : 'windows';
-          final String expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
+          final expectedOS = flutterTester ? OS.current.toString() : 'windows';
+          final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[

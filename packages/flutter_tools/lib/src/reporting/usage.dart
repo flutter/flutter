@@ -4,7 +4,7 @@
 
 part of 'reporting.dart';
 
-const String _kFlutterUA = 'UA-67589403-6';
+const _kFlutterUA = 'UA-67589403-6';
 
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
@@ -133,15 +133,15 @@ class _DefaultUsage implements Usage {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version =
         versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final bool suppressEnvFlag =
+    final suppressEnvFlag =
         globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String? logFilePath =
         logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
-    bool suppressAnalytics = false;
-    bool skipAnalyticsSessionSetup = false;
+    var suppressAnalytics = false;
+    var skipAnalyticsSessionSetup = false;
     Analytics? setupAnalytics;
     if ( // To support testing, only allow other signals to suppress analytics
     // when analytics are not being shunted to a file.
@@ -219,8 +219,8 @@ class _DefaultUsage implements Usage {
   final Analytics _analytics;
   final FirstRunMessenger? firstRunMessenger;
 
-  bool _printedWelcome = false;
-  bool _suppressAnalytics = false;
+  var _printedWelcome = false;
+  var _suppressAnalytics = false;
   final SystemClock _clock;
 
   @override
@@ -333,9 +333,9 @@ class LogToFileAnalytics extends AnalyticsMock {
       super(true);
 
   final File logFile;
-  final Map<String, String> _sessionValues = <String, String>{};
+  final _sessionValues = <String, String>{};
 
-  final StreamController<Map<String, dynamic>> _sendController =
+  final _sendController =
       StreamController<Map<String, dynamic>>.broadcast(sync: true);
 
   @override
@@ -378,7 +378,7 @@ class LogToFileAnalytics extends AnalyticsMock {
     if (!enabled) {
       return Future<void>.value();
     }
-    final Map<String, String> parameters = <String, String>{
+    final parameters = <String, String>{
       'variableName': variableName,
       'time': '$time',
       if (category != null) 'category': category,
@@ -401,18 +401,18 @@ class LogToFileAnalytics extends AnalyticsMock {
 /// buffered on the object and can be inspected later.
 @visibleForTesting
 class TestUsage implements Usage {
-  final List<TestUsageCommand> commands = <TestUsageCommand>[];
-  final List<TestUsageEvent> events = <TestUsageEvent>[];
-  final List<dynamic> exceptions = <dynamic>[];
-  final List<TestTimingEvent> timings = <TestTimingEvent>[];
-  int ensureAnalyticsSentCalls = 0;
-  bool _printedWelcome = false;
+  final commands = <TestUsageCommand>[];
+  final events = <TestUsageEvent>[];
+  final exceptions = <dynamic>[];
+  final timings = <TestTimingEvent>[];
+  var ensureAnalyticsSentCalls = 0;
+  var _printedWelcome = false;
 
   @override
-  bool enabled = true;
+  var enabled = true;
 
   @override
-  bool suppressAnalytics = false;
+  var suppressAnalytics = false;
 
   @override
   String get clientId => 'test-client';

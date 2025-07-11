@@ -28,7 +28,7 @@ void main() {
     Cache.disableLocking();
   });
 
-  const String storageBaseUrl = 'https://fake.googleapis.com';
+  const storageBaseUrl = 'https://fake.googleapis.com';
   setUp(() {
     memoryFileSystem = MemoryFileSystem.test();
     fakePlatform = FakePlatform(
@@ -45,7 +45,7 @@ void main() {
 
   group('build ios-framework', () {
     group('podspec', () {
-      const String engineRevision = '0123456789abcdef';
+      const engineRevision = '0123456789abcdef';
       late Cache cache;
 
       setUp(() {
@@ -64,12 +64,12 @@ void main() {
       testUsingContext(
         'version unknown',
         () async {
-          const String frameworkVersion = '0.0.0-unknown';
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          const frameworkVersion = '0.0.0-unknown';
+          final fakeFlutterVersion = FakeFlutterVersion(
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -95,8 +95,8 @@ void main() {
       testUsingContext(
         'throws when not on a released version',
         () async {
-          const String frameworkVersion = 'v1.13.10+hotfix-pre.2';
-          const GitTagVersion gitTagVersion = GitTagVersion(
+          const frameworkVersion = 'v1.13.10+hotfix-pre.2';
+          const gitTagVersion = GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
@@ -105,12 +105,12 @@ void main() {
             hash: '',
             gitTag: frameworkVersion,
           );
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -136,7 +136,7 @@ void main() {
       testUsingContext(
         'throws when license not found',
         () async {
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: const GitTagVersion(
               x: 1,
               y: 13,
@@ -148,7 +148,7 @@ void main() {
             ),
           );
 
-          final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -169,8 +169,8 @@ void main() {
       );
 
       group('is created', () {
-        const String frameworkVersion = 'v1.13.11+hotfix.14';
-        const String licenseText = 'This is the license!';
+        const frameworkVersion = 'v1.13.11+hotfix.14';
+        const licenseText = 'This is the license!';
 
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
@@ -184,8 +184,8 @@ void main() {
           testUsingContext(
             'created when forced',
             () async {
-              const String frameworkVersionWithCommits = '$frameworkVersion.pre.100';
-              const GitTagVersion gitTagVersion = GitTagVersion(
+              const frameworkVersionWithCommits = '$frameworkVersion.pre.100';
+              const gitTagVersion = GitTagVersion(
                 x: 1,
                 y: 13,
                 z: 11,
@@ -194,12 +194,12 @@ void main() {
                 hash: '',
                 gitTag: frameworkVersionWithCommits,
               );
-              final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+              final fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
                 frameworkVersion: frameworkVersionWithCommits,
               );
 
-              final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -222,8 +222,8 @@ void main() {
         group('not on master channel', () {
           late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
-            const String frameworkVersionWithCommits = '$frameworkVersion.pre.0';
-            const GitTagVersion gitTagVersion = GitTagVersion(
+            const frameworkVersionWithCommits = '$frameworkVersion.pre.0';
+            const gitTagVersion = GitTagVersion(
               x: 1,
               y: 13,
               z: 11,
@@ -241,7 +241,7 @@ void main() {
           testUsingContext(
             'contains license and version',
             () async {
-              final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -266,7 +266,7 @@ void main() {
           testUsingContext(
             'debug URL',
             () async {
-              final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -294,7 +294,7 @@ void main() {
           testUsingContext(
             'profile URL',
             () async {
-              final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -322,7 +322,7 @@ void main() {
           testUsingContext(
             'release URL',
             () async {
-              final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -353,7 +353,7 @@ void main() {
 
   group('build macos-framework', () {
     group('podspec', () {
-      const String engineRevision = '0123456789abcdef';
+      const engineRevision = '0123456789abcdef';
       late Cache cache;
 
       setUp(() {
@@ -372,12 +372,12 @@ void main() {
       testUsingContext(
         'version unknown',
         () async {
-          const String frameworkVersion = '0.0.0-unknown';
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          const frameworkVersion = '0.0.0-unknown';
+          final fakeFlutterVersion = FakeFlutterVersion(
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -403,8 +403,8 @@ void main() {
       testUsingContext(
         'throws when not on a released version',
         () async {
-          const String frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
-          const GitTagVersion gitTagVersion = GitTagVersion(
+          const frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
+          const gitTagVersion = GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
@@ -413,12 +413,12 @@ void main() {
             hash: '',
             gitTag: frameworkVersion,
           );
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: gitTagVersion,
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -444,7 +444,7 @@ void main() {
       testUsingContext(
         'throws when license not found',
         () async {
-          final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+          final fakeFlutterVersion = FakeFlutterVersion(
             gitTagVersion: const GitTagVersion(
               x: 1,
               y: 13,
@@ -456,7 +456,7 @@ void main() {
             ),
           );
 
-          final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
@@ -477,8 +477,8 @@ void main() {
       );
 
       group('is created', () {
-        const String frameworkVersion = 'v1.13.11+hotfix.13';
-        const String licenseText = 'This is the license!';
+        const frameworkVersion = 'v1.13.11+hotfix.13';
+        const licenseText = 'This is the license!';
 
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
@@ -492,7 +492,7 @@ void main() {
           testUsingContext(
             'created when forced',
             () async {
-              const GitTagVersion gitTagVersion = GitTagVersion(
+              const gitTagVersion = GitTagVersion(
                 x: 1,
                 y: 13,
                 z: 11,
@@ -501,12 +501,12 @@ void main() {
                 hash: '',
                 gitTag: '$frameworkVersion.pre.100',
               );
-              final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
+              final fakeFlutterVersion = FakeFlutterVersion(
                 gitTagVersion: gitTagVersion,
                 frameworkVersion: frameworkVersion,
               );
 
-              final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -529,7 +529,7 @@ void main() {
         group('not on master channel', () {
           late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
-            const GitTagVersion gitTagVersion = GitTagVersion(
+            const gitTagVersion = GitTagVersion(
               x: 1,
               y: 13,
               z: 11,
@@ -547,7 +547,7 @@ void main() {
           testUsingContext(
             'contains license and version',
             () async {
-              final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -572,7 +572,7 @@ void main() {
           testUsingContext(
             'debug URL',
             () async {
-              final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -600,7 +600,7 @@ void main() {
           testUsingContext(
             'profile URL',
             () async {
-              final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
@@ -628,7 +628,7 @@ void main() {
           testUsingContext(
             'release URL',
             () async {
-              final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,

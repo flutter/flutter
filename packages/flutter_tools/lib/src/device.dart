@@ -83,7 +83,7 @@ abstract class DeviceManager {
   }
 
   /// A minimum duration to use when discovering wireless iOS devices.
-  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
+  static const minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
 
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
@@ -119,16 +119,16 @@ abstract class DeviceManager {
 
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
-    final List<Device> prefixMatches = <Device>[];
-    final Completer<Device> exactMatchCompleter = Completer<Device>();
-    final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
+    final prefixMatches = <Device>[];
+    final exactMatchCompleter = Completer<Device>();
+    final futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
           discoverer
               .devices(filter: filter)
               .then(
                 (List<Device> devices) {
-                  for (final Device device in devices) {
+                  for (final device in devices) {
                     if (exactlyMatchesDeviceId(device)) {
                       exactMatchCompleter.complete(device);
                       return null;
@@ -460,14 +460,14 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = Duration(seconds: 4);
-  static const Duration _pollingTimeout = Duration(seconds: 30);
+  static const _pollingInterval = Duration(seconds: 4);
+  static const _pollingTimeout = Duration(seconds: 30);
 
   final String name;
 
   @protected
   @visibleForTesting
-  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
+  final deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
@@ -812,12 +812,12 @@ abstract class Device {
     }
 
     // Extract device information
-    final List<List<String>> table = <List<String>>[];
-    for (final Device device in devices) {
-      String supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
+    final table = <List<String>>[];
+    for (final device in devices) {
+      var supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -829,9 +829,9 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final List<String> row in table) {
+    for (final row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -1383,7 +1383,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer('started=$started');
+    final buf = StringBuffer('started=$started');
     if (vmServiceUri != null) {
       buf.write(', vmService=$vmServiceUri');
     }
